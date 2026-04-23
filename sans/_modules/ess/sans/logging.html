@@ -1,0 +1,974 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.sans.logging &#8212; ESSsans</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=134d78e6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/sans/logging';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSsans - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSsans - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.sans.logging</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.sans.logging</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2023 Scipp contributors (https://github.com/scipp)</span>
+<span class="c1"># @author Jan-Lukas Wynen</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utilities for logging.</span>
+
+<span class="sd">All code in the ess package should log auxiliary information</span>
+<span class="sd">through this module.</span>
+<span class="sd">Loggers should be obtained through :py:func:`ess.logging.get_logger`</span>
+<span class="sd">and pass a name that reflects the current context.</span>
+<span class="sd">E.g., in the loki package, pass ``&#39;loki&#39;`` (all lowercase).</span>
+
+<span class="sd">Logging can be configured using :py:func:`ess.logging.configure` or</span>
+<span class="sd">:py:func:`ess.logging.configure_workflow`.</span>
+<span class="sd">Use the latter at the beginning of workflow notebooks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging.config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">os</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippneutron</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipp.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">running_in_jupyter</span>
+
+
+<div class="viewcode-block" id="get_logger">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.get_logger.html#ess.sans.logging.get_logger">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_logger</span><span class="p">(</span><span class="n">subname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return one of ess&#39;s loggers.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subname:</span>
+<span class="sd">        Name of an instrument, technique, or workflow.</span>
+<span class="sd">        If given, return the logger with the given name</span>
+<span class="sd">        as a child of the ess logger.</span>
+<span class="sd">        Otherwise, return the general ess logger.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The requested logger.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;scipp.ess&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">subname</span> <span class="k">if</span> <span class="n">subname</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="log_call">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.log_call.html#ess.sans.logging.log_call">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_call</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator that logs a message every time the function is called.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLevelName</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">level</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">deco</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">get_logger</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">get_logger</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;Calling </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">_function_name</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">impl</span>
+
+    <span class="k">return</span> <span class="n">deco</span></div>
+
+
+
+<div class="viewcode-block" id="Formatter">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.Formatter.html#ess.sans.logging.Formatter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Formatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Logging formatter that indents messages and optionally shows threading information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Formatter.__init__">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.Formatter.html#ess.sans.logging.Formatter.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show_thread</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">show_process</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the formatter.</span>
+
+<span class="sd">        The formatting is mostly fixed.</span>
+<span class="sd">        Only printing of thread and processor names can be toggled using the</span>
+<span class="sd">        corresponding arguments.</span>
+<span class="sd">        Times are always printed in ISO 8601 format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fmt_proc</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(processName)s</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">show_process</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">fmt_thread</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(threadName)s</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">show_thread</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">show_process</span><span class="p">:</span>
+            <span class="n">fmt_proc_thread</span> <span class="o">=</span> <span class="n">fmt_proc</span>
+            <span class="k">if</span> <span class="n">show_thread</span><span class="p">:</span>
+                <span class="n">fmt_proc_thread</span> <span class="o">+=</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="n">fmt_thread</span>
+        <span class="k">elif</span> <span class="n">show_thread</span><span class="p">:</span>
+            <span class="n">fmt_proc_thread</span> <span class="o">=</span> <span class="n">fmt_thread</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fmt_proc_thread</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">fmt_pre</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">%(asctime)s</span><span class="s1">] </span><span class="si">%(levelname)-8s</span><span class="s1"> &#39;</span>
+        <span class="n">fmt_post</span> <span class="o">=</span> <span class="s1">&#39;&lt;</span><span class="si">%(name)s</span><span class="s1">&gt; : </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">fmt_pre</span>
+            <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">fmt_proc_thread</span> <span class="o">+</span> <span class="s1">&#39;} &#39;</span> <span class="k">if</span> <span class="n">fmt_proc_thread</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">fmt_post</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S%z&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Formatter.format">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.Formatter.html#ess.sans.logging.Formatter.format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">    &#39;</span> <span class="o">+</span> <span class="n">record</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">    &#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="default_loggers_to_configure">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.default_loggers_to_configure.html#ess.sans.logging.default_loggers_to_configure">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_loggers_to_configure</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list of all loggers that get configured by ess by default.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
+
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(),</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;Mantid&#39;</span><span class="p">),</span>
+        <span class="n">pooch</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(),</span>
+    <span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="configure">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.configure.html#ess.sans.logging.configure">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">PathLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;scipp.ess.log&#39;</span><span class="p">,</span>
+    <span class="n">file_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="n">stream_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
+    <span class="n">widget_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="n">show_thread</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_process</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">loggers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up logging for the ess package.</span>
+
+<span class="sd">    This function is meant as a helper for application (or notebook) developers.</span>
+<span class="sd">    It configures the loggers of ess, scippneutron, scipp, and some</span>
+<span class="sd">    third party packages.</span>
+<span class="sd">    *Calling it from a library should be avoided*</span>
+<span class="sd">    because it can mess up a user&#39;s setup.</span>
+
+<span class="sd">    Up to 3 handlers are configured:</span>
+
+<span class="sd">      - *File Handler* Writes files to a file with given name.</span>
+<span class="sd">        Can be disabled using the `filename` argument.</span>
+<span class="sd">      - *Stream Handler* Writes to `sys.stderr`.</span>
+<span class="sd">      - *Widget Handler* Writes to a :py:class:`scipp.logging.LogWidget`</span>
+<span class="sd">        if Python is running in a Jupyter notebook.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename:</span>
+<span class="sd">        Name of the log file. Overwrites existing files.</span>
+<span class="sd">        Setting this to `None` disables logging to file.</span>
+<span class="sd">    file_level:</span>
+<span class="sd">        Log level for the file handler.</span>
+<span class="sd">    stream_level:</span>
+<span class="sd">        Log level for the stream handler.</span>
+<span class="sd">    widget_level:</span>
+<span class="sd">        Log level for the widget handler.</span>
+<span class="sd">    show_thread:</span>
+<span class="sd">        If `True`, log messages include the name of the thread</span>
+<span class="sd">        the message originates from.</span>
+<span class="sd">    show_process:</span>
+<span class="sd">        If `True`, log messages include the name of the process</span>
+<span class="sd">        the message originates from.</span>
+<span class="sd">    loggers:</span>
+<span class="sd">        Collection of loggers or names of loggers to configure.</span>
+<span class="sd">        If not given, uses :py:func:`default_loggers_to_configure`.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    ess.logging.configure_workflow:</span>
+<span class="sd">        Configure logging and do some additional setup for a reduction workflow.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">configure</span><span class="o">.</span><span class="n">is_configured</span><span class="p">:</span>
+        <span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s1">&#39;Called `logging.configure` but logging is already configured&#39;</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">handlers</span> <span class="o">=</span> <span class="n">_make_handlers</span><span class="p">(</span>
+        <span class="n">filename</span><span class="p">,</span> <span class="n">file_level</span><span class="p">,</span> <span class="n">stream_level</span><span class="p">,</span> <span class="n">widget_level</span><span class="p">,</span> <span class="n">show_thread</span><span class="p">,</span> <span class="n">show_process</span>
+    <span class="p">)</span>
+    <span class="n">base_level</span> <span class="o">=</span> <span class="n">_base_level</span><span class="p">([</span><span class="n">file_level</span><span class="p">,</span> <span class="n">stream_level</span><span class="p">,</span> <span class="n">widget_level</span><span class="p">])</span>
+    <span class="n">loggers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">logger</span>
+        <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="p">(</span><span class="n">default_loggers_to_configure</span><span class="p">()</span> <span class="k">if</span> <span class="n">loggers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">loggers</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
+        <span class="n">_configure_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">handlers</span><span class="p">,</span> <span class="n">base_level</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Mantid&#39;</span> <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">):</span>
+        <span class="n">_configure_mantid_logging</span><span class="p">(</span><span class="s1">&#39;notice&#39;</span><span class="p">)</span>
+
+    <span class="n">configure</span><span class="o">.</span><span class="n">is_configured</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+
+<span class="n">configure</span><span class="o">.</span><span class="n">is_configured</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="configure_workflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.configure_workflow.html#ess.sans.logging.configure_workflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">configure_workflow</span><span class="p">(</span>
+    <span class="n">workflow_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure logging for a reduction workflow.</span>
+
+<span class="sd">    Configures loggers, logs a greeting message, sets up a logger for a workflow,</span>
+<span class="sd">    and optionally creates and displays a log widget.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    workflow_name:</span>
+<span class="sd">        Used as the name of the returned logger.</span>
+<span class="sd">    display:</span>
+<span class="sd">        If `True`, show a :py:class:`scipp.logging.LogWidget`</span>
+<span class="sd">        in the outputs of the current cell.</span>
+<span class="sd">        Defaults to `True` in Jupyter and `False` otherwise.</span>
+<span class="sd">    kwargs:</span>
+<span class="sd">        Forwarded to :py:func:`ess.logging.configure`.</span>
+<span class="sd">        Refer to that function for details.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        A logger for use in the workflow.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    ess.logging.configure:</span>
+<span class="sd">        General logging setup.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">configure</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">greet</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">display</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">running_in_jupyter</span><span class="p">())</span> <span class="ow">or</span> <span class="n">display</span><span class="p">:</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">display_logs</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">get_logger</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="greet">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.logging.greet.html#ess.sans.logging.greet">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Log a message showing the versions of important packages.&quot;&quot;&quot;</span>
+    <span class="c1"># Import here so we don&#39;t import from a partially built package.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;Software Versions:</span>
+<span class="s1">  ess: </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s1"> (https://scipp.github.io/ess)</span>
+<span class="s1">  scippneutron: </span><span class="si">{</span><span class="n">scn</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1"> (https://scipp.github.io/scippneutron)</span>
+<span class="s1">  scipp: </span><span class="si">{</span><span class="n">sc</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1"> (https://scipp.github.io)&#39;&#39;&#39;</span>
+    <span class="n">mantid_version</span> <span class="o">=</span> <span class="n">_mantid_version</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">mantid_version</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  Mantid: </span><span class="si">{</span><span class="n">mantid_version</span><span class="si">}</span><span class="s1"> (https://www.mantidproject.org)&#39;</span>
+    <span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+
+<span class="n">_INSTRUMENTS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;amor&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;beer&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;bifrost&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cspec&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;dream&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;estia&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;freia&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;heimdal&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;loki&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;magic&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;miracles&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;nmx&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;odin&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;skadi&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;trex&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;v20&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;vespa&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_deduce_instrument_name</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># Assumes package name: ess.&lt;instrument&gt;[.subpackage]</span>
+    <span class="n">package</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmodule</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">__package__</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ess&#39;</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">_INSTRUMENTS</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">candidate</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_function_name</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;__module__&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_stream_handler</span><span class="p">(</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">show_thread</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">show_process</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">:</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">(</span><span class="n">show_thread</span><span class="p">,</span> <span class="n">show_process</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">handler</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_file_handler</span><span class="p">(</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">PathLike</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">show_thread</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">show_process</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">:</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">(</span><span class="n">show_thread</span><span class="p">,</span> <span class="n">show_process</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">handler</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_handlers</span><span class="p">(</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">PathLike</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">file_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">stream_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">widget_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">show_thread</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">show_process</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">]:</span>
+    <span class="n">handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">_make_stream_handler</span><span class="p">(</span><span class="n">stream_level</span><span class="p">,</span> <span class="n">show_thread</span><span class="p">,</span> <span class="n">show_process</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">handlers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">_make_file_handler</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_level</span><span class="p">,</span> <span class="n">show_thread</span><span class="p">,</span> <span class="n">show_process</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">running_in_jupyter</span><span class="p">():</span>
+        <span class="n">handlers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">make_widget_handler</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">handlers</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_configure_logger</span><span class="p">(</span>
+    <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">handlers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">],</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span>
+<span class="p">):</span>
+    <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_configure_mantid_logging</span><span class="p">(</span><span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">mantid.utils.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_to_python</span>
+
+        <span class="n">log_to_python</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_base_level</span><span class="p">(</span><span class="n">levels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLevelName</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">level</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">levels</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_mantid_version</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">mantid</span>
+
+        <span class="k">return</span> <span class="n">mantid</span><span class="o">.</span><span class="n">__version__</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSsans version: 26.4.1 (<a href="https://github.com/scipp/esssans/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

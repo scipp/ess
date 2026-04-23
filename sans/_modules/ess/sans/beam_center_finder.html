@@ -1,0 +1,1155 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.sans.beam_center_finder &#8212; ESSsans</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=134d78e6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/sans/beam_center_finder';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSsans - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSsans - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.sans.beam_center_finder</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.sans.beam_center_finder</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2023 Scipp contributors (https://github.com/scipp)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipp.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">concepts</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">UncertaintyBroadcastMode</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ElasticCoordTransformGraph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BeamCenter</span><span class="p">,</span>
+    <span class="n">CleanDirectBeam</span><span class="p">,</span>
+    <span class="n">CorrectedDetector</span><span class="p">,</span>
+    <span class="n">DetectorBankSizes</span><span class="p">,</span>
+    <span class="n">DimsToKeep</span><span class="p">,</span>
+    <span class="n">IntensityQ</span><span class="p">,</span>
+    <span class="n">NeXusComponent</span><span class="p">,</span>
+    <span class="n">Numerator</span><span class="p">,</span>
+    <span class="n">QBins</span><span class="p">,</span>
+    <span class="n">ReturnEvents</span><span class="p">,</span>
+    <span class="n">SampleRun</span><span class="p">,</span>
+    <span class="n">WavelengthBands</span><span class="p">,</span>
+    <span class="n">WavelengthMask</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_xy_extrema</span><span class="p">(</span><span class="n">pos</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="n">x_min</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">x_max</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">y_min</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">y_max</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;extremes&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_beam_center</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">beam_stop_radius</span><span class="p">,</span>
+    <span class="n">beam_stop_arm_width</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Each iteration the center of mass of the remaining intensity is computed</span>
+<span class="sd">    and assigned to be the current beam center guess.</span>
+<span class="sd">    Then three symmetrical masks are created to make sure that the remaining intensity</span>
+<span class="sd">    distribution does not extend outside of the detector and that the beam stop</span>
+<span class="sd">    does not make the remaining intensity asymmetrical.</span>
+
+<span class="sd">    The three masks are:</span>
+
+<span class="sd">      - one &quot;outer&quot; circular mask with radius less than the minimal distance</span>
+<span class="sd">        from the current beam center guess to the border of the detector</span>
+<span class="sd">      - one &quot;inner&quot; circular mask with radius larger than the beam stop</span>
+<span class="sd">      - one &quot;arm&quot; rectangular mask with width wider than the beam stop arm</span>
+
+<span class="sd">    The &quot;outer&quot; mask radius is found from the detector size.</span>
+<span class="sd">    The &quot;inner&quot; mask radius is supplied by the caller.</span>
+<span class="sd">    The &quot;arm&quot; mask slope is determined by the direction of minimum intensity</span>
+<span class="sd">    around the current beam center guess, the &quot;arm&quot; mask width is an argument</span>
+<span class="sd">    supplied by the caller.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">events</span><span class="o">.</span><span class="n">masks</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">intensity</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+        <span class="c1"># Average position, weighted by intensity.</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">intensity</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">intensity</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">intensity</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">distance_to_center</span> <span class="o">=</span> <span class="n">intensity</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">center</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># Outer radius of annulus around center.</span>
+        <span class="c1"># Defined so that the annulus does not go outside of the bounds of the detector.</span>
+        <span class="n">outer</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="nb">min</span><span class="p">(</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span>
+        <span class="p">)</span>
+        <span class="n">intensity</span><span class="o">.</span><span class="n">masks</span><span class="p">[</span><span class="s1">&#39;outer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">&gt;</span> <span class="n">outer</span><span class="o">**</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="c1"># Inner radius defined by size of beam stop.</span>
+        <span class="n">intensity</span><span class="o">.</span><span class="n">masks</span><span class="p">[</span><span class="s1">&#39;inner&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span>
+            <span class="o">&lt;</span> <span class="n">beam_stop_radius</span><span class="o">**</span><span class="mi">2</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Iterate without the arm mask a few times to settle near the center</span>
+        <span class="c1"># before introducing the arm mask.</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="c1"># Angle between +x and distance_to_center.</span>
+            <span class="n">intensity</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">),</span>
+                <span class="n">sc</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+                <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">pi</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
+                <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=-</span><span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">intensity_over_angle</span> <span class="o">=</span> <span class="n">intensity</span><span class="o">.</span><span class="n">drop_masks</span><span class="p">(</span>
+                <span class="p">[</span><span class="s1">&#39;arm&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;arm&#39;</span> <span class="ow">in</span> <span class="n">intensity</span><span class="o">.</span><span class="n">masks</span> <span class="k">else</span> <span class="p">[]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+            <span class="c1"># Assume angle of arm coincides with intensity minimum</span>
+            <span class="n">arm_angle</span> <span class="o">=</span> <span class="n">intensity_over_angle</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">][</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">intensity_over_angle</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="p">]</span>
+
+            <span class="n">slope</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">arm_angle</span><span class="p">)</span>
+            <span class="n">intensity</span><span class="o">.</span><span class="n">masks</span><span class="p">[</span><span class="s1">&#39;arm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span>
+                <span class="o">&lt;</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">beam_stop_arm_width</span>
+            <span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span>
+                <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span>
+                <span class="o">&gt;</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">beam_stop_arm_width</span>
+            <span class="p">)</span>
+
+    <span class="n">center</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">center</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">center</span><span class="o">.</span><span class="n">data</span>
+
+
+<div class="viewcode-block" id="beam_center_from_center_of_mass_alternative">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.beam_center_finder.beam_center_from_center_of_mass_alternative.html#ess.sans.beam_center_finder.beam_center_from_center_of_mass_alternative">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">beam_center_from_center_of_mass_alternative</span><span class="p">(</span>
+    <span class="n">workflow</span><span class="p">,</span>
+    <span class="n">beam_stop_radius</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">beam_stop_arm_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BeamCenter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estimate the beam center via the center-of-mass of the data counts.</span>
+
+<span class="sd">    We are assuming the intensity distribution is symmetric around the beam center.</span>
+<span class="sd">    Even if the intensity distribution is symmetric around the beam center</span>
+<span class="sd">    the intensity distribution in the detector might not be, because</span>
+
+<span class="sd">        - the detector has a finite extent,</span>
+<span class="sd">        - and there is a beam stop covering part of the detector.</span>
+
+<span class="sd">    To deal with the limited size of the detector a mask can be applied that is small</span>
+<span class="sd">    enough so that the the remaining intensity is entirely inside the detector.</span>
+<span class="sd">    To deal with the beam stop we can mask the region of the detector that the</span>
+<span class="sd">    beam stop covers.</span>
+
+<span class="sd">    But to preserve the symmetry of the intensity around the beam center the masks</span>
+<span class="sd">    also need to be symmetical around the beam center.</span>
+<span class="sd">    The problem is, the beam center is unknown.</span>
+<span class="sd">    However, if the beam center was known to us, and we applied symmetrical masks</span>
+<span class="sd">    that covered the regions of the detector where the intensity distribution is</span>
+<span class="sd">    asymmetrical,</span>
+<span class="sd">    then the center of mass of the remaining intensity would equal the beam center.</span>
+<span class="sd">    Conversely, if we apply symmetrical masks around a point that is not the beam center</span>
+<span class="sd">    the center of mass of the remaining intensity will (likely) not equal the original</span>
+<span class="sd">    point.</span>
+<span class="sd">    This suggests the beam center can be found using a fixed point iteration where each</span>
+<span class="sd">    iteration we</span>
+
+<span class="sd">    1. Compute the center of mass of the remaining intensity and assign it to be our</span>
+<span class="sd">       current estimate of the beam center.</span>
+<span class="sd">    2. Create symmetrical masks around the current estimate of the beam center.</span>
+<span class="sd">    3. Repeat from 1. until convergence.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    workflow:</span>
+<span class="sd">        The reduction workflow to compute CorrectedDetector[SampleRun, Numerator].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The beam center position as a vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">beam_stop_radius</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">beam_stop_radius</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">beam_stop_arm_width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">beam_stop_arm_width</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">beam_center</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">BeamCenter</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">sciline</span><span class="o">.</span><span class="n">UnsatisfiedRequirement</span><span class="p">:</span>
+        <span class="n">beam_center</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">beam_center</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">_find_beam_center</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">beam_stop_radius</span><span class="p">,</span> <span class="n">beam_stop_arm_width</span><span class="p">)</span> <span class="o">+</span> <span class="n">beam_center</span></div>
+
+
+
+<div class="viewcode-block" id="beam_center_from_center_of_mass">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.beam_center_finder.beam_center_from_center_of_mass.html#ess.sans.beam_center_finder.beam_center_from_center_of_mass">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">beam_center_from_center_of_mass</span><span class="p">(</span><span class="n">workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BeamCenter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estimate the beam center via the center-of-mass of the data counts.</span>
+
+<span class="sd">    The center-of-mass is simply the weighted mean of the positions.</span>
+<span class="sd">    Areas with low counts are excluded from the center of mass calculation, as they</span>
+<span class="sd">    typically fall into asymmetric regions of the detector panel and would thus lead</span>
+<span class="sd">    to a biased result. The beam is assumed to be roughly aligned with the Z axis.</span>
+<span class="sd">    The returned beam center is the component normal to the beam direction, projected</span>
+<span class="sd">    onto the X-Y plane.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    workflow:</span>
+<span class="sd">        The reduction workflow to compute CorrectedDetector[SampleRun, Numerator].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The beam center position as a vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">beam_center</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">BeamCenter</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">sciline</span><span class="o">.</span><span class="n">UnsatisfiedRequirement</span><span class="p">:</span>
+        <span class="n">beam_center</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">beam_center</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">])</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+
+    <span class="n">dims_to_sum</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dims_to_sum</span><span class="p">:</span>
+        <span class="n">summed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dims_to_sum</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">summed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">summed</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">summed</span> <span class="o">=</span> <span class="n">summed</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">)</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">summed</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">summed</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">concepts</span><span class="o">.</span><span class="n">irreducible_mask</span><span class="p">(</span><span class="n">summed</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sizes</span><span class="o">=</span><span class="n">pos</span><span class="o">.</span><span class="n">sizes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+    <span class="n">extrema</span> <span class="o">=</span> <span class="n">_xy_extrema</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">])</span>
+    <span class="c1"># Mean including existing masks</span>
+    <span class="n">cutoff</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">v</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">low_counts</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">cutoff</span>
+    <span class="c1"># Increase cutoff until we no longer include pixels at the X/Y min/max.</span>
+    <span class="c1"># This would be simpler if the logical panel shape was reflected in the</span>
+    <span class="c1"># dims of the input data, instead of having a flat list of pixels.</span>
+    <span class="k">while</span> <span class="n">sc</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">_xy_extrema</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="n">mask</span> <span class="o">|</span> <span class="n">low_counts</span><span class="p">)])</span> <span class="o">==</span> <span class="n">extrema</span><span class="p">):</span>
+        <span class="n">cutoff</span> <span class="o">*=</span> <span class="mf">2.0</span>
+        <span class="n">low_counts</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">cutoff</span>
+    <span class="c1"># See scipp/scipp#3271, the following lines are a workaround</span>
+    <span class="n">select</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">low_counts</span> <span class="o">|</span> <span class="n">mask</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">select</span><span class="p">]</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">select</span><span class="p">]</span>
+    <span class="n">com</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pos</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span> <span class="o">/</span> <span class="n">v</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># We compute the shift between the incident beam direction and the center-of-mass</span>
+    <span class="n">incident_beam</span> <span class="o">=</span> <span class="n">summed</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span><span class="s1">&#39;incident_beam&#39;</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span>
+        <span class="s1">&#39;incident_beam&#39;</span>
+    <span class="p">]</span>
+    <span class="n">n_beam</span> <span class="o">=</span> <span class="n">incident_beam</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">incident_beam</span><span class="p">)</span>
+    <span class="n">com_shift</span> <span class="o">=</span> <span class="n">com</span> <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">com</span><span class="p">,</span> <span class="n">n_beam</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_beam</span>
+    <span class="n">xy</span> <span class="o">=</span> <span class="p">[</span><span class="n">com_shift</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">com_shift</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">beam_center</span> <span class="o">+</span> <span class="n">_offsets_to_vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">summed</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_offsets_to_vector</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert x,y offsets inside the plane normal to the beam to a vector in absolute</span>
+<span class="sd">    coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span>
+    <span class="c1"># Get two vectors that define the plane normal to the beam</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;cyl_x_unit_vector&#39;</span><span class="p">,</span> <span class="s1">&#39;cyl_y_unit_vector&#39;</span><span class="p">],</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">coords</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cyl_x_unit_vector&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cyl_y_unit_vector&#39;</span><span class="p">]</span>
+    <span class="n">center</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">u</span>
+    <span class="k">return</span> <span class="n">center</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_iofq_in_quadrants</span><span class="p">(</span>
+    <span class="n">xy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">norm</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the intensity as a function of Q inside 4 quadrants in Phi.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xy:</span>
+<span class="sd">        The x,y offsets in the plane normal to the beam.</span>
+<span class="sd">    detector:</span>
+<span class="sd">        The raw detector.</span>
+<span class="sd">    norm:</span>
+<span class="sd">        The denominator data for normalization.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        A dictionary containing the intensity as a function of Q in each quadrant.</span>
+<span class="sd">        The quadrants are named &#39;south-west&#39;, &#39;south-east&#39;, &#39;north-east&#39;, and</span>
+<span class="sd">        &#39;north-west&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">pi</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">phi_bins</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;phi&#39;</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
+    <span class="n">quadrants</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;south-west&#39;</span><span class="p">,</span> <span class="s1">&#39;south-east&#39;</span><span class="p">,</span> <span class="s1">&#39;north-east&#39;</span><span class="p">,</span> <span class="s1">&#39;north-west&#39;</span><span class="p">]</span>
+
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">_offsets_to_vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">detector</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">calibrated</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">])</span>
+    <span class="n">with_phi</span> <span class="o">=</span> <span class="n">calibrated</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
+        <span class="s1">&#39;phi&#39;</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">keep_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_inputs</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="c1"># If gravity-correction is enabled, phi depends on wavelength (and event).</span>
+    <span class="c1"># We cannot handle this below, so we approximate phi by the mean value.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;phi&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">with_phi</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;phi&#39;</span> <span class="ow">in</span> <span class="n">with_phi</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">):</span>
+        <span class="c1"># This is the case where we have a phi event coord but no coord at the top level</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">with_phi</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;phi&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">with_phi</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;phi&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">phi</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="s1">&#39;wavelength&#39;</span> <span class="ow">in</span> <span class="n">phi</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">quad</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quadrants</span><span class="p">):</span>
+        <span class="c1"># Select pixels based on phi</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="p">(</span><span class="n">phi</span> <span class="o">&gt;=</span> <span class="n">phi_bins</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">phi</span> <span class="o">&lt;</span> <span class="n">phi_bins</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># The beam center is applied when computing EmptyDetector, set quadrant</span>
+        <span class="c1"># *before* that step.</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">detector</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1"># MaskedData would be computed automatically, but we did it above already</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">]]</span> <span class="o">=</span> <span class="n">calibrated</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">CleanDirectBeam</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span> <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">dims</span> <span class="o">==</span> <span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,)</span> <span class="k">else</span> <span class="n">norm</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">quad</span><span class="p">]</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">IntensityQ</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cost</span><span class="p">(</span><span class="n">xy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cost function for determining how close the :math:`I(Q)` curves are in all four</span>
+<span class="sd">    quadrants. The cost is defined as</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \\text{cost} = \\frac{\\sum_{Q}\\sum_{i=1}^{i=4} \\overline{I}(Q)\\left(I(Q)_{i} - \\overline{I}(Q)\\right)^2}{\\sum_{Q}\\overline{I}(Q)} ~,</span>
+
+<span class="sd">    where :math:`i` represents the 4 quadrants and :math:`\\overline{I}(Q)` is the mean</span>
+<span class="sd">    intensity of the 4 quadrants as a function of :math:`Q`. This is basically a</span>
+<span class="sd">    weighted mean of the square of the differences between the :math:`I(Q)` curves in</span>
+<span class="sd">    the 4 quadrants with respect to the mean, and where the weights are</span>
+<span class="sd">    :math:`\\overline{I}(Q)`.</span>
+<span class="sd">    We use a weighted mean, as opposed to relative (percentage) differences to give</span>
+<span class="sd">    less importance to regions with low statistics which are potentially noisy and</span>
+<span class="sd">    would contribute significantly to the computed cost.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xy:</span>
+<span class="sd">        The x,y offsets in the plane normal to the beam.</span>
+<span class="sd">    *args:</span>
+<span class="sd">        Arguments passed to :func:`iofq_in_quadrants`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The sum of the residuals for :math:`I(Q)` in the 4 quadrants, with respect to</span>
+<span class="sd">        the mean :math:`I(Q)` in all quadrants.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Mantid uses a different cost function. They compute the horizontal (Left - Right)</span>
+<span class="sd">    and the vertical (Top - Bottom) costs, and require both to be below the tolerance.</span>
+<span class="sd">    The costs are defined as</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \\text{cost} = \\sum_{Q} \\left(I(Q)_{\\text{L,T}} - I(Q)_{\\text{R,B}}\\right)^2 ~.</span>
+
+<span class="sd">    Using absolute differences instead of a weighted mean is similar to our cost</span>
+<span class="sd">    function in the way that it would give a lot of weight to even a small difference</span>
+<span class="sd">    in a high-intensity region. However, it also means that an absolute difference of</span>
+<span class="sd">    e.g. 2 in a high-intensity region would be weighted the same as a difference of 2</span>
+<span class="sd">    in a low-intensity region.</span>
+<span class="sd">    It is also not documented why two separate costs are computed, instead of a single</span>
+<span class="sd">    one. The Mantid implementation is available</span>
+<span class="sd">    `here &lt;https://github.com/mantidproject/mantid/blob/main/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py`_.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+    <span class="n">iofq</span> <span class="o">=</span> <span class="n">_iofq_in_quadrants</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">all_q</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">da</span><span class="p">)</span> <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="n">iofq</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;quadrant&#39;</span><span class="p">)</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">all_q</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;quadrant&#39;</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">all_q</span> <span class="o">-</span> <span class="n">ref</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ref</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;sans&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Non-finite value computed in cost. This is likely due to a division by &#39;</span>
+            <span class="s1">&#39;zero. If the final results for the beam center are not satisfactory, &#39;</span>
+            <span class="s1">&#39;try restricting your Q range, or increasing the size of your Q bins to &#39;</span>
+            <span class="s1">&#39;improve statistics in the denominator.&#39;</span>
+        <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beam center finder: x=</span><span class="si">%s</span><span class="s1">, y=</span><span class="si">%s</span><span class="s1">, cost=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<div class="viewcode-block" id="beam_center_from_iofq">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.beam_center_finder.beam_center_from_iofq.html#ess.sans.beam_center_finder.beam_center_from_iofq">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">beam_center_from_iofq</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
+    <span class="n">q_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">minimizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BeamCenter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the beam center of a SANS scattering pattern using an I(Q) calculation.</span>
+
+<span class="sd">    Description of the procedure:</span>
+
+<span class="sd">    #. obtain an initial guess by computing the center-of-mass of the pixels,</span>
+<span class="sd">       weighted by the counts on each pixel</span>
+<span class="sd">    #. from that initial guess, divide the panel into 4 quadrants</span>
+<span class="sd">    #. compute :math:`I(Q)` inside each quadrant and compute the residual difference</span>
+<span class="sd">       between all 4 quadrants</span>
+<span class="sd">    #. iteratively move the centre position and repeat 2. and 3. until all 4</span>
+<span class="sd">       :math:`I(Q)` curves lie on top of each other</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    workflow:</span>
+<span class="sd">        The reduction workflow to compute I(Q).</span>
+<span class="sd">    q_bins:</span>
+<span class="sd">        The binning in the Q dimension to be used.</span>
+<span class="sd">    minimizer:</span>
+<span class="sd">        The Scipy minimizer method to use (see the</span>
+<span class="sd">        `Scipy docs &lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html&gt;`_</span>
+<span class="sd">        for details).</span>
+<span class="sd">    tolerance:</span>
+<span class="sd">        Tolerance for termination (see the</span>
+<span class="sd">        `Scipy docs &lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html&gt;`_</span>
+<span class="sd">        for details).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The beam center position as a vector.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    We record here the thought process we went through during the writing of this</span>
+<span class="sd">    algorithm. This information is important for understanding why the beam center</span>
+<span class="sd">    finding is implemented the way it is, and should be considered carefully before</span>
+<span class="sd">    making changes to the logic of the algorithm.</span>
+
+<span class="sd">    **Use a + cut, not an X cut**</span>
+
+<span class="sd">    The first idea for implementing the beam center finder was to cut the detector</span>
+<span class="sd">    panel into 4 wedges using a cross (X) shape. This is what Mantid does, and seemed</span>
+<span class="sd">    natural, because the offsets when searching for the beam center would be applied</span>
+<span class="sd">    along the horizontal and vertical directions.</span>
+<span class="sd">    This worked well on square detector panels (like the SANS2D detector), but on</span>
+<span class="sd">    rectangular detectors, the north and south wedges ended up holding many less pixels</span>
+<span class="sd">    than the east and west panels.</span>
+<span class="sd">    More pixels means more contributions to a particular :math:`Q` bin, and comparing</span>
+<span class="sd">    the :math:`I(Q)` curves in the 4 wedges was thus not possible.</span>
+<span class="sd">    We therefore divided the detector panel into 4 quadrants using a ``+`` cut instead.</span>
+<span class="sd">    Note that since we are looking at an isotropic scattering pattern, the shape of the</span>
+<span class="sd">    cut (and the number of quadrants) should not matter for the resulting shapes of the</span>
+<span class="sd">    :math:`I(Q)` curves.</span>
+
+<span class="sd">    **Normalization inside the 4 quadrants**</span>
+
+<span class="sd">    The first attempt at implementing the beam center finder was to only compute the</span>
+<span class="sd">    raw counts as a function of $Q$ for the sample run, and not compute any</span>
+<span class="sd">    normalization term.</span>
+<span class="sd">    The idea was that even though this would change the shape of the :math:`I(Q)` curve,</span>
+<span class="sd">    because we were looking at isotropic scattering, it would change the shape of the</span>
+<span class="sd">    curve isotropically, thus still allowing us to find the center when the curves in</span>
+<span class="sd">    all 4 quadrants overlap.</span>
+<span class="sd">    The motivation for this was to save computational cost.</span>
+
+<span class="sd">    After discovering the issue that using a ``X`` shaped cut for dividing the detector</span>
+<span class="sd">    panel would yield different contributions to :math:`I(Q)` in the different wedges,</span>
+<span class="sd">    we concluded that some normalization was necessary.</span>
+<span class="sd">    The first version was to simply sum the counts in each quadrant and use this to</span>
+<span class="sd">    normalize the counts for each intensity curve.</span>
+
+<span class="sd">    This was, however, not sufficient in cases where masks are applied to the detector</span>
+<span class="sd">    pixels. It is indeed very common to mask broken pixels, as well as the region of</span>
+<span class="sd">    the detector where the beam stop is casting a shadow.</span>
+<span class="sd">    Such a beam stop will not appear in all 4 quadrants, and because it spans a</span>
+<span class="sd">    range of scattering (:math:`2{\\theta}`) angles, it spans a range of :math:`Q` bins.</span>
+
+<span class="sd">    All this means that we in fact need to perform a reduction as close as possible to</span>
+<span class="sd">    the full :math:`I(Q)` reduction in each of the 4 quadrants to achieve a reliable</span>
+<span class="sd">    result.</span>
+<span class="sd">    We write &#39;as close as possible&#39; because In the full :math:`I(Q)` reduction, there</span>
+<span class="sd">    is a term :math:`D({\\lambda})` in the normalization called the &#39;direct beam&#39; which</span>
+<span class="sd">    gives the efficiency of the detectors as a function of wavelength.</span>
+<span class="sd">    Because finding the beam center is required to compute the direct beam in the first</span>
+<span class="sd">    place, we do not include this term in the computation of :math:`I(Q)` for finding</span>
+<span class="sd">    the beam center. This changes the shape of the :math:`I(Q)` curve, but since it</span>
+<span class="sd">    changes it in the same manner for all :math:`{\\phi}` angles, this does not affect</span>
+<span class="sd">    the results for finding the beam center.</span>
+
+<span class="sd">    This is what is now implemented in this version of the algorithm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;sans&#39;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Requested minimizer: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">minimizer</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Requested tolerance: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+    <span class="n">minimizer</span> <span class="o">=</span> <span class="n">minimizer</span> <span class="ow">or</span> <span class="s1">&#39;Nelder-Mead&#39;</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="n">tolerance</span> <span class="ow">or</span> <span class="mf">0.1</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using minimizer: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">minimizer</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using tolerance: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">],</span>
+        <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">],</span>
+        <span class="n">CleanDirectBeam</span><span class="p">,</span>
+        <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># Avoid reshape of detector, which would break boolean-indexing by cost function</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">DetectorBankSizes</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+    <span class="n">detector</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">]][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">]]</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">CleanDirectBeam</span><span class="p">]</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
+
+    <span class="c1"># Avoid reloading the detector</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">detector</span><span class="p">)</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">UncertaintyBroadcastMode</span><span class="p">]</span> <span class="o">=</span> <span class="n">UncertaintyBroadcastMode</span><span class="o">.</span><span class="n">upper_bound</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">ReturnEvents</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">DimsToKeep</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">WavelengthMask</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">WavelengthBands</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">QBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_bins</span>
+
+    <span class="c1"># Use center of mass to get initial guess for beam center</span>
+    <span class="n">com_shift</span> <span class="o">=</span> <span class="n">beam_center_from_center_of_mass</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initial guess for beam center: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">com_shift</span><span class="p">)</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;cylindrical_x&#39;</span><span class="p">,</span> <span class="s1">&#39;cylindrical_y&#39;</span><span class="p">],</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">coords</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cylindrical_x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cylindrical_x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cylindrical_y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cylindrical_y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Refine using Scipy optimize</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+        <span class="n">_cost</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="n">com_shift</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">com_shift</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">detector</span><span class="p">,</span> <span class="n">norm</span><span class="p">),</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="n">minimizer</span><span class="p">,</span>
+        <span class="n">tol</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">center</span> <span class="o">=</span> <span class="n">_offsets_to_vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Final beam center value: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">center</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beam center finder minimizer info: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">center</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSsans version: 26.4.1 (<a href="https://github.com/scipp/esssans/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

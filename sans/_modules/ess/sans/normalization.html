@@ -1,0 +1,1104 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.sans.normalization &#8212; ESSsans</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=134d78e6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/sans/normalization';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.4.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSsans - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSsans - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.sans.normalization</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.sans.normalization</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2023 Scipp contributors (https://github.com/scipp)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipp.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">concepts</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">UncertaintyBroadcastMode</span><span class="p">,</span> <span class="n">broadcast_uncertainties</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CleanDirectBeam</span><span class="p">,</span>
+    <span class="n">CorrectedDetector</span><span class="p">,</span>
+    <span class="n">CorrectedMonitor</span><span class="p">,</span>
+    <span class="n">Denominator</span><span class="p">,</span>
+    <span class="n">DetectorMasks</span><span class="p">,</span>
+    <span class="n">DetectorPixelShape</span><span class="p">,</span>
+    <span class="n">DetectorTerm</span><span class="p">,</span>
+    <span class="n">EmptyBeamRun</span><span class="p">,</span>
+    <span class="n">EmptyDetector</span><span class="p">,</span>
+    <span class="n">Incident</span><span class="p">,</span>
+    <span class="n">IntensityQ</span><span class="p">,</span>
+    <span class="n">IntensityQxQy</span><span class="p">,</span>
+    <span class="n">IofQPart</span><span class="p">,</span>
+    <span class="n">MonitorTerm</span><span class="p">,</span>
+    <span class="n">NeXusTransformation</span><span class="p">,</span>
+    <span class="n">NormalizedQ</span><span class="p">,</span>
+    <span class="n">NormalizedQxQy</span><span class="p">,</span>
+    <span class="n">Numerator</span><span class="p">,</span>
+    <span class="n">Position</span><span class="p">,</span>
+    <span class="n">ProcessedWavelengthBands</span><span class="p">,</span>
+    <span class="n">ReducedQ</span><span class="p">,</span>
+    <span class="n">ReducedQxQy</span><span class="p">,</span>
+    <span class="n">ReturnEvents</span><span class="p">,</span>
+    <span class="n">RunType</span><span class="p">,</span>
+    <span class="n">SolidAngle</span><span class="p">,</span>
+    <span class="n">Transmission</span><span class="p">,</span>
+    <span class="n">TransmissionFraction</span><span class="p">,</span>
+    <span class="n">TransmissionRun</span><span class="p">,</span>
+    <span class="n">WavelengthBands</span><span class="p">,</span>
+    <span class="n">WavelengthBins</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="solid_angle">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.solid_angle.html#ess.sans.normalization.solid_angle">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">solid_angle</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">pixel_shape</span><span class="p">:</span> <span class="n">DetectorPixelShape</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">transform</span><span class="p">:</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SolidAngle</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solid angle for cylindrical pixels.</span>
+
+<span class="sd">    Note that the approximation is valid when the distance from sample</span>
+<span class="sd">    to pixel is much larger than the length or the radius of the pixels.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data:</span>
+<span class="sd">        The DataArray that contains the positions of the detector pixels</span>
+<span class="sd">        and the position of the sample in the coords.</span>
+
+<span class="sd">    pixel_shape:</span>
+<span class="sd">        Contains the description of the detector pixel shape.</span>
+
+<span class="sd">    transform:</span>
+<span class="sd">        Transformation from the local coordinate system of the detector</span>
+<span class="sd">        to the coordinate system of the sample.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The solid angle of the detector pixels, as viewed from the sample position.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">face_1_center</span><span class="p">,</span> <span class="n">face_1_edge</span><span class="p">,</span> <span class="n">face_2_center</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">pixel_shape</span><span class="p">[</span><span class="s1">&#39;vertices&#39;</span><span class="p">][</span><span class="s1">&#39;vertex&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">cylinder_axis</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">face_2_center</span> <span class="o">-</span> <span class="n">transform</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">face_1_center</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">face_1_center</span> <span class="o">-</span> <span class="n">face_1_edge</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cylinder_axis</span><span class="p">)</span>
+
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">_approximate_solid_angle_for_cylinder_shaped_pixel_of_detector</span><span class="p">(</span>
+        <span class="n">pixel_position</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">sample_position</span><span class="p">,</span>
+        <span class="n">cylinder_axis</span><span class="o">=</span><span class="n">cylinder_axis</span><span class="p">,</span>
+        <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">SolidAngle</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="n">concepts</span><span class="o">.</span><span class="n">rewrap_reduced_data</span><span class="p">(</span>
+            <span class="n">prototype</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">omega</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">omega</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mask_solid_angle">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.mask_solid_angle.html#ess.sans.normalization.mask_solid_angle">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mask_solid_angle</span><span class="p">(</span>
+    <span class="n">solid_angle</span><span class="p">:</span> <span class="n">SolidAngle</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">masks</span><span class="p">:</span> <span class="n">DetectorMasks</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Denominator</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Denominator</span><span class="p">](</span><span class="n">solid_angle</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_approximate_solid_angle_for_cylinder_shaped_pixel_of_detector</span><span class="p">(</span>
+    <span class="n">pixel_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">cylinder_axis</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">length</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Computes solid angle of a detector pixel under the assumption that the</span>
+<span class="sd">    distance to the detector pixel from the sample is large compared to the radius</span>
+<span class="sd">    and to the length of the piece of the detector cylinder that makes up the pixel.</span>
+
+<span class="sd">    The cylinder is approximated by a rectangle element contained in the cylinder.</span>
+<span class="sd">    The normal of the rectangle is selected to</span>
+<span class="sd">    1. be orthogonal to the cylinder axis and</span>
+<span class="sd">    2. &quot;maximally parallel&quot; to the pixel position vector.</span>
+<span class="sd">    This occurs when the normal :math:`n`, the cylinder axis :math:`c` and the</span>
+<span class="sd">    pixel position :math:`r` fall in a shared plane such that</span>
+<span class="sd">    .. math::</span>
+<span class="sd">        r = (n\cdot r)n + (c \cdot r)c.</span>
+
+<span class="sd">    From the above relationship we get the scalar product of the position</span>
+<span class="sd">    vector and the normal:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        |\hat{r}\cdot n| = \sqrt{\frac{r \cdot r - (c \cdot r^2)}{||r||^2}}</span>
+
+<span class="sd">    The solid angle contribution from the detector element is approximated as</span>
+<span class="sd">    .. math::</span>
+<span class="sd">        \Delta\Omega =  A \frac{|\hat{r}\cdot n|}{||r||^2}</span>
+<span class="sd">    where :math:`A = 2 R L` is the area of the rectangular element</span>
+<span class="sd">    and :math:`\hat{r}` is the normalized pixel position vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">norm_pp</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">pixel_position</span><span class="p">)</span>
+    <span class="n">norm_ca</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cylinder_axis</span><span class="p">)</span>
+    <span class="n">cosalpha</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">pixel_position</span><span class="p">,</span> <span class="n">cylinder_axis</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">norm_pp</span> <span class="o">*</span> <span class="n">norm_ca</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">length</span><span class="p">)</span> <span class="o">*</span> <span class="n">cosalpha</span> <span class="o">/</span> <span class="n">norm_pp</span><span class="o">**</span><span class="mi">2</span>
+
+
+<div class="viewcode-block" id="transmission_fraction">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.transmission_fraction.html#ess.sans.normalization.transmission_fraction">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">transmission_fraction</span><span class="p">(</span>
+    <span class="n">sample_incident_monitor</span><span class="p">:</span> <span class="n">CorrectedMonitor</span><span class="p">[</span><span class="n">TransmissionRun</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span> <span class="n">Incident</span><span class="p">],</span>
+    <span class="n">sample_transmission_monitor</span><span class="p">:</span> <span class="n">CorrectedMonitor</span><span class="p">[</span>
+        <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span> <span class="n">Transmission</span>
+    <span class="p">],</span>
+    <span class="n">direct_incident_monitor</span><span class="p">:</span> <span class="n">CorrectedMonitor</span><span class="p">[</span><span class="n">EmptyBeamRun</span><span class="p">,</span> <span class="n">Incident</span><span class="p">],</span>
+    <span class="n">direct_transmission_monitor</span><span class="p">:</span> <span class="n">CorrectedMonitor</span><span class="p">[</span><span class="n">EmptyBeamRun</span><span class="p">,</span> <span class="n">Transmission</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransmissionFraction</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Approximation based on equations in</span>
+<span class="sd">    `CalculateTransmission &lt;https://docs.mantidproject.org/v4.0.0/algorithms/CalculateTransmission-v1.html&gt;`_</span>
+<span class="sd">    documentation:</span>
+<span class="sd">    ``(sample_transmission_monitor / direct_transmission_monitor) * (direct_incident_monitor / sample_incident_monitor)``</span>
+
+<span class="sd">    This is equivalent to ``mantid.CalculateTransmission`` without fitting.</span>
+<span class="sd">    Inputs should be wavelength-dependent.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sample_incident_monitor:</span>
+<span class="sd">        The incident monitor data for the sample (transmission) run.</span>
+<span class="sd">    sample_transmission_monitor:</span>
+<span class="sd">        The transmission monitor data for the sample (transmission) run.</span>
+<span class="sd">    direct_incident_monitor:</span>
+<span class="sd">        The incident monitor data for the direct beam run.</span>
+<span class="sd">    direct_transmission_monitor:</span>
+<span class="sd">        The transmission monitor data for the direct beam run.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The transmission fraction computed from the monitor counts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+    <span class="n">frac</span> <span class="o">=</span> <span class="p">(</span><span class="n">sample_transmission_monitor</span> <span class="o">/</span> <span class="n">direct_transmission_monitor</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">direct_incident_monitor</span> <span class="o">/</span> <span class="n">sample_incident_monitor</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">TransmissionFraction</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">frac</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="norm_monitor_term">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.norm_monitor_term.html#ess.sans.normalization.norm_monitor_term">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">norm_monitor_term</span><span class="p">(</span>
+    <span class="n">incident_monitor</span><span class="p">:</span> <span class="n">CorrectedMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Incident</span><span class="p">],</span>
+    <span class="n">transmission_fraction</span><span class="p">:</span> <span class="n">TransmissionFraction</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MonitorTerm</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the monitor-dependent contribution to the denominator term of I(Q).</span>
+
+<span class="sd">    This is basically ``incident_monitor * transmission_fraction``.</span>
+
+<span class="sd">    Keeping the monitor term separate from the detector term allows us to compute</span>
+<span class="sd">    the latter only once when repeatedly processing chunks of events in streamed data</span>
+<span class="sd">    processing, e.g., for live data reduction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    incident_monitor:</span>
+<span class="sd">        The incident monitor data (depends on wavelength).</span>
+<span class="sd">    transmission_fraction:</span>
+<span class="sd">        The transmission fraction (depends on wavelength).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Monitor-dependent factor of the normalization term for the SANS I(Q).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">incident_monitor</span> <span class="o">*</span> <span class="n">transmission_fraction</span>
+    <span class="c1"># Convert wavelength coordinate to midpoints for future histogramming</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">MonitorTerm</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">out</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="norm_detector_term_denominator">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.norm_detector_term_denominator.html#ess.sans.normalization.norm_detector_term_denominator">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">norm_detector_term_denominator</span><span class="p">(</span>
+    <span class="n">solid_angle</span><span class="p">:</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Denominator</span><span class="p">],</span>
+    <span class="n">direct_beam</span><span class="p">:</span> <span class="n">CleanDirectBeam</span><span class="p">,</span>
+    <span class="n">uncertainties</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorTerm</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Denominator</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the detector-dependent contribution to the denominator term of I(Q).</span>
+
+<span class="sd">    This is basically ``solid_angle * direct_beam``.</span>
+<span class="sd">    If the direct beam is not supplied, it is assumed to be 1.</span>
+
+<span class="sd">    Keeping the monitor term separate from the detector term allows us to compute the</span>
+<span class="sd">    the latter only once when repeatedly processing chunks of events in streamed data</span>
+<span class="sd">    processing, e.g., for live data reduction.</span>
+
+<span class="sd">    Because the multiplication between the pixel-dependent solid angle and the</span>
+<span class="sd">    (potentially) pixel-independent direct beam constitutes a broadcast operation which</span>
+<span class="sd">    would introduce correlations, variances of the direct beam are dropped or replaced</span>
+<span class="sd">    by an upper-bound estimation, depending on the configured mode.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    solid_angle:</span>
+<span class="sd">        The solid angle of the detector pixels, as viewed from the sample position.</span>
+<span class="sd">    direct_beam:</span>
+<span class="sd">        The direct beam function (depends on wavelength).</span>
+<span class="sd">    uncertainties:</span>
+<span class="sd">        The mode for broadcasting uncertainties. See</span>
+<span class="sd">        :py:class:`ess.reduce.uncertainty.UncertaintyBroadcastMode` for details.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Detector-dependent factor of the normalization term for the SANS I(Q).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Make wavelength the inner dim</span>
+    <span class="n">dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">direct_beam</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+    <span class="n">dims</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">)</span>
+    <span class="n">dims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">)</span>
+    <span class="n">direct_beam</span> <span class="o">=</span> <span class="n">direct_beam</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">solid_angle</span> <span class="o">*</span> <span class="n">broadcast_uncertainties</span><span class="p">(</span>
+        <span class="n">direct_beam</span><span class="p">,</span> <span class="n">prototype</span><span class="o">=</span><span class="n">solid_angle</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">uncertainties</span>
+    <span class="p">)</span>
+    <span class="c1"># Convert wavelength coordinate to midpoints for future histogramming</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">DetectorTerm</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Denominator</span><span class="p">](</span><span class="n">out</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="norm_detector_term_numerator">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.norm_detector_term_numerator.html#ess.sans.normalization.norm_detector_term_numerator">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">norm_detector_term_numerator</span><span class="p">(</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorTerm</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dummy provider to convert CorrectedDetector into DetectorTerm.</span>
+<span class="sd">    This is added instead of having the masking operation directly return the</span>
+<span class="sd">    DetectorTerm, as it is more consistent that Denominator and Numerator have a</span>
+<span class="sd">    CorrectedDetector step. We also do not make :func:`compute_Q` accept</span>
+<span class="sd">    the CorrectedDetector directly, because this would lead to complications when we</span>
+<span class="sd">    want to swap it out for :func:`compute_Qxy`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">DetectorTerm</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">](</span><span class="n">detector</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="process_wavelength_bands">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.process_wavelength_bands.html#ess.sans.normalization.process_wavelength_bands">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_wavelength_bands</span><span class="p">(</span>
+    <span class="n">wavelength_bands</span><span class="p">:</span> <span class="n">WavelengthBands</span><span class="p">,</span>
+    <span class="n">wavelength_bins</span><span class="p">:</span> <span class="n">WavelengthBins</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProcessedWavelengthBands</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform some checks and potential reshaping on the wavelength bands.</span>
+
+<span class="sd">    The wavelength bands must be either one- or two-dimensional.</span>
+<span class="sd">    If the wavelength bands are defined as a one-dimensional array, convert them to a</span>
+<span class="sd">    two-dimensional array with start and end wavelengths.</span>
+
+<span class="sd">    The final bands must have a size of 2 in the wavelength dimension, defining a start</span>
+<span class="sd">    and an end wavelength.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">wavelength_bands</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">wavelength_bands</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">wavelength_bins</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">wavelength_bins</span><span class="o">.</span><span class="n">max</span><span class="p">()],</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;wavelength&#39;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">wavelength_bands</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">wavelength_bands</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">wavelength_bands</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">wavelength_bands</span><span class="p">[</span><span class="mi">1</span><span class="p">:]],</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;x&#39;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="s1">&#39;band&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wavelength_bands</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Wavelength_bands must be one- or two-dimensional, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;got </span><span class="si">{</span><span class="n">wavelength_bands</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s1">.&#39;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">wavelength_bands</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Wavelength_bands must have a size of 2 in the wavelength dimension, &#39;</span>
+            <span class="s1">&#39;defining a start and an end wavelength, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;got </span><span class="si">{</span><span class="n">wavelength_bands</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.&#39;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">wavelength_bands</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize</span><span class="p">(</span>
+    <span class="n">numerator</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">denominator</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">return_events</span><span class="p">:</span> <span class="n">ReturnEvents</span><span class="p">,</span>
+    <span class="n">uncertainties</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform normalization of counts as a function of Q to obtain I(Q) or I(Qx, Qy).</span>
+<span class="sd">    division.</span>
+
+<span class="sd">    In a SANS experiment, the scattering cross section :math:`I(Q)` is defined as</span>
+<span class="sd">    (`Heenan et al. 1997 &lt;https://doi.org/10.1107/S0021889897002173&gt;`_):</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       I(Q) = \\frac{\\partial\\Sigma{Q}}{\\partial\\Omega} = \\frac{A_{H} \\Sigma_{R,\\lambda\\subset Q} C(R, \\lambda)}{A_{M} t \\Sigma_{R,\\lambda\\subset Q}M(\\lambda)T(\\lambda)D(\\lambda)\\Omega(R)}</span>
+
+<span class="sd">    where :math:`A_{H}` is the area of a mask (which avoids saturating the detector)</span>
+<span class="sd">    placed between the monitor of area :math:`A_{M}` and the main detector.</span>
+<span class="sd">    :math:`\\Omega` is the detector solid angle, and :math:`C` is the count rate on the</span>
+<span class="sd">    main detector, which depends on the position :math:`R` and the wavelength.</span>
+<span class="sd">    :math:`t` is the sample thickness, :math:`M` represents the incident monitor count</span>
+<span class="sd">    rate for the sample run, and :math:`T` is known as the transmission fraction.</span>
+
+<span class="sd">    Note that the incident monitor used to compute the transmission fraction is not</span>
+<span class="sd">    necessarily the same as :math:`M`, as the transmission fraction is usually computed</span>
+<span class="sd">    from a separate &#39;transmission&#39; run (in the &#39;sample&#39; run, the transmission monitor is</span>
+<span class="sd">    commonly moved out of the beam path, to avoid polluting the sample detector signal).</span>
+
+<span class="sd">    Finally, :math:`D` is the &#39;direct beam function&#39;, and is defined as</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       D(\\lambda) = \\frac{\\eta(\\lambda)}{\\eta_{M}(\\lambda)} \\frac{A_{H}}{A_{M}}</span>
+
+<span class="sd">    where :math:`\\eta` and :math:`\\eta_{M}` are the detector and monitor</span>
+<span class="sd">    efficiencies, respectively.</span>
+
+<span class="sd">    Hence, in order to normalize the main detector counts :math:`C`, we need compute the</span>
+<span class="sd">    transmission fraction :math:`T(\\lambda)`, the direct beam function</span>
+<span class="sd">    :math:`D(\\lambda)` and the solid angle :math:`\\Omega(R)`.</span>
+
+<span class="sd">    The denominator is then simply:</span>
+<span class="sd">    :math:`M_{\\lambda} T_{\\lambda} D_{\\lambda} \\Omega_{R}`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    numerator:</span>
+<span class="sd">        The data whose counts will be divided by the denominator. This can either be</span>
+<span class="sd">        event or dense (histogrammed) data.</span>
+<span class="sd">    denominator:</span>
+<span class="sd">        The divisor for the normalization operation. This cannot be event data, it must</span>
+<span class="sd">        contain histogrammed data.</span>
+<span class="sd">    return_events:</span>
+<span class="sd">        Whether to return the result as event data or histogrammed data.</span>
+<span class="sd">    uncertainties:</span>
+<span class="sd">        The mode for broadcasting uncertainties. See</span>
+<span class="sd">        :py:class:`ess.reduce.uncertainty.UncertaintyBroadcastMode` for details.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Normalized I(Q) or I(Qx, Qy).</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+    <span class="k">if</span> <span class="n">return_events</span> <span class="ow">and</span> <span class="n">numerator</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Naive event-mode normalization is not correct if norm-term has variances.</span>
+        <span class="c1"># See https://doi.org/10.3233/JNR-220049 for context.</span>
+        <span class="n">denominator</span> <span class="o">=</span> <span class="n">broadcast_uncertainties</span><span class="p">(</span>
+            <span class="n">denominator</span><span class="p">,</span> <span class="n">prototype</span><span class="o">=</span><span class="n">numerator</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">uncertainties</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">numerator</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">numerator</span> <span class="o">=</span> <span class="n">numerator</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
+    <span class="n">numerator</span> <span class="o">/=</span> <span class="n">denominator</span><span class="o">.</span><span class="n">drop_coords</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">denominator</span><span class="o">.</span><span class="n">coords</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">denominator</span><span class="o">.</span><span class="n">dims</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">numerator</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_do_reduce</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="n">wav</span> <span class="o">=</span> <span class="s1">&#39;wavelength&#39;</span>
+    <span class="k">if</span> <span class="n">da</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="n">wav</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Can avoid costly event-data da.bins.concat</span>
+        <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">wav</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">wav</span><span class="p">)</span> <span class="k">if</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">wav</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_reduce</span><span class="p">(</span><span class="n">part</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bands</span><span class="p">:</span> <span class="n">ProcessedWavelengthBands</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reduce data by summing or concatenating along the wavelength dimension.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data:</span>
+<span class="sd">        Numerator or denominator data to be reduced.</span>
+<span class="sd">    wavelength_bands:</span>
+<span class="sd">        Defines bands in wavelength that can be used to separate different wavelength</span>
+<span class="sd">        ranges that contribute to different regions in Q space. Note that this needs to</span>
+<span class="sd">        be defined, so if all wavelengths should be used, this should simply be a start</span>
+<span class="sd">        and end edges that encompass the entire wavelength range.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Q-dependent data, ready for normalization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wav</span> <span class="o">=</span> <span class="s1">&#39;wavelength&#39;</span>
+    <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># If in event mode the desired wavelength binning has not been applied, we need</span>
+        <span class="c1"># it for splitting by bands, or restricting the range in case of a single band.</span>
+        <span class="n">part</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">bands</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="n">wav</span><span class="p">),</span> <span class="n">wav</span><span class="p">))</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_do_reduce</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="n">wav</span><span class="p">,</span> <span class="n">wav_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">wav_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="k">for</span> <span class="n">wav_range</span> <span class="ow">in</span> <span class="n">sc</span><span class="o">.</span><span class="n">collapse</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="n">wav</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="p">]</span>
+    <span class="n">band_dim</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">bands</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s1">&#39;wavelength&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">reduced</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">band_dim</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">reduced</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">bands</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="reduce_q">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.reduce_q.html#ess.sans.normalization.reduce_q">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reduce_q</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">NormalizedQ</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">IofQPart</span><span class="p">],</span>
+    <span class="n">bands</span><span class="p">:</span> <span class="n">ProcessedWavelengthBands</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReducedQ</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">IofQPart</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">ReducedQ</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">IofQPart</span><span class="p">](</span><span class="n">_reduce</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="reduce_qxy">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.reduce_qxy.html#ess.sans.normalization.reduce_qxy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reduce_qxy</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">NormalizedQxQy</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">IofQPart</span><span class="p">],</span>
+    <span class="n">bands</span><span class="p">:</span> <span class="n">ProcessedWavelengthBands</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReducedQxQy</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">IofQPart</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">ReducedQxQy</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">IofQPart</span><span class="p">](</span><span class="n">_reduce</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="normalize_q">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.normalize_q.html#ess.sans.normalization.normalize_q">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_q</span><span class="p">(</span>
+    <span class="n">numerator</span><span class="p">:</span> <span class="n">ReducedQ</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">],</span>
+    <span class="n">denominator</span><span class="p">:</span> <span class="n">ReducedQ</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Denominator</span><span class="p">],</span>
+    <span class="n">return_events</span><span class="p">:</span> <span class="n">ReturnEvents</span><span class="p">,</span>
+    <span class="n">uncertainties</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntensityQ</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">IntensityQ</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="n">_normalize</span><span class="p">(</span>
+            <span class="n">numerator</span><span class="o">=</span><span class="n">numerator</span><span class="p">,</span>
+            <span class="n">denominator</span><span class="o">=</span><span class="n">denominator</span><span class="p">,</span>
+            <span class="n">return_events</span><span class="o">=</span><span class="n">return_events</span><span class="p">,</span>
+            <span class="n">uncertainties</span><span class="o">=</span><span class="n">uncertainties</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="normalize_qxy">
+<a class="viewcode-back" href="../../../generated/modules/ess.sans.normalization.normalize_qxy.html#ess.sans.normalization.normalize_qxy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_qxy</span><span class="p">(</span>
+    <span class="n">numerator</span><span class="p">:</span> <span class="n">ReducedQxQy</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">],</span>
+    <span class="n">denominator</span><span class="p">:</span> <span class="n">ReducedQxQy</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">Denominator</span><span class="p">],</span>
+    <span class="n">return_events</span><span class="p">:</span> <span class="n">ReturnEvents</span><span class="p">,</span>
+    <span class="n">uncertainties</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntensityQxQy</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">IntensityQxQy</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="n">_normalize</span><span class="p">(</span>
+            <span class="n">numerator</span><span class="o">=</span><span class="n">numerator</span><span class="p">,</span>
+            <span class="n">denominator</span><span class="o">=</span><span class="n">denominator</span><span class="p">,</span>
+            <span class="n">return_events</span><span class="o">=</span><span class="n">return_events</span><span class="p">,</span>
+            <span class="n">uncertainties</span><span class="o">=</span><span class="n">uncertainties</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">reduce_q</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">_reduce</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="n">reduce_qxy</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">_reduce</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="n">normalize_q</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">_normalize</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="n">normalize_qxy</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">_normalize</span><span class="o">.</span><span class="vm">__doc__</span>
+
+
+<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">transmission_fraction</span><span class="p">,</span>
+    <span class="n">norm_monitor_term</span><span class="p">,</span>
+    <span class="n">norm_detector_term_denominator</span><span class="p">,</span>
+    <span class="n">norm_detector_term_numerator</span><span class="p">,</span>
+    <span class="n">reduce_q</span><span class="p">,</span>
+    <span class="n">reduce_qxy</span><span class="p">,</span>
+    <span class="n">normalize_q</span><span class="p">,</span>
+    <span class="n">normalize_qxy</span><span class="p">,</span>
+    <span class="n">process_wavelength_bands</span><span class="p">,</span>
+    <span class="n">solid_angle</span><span class="p">,</span>
+    <span class="n">mask_solid_angle</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSsans version: 26.4.1 (<a href="https://github.com/scipp/esssans/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
