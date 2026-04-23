@@ -43,8 +43,8 @@ DETECTOR_BANK_SIZES = {
 def loki_default_parameters() -> dict:
     return {
         DetectorBankSizes: DETECTOR_BANK_SIZES,
-        NeXusMonitorName[Incident]: 'beam_monitor_1',
-        NeXusMonitorName[Transmission]: 'beam_monitor_3',
+        NeXusMonitorName[Incident]: 'beam_monitor_m1',
+        NeXusMonitorName[Transmission]: 'beam_monitor_m3',
         PixelShapePath: 'pixel_shape',
         NonBackgroundWavelengthRange: None,
         LookupTableRelativeErrorThreshold: {
