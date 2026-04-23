@@ -71,6 +71,8 @@ Add the new feature to the `default` environment.
 
 Add a change filter and matrix entry. If the package depends on `essreduce`, include essreduce paths in the filter.
 
+Add package to other workflows in `.github/workflows`.
+
 ## 5. Run `pixi install` and commit
 
 ```bash
