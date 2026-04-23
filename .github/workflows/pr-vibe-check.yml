@@ -125,6 +125,7 @@ jobs:
             else
               title_prefix="[${label}]";
             fi
+            title_prefix=${title_prefix^^};
           # Handle ultiple labels
           elif [[ ${#labels[@]} -gt 1  ]]; then
             ess_labels=();
