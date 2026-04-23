@@ -16,6 +16,9 @@ jobs:
           - essreduce
           - essimaging
           - essnmx
+          - essdiffraction
+          - essreflectometry
+          - esssans
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6

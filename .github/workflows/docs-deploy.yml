@@ -13,6 +13,7 @@ on:
           - essnmx
           - essdiffraction
           - essreflectometry
+          - esssans
       publish:
         default: false
         type: boolean
