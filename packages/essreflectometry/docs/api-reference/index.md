@@ -85,6 +85,28 @@
    workflow
 ```
 
+## Freia
+
+```{eval-rst}
+.. currentmodule:: ess.freia
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   conversions
+   maskings
+   corrections
+   data
+   mcstas
+   load
+   resolution
+   types
+   normalization
+   workflow
+```
+
 ## Offspec
 
 ```{eval-rst}

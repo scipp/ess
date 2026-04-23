@@ -30,10 +30,15 @@
 
 ## Quick links
 
-::::{grid} 3
+::::{grid} 2 2
 
 :::{grid-item-card} ESTIA
 :link: user-guide/estia/index.md
+
+:::
+
+:::{grid-item-card} FREIA
+:link: user-guide/freia/index.md
 
 :::
 
