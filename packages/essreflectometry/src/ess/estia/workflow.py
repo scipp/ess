@@ -3,6 +3,8 @@
 
 import sciline
 import scipp as sc
+import scippnexus as snx
+from ess.reduce.nexus.types import TransformationTimeFilter
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
@@ -105,4 +107,12 @@ def EstiaWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for name, param in default_parameters().items():
         workflow[name] = param
+
+    workflow[TransformationTimeFilter[snx.NXdetector, RunType]] = (
+        # Default to zero detector rotation if the log is empty.
+        # In practice it should never be empty, and it cannot be reduced,
+        # but this default makes it possible to at least load the data
+        # for visualization.
+        lambda da: da[0] if len(da) > 0 else sc.scalar(0.0, unit=da.unit)
+    )
     return workflow
