@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import ess.reduce
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
 from ..reflectometry.conversions import (
     add_proton_current_coord,
@@ -21,6 +23,47 @@ from ..reflectometry.types import (
 )
 from .conversions import add_coords
 from .maskings import add_masks
+from .types import WavelengthMonitor
+
+
+def normalize_by_monitor_histogram(
+    detector: ReducibleData[RunType],
+    *,
+    monitor: WavelengthMonitor[RunType],
+) -> ReducibleData[RunType]:
+    """Normalize detector data by a histogrammed monitor.
+
+    The detector is normalized according to
+
+    .. math::
+
+        d_i^\\text{Norm} = \\frac{d_i}{m_i} \\Delta \\lambda_i
+
+    Parameters
+    ----------
+    detector:
+        Input event data in wavelength.
+    monitor:
+        A histogrammed monitor in wavelength.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of the monitor are broadcast to the sample data.
+
+    Returns
+    -------
+    :
+        `detector` normalized by a monitor.
+
+    See also
+    --------
+    ess.reduce.normalization.normalize_by_monitor_histogram:
+        For details and the actual implementation.
+    """
+    return ess.reduce.normalization.normalize_by_monitor_histogram(
+        detector=detector,
+        monitor=monitor,
+        uncertainty_broadcast_mode=UncertaintyBroadcastMode.drop,
+        skip_range_check=False,
+    )
 
 
 def add_coords_masks_and_apply_corrections(
@@ -30,6 +73,7 @@ def add_coords_masks_and_apply_corrections(
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
     proton_current: ProtonCurrent[RunType],
+    monitor: WavelengthMonitor[RunType],
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
 ) -> ReducibleData[RunType]:
@@ -45,7 +89,10 @@ def add_coords_masks_and_apply_corrections(
         da = add_proton_current_mask(da)
 
     for correction in corrections_to_apply:
-        da = correction(da)
+        if correction == 'monitor':
+            da = normalize_by_monitor_histogram(da, monitor=monitor)
+        else:
+            da = correction(da)
 
     return ReducibleData[RunType](da)
 
@@ -61,6 +108,6 @@ def assume_time_series_constant_with_zero_default_value_if_empty(da: sc.DataArra
     return da.mean() if len(da) > 0 else sc.scalar(0.0, unit=da.unit)
 
 
-default_corrections = {correct_by_proton_current, correct_by_footprint}
+default_corrections = {correct_by_footprint, 'proton_current', 'monitor'}
 
 providers = (add_coords_masks_and_apply_corrections,)

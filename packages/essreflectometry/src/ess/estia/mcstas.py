@@ -302,6 +302,7 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
         zlims=zlims,
         bdlim=bdlim,
         wbins=wbins,
+        monitor=None,
         proton_current=proton_current,
         graph={
             **graph,

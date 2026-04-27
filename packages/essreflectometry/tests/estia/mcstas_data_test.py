@@ -8,6 +8,9 @@ import numpy as np
 import pytest
 import sciline
 import scipp as sc
+import scipp.testing
+from ess.reduce.normalization import normalize_by_monitor_histogram
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from orsopy import fileio
 
 from ess.estia import EstiaMcStasWorkflow
@@ -19,9 +22,11 @@ from ess.estia.data import (
 from ess.estia.mcstas import (
     use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival,
 )
+from ess.estia.types import WavelengthMonitor
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
+    CorrectionsToApply,
     Filename,
     LookupTableFilename,
     ProtonCurrent,
@@ -95,6 +100,27 @@ def test_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
     assert 'theta' in da.coords
     assert 'wavelength' in da.bins.coords
     assert 'Q' in da.bins.coords
+
+
+def test_compute_reducible_data_with_monitor(estia_mcstas_pipeline: sciline.Pipeline):
+    wf = estia_mcstas_pipeline
+    wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
+    without_monitor = wf.compute(ReducibleData[SampleRun])
+    wf[WavelengthMonitor[SampleRun]] = sc.DataArray(
+        sc.array(dims=['wavelength'], values=[30.0], variances=[1.0]),
+        coords={'wavelength': sc.linspace('wavelength', 0, 15, 2, unit='angstrom')},
+    )
+    corrections = wf.compute(CorrectionsToApply)
+    wf[CorrectionsToApply] = {*corrections, 'monitor'}
+    with_monitor = wf.compute(ReducibleData[SampleRun])
+    scipp.testing.assert_allclose(
+        normalize_by_monitor_histogram(
+            without_monitor,
+            monitor=wf.compute(WavelengthMonitor[SampleRun]),
+            uncertainty_broadcast_mode=UncertaintyBroadcastMode.drop,
+        ),
+        with_monitor,
+    )
 
 
 def test_can_compute_reflectivity_curve_exact_wavelengths(

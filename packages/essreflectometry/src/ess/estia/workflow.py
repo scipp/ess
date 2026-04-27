@@ -28,6 +28,7 @@ from . import (
     normalization,
     orso,
 )
+from .types import WavelengthMonitor
 
 _general_providers = (
     *reflectometry_providers,
@@ -70,10 +71,12 @@ def mcstas_default_parameters() -> dict:
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: corrections.default_corrections
+        - {'monitor'}
         - {correct_by_proton_current},
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": 0.06,
         },
+        WavelengthMonitor[RunType]: None,
     }
 
 
@@ -82,11 +85,12 @@ def default_parameters() -> dict:
     return {
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections,
+        CorrectionsToApply: corrections.default_corrections - {'monitor'},
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
         },
+        WavelengthMonitor[RunType]: None,
     }
 
 
