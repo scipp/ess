@@ -70,9 +70,9 @@ def mcstas_default_parameters() -> dict:
             sc.scalar(0.75, unit='deg'),
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections
-        - {'monitor'}
-        - {correct_by_proton_current},
+        CorrectionsToApply: (
+            corrections.default_corrections - {'monitor', correct_by_proton_current}
+        ),
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": 0.06,
         },
@@ -90,6 +90,9 @@ def default_parameters() -> dict:
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
         },
+        # The monitor is missing from the Nexus files,
+        # so to be able to load Nexus files anyway
+        # this is set to None.
         WavelengthMonitor[RunType]: None,
     }
 
