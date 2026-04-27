@@ -203,6 +203,15 @@ class OutputConfig(BaseModel):
         description="Compress option of reduced output file.",
         default=Compression.BITSHUFFLE_LZ4,
     )
+    output_time_bin_unit: TimeBinUnit = Field(
+        title="Output Time Bin Unit",
+        description="Time bin unit in the output file. "
+        "If the input time bin is different from the output time bin unit, "
+        "the unit will be converted to the output time bin "
+        "before it is written in the output file.",
+        default=TimeBinUnit.ns,
+        # DIALS expects [ns] by default.
+    )
 
 
 class ReductionConfig(BaseModel):
