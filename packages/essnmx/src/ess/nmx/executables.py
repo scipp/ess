@@ -283,7 +283,7 @@ def reduction(
     )
 
     # Histogram detector counts
-    output_tunit = config.output.output_time_bin_unit
+    output_tunit = config.workflow.result_time_bin_unit
     t_bin_edges = t_bin_edges.to(unit=output_tunit)
     tof_histograms = sc.DataGroup()
     for detector_name, tof_da in tof_das.items():
@@ -330,7 +330,6 @@ def reduction(
 
 def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
     # Validate if results have expected fields
-
     export_static_metadata_as_nxlauetof(
         sample_metadata=results.sample,
         source_metadata=results.instrument.source,
