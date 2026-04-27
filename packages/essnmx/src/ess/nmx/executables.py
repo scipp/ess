@@ -186,7 +186,7 @@ def _build_time_bin_edges(
             true_last_bin_edge = bin_edges[t_coord_name, -1] + time_bin_width
             bin_edges = sc.concat([bin_edges, true_last_bin_edge], dim=t_coord_name)
 
-        return bin_edges
+        return bin_edges.to(dtype=float)
 
     else:  # Number of bin edges are given but not the bin width.
         n_edges = wf_config.nbins + 1
@@ -197,7 +197,9 @@ def _build_time_bin_edges(
         # Avoid dropping the event that has the exact same
         # `event_time_offset`` or `tof` value as the upper bin edge.
         max_t.value = np.nextafter(max_t.value, np.inf)
-        return sc.linspace(dim=t_coord_name, start=min_t, stop=max_t, num=n_edges)
+        return sc.linspace(
+            dim=t_coord_name, start=min_t, stop=max_t, num=n_edges, dtype=float
+        )
 
 
 def reduction(
@@ -281,11 +283,14 @@ def reduction(
     )
 
     # Histogram detector counts
+    output_tunit = config.output.output_time_bin_unit
+    t_bin_edges = t_bin_edges.to(unit=output_tunit)
     tof_histograms = sc.DataGroup()
     for detector_name, tof_da in tof_das.items():
-        t_coord_unit = tof_da.bins.coords[t_coord_name].unit
-        histogram = tof_da.hist({t_coord_name: t_bin_edges.to(unit=t_coord_unit)})
-        tof_histograms[detector_name] = histogram
+        tof_da.bins.coords[t_coord_name] = tof_da.bins.coords[t_coord_name].to(
+            unit=output_tunit
+        )
+        tof_histograms[detector_name] = tof_da.hist({t_coord_name: t_bin_edges})
 
     _tof_histogram = next(iter(tof_histograms.values()))
     monitor_metadata = NMXMonitorMetadata(

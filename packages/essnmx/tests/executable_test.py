@@ -108,6 +108,7 @@ def test_reduction_config() -> None:
         verbose=True,
         skip_file_output=True,
         overwrite=True,
+        output_time_bin_unit=TimeBinUnit.us,
     )
     expected_config = ReductionConfig(
         inputs=input_options, workflow=workflow_options, output=output_options
@@ -162,9 +163,11 @@ def _check_output_file(
             if nbins and bin_width is None:
                 assert len(toa_edges) == nbins
             else:
-                assert (toa_edges[1] - toa_edges[0]) == sc.scalar(
-                    bin_width, unit='ms'
-                ).to(unit='us')
+                computed_bin_width = toa_edges[1] - toa_edges[0]
+                expected_bin_width = sc.scalar(bin_width, unit='ms').to(
+                    unit=computed_bin_width.unit
+                )
+                assert_identical(computed_bin_width, expected_bin_width)
             assert all(field_name in det_gr for field_name in mandatory_fields)
 
 
@@ -173,14 +176,14 @@ def test_executable_runs(small_nmx_nexus_path, tmp_path: pathlib.Path):
     output_file = tmp_path / "output.h5"
     assert not output_file.exists()
 
-    bin_width = 10  # Bigger bins for testing.
+    bin_width = 10.0  # Bigger bins for testing.
     # The output has 1280x1280 pixels per detector per time bin.
     commands = (
         'essnmx-reduce',
         '--input-file',
         small_nmx_nexus_path,
         '--time-bin-width',
-        str(bin_width),
+        str(int(bin_width)),
         '--output-file',
         output_file.as_posix(),
     )
@@ -294,7 +297,9 @@ def test_reduction_only_time_bin_width(reduction_config: ReductionConfig) -> Non
         hist = _retrieve_one_hist(reduction(config=reduction_config))
 
     width = hist.coords['tof'][1] - hist.coords['tof'][0]
-    assert width == sc.scalar(20.0, unit='ms').to(unit='us')
+    assert width == sc.scalar(20.0, unit='ms').to(
+        unit=reduction_config.output.output_time_bin_unit
+    )
 
 
 def test_reduction_only_number_of_time_bins(reduction_config: ReductionConfig) -> None:
@@ -315,7 +320,10 @@ def test_histogram_event_time_offset(reduction_config: ReductionConfig) -> None:
 
     # Check that the number of time bins is as expected.
     width = hist.coords['event_time_offset'][1] - hist.coords['event_time_offset'][0]
-    assert_identical(width, sc.scalar(20.0, unit='ms').to(unit='ns'))
+    expected_output_width = sc.scalar(20.0, unit='ms').to(
+        unit=reduction_config.output.output_time_bin_unit
+    )
+    assert_identical(width, expected_output_width)
     # Check if the histogram result is reasonable
     zero = sc.scalar(0.0, unit='counts', dtype='float32', variance=0.0)
     assert bool(hist.data.sum() > zero)
