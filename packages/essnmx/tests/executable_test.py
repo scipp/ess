@@ -101,6 +101,7 @@ def test_reduction_config() -> None:
         tof_simulation_min_ltotal=140.0,
         tof_simulation_max_ltotal=200.0,
         tof_simulation_seed=12345,
+        result_time_bin_unit=TimeBinUnit.us,
     )
     output_options = OutputConfig(
         output_file='test-output.h5',
@@ -108,7 +109,6 @@ def test_reduction_config() -> None:
         verbose=True,
         skip_file_output=True,
         overwrite=True,
-        output_time_bin_unit=TimeBinUnit.us,
     )
     expected_config = ReductionConfig(
         inputs=input_options, workflow=workflow_options, output=output_options
@@ -298,7 +298,7 @@ def test_reduction_only_time_bin_width(reduction_config: ReductionConfig) -> Non
 
     width = hist.coords['tof'][1] - hist.coords['tof'][0]
     assert width == sc.scalar(20.0, unit='ms').to(
-        unit=reduction_config.output.output_time_bin_unit
+        unit=reduction_config.workflow.result_time_bin_unit
     )
 
 
@@ -321,7 +321,7 @@ def test_histogram_event_time_offset(reduction_config: ReductionConfig) -> None:
     # Check that the number of time bins is as expected.
     width = hist.coords['event_time_offset'][1] - hist.coords['event_time_offset'][0]
     expected_output_width = sc.scalar(20.0, unit='ms').to(
-        unit=reduction_config.output.output_time_bin_unit
+        unit=reduction_config.workflow.result_time_bin_unit
     )
     assert_identical(width, expected_output_width)
     # Check if the histogram result is reasonable
