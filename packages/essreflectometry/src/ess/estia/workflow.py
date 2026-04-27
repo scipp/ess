@@ -113,6 +113,6 @@ def EstiaWorkflow() -> sciline.Pipeline:
         # In practice it should never be empty, and it cannot be reduced,
         # but this default makes it possible to at least load the data
         # for visualization.
-        lambda da: da.mean() if len(da) > 0 else sc.scalar(0.0, unit=da.unit)
+        corrections.assume_time_series_constant_with_zero_default_value_if_empty
     )
     return workflow
