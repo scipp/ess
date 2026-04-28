@@ -1,14 +1,3 @@
 # FREIA
 
-## Reduction Workflows
-
-::::{grid} 0
-
-::::
-
-```{toctree}
----
-hidden:
----
-
-```
+FREIA-specific reduction guides will be added here once example workflows are available.
