@@ -43,9 +43,25 @@ def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
     )
 
 
-def correct_by_proton_current(da: sc.DataArray) -> sc.DataArray:
+def correct_by_proton_current(
+    da: sc.DataArray, proton_current: sc.DataArray
+) -> sc.DataArray:
     "Corrects the data by the proton current during the time of data collection"
-    return da / da.bins.coords['proton_current']
+    pc_lookup = sc.lookup(
+        sc.values(
+            proton_current.assign_coords(
+                time=proton_current.coords['time'].to(unit='ns')
+            )
+        ),
+        dim='time',
+        mode='previous',
+        fill_value=sc.scalar(float('nan'), unit=proton_current.unit),
+    )
+    median_pc = sc.median(sc.values(proton_current)).data
+    pc = pc_lookup(da.bins.coords['event_time_zero'])
+    # The test is "not larger than" because that masks nan values as well.
+    da = da.bins.assign_masks(proton_current_too_low=~(pc >= median_pc / 4))
+    return da / pc
 
 
 def correct_sample_rotation(

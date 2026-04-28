@@ -24,6 +24,7 @@ from ess.estia.mcstas import (
 )
 from ess.estia.types import WavelengthMonitor
 from ess.reflectometry import orso
+from ess.reflectometry.corrections import correct_by_proton_current
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -120,6 +121,28 @@ def test_compute_reducible_data_with_monitor(estia_mcstas_pipeline: sciline.Pipe
             uncertainty_broadcast_mode=UncertaintyBroadcastMode.drop,
         ),
         with_monitor,
+    )
+
+
+def test_compute_reducible_data_with_proton_current(
+    estia_mcstas_pipeline: sciline.Pipeline,
+):
+    wf = estia_mcstas_pipeline
+    wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
+    without_proton_current = wf.compute(ReducibleData[SampleRun])
+    wf[ProtonCurrent[SampleRun]] = sc.DataArray(
+        sc.array(dims=['time'], values=[2.0], variances=[1.0]),
+        coords={'time': sc.datetimes(dims=['time'], values=[0], unit='s')},
+    )
+    corrections = wf.compute(CorrectionsToApply)
+    wf[CorrectionsToApply] = {*corrections, 'proton_current'}
+    with_proton_current = wf.compute(ReducibleData[SampleRun])
+    scipp.testing.assert_allclose(
+        correct_by_proton_current(
+            without_proton_current,
+            proton_current=wf.compute(ProtonCurrent[SampleRun]),
+        ),
+        with_proton_current,
     )
 
 

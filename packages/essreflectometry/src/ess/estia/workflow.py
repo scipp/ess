@@ -8,7 +8,6 @@ from ess.reduce.nexus.types import TransformationTimeFilter
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
-from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -71,7 +70,7 @@ def mcstas_default_parameters() -> dict:
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: (
-            corrections.default_corrections - {'monitor', correct_by_proton_current}
+            corrections.default_corrections - {'monitor', 'proton_current'}
         ),
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": 0.06,
@@ -85,15 +84,12 @@ def default_parameters() -> dict:
     return {
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections - {'monitor'},
+        CorrectionsToApply: corrections.default_corrections
+        - {'monitor', 'proton_current'},
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
         },
-        # The monitor is missing from the Nexus files,
-        # so to be able to load Nexus files anyway
-        # this is set to None.
-        WavelengthMonitor[RunType]: None,
     }
 
 

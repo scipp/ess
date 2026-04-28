@@ -4,10 +4,6 @@ import ess.reduce
 import scipp as sc
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
-from ..reflectometry.conversions import (
-    add_proton_current_coord,
-    add_proton_current_mask,
-)
 from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
@@ -84,13 +80,12 @@ def add_coords_masks_and_apply_corrections(
     da = add_coords(da, graph)
     da = add_masks(da, ylim, zlims, bdlim, wbins)
 
-    if len(proton_current) != 0:
-        da = add_proton_current_coord(da, proton_current)
-        da = add_proton_current_mask(da)
-
     for correction in corrections_to_apply:
         if correction == 'monitor':
             da = normalize_by_monitor_histogram(da, monitor=monitor)
+        elif correction == 'proton_current':
+            if len(proton_current) != 0:
+                da = correct_by_proton_current(da, proton_current=proton_current)
         else:
             da = correction(da)
 

@@ -223,10 +223,11 @@ def load_mcstas(
 
     da.bins.coords['event_time_zero'] = (
         sc.scalar(0, unit='s') * da.bins.coords['t']
-    ).to(unit='ns')
+    ).to(unit='ns', dtype='int64') + sc.datetime(0, unit='ns')
     da.bins.coords['event_time_offset'] = (
-        sc.scalar(1, unit='s') * da.bins.coords['t']
-    ).to(unit='ns') % sc.scalar(1 / 14, unit='s').to(unit='ns')
+        (sc.scalar(1, unit='s') * da.bins.coords['t']).to(unit='ns')
+        % sc.scalar(1 / 14, unit='s').to(unit='ns')
+    ).to(dtype='int32')
     da.bins.coords.pop('t')
 
     if 'L' in da.bins.coords:
