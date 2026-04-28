@@ -20,7 +20,7 @@ from ess.sans.types import (
 def loki_data():
     wf = loki.LokiWorkflow()
     wf[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    wf[Filename[SampleRun]] = loki.data.loki_coda_file_small()
+    wf[Filename[SampleRun]] = loki.data.loki_coda_file()
 
     data = sc.DataGroup()
     for i in range(9):

@@ -55,6 +55,12 @@ def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
     return da / sc.sin(da.coords['theta'])
 
 
+def assume_time_series_constant_with_zero_default_value_if_empty(da: sc.DataArray):
+    '''Converts a time series to a single value by taking the average.
+    If the time series if empty it returns the default value 0.'''
+    return da.mean() if len(da) > 0 else sc.scalar(0.0, unit=da.unit)
+
+
 default_corrections = {correct_by_proton_current, correct_by_footprint}
 
 providers = (add_coords_masks_and_apply_corrections,)
