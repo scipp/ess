@@ -151,8 +151,9 @@ def _effective_chopper_position_from_mode(
 def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
     # Allow the keys of detector_sizes to be both the
     # NeXus detector name or DetectorBank enum.
-    # It makes the code a bit more complex here, but I think it's an easy mistake
-    # to make for the user and it makes sense to handle it gracefully.
+    # It makes the code a bit more complex here, but I think mixing them up
+    # is an easy mistake to make and it makes sense
+    # to handle that gracefully.
     normalized_detector_sizes = {
         (
             'south'
