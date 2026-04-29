@@ -26,6 +26,7 @@ def normalize_by_monitor_histogram(
     detector: ReducibleData[RunType],
     *,
     monitor: WavelengthMonitor[RunType],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> ReducibleData[RunType]:
     """Normalize detector data by a histogrammed monitor.
 
@@ -57,7 +58,7 @@ def normalize_by_monitor_histogram(
     return ess.reduce.normalization.normalize_by_monitor_histogram(
         detector=detector,
         monitor=monitor,
-        uncertainty_broadcast_mode=UncertaintyBroadcastMode.drop,
+        uncertainty_broadcast_mode=uncertainty_broadcast_mode,
         skip_range_check=False,
     )
 
@@ -103,6 +104,6 @@ def assume_time_series_constant_with_zero_default_value_if_empty(da: sc.DataArra
     return da.mean() if len(da) > 0 else sc.scalar(0.0, unit=da.unit)
 
 
-default_corrections = {correct_by_footprint, 'proton_current', 'monitor'}
+default_corrections = {correct_by_footprint, 'proton_current'}
 
 providers = (add_coords_masks_and_apply_corrections,)
