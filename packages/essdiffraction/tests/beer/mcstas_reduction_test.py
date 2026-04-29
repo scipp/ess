@@ -20,10 +20,10 @@ from ess.beer.io import (
     mcstas_chopper_delay_from_mode_new_simulations,
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
-from ess.powder.types import ElasticCoordTransformGraph, SampleRun
+from ess.powder.types import ElasticCoordTransformGraph, RawDetector, SampleRun
 from scipp.testing import assert_allclose
 
-from ess.reduce.nexus.types import Filename
+from ess.reduce.nexus.types import DetectorBankSizes, Filename
 
 
 def test_can_reduce_using_known_peaks_workflow():
@@ -97,8 +97,13 @@ def test_pulse_shaping_workflow():
 
 
 def test_can_load_3d_detector():
-    load_beer_mcstas(mcstas_few_neutrons_3d_detector_example(), DetectorBank.north)
-    da = load_beer_mcstas(mcstas_few_neutrons_3d_detector_example(), DetectorBank.south)
+    sizes = {'north_detector': {'x': 10, 'y': 20}, 'south_detector': {'x': 10, 'y': 20}}
+    load_beer_mcstas(
+        mcstas_few_neutrons_3d_detector_example(), DetectorBank.north, sizes
+    )
+    da = load_beer_mcstas(
+        mcstas_few_neutrons_3d_detector_example(), DetectorBank.south, sizes
+    )
     assert 'panel' in da.dims
 
 
@@ -108,3 +113,27 @@ def test_can_load_monitor():
     assert 'position' in da.coords
     assert da.coords['position'].dtype == sc.DType.vector3
     assert da.coords['position'].unit == 'm'
+
+
+@pytest.mark.parametrize(
+    ('bank_in_sizes', 'bank'),
+    [
+        ('south_detector', DetectorBank.south),
+        ('north_detector', DetectorBank.north),
+        (DetectorBank.south, DetectorBank.south),
+        (DetectorBank.north, DetectorBank.north),
+    ],
+)
+@pytest.mark.parametrize(
+    'fname', [mcstas_silicon_new_model(7), mcstas_more_neutrons_3d_detector_example()]
+)
+def test_detector_bank_size_parameter_determines_loaded_detector_size(
+    bank_in_sizes, bank, fname
+):
+    wf = BeerMcStasWorkflowPulseShaping()
+    wf[Filename[SampleRun]] = fname
+    wf[DetectorBank] = bank
+    wf[DetectorBankSizes] = {bank_in_sizes: {'x': 10, 'y': 20}}
+    res = wf.compute(RawDetector[SampleRun])
+    assert res.sizes['x'] == 10
+    assert res.sizes['y'] == 20

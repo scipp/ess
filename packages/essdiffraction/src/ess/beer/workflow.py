@@ -28,6 +28,10 @@ from .types import (
 
 default_parameters = {
     PulseLength: sc.scalar(0.003, unit='s'),
+    DetectorBankSizes: {
+        'south_detector': {'y': 200, 'x': 500},
+        'north_detector': {'y': 200, 'x': 500},
+    },
 }
 
 
@@ -93,10 +97,6 @@ def BeerPowderWorkflow(
         monitor_types=[BunkerMonitor, CaveMonitor],
         **kwargs,
     )
-    wf[DetectorBankSizes] = {
-        'south_detector': {'y': 200, 'x': 500},
-        'north_detector': {'y': 200, 'x': 500},
-    }
     wf[NeXusName[CaveMonitor]] = "monitor_cave"
 
     for provider in itertools.chain(powder_providers, convert_pulse_shaping):
