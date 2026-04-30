@@ -10,6 +10,8 @@ import scipp as sc
 import scipp.constants
 from ess.powder.types import CaveMonitor, RunType, WavelengthMonitor
 
+from ess.reduce.nexus.types import DetectorBankSizes
+
 from .types import (
     DetectorBank,
     Filename,
@@ -146,7 +148,38 @@ def _effective_chopper_position_from_mode(
         raise ValueError(f'Unkonwn chopper mode {mode}.')
 
 
-def _load_beer_mcstas(f, north_or_south=None, number=None):
+def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
+    # Allow the keys of detector_sizes to be both the
+    # NeXus detector name or DetectorBank enum.
+    # It makes the code a bit more complex here, but I think mixing them up
+    # is an easy mistake to make and it makes sense
+    # to handle that gracefully.
+    normalized_detector_sizes = {
+        (
+            'south'
+            if key in (DetectorBank.south, 'south_detector')
+            else 'north'
+            if key in (DetectorBank.north, 'north_detector')
+            else key
+        ): value
+        for key, value in detector_sizes.items()
+    }
+    if north_or_south is not None:
+        # In newer files the bank is determined by a name (north or south).
+        sizes = normalized_detector_sizes[north_or_south]
+    else:
+        # In older files the detector bank is determined by an index.
+        if number == 1:
+            sizes = normalized_detector_sizes['south']
+        elif number == 2:
+            sizes = normalized_detector_sizes['north']
+        else:
+            raise ValueError(
+                'Could not determine detector sizes from provided '
+                f'`DetectorBankSizes`: {detector_sizes}. '
+                'Expected keys: "south_detector" and "north_detector".'
+            )
+
     positions = {
         name: f'/entry1/instrument/components/{key}/Position'
         for key in f['/entry1/instrument/components']
@@ -254,8 +287,8 @@ def _load_beer_mcstas(f, north_or_south=None, number=None):
     # Bin detector panel into rectangular "pixels"
     # similar in size to the physical detector pixels.
     da = da.bin(
-        y=sc.linspace('y', -0.5, 0.5, 201, unit='m'),
-        x=sc.linspace('x', -0.5, 0.5, 501, unit='m'),
+        y=sc.linspace('y', -0.5, 0.5, sizes['y'] + 1, unit='m'),
+        x=sc.linspace('x', -0.5, 0.5, sizes['x'] + 1, unit='m'),
     )
 
     # Compute the position of each pixel in the global coordinate system.
@@ -317,7 +350,9 @@ def _load_beer_mcstas(f, north_or_south=None, number=None):
     return da
 
 
-def load_beer_mcstas(f: str | Path | h5py.File, bank: DetectorBank) -> sc.DataArray:
+def load_beer_mcstas(
+    f: str | Path | h5py.File, bank: DetectorBank, detector_sizes: DetectorBankSizes
+) -> sc.DataArray:
     '''Load beer McStas data from a file to a data array.'''
     if not isinstance(bank, DetectorBank):
         raise ValueError(
@@ -326,20 +361,30 @@ def load_beer_mcstas(f: str | Path | h5py.File, bank: DetectorBank) -> sc.DataAr
 
     if isinstance(f, str | Path):
         with h5py.File(f) as ff:
-            return load_beer_mcstas(ff, bank=bank)
+            return load_beer_mcstas(ff, bank=bank, detector_sizes=detector_sizes)
 
     if len(list(_find_all_h5(f['/entry1/data'], '.*bank', nxclass='NXdata'))) < 8:
         # If we don't find ~13 detectors, then assume the detectors are 2D
         if len(list(_find_all_h5(f['/entry1/data'], '.*south', nxclass='NXdata'))) > 0:
-            return _load_beer_mcstas(f, north_or_south=bank.name)
+            return _load_beer_mcstas(
+                f, north_or_south=bank.name, detector_sizes=detector_sizes
+            )
 
         return _load_beer_mcstas(
-            f, north_or_south=None, number=1 if bank == DetectorBank.south else 2
+            f,
+            north_or_south=None,
+            number=1 if bank == DetectorBank.south else 2,
+            detector_sizes=detector_sizes,
         )
 
     return sc.concat(
         [
-            _load_beer_mcstas(f, north_or_south=bank.name, number=number)
+            _load_beer_mcstas(
+                f,
+                north_or_south=bank.name,
+                number=number,
+                detector_sizes=detector_sizes,
+            )
             for number in range(1, 13)
         ],
         dim='panel',
@@ -398,10 +443,9 @@ def load_beer_mcstas_monitor(f: str | Path | h5py.File):
 
 
 def load_beer_mcstas_provider(
-    fname: Filename[RunType],
-    bank: DetectorBank,
+    fname: Filename[RunType], bank: DetectorBank, detector_bank_sizes: DetectorBankSizes
 ) -> RawDetector[RunType]:
-    return load_beer_mcstas(fname, bank)
+    return load_beer_mcstas(fname, bank, detector_bank_sizes)
 
 
 def load_beer_mcstas_monitor_provider(
