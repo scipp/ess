@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import scipp as sc
 from ess.reduce.nexus.types import Position
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from scippnexus import NXsample, NXsource
 
 from ..reflectometry.load import load_h5
@@ -28,6 +29,7 @@ from ..reflectometry.types import (
 )
 from .beamline import DETECTOR_BANK_SIZES
 from .corrections import add_coords_masks_and_apply_corrections
+from .types import WavelengthMonitor
 
 
 def parse_metadata_ascii(lines) -> dict:
@@ -294,6 +296,8 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
     proton_current: ProtonCurrent[RunType],
+    monitor: WavelengthMonitor[RunType],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
 ) -> ReducibleData[RunType]:
@@ -303,7 +307,8 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
         zlims=zlims,
         bdlim=bdlim,
         wbins=wbins,
-        monitor=None,
+        monitor=monitor,
+        uncertainty_broadcast_mode=uncertainty_broadcast_mode,
         proton_current=proton_current,
         graph={
             **graph,

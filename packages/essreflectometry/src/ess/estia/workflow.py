@@ -5,6 +5,7 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import TransformationTimeFilter
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
@@ -76,6 +77,7 @@ def mcstas_default_parameters() -> dict:
             "multiblade_detector": 0.06,
         },
         WavelengthMonitor[RunType]: None,
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
@@ -90,6 +92,7 @@ def default_parameters() -> dict:
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
         },
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 

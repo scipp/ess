@@ -71,6 +71,7 @@ def add_coords_masks_and_apply_corrections(
     wbins: WavelengthBins,
     proton_current: ProtonCurrent[RunType],
     monitor: WavelengthMonitor[RunType],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
 ) -> ReducibleData[RunType]:
@@ -83,7 +84,11 @@ def add_coords_masks_and_apply_corrections(
 
     for correction in corrections_to_apply:
         if correction == 'monitor':
-            da = normalize_by_monitor_histogram(da, monitor=monitor)
+            da = normalize_by_monitor_histogram(
+                da,
+                monitor=monitor,
+                uncertainty_broadcast_mode=uncertainty_broadcast_mode,
+            )
         elif correction == 'proton_current':
             if len(proton_current) != 0:
                 da = correct_by_proton_current(da, proton_current=proton_current)
