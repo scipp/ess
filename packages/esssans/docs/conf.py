@@ -188,7 +188,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://anaconda.org/conda-forge/esssans",
+            "url": "https://prefix.dev/channels/conda-forge/packages/esssans",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },
