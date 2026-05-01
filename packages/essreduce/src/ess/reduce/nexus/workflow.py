@@ -3,10 +3,10 @@
 
 """Workflow and workflow components for interacting with NeXus files."""
 
+import dataclasses
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
-import dataclasses
 from typing import Any, Never, TypeVar
 
 import sciline
@@ -46,6 +46,8 @@ from .types import (
     NeXusTransformationChain,
     Position,
     PreopenNeXusFile,
+    ProductionInfo,
+    ProtonCharge,
     RawChoppers,
     RawDetector,
     RawMonitor,
@@ -54,8 +56,6 @@ from .types import (
     TimeInterval,
     TransformationTimeFilter,
     UniqueComponent,
-    ProductionInfo,
-    ProtonCharge,
 )
 
 origin = sc.vector([0, 0, 0], unit="m")
