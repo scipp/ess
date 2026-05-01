@@ -1,0 +1,741 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.beer.data &#8212; ESSdiffraction</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=527e589a"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/beer/data';</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.5.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSdiffraction - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSdiffraction - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essdiffraction" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essdiffraction/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essdiffraction" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/essdiffraction" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essdiffraction/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essdiffraction" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.beer.data</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+<span data-pagefind-meta="image[data-url]" data-url="../../../_static/essdiffraction-search-logo.png" hidden></span>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.beer.data</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
+<span class="sd">&quot;&quot;&quot;Data for tests and documentation with BEER.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_registry</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mcstas_duplex&quot;</span><span class="p">,</span> <span class="s2">&quot;mcstas_silicon_medium_resolution&quot;</span><span class="p">]</span>
+
+<span class="n">_registry</span> <span class="o">=</span> <span class="n">make_registry</span><span class="p">(</span>
+    <span class="s2">&quot;ess/beer&quot;</span><span class="p">,</span>
+    <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+    <span class="n">files</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;duplex-mode07.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:e8d44197e4bc6a84ab9265bfabd96efe&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;duplex-mode08.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:7cd2cf86d5d98fe07097ff98b250ba9b&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;duplex-mode09.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:ebb3f9694ffdd0949f342bd0deaaf627&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;duplex-mode10.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:559e7fc0cce265f5102520e382ee5b26&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;duplex-mode16.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:2ccd05832bbc8a087a731b37364b995d&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode09.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:aa068d46dc7efc303b68a13e527e2607&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mccode_quartz_mode10.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:fd6ea529cad7cefdcb57bf57bc27668c&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mccode_quartz_mode16.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:b9bef04bd6e4c60a8a0d55d4d6ebb89f&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mccode_quartz_mode7.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:24c7006336f58c26689abec1645cfba1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mccode_quartz_mode8.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:9a4606ce56a6397d05d70246d54407d6&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mccode_quartz_mode9.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:1394df47287ecd62bfa62c200203f214&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-dhkl.tab&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:59ee9ed57a7c039ce416c8df886da9cc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;duplex-dhkl.tab&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:b4c6c2fcd66466ad291f306b2d6b346e&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dhkl_quartz_nc.tab&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:40887d736e3acf859e44488bfd9a9213&quot;</span><span class="p">,</span>
+        <span class="c1"># Simulations from new model with corrected(?) moderator to detector</span>
+        <span class="c1"># distance.</span>
+        <span class="c1"># For correct reduction you need to use</span>
+        <span class="c1"># beer.io.mcstas_chopper_delay_from_mode_new_simulations</span>
+        <span class="c1"># to obtain the correct WavelengthDefinitionChopperDelay for these files.</span>
+        <span class="s2">&quot;silicon-mode10-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:98500830f27700fc719634e1acd49944&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode16-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:393f9287e7d3f97ceedbe64343918413&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode3-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:260fc811352b96c1dcdf431d91c11787&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode4-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:625561f6a57c6e6892e1bbd4043d71ee&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode5-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:315d457d136bb597d7f7ab596497324b&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode6-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:be9b48ee9db9fcf1808ed2f2e35f594b&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode7-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:d2070d3132722bb551d99b243c62752f&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode8-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:d6dfdf7e87eccedf4f83c67ec552ca22&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode9-new-model.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:694a17fb616b7f1c20e94d9da113d201&quot;</span><span class="p">,</span>
+        <span class="c1"># Simulation with 3D detector model - almost no events</span>
+        <span class="c1"># - only used to verify we can load the 3D geometry.</span>
+        <span class="s2">&quot;few_neutrons_3d_detector_example.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:88cbe29cb539c8acebf9fd7cee9d3c57&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;silicon-mode9-3d-more-neutrons.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:a6afdc4ee9827a57f88c2a3c6ef27383&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="mcstas_duplex">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.mcstas_duplex.html#ess.beer.data.mcstas_duplex">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_duplex</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulated intensity from duplex sample with ``mode`` chopper configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;duplex-mode</span><span class="si">{</span><span class="n">mode</span><span class="si">:</span><span class="s1">02</span><span class="si">}</span><span class="s1">.h5&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcstas_quartz">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.mcstas_quartz.html#ess.beer.data.mcstas_quartz">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_quartz</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulated intensity from quartz sample with ``mode`` chopper configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mccode_quartz_mode</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">.h5&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcstas_silicon_medium_resolution">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.mcstas_silicon_medium_resolution.html#ess.beer.data.mcstas_silicon_medium_resolution">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_silicon_medium_resolution</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulated intensity from silicon sample with</span>
+<span class="sd">    medium resolution chopper configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;silicon-mode09.h5&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcstas_silicon_new_model">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.mcstas_silicon_new_model.html#ess.beer.data.mcstas_silicon_new_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_silicon_new_model</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simulated intensity from duplex sample with ``mode`` chopper configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;silicon-mode</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">-new-model.h5&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcstas_few_neutrons_3d_detector_example">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.mcstas_few_neutrons_3d_detector_example.html#ess.beer.data.mcstas_few_neutrons_3d_detector_example">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_few_neutrons_3d_detector_example</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;few_neutrons_3d_detector_example.h5&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcstas_more_neutrons_3d_detector_example">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.mcstas_more_neutrons_3d_detector_example.html#ess.beer.data.mcstas_more_neutrons_3d_detector_example">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcstas_more_neutrons_3d_detector_example</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;silicon-mode9-3d-more-neutrons.h5&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="duplex_peaks">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.duplex_peaks.html#ess.beer.data.duplex_peaks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">duplex_peaks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;duplex-dhkl.tab&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="quartz_peaks">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.quartz_peaks.html#ess.beer.data.quartz_peaks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">quartz_peaks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;dhkl_quartz_nc.tab&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="silicon_peaks">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.silicon_peaks.html#ess.beer.data.silicon_peaks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">silicon_peaks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;silicon-dhkl.tab&#39;</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_peak_file_to_dataarray</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">dims</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span>
+            <span class="n">values</span><span class="o">=</span><span class="nb">sorted</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]),</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="duplex_peaks_array">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.duplex_peaks_array.html#ess.beer.data.duplex_peaks_array">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">duplex_peaks_array</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_read_peak_file_to_dataarray</span><span class="p">(</span><span class="n">duplex_peaks</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="silicon_peaks_array">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.silicon_peaks_array.html#ess.beer.data.silicon_peaks_array">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">silicon_peaks_array</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_read_peak_file_to_dataarray</span><span class="p">(</span><span class="n">silicon_peaks</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="quartz_peaks_array">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.data.quartz_peaks_array.html#ess.beer.data.quartz_peaks_array">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">quartz_peaks_array</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_read_peak_file_to_dataarray</span><span class="p">(</span><span class="n">quartz_peaks</span><span class="p">())</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSdiffraction version: 26.5.1 (<a href="https://github.com/scipp/essdiffraction/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
