@@ -18,7 +18,6 @@ git remote remove essdiffraction
 
 ## 2. Update `packages/essdiffraction/pyproject.toml`
 
-- Set `license-files = ["../../LICENSE"]`
 - Add setuptools-scm monorepo config:
   ```toml
   [tool.setuptools_scm]
