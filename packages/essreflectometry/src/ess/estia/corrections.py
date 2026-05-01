@@ -90,8 +90,7 @@ def add_coords_masks_and_apply_corrections(
                 uncertainty_broadcast_mode=uncertainty_broadcast_mode,
             )
         elif correction == 'proton_current':
-            if len(proton_current) != 0:
-                da = correct_by_proton_current(da, proton_current=proton_current)
+            da = correct_by_proton_current(da, proton_current=proton_current)
         else:
             da = correction(da)
 
