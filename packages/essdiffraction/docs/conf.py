@@ -203,7 +203,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://prefix.dev/channels/conda-forge/packages/essdiffraction",
+            "url": "https://anaconda.org/conda-forge/essdiffraction",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },

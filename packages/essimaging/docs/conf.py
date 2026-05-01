@@ -190,7 +190,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://prefix.dev/channels/conda-forge/packages/essimaging",
+            "url": "https://anaconda.org/conda-forge/essimaging",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },

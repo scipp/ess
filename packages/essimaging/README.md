@@ -1,6 +1,6 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](../../CODE_OF_CONDUCT.md)
 [![PyPI badge](http://img.shields.io/pypi/v/essimaging.svg)](https://pypi.python.org/pypi/essimaging)
-[![Conda Badge](https://img.shields.io/conda/v/conda-forge/essimaging)](https://prefix.dev/channels/conda-forge/packages/essimaging)
+[![Conda Badge](https://img.shields.io/conda/v/conda-forge/essimaging)](https://anaconda.org/conda-forge/essimaging)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](../../LICENSE)
 
 # ESSimaging

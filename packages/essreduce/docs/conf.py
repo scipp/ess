@@ -191,7 +191,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://prefix.dev/channels/conda-forge/packages/essreduce",
+            "url": "https://anaconda.org/conda-forge/essreduce",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },

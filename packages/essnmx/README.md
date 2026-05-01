@@ -1,6 +1,6 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](../../CODE_OF_CONDUCT.md)
 [![PyPI badge](http://img.shields.io/pypi/v/essnmx.svg)](https://pypi.python.org/pypi/essnmx)
-[![Conda Badge](https://img.shields.io/conda/v/conda-forge/essnmx)](https://prefix.dev/channels/conda-forge/packages/essnmx)
+[![Conda Badge](https://img.shields.io/conda/v/conda-forge/essnmx)](https://anaconda.org/conda-forge/essnmx)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](../../LICENSE)
 
 # ESSnmx

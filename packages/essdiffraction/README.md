@@ -1,6 +1,6 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![PyPI badge](http://img.shields.io/pypi/v/essdiffraction.svg)](https://pypi.python.org/pypi/essdiffraction)
-[![Conda Badge](https://img.shields.io/conda/v/conda-forge/essdiffraction)](https://prefix.dev/channels/conda-forge/packages/essdiffraction)
+[![Conda Badge](https://img.shields.io/conda/v/conda-forge/essdiffraction)](https://anaconda.org/conda-forge/essdiffraction)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
 
 # ESSdiffraction

@@ -188,7 +188,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://prefix.dev/channels/conda-forge/packages/essreflectometry",
+            "url": "https://anaconda.org/conda-forge/essreflectometry",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },
