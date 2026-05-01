@@ -19,6 +19,7 @@ NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
 Position = reduce_t.Position
+ProtonCharge = reduce_t.ProtonCharge
 RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 
@@ -85,10 +86,6 @@ class BackgroundSubtractedDetector(sciline.Scope[RunType, sc.DataArray], sc.Data
 NormalizedImage = NewType("NormalizedImage", sc.DataArray)
 """Final image: background-subtracted sample run divided by background-subtracted open
 beam run."""
-
-
-class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Proton charge data for a run."""
 
 
 class ExposureTime(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

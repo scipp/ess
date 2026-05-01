@@ -6,6 +6,7 @@
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
+import dataclasses
 from typing import Any, Never, TypeVar
 
 import sciline
@@ -53,6 +54,8 @@ from .types import (
     TimeInterval,
     TransformationTimeFilter,
     UniqueComponent,
+    ProductionInfo,
+    ProtonCharge,
 )
 
 origin = sc.vector([0, 0, 0], unit="m")
@@ -199,6 +202,10 @@ def nx_class_for_disk_chopper() -> NeXusClass[snx.NXdisk_chopper]:
 
 def nx_class_for_crystal() -> NeXusClass[snx.NXcrystal]:
     return NeXusClass[snx.NXcrystal](snx.NXcrystal)
+
+
+def nx_class_for_production_info() -> NeXusClass[ProductionInfo]:
+    return NeXusClass[ProductionInfo](snx.NXsource)
 
 
 def load_nexus_component(
@@ -552,6 +559,44 @@ def parse_disk_choppers(
     )
 
 
+def load_proton_charge(
+    parent_location: NeXusComponentLocationSpec[ProductionInfo, RunType],
+    interval: TimeInterval[RunType],
+) -> ProtonCharge[RunType]:
+    """Load the time-dependent proton charge from a NeXus file.
+
+    Parameters
+    ----------
+    parent_location:
+        Location spec for the ``ProductionInfo`` that holds the proton charge.
+        The charge is loaded from the "pulse_charge" subgroup.
+    interval:
+        Time range to load.
+        Overrides ``parent_location.selection``.
+
+    Returns
+    -------
+    :
+        The proton charge as a data array.
+    """
+    # The ProductionInfo location spec does not encode a time interval, that
+    # would require a NeXusDataLocationSpec. But we don't expose the precise
+    # path of the proton charge in the graph and can't build a data spec.
+    #
+    # The else branch is a workaround for https://github.com/scipp/scippnexus/pull/299
+    selection = interval.value if interval.value != slice(None) else ()
+    charge_location = dataclasses.replace(
+        parent_location,
+        # The pulse charge is a log and not a component, so we build the path
+        # based on the parent ProductionInfo component.
+        component_name=str(parent_location.component_name) + "/pulse_charge",
+        selection=selection,
+    )
+    # This loads all children in the NXlog, extract the value.
+    dg = nexus.load_from_path(charge_location, definitions=definitions)
+    return ProtonCharge[RunType](dg['value'])
+
+
 def _drop(
     children: dict[str, snx.Field | snx.Group], classes: tuple[snx.NXobject, ...]
 ) -> dict[str, snx.Field | snx.Group]:
@@ -720,6 +765,7 @@ _common_providers = (
     compute_dynamic_position,
     load_nexus_data,
     load_nexus_component,
+    load_proton_charge,
     load_all_nexus_components,
     data_by_name,
     nx_class_for_detector,
@@ -727,6 +773,7 @@ _common_providers = (
     nx_class_for_source,
     nx_class_for_sample,
     nx_class_for_disk_chopper,
+    nx_class_for_production_info,
 )
 
 _monitor_providers = (
@@ -832,6 +879,7 @@ def GenericNeXusWorkflow(
             DetectorBankSizes: DetectorBankSizes({}),
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
+            NeXusName[ProductionInfo]: "/entry/neutron_prod_info",
         },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types

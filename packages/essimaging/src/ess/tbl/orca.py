@@ -28,19 +28,6 @@ from ..imaging.types import (
 )
 
 
-def load_proton_charge(
-    file: NeXusFileSpec[RunType], path: NeXusName[ProtonCharge[RunType]]
-) -> ProtonCharge[RunType]:
-    # Note that putting '/value' at the end of the 'path' in the default_parameters
-    # yields different results as it can return a Variable instead of a DataArray,
-    # depending on the contents of the NeXus file.
-    return ProtonCharge[RunType](
-        load_from_path(NeXusLocationSpec(filename=file.value, component_name=path))[
-            "value"
-        ]
-    )
-
-
 def load_exposure_time(
     file: NeXusFileSpec[RunType], path: NeXusName[ExposureTime[RunType]]
 ) -> ExposureTime[RunType]:
@@ -142,7 +129,6 @@ def normalize_by_proton_charge_orca_sample(
 
 providers = (
     load_exposure_time,
-    load_proton_charge,
     normalize_by_proton_charge_orca,
     normalize_by_proton_charge_orca_sample,
 )
@@ -152,7 +138,6 @@ def default_parameters() -> dict:
     """Return the default NeXus names and detector name for the ORCA workflow."""
     return {
         NeXusDetectorName: 'orca_detector',
-        NeXusName[ProtonCharge]: '/entry/neutron_prod_info/pulse_charge',
         NeXusName[ExposureTime]: '/entry/instrument/orca_detector/camera_exposure',
     }
 
