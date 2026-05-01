@@ -142,7 +142,11 @@ This list will be supplemented with monitor types when creating a pipeline.
 """
 
 UniqueComponent = TypeVar('UniqueComponent', snx.NXsample, snx.NXsource)
-"""Components that can be identified by their type as there will only be one."""
+"""Components that can be identified by their type as there will only be one.
+
+This applies for a given parent for these components, not the entire file.
+E.g., NXsource appears in both `/entry/instrument` and `/entry` directly.
+"""
 
 
 class Beamline(scn_meta.Beamline, Generic[RunType]):
