@@ -306,7 +306,12 @@ def _apply_time_filter(
 ) -> sc.Variable | sc.DataArray:
     if transform.ndim == 0 or transform.sizes == {'time': 1}:
         return transform.data.squeeze()
-    return user_filter(transform)
+    filtered = user_filter(transform)
+    if isinstance(filtered, sc.DataArray) and (not filtered.dims):
+        # If the filter returns a 0-dim DataArray, we can safely extract the value.
+        # This is a common case when the filter selects a single time point.
+        filtered = filtered.data
+    return filtered
 
 
 def to_transformation(
