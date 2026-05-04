@@ -10,7 +10,6 @@ name = "essdiffraction"
 description = "Diffraction data reduction for the European Spallation Source"
 authors = [{ name = "Scipp contributors" }]
 license = "BSD-3-Clause"
-license-files = ["../../LICENSE"]
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Science/Research",
