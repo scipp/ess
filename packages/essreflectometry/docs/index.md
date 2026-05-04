@@ -30,10 +30,15 @@
 
 ## Quick links
 
-::::{grid} 3
+::::{grid} 1 1 2 2
 
 :::{grid-item-card} ESTIA
 :link: user-guide/estia/index.md
+
+:::
+
+:::{grid-item-card} FREIA
+:link: user-guide/freia/index.md
 
 :::
 
@@ -42,7 +47,7 @@
 
 :::
 
-::::{grid-item-card} Offspec
+:::{grid-item-card} Offspec
 :link: user-guide/offspec/index.md
 
 :::
