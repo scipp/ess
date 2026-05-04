@@ -39,7 +39,7 @@ def energy_data(
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
-        '110_frame_3': np.inf,
+        'normalization_monitor': np.inf,
     }
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     return workflow.compute(EnergyQDetector[SampleRun])
@@ -59,7 +59,7 @@ def test_cut_along_q_norm_and_energy_transfer_preserves_counts(
     axis_2 = CutAxis(
         output='E',
         fn=lambda energy_transfer: energy_transfer,
-        bins=sc.linspace(dim='E', start=-10.0, stop=10.0, num=50, unit='meV'),
+        bins=sc.linspace(dim='E', start=-10.0, stop=15.0, num=50, unit='meV'),
     )
 
     cut_data = cut(
@@ -84,12 +84,12 @@ def test_cut_along_qx_direction_preserves_counts(
     axis_1 = CutAxis.from_q_vector(
         output='Qx',
         vec=sc.vector([1, 0, 0]),
-        bins=sc.linspace(dim='Qx', start=-2.0, stop=2.0, num=40, unit='1/angstrom'),
+        bins=sc.linspace(dim='Qx', start=-3.0, stop=2.0, num=40, unit='1/angstrom'),
     )
     axis_2 = CutAxis(
         output='E',
         fn=lambda energy_transfer: energy_transfer,
-        bins=sc.linspace(dim='E', start=-5.0, stop=5.0, num=30, unit='meV'),
+        bins=sc.linspace(dim='E', start=-10.0, stop=15.0, num=30, unit='meV'),
     )
 
     cut_data = cut(

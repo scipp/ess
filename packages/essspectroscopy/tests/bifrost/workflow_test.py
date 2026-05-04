@@ -42,7 +42,7 @@ def workflow(simulation_detector_names: list[NeXusDetectorName]) -> sciline.Pipe
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
-        '110_frame_3': np.inf,
+        'normalization_monitor': np.inf,
     }
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     return workflow
@@ -50,14 +50,14 @@ def workflow(simulation_detector_names: list[NeXusDetectorName]) -> sciline.Pipe
 
 def test_simulation_workflow_can_load_detector() -> None:
     workflow = bifrost.BifrostSimulationWorkflow(
-        [NeXusDetectorName("125_channel_1_1_triplet")]
+        [NeXusDetectorName("channel_3_1_triplet")]
     )
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     results = sciline.compute_mapped(workflow, RawDetector[SampleRun])
     result = results.iloc[0]
 
     assert result.bins is not None
-    assert set(result.dims) == {'tube', 'length'}
+    assert set(result.dims) == {'tube', 'length', 'time'}
     assert result.sizes['tube'] == 3
     assert 'position' in result.coords
 
@@ -80,7 +80,7 @@ def test_simulation_workflow_can_compute_energy_data(
         'tube': 3,
         'length': 100,
         'a3': 180,
-        'a4': 1,
+        'a4': 2,
     }
     expected_coords = {'a3', 'a4', 'detector_number'}
     assert expected_coords.issubset(energy_data.coords)
@@ -111,7 +111,6 @@ def test_simulation_workflow_produces_the_same_data_as_before(
     workflow: sciline.Pipeline,
 ) -> None:
     energy_data = workflow.compute(EnergyQDetector[SampleRun])
-    sc.io.save_hdf5(energy_data, 'computed_energy_data_simulated_5x2.h5')
     expected = sc.io.load_hdf5(computed_energy_data_simulated_5x2())
 
     assert not energy_data.masks

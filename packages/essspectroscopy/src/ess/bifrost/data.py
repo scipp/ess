@@ -10,12 +10,11 @@ from ess.reduce.data import make_registry
 _registry = make_registry(
     'ess/bifrost',
     files={
-        "BIFROST_20240914T053723.h5": "md5:0f2fa5c9a851f8e3a4fa61defaa3752e",
-        "computed_energy_data_simulated_5x2.h5": "md5:57408fa10aa4689c43630f994cff8d30",
-        "BIFROST-simulation-tof-lookup-table.h5": "blake2b:682021920a355f789da37b18029719fe20569d86db26cdaf5f3d916d2f76f9360907960ba86903be4cab489d39f1b6f9f265f3a4ab3f82c5e095afa4a2c456af",  # noqa: E501
-        "BIFROST-simulation-lookup-table.h5": "md5:6d776afa591d4a83c91ad0142bbfc53d",
+        "bifrost_260418T170408.h5": "md5:5fe544c2eccfb6c4ec52beca9957f528",
+        "computed_energy_data_simulated_5x2.h5": "md5:1a24a1067ae2968dfc162c5c72dcb073",
+        "BIFROST-simulation-lookup-table.h5": "md5:237e26125b22aa9cb0c68454206896a2",
     },
-    version="7",
+    version="8",
 )
 
 
@@ -31,7 +30,7 @@ def get_path(name: str) -> Path:
 
 def simulated_elastic_incoherent_with_phonon() -> Path:
     """Simulated data for elastic incoherent scattering including a phonon."""
-    return get_path("BIFROST_20240914T053723.h5")
+    return get_path("bifrost_260418T170408.h5")
 
 
 def lookup_table_simulation() -> Path:

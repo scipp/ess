@@ -40,7 +40,7 @@ class TestBifrostQCutWorkflow:
         workflow[LookupTableFilename] = lookup_table_simulation()
         workflow[LookupTableRelativeErrorThreshold] = {
             'detector': np.inf,
-            '110_frame_3': np.inf,
+            'normalization_monitor': np.inf,
         }
         workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
         workflow[ProtonCharge[SampleRun]] = sc.DataArray(sc.scalar(1.0, unit='pC'))

@@ -77,7 +77,7 @@ def common_workflow(
     wf[LookupTableFilename] = lookup_table_simulation()
     wf[LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
-        '110_frame_3': np.inf,
+        'normalization_monitor': np.inf,
     }
     wf[PreopenNeXusFile] = PreopenNeXusFile(True)
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
