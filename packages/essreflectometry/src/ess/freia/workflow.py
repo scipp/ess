@@ -5,7 +5,7 @@ import sciline
 import scipp as sc
 
 from ..reflectometry import providers as reflectometry_providers
-from ..reflectometry.corrections import correct_by_proton_current
+from ..reflectometry.corrections import correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -63,7 +63,7 @@ def mcstas_default_parameters() -> dict:
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: corrections.default_corrections
-        - {correct_by_proton_current},
+        - {correct_by_proton_charge},
         LookupTableRelativeErrorThreshold: {
             "detector": 0.06,
         },

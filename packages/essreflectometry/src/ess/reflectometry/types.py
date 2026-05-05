@@ -21,6 +21,7 @@ Measurement = nexus_t.Measurement
 NeXusComponent = nexus_t.NeXusComponent
 NeXusDetectorName = nexus_t.NeXusDetectorName
 Position = nexus_t.Position
+ProtonCharge = nexus_t.ProtonCharge
 
 WavelengthDetector = unwrap_t.WavelengthDetector
 PulseStrideOffset = unwrap_t.PulseStrideOffset
@@ -103,10 +104,6 @@ class BeamSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 class SampleSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Diameter of the sample. If None it is assumed to be the same as the reference."""
-
-
-class ProtonCurrent(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Proton current log from file"""
 
 
 YIndexLimits = NewType("YIndexLimits", tuple[sc.Variable, sc.Variable])
