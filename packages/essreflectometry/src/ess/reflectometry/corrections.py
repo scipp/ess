@@ -43,9 +43,9 @@ def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
     )
 
 
-def correct_by_proton_current(da: sc.DataArray) -> sc.DataArray:
-    "Corrects the data by the proton current during the time of data collection"
-    return da / da.bins.coords['proton_current']
+def correct_by_proton_charge(da: sc.DataArray) -> sc.DataArray:
+    """Corrects the data by the proton charge during the time of data collection."""
+    return da / da.bins.coords['proton_charge']
 
 
 def correct_sample_rotation(

@@ -24,7 +24,7 @@ from ess.reflectometry.types import (
     BeamDivergenceLimits,
     Filename,
     LookupTableFilename,
-    ProtonCurrent,
+    ProtonCharge,
     QBins,
     ReducibleData,
     ReferenceRun,
@@ -49,12 +49,12 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
 
     wf[LookupTableFilename] = estia_wavelength_lookup_table()
 
-    wf[ProtonCurrent[SampleRun]] = sc.DataArray(
-        sc.array(dims=('time',), values=[]),
+    wf[ProtonCharge[SampleRun]] = sc.DataArray(
+        sc.array(dims=('time',), values=[], unit='uC'),
         coords={'time': sc.array(dims=('time',), values=[], unit='s')},
     )
-    wf[ProtonCurrent[ReferenceRun]] = sc.DataArray(
-        sc.array(dims=('time',), values=[]),
+    wf[ProtonCharge[ReferenceRun]] = sc.DataArray(
+        sc.array(dims=('time',), values=[], unit='uC'),
         coords={'time': sc.array(dims=('time',), values=[], unit='s')},
     )
     wf[orso.OrsoCreator] = orso.OrsoCreator(

@@ -3,15 +3,15 @@
 import scipp as sc
 
 from ..reflectometry.conversions import (
-    add_proton_current_coord,
-    add_proton_current_mask,
+    add_proton_charge_coord,
+    add_proton_charge_mask,
 )
-from ..reflectometry.corrections import correct_by_proton_current
+from ..reflectometry.corrections import correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
     CorrectionsToApply,
-    ProtonCurrent,
+    ProtonCharge,
     ReducibleData,
     RunType,
     WavelengthBins,
@@ -29,7 +29,7 @@ def add_coords_masks_and_apply_corrections(
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-    proton_current: ProtonCurrent[RunType],
+    proton_current: ProtonCharge[RunType],
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
 ) -> ReducibleData[RunType]:
@@ -41,8 +41,8 @@ def add_coords_masks_and_apply_corrections(
     da = add_masks(da, ylim, zlims, bdlim, wbins)
 
     if len(proton_current) != 0:
-        da = add_proton_current_coord(da, proton_current)
-        da = add_proton_current_mask(da)
+        da = add_proton_charge_coord(da, proton_current)
+        da = add_proton_charge_mask(da)
 
     for correction in corrections_to_apply:
         da = correction(da)
@@ -55,6 +55,6 @@ def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
     return da / sc.sin(da.coords['theta'])
 
 
-default_corrections = {correct_by_proton_current, correct_by_footprint}
+default_corrections = {correct_by_proton_charge, correct_by_footprint}
 
 providers = (add_coords_masks_and_apply_corrections,)

@@ -13040,7 +13040,7 @@ packages:
   timestamp: 1758743805063
 - pypi: ./packages/essdiffraction
   name: essdiffraction
-  version: 26.4.2.dev4571+g6dbadde8
+  version: 26.5.1.dev3+g415a48216.d20260505
   sha256: f7442fcb8892eb5baf1f2ab6b3206185a64df9d910462810d00d61961a1eb16f
   requires_dist:
   - dask>=2022.1.0
@@ -13078,7 +13078,7 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essimaging
   name: essimaging
-  version: 26.4.1.dev3127+g6dbadde8
+  version: 26.4.1.dev3194+g415a48216.d20260505
   sha256: f0070a5ae1f7957e8ed16a9a8e451dc47af25af14056a52bea18969ccdfa3aff
   requires_dist:
   - dask>=2022.1.0
@@ -13111,7 +13111,7 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essnmx
   name: essnmx
-  version: 26.4.1.dev3127+g6dbadde8
+  version: 26.4.1.dev3194+g415a48216.d20260505
   sha256: 55671f87213d0cad915b5def554cb8380e6bcc8f2a0af5acbcdc8a8ebcfd9531
   requires_dist:
   - dask>=2022.1.0
@@ -13161,7 +13161,7 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essreduce
   name: essreduce
-  version: 26.4.2.dev1064+g6dbadde8
+  version: 26.4.2.dev1131+g415a48216.d20260505
   sha256: 4abbc4045bccda954282bb39956f775e74f753431168e2fb3a204e4c3bf5f9f8
   requires_dist:
   - dask>=2022.1.0
@@ -13198,8 +13198,8 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/essreflectometry
   name: essreflectometry
-  version: 26.4.1.dev4475+g6dbadde8
-  sha256: 1bdaf0414f6474e2d20b379284338a01705165a8ebabc9848312675ca2a89b0e
+  version: 26.5.1.dev3+g415a48216.d20260505
+  sha256: 8ab84bdb7607fb1f62917c30c4d4165aae50a4c20b77d4aaba6e556876a9f532
   requires_dist:
   - dask>=2022.1.0
   - python-dateutil
@@ -13210,7 +13210,7 @@ packages:
   - scipp>=24.9.1
   - scippneutron>=24.10.0
   - scippnexus>=24.9.1
-  - essreduce>=26.4.0
+  - essreduce>26.4.0
   - esspolarization>=25.7.0
   - pandas>=2.1.2
   - pytest>=7.0 ; extra == 'test'
@@ -13240,7 +13240,7 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./packages/esssans
   name: esssans
-  version: 26.4.1.dev4319+g6dbadde8
+  version: 26.4.1.dev4386+g415a48216.d20260505
   sha256: fb92b8fbde072b0cb7861029be6ffdd4d7b42c8d6a278c6a4db77db515a4dedc
   requires_dist:
   - dask>=2022.1.0
