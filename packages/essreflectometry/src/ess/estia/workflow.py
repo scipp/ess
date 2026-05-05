@@ -5,10 +5,10 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import TransformationTimeFilter
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
-from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -28,6 +28,7 @@ from . import (
     normalization,
     orso,
 )
+from .types import WavelengthMonitor
 
 _general_providers = (
     *reflectometry_providers,
@@ -69,11 +70,14 @@ def mcstas_default_parameters() -> dict:
             sc.scalar(0.75, unit='deg'),
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections
-        - {correct_by_proton_current},
+        CorrectionsToApply: (
+            corrections.default_corrections - {'monitor', 'proton_current'}
+        ),
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": 0.06,
         },
+        WavelengthMonitor[RunType]: None,
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
@@ -82,11 +86,13 @@ def default_parameters() -> dict:
     return {
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections,
+        CorrectionsToApply: corrections.default_corrections
+        - {'monitor', 'proton_current'},
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
         },
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 

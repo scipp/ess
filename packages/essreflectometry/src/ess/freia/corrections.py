@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import ess.reduce
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
-from ..reflectometry.conversions import (
-    add_proton_current_coord,
-    add_proton_current_mask,
-)
 from ..reflectometry.corrections import correct_by_proton_current
 from ..reflectometry.types import (
     BeamDivergenceLimits,
@@ -21,6 +19,48 @@ from ..reflectometry.types import (
 )
 from .conversions import add_coords
 from .maskings import add_masks
+from .types import WavelengthMonitor
+
+
+def normalize_by_monitor_histogram(
+    detector: ReducibleData[RunType],
+    *,
+    monitor: WavelengthMonitor[RunType],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> ReducibleData[RunType]:
+    """Normalize detector data by a histogrammed monitor.
+
+    The detector is normalized according to
+
+    .. math::
+
+        d_i^\\text{Norm} = \\frac{d_i}{m_i} \\Delta \\lambda_i
+
+    Parameters
+    ----------
+    detector:
+        Input event data in wavelength.
+    monitor:
+        A histogrammed monitor in wavelength.
+    uncertainty_broadcast_mode:
+        Choose how uncertainties of the monitor are broadcast to the sample data.
+
+    Returns
+    -------
+    :
+        `detector` normalized by a monitor.
+
+    See also
+    --------
+    ess.reduce.normalization.normalize_by_monitor_histogram:
+        For details and the actual implementation.
+    """
+    return ess.reduce.normalization.normalize_by_monitor_histogram(
+        detector=detector,
+        monitor=monitor,
+        uncertainty_broadcast_mode=uncertainty_broadcast_mode,
+        skip_range_check=False,
+    )
 
 
 def add_coords_masks_and_apply_corrections(
@@ -30,6 +70,8 @@ def add_coords_masks_and_apply_corrections(
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
     proton_current: ProtonCurrent[RunType],
+    monitor: WavelengthMonitor[RunType],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
 ) -> ReducibleData[RunType]:
@@ -40,12 +82,17 @@ def add_coords_masks_and_apply_corrections(
     da = add_coords(da, graph)
     da = add_masks(da, ylim, zlims, bdlim, wbins)
 
-    if len(proton_current) != 0:
-        da = add_proton_current_coord(da, proton_current)
-        da = add_proton_current_mask(da)
-
     for correction in corrections_to_apply:
-        da = correction(da)
+        if correction == 'monitor':
+            da = normalize_by_monitor_histogram(
+                da,
+                monitor=monitor,
+                uncertainty_broadcast_mode=uncertainty_broadcast_mode,
+            )
+        elif correction == 'proton_current':
+            da = correct_by_proton_current(da, proton_current=proton_current)
+        else:
+            da = correction(da)
 
     return ReducibleData[RunType](da)
 

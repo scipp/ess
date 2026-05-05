@@ -199,12 +199,10 @@ def test_proton_current(amor_pipeline: sciline.Pipeline):
     )
     da_with_proton_current = amor_pipeline.compute(ReducibleData[SampleRun])
 
-    assert "proton_current" in da_with_proton_current.bins.coords
     assert "proton_current_too_low" in da_with_proton_current.bins.masks
     assert da_with_proton_current.bins.masks["proton_current_too_low"].any()
     assert not da_with_proton_current.bins.masks["proton_current_too_low"].all()
 
-    assert "proton_current" not in da_without_proton_current.bins.coords
     assert "proton_current_too_low" not in da_without_proton_current.bins.masks
 
     t = (

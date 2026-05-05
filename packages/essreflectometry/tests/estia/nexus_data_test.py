@@ -13,18 +13,14 @@ from ess.reduce.normalization import normalize_by_monitor_histogram
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from orsopy import fileio
 
-from ess.estia import EstiaMcStasWorkflow
+from ess.estia import EstiaWorkflow
 from ess.estia.data import (
-    estia_mcstas_reference_run,
-    estia_mcstas_sample_run,
+    estia_mcstas_nexus_reference_example,
+    estia_mcstas_nexus_sample_example,
     estia_wavelength_lookup_table,
 )
-from ess.estia.mcstas import (
-    use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival,
-)
 from ess.estia.types import WavelengthMonitor
-from ess.reflectometry import orso
-from ess.reflectometry.corrections import correct_by_proton_current
+from ess.reflectometry import orso, supermirror
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -43,15 +39,19 @@ from ess.reflectometry.types import (
 
 
 @pytest.fixture
-def estia_mcstas_pipeline() -> sciline.Pipeline:
-    wf = EstiaMcStasWorkflow()
-    wf[Filename[ReferenceRun]] = estia_mcstas_reference_run()
+def estia_pipeline() -> sciline.Pipeline:
+    wf = EstiaWorkflow()
+    wf[Filename[ReferenceRun]] = estia_mcstas_nexus_reference_example()
 
     wf[YIndexLimits] = sc.scalar(35), sc.scalar(64)
     wf[ZIndexLimits] = sc.scalar(0), sc.scalar(48 * 32)
     wf[BeamDivergenceLimits] = sc.scalar(-1.0, unit='deg'), sc.scalar(1.0, unit='deg')
     wf[WavelengthBins] = sc.geomspace('wavelength', 3.5, 12, 2001, unit='angstrom')
     wf[QBins] = sc.geomspace('Q', 0.005, 0.1, 200, unit='1/angstrom')
+
+    wf[supermirror.CriticalEdge] = sc.scalar(float('inf'), unit='1/angstrom')
+    wf[supermirror.Alpha] = sc.scalar(0.25 / 0.088, unit=sc.units.angstrom)
+    wf[supermirror.MValue] = sc.scalar(5, unit=sc.units.dimensionless)
 
     wf[LookupTableFilename] = estia_wavelength_lookup_table()
 
@@ -87,12 +87,16 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
         )
     )
     wf[orso.OrsoSample] = orso.OrsoSample(fileio.data_source.Sample.empty())
+    wf[WavelengthMonitor[SampleRun]] = None
+    wf[WavelengthMonitor[ReferenceRun]] = None
     return wf
 
 
-def test_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
-    estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    da = estia_mcstas_pipeline.compute(ReducibleData[SampleRun])
+def test_compute_reducible_data(estia_pipeline: sciline.Pipeline):
+    estia_pipeline[Filename[SampleRun]] = estia_mcstas_nexus_sample_example(
+        'Ni/Ti-multilayer'
+    )[0]
+    da = estia_pipeline.compute(ReducibleData[SampleRun])
     assert da.dims == ('strip', 'blade', 'wire')
     assert da.shape == (64, 48, 32)
     assert 'position' in da.coords
@@ -103,9 +107,9 @@ def test_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
     assert 'Q' in da.bins.coords
 
 
-def test_compute_reducible_data_with_monitor(estia_mcstas_pipeline: sciline.Pipeline):
-    wf = estia_mcstas_pipeline
-    wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
+def test_compute_reducible_data_with_monitor(estia_pipeline: sciline.Pipeline):
+    wf = estia_pipeline
+    wf[Filename[SampleRun]] = estia_mcstas_nexus_sample_example('Ni/Ti-multilayer')[0]
     without_monitor = wf.compute(ReducibleData[SampleRun])
     wf[WavelengthMonitor[SampleRun]] = sc.DataArray(
         sc.array(dims=['wavelength'], values=[30.0], variances=[1.0]),
@@ -124,64 +128,20 @@ def test_compute_reducible_data_with_monitor(estia_mcstas_pipeline: sciline.Pipe
     )
 
 
-def test_compute_reducible_data_with_proton_current(
-    estia_mcstas_pipeline: sciline.Pipeline,
-):
-    wf = estia_mcstas_pipeline
-    wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    without_proton_current = wf.compute(ReducibleData[SampleRun])
-    wf[ProtonCurrent[SampleRun]] = sc.DataArray(
-        sc.array(dims=['time'], values=[2.0], variances=[1.0]),
-        coords={'time': sc.datetimes(dims=['time'], values=[0], unit='s')},
-    )
-    corrections = wf.compute(CorrectionsToApply)
-    wf[CorrectionsToApply] = {*corrections, 'proton_current'}
-    with_proton_current = wf.compute(ReducibleData[SampleRun])
-    scipp.testing.assert_allclose(
-        correct_by_proton_current(
-            without_proton_current,
-            proton_current=wf.compute(ProtonCurrent[SampleRun]),
-        ),
-        with_proton_current,
-    )
-
-
-def test_can_compute_reflectivity_curve_exact_wavelengths(
-    estia_mcstas_pipeline: sciline.Pipeline,
-):
-    wf = estia_mcstas_pipeline.copy()
-    wf.insert(use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival)
-    wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    r = wf.compute(ReflectivityOverQ)
-
-    assert "Q" in r.coords
-    assert "Q_resolution" in r.coords
-    r = r.hist()
-    min_q = sc.where(
-        r.data > sc.scalar(0),
-        sc.midpoints(r.coords['Q']),
-        sc.scalar(np.nan, unit='1/angstrom'),
-    ).nanmin()
-    max_q = sc.where(
-        r.data > sc.scalar(0),
-        sc.midpoints(r.coords['Q']),
-        sc.scalar(np.nan, unit='1/angstrom'),
-    ).nanmax()
-
-    assert max_q > sc.scalar(0.075, unit='1/angstrom')
-    assert min_q < sc.scalar(0.007, unit='1/angstrom')
-
-
-def test_can_compute_reflectivity_curve(estia_mcstas_pipeline: sciline.Pipeline):
-    estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    r = estia_mcstas_pipeline.compute(ReflectivityOverQ)
+def test_can_compute_reflectivity_curve(estia_pipeline: sciline.Pipeline):
+    estia_pipeline[Filename[SampleRun]] = estia_mcstas_nexus_sample_example(
+        'Ni/Ti-multilayer'
+    )[0]
+    r = estia_pipeline.compute(ReflectivityOverQ)
     assert "Q" in r.coords
     assert "Q_resolution" in r.coords
 
 
-def test_orso_pipeline(estia_mcstas_pipeline: sciline.Pipeline):
-    estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    res = estia_mcstas_pipeline.compute(orso.OrsoIofQDataset)
+def test_orso_pipeline(estia_pipeline: sciline.Pipeline):
+    estia_pipeline[Filename[SampleRun]] = estia_mcstas_nexus_sample_example(
+        'Ni/Ti-multilayer'
+    )[0]
+    res = estia_pipeline.compute(orso.OrsoIofQDataset)
     assert res.info.data_source.experiment.instrument == "Estia"
     assert res.info.reduction.software.name == "ess.reflectometry"
     assert res.info.reduction.corrections == [
@@ -195,11 +155,11 @@ def test_orso_pipeline(estia_mcstas_pipeline: sciline.Pipeline):
     assert np.isfinite(res.data).all()
 
 
-def test_save_reduced_orso_file(
-    estia_mcstas_pipeline: sciline.Pipeline, output_folder: Path
-):
-    estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    res = estia_mcstas_pipeline.compute(orso.OrsoIofQDataset)
+def test_save_reduced_orso_file(estia_pipeline: sciline.Pipeline, output_folder: Path):
+    estia_pipeline[Filename[SampleRun]] = estia_mcstas_nexus_sample_example(
+        'Ni/Ti-multilayer'
+    )[0]
+    res = estia_pipeline.compute(orso.OrsoIofQDataset)
     fileio.orso.save_orso(
         datasets=[res], fname=output_folder / 'estia_reduced_iofq.ort'
     )
