@@ -6,7 +6,9 @@ import sciline
 import scipp as sc
 
 from ..nexus import GenericNeXusWorkflow
-from . import to_wavelength
+from .lut import default_parameters as lut_default_parameters
+from .lut import providers as lut_providers
+from .to_wavelength import providers as wavelength_providers
 from .types import LookupTable, LookupTableFilename, PulseStrideOffset
 
 
@@ -82,12 +84,14 @@ def GenericUnwrapWorkflow(
     """
     wf = GenericNeXusWorkflow(run_types=run_types, monitor_types=monitor_types)
 
-    for provider in to_wavelength.providers():
+    for provider in (*wavelength_providers(), *lut_providers()):
         wf.insert(provider)
 
-    wf.insert(load_lookup_table)
+    # wf.insert(load_lookup_table)
 
     # Default parameters
     wf[PulseStrideOffset] = None
+    for key, value in lut_default_parameters().items():
+        wf[key] = value
 
     return wf
