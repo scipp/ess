@@ -206,6 +206,26 @@ def test_to_transform_with_custom_time_filter(
     )
 
 
+def test_to_transform_with_time_filter_slice_single_value(
+    time_dependent_depends_on: snx.TransformationChain,
+) -> None:
+    def time_filter(transformation: sc.DataArray) -> sc.DataArray:
+        return transformation['time', 1]
+
+    transform = workflow.to_transformation(
+        time_dependent_depends_on,
+        TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(1.9, unit='s'))),
+        time_filter=time_filter,
+    ).value
+
+    # Note that after slicing a single value, we should just have the Variable, not a
+    # DataArray.
+    expected = sc.vector([1.0, 2.0, 0.0], unit='m')
+    sc.testing.assert_identical(
+        transform * sc.vector([0.0, 0.0, 0.0], unit='m'), expected
+    )
+
+
 def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
     loki_tutorial_sample_run_60250: Path,
 ) -> None:
