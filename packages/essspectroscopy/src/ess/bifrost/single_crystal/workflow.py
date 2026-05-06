@@ -16,11 +16,12 @@ from ..cutting import group_by_rotation
 from ..io import nexus
 from ..io.mcstas import convert_simulated_time_to_event_time_offset
 from ..workflow import default_parameters, simulation_default_parameters
-from . import conversion, q_map, time_of_flight
+from . import conversion, detector, q_map, time_of_flight
 
 _PROVIDERS = (
     *nexus.providers,
     *conversion.providers,
+    *detector.providers,
     *q_map.providers,
     *time_of_flight.providers,
     group_by_rotation,
@@ -29,6 +30,7 @@ _PROVIDERS = (
 _SIMULATION_PROVIDERS = (
     *nexus.providers,
     *conversion.providers,
+    *detector.providers,
     *q_map.providers,
     *time_of_flight.providers,
     convert_simulated_time_to_event_time_offset,

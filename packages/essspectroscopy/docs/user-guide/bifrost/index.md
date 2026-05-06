@@ -1,4 +1,5 @@
 # BIFROST
+
 ## Reduction Workflows
 
 ::::{grid} 3
@@ -11,10 +12,12 @@
 :class: only-light
 :width: 100%
 ```
+
 ```{image} ../../_static/thumbnails/bifrost_reduction_dark.svg
 :class: only-dark
 :width: 100%
 ```
+
 :::
 
 ::::
@@ -25,7 +28,6 @@ hidden:
 ---
 
 bifrost-reduction
-bifrost-bragg-peak-monitor
 ```
 
 ## Advanced Tools
@@ -35,5 +37,6 @@ bifrost-bragg-peak-monitor
 maxdepth: 1
 ---
 
+bifrost-bragg-peak-monitor
 bifrost-make-wavelength-lookup-table
 ```

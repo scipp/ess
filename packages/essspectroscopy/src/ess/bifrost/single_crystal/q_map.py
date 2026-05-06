@@ -47,6 +47,9 @@ def project_momentum_transfer(
         transformed.bins.coords['a3'] = sc.bins_like(
             transformed, transformed.coords['a3']
         )
+        transformed.bins.coords['a4'] = sc.bins_like(
+            transformed, transformed.coords['a4']
+        )
         transformed = transformed.bins.concat()
 
     return CountsWithQMapCoords[RunType](transformed)

@@ -91,12 +91,12 @@ def get_calibrated_detector_bifrost(
 ) -> EmptyDetector[RunType]:
     """Extract the data array corresponding to a detector's signal field.
 
-    The data array is reshaped to the logical detector shape.
+    This includes:
 
-    This function is specific to BIFROST and differs from the generic
-    :func:`ess.reduce.nexus.workflow.get_calibrated_detector` in that it does not
-    fold the detectors into logical dimensions because the files already contain
-    the detectors in the correct shape.
+    - Reshaping the data array is reshaped to the logical detector shape.
+    - Assigning geometry coordinate "position".
+    - Assigning spectrometer coordinates such as "final_energy",
+      "secondary_flight_time", and "L1".
 
     Parameters
     ----------
@@ -119,16 +119,12 @@ def get_calibrated_detector_bifrost(
     -------
     :
         Detector geometry and spectrometer coordinates.
-        This includes "final_energy", "secondary_flight_time", and "L1".
     """
 
-    from ess.reduce.nexus import compute_detector_position, extract_signal_data_array
-
-    da = extract_signal_data_array(detector)
+    da = get_base_calibrated_detector_bifrost(
+        detector, analyzer, transform=transform, offset=offset
+    )
     da = da.rename(dim_0='tube', dim_1='length')
-
-    position = compute_detector_position(da, transform=transform, offset=offset)
-    da = _assign_detector_position(da, position)
 
     arc, channel = arc_and_channel_from_detector_number(da.coords['detector_number'])
     da.coords['arc'] = arc
@@ -143,6 +139,43 @@ def get_calibrated_detector_bifrost(
     )
 
     return EmptyDetector[RunType](da)
+
+
+def get_base_calibrated_detector_bifrost(
+    detector: NeXusComponent[snx.NXdetector, RunType],
+    analyzer: Analyzer[RunType],
+    *,
+    transform: NeXusTransformation[snx.NXdetector, RunType],
+    offset: DetectorPositionOffset[RunType],
+) -> sc.DataArray:
+    """Extract the data array corresponding to a detector's signal field.
+
+    This function is specific to BIFROST and differs from the generic
+    :func:`ess.reduce.nexus.workflow.get_calibrated_detector` in that it
+    assigns time-dependent positions by broadcasting the data into the 'time' dimension.
+
+    Parameters
+    ----------
+    detector:
+        Loaded NeXus detector.
+    analyzer:
+        Loaded analyzer parameters.
+    transform:
+        Transformation that determines the detector position.
+    offset:
+        Offset to add to the detector position.
+
+    Returns
+    -------
+    :
+        Detector with geometry coordinates.
+    """
+
+    from ess.reduce.nexus import compute_detector_position, extract_signal_data_array
+
+    da = extract_signal_data_array(detector)
+    position = compute_detector_position(da, transform=transform, offset=offset)
+    return _assign_detector_position(da, position)
 
 
 def _assign_detector_position(
