@@ -73,9 +73,11 @@ def assert_h5obj_equal(
         else:
             assert values_left.shape == values_right.shape, _cur_path
             # We use np.allclose instead of np.all(left==right)
-            # because we run ray-simulation on the fly
-            # and the time-dependent values might slightly change.
-            assert np.allclose(values_left, values_right), _cur_path
+            # since some reduction operations might give a small difference every time.
+            # Tolerance of 1e-13 was decided since assertion starts failing at 1e-15
+            assert np.allclose(values_left, values_right, rtol=1e-13, atol=1e-13), (
+                _cur_path
+            )
 
 
 def test_compare_output_file_with_frozen(tmp_path: pathlib.Path):
