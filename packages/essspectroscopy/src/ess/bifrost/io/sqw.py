@@ -106,19 +106,13 @@ def save_sqw(
     scippneutron.io.sqw:
         For low-level SQW I/O and the underlying implementation of ``save_sqw``.
     """
-    if np.unique(events.coords['a4'].values).size != 1:
-        # We need to support this eventually, but we don't
-        # have data for a moving detector vessel yet.
-        raise NotImplementedError("a4 must be constant for all events")
-
     flat_events = _flatten_events(events)
     del events  # 'move' events into _flatten_events
     _filter_and_convert_coords_in_place(flat_events)
 
-    sample_angle = flat_events.coords['a3']
-
     observations = _histogram_detector_setting_ei(flat_events, energy_bins=energy_bins)
     del flat_events  # 'move' flat_events into _histogram_detector_setting_ei
+    sample_angle = observations.coords['a3']
     final_energy = observations.coords['final_energy']
     observations = _with_inelastic_coords(observations, gravity)
     energy_transfer = observations.coords['energy_transfer'].rename_dims(
@@ -161,7 +155,7 @@ def _flatten_events(
     n_a3 = aux.sizes['a3']
     aux.coords['i_a3'] = sc.arange('a3', n_a3, dtype='float32', unit=None)
     aux.coords['i_a4'] = sc.arange('a4', aux.sizes['a4'], dtype='float32', unit=None)
-    flat = aux.flatten(['a3', 'a4'], 'setting')
+    flat = aux.transpose(['detector', 'a4', 'a3']).flatten(['a4', 'a3'], 'setting')
     return flat.assign_coords(
         irun=flat.coords.pop('i_a3')
         + flat.coords.pop('i_a4') * sc.index(n_a3)
@@ -422,9 +416,9 @@ def _make_experiments(
 ) -> list[sqw.SqwIXExperiment]:
     experiment_template = sqw.SqwIXExperiment(
         run_id=0,  # converted to 1-based by ScippNeutron
-        efix=final_energy,
         emode=sqw.EnergyMode.indirect,
-        en=energy_transfer,
+        efix=None,  # type: ignore[assignment] (overridden below)
+        en=None,  # type: ignore[assignment]
         psi=sc.scalar(0.0, unit="rad"),
         u=_AXIS_U,
         v=_AXIS_V,
@@ -434,6 +428,12 @@ def _make_experiments(
         gs=sc.scalar(0.0, unit="rad"),
     )
     return [
-        dataclasses.replace(experiment_template, run_id=i, psi=a3)
+        dataclasses.replace(
+            experiment_template,
+            run_id=i,
+            psi=a3,
+            efix=final_energy['setting', i],
+            en=energy_transfer['setting', i],
+        )
         for i, a3 in enumerate(sample_angle)
     ]

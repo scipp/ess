@@ -7,6 +7,7 @@
 # Function-scoped fixtures allow accessing that file for reading.
 
 import itertools
+from collections import Counter
 from collections.abc import Generator
 from pathlib import Path
 
@@ -38,7 +39,8 @@ from ess.spectroscopy.types import (
 )
 
 N_DETECTORS = 3
-N_ANGLES = 180
+N_ANGLES = 178
+N_DET_ROTATIONS = 2
 
 BIN_SIZES = {'u1': 6, 'u2': 7, 'u3': 8, 'u4': 9}
 ENERGY_BIN_SIZE = 13
@@ -108,13 +110,13 @@ def output_file(write_file: Path) -> Generator[sqw.Sqw, None, None]:
 def test_save_sqw_writes_instrument_metadata(output_file: sqw.Sqw) -> None:
     instruments = output_file.read_data_block("experiment_info", "instruments")
 
-    assert len(instruments) == N_ANGLES
+    assert len(instruments) == N_ANGLES * N_DET_ROTATIONS
     # All instruments are the same:
     for instrument in instruments[1:]:
         sc.testing.assert_identical(instrument, instruments[0])
 
     instrument = instruments[0]
-    assert instrument.name == "BIFROST"
+    assert instrument.name == "bifrost"
     sc.testing.assert_identical(instrument.source.frequency, sc.scalar(14.0, unit="Hz"))
 
 
@@ -123,7 +125,7 @@ def test_save_sqw_writes_sample_metadata(
 ) -> None:
     samples = output_file.read_data_block("experiment_info", "samples")
 
-    assert len(samples) == N_ANGLES
+    assert len(samples) == N_ANGLES * N_DET_ROTATIONS
     # All samples are the same:
     for s in samples:
         sc.testing.assert_identical(s, sample)
@@ -132,13 +134,21 @@ def test_save_sqw_writes_sample_metadata(
 def test_save_sqw_writes_experiment_metadata(output_file: sqw.Sqw) -> None:
     experiments = output_file.read_data_block("experiment_info", "expdata")
 
-    assert len(experiments) == N_ANGLES
+    assert len(experiments) == N_ANGLES * N_DET_ROTATIONS
     # N unique run ids
-    assert len({experiment.run_id for experiment in experiments}) == N_ANGLES
+    assert (
+        len({experiment.run_id for experiment in experiments})
+        == N_ANGLES * N_DET_ROTATIONS
+    )
     for experiment in experiments:
         assert experiment.emode == sqw.EnergyMode.indirect
         assert experiment.u == U
         assert experiment.v == V
+
+    # Every a3 (psi) is represented once per detector rotation
+    # because we have a regular grid.
+    psi_counts = Counter(experiment.psi.value for experiment in experiments)
+    assert all(count == N_DET_ROTATIONS for count in psi_counts.values())
 
 
 def test_save_sqw_writes_dnd_metadata(
@@ -176,7 +186,11 @@ def test_save_sqw_writes_pixel_data(output_file: sqw.Sqw) -> None:
     pix = output_file.read_data_block("pix", "data_wrap")
 
     assert pix.shape == (
-        N_DETECTORS * N_PIXELS_PER_DETECTOR * N_ANGLES * ENERGY_BIN_SIZE,
+        N_DETECTORS
+        * N_PIXELS_PER_DETECTOR
+        * N_ANGLES
+        * ENERGY_BIN_SIZE
+        * N_DET_ROTATIONS,
         9,
     )
 
@@ -222,7 +236,7 @@ def check_pixel_indices_in_ranges(pix: npt.NDArray[np.float32]) -> None:
 
     # 1-based indices!
     assert irun.min() == 1
-    assert irun.max() == N_ANGLES
+    assert irun.max() == N_ANGLES * N_DET_ROTATIONS
     assert ien.min() == 1
     assert ien.max() == ENERGY_BIN_SIZE
 
