@@ -163,7 +163,7 @@ def _compute_mean_wavelength(
     return mean_wavelength
 
 
-def make_wavelength_lookup_table(
+def wavelength_lookup_table_from_simulation(
     simulation: SimulationResults,
     ltotal_range: LtotalRange,
     distance_resolution: DistanceResolution,
@@ -405,21 +405,32 @@ def simulate_chopper_cascade_using_tof(
     return SimulationResults(readings=sim_readings, choppers=choppers)
 
 
-def LookupTableFromTofWorkflow():
+def LookupTableFromSimulation():
     """
     Create a workflow for computing a wavelength lookup table from a
     simulation of neutrons propagating through a chopper cascade.
     """
     wf = sl.Pipeline(
-        (make_wavelength_lookup_table, simulate_chopper_cascade_using_tof),
+        (wavelength_lookup_table_from_simulation,),
         params={
             PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
             PulseStride: 1,
             DistanceResolution: sc.scalar(0.1, unit="m"),
             TimeResolution: sc.scalar(250.0, unit='us'),
-            NumberOfSimulatedNeutrons: 1_000_000,
-            SimulationSeed: None,
-            SimulationFacility: 'ess',
         },
     )
+    return wf
+
+
+def LookupTableFromTof():
+    """
+    Create a workflow for computing a wavelength lookup table using the ``tof`` package
+    to propagate neutrons through the chopper cascade.
+    """
+    wf = LookupTableFromSimulation()
+    wf.insert(simulate_chopper_cascade_using_tof)
+    wf[NumberOfSimulatedNeutrons] = 1_000_000
+    wf[SimulationSeed] = None
+    wf[SimulationFacility] = 'ess'
+
     return wf

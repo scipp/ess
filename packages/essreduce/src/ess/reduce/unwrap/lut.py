@@ -86,7 +86,8 @@ def _polygon_intersections(polygons: list[np.ndarray], xs: np.ndarray) -> np.nda
         y_min = np.nanmin(y, axis=0)
         y_max = np.nanmax(y, axis=0)
 
-    return 0.5 * (y_min + y_max)
+    # Value and spread estimate
+    return 0.5 * (y_min + y_max), 0.5 * (y_max - y_min)
 
 
 def _compute_mean_wavelength(
@@ -136,10 +137,13 @@ def _compute_mean_wavelength(
         for f in subframes
     ]
 
-    wavs = _polygon_intersections(polygons, time_edges.values)
+    wavs, stddevs = _polygon_intersections(polygons, time_edges.values)
 
     return sc.array(
-        dims=time_edges.dims, values=wavs, unit=subframes[0].wavelength.unit
+        dims=time_edges.dims,
+        values=wavs,
+        variances=stddevs**2,
+        unit=subframes[0].wavelength.unit,
     )
 
 

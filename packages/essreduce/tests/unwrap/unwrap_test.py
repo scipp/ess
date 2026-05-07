@@ -15,37 +15,52 @@ from ess.reduce.nexus.types import (
     RawMonitor,
     SampleRun,
 )
-from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
+from ess.reduce.unwrap import (
+    GenericUnwrapWorkflow,
+    LookupTableFromTof,
+    LookupTableWorkflow,
+    fakes,
+)
 
 sl = pytest.importorskip("sciline")
 
 
-def make_lut_workflow(choppers, neutrons, seed, pulse_stride):
-    lut_wf = LookupTableWorkflow()
+def make_lut_workflow(engine, choppers, pulse_stride, neutrons=None, seed=None):
+    lut_wf = LookupTableFromTof() if engine == "tof" else LookupTableWorkflow()
     lut_wf[unwrap.DiskChoppers[AnyRun]] = choppers
     lut_wf[unwrap.SourcePosition] = fakes.source_position()
     lut_wf[unwrap.NumberOfSimulatedNeutrons] = neutrons
-    lut_wf[unwrap.SimulationSeed] = seed
-    lut_wf[unwrap.PulseStride] = pulse_stride
-    lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
+    if engine == "tof":
+        lut_wf[unwrap.SimulationSeed] = seed
+        lut_wf[unwrap.PulseStride] = pulse_stride
+        lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
     return lut_wf
 
 
 @pytest.fixture(scope="module")
 def lut_workflow_psc_choppers():
-    return make_lut_workflow(
-        choppers=fakes.psc_choppers(), neutrons=500_000, seed=1234, pulse_stride=1
-    )
+    choppers = fakes.psc_choppers()
+    return {
+        'tof': make_lut_workflow(
+            engine='tof', choppers=choppers, neutrons=500_000, seed=1234, pulse_stride=1
+        ),
+        'analytical': make_lut_workflow(
+            engine='analytical', choppers=choppers, pulse_stride=1
+        ),
+    }
 
 
 @pytest.fixture(scope="module")
 def lut_workflow_pulse_skipping():
-    return make_lut_workflow(
-        choppers=fakes.pulse_skipping_choppers(),
-        neutrons=500_000,
-        seed=112,
-        pulse_stride=2,
-    )
+    choppers = fakes.pulse_skipping_choppers()
+    return {
+        'tof': make_lut_workflow(
+            engine='tof', choppers=choppers, neutrons=500_000, seed=112, pulse_stride=2
+        ),
+        'analytical': make_lut_workflow(
+            engine='analytical', choppers=choppers, pulse_stride=2
+        ),
+    }
 
 
 def _make_workflow_event_mode(
@@ -166,15 +181,16 @@ def _validate_result_histogram_mode(wavs, ref, percentile, diff_threshold, rtol)
     assert sc.isclose(ref.data.nansum(), wavs.data.nansum(), rtol=sc.scalar(rtol))
 
 
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_unwrap_with_no_choppers(detector_or_monitor) -> None:
+def test_unwrap_with_no_choppers(engine, detector_or_monitor) -> None:
     # At this small distance the frames are not overlapping (with the given wavelength
     # range), despite not using any choppers.
     distance = sc.scalar(10.0, unit="m")
     choppers = {}
 
     lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=300_000, seed=1234, pulse_stride=1
+        engine=engine, choppers=choppers, neutrons=300_000, seed=1234, pulse_stride=1
     )
 
     pl, ref = _make_workflow_event_mode(
@@ -202,12 +218,15 @@ def test_unwrap_with_no_choppers(detector_or_monitor) -> None:
 # At 80m, events are split between the second and third pulse.
 # At 108m, events are split between the third and fourth pulse.
 @pytest.mark.parametrize("dist", [30.0, 60.0, 80.0, 108.0])
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_standard_unwrap(dist, detector_or_monitor, lut_workflow_psc_choppers) -> None:
+def test_standard_unwrap(
+    dist, engine, detector_or_monitor, lut_workflow_psc_choppers
+) -> None:
     pl, ref = _make_workflow_event_mode(
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.psc_choppers(),
-        lut_workflow=lut_workflow_psc_choppers,
+        lut_workflow=lut_workflow_psc_choppers[engine],
         seed=2,
         # pulse_stride=1,
         pulse_stride_offset=0,

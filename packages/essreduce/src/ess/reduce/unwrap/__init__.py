@@ -17,9 +17,10 @@ from .lut import (
     SourcePulse,
     TimeResolution,
 )
-from .lut_from_tof import (
+from .lut_from_simulation import (
     BeamlineComponentReading,
-    LookupTableFromTofWorkflow,
+    LookupTableFromSimulation,
+    LookupTableFromTof,
     NumberOfSimulatedNeutrons,
     SimulationResults,
     SimulationSeed,
@@ -48,7 +49,8 @@ __all__ = [
     "GenericUnwrapWorkflow",
     "LookupTable",
     "LookupTableFilename",
-    "LookupTableFromTofWorkflow",
+    "LookupTableFromSimulation",
+    "LookupTableFromTof",
     "LookupTableRelativeErrorThreshold",
     "LookupTableWorkflow",
     "LtotalRange",
