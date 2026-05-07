@@ -21,16 +21,13 @@ concurrency:
   # Even if the pull request has same reference, it should also run again if it's a different PR.
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.pull_request.number }}
 
-permissions:
-  # The bot write comments, add labels or update the title of PR.
-  pull-requests: write
+env:
+  PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
   check-pr-labels:
-    name: Labels
-    runs-on: ubuntu-24.04
-    env:
-      PR_NUM: ${{ github.event.pull_request.number }}
+    name: Check Labels
+    runs-on: ubuntu-slim-24.04
     outputs:
       all_labels: ${{ steps.all-labels.outputs.all_labels }}
       new_labels: ${{ steps.new-labels.outputs.new_labels }}
@@ -54,6 +51,7 @@ jobs:
           echo "Found labels to add: ${labels[@]}";
           echo "all_labels=${labels[@]}" >> "$GITHUB_OUTPUT";
       - id: new-labels
+        name: Collect labels that need to be added among all_labels.
         env:
            all_labels: ${{ steps.all-labels.outputs.all_labels }}
            GH_TOKEN: ${{ github.token }}
@@ -64,51 +62,29 @@ jobs:
             if [[ "$EXISTING_LABELS" == *"${label}"* ]]; then
           	  echo "${label} is already added to the current PR.";
             else
+              echo "Found a new label to be added: ${label}";
               new_labels+=("${label}");
-          	  gh pr edit ${PR_NUM} --add-label ${label};
             fi
           done
           echo "new_labels=${new_labels[@]}" >> "$GITHUB_OUTPUT";
-      - id: new-labels-report
-        env:
-           all_labels: ${{ steps.all-labels.outputs.all_labels }}
-           new_labels: ${{ steps.new-labels.outputs.new_labels }}
-           GH_TOKEN: ${{ github.token }}
-        if: ${{ steps.new-labels.outputs.new_labels }}
-        run: |
-          echo "Hi! Your PR was missing some labels 🔖 so I added them." >> pr-comment.md;
-          echo "It looks like you're working on these packages/features: ${all_labels}" >> pr-comment.md;
-          echo "These labels were missing: ${new_labels}" >> pr-comment.md;
-          gh pr comment ${PR_NUM} -F pr-comment.md;
-      - id: export-comment
-        if: ${{ steps.new-labels.outputs.new_labels }}
-        uses: actions/upload-artifact@v7
-        with:
-          path: pr-comment.md
-          name: pr-comment.md
-          if-no-files-found: ignore
 
   check-pr-title:
     name: Title Prefix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim-24.04
     needs:
       - check-pr-labels
-    if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' }} # Only when it's (re)opened.
+    if: |
+      ${{ ( github.event.action == 'opened' || github.event.action == 'reopened' ) &&
+        !startsWith( github.event.pull_request.title, '[' ) }}
     env:
       PR_NUM: ${{ github.event.pull_request.number }}
       all_labels: ${{ needs.check-pr-labels.outputs.all_labels }}
       original_title: ${{ github.event.pull_request.title }}
     outputs:
       title_prefix: ${{ steps.title-prefix.outputs.title_prefix }}
+      new_title: ${{ steps.title-prefix.outputs.new_title }}
     steps:
       - uses: actions/checkout@v6
-      - id: download-comment
-        uses: actions/download-artifact@v8
-        continue-on-error: true  # pre-commit.md might not exist.
-        with:
-          path: ./
-          name: pr-comment.md
-      - run: if [[ -f pr-commit.md ]]; then echo "\nHi Again!" >> pre-comment.md; echo "Found existing pr-comment file."; cat pr-comment.md; else echo "Hi!" >> pre-comment.md; fi
       - id: title-prefix
         name: Compose title prefix.
         run: |
@@ -126,7 +102,7 @@ jobs:
               title_prefix="[${label}]";
             fi
             title_prefix=${title_prefix^^};
-          # Handle ultiple labels
+          # Handle multiple labels
           elif [[ ${#labels[@]} -gt 1  ]]; then
             ess_labels=();
             other_labels=();
@@ -159,6 +135,7 @@ jobs:
             title_prefix="[${title_prefixes[@]}]";
           fi
           echo "title_prefix=${title_prefix}" >> "$GITHUB_OUTPUT";
+          echo "new_title=${title_prefix} ${original_title}" >> "$GITHUB_OUTPUT";
       - id: title-prefix-correct
         name: Title already has correct prefix.
         if: ${{ startsWith( env.original_title, steps.title-prefix.outputs.title_prefix ) }}
@@ -185,9 +162,39 @@ jobs:
         run: |
           echo "Title doesn't have expected prefix... adding one...";
           gh pr edit ${PR_NUM} --title "${title_prefix} ${original_title}";
+          echo "new_title=${title_prefix} ${original_title}" >> "$GITHUB_OUTPUT";
           echo "Your PR title didn't have any prefix yet. I added the prefix: ${title_prefix} to the title." >> pr-comment.md;
           echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
           gh pr comment ${PR_NUM} \
             --edit-last \
             --create-if-none \
             -F pr-comment.md;
+
+  edit-pr:
+    name: Edit and Report New Labels or Title Prefix
+    runs-on: ubuntu-slim-24.04
+    env:
+       all_labels: ${{ needs.check-pr-labels.outputs.all_labels }}
+       new_labels: ${{ needs.check-pr-labels.outputs.new_labels }}
+       GH_TOKEN: ${{ github.token }}
+    permissions:
+      # The bot write comments, add labels or update the title of PR.
+      pull-requests: write
+    needs:
+      - check-pr-labels
+    if: ${{ needs.check-pr-labels.outputs.new_labels }}
+    steps:
+      - id: add-new-labels
+        run: |
+          combined_label=${new_labels[0]};
+          for label in ${new_labels[@]:1}; do combined_label="${combined_label},${label}"; done
+          gh pr edit ${PR_NUM} --add-label ${combined_label};
+      - id: new-labels-report
+        run: |
+          echo "Hi! Your PR was missing some labels 🔖 so I added them." >> pr-comment.md;
+          echo "It looks like you're working on these packages/features: ${all_labels}" >> pr-comment.md;
+          echo "These labels were missing: ${new_labels}" >> pr-comment.md;
+          gh pr comment ${PR_NUM} -F pr-comment.md;
+      - id: new-title-report
+        run: |
+          if [[ -f pr-commit.md ]]; then echo "\nHi Again!" >> pre-comment.md; else echo "Hi!" >> pre-comment.md; fi
