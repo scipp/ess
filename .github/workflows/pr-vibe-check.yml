@@ -109,8 +109,9 @@ jobs:
         id: add-new-labels
         if: ${{ needs.check-pr.outputs.new_labels }}
         run: |
-          combined_label=${new_labels[0]};
-          for label in ${new_labels[@]:1}; do combined_label="${combined_label},${label}"; done
+          labels=(${new_labels});
+          combined_label=${labels[0]};
+          for label in ${labels[@]:1}; do combined_label="${combined_label},${label}"; done
           gh pr edit ${PR_NUM} --add-label ${combined_label};
       - name: Collect comments about the new labels
         id: new-labels-add-to-report
