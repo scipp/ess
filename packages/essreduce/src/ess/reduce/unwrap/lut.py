@@ -121,6 +121,8 @@ def _compute_mean_wavelength(
         Period of the source pulses, used to handle the periodicity of the subframes.
     """
 
+    # n = subframes.time.min() - sc.scalar(1/14, unit='s')
+
     # To handle the periodicity of the subframes, we need to consider not only the
     # original subframes, but also copies of the subframes shifted by the frame period.
     # This is because neutrons that arrive after the frame period will wrap around and
@@ -278,7 +280,17 @@ def make_wavelength_lookup_table(
                 f"has distance {sorted_frames[0].distance:c}."
             )
 
-        subframes = selected_frame.propagate_to(dist).subframes
+        # Here, the frame could be offset by more than one frame period (if the neutron
+        # flight path is very long). So we shift the frame back enough times so that
+        # the minimum time is between 0 and the frame period.
+        propagated = selected_frame.propagate_to(dist)
+        nsub = int(
+            propagated.bounds()['time'].min().to(unit=time_unit).value
+            / frame_period.value
+        )
+        subframes = propagated.subframes
+        for f in subframes:
+            f.time -= (nsub * frame_period).to(unit=f.time.unit)
 
         pieces.append(
             _compute_mean_wavelength(
