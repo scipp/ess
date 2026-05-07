@@ -4,9 +4,7 @@
 Utilities for computing wavelength lookup tables.
 """
 
-import time
-from dataclasses import dataclass
-from typing import NewType
+import warnings
 
 import numpy as np
 import sciline as sl
@@ -81,8 +79,12 @@ def _polygon_intersections(polygons: list[np.ndarray], xs: np.ndarray) -> np.nda
     y = np.where(mask, y, np.nan)
 
     # now reduce along edges axis
-    y_min = np.nanmin(y, axis=0)
-    y_max = np.nanmax(y, axis=0)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore", category=RuntimeWarning, message="All-NaN slice encountered"
+        )
+        y_min = np.nanmin(y, axis=0)
+        y_max = np.nanmax(y, axis=0)
 
     return 0.5 * (y_min + y_max)
 
