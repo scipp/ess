@@ -121,15 +121,11 @@ def _compute_mean_wavelength(
         Period of the source pulses, used to handle the periodicity of the subframes.
     """
 
-    # n = subframes.time.min() - sc.scalar(1/14, unit='s')
-
     # Here, the frame could be offset by more than one frame period (if the neutron
     # flight path is very long). So we shift the frame back enough times so that
     # the minimum time is between 0 and the frame period.
-    # propagated = selected_frame.propagate_to(dist)
     min_time = sc.reduce([f.time.min() for f in subframes]).min()
     noffset = int(min_time.to(unit=time_unit).value / frame_period.value)
-    # offset = nsub * frame_period  # .to(unit=f.time.unit)
 
     # To handle the periodicity of the subframes, we need to consider not only the
     # original subframes, but also copies of the subframes shifted by the frame period.
@@ -139,21 +135,13 @@ def _compute_mean_wavelength(
     polygons = [
         np.stack(
             [
-                (f.time.to(unit=time_unit) - noffset * frame_period).values,
+                (f.time.to(unit=time_unit) - (noffset + i) * frame_period).values,
                 f.wavelength.values,
             ],
             axis=1,
         )
         for f in subframes
-    ] + [
-        np.stack(
-            [
-                (f.time.to(unit=time_unit) - (noffset + 1) * frame_period).values,
-                f.wavelength.values,
-            ],
-            axis=1,
-        )
-        for f in subframes
+        for i in (0, 1)
     ]
 
     wavs, stddevs = _polygon_intersections(polygons, time_edges.values)
