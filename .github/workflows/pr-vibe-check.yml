@@ -88,7 +88,7 @@ jobs:
 
   edit-pr:
     name: Edit PR with New Labels or Title Prefix and Report
-    runs-on: ubuntu-slim-24.04
+    runs-on: ubuntu-slim
     needs:
       - check-pr
     env:
