@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v6
       - run: git fetch origin ${{ github.base_ref }}
       - name: Collect all expected labels based on the change.
-        id: all-labels        
+        id: all-labels
         run: |
           DIFFFILES=($(git diff --name-only origin/${{ github.base_ref }}));
           labels=($(for diff_file in ${DIFFFILES[@]}; do
@@ -53,7 +53,7 @@ jobs:
           echo "Found labels to add: ${labels[@]}";
           echo "all_labels=${labels[@]}" >> "$GITHUB_OUTPUT";
       - name: Collect labels that need to be added among all_labels.
-        id: new-labels        
+        id: new-labels
         env:
            all_labels: ${{ steps.all-labels.outputs.all_labels }}
         run: |
@@ -97,7 +97,7 @@ jobs:
        new_labels: ${{ needs.check-pr.outputs.new_labels }}
        title_prefix: ${{ needs.check-pr.outputs.title_prefix }}
        new_title: ${{ needs.check-pr.outputs.new_title }}
-       # The bot needs this token for editting PR.
+       # The bot needs this token for editing PR.
        GH_TOKEN: ${{ github.token }}
     permissions:
       # The bot write comments, add labels or update the title of PR.
@@ -135,5 +135,5 @@ jobs:
           echo "Your PR title didn't have any prefix yet. I added the prefix: ${title_prefix} to the title." >> pr-comment.md;
           echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
       - name: Leave a comment about the changes.
-        id: report        
+        id: report
         run: gh pr comment ${PR_NUM} -F pr-comment.md;
