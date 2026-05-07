@@ -31,6 +31,8 @@ jobs:
     outputs:
       all_labels: ${{ steps.all-labels.outputs.all_labels }}
       new_labels: ${{ steps.new-labels.outputs.new_labels }}
+      title_prefix: ${{ steps.title-check.outputs.title_prefix }}
+      new_title: ${{ steps.title-check.outputs.new_title }}
     if: ${{ github.event.action == 'opened' || github.event.action == 'closed' || github.event.action == 'reopened' }}
     steps:
       - uses: actions/checkout@v6
@@ -54,7 +56,6 @@ jobs:
         name: Collect labels that need to be added among all_labels.
         env:
            all_labels: ${{ steps.all-labels.outputs.all_labels }}
-           GH_TOKEN: ${{ github.token }}
         run: |
           EXISTING_LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}';
           new_labels=();
@@ -67,6 +68,22 @@ jobs:
             fi
           done
           echo "new_labels=${new_labels[@]}" >> "$GITHUB_OUTPUT";
+      - id: title-check
+        name: Check the title prefix.
+        env:
+          all_labels: ${{ steps.all-labels.outputs.all_labels }}
+          new_labels: ${{ steps.new-labels.outputs.new_labels }}
+        run: |
+          labels=(${all_labels});
+          # Only one label
+          if [[ ${#labels[@]} -eq 1  ]]; then
+            title_prefix="[${labels[0]^^}]";
+            echo "title_prefix=${title_prefix}" >> "$GITHUB_OUTPUT";
+            echo "new_title=${title_prefix} ${original_title}" >> "$GITHUB_OUTPUT";
+          # Ignore multiple labels
+          elif [[ ${#labels[@]} -gt 1  ]]; then
+            echo "There are multiple labels found for this PR. Skipping making a new title...";
+          fi
 
   check-pr-title:
     name: Title Prefix
@@ -91,110 +108,60 @@ jobs:
           labels=(${all_labels});
           # Only one label
           if [[ ${#labels[@]} -eq 1  ]]; then
-            label=${labels[0]};
-            # Do not drop ess prefix if it's essreduce... cause... just reduce doesn't make sense...
-            if [[ "${label}" == "essreduce" ]]; then
-              title_prefix="[${label}]";
-            # Only use technique part for prefix
-            elif [[ "${label}" =~ ^ess([a-zA-Z]+)$ ]]; then
-              title_prefix="[${BASH_REMATCH[1]}]";
-            else
-              title_prefix="[${label}]";
-            fi
-            title_prefix=${title_prefix^^};
-          # Handle multiple labels
+            title_prefix="[${labels[0]^^}]";
+            echo "title_prefix=${title_prefix}" >> "$GITHUB_OUTPUT";
+            echo "new_title=${title_prefix} ${original_title}" >> "$GITHUB_OUTPUT";
+          # Ignore multiple labels
           elif [[ ${#labels[@]} -gt 1  ]]; then
-            ess_labels=();
-            other_labels=();
-            label_to_title=();
-            for label in ${labels[@]}; do
-              # Do not drop ess prefix if it's essreduce... cause... just reduce doesn't make sense...
-              if [[ "${label}" == "essreduce" ]]; then
-                ess_labels+=(${label});
-              # Only use technique part for prefix
-              elif [[ "${label}" =~ ^ess([a-zA-Z]+)$ ]]; then
-              	ess_labels+=(${BASH_REMATCH[1]});
-              else
-                other_labels+=(${label});
-              fi
-            done
-            # Collect only ess titles
-            ess_title_prefixes=()
-            if [[ ${#ess_labels[@]} -eq 1 ]]; then
-              ess_title_prefixes+=(${ess_labels[0]});
-            elif [[ ${#ess_labels[@]} -gt 1 ]]; then
-              ess_title_prefixes+=('ess');
-            fi
-            # Combine all title prefixes
-            label_to_title=(${ess_title_prefixes[@]} ${other_labels[@]});
-            # Capitalize title prefixes
-            title_prefixes=();
-            for title in ${label_to_title[@]}; do
-              title_prefixes+=(${title^^});
-            done
-            title_prefix="[${title_prefixes[@]}]";
+            echo "There are multiple labels found for this PR. Skipping making a new title...";
           fi
-          echo "title_prefix=${title_prefix}" >> "$GITHUB_OUTPUT";
-          echo "new_title=${title_prefix} ${original_title}" >> "$GITHUB_OUTPUT";
-      - id: title-prefix-correct
-        name: Title already has correct prefix.
-        if: ${{ startsWith( env.original_title, steps.title-prefix.outputs.title_prefix ) }}
-        run: echo "Title already has prefix ${title_prefix}."
-      - id: report-title-prefix-unexpected
-        name: Title already has prefix but not expected one.
-        if: ${{ !startsWith( env.original_title, steps.title-prefix.outputs.title_prefix ) && startsWith( env.original_title, '[' ) }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "Title already has prefix but not same as the expected one. Reporting in the comment...";
-          echo "Your PR has unexpected title. Recommended prefix is: ${title_prefix}." >> pr-comment.md;
-          echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
-          gh pr comment ${PR_NUM} \
-            --edit-last \
-            --create-if-none \
-            -F pr-comment.md;
-      - id: report-title-prefix-none
-        name: Add title prefix.
-        if: ${{ !startsWith( env.original_title, steps.title-prefix.outputs.title_prefix ) && !startsWith( env.original_title, '[' ) }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          title_prefix: ${{ steps.title-prefix.outputs.title_prefix }}
-        run: |
-          echo "Title doesn't have expected prefix... adding one...";
-          gh pr edit ${PR_NUM} --title "${title_prefix} ${original_title}";
-          echo "new_title=${title_prefix} ${original_title}" >> "$GITHUB_OUTPUT";
-          echo "Your PR title didn't have any prefix yet. I added the prefix: ${title_prefix} to the title." >> pr-comment.md;
-          echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
-          gh pr comment ${PR_NUM} \
-            --edit-last \
-            --create-if-none \
-            -F pr-comment.md;
 
   edit-pr:
-    name: Edit and Report New Labels or Title Prefix
+    name: Edit PR with New Labels or Title Prefix and Report
     runs-on: ubuntu-slim-24.04
+    needs:
+      - check-pr-labels
+      - check-pr-title
     env:
        all_labels: ${{ needs.check-pr-labels.outputs.all_labels }}
        new_labels: ${{ needs.check-pr-labels.outputs.new_labels }}
+       title_prefix: ${{ needs.check-pr-title.outputs.title_prefix }}
+       new_title: ${{ needs.check-pr-title.outputs.new_title }}
+       # The bot needs this token for editting PR.
        GH_TOKEN: ${{ github.token }}
     permissions:
       # The bot write comments, add labels or update the title of PR.
       pull-requests: write
-    needs:
-      - check-pr-labels
-    if: ${{ needs.check-pr-labels.outputs.new_labels }}
+    # If there is any new label or new title
+    if: ${{ needs.check-pr-labels.outputs.new_labels || needs.check-pr-title.outputs.new_title }}
     steps:
-      - id: add-new-labels
+      - name: Add new labels to the PR
+        id: add-new-labels
+        if: ${{ needs.check-pr-labels.outputs.new_labels }}
         run: |
           combined_label=${new_labels[0]};
           for label in ${new_labels[@]:1}; do combined_label="${combined_label},${label}"; done
           gh pr edit ${PR_NUM} --add-label ${combined_label};
-      - id: new-labels-report
+      - name: Collect comments about the new labels
+        id: new-labels-add-to-report
+        if: ${{ needs.check-pr-labels.outputs.new_labels }}
         run: |
           echo "Hi! Your PR was missing some labels 🔖 so I added them." >> pr-comment.md;
           echo "It looks like you're working on these packages/features: ${all_labels}" >> pr-comment.md;
           echo "These labels were missing: ${new_labels}" >> pr-comment.md;
-          gh pr comment ${PR_NUM} -F pr-comment.md;
-      - id: new-title-report
+      - name: Add missing title prefix to the PR
+        id: edit-title-prefix
+        if: ${{ needs.check-pr-title.outputs.new_title }}
+        run: |
+          echo "Title doesn't have any relevant prefix... adding one...";
+          gh pr edit ${PR_NUM} --title "${new_title}";
+      - name: Collect comments about the new title
+        id: new-title-add-to-report
+        if: ${{ needs.check-pr-title.outputs.new_title }}
         run: |
           if [[ -f pr-commit.md ]]; then echo "\nHi Again!" >> pre-comment.md; else echo "Hi!" >> pre-comment.md; fi
+          echo "Your PR title didn't have any prefix yet. I added the prefix: ${title_prefix} to the title." >> pr-comment.md;
+          echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
+      - name: Leave a comment about the changes.
+        id: report        
+        run: gh pr comment ${PR_NUM} -F pr-comment.md;
