@@ -131,7 +131,7 @@ jobs:
         id: new-title-add-to-report
         if: ${{ needs.check-pr.outputs.new_title }}
         run: |
-          if [[ -f pr-commit.md ]]; then echo "\nHi Again!" >> pre-comment.md; else echo "Hi!" >> pre-comment.md; fi
+          if [[ -f pr-comment.md ]]; then echo "\nHi Again!" >> pre-comment.md; else echo "Hi!" >> pre-comment.md; fi
           echo "Your PR title didn't have any prefix yet. I added the prefix: ${title_prefix} to the title." >> pr-comment.md;
           echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
       - name: Leave a comment about the changes.
