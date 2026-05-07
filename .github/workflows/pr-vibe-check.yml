@@ -104,6 +104,7 @@ jobs:
     # If there is any new label or new title
     if: ${{ needs.check-pr.outputs.new_labels || needs.check-pr.outputs.new_title }}
     steps:
+      - uses: actions/checkout@v6
       - name: Add new labels to the PR
         id: add-new-labels
         if: ${{ needs.check-pr.outputs.new_labels }}
