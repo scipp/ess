@@ -74,6 +74,7 @@ jobs:
         env:
           all_labels: ${{ steps.all-labels.outputs.all_labels }}
           new_labels: ${{ steps.new-labels.outputs.new_labels }}
+          original_title: ${{ github.event.pull_request.title }}
         run: |
           labels=(${all_labels});
           # Only one label
