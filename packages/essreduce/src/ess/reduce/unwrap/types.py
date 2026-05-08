@@ -7,6 +7,7 @@ from typing import Any, NewType
 
 import sciline as sl
 import scipp as sc
+from scippneutron.tof import chopper_cascade
 
 from ..nexus.types import Component, MonitorType, RunType
 
@@ -68,6 +69,12 @@ Stride of used pulses. Usually 1, but may be a small integer when pulse-skipping
 SourcePosition = NewType("SourcePosition", sc.Variable)
 """
 Position of the neutron source in the coordinate system of the choppers.
+"""
+
+ChopperFrameSequence = NewType("ChopperFrameSequence", chopper_cascade.FrameSequence)
+"""
+Sequence of chopper frames used to compute the wavelength as a function of distance and
+event_time_offset in the lookup table.
 """
 
 

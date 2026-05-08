@@ -13,6 +13,7 @@ from scippneutron.tof import chopper_cascade
 
 from ..nexus.types import AnyRun, DiskChoppers
 from .types import (
+    ChopperFrameSequence,
     DistanceResolution,
     LookupTable,
     LtotalRange,
@@ -154,24 +155,28 @@ def _compute_mean_wavelength(
     )
 
 
-def _compute_frame_sequence(
-    pulse_period: sc.Variable,
+def compute_frame_sequence(
+    pulse_period: PulsePeriod,
     disk_choppers: DiskChoppers[AnyRun],
     source_position: SourcePosition,
     source_pulse: SourcePulse,
     pulse_stride: PulseStride,
-) -> chopper_cascade.FrameSequence:
+) -> ChopperFrameSequence:
 
-    # The time_offset_open and time_offset_close below require the pulse_frequency to
-    # be an integer multiple of the pulse frequency or vice versa. A simple trick is
-    # to make sure that the requested pulse frequency is divided by an even number.
-    div = pulse_stride + 1 if pulse_stride % 2 == 1 else pulse_stride
     # The `pulse_frequency` parameter in time_offset_open and time_offset_close below
     # decides how many rotations the chopper will perform when computing the open and
     # close times. Because we want to cover a number of pulses equal to `pulse_stride`,
     # we need to set the pulse frequency to be `pulse_stride` times smaller than the
     # actual pulse frequency.
-    frequency_for_chopper_rotation = (1.0 / pulse_period.to(unit='s')) / div
+    #
+    # In addition, the time_offset_open and time_offset_close below require the
+    # pulse_frequency to be an integer multiple of the pulse frequency or vice versa.
+    # A simple trick is to make sure that the requested pulse frequency is divided by
+    # an even number. We need to rotate the chopper for long enough to cover wrapping
+    # around the frame period, so we cover two pulses strides.
+    frequency_for_chopper_rotation = (1.0 / pulse_period.to(unit='s')) / (
+        pulse_stride * 2
+    )
 
     chops = {
         key: chopper_cascade.Chopper(
@@ -195,18 +200,19 @@ def _compute_frame_sequence(
         npulses=pulse_stride,
     )
     frames = frames.chop(chops.values())
-    return frames
+    return ChopperFrameSequence(frames)
 
 
 def make_wavelength_lookup_table(
-    choppers: DiskChoppers[AnyRun],
-    source_pulse: SourcePulse,
+    # choppers: DiskChoppers[AnyRun],
+    # source_pulse: SourcePulse,
     ltotal_range: LtotalRange,
     distance_resolution: DistanceResolution,
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride,
-    source_position: SourcePosition,
+    # source_position: SourcePosition,
+    frames: ChopperFrameSequence,
 ) -> LookupTable:
     """
     Compute a lookup table for wavelength as a function of distance and
@@ -214,6 +220,12 @@ def make_wavelength_lookup_table(
 
     Parameters
     ----------
+    choppers:
+        Disk chopper parameters, used to compute the frame sequence for the lookup
+        table.
+    source_pulse:
+        Time and wavelength range of the source pulse, used to compute the frame
+        sequence for the lookup table.
     ltotal_range:
         Range of total flight path lengths from the source to the detector.
     distance_resolution:
@@ -225,6 +237,11 @@ def make_wavelength_lookup_table(
     pulse_stride:
         Stride of used pulses. Usually 1, but may be a small integer when
         pulse-skipping.
+    source_position:
+        Position of the neutron source.
+    frames:
+        Chopper frame sequence used to compute the wavelength as a function of distance
+        and event_time_offset in the lookup table.
     """
     distance_unit = "m"
     time_unit = "us"
@@ -255,13 +272,13 @@ def make_wavelength_lookup_table(
         'event_time_offset', 0.0, frame_period.value, nbins + 1, unit=pulse_period.unit
     )
 
-    frames = _compute_frame_sequence(
-        pulse_period=pulse_period,
-        disk_choppers=choppers,
-        source_position=source_position,
-        source_pulse=source_pulse,
-        pulse_stride=pulse_stride,
-    )
+    # frames = _compute_frame_sequence(
+    #     pulse_period=pulse_period,
+    #     disk_choppers=choppers,
+    #     source_position=source_position,
+    #     source_pulse=source_pulse,
+    #     pulse_stride=pulse_stride,
+    # )
 
     # Sort frames by reverse distance
     sorted_frames = sorted(frames, key=lambda x: x.distance.value, reverse=True)
@@ -329,14 +346,14 @@ def LookupTableWorkflow():
     simulation of neutrons propagating through a chopper cascade.
     """
     wf = sl.Pipeline(
-        (make_wavelength_lookup_table,),
+        (make_wavelength_lookup_table, compute_frame_sequence),
         params={
             PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
             PulseStride: 1,
             DistanceResolution: sc.scalar(0.1, unit="m"),
             TimeResolution: sc.scalar(250.0, unit='us'),
             SourcePulse: SourcePulse(
-                time=(sc.scalar(0.0, unit='ms'), sc.scalar(4.0, unit='ms')),
+                time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
                 wavelength=(
                     sc.scalar(0.0, unit='angstrom'),
                     sc.scalar(15.0, unit='angstrom'),

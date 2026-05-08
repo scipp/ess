@@ -28,6 +28,7 @@ from .lut_from_simulation import (
 )
 from .to_wavelength import providers
 from .types import (
+    ChopperFrameSequence,
     DetectorLtotal,
     ErrorLimitedLookupTable,
     LookupTable,
@@ -42,6 +43,7 @@ from .workflow import GenericUnwrapWorkflow
 
 __all__ = [
     "BeamlineComponentReading",
+    "ChopperFrameSequence",
     "DetectorLtotal",
     "DiskChoppers",
     "DistanceResolution",
