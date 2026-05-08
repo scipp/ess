@@ -169,8 +169,6 @@ def _validate_result_histogram_mode(wavs, ref, percentile, diff_threshold, rtol)
     assert "time_of_flight" not in wavs.coords
     assert "frame_time" not in wavs.coords
 
-    # graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
-    # wavs = tofs.transform_coords("wavelength", graph=graph)
     ref = ref.hist(wavelength=wavs.coords["wavelength"])
     # We divide by the maximum to avoid large relative differences at the edges of the
     # frames where the counts are low.
@@ -213,11 +211,10 @@ def test_unwrap_with_no_choppers(engine, detector_or_monitor) -> None:
     )
 
 
-# At 30m, event_time_offset does not wrap around (all events within the first pulse).
-# At 60m, all events are within the second pulse.
-# At 80m, events are split between the second and third pulse.
-# At 108m, events are split between the third and fourth pulse.
-# @pytest.mark.parametrize("dist", [30.0, 60.0, 80.0, 108.0])
+# At 25m, event_time_offset does not wrap around (all events within the first pulse).
+# At 50m, all events are within the second pulse.
+# At 62m, events are split between the second and third pulse.
+# At 90m, events are split between the third and fourth pulse.
 @pytest.mark.parametrize("dist", [25.0, 50.0, 62.0, 90.0])
 @pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
@@ -248,11 +245,10 @@ def test_standard_unwrap(
     )
 
 
-# At 30m, event_time_offset does not wrap around (all events within the first pulse).
-# At 60m, all events are within the second pulse.
-# At 80m, events are split between the second and third pulse.
-# At 108m, events are split between the third and fourth pulse.
-# @pytest.mark.parametrize("dist", [30.0, 60.0, 80.0, 108.0])
+# At 25m, event_time_offset does not wrap around (all events within the first pulse).
+# At 50m, all events are within the second pulse.
+# At 62m, events are split between the second and third pulse.
+# At 90m, events are split between the third and fourth pulse.
 @pytest.mark.parametrize("dist", [25.0, 50.0, 62.0, 90.0])
 @pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("dim", ["time_of_flight", "tof", "frame_time"])
@@ -470,8 +466,6 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
         pl[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
-    # Convert to wavelength
-    # graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
     wavs = wavs.bins.concat().value
     # Bin the events in toa starting from the pulse period to skip the first pulse.
     ref = (

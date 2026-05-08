@@ -162,6 +162,24 @@ def compute_frame_sequence(
     source_pulse: SourcePulse,
     pulse_stride: PulseStride,
 ) -> ChopperFrameSequence:
+    """
+    Compute the chopper frame sequence for a given set of disk choppers and source pulse
+    parameters.
+
+    Parameters
+    ----------
+    pulse_period:
+        Period of the source pulses, i.e., time between consecutive pulse starts.
+    disk_choppers:
+        Disk chopper parameters.
+    source_position:
+        Position of the neutron source.
+    source_pulse:
+        Time and wavelength range of the source pulse.
+    pulse_stride:
+        Stride of used pulses. Usually 1, but may be a small integer when
+        pulse-skipping.
+    """
 
     # The `pulse_frequency` parameter in time_offset_open and time_offset_close below
     # decides how many rotations the chopper will perform when computing the open and
@@ -204,14 +222,11 @@ def compute_frame_sequence(
 
 
 def make_wavelength_lookup_table(
-    # choppers: DiskChoppers[AnyRun],
-    # source_pulse: SourcePulse,
     ltotal_range: LtotalRange,
     distance_resolution: DistanceResolution,
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride,
-    # source_position: SourcePosition,
     frames: ChopperFrameSequence,
 ) -> LookupTable:
     """
@@ -272,14 +287,6 @@ def make_wavelength_lookup_table(
         'event_time_offset', 0.0, frame_period.value, nbins + 1, unit=pulse_period.unit
     )
 
-    # frames = _compute_frame_sequence(
-    #     pulse_period=pulse_period,
-    #     disk_choppers=choppers,
-    #     source_position=source_position,
-    #     source_pulse=source_pulse,
-    #     pulse_stride=pulse_stride,
-    # )
-
     # Sort frames by reverse distance
     sorted_frames = sorted(frames, key=lambda x: x.distance.value, reverse=True)
 
@@ -301,18 +308,6 @@ def make_wavelength_lookup_table(
                 "distance in the simulation. The first component in the beamline "
                 f"has distance {sorted_frames[0].distance:c}."
             )
-
-        # # Here, the frame could be offset by more than one frame period (if the neutron
-        # # flight path is very long). So we shift the frame back enough times so that
-        # # the minimum time is between 0 and the frame period.
-        # propagated = selected_frame.propagate_to(dist)
-        # nsub = int(
-        #     propagated.bounds()['time'].min().to(unit=time_unit).value
-        #     / frame_period.value
-        # )
-        # subframes = propagated.subframes
-        # for f in subframes:
-        #     f.time -= (nsub * frame_period).to(unit=f.time.unit)
 
         subframes = selected_frame.propagate_to(dist).subframes
 
