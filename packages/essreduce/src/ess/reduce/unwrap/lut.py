@@ -334,6 +334,7 @@ def make_wavelength_lookup_table(
         distance_resolution=table.coords["distance"][1] - table.coords["distance"][0],
         time_resolution=table.coords["event_time_offset"][1]
         - table.coords["event_time_offset"][0],
+        # TODO: Do we still want to store the chopper information in the lookup table?
     )
 
 

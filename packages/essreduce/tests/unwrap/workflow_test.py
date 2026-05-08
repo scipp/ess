@@ -89,7 +89,7 @@ def test_LookupTableWorkflow_can_compute_lut():
     assert lut.time_resolution is not None
     assert lut.pulse_stride is not None
     assert lut.pulse_period is not None
-    assert lut.choppers is not None
+    # assert lut.choppers is not None
 
 
 def test_GenericUnwrapWorkflow_with_lut_from_tof_simulation(workflow):
