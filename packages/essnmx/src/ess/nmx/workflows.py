@@ -5,10 +5,11 @@ from collections.abc import Iterable
 import sciline
 import scipp as sc
 import scippnexus as snx
-import tof
 from scippneutron.conversion.tof import tof_from_wavelength
 
 from ess.reduce.nexus.types import (
+    AnyRun,
+    DiskChoppers,
     EmptyDetector,
     Filename,
     NeXusComponent,
@@ -18,15 +19,13 @@ from ess.reduce.nexus.types import (
     SampleRun,
 )
 from ess.reduce.unwrap import (
-    BeamlineComponentReading,
     GenericUnwrapWorkflow,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     LookupTableWorkflow,
     LtotalRange,
-    NumberOfSimulatedNeutrons,
-    SimulationResults,
-    SimulationSeed,
+    SourcePosition,
+    SourcePulse,
     WavelengthDetector,
 )
 from ess.reduce.workflow import register_workflow
@@ -45,58 +44,9 @@ default_parameters = {
     TofSimulationMaxWavelength: sc.scalar(3.6, unit='angstrom'),
     TofSimulationMinWavelength: sc.scalar(1.8, unit='angstrom'),
     LookupTableRelativeErrorThreshold: {f'detector_panel_{i}': 0.1 for i in range(5)},
+    # TODO: This should become DiskChoppers[RunType] once we add choppers
+    DiskChoppers[AnyRun]: {},
 }
-
-
-def _simulate_fixed_wavelength_tof(
-    wmin: TofSimulationMinWavelength,
-    wmax: TofSimulationMaxWavelength,
-    neutrons: NumberOfSimulatedNeutrons,
-    seed: SimulationSeed,
-) -> SimulationResults:
-    """
-    Simulate a pulse of neutrons propagating through the instrument using the
-    ``tof`` package (https://scipp.github.io/tof/).
-    This runs a simulation assuming there are no choppers in the instrument.
-
-    Parameters
-    ----------
-    wmin:
-        Minimum wavelength of the simulated neutrons.
-    wmax:
-        Maximum wavelength of the simulated neutrons.
-    neutrons:
-        Number of neutrons to simulate.
-    seed:
-        Random seed for the simulation.
-    """
-    source = tof.Source(
-        facility="ess",
-        neutrons=neutrons,
-        pulses=1,
-        seed=seed,
-        wmax=wmax,
-        wmin=wmin,
-    )
-    events = source.data.squeeze().flatten(to="event")
-
-    return SimulationResults(
-        readings={
-            "source": BeamlineComponentReading(
-                time_of_arrival=events.coords["birth_time"],
-                wavelength=events.coords["wavelength"],
-                weight=events.data,
-                distance=source.distance,
-            )
-        },
-        choppers=None,
-    )
-
-
-def _merge_panels(*da: sc.DataArray) -> sc.DataArray:
-    """Merge multiple DataArrays representing different panels into one."""
-    merged = sc.concat(da, dim='panel')
-    return merged
 
 
 def select_detector_names(*, detector_ids: Iterable[int] = (0, 1, 2)):
@@ -259,15 +209,32 @@ def compute_detector_tof(da: WavelengthDetector[RunType]) -> TofDetector[RunType
     )
 
 
+def _source_position_to_SourcePosition(
+    source_position: Position[snx.NXsource, SampleRun],
+) -> SourcePosition:
+    """
+    This is a temporary provider to convert the source position from the Nexus file to
+    the SourcePosition type used in the unwrapping workflow.
+    In the next iteration, we will directly use the source position from the Nexus file
+    in the unwrapping workflow and remove this provider.
+    """
+    return SourcePosition(source_position)
+
+
 @register_workflow
 def NMXWorkflow() -> sciline.Pipeline:
     generic_wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
 
-    generic_wf.insert(_retrieve_crystal_rotation)
-    generic_wf.insert(assemble_sample_metadata)
-    generic_wf.insert(assemble_source_metadata)
-    generic_wf.insert(assemble_detector_metadata)
-    generic_wf.insert(compute_detector_tof)
+    for provider in (
+        _retrieve_crystal_rotation,
+        assemble_sample_metadata,
+        assemble_source_metadata,
+        assemble_detector_metadata,
+        compute_detector_tof,
+        _source_position_to_SourcePosition,
+    ):
+        generic_wf.insert(provider)
+
     for key, value in default_parameters.items():
         generic_wf[key] = value
 
@@ -317,12 +284,12 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
         wf[LookupTableFilename] = config.lookup_table_file_path
     else:
         wf = _merge_workflows(base_wf=wf, merged_wf=LookupTableWorkflow())
-        wf.insert(_simulate_fixed_wavelength_tof)
         wmax = sc.scalar(config.tof_simulation_max_wavelength, unit='angstrom')
         wmin = sc.scalar(config.tof_simulation_min_wavelength, unit='angstrom')
-        wf[TofSimulationMaxWavelength] = wmax
-        wf[TofSimulationMinWavelength] = wmin
-        wf[SimulationSeed] = config.tof_simulation_seed
+        wf[SourcePulse] = SourcePulse(
+            time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+            wavelength=(wmin, wmax),
+        )
         ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
         ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
         wf[LtotalRange] = LtotalRange((ltotal_min, ltotal_max))

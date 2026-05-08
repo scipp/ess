@@ -87,7 +87,7 @@ def _polygon_intersections(polygons: list[np.ndarray], xs: np.ndarray) -> np.nda
         y_min = np.nanmin(y, axis=0)
         y_max = np.nanmax(y, axis=0)
 
-    # Value and spread estimate
+    # Median value and spread estimate
     return 0.5 * (y_min + y_max), 0.5 * (y_max - y_min)
 
 
@@ -198,7 +198,9 @@ def compute_frame_sequence(
 
     chops = {
         key: chopper_cascade.Chopper(
-            distance=(ch.axle_position - source_position).fields.z,
+            distance=sc.norm(
+                ch.axle_position - source_position.to(unit=ch.axle_position.unit)
+            ),
             time_open=ch.time_offset_open(
                 pulse_frequency=frequency_for_chopper_rotation
             ),
@@ -292,7 +294,7 @@ def make_wavelength_lookup_table(
 
     pieces = []
     # To avoid large RAM usage, and having to split the distances into chunks
-    # according to which component reading to use, we simply loop over distances one
+    # according to which frame to use, we simply loop over distances one
     # by one here.
     for dist in distances:
         # Find the correct simulation reading
