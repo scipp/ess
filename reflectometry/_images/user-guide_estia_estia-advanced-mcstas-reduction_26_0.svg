@@ -40,9 +40,9 @@
 <text xml:space="preserve" text-anchor="middle" x="539.88" y="-468.32" font-family="Times,serif" font-size="14.00">Position</text>
 </g>
 <g id="clust18" class="cluster">
-<title>cluster_ProtonCurrent</title>
+<title>cluster_ProtonCharge</title>
 <polygon fill="#f0f0ff" stroke="#f0f0ff" points="1440.25,-366.62 1440.25,-455.62 1566,-455.62 1566,-366.62 1440.25,-366.62"/>
-<text xml:space="preserve" text-anchor="middle" x="1503.12" y="-438.32" font-family="Times,serif" font-size="14.00">ProtonCurrent</text>
+<text xml:space="preserve" text-anchor="middle" x="1503.12" y="-438.32" font-family="Times,serif" font-size="14.00">ProtonCharge</text>
 </g>
 <g id="clust22" class="cluster">
 <title>cluster_RawDetector</title>
@@ -575,27 +575,27 @@
 <path fill="none" stroke="black" d="M1829.5,-247.62C1902.69,-247.62 1920.38,-235.96 1993.5,-232.62 2084.18,-228.49 2107.23,-225.75 2197.75,-232.62 2225.87,-234.76 2235.07,-241.52 2258.37,-243.23"/>
 <polygon fill="black" stroke="black" points="2258.12,-246.72 2268.24,-243.57 2258.36,-239.73 2258.12,-246.72"/>
 </g>
-<!-- ProtonCurrent[ReferenceRun] -->
+<!-- ProtonCharge[ReferenceRun] -->
 <g id="node29" class="node">
-<title>ProtonCurrent[ReferenceRun]</title>
+<title>ProtonCharge[ReferenceRun]</title>
 <polygon fill="none" stroke="black" points="1558,-396.75 1448.25,-396.75 1448.25,-374.5 1558,-374.5 1558,-396.75"/>
 <text xml:space="preserve" text-anchor="start" x="1456.25" y="-381.35" font-family="Times,serif" font-size="12.00">[ReferenceRun]</text>
 </g>
-<!-- ProtonCurrent[ReferenceRun]&#45;&gt;ReducibleData[ReferenceRun] -->
+<!-- ProtonCharge[ReferenceRun]&#45;&gt;ReducibleData[ReferenceRun] -->
 <g id="edge42" class="edge">
-<title>ProtonCurrent[ReferenceRun]:e&#45;&gt;ReducibleData[ReferenceRun]:w</title>
+<title>ProtonCharge[ReferenceRun]:e&#45;&gt;ReducibleData[ReferenceRun]:w</title>
 <path fill="none" stroke="black" d="M1559,-385.62C1609.4,-385.62 1611.69,-349.3 1659.25,-332.62 1689.06,-322.17 1699.91,-318.46 1726.82,-317.76"/>
 <polygon fill="black" stroke="black" points="1726.53,-321.26 1736.49,-317.64 1726.45,-314.26 1726.53,-321.26"/>
 </g>
-<!-- ProtonCurrent[SampleRun] -->
+<!-- ProtonCharge[SampleRun] -->
 <g id="node30" class="node">
-<title>ProtonCurrent[SampleRun]</title>
+<title>ProtonCharge[SampleRun]</title>
 <polygon fill="none" stroke="black" points="1550.12,-422.75 1456.12,-422.75 1456.12,-400.5 1550.12,-400.5 1550.12,-422.75"/>
 <text xml:space="preserve" text-anchor="start" x="1464.12" y="-407.35" font-family="Times,serif" font-size="12.00">[SampleRun]</text>
 </g>
-<!-- ProtonCurrent[SampleRun]&#45;&gt;ReducibleData[SampleRun] -->
+<!-- ProtonCharge[SampleRun]&#45;&gt;ReducibleData[SampleRun] -->
 <g id="edge46" class="edge">
-<title>ProtonCurrent[SampleRun]:e&#45;&gt;ReducibleData[SampleRun]:w</title>
+<title>ProtonCharge[SampleRun]:e&#45;&gt;ReducibleData[SampleRun]:w</title>
 <path fill="none" stroke="black" d="M1551.12,-411.62C1638.87,-411.62 1653.07,-349.34 1734.49,-343.99"/>
 <polygon fill="black" stroke="black" points="1734.48,-347.49 1744.36,-343.67 1734.25,-340.5 1734.48,-347.49"/>
 </g>

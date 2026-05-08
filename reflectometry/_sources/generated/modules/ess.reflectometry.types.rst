@@ -41,7 +41,6 @@
       BeamSize
       CoordTransformationGraph
       DetectorRotation
-      ProtonCurrent
       RawChopper
       RawSampleRotation
       ReducibleData

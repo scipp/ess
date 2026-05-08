@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=adc4edb8"></script>
+    <script src="../../_static/documentation_options.js?v=f1d3ac69"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@
     <link rel="prev" title="ESTIA" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.4.1" />
+  <meta name="docsearch:version" content="26.5.2" />
   </head>
   
   
@@ -465,6 +465,7 @@
 <li class="toctree-l2"><a class="reference internal" href="create-estia-wavelength-lookup-table.html">Create a wavelength lookup table for ESTIA</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1"><a class="reference internal" href="../freia/index.html">FREIA</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../offspec/index.html">Offspec</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../offspec/offspec_reduction.html">Collimated data reduction for OFFSPEC</a></li>
 </ul>
@@ -542,6 +543,8 @@
 </div>
               
               
+<span data-pagefind-meta="image[data-url]" data-url="../../_static/essreflectometry-search-logo.png" hidden></span>
+
               
                 
 <div id="searchbox"></div>
@@ -604,13 +607,13 @@
 
 <span class="n">wf</span><span class="p">[</span><span class="n">LookupTableFilename</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">estia_wavelength_lookup_table</span><span class="p">()</span>
 
-<span class="c1"># There is no proton current data in the McStas files, here we just add some fake proton current</span>
+<span class="c1"># There is no proton charge data in the McStas files, here we just add some fake proton charge</span>
 <span class="c1"># data to make the workflow run.</span>
-<span class="n">wf</span><span class="p">[</span><span class="n">ProtonCurrent</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,),</span> <span class="n">values</span><span class="o">=</span><span class="p">[]),</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">ProtonCharge</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,),</span> <span class="n">values</span><span class="o">=</span><span class="p">[],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;uC&#39;</span><span class="p">),</span>
     <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,),</span> <span class="n">values</span><span class="o">=</span><span class="p">[],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)})</span>
-<span class="n">wf</span><span class="p">[</span><span class="n">ProtonCurrent</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,),</span> <span class="n">values</span><span class="o">=</span><span class="p">[]),</span>
+<span class="n">wf</span><span class="p">[</span><span class="n">ProtonCharge</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,),</span> <span class="n">values</span><span class="o">=</span><span class="p">[],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;uC&#39;</span><span class="p">),</span>
     <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,),</span> <span class="n">values</span><span class="o">=</span><span class="p">[],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)})</span>
 </pre></div>
 </div>
@@ -750,6 +753,7 @@
 
                 </article>
               
+
               
               
               
@@ -826,7 +830,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.4.1 (<a href="https://github.com/scipp/essreflectometry/releases">older versions</a>).</div>
+Current ESSreflectometry version: 26.5.2 (<a href="https://github.com/scipp/essreflectometry/releases">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

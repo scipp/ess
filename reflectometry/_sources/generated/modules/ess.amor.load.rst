@@ -20,7 +20,7 @@
       load_amor_chopper_distance
       load_amor_chopper_separation
       load_amor_detector_rotation
-      load_amor_proton_current
+      load_amor_proton_charge
       load_amor_sample_rotation
       load_beamline_metadata
       load_detector

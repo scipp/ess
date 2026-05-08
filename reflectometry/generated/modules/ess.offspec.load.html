@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=adc4edb8"></script>
+    <script src="../../_static/documentation_options.js?v=f1d3ac69"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
     <link rel="prev" title="ess.offspec.data.offspec_sample_run" href="ess.offspec.data.offspec_sample_run.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.4.1" />
+  <meta name="docsearch:version" content="26.5.2" />
   </head>
   
   
@@ -502,7 +502,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.BeamSize.html">ess.reflectometry.types.BeamSize</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.CoordTransformationGraph.html">ess.reflectometry.types.CoordTransformationGraph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.DetectorRotation.html">ess.reflectometry.types.DetectorRotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.ProtonCurrent.html">ess.reflectometry.types.ProtonCurrent</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.RawChopper.html">ess.reflectometry.types.RawChopper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.RawSampleRotation.html">ess.reflectometry.types.RawSampleRotation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.ReducibleData.html">ess.reflectometry.types.ReducibleData</a></li>
@@ -563,7 +562,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.amor.load.load_amor_chopper_distance.html">ess.amor.load.load_amor_chopper_distance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.amor.load.load_amor_chopper_separation.html">ess.amor.load.load_amor_chopper_separation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.amor.load.load_amor_detector_rotation.html">ess.amor.load.load_amor_detector_rotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.amor.load.load_amor_proton_current.html">ess.amor.load.load_amor_proton_current</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.amor.load.load_amor_proton_charge.html">ess.amor.load.load_amor_proton_charge</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.amor.load.load_amor_sample_rotation.html">ess.amor.load.load_amor_sample_rotation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.amor.load.load_beamline_metadata.html">ess.amor.load.load_beamline_metadata</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.amor.load.load_detector.html">ess.amor.load.load_detector</a></li>
@@ -619,6 +618,7 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.estia.corrections.html">ess.estia.corrections</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.estia.corrections.add_coords_masks_and_apply_corrections.html">ess.estia.corrections.add_coords_masks_and_apply_corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.estia.corrections.assume_time_series_constant_with_zero_default_value_if_empty.html">ess.estia.corrections.assume_time_series_constant_with_zero_default_value_if_empty</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.estia.corrections.correct_by_footprint.html">ess.estia.corrections.correct_by_footprint</a></li>
 </ul>
 </details></li>
@@ -675,6 +675,50 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.estia.workflow.EstiaWorkflow.html">ess.estia.workflow.EstiaWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.estia.workflow.default_parameters.html">ess.estia.workflow.default_parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.estia.workflow.mcstas_default_parameters.html">ess.estia.workflow.mcstas_default_parameters</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.conversions.html">ess.freia.conversions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.add_coords.html">ess.freia.conversions.add_coords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.coordinate_transformation_graph.html">ess.freia.conversions.coordinate_transformation_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.divergence_angle.html">ess.freia.conversions.divergence_angle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.reflectometry_q_x.html">ess.freia.conversions.reflectometry_q_x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.theta.html">ess.freia.conversions.theta</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.maskings.html">ess.freia.maskings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.maskings.add_masks.html">ess.freia.maskings.add_masks</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.corrections.html">ess.freia.corrections</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.add_coords_masks_and_apply_corrections.html">ess.freia.corrections.add_coords_masks_and_apply_corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.correct_by_footprint.html">ess.freia.corrections.correct_by_footprint</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.freia.data.html">ess.freia.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.freia.mcstas.html">ess.freia.mcstas</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.load.html">ess.freia.load</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.load.load_detector_rotation.html">ess.freia.load.load_detector_rotation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.load.load_sample_rotation.html">ess.freia.load.load_sample_rotation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.resolution.html">ess.freia.resolution</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.resolution.angular_resolution.html">ess.freia.resolution.angular_resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.resolution.q_resolution.html">ess.freia.resolution.q_resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.resolution.sample_size_resolution.html">ess.freia.resolution.sample_size_resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.resolution.wavelength_resolution.html">ess.freia.resolution.wavelength_resolution</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.freia.types.html">ess.freia.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ess.freia.normalization.html">ess.freia.normalization</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.workflow.html">ess.freia.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.mcstas_providers.html">ess.freia.workflow.mcstas_providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.providers.html">ess.freia.workflow.providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaMcStasWorkflow.html">ess.freia.workflow.FreiaMcStasWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaWorkflow.html">ess.freia.workflow.FreiaWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.default_parameters.html">ess.freia.workflow.default_parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.mcstas_default_parameters.html">ess.freia.workflow.mcstas_default_parameters</a></li>
 </ul>
 </details></li>
 </ul>
@@ -764,6 +808,8 @@
 </div>
               
               
+<span data-pagefind-meta="image[data-url]" data-url="../../_static/essreflectometry-search-logo.png" hidden></span>
+
               
                 
 <div id="searchbox"></div>
@@ -788,6 +834,7 @@
 
                 </article>
               
+
               
               
               
@@ -864,7 +911,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.4.1 (<a href="https://github.com/scipp/essreflectometry/releases">older versions</a>).</div>
+Current ESSreflectometry version: 26.5.2 (<a href="https://github.com/scipp/essreflectometry/releases">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
