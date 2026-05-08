@@ -61,6 +61,11 @@ def load_analyzer_for_detector(
 
     This function searches for an ``NXcrystal`` in the inputs (via the
     'input' attribute) of the detector and loads the first NeXus group it finds.
+
+    See Also
+    --------
+    get_calibrated_analyzer:
+        A provider that combines loaded analyzer data into an ``Analyzer`` object.
     """
     with open_component_group(detector_location, nx_class=snx.NXdetector) as det_group:
         analyzer_group = _find_class_in_inputs(
@@ -114,14 +119,19 @@ def _get_inputs(group: snx.Group) -> list[str]:
     return [inputs] if isinstance(inputs, str) else inputs
 
 
-# This function is separate from load_analyzer_for_detector so we get the default
-# behavior for resolving NXtransformations.
 def get_calibrated_analyzer(
     analyzer_component: NeXusComponent[snx.NXcrystal, RunType],
     analyzer_transform: NeXusTransformation[snx.NXcrystal, RunType],
     analyzer_position: DynamicPosition[snx.NXcrystal, RunType],
 ) -> Analyzer[RunType]:
     """Collect the data for a single analyzer.
+
+    This provider works together with :func:`load_analyzer_for_detector` and the
+    generic NeXus workflow from ESSreduce.
+    ``load_analyzer_for_detector`` loads a raw analyzer component.
+    Then the default providers from ESSreduce extract a transform and position like
+    for any other component.
+    Finally, this provider combines the data into a single Analyzer object.
 
     Parameters
     ----------
