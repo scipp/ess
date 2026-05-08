@@ -118,9 +118,7 @@ jobs:
         id: new-labels-add-to-report
         if: ${{ needs.check-pr.outputs.new_labels }}
         run: |
-          echo "Hi! Your PR was missing some labels 🔖 so I added them." >> pr-comment.md;
-          echo "It looks like you're working on these packages/features: ${all_labels}" >> pr-comment.md;
-          echo "These labels were missing: ${new_labels}" >> pr-comment.md;
+          echo "Hi! Your PR was missing some labels 🔖 so I added them: ${new_labels}" >> pr-comment.md;
       - name: Add missing title prefix to the PR
         id: edit-title-prefix
         if: ${{ needs.check-pr.outputs.new_title }}
@@ -131,9 +129,8 @@ jobs:
         id: new-title-add-to-report
         if: ${{ needs.check-pr.outputs.new_title }}
         run: |
-          if [[ -f pr-comment.md ]]; then echo "\nHi Again!" >> pr-comment.md; else echo "Hi!" >> pr-comment.md; fi
-          echo "Your PR title didn't have any prefix yet. I added the prefix: ${title_prefix} to the title." >> pr-comment.md;
-          echo "But feel free to use your own...! Bye 👋...!" >> pr-comment.md;
+          if [[ -f pr-comment.md ]]; then greeting="Hi Again 👋!"; else greeting="Hi 👋!"; fi
+          echo "${greeting} I added the missing prefix: ${title_prefix} to the title." >> pr-comment.md;
       - name: Leave a comment about the changes.
         id: report
         run: gh pr comment ${PR_NUM} -F pr-comment.md;
