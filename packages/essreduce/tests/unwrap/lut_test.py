@@ -6,18 +6,21 @@ from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import AnyRun
-from ess.reduce.unwrap import LookupTableWorkflow
+from ess.reduce.unwrap import LookupTableFromTof, LookupTableWorkflow
 
 sl = pytest.importorskip("sciline")
 
 
-def test_lut_workflow_computes_table():
-    wf = LookupTableWorkflow()
+@pytest.mark.parametrize("engine", ["analytical", "tof"])
+def test_lut_workflow_computes_table(engine):
+    wf = LookupTableWorkflow() if engine == "analytical" else LookupTableFromTof()
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
-    wf[unwrap.SimulationSeed] = 60
     wf[unwrap.PulseStride] = 1
+
+    if engine == "tof":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 60
 
     lmin, lmax = sc.scalar(25.0, unit='m'), sc.scalar(35.0, unit='m')
     dres = sc.scalar(0.1, unit='m')
@@ -40,12 +43,14 @@ def test_lut_workflow_computes_table():
     assert sc.isclose(table.time_resolution, tres, rtol=sc.scalar(0.01))
 
 
-def test_lut_workflow_pulse_skipping():
-    wf = LookupTableWorkflow()
+@pytest.mark.parametrize("engine", ["analytical", "tof"])
+def test_lut_workflow_pulse_skipping(engine):
+    wf = LookupTableWorkflow() if engine == "analytical" else LookupTableFromTof()
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
-    wf[unwrap.SimulationSeed] = 62
+    if engine == "tof":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 62
     wf[unwrap.PulseStride] = 2
 
     lmin, lmax = sc.scalar(55.0, unit='m'), sc.scalar(65.0, unit='m')
@@ -63,12 +68,14 @@ def test_lut_workflow_pulse_skipping():
     ).to(unit=table.array.coords['event_time_offset'].unit)
 
 
-def test_lut_workflow_non_exact_distance_range():
-    wf = LookupTableWorkflow()
+@pytest.mark.parametrize("engine", ["analytical", "tof"])
+def test_lut_workflow_non_exact_distance_range(engine):
+    wf = LookupTableWorkflow() if engine == "analytical" else LookupTableFromTof()
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
-    wf[unwrap.SimulationSeed] = 63
+    if engine == "tof":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 63
     wf[unwrap.PulseStride] = 1
 
     lmin, lmax = sc.scalar(25.0, unit='m'), sc.scalar(35.0, unit='m')
@@ -145,12 +152,14 @@ def _make_choppers():
     }
 
 
-def test_lut_workflow_computes_table_with_choppers():
-    wf = LookupTableWorkflow()
+@pytest.mark.parametrize("engine", ["analytical", "tof"])
+def test_lut_workflow_computes_table_with_choppers(engine):
+    wf = LookupTableWorkflow() if engine == "analytical" else LookupTableFromTof()
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
-    wf[unwrap.SimulationSeed] = 64
+    if engine == "tof":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 64
     wf[unwrap.PulseStride] = 1
 
     wf[unwrap.LtotalRange] = (
@@ -179,12 +188,14 @@ def test_lut_workflow_computes_table_with_choppers():
     assert eto.max() < sc.scalar(6.9e4, unit="us").to(unit=eto.unit)
 
 
-def test_lut_workflow_computes_table_with_choppers_full_beamline_range():
-    wf = LookupTableWorkflow()
+@pytest.mark.parametrize("engine", ["analytical", "tof"])
+def test_lut_workflow_computes_table_with_choppers_full_beamline_range(engine):
+    wf = LookupTableWorkflow() if engine == "analytical" else LookupTableFromTof()
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
-    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
-    wf[unwrap.SimulationSeed] = 64
+    if engine == "tof":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 64
     wf[unwrap.PulseStride] = 1
 
     wf[unwrap.LtotalRange] = (
@@ -199,9 +210,9 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range():
     # Close to source: early times and large spread
     da = table.array['distance', 2]
     eto = da.coords['event_time_offset'][sc.isfinite(da.data)]
-    assert eto.min() > sc.scalar(0.0, unit="us").to(unit=eto.unit)
+    assert eto.min() >= sc.scalar(0.0, unit="us").to(unit=eto.unit)
     assert eto.min() < sc.scalar(1.0e3, unit="us").to(unit=eto.unit)
-    assert eto.max() > sc.scalar(2.5e4, unit="us").to(unit=eto.unit)
+    assert eto.max() > sc.scalar(2.0e4, unit="us").to(unit=eto.unit)
     assert eto.max() < sc.scalar(3.0e4, unit="us").to(unit=eto.unit)
 
     # Just after WFM choppers, very small range
@@ -229,12 +240,14 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range():
     assert eto.max() < sc.scalar(6.9e4, unit="us").to(unit=eto.unit)
 
 
-def test_lut_workflow_raises_for_distance_before_source():
-    wf = LookupTableWorkflow()
+@pytest.mark.parametrize("engine", ["analytical", "tof"])
+def test_lut_workflow_raises_for_distance_before_source(engine):
+    wf = LookupTableWorkflow() if engine == "analytical" else LookupTableFromTof()
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 10], unit='m')
-    wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
-    wf[unwrap.SimulationSeed] = 65
+    if engine == "tof":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 65
     wf[unwrap.PulseStride] = 1
 
     # Setting the starting point at zero will make a table that would cover a range

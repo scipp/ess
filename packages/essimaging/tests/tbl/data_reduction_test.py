@@ -29,8 +29,6 @@ def wavelength_lookup_table() -> sl.Pipeline:
     lut_wf = unwrap.LookupTableWorkflow()
     lut_wf[unwrap.DiskChoppers[AnyRun]] = {}
     lut_wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit="m")
-    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 200_000
-    lut_wf[unwrap.SimulationSeed] = 333
     lut_wf[unwrap.PulseStride] = 1
     lut_wf[unwrap.LtotalRange] = (sc.scalar(25.0, unit="m"), sc.scalar(35.0, unit="m"))
     return lut_wf.compute(LookupTable)

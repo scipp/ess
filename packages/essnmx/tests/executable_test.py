@@ -25,6 +25,7 @@ from ess.nmx._executable_helper import (
 from ess.nmx.configurations import TimeBinCoordinate, TimeBinUnit, to_command_arguments
 from ess.nmx.executables import reduction
 from ess.nmx.types import Compression, NMXLauetof
+from ess.reduce.unwrap.types import SourcePosition
 
 
 def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> list[str]:
@@ -410,6 +411,7 @@ def lut_file_path(tmp_path: pathlib.Path):
 
     # Simply use the default workflow for testing.
     workflow = initialize_nmx_workflow(config=WorkflowConfig())
+    workflow[SourcePosition] = sc.vector([0, 0, 0], unit='m')
     lut: LookupTable = workflow.compute(LookupTable)
 
     # Change the tof range a bit for testing.

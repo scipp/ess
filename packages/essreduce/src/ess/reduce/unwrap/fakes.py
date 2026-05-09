@@ -80,7 +80,7 @@ def psc_choppers():
         "chopper": DiskChopper(
             frequency=sc.scalar(-14.0, unit="Hz"),
             beam_position=sc.scalar(0.0, unit="deg"),
-            phase=sc.scalar(-85.0, unit="deg"),
+            phase=sc.scalar(-105.0, unit="deg"),
             axle_position=sc.vector(value=[0, 0, 8.0], unit="m"),
             slit_begin=sc.array(dims=["cutout"], values=[0.0], unit="deg"),
             slit_end=sc.array(dims=["cutout"], values=[3.0], unit="deg"),

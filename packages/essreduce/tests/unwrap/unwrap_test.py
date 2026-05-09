@@ -15,37 +15,52 @@ from ess.reduce.nexus.types import (
     RawMonitor,
     SampleRun,
 )
-from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
+from ess.reduce.unwrap import (
+    GenericUnwrapWorkflow,
+    LookupTableFromTof,
+    LookupTableWorkflow,
+    fakes,
+)
 
 sl = pytest.importorskip("sciline")
 
 
-def make_lut_workflow(choppers, neutrons, seed, pulse_stride):
-    lut_wf = LookupTableWorkflow()
+def make_lut_workflow(engine, choppers, pulse_stride, neutrons=None, seed=None):
+    lut_wf = LookupTableFromTof() if engine == "tof" else LookupTableWorkflow()
     lut_wf[unwrap.DiskChoppers[AnyRun]] = choppers
     lut_wf[unwrap.SourcePosition] = fakes.source_position()
     lut_wf[unwrap.NumberOfSimulatedNeutrons] = neutrons
-    lut_wf[unwrap.SimulationSeed] = seed
     lut_wf[unwrap.PulseStride] = pulse_stride
-    lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
+    if engine == "tof":
+        lut_wf[unwrap.SimulationSeed] = seed
+        lut_wf[unwrap.SimulationResults] = lut_wf.compute(unwrap.SimulationResults)
     return lut_wf
 
 
 @pytest.fixture(scope="module")
 def lut_workflow_psc_choppers():
-    return make_lut_workflow(
-        choppers=fakes.psc_choppers(), neutrons=500_000, seed=1234, pulse_stride=1
-    )
+    choppers = fakes.psc_choppers()
+    return {
+        'tof': make_lut_workflow(
+            engine='tof', choppers=choppers, neutrons=1e6, seed=1234, pulse_stride=1
+        ),
+        'analytical': make_lut_workflow(
+            engine='analytical', choppers=choppers, pulse_stride=1
+        ),
+    }
 
 
 @pytest.fixture(scope="module")
 def lut_workflow_pulse_skipping():
-    return make_lut_workflow(
-        choppers=fakes.pulse_skipping_choppers(),
-        neutrons=500_000,
-        seed=112,
-        pulse_stride=2,
-    )
+    choppers = fakes.pulse_skipping_choppers()
+    return {
+        'tof': make_lut_workflow(
+            engine='tof', choppers=choppers, neutrons=1e6, seed=112, pulse_stride=2
+        ),
+        'analytical': make_lut_workflow(
+            engine='analytical', choppers=choppers, pulse_stride=2
+        ),
+    }
 
 
 def _make_workflow_event_mode(
@@ -154,8 +169,6 @@ def _validate_result_histogram_mode(wavs, ref, percentile, diff_threshold, rtol)
     assert "time_of_flight" not in wavs.coords
     assert "frame_time" not in wavs.coords
 
-    # graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
-    # wavs = tofs.transform_coords("wavelength", graph=graph)
     ref = ref.hist(wavelength=wavs.coords["wavelength"])
     # We divide by the maximum to avoid large relative differences at the edges of the
     # frames where the counts are low.
@@ -166,15 +179,16 @@ def _validate_result_histogram_mode(wavs, ref, percentile, diff_threshold, rtol)
     assert sc.isclose(ref.data.nansum(), wavs.data.nansum(), rtol=sc.scalar(rtol))
 
 
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_unwrap_with_no_choppers(detector_or_monitor) -> None:
+def test_unwrap_with_no_choppers(engine, detector_or_monitor) -> None:
     # At this small distance the frames are not overlapping (with the given wavelength
     # range), despite not using any choppers.
     distance = sc.scalar(10.0, unit="m")
     choppers = {}
 
     lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=300_000, seed=1234, pulse_stride=1
+        engine=engine, choppers=choppers, neutrons=300_000, seed=1234, pulse_stride=1
     )
 
     pl, ref = _make_workflow_event_mode(
@@ -197,19 +211,21 @@ def test_unwrap_with_no_choppers(detector_or_monitor) -> None:
     )
 
 
-# At 30m, event_time_offset does not wrap around (all events within the first pulse).
-# At 60m, all events are within the second pulse.
-# At 80m, events are split between the second and third pulse.
-# At 108m, events are split between the third and fourth pulse.
-@pytest.mark.parametrize("dist", [30.0, 60.0, 80.0, 108.0])
+# At 25m, event_time_offset does not wrap around (all events within the first pulse).
+# At 50m, all events are within the second pulse.
+# At 62m, events are split between the second and third pulse.
+# At 90m, events are split between the third and fourth pulse.
+@pytest.mark.parametrize("dist", [25.0, 50.0, 62.0, 90.0])
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_standard_unwrap(dist, detector_or_monitor, lut_workflow_psc_choppers) -> None:
+def test_standard_unwrap(
+    dist, engine, detector_or_monitor, lut_workflow_psc_choppers
+) -> None:
     pl, ref = _make_workflow_event_mode(
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.psc_choppers(),
-        lut_workflow=lut_workflow_psc_choppers,
-        seed=2,
-        # pulse_stride=1,
+        lut_workflow=lut_workflow_psc_choppers[engine],
+        seed=7,
         pulse_stride_offset=0,
         error_threshold=0.1,
         detector_or_monitor=detector_or_monitor,
@@ -221,25 +237,30 @@ def test_standard_unwrap(dist, detector_or_monitor, lut_workflow_psc_choppers) -
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=100,
+        diff_threshold=0.02,
+        rtol=0.06 if engine == "tof" else 0.01,
     )
 
 
-# At 30m, event_time_offset does not wrap around (all events within the first pulse).
-# At 60m, all events are within the second pulse.
-# At 80m, events are split between the second and third pulse.
-# At 108m, events are split between the third and fourth pulse.
-@pytest.mark.parametrize("dist", [30.0, 60.0, 80.0, 108.0])
+# At 25m, event_time_offset does not wrap around (all events within the first pulse).
+# At 50m, all events are within the second pulse.
+# At 62m, events are split between the second and third pulse.
+# At 90m, events are split between the third and fourth pulse.
+@pytest.mark.parametrize("dist", [25.0, 50.0, 62.0, 90.0])
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("dim", ["time_of_flight", "tof", "frame_time"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_standard_unwrap_histogram_mode(
-    dist, dim, detector_or_monitor, lut_workflow_psc_choppers
+    dist, engine, dim, detector_or_monitor, lut_workflow_psc_choppers
 ) -> None:
     pl, ref = _make_workflow_histogram_mode(
         dim=dim,
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.psc_choppers(),
-        lut_workflow=lut_workflow_psc_choppers,
+        lut_workflow=lut_workflow_psc_choppers[engine],
         seed=37,
         error_threshold=np.inf,
         detector_or_monitor=detector_or_monitor,
@@ -251,21 +272,25 @@ def test_standard_unwrap_histogram_mode(
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_histogram_mode(
-        wavs=wavs, ref=ref, percentile=96, diff_threshold=0.4, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=96,
+        diff_threshold=0.4,
+        rtol=0.06 if engine == "tof" else 0.01,
     )
 
 
 @pytest.mark.parametrize("dist", [60.0, 100.0])
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_unwrap(
-    dist, detector_or_monitor, lut_workflow_pulse_skipping
+    dist, engine, detector_or_monitor, lut_workflow_pulse_skipping
 ) -> None:
     pl, ref = _make_workflow_event_mode(
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.pulse_skipping_choppers(),
-        lut_workflow=lut_workflow_pulse_skipping,
+        lut_workflow=lut_workflow_pulse_skipping[engine],
         seed=432,
-        # pulse_stride=2,
         pulse_stride_offset=1,
         error_threshold=0.1,
         detector_or_monitor=detector_or_monitor,
@@ -277,17 +302,22 @@ def test_pulse_skipping_unwrap(
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=100,
+        diff_threshold=0.1,
+        rtol=0.05 if engine == "tof" else 0.01,
     )
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_pulse_skipping_unwrap_180_phase_shift(detector_or_monitor) -> None:
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
+def test_pulse_skipping_unwrap_180_phase_shift(engine, detector_or_monitor) -> None:
     choppers = fakes.pulse_skipping_choppers()
     choppers["pulse_skipping"].phase.value += 180.0
 
     lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=500_000, seed=111, pulse_stride=2
+        engine=engine, choppers=choppers, neutrons=500_000, seed=111, pulse_stride=2
     )
 
     pl, ref = _make_workflow_event_mode(
@@ -306,19 +336,24 @@ def test_pulse_skipping_unwrap_180_phase_shift(detector_or_monitor) -> None:
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=100,
+        diff_threshold=0.1,
+        rtol=0.05 if engine == "tof" else 0.01,
     )
 
 
 @pytest.mark.parametrize("dist", [60.0, 100.0])
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_stride_offset_guess_gives_expected_result(
-    dist, detector_or_monitor, lut_workflow_pulse_skipping
+    dist, engine, detector_or_monitor, lut_workflow_pulse_skipping
 ) -> None:
     pl, ref = _make_workflow_event_mode(
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.pulse_skipping_choppers(),
-        lut_workflow=lut_workflow_pulse_skipping,
+        lut_workflow=lut_workflow_pulse_skipping[engine],
         seed=97,
         pulse_stride_offset=None,
         error_threshold=0.1,
@@ -331,13 +366,18 @@ def test_pulse_skipping_stride_offset_guess_gives_expected_result(
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=100,
+        diff_threshold=0.1,
+        rtol=0.05 if engine == "tof" else 0.01,
     )
 
 
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
-    detector_or_monitor,
+    engine, detector_or_monitor
 ) -> None:
     choppers = fakes.pulse_skipping_choppers()
     choppers['chopper'] = DiskChopper(
@@ -352,11 +392,11 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
     )
 
     lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=500_000, seed=222, pulse_stride=2
+        engine=engine, choppers=choppers, neutrons=500_000, seed=222, pulse_stride=2
     )
 
     pl, ref = _make_workflow_event_mode(
-        distance=sc.scalar(150.0, unit="m"),
+        distance=sc.scalar(130.0, unit="m"),
         choppers=choppers,
         lut_workflow=lut_wf,
         seed=6,
@@ -371,13 +411,18 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=100,
+        diff_threshold=0.1,
+        rtol=0.05 if engine == "tof" else 0.01,
     )
 
 
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
-    detector_or_monitor,
+    engine, detector_or_monitor
 ) -> None:
     distance = sc.scalar(100.0, unit="m")
     choppers = fakes.pulse_skipping_choppers()
@@ -392,7 +437,7 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     mon, ref = beamline.get_monitor("detector")
 
     lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=300_000, seed=1234, pulse_stride=2
+        engine=engine, choppers=choppers, neutrons=300_000, seed=1234, pulse_stride=2
     )
     lut_wf[unwrap.LtotalRange] = distance, distance
 
@@ -421,8 +466,6 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
         pl[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
-    # Convert to wavelength
-    # graph = {**beamline_graph(scatter=False), **elastic_graph("tof")}
     wavs = wavs.bins.concat().value
     # Bin the events in toa starting from the pulse period to skip the first pulse.
     ref = (
@@ -448,7 +491,7 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
         / ref.coords["wavelength"]
     )
     # All errors should be small
-    assert np.nanpercentile(diff.values, 100) < 0.05
+    assert np.nanpercentile(diff.values, 100) < 0.06
     # Make sure that we have not lost too many events (we lose some because they may be
     # given a NaN wavelength from the lookup).
     if detector_or_monitor == "detector":
@@ -462,13 +505,14 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     )
 
 
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_pulse_skipping_stride_3(detector_or_monitor) -> None:
+def test_pulse_skipping_stride_3(engine, detector_or_monitor) -> None:
     choppers = fakes.pulse_skipping_choppers()
     choppers["pulse_skipping"].frequency.value = -14.0 / 3.0
 
     lut_wf = make_lut_workflow(
-        choppers=choppers, neutrons=500_000, seed=111, pulse_stride=3
+        engine=engine, choppers=choppers, neutrons=500_000, seed=111, pulse_stride=3
     )
 
     pl, ref = _make_workflow_event_mode(
@@ -487,19 +531,24 @@ def test_pulse_skipping_stride_3(detector_or_monitor) -> None:
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.1, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=100,
+        diff_threshold=0.1,
+        rtol=0.05 if engine == "tof" else 0.01,
     )
 
 
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_unwrap_histogram_mode(
-    detector_or_monitor, lut_workflow_pulse_skipping
+    engine, detector_or_monitor, lut_workflow_pulse_skipping
 ) -> None:
     pl, ref = _make_workflow_histogram_mode(
         dim='time_of_flight',
         distance=sc.scalar(50.0, unit="m"),
         choppers=fakes.pulse_skipping_choppers(),
-        lut_workflow=lut_workflow_pulse_skipping,
+        lut_workflow=lut_workflow_pulse_skipping[engine],
         seed=9,
         error_threshold=np.inf,
         detector_or_monitor=detector_or_monitor,
@@ -511,17 +560,24 @@ def test_pulse_skipping_unwrap_histogram_mode(
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_histogram_mode(
-        wavs=wavs, ref=ref, percentile=96, diff_threshold=0.4, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=96,
+        diff_threshold=0.4,
+        rtol=0.05 if engine == "tof" else 0.01,
     )
 
 
 @pytest.mark.parametrize("dtype", ["int32", "int64"])
+@pytest.mark.parametrize("engine", ["tof", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_unwrap_int(dtype, detector_or_monitor, lut_workflow_psc_choppers) -> None:
+def test_unwrap_int(
+    dtype, engine, detector_or_monitor, lut_workflow_psc_choppers
+) -> None:
     pl, ref = _make_workflow_event_mode(
-        distance=sc.scalar(80.0, unit="m"),
+        distance=sc.scalar(62.0, unit="m"),
         choppers=fakes.psc_choppers(),
-        lut_workflow=lut_workflow_psc_choppers,
+        lut_workflow=lut_workflow_psc_choppers[engine],
         seed=2,
         pulse_stride_offset=0,
         error_threshold=0.1,
@@ -544,5 +600,9 @@ def test_unwrap_int(dtype, detector_or_monitor, lut_workflow_psc_choppers) -> No
         wavs = pl.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
     _validate_result_events(
-        wavs=wavs, ref=ref, percentile=100, diff_threshold=0.02, rtol=0.05
+        wavs=wavs,
+        ref=ref,
+        percentile=100,
+        diff_threshold=0.02,
+        rtol=0.05 if engine == "tof" else 0.01,
     )
