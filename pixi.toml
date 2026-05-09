@@ -112,28 +112,28 @@ cmd = "python -m sphinx -v -b html -d packages/esssans/.docs_doctrees packages/e
 default = { features = ["dev", "essreduce", "essimaging", "essnmx", "essreflectometry", "essdiffraction", "esssans"], solve-group = "default" }
 
 # Per-package test environments (include workspace dep features)
-essreduce = { features = ["essreduce"], solve-group = "default" }
-essimaging = { features = ["essimaging", "essreduce"], solve-group = "default" }
-essnmx = { features = ["essnmx", "essreduce"], solve-group = "default" }
-essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group = "default" }
-essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "default" }
-esssans = { features = ["esssans", "essreduce"], solve-group = "default" }
+essreduce = { features = ["essreduce"], solve-group = "essreduce" }
+essimaging = { features = ["essimaging", "essreduce"], solve-group = "essimaging" }
+essnmx = { features = ["essnmx", "essreduce"], solve-group = "essnmx" }
+essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group = "essreflectometry" }
+essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "essdiffraction" }
+esssans = { features = ["esssans", "essreduce"], solve-group = "esssans" }
 
 # Lower-bound test environments (separate resolution)
-lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
-lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lower-bound" }
-lb-essnmx = { features = ["essnmx", "essreduce"], solve-group = "lower-bound" }
-lb-essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group = "lower-bound" }
-lb-essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "lower-bound" }
-lb-esssans = { features = ["esssans", "essreduce"], solve-group = "lower-bound" }
+lb-essreduce = { features = ["essreduce"], solve-group = "lb-essreduce" }
+lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lb-essimaging" }
+lb-essnmx = { features = ["essnmx", "essreduce"], solve-group = "lb-essnmx" }
+lb-essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group = "lb-essreflectometry" }
+lb-essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "lb-essdiffraction" }
+lb-esssans = { features = ["esssans", "essreduce"], solve-group = "lb-esssans" }
 
 # Docs environments (package with docs extra + pandoc)
-docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
-docs-essimaging = { features = ["docs-essimaging", "docs-essreduce", "docs"], solve-group = "default" }
-docs-essnmx = { features = ["docs-essnmx", "docs-essreduce", "docs"], solve-group = "default" }
-docs-essreflectometry = { features = ["docs-essreflectometry", "docs-essreduce", "docs"], solve-group = "default" }
-docs-essdiffraction = { features = ["docs-essdiffraction", "docs-essreduce", "docs"], solve-group = "default" }
-docs-esssans = { features = ["docs-esssans", "docs-essreduce", "docs"], solve-group = "default" }
+docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "docs-essreduce" }
+docs-essimaging = { features = ["docs-essimaging", "docs-essreduce", "docs"], solve-group = "docs-essimaging" }
+docs-essnmx = { features = ["docs-essnmx", "docs-essreduce", "docs"], solve-group = "docs-essnmx" }
+docs-essreflectometry = { features = ["docs-essreflectometry", "docs-essreduce", "docs"], solve-group = "docs-essreflectometry" }
+docs-essdiffraction = { features = ["docs-essdiffraction", "docs-essreduce", "docs"], solve-group = "docs-essdiffraction" }
+docs-esssans = { features = ["docs-esssans", "docs-essreduce", "docs"], solve-group = "docs-esssans" }
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }
