@@ -123,8 +123,6 @@ def dream_lookup_table():
         dream.beamline.InstrumentConfiguration.high_flux_BC215
     )
     lut_wf[unwrap.SourcePosition] = sc.vector(value=[0, 0, -76.55], unit="m")
-    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 500_000
-    lut_wf[unwrap.SimulationSeed] = 555
     lut_wf[unwrap.PulseStride] = 1
     lut_wf[unwrap.LtotalRange] = (
         sc.scalar(60.0, unit="m"),
