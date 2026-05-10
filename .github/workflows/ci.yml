@@ -90,7 +90,7 @@ jobs:
           pixi-version: v0.67.2
           frozen: true
           environments: lint
-      - run: pixi run -e lint lint
+      - run: pixi run --frozen -e lint lint
 
   test:
     name: Test ${{ matrix.package }}
@@ -111,7 +111,7 @@ jobs:
           frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests
-        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
+        run: pixi run --frozen -e ${{ matrix.package }} test ${{ matrix.package }}
 
   docs:
     name: Docs ${{ matrix.package }}
@@ -132,7 +132,7 @@ jobs:
           frozen: true
           environments: docs-${{ matrix.package }}
       - name: Build docs
-        run: pixi run docs-${{ matrix.package }}
+        run: pixi run --frozen docs-${{ matrix.package }}
       - uses: actions/upload-artifact@v7
         id: artifact-upload-step
         with:

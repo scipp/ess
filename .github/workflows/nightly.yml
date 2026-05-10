@@ -29,7 +29,7 @@ jobs:
           frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests
-        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
+        run: pixi run --frozen -e ${{ matrix.package }} test ${{ matrix.package }}
 
   lower-bound:
     name: Lower bound ${{ matrix.package }}
@@ -51,4 +51,4 @@ jobs:
           frozen: true
           environments: lb-${{ matrix.package }}
       - name: Test with lowest direct dependencies
-        run: pixi run -e lb-${{ matrix.package }} test ${{ matrix.package }}
+        run: pixi run --frozen -e lb-${{ matrix.package }} test ${{ matrix.package }}

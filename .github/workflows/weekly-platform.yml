@@ -30,4 +30,4 @@ jobs:
           frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests
-        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
+        run: pixi run --frozen -e ${{ matrix.package }} test ${{ matrix.package }}
