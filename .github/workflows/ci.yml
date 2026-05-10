@@ -107,6 +107,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          pixi-version: v0.67.2
           frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests
@@ -127,6 +128,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          pixi-version: v0.67.2
           frozen: true
           environments: docs-${{ matrix.package }}
       - name: Build docs
