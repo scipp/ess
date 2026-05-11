@@ -288,8 +288,7 @@ def reduction(
     tof_histograms = sc.DataGroup()
     for detector_name, tof_da in tof_das.items():
         tof_da.bins.coords[t_coord_name] = tof_da.bins.coords[t_coord_name].to(
-            dtype=float,
-            unit=output_tunit
+            dtype=float, unit=output_tunit
         )
         tof_histograms[detector_name] = tof_da.hist({t_coord_name: t_bin_edges})
 
