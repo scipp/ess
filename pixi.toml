@@ -3,6 +3,7 @@ name = "ess"
 channels = ["conda-forge"]
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 version = "2026.2.0"
+exclude-newer = "14d"
 
 [dependencies]
 python = "3.11.*"
@@ -10,6 +11,16 @@ python = "3.11.*"
 [system-requirements]
 # Scipp does not support older OSX versions.
 macos = "14.0"
+
+[exclude-newer]
+scipp = "0m"
+scippneutron = "0m"
+scippnexus = "0m"
+
+[pypi-exclude-newer]
+scipp = "0m"
+scippneutron = "0m"
+scippnexus = "0m"
 
 # ==================== Parameterized tasks ====================
 
