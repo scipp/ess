@@ -6,7 +6,6 @@ import sciline
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-
 from ess.bifrost.data import (
     lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,

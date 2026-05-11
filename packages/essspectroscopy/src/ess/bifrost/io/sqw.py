@@ -8,9 +8,6 @@ import dataclasses
 import numpy as np
 import numpy.typing as npt
 import scipp as sc
-from scippneutron.io import sqw
-from scippneutron.metadata import ESS_SOURCE
-
 from ess.spectroscopy.types import (
     Beamline,
     EnergyBins,
@@ -22,6 +19,8 @@ from ess.spectroscopy.types import (
     SampleRun,
     SQWBinSizes,
 )
+from scippneutron.io import sqw
+from scippneutron.metadata import ESS_SOURCE
 
 # Projection axes
 # For now, we always project onto the cartesian axes for simplicity.

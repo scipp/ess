@@ -6,7 +6,6 @@ import sciline
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-
 from ess import bifrost
 from ess.bifrost.data import (
     computed_energy_data_simulated_5x2,

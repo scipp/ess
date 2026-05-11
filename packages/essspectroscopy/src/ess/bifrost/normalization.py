@@ -4,8 +4,6 @@
 """Normalization routines."""
 
 import scipp as sc
-
-from ess.reduce.uncertainty import broadcast_uncertainties
 from ess.spectroscopy.types import (
     IncidentEnergyDetector,
     NormalizationMonitor,
@@ -15,6 +13,8 @@ from ess.spectroscopy.types import (
     UncertaintyBroadcastMode,
     WavelengthMonitor,
 )
+
+from ess.reduce.uncertainty import broadcast_uncertainties
 
 
 def normalize_by_monitor_and_proton_charge(

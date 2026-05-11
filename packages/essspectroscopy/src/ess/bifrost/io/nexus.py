@@ -8,9 +8,6 @@ import warnings
 import numpy as np
 import scipp as sc
 import scippnexus as snx
-
-from ess.reduce.nexus import open_component_group
-from ess.reduce.nexus.types import NeXusLocationSpec, TransformationTimeFilter
 from ess.spectroscopy.types import (
     Analyzer,
     DynamicPosition,
@@ -23,6 +20,9 @@ from ess.spectroscopy.types import (
     RunType,
     SampleAngle,
 )
+
+from ess.reduce.nexus import open_component_group
+from ess.reduce.nexus.types import NeXusLocationSpec, TransformationTimeFilter
 
 
 # See https://github.com/scipp/essreduce/issues/98
@@ -103,7 +103,7 @@ def _find_class_in_inputs(
         for name in _get_inputs(element):
             try:
                 pending.append(group[name])
-            except KeyError:
+            except KeyError:  # noqa: PERF203
                 warnings.warn(f"No '{name}' in NeXus group {group.name}", stacklevel=2)
                 continue
     raise ValueError(f"No {target} found in the inputs of {start.name}")

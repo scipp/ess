@@ -3,14 +3,14 @@
 """BIFROST Bragg peak monitor workflows."""
 
 import sciline
-
-from ess.reduce import unwrap as reduce_unwrap
 from ess.spectroscopy.indirect.time_of_flight import TofWorkflow
 from ess.spectroscopy.types import (
     ElasticMonitor,
     NormalizationMonitor,
     SampleRun,
 )
+
+from ess.reduce import unwrap as reduce_unwrap
 
 from ..cutting import group_by_rotation
 from ..io import nexus

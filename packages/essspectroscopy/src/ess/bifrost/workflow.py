@@ -7,8 +7,6 @@ from typing import Any
 
 import sciline
 import scipp as sc
-from scippnexus import NXdetector
-
 from ess.spectroscopy.indirect.conversion import providers as conversion_providers
 from ess.spectroscopy.indirect.kf import providers as kf_providers
 from ess.spectroscopy.indirect.ki import providers as ki_providers
@@ -28,6 +26,7 @@ from ess.spectroscopy.types import (
     SampleRun,
     UncertaintyBroadcastMode,
 )
+from scippnexus import NXdetector
 
 from .cutting import providers as cutting_providers
 from .detector import merge_triplets

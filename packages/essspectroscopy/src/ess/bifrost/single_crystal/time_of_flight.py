@@ -4,9 +4,6 @@
 """Utilities for computing real neutron time-of-flight."""
 
 import scippnexus as snx
-
-from ess.reduce import unwrap as reduce_unwrap
-from ess.reduce.unwrap.types import DetectorLtotal
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
     ErrorLimitedLookupTable,
@@ -15,6 +12,9 @@ from ess.spectroscopy.types import (
     RunType,
     WavelengthDetector,
 )
+
+from ess.reduce import unwrap as reduce_unwrap
+from ess.reduce.unwrap.types import DetectorLtotal
 
 
 def detector_wavelength_data(

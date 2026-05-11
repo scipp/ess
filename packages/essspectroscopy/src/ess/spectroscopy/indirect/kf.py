@@ -5,16 +5,15 @@
 
 import numpy as np
 import scipp as sc
-from scippneutron.conversion.beamline import (
-    BeamAlignedUnitVectors,
-)
-
 from ess.spectroscopy.types import (
     DataAtSample,
     DataGroupedByRotation,
     PulsePeriod,
     RunType,
     SecondarySpecCoordTransformGraph,
+)
+from scippneutron.conversion.beamline import (
+    BeamAlignedUnitVectors,
 )
 
 

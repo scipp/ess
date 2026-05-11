@@ -4,9 +4,6 @@
 """Coordinate conversions for single crystal diffraction with BIFROST."""
 
 import scippnexus as snx
-from scippneutron.conversion.graph import beamline as beamline_graphs
-from scippneutron.conversion.graph import tof as tof_graphs
-
 from ess.spectroscopy.indirect.conversion import (
     rotate_to_sample_table_momentum_transfer,
 )
@@ -18,6 +15,8 @@ from ess.spectroscopy.types import (
     RunType,
     WavelengthDetector,
 )
+from scippneutron.conversion.graph import beamline as beamline_graphs
+from scippneutron.conversion.graph import tof as tof_graphs
 
 
 def single_crystal_coordinate_transformation_graph(

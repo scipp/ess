@@ -10,9 +10,8 @@ import numpy as np
 import numpy.typing as npt
 import plopp as pp
 import scipp as sc
-from matplotlib.axes import Axes
-
 from ess.spectroscopy.types import QDetector, RunType
+from matplotlib.axes import Axes
 
 from .types import (
     CountsWithQMapCoords,

@@ -5,7 +5,6 @@ import pytest
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-
 from ess import bifrost
 from ess.bifrost.data import (
     lookup_table_simulation,

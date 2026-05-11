@@ -5,7 +5,6 @@
 
 import scipp as sc
 import scippnexus as snx
-
 from ess.spectroscopy.types import (
     EmptyDetector,
     NeXusData,

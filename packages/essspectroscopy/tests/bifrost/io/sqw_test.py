@@ -18,8 +18,6 @@ import sciline
 import scipp as sc
 import scipp.testing
 import scippnexus as snx
-from scippneutron.io import sqw
-
 from ess import bifrost
 from ess.bifrost.data import (
     lookup_table_simulation,
@@ -37,6 +35,7 @@ from ess.spectroscopy.types import (
     SQWBinSizes,
     UncertaintyBroadcastMode,
 )
+from scippneutron.io import sqw
 
 N_DETECTORS = 3
 N_ANGLES = 178

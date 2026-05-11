@@ -6,7 +6,6 @@
 from collections.abc import Callable
 
 import scipp as sc
-
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
     InstrumentAngle,

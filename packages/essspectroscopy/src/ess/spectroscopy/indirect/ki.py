@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import scippnexus as snx
-
 from ess.spectroscopy.types import (
     GravityVector,
     Position,

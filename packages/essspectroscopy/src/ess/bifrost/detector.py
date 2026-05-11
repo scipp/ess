@@ -7,8 +7,6 @@ from collections.abc import Callable
 
 import scipp as sc
 import scippnexus as snx
-
-from ess.reduce.nexus.types import Position
 from ess.spectroscopy.indirect.conversion import add_spectrometer_coords
 from ess.spectroscopy.types import (
     Analyzer,
@@ -20,6 +18,8 @@ from ess.spectroscopy.types import (
     RunType,
     SecondarySpecCoordTransformGraph,
 )
+
+from ess.reduce.nexus.types import Position
 
 from .types import ArcNumber
 

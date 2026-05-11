@@ -4,7 +4,6 @@
 """Bragg peak detector handling for BIFROST."""
 
 import scippnexus as snx
-
 from ess.spectroscopy.types import (
     Analyzer,
     DetectorPositionOffset,
