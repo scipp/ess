@@ -12,6 +12,10 @@ permissions:
   contents: read
   pull-requests: read
 
+env:
+  PIXI_FROZEN: true
+  PIXI_NO_INSTALL: true
+
 jobs:
   changes:
     name: Detect changes
