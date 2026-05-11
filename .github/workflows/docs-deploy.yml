@@ -14,6 +14,7 @@ on:
           - essdiffraction
           - essreflectometry
           - esssans
+          - essspectroscopy
       publish:
         default: false
         type: boolean

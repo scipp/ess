@@ -43,6 +43,10 @@ essdiffraction = { path = "packages/essdiffraction", editable = true, extras = [
 [feature.esssans.pypi-dependencies]
 esssans = { path = "packages/esssans", editable = true, extras = ["test"] }
 
+# essspectroscopy (depends on essreduce)
+[feature.essspectroscopy.pypi-dependencies]
+essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["test"] }
+
 # ==================== Dev feature ====================
 
 [feature.dev.pypi-dependencies]
@@ -105,11 +109,17 @@ esssans = { path = "packages/esssans", editable = true, extras = ["test", "docs"
 [feature.docs-esssans.tasks.docs-esssans]
 cmd = "python -m sphinx -v -b html -d packages/esssans/.docs_doctrees packages/esssans/docs packages/esssans/html"
 
+[feature.docs-essspectroscopy.pypi-dependencies]
+essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["test", "docs"] }
+
+[feature.docs-essspectroscopy.tasks.docs-essspectroscopy]
+cmd = "python -m sphinx -v -b html -d packages/essspectroscopy/.docs_doctrees packages/essspectroscopy/docs packages/essspectroscopy/html"
+
 # ==================== Environments ====================
 
 [environments]
 # Default: all packages (for full dev setup)
-default = { features = ["dev", "essreduce", "essimaging", "essnmx", "essreflectometry", "essdiffraction", "esssans"], solve-group = "default" }
+default = { features = ["dev", "essreduce", "essimaging", "essnmx", "essreflectometry", "essdiffraction", "esssans", "essspectroscopy"], solve-group = "default" }
 
 # Per-package test environments (include workspace dep features)
 essreduce = { features = ["essreduce"], solve-group = "default" }
@@ -118,6 +128,7 @@ essnmx = { features = ["essnmx", "essreduce"], solve-group = "default" }
 essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group = "default" }
 essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "default" }
 esssans = { features = ["esssans", "essreduce"], solve-group = "default" }
+essspectroscopy = { features = ["essspectroscopy", "essreduce"], solve-group = "default" }
 
 # Lower-bound test environments (separate resolution)
 lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
@@ -126,6 +137,7 @@ lb-essnmx = { features = ["essnmx", "essreduce"], solve-group = "lower-bound" }
 lb-essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group = "lower-bound" }
 lb-essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "lower-bound" }
 lb-esssans = { features = ["esssans", "essreduce"], solve-group = "lower-bound" }
+lb-essspectroscopy = { features = ["essspectroscopy", "essreduce"], solve-group = "lower-bound" }
 
 # Docs environments (package with docs extra + pandoc)
 docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
@@ -134,6 +146,7 @@ docs-essnmx = { features = ["docs-essnmx", "docs-essreduce", "docs"], solve-grou
 docs-essreflectometry = { features = ["docs-essreflectometry", "docs-essreduce", "docs"], solve-group = "default" }
 docs-essdiffraction = { features = ["docs-essdiffraction", "docs-essreduce", "docs"], solve-group = "default" }
 docs-esssans = { features = ["docs-esssans", "docs-essreduce", "docs"], solve-group = "default" }
+docs-essspectroscopy = { features = ["docs-essspectroscopy", "docs-essreduce", "docs"], solve-group = "default" }
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }
