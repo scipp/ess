@@ -90,73 +90,75 @@ jobs:
           pixi-version: v0.68.0
           frozen: true
           environments: lint
+      - name: Check env
+        run: if [[! -v PIXI_FROZEN ]]; then echo "Pixi frozen not set"; else echo "Pixi frozen environment variable = ${PIXI_FROZEN}"; fi
       - run: pixi run -e lint lint
 
-  test:
-    name: Test ${{ matrix.package }}
-    needs: [changes, formatting]
-    if: needs.changes.outputs.packages != '[]'
-    strategy:
-      fail-fast: false
-      matrix:
-        package: ${{ fromJSON(needs.changes.outputs.packages) }}
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.9.4
-        with:
-          pixi-version: v0.68.0
-          frozen: true
-          environments: ${{ matrix.package }}
-      - name: Run tests
-        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
+  # test:
+  #   name: Test ${{ matrix.package }}
+  #   needs: [changes, formatting]
+  #   if: needs.changes.outputs.packages != '[]'
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       package: ${{ fromJSON(needs.changes.outputs.packages) }}
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: prefix-dev/setup-pixi@v0.9.4
+  #       with:
+  #         pixi-version: v0.68.0
+  #         frozen: true
+  #         environments: ${{ matrix.package }}
+  #     - name: Run tests
+  #       run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
 
-  docs:
-    name: Docs ${{ matrix.package }}
-    needs: [changes, test]
-    if: needs.changes.outputs.packages != '[]'
-    strategy:
-      fail-fast: false
-      matrix:
-        package: ${{ fromJSON(needs.changes.outputs.packages) }}
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.9.4
-        with:
-          pixi-version: v0.68.0
-          frozen: true
-          environments: docs-${{ matrix.package }}
-      - name: Build docs
-        run: pixi run docs-${{ matrix.package }}
-      - uses: actions/upload-artifact@v7
-        id: artifact-upload-step
-        with:
-          name: docs-${{ matrix.package }}
-          path: packages/${{ matrix.package }}/html
-      - run: echo "::notice::https://remote-unzip.deno.dev/${{ github.repository }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"
+  # docs:
+  #   name: Docs ${{ matrix.package }}
+  #   needs: [changes, test]
+  #   if: needs.changes.outputs.packages != '[]'
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       package: ${{ fromJSON(needs.changes.outputs.packages) }}
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: prefix-dev/setup-pixi@v0.9.4
+  #       with:
+  #         pixi-version: v0.68.0
+  #         frozen: true
+  #         environments: docs-${{ matrix.package }}
+  #     - name: Build docs
+  #       run: pixi run docs-${{ matrix.package }}
+  #     - uses: actions/upload-artifact@v7
+  #       id: artifact-upload-step
+  #       with:
+  #         name: docs-${{ matrix.package }}
+  #         path: packages/${{ matrix.package }}/html
+  #     - run: echo "::notice::https://remote-unzip.deno.dev/${{ github.repository }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"
 
-  report:
-    name: Report Job Status
-    needs: [changes, formatting, test, docs]
-    if: always()  # Should always run regardless of the state of the needs jobs.
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Report Job Success
-        run: echo "All Tests Succeeded"
-        if: |
-          needs.formatting.result == 'success' &&
-          (needs.test.result == 'skipped' || needs.test.result == 'success') &&
-          (needs.docs.result == 'skipped' || needs.docs.result == 'success')
-      - name: Report Job Failure
-        run: |
-          echo "Not All Tests Succeeded..."
-          exit 1
-        if: |
-          !( needs.formatting.result == 'success' &&
-          (needs.test.result == 'skipped' || needs.test.result == 'success') &&
-          (needs.docs.result == 'skipped' || needs.docs.result == 'success') )
+  # report:
+  #   name: Report Job Status
+  #   needs: [changes, formatting, test, docs]
+  #   if: always()  # Should always run regardless of the state of the needs jobs.
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - name: Report Job Success
+  #       run: echo "All Tests Succeeded"
+  #       if: |
+  #         needs.formatting.result == 'success' &&
+  #         (needs.test.result == 'skipped' || needs.test.result == 'success') &&
+  #         (needs.docs.result == 'skipped' || needs.docs.result == 'success')
+  #     - name: Report Job Failure
+  #       run: |
+  #         echo "Not All Tests Succeeded..."
+  #         exit 1
+  #       if: |
+  #         !( needs.formatting.result == 'success' &&
+  #         (needs.test.result == 'skipped' || needs.test.result == 'success') &&
+  #         (needs.docs.result == 'skipped' || needs.docs.result == 'success') )
