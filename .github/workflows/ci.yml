@@ -91,7 +91,7 @@ jobs:
           frozen: true
           environments: lint
       - name: Check env
-        run: if [[! -v PIXI_FROZEN ]]; then echo "Pixi frozen not set"; else echo "Pixi frozen environment variable = ${PIXI_FROZEN}"; fi
+        run: if [[ ! -v PIXI_FROZEN ]]; then echo "Pixi frozen not set"; else echo "Pixi frozen environment variable = ${PIXI_FROZEN}"; fi
       - run: pixi run -e lint lint
 
   # test:
