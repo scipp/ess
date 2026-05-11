@@ -82,6 +82,15 @@ jobs:
               - '.github/workflows/ci.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
+            essspectroscopy:
+              - 'packages/essspectroscopy/**'
+              - 'packages/essreduce/**'
+              - 'pyproject.toml'
+              - 'pixi.lock'
+              - 'pixi.toml'
+              - '.github/workflows/ci.yml'
+              - '.pre-commit-config.yaml'
+              - '.python-version'
 
   formatting:
     name: Formatting and static analysis

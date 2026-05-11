@@ -23,6 +23,7 @@ jobs:
           - essdiffraction
           - essreflectometry
           - esssans
+          - essspectroscopy
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
