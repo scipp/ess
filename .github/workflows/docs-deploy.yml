@@ -23,6 +23,10 @@ on:
         required: false
         type: string
 
+env:
+  PIXI_FROZEN: true
+  PIXI_NO_INSTALL: true
+
 jobs:
   docs:
     name: Build and deploy docs

@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: "0 2 * * 1"
 
+env:
+  PIXI_FROZEN: true
+  PIXI_NO_INSTALL: true
+
 jobs:
   test:
     name: ${{ matrix.package }} on ${{ matrix.os }}

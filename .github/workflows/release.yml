@@ -5,6 +5,10 @@ on:
     tags:
       - "*/[0-9]*"
 
+env:
+  PIXI_FROZEN: true
+  PIXI_NO_INSTALL: true
+
 jobs:
   determine-package:
     name: Determine package
