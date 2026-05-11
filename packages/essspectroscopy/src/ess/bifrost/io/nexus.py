@@ -189,8 +189,20 @@ def stepwise_transformation_time_filter(transform: sc.DataArray) -> sc.DataArray
     """Collapse runs of equal values into a single value.
 
     This can be used as a time filter for NeXus transformations when the component
-    mostly stays at a position and only rarely moves.
+    mostly stays at one position and only rarely moves.
     For example, a stepwise scan across detector rotations.
+
+    Repeated values are identified using :func:`numpy.isclose` with default tolerances
+    applied to the individual transformation components.
+    I.e., for the BIFROST detector, the detector angle (currently in degrees)
+    is checked for approximate equality between consecutive values.
+
+    Note
+    ----
+    This approach is meant to handle noisy NXlogs if they are written
+    from readback values or repeated setpoint values.
+    We currently do not know enough about how ESS NeXus files will be written for
+    real measurements, so we may need to revisit this approach.
     """
     collapsed = _collapse_runs(transform, 'time')
     if collapsed.sizes['time'] == 1:
