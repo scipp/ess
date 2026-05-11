@@ -73,7 +73,7 @@ jobs:
           frozen: true
           environments: docs-${{ needs.determine-package.outputs.package }}
       - name: Build docs
-        run: pixi run --frozen docs-${{ needs.determine-package.outputs.package }}
+        run: pixi run docs-${{ needs.determine-package.outputs.package }}
       - name: Prepare site
         run: |
           PACKAGE=${{ needs.determine-package.outputs.package }}
