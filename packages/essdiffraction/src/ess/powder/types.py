@@ -33,6 +33,7 @@ NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
 Position = reduce_t.Position
+ProtonCharge = reduce_t.ProtonCharge
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 
@@ -189,10 +190,6 @@ class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 PixelMaskFilename = NewType("PixelMaskFilename", str)
 """Filename of a pixel mask."""
-
-
-class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Time-dependent proton charge."""
 
 
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):

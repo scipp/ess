@@ -18,7 +18,7 @@ from ess.reflectometry.types import (
     BeamDivergenceLimits,
     DetectorRotation,
     Filename,
-    ProtonCurrent,
+    ProtonCharge,
     QBins,
     RawSampleRotation,
     ReducedReference,
@@ -180,14 +180,14 @@ def test_pipeline_merging_events_result_unchanged(amor_pipeline: sciline.Pipelin
     )
 
 
-def test_proton_current(amor_pipeline: sciline.Pipeline):
+def test_proton_charge(amor_pipeline: sciline.Pipeline):
     amor_pipeline[Filename[SampleRun]] = amor.data.amor_run(611)
-    da_without_proton_current = amor_pipeline.compute(ReducibleData[SampleRun])
+    da_without_proton_charge = amor_pipeline.compute(ReducibleData[SampleRun])
 
-    proton_current = [1, 2, 0.1]
+    proton_charge = [1, 2, 0.1]
     timestamps = [1699883542349602112, 1699883542349602112, 1699886864071691036]
-    amor_pipeline[ProtonCurrent[SampleRun]] = sc.DataArray(
-        sc.array(dims=['time'], values=proton_current),
+    amor_pipeline[ProtonCharge[SampleRun]] = sc.DataArray(
+        sc.array(dims=['time'], values=proton_charge, unit='uC'),
         coords={
             'time': sc.array(
                 dims=['time'],
@@ -197,25 +197,25 @@ def test_proton_current(amor_pipeline: sciline.Pipeline):
             )
         },
     )
-    da_with_proton_current = amor_pipeline.compute(ReducibleData[SampleRun])
+    da_with_proton_charge = amor_pipeline.compute(ReducibleData[SampleRun])
 
-    assert "proton_current" in da_with_proton_current.bins.coords
-    assert "proton_current_too_low" in da_with_proton_current.bins.masks
-    assert da_with_proton_current.bins.masks["proton_current_too_low"].any()
-    assert not da_with_proton_current.bins.masks["proton_current_too_low"].all()
+    assert "proton_charge" in da_with_proton_charge.bins.coords
+    assert "proton_charge_too_low" in da_with_proton_charge.bins.masks
+    assert da_with_proton_charge.bins.masks["proton_charge_too_low"].any()
+    assert not da_with_proton_charge.bins.masks["proton_charge_too_low"].all()
 
-    assert "proton_current" not in da_without_proton_current.bins.coords
-    assert "proton_current_too_low" not in da_without_proton_current.bins.masks
+    assert "proton_charge" not in da_without_proton_charge.bins.coords
+    assert "proton_charge_too_low" not in da_without_proton_charge.bins.masks
 
     t = (
-        da_with_proton_current.bins.constituents['data']
+        da_with_proton_charge.bins.constituents['data']
         .coords['event_time_zero'][0]
         .value.astype('uint64')
     )
-    w_with = da_with_proton_current.bins.constituents['data'].data[0].value
-    w_without = da_without_proton_current.bins.constituents['data'].data[0].value
+    w_with = da_with_proton_charge.bins.constituents['data'].data[0].value
+    w_without = da_without_proton_charge.bins.constituents['data'].data[0].value
     np.testing.assert_allclose(
-        proton_current[np.searchsorted(timestamps, t) - 1], w_without / w_with
+        proton_charge[np.searchsorted(timestamps, t) - 1], w_without / w_with
     )
 
 

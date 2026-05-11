@@ -16,7 +16,7 @@ from ..reflectometry.types import (
     DetectorLtotal,
     DetectorRotation,
     Filename,
-    ProtonCurrent,
+    ProtonCharge,
     RawDetector,
     ReducibleData,
     RunType,
@@ -292,7 +292,7 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-    proton_current: ProtonCurrent[RunType],
+    proton_charge: ProtonCharge[RunType],
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
 ) -> ReducibleData[RunType]:
@@ -302,7 +302,7 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
         zlims=zlims,
         bdlim=bdlim,
         wbins=wbins,
-        proton_current=proton_current,
+        proton_charge=proton_charge,
         graph={
             **graph,
             "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,

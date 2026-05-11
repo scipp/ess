@@ -3,10 +3,12 @@
 
 import sciline
 import scipp as sc
+import scippnexus as snx
+from ess.reduce.nexus.types import TransformationTimeFilter
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
-from ..reflectometry.corrections import correct_by_proton_current
+from ..reflectometry.corrections import correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -61,16 +63,16 @@ def mcstas_default_parameters() -> dict:
         supermirror.CriticalEdge: sc.scalar(float('inf'), unit='1/angstrom'),
         supermirror.Alpha: sc.scalar(0.25 / 0.088, unit=sc.units.angstrom),
         DetectorSpatialResolution: 0.0025 * sc.units.m,
-        NeXusDetectorName: "detector",
+        NeXusDetectorName: "multiblade_detector",
         BeamDivergenceLimits: (
             sc.scalar(-0.75, unit='deg'),
             sc.scalar(0.75, unit='deg'),
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: corrections.default_corrections
-        - {correct_by_proton_current},
+        - {correct_by_proton_charge},
         LookupTableRelativeErrorThreshold: {
-            "detector": 0.06,
+            "multiblade_detector": 0.06,
         },
     }
 
@@ -105,4 +107,12 @@ def EstiaWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for name, param in default_parameters().items():
         workflow[name] = param
+
+    workflow[TransformationTimeFilter[snx.NXdetector, RunType]] = (
+        # Default to zero detector rotation if the log is empty.
+        # In practice it should never be empty, and it cannot be reduced,
+        # but this default makes it possible to at least load the data
+        # for visualization.
+        corrections.assume_time_series_constant_with_zero_default_value_if_empty
+    )
     return workflow

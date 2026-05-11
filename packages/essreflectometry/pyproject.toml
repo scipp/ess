@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-  "setuptools>=77",
-  "setuptools_scm[toml]>=8.0",
+    "setuptools>=77",
+    "setuptools_scm[toml]>=8.0",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -10,7 +10,6 @@ name = "essreflectometry"
 description = "Reflectometry data reduction for the European Spallation Source"
 authors = [{ name = "Scipp contributors" }]
 license = "BSD-3-Clause"
-license-files = ["../../LICENSE"]
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Science/Research",
@@ -30,18 +29,18 @@ requires-python = ">=3.11"
 # Run 'tox -e deps' after making changes here. This will update requirement files.
 # Make sure to list one dependency per line.
 dependencies = [
-  "dask>=2022.1.0",
-  "python-dateutil",
-  "graphviz",
-  "plopp>=24.7.0",
-  "orsopy>=1.2",
-  "sciline>=24.6.0",
-  "scipp>=24.09.1",  # Fixed new hist/bin API
-  "scippneutron>=24.10.0",
-  "scippnexus>=24.9.1",
-  "essreduce>=26.4.0",
-  "esspolarization>=25.7.0",
-  "pandas>=2.1.2",
+    "dask>=2022.1.0",
+    "python-dateutil",
+    "graphviz",
+    "plopp>=24.7.0",
+    "orsopy>=1.2",
+    "sciline>=24.6.0",
+    "scipp>=24.09.1", # Fixed new hist/bin API
+    "scippneutron>=24.10.0",
+    "scippnexus>=24.9.1",
+    "essreduce>26.4.0",
+    "esspolarization>=25.7.0",
+    "pandas>=2.1.2",
 ]
 
 dynamic = ["version"]
@@ -52,10 +51,10 @@ test = [
     "pooch>=1.5",
 ]
 gui = [
-  "ipywidgets",
-  "ipydatagrid",
-  "ipytree",
-  "pythreejs",
+    "ipywidgets",
+    "ipydatagrid",
+    "ipytree",
+    "pythreejs",
 ]
 docs = [
     "autodoc-pydantic",
@@ -78,7 +77,7 @@ docs = [
     "tof",
 ]
 all = [
-  "essreflectometry[gui]",
+    "essreflectometry[gui]",
 ]
 
 [project.urls]
@@ -102,10 +101,10 @@ addopts = """
 """
 testpaths = "tests"
 filterwarnings = [
-  "error",
-  'ignore:\n.*Sentinel is not a public part of the traitlets API.*:DeprecationWarning',
-  "ignore:.*metadata to be logged in the data array, it is necessary to install the orsopy package.:UserWarning",
-  "ignore:.*A transformation needs a vector attribute. Falling back to returning underlying value.:UserWarning",
+    "error",
+    'ignore:\n.*Sentinel is not a public part of the traitlets API.*:DeprecationWarning',
+    "ignore:.*metadata to be logged in the data array, it is necessary to install the orsopy package.:UserWarning",
+    "ignore:.*A transformation needs a vector attribute. Falling back to returning underlying value.:UserWarning",
 ]
 
 [tool.ruff]
@@ -130,16 +129,16 @@ pydocstyle.convention = "numpy"
 [tool.ruff.lint.per-file-ignores]
 # those files have an increased risk of relying on import order
 "tests/*" = [
-    "S101",  # asserts are fine in tests
-    "B018",  # 'useless expressions' are ok because some tests just check for exceptions
+    "S101", # asserts are fine in tests
+    "B018", # 'useless expressions' are ok because some tests just check for exceptions
 ]
 "*.ipynb" = [
-    "E501",  # longer lines are sometimes more readable
-    "F403",  # *-imports used with domain types
-    "F405",  # linter may fail to find names because of *-imports
-    "I",  # we don't collect imports at the top
-    "S101",  # asserts are used for demonstration and are safe in notebooks
-    "T201",  # printing is ok for demonstration purposes
+    "E501", # longer lines are sometimes more readable
+    "F403", # *-imports used with domain types
+    "F405", # linter may fail to find names because of *-imports
+    "I", # we don't collect imports at the top
+    "S101", # asserts are used for demonstration and are safe in notebooks
+    "T201", # printing is ok for demonstration purposes
 ]
 
 [tool.ruff.format]
