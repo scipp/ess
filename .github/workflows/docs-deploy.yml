@@ -23,6 +23,10 @@ on:
         required: false
         type: string
 
+env:
+  PIXI_FROZEN: true
+  PIXI_NO_INSTALL: true
+
 jobs:
   docs:
     name: Build and deploy docs
@@ -36,6 +40,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          pixi-version: v0.68.0
           frozen: true
           environments: docs-${{ inputs.package }}
       - name: Build docs
