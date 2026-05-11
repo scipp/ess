@@ -1,0 +1,136 @@
+name: Check PR
+run-name: Check PR(\#${{ github.event.pull_request.number }})
+
+on:
+  pull_request:
+    types:
+      # Label checks should run on `opened`, `reopened` and `closed`
+      # but title check should only run on `opened` or `reopened`.
+      - opened
+      - reopened
+      - closed
+    paths:
+      # Labels are added based on changes of specific path patterns.
+      # Make sure the paths are handled when you add a new path patterns.
+      - 'packages/**'
+      - '.github/**'
+      - 'pixi.toml'
+      - 'docs/**'
+
+concurrency:
+  # Even if the pull request has same reference, it should also run again if it's a different PR.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.pull_request.number }}
+
+env:
+  PR_NUM: ${{ github.event.pull_request.number }}
+
+jobs:
+  check-pr:
+    name: Check Labels
+    runs-on: ubuntu-slim
+    outputs:
+      all_labels: ${{ steps.all-labels.outputs.all_labels }}
+      new_labels: ${{ steps.new-labels.outputs.new_labels }}
+      title_prefix: ${{ steps.title-check.outputs.title_prefix }}
+      new_title: ${{ steps.title-check.outputs.new_title }}
+    if: ${{ github.event.action == 'opened' || github.event.action == 'closed' || github.event.action == 'reopened' }}
+    steps:
+      - uses: actions/checkout@v6
+      - run: git fetch origin ${{ github.base_ref }}
+      - name: Collect all expected labels based on the change.
+        id: all-labels
+        run: |
+          DIFFFILES=($(git diff --name-only origin/${{ github.base_ref }}));
+          labels=($(for diff_file in ${DIFFFILES[@]}; do
+            if [[ "${diff_file}" =~ ^packages\/([a-zA-Z]+)\/[a-zA-Z]+ ]]; then
+                echo ${BASH_REMATCH[1]};
+              elif [[ ${diff_file} =~ ^\.github* || ${diff_file} == "pixi\.toml" ]]; then
+                echo CI;
+              elif [[ ${diff_file} =~ ^docs\/* ]]; then
+                echo documentation;
+              fi
+            done | sort -u));
+          echo "Found labels to add: ${labels[@]}";
+          echo "all_labels=${labels[@]}" >> "$GITHUB_OUTPUT";
+      - name: Collect labels that need to be added among all_labels.
+        id: new-labels
+        env:
+           all_labels: ${{ steps.all-labels.outputs.all_labels }}
+        run: |
+          EXISTING_LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}';
+          new_labels=();
+          for label in ${all_labels[@]}; do
+            if [[ "$EXISTING_LABELS" == *"${label}"* ]]; then
+          	  echo "${label} is already added to the current PR.";
+            else
+              echo "Found a new label to be added: ${label}";
+              new_labels+=("${label}");
+            fi
+          done
+          echo "new_labels=${new_labels[@]}" >> "$GITHUB_OUTPUT";
+      - name: Check the title prefix.
+        id: title-check
+        if: ${{ steps.all-labels.outputs.all_labels && !startsWith( github.event.pull_request.title, '[' ) }}
+        env:
+          all_labels: ${{ steps.all-labels.outputs.all_labels }}
+          new_labels: ${{ steps.new-labels.outputs.new_labels }}
+          original_title: ${{ github.event.pull_request.title }}
+        run: |
+          labels=(${all_labels});
+          # Only one label
+          if [[ ${#labels[@]} -eq 1  ]]; then
+            title_prefix="[${labels[0]^^}]";
+            echo "title_prefix=${title_prefix}" >> "$GITHUB_OUTPUT";
+            echo "new_title=${title_prefix} ${original_title}" >> "$GITHUB_OUTPUT";
+          # Ignore multiple labels
+          elif [[ ${#labels[@]} -gt 1  ]]; then
+            echo "There are multiple labels found for this PR. Skipping making a new title...";
+          fi
+
+  edit-pr:
+    name: Edit PR with New Labels or Title Prefix and Report
+    runs-on: ubuntu-slim
+    needs:
+      - check-pr
+    env:
+       all_labels: ${{ needs.check-pr.outputs.all_labels }}
+       new_labels: ${{ needs.check-pr.outputs.new_labels }}
+       title_prefix: ${{ needs.check-pr.outputs.title_prefix }}
+       new_title: ${{ needs.check-pr.outputs.new_title }}
+       # The bot needs this token for editing PR.
+       GH_TOKEN: ${{ github.token }}
+    permissions:
+      # The bot write comments, add labels or update the title of PR.
+      pull-requests: write
+    # If there is any new label or new title
+    if: ${{ needs.check-pr.outputs.new_labels || needs.check-pr.outputs.new_title }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Add new labels to the PR
+        id: add-new-labels
+        if: ${{ needs.check-pr.outputs.new_labels }}
+        run: |
+          labels=(${new_labels});
+          combined_label=${labels[0]};
+          for label in ${labels[@]:1}; do combined_label="${combined_label},${label}"; done
+          gh pr edit ${PR_NUM} --add-label ${combined_label};
+      - name: Collect comments about the new labels
+        id: new-labels-add-to-report
+        if: ${{ needs.check-pr.outputs.new_labels }}
+        run: |
+          echo "Hi! Your PR was missing some labels 🔖 so I added them: ${new_labels}" >> pr-comment.md;
+      - name: Add missing title prefix to the PR
+        id: edit-title-prefix
+        if: ${{ needs.check-pr.outputs.new_title }}
+        run: |
+          echo "Title doesn't have any relevant prefix... adding one...";
+          gh pr edit ${PR_NUM} --title "${new_title}";
+      - name: Collect comments about the new title
+        id: new-title-add-to-report
+        if: ${{ needs.check-pr.outputs.new_title }}
+        run: |
+          if [[ -f pr-comment.md ]]; then greeting="Hi Again 👋!"; else greeting="Hi 👋!"; fi
+          echo "${greeting} I added the missing prefix: ${title_prefix} to the title." >> pr-comment.md;
+      - name: Leave a comment about the changes.
+        id: report
+        run: gh pr comment ${PR_NUM} -F pr-comment.md;
