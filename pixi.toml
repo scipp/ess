@@ -16,11 +16,13 @@ macos = "14.0"
 scipp = "0m"
 scippneutron = "0m"
 scippnexus = "0m"
+plopp = "0m"
 
 [pypi-exclude-newer]
 scipp = "0m"
 scippneutron = "0m"
 scippnexus = "0m"
+plopp = "0m"
 
 # ==================== Parameterized tasks ====================
 
