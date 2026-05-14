@@ -44,7 +44,7 @@ jobs:
           labels=($(for diff_file in ${DIFFFILES[@]}; do
             if [[ "${diff_file}" =~ ^packages\/([a-zA-Z]+)\/[a-zA-Z]+ ]]; then
                 echo ${BASH_REMATCH[1]};
-              elif [[ ${diff_file} =~ ^\.github* || ${diff_file} == "pixi\.toml" ]]; then
+              elif [[ ${diff_file} =~ ^\.github* || ${diff_file} =~ pixi\.toml ]]; then
                 echo CI;
               elif [[ ${diff_file} =~ ^docs\/* ]]; then
                 echo documentation;
