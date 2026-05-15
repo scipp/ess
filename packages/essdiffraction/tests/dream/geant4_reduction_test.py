@@ -307,7 +307,7 @@ def test_pipeline_save_data_to_disk(output_folder: Path):
     result = wf.compute(ReducedTofCIF)
     result.comment = """This file was generated with the DREAM data reduction user guide
     in the documentation of ESSdiffraction.
-    See https://scipp.github.io/essdiffraction/
+    See https://scipp.github.io/ess/diffraction/
     """
     result.save(output_folder / "dream_reduced.cif")
 
