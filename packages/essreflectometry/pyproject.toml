@@ -81,9 +81,9 @@ all = [
 ]
 
 [project.urls]
-"Bug Tracker" = "https://github.com/scipp/essreflectometry/issues"
-"Documentation" = "https://scipp.github.io/essreflectometry"
-"Source" = "https://github.com/scipp/essreflectometry"
+"Bug Tracker" = "https://github.com/scipp/ess/issues"
+"Documentation" = "https://scipp.github.io/ess/reflectometry"
+"Source" = "https://github.com/scipp/ess/tree/main/packages/essreflectometry"
 
 [tool.setuptools_scm]
 root = "../.."

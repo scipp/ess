@@ -179,7 +179,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/scipp/essspectroscopy",
+            "url": "https://github.com/scipp/ess/tree/main/packages/essspectroscopy",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },
