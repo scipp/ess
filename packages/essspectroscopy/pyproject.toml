@@ -65,9 +65,9 @@ docs = [
 ]
 
 [project.urls]
-"Bug Tracker" = "https://github.com/scipp/essspectroscopy/issues"
-"Documentation" = "https://scipp.github.io/essspectroscopy"
-"Source" = "https://github.com/scipp/essspectroscopy"
+"Bug Tracker" = "https://github.com/scipp/ess/issues"
+"Documentation" = "https://scipp.github.io/ess/spectroscopy"
+"Source" = "https://github.com/scipp/ess/tree/main/packages/essspectroscopy"
 
 [tool.setuptools_scm]
 root = "../.."

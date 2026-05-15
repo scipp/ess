@@ -18,9 +18,9 @@ To cite a specific version of ESSsans, select the desired version on Zenodo to g
 
 ## Older versions of the documentation
 
-Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/esssans/releases).
+Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/ess/releases?q=esssans).
 Simply download the archive, unzip and view locally in a web browser.
 
 ## Source code and development
 
-ESSsans is hosted and developed [on GitHub](https://github.com/scipp/esssans).
+ESSsans is hosted and developed [on GitHub](https://github.com/scipp/ess/tree/main/packages/esssans).

@@ -18,9 +18,9 @@ To cite a specific version of ESSspectroscopy, select the desired version on Zen
 
 ## Older versions of the documentation
 
-Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/essspectroscopy/releases).
+Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/ess/releases?q=essspectroscopy).
 Simply download the archive, unzip and view locally in a web browser.
 
 ## Source code and development
 
-ESSspectroscopy is hosted and developed [on GitHub](https://github.com/scipp/essspectroscopy).
+ESSspectroscopy is hosted and developed [on GitHub](https://github.com/scipp/ess/tree/main/packages/essspectroscopy).

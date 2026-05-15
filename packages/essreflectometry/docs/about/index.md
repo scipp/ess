@@ -18,12 +18,12 @@ To cite a specific version of ESSreflectometry, select the desired version on Ze
 
 ## Older versions of the documentation
 
-Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/essreflectometry/releases).
+Older versions of the documentation pages can be found under the assets of each [release](https://github.com/scipp/ess/releases?q=essreflectometry).
 Simply download the archive, unzip and view locally in a web browser.
 
 ## Source code and development
 
-ESSreflectometry is hosted and developed [on GitHub](https://github.com/scipp/essreflectometry).
+ESSreflectometry is hosted and developed [on GitHub](https://github.com/scipp/ess/tree/main/packages/essreflectometry).
 
 
 ```{toctree}
