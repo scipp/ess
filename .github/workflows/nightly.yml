@@ -45,6 +45,10 @@ jobs:
           - essreduce
           - essimaging
           - essnmx
+          - essdiffraction
+          - essreflectometry
+          - esssans
+          - essspectroscopy
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
