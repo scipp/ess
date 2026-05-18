@@ -10,6 +10,7 @@ from ..nexus.types import DiskChoppers
 from .lut import (
     BeamlineComponentReading,
     DistanceResolution,
+    FastLookupTableWorkflow,
     LookupTableWorkflow,
     LtotalRange,
     NumberOfSimulatedNeutrons,
@@ -41,6 +42,7 @@ __all__ = [
     "DiskChoppers",
     "DistanceResolution",
     "ErrorLimitedLookupTable",
+    "FastLookupTableWorkflow",
     "GenericUnwrapWorkflow",
     "LookupTable",
     "LookupTableFilename",
