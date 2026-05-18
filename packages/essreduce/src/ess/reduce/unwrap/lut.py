@@ -17,7 +17,7 @@ from scippneutron.chopper import DiskChopper
 from scippneutron.tof import chopper_cascade
 
 from ..nexus.types import DiskChoppers, Position, RunType
-from .types import LookupTable
+from .types import LookupTable, Lut
 
 
 @dataclass
@@ -806,13 +806,16 @@ def make_wavelength_lut_from_polygons(
     )
 
     return LookupTable[RunType](
-        array=table,
-        pulse_period=pulse_period,
-        pulse_stride=pulse_stride,
-        distance_resolution=table.coords["distance"][1] - table.coords["distance"][0],
-        time_resolution=table.coords["event_time_offset"][1]
-        - table.coords["event_time_offset"][0],
-        # TODO: Do we still want to store the chopper information in the lookup table?
+        Lut(
+            array=table,
+            pulse_period=pulse_period,
+            pulse_stride=pulse_stride,
+            distance_resolution=table.coords["distance"][1]
+            - table.coords["distance"][0],
+            time_resolution=table.coords["event_time_offset"][1]
+            - table.coords["event_time_offset"][0],
+            # TODO: Do we still want to store the chopper information in the lookup table?
+        )
     )
 
 
@@ -823,25 +826,26 @@ def providers() -> tuple[Callable]:
     return (make_wavelength_lut_from_polygons, compute_frame_sequence)
 
 
+def default_parameters() -> dict:
+    return {
+        PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
+        PulseStride: 1,
+        DistanceResolution: sc.scalar(0.1, unit="m"),
+        TimeResolution: sc.scalar(250.0, unit='us'),
+        SourceBounds: SourceBounds(
+            time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+            wavelength=(
+                sc.scalar(0.0, unit='angstrom'),
+                sc.scalar(15.0, unit='angstrom'),
+            ),
+        ),
+    }
+
+
 def FastLookupTableWorkflow():
     """
     Create a workflow for computing a wavelength lookup table from computing an
     acceptance diagram for a pulse propagating through a chopper cascade.
     """
-    wf = sl.Pipeline(
-        providers(),
-        params={
-            PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
-            PulseStride: 1,
-            DistanceResolution: sc.scalar(0.1, unit="m"),
-            TimeResolution: sc.scalar(250.0, unit='us'),
-            SourceBounds: SourceBounds(
-                time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
-                wavelength=(
-                    sc.scalar(0.0, unit='angstrom'),
-                    sc.scalar(15.0, unit='angstrom'),
-                ),
-            ),
-        },
-    )
+    wf = sl.Pipeline(providers(), params=default_parameters())
     return wf

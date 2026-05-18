@@ -89,5 +89,7 @@ def GenericUnwrapWorkflow(
 
     # Default parameters
     wf[PulseStrideOffset] = None
+    for key, value in lut.default_parameters().items():
+        wf[key] = value
 
     return wf
