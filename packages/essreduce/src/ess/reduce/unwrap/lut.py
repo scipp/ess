@@ -547,7 +547,7 @@ def _polygon_intersections(polygons: list[np.ndarray], xs: np.ndarray) -> np.nda
     return 0.5 * (y_min + y_max), 0.5 * (y_max - y_min)
 
 
-def _compute_mean_wavelength_in_polygons(
+def _estimate_wavelength_by_polygon_centers(
     subframes: list[chopper_cascade.Subframe],
     time_edges: sc.Variable,
     time_unit: str,
@@ -725,9 +725,6 @@ def make_wavelength_lut_from_polygons(
     min_dist = ltotal_range[0].to(unit=distance_unit)
     max_dist = ltotal_range[1].to(unit=distance_unit)
 
-    # We need to bin the data below, to compute the weighted mean of the wavelength.
-    # This results in data with bin edges.
-    # However, the 2d interpolator expects bin centers.
     # We want to give the 2d interpolator a table that covers the requested range,
     # hence we need to extend the range by at least half a resolution in each direction.
     # Then, we make the choice that the resolution in distance is the quantity that
@@ -770,7 +767,7 @@ def make_wavelength_lut_from_polygons(
         subframes = selected_frame.propagate_to(dist).subframes
 
         pieces.append(
-            _compute_mean_wavelength_in_polygons(
+            _estimate_wavelength_by_polygon_centers(
                 subframes=subframes,
                 time_edges=time_edges,
                 time_unit=time_unit,
