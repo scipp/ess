@@ -5,15 +5,18 @@ Utilities for computing wavelength lookup tables.
 """
 
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import NewType
 
 import numpy as np
 import sciline as sl
 import scipp as sc
+import scippnexus as snx
+from scippneutron.chopper import DiskChopper
 from scippneutron.tof import chopper_cascade
 
-from ..nexus.types import AnyRun, DiskChoppers
+from ..nexus.types import DiskChoppers, Position, RunType
 from .types import LookupTable
 
 
@@ -52,7 +55,7 @@ class BeamlineComponentReading:
 
 
 @dataclass
-class SimulationResults:
+class SimulationResultsBaseClass:
     """
     Results of a time-of-flight simulation used to create a lookup table.
     It should contain readings at various positions along the beamline, e.g., at
@@ -73,7 +76,31 @@ class SimulationResults:
     """
 
     readings: dict[str, BeamlineComponentReading]
-    choppers: DiskChoppers[AnyRun] | None = None
+    choppers: dict[str, DiskChopper] | None = None
+
+
+class SimulationResults(
+    sl.Scope[RunType, SimulationResultsBaseClass],
+    SimulationResultsBaseClass,
+):
+    """
+    Results of a time-of-flight simulation used to create a lookup table.
+    It should contain readings at various positions along the beamline, e.g., at
+    the source and after each chopper.
+    It also contains the chopper parameters used in the simulation, so it can be
+    determined if this simulation is compatible with a given experiment.
+
+    Parameters
+    ----------
+    readings:
+        A dict of :class:`BeamlineComponentReading` objects representing the readings at
+        various positions along the beamline. The keys in the dict should correspond to
+        the names of the components (e.g., 'source', 'chopper1', etc.).
+    choppers:
+        The chopper parameters used in the simulation (if any). These are used to verify
+        that the simulation is compatible with a given experiment (comparing chopper
+        openings, frequencies, phases, etc.).
+    """
 
 
 NumberOfSimulatedNeutrons = NewType("NumberOfSimulatedNeutrons", int)
@@ -151,11 +178,13 @@ class SourceBounds:
     """Wavelength range (min, max) of the neutrons in the source pulse."""
 
 
-ChopperFrameSequence = NewType("ChopperFrameSequence", chopper_cascade.FrameSequence)
-"""
-Sequence of chopper frames used to compute the wavelength as a function of distance and
-event_time_offset in the lookup table.
-"""
+class ChopperFrameSequence(
+    sl.Scope[RunType, chopper_cascade.FrameSequence], chopper_cascade.FrameSequence
+):
+    """
+    Sequence of chopper frames used to compute the wavelength as a function of distance
+    and event_time_offset in the lookup table.
+    """
 
 
 def _compute_mean_wavelength(
@@ -224,13 +253,13 @@ def _compute_mean_wavelength(
 
 
 def make_wavelength_lookup_table(
-    simulation: SimulationResults,
+    simulation: SimulationResults[RunType],
     ltotal_range: LtotalRange,
     distance_resolution: DistanceResolution,
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride,
-) -> LookupTable:
+) -> LookupTable[RunType]:
     """
     Compute a lookup table for wavelength as a function of distance and
     time-of-arrival.
@@ -378,7 +407,7 @@ def make_wavelength_lookup_table(
         },
     )
 
-    return LookupTable(
+    return LookupTable[RunType](
         array=table,
         pulse_period=pulse_period,
         pulse_stride=pulse_stride,
@@ -393,7 +422,7 @@ def make_wavelength_lookup_table(
     )
 
 
-def _to_component_reading(component):
+def _to_component_reading(component) -> BeamlineComponentReading:
     events = component.data.squeeze().flatten(to='event')
     sel = sc.full(value=True, sizes=events.sizes)
     for key in {'blocked_by_others', 'blocked_by_me'} & set(events.masks.keys()):
@@ -412,13 +441,13 @@ def _to_component_reading(component):
 
 
 def simulate_chopper_cascade_using_tof(
-    choppers: DiskChoppers[AnyRun],
+    choppers: DiskChoppers[RunType],
     source_position: SourcePosition,
     neutrons: NumberOfSimulatedNeutrons,
     pulse_stride: PulseStride,
     seed: SimulationSeed,
     facility: SimulationFacility,
-) -> SimulationResults:
+) -> SimulationResults[RunType]:
     """
     Simulate a pulse of neutrons propagating through a chopper cascade using the
     ``tof`` package (https://scipp.github.io/tof).
@@ -457,12 +486,12 @@ def simulate_chopper_cascade_using_tof(
     )
     sim_readings = {"source": _to_component_reading(source)}
     if not tof_choppers:
-        return SimulationResults(readings=sim_readings, choppers=None)
+        return SimulationResults[RunType](readings=sim_readings, choppers=None)
     model = tof.Model(source=source, choppers=tof_choppers)
     results = model.run()
     for name, ch in results.choppers.items():
         sim_readings[name] = _to_component_reading(ch)
-    return SimulationResults(readings=sim_readings, choppers=choppers)
+    return SimulationResults[RunType](readings=sim_readings, choppers=choppers)
 
 
 def LookupTableWorkflow():
@@ -617,11 +646,11 @@ def _estimate_wavelength_by_polygon_centers(
 
 def compute_frame_sequence(
     pulse_period: PulsePeriod,
-    disk_choppers: DiskChoppers[AnyRun],
-    source_position: SourcePosition,
+    disk_choppers: DiskChoppers[RunType],
+    source_position: Position[snx.NXsource, RunType],
     source_bounds: SourceBounds,
     pulse_stride: PulseStride,
-) -> ChopperFrameSequence:
+) -> ChopperFrameSequence[RunType]:
     """
     Compute the chopper frame sequence for a given set of disk choppers and source pulse
     parameters.
@@ -680,7 +709,7 @@ def compute_frame_sequence(
         npulses=pulse_stride,
     )
     frames = frames.chop(chops.values())
-    return ChopperFrameSequence(frames)
+    return ChopperFrameSequence[RunType](frames)
 
 
 def make_wavelength_lut_from_polygons(
@@ -690,7 +719,7 @@ def make_wavelength_lut_from_polygons(
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride,
     frames: ChopperFrameSequence,
-) -> LookupTable:
+) -> LookupTable[RunType]:
     """
     Compute a lookup table for wavelength as a function of distance and
     time-of-arrival.
@@ -776,7 +805,7 @@ def make_wavelength_lut_from_polygons(
         coords={"distance": distances, "event_time_offset": time_edges},
     )
 
-    return LookupTable(
+    return LookupTable[RunType](
         array=table,
         pulse_period=pulse_period,
         pulse_stride=pulse_stride,
@@ -787,13 +816,20 @@ def make_wavelength_lut_from_polygons(
     )
 
 
+def providers() -> tuple[Callable]:
+    """
+    Return the providers for creating the wavelength lookup table.
+    """
+    return (make_wavelength_lut_from_polygons, compute_frame_sequence)
+
+
 def FastLookupTableWorkflow():
     """
     Create a workflow for computing a wavelength lookup table from computing an
     acceptance diagram for a pulse propagating through a chopper cascade.
     """
     wf = sl.Pipeline(
-        (make_wavelength_lut_from_polygons, compute_frame_sequence),
+        providers(),
         params={
             PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
             PulseStride: 1,

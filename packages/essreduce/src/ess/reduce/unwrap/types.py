@@ -15,9 +15,10 @@ LookupTableFilename = NewType("LookupTableFilename", str)
 
 
 @dataclass
-class LookupTable:
+class Lut:
     """
-    Lookup table giving wavelength as a function of distance and ``event_time_offset``.
+    Base class for a lookup table giving wavelength as a function of distance and
+    ``event_time_offset``.
     """
 
     array: sc.DataArray
@@ -44,7 +45,12 @@ class LookupTable:
         return self.array.plot(*args, **kwargs)
 
 
-class ErrorLimitedLookupTable(sl.Scope[Component, LookupTable], LookupTable):
+class LookupTable(sl.Scope[RunType, Lut], Lut):
+    """Lookup table giving wavelength as a function of distance and
+    ``event_time_offset``."""
+
+
+class ErrorLimitedLookupTable(sl.Scope[RunType, Component, Lut], Lut):
     """Lookup table that is masked with NaNs in regions where the standard deviation of
     the wavelength is above a certain threshold."""
 
