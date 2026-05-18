@@ -1,0 +1,769 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ADR 0001: Relagate NXspe support &#8212; ESSspectroscopy</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../_static/documentation_options.js?v=3eff4b7d"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'developer/adr/0001-relegate-nxspe-support';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Issues encountered during workflow development" href="../bifrost-encountered-issues.html" />
+    <link rel="prev" title="Architecture Decision Records" href="../architecture-decision-records.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev5834+g27179d6b7" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSspectroscopy - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSspectroscopy - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essspectroscopy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essspectroscopy/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essspectroscopy" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essspectroscopy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essspectroscopy/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essspectroscopy" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coding-conventions.html">Coding conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dependency-management.html">Dependency management</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../architecture-decision-records.html">Architecture Decision Records</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ADR 0001: Relagate NXspe support</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../bifrost-encountered-issues.html">Issues encountered during workflow development</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sqw-prioritization-and-challenges"><code class="docutils literal notranslate"><span class="pre">SQW</span></code> Prioritization and Challenges</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bending-nxspe-to-indirect-geometry-time-of-flight">Bending <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> to Indirect-Geometry Time-of-Flight</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#imaginary-observations">Imaginary observations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#natural-e-binning">Natural <em>E</em> binning</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/developer/adr/0001-relegate-nxspe-support.md">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Development</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../architecture-decision-records.html" class="nav-link">Architecture Decision Records</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR 0001: Relagate NXspe support</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0001-relagate-nxspe-support">
+<h1>ADR 0001: Relagate NXspe support<a class="headerlink" href="#adr-0001-relagate-nxspe-support" title="Link to this heading">#</a></h1>
+<ul class="simple">
+<li><p>Status: accepted</p></li>
+<li><p>Deciders: Greg, Jan-Lukas</p></li>
+<li><p>Date: 2024-10</p></li>
+</ul>
+<section id="context">
+<h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
+<p>Targeting community supported data formats will enable efficient use of existing analysis and visualization tools.
+A number of histogram formats have been <a class="reference external" href="https://jira.ess.eu/browse/DMSCSPEC-46">listed for possible support</a>:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://jira.ess.eu/browse/DMSCSPEC-50"><code class="docutils literal notranslate"><span class="pre">NXspe</span></code></a></p></li>
+<li><p><a class="reference external" href="https://jira.ess.eu/browse/DMSCSPEC-51"><code class="docutils literal notranslate"><span class="pre">SQW</span></code></a></p></li>
+<li><p><a class="reference external" href="https://jira.ess.eu/browse/DMSCSPEC-52"><code class="docutils literal notranslate"><span class="pre">MJOLNIR</span></code></a></p></li>
+</ul>
+<section id="sqw-prioritization-and-challenges">
+<h3><code class="docutils literal notranslate"><span class="pre">SQW</span></code> Prioritization and Challenges<a class="headerlink" href="#sqw-prioritization-and-challenges" title="Link to this heading">#</a></h3>
+<p>One of which, <a class="reference external" href="https://github.com/scipp/essspectroscopy/issues/23"><code class="docutils literal notranslate"><span class="pre">SQW</span></code></a>,
+has been identified as higher importance because it will enable interfacing with
+the PACE tools.</p>
+<p>The major drawback to the <code class="docutils literal notranslate"><span class="pre">SQW</span></code> format is that it is documented most thoroughly by
+its <code class="docutils literal notranslate"><span class="pre">MATLAB</span></code> serialization/deserialization routines, which are less than straightforward
+to replicate in part due to an extensive class hierarchy, single-source backwards
+compatibility over multiple file format versions, the ability to mix definition and
+implementation of functions and place either in at least three different locations
+(the <code class="docutils literal notranslate"><span class="pre">rundata</span></code> helper class seems to be spread over six),
+and the lack of a free IDE that can help sort out the runtime behavior.</p>
+<p>Recently it was posited that, since <code class="docutils literal notranslate"><span class="pre">Horace</span></code> can read <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> files and produce a valid
+<code class="docutils literal notranslate"><span class="pre">SQW</span></code> file from them, perhaps focusing on their output from <code class="docutils literal notranslate"><span class="pre">essspectroscopy</span></code> could
+be prudent.</p>
+</section>
+<section id="bending-nxspe-to-indirect-geometry-time-of-flight">
+<h3>Bending <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> to Indirect-Geometry Time-of-Flight<a class="headerlink" href="#bending-nxspe-to-indirect-geometry-time-of-flight" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">NXspe</span></code> is the <a class="reference external" href="https://manual.nexusformat.org/classes/applications/NXspe.html#nxspe"><code class="docutils literal notranslate"><span class="pre">NeXus</span></code> application definition</a>
+implementation of the columns-of-text <code class="docutils literal notranslate"><span class="pre">SPE</span></code> data format.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SPE</span></code> format files contain energy-transfer (or time) histograms of intensity,
+one per detector element in the instrument.
+Information about the positions and sizes of the detector elements was contained in
+a separate file, either <code class="docutils literal notranslate"><span class="pre">PAR</span></code> or <code class="docutils literal notranslate"><span class="pre">PHX</span></code>.
+The format was defined with Direct-Geometry (DG) Time-of-Flight (TOF) spectrometers in
+mind where a single incident energy applied to all data, and all detector elements
+shared the same energy-transfer histogram bin edges. This information was kept
+separately from the two text files, and put into analysis scripts by the user.</p>
+<p><code class="docutils literal notranslate"><span class="pre">NXspe</span></code> incorporates all information contained previously in <code class="docutils literal notranslate"><span class="pre">SPE</span></code> and <code class="docutils literal notranslate"><span class="pre">PAR</span></code> files
+plus minimal information that otherwise may have gone into a log book.
+It represents an appreciable improvement over the previous status-quo for DG-TOF.</p>
+<p>For Indirect-Geometry (IG) TOF instruments with a single final neutron energy, like
+back-scattering instruments, it is also possible to histogram all detector energy
+spectra with a single set of bin edges. By means of a flag, <code class="docutils literal notranslate"><span class="pre">Horace</span></code> can exchange
+<em>E</em><sub>i</sub> and <em>E</em><sub>f</sub> in early data loading calculations, and then
+otherwise treat conversion more-or-less the same to produce intensity of (<strong><em>Q</em></strong>,<em>E</em>)
+observations binned, not unlike <code class="docutils literal notranslate"><span class="pre">scipp</span></code>, in a coarse 4-D grid.</p>
+<p>The problems start, however, when not all detectors share a single final energy,
+as with BIFROST.
+A single incident wavelength range applies for all BIFROST detector elements,
+so one <em>E</em><sub>i</sub> bin-boundary set would naturally apply for all detectors.
+But this is <em>far</em> from fixed <em>E</em><sub>i</sub> or fixed <em>E</em><sub>f</sub> with a single
+energy transfer, <em>E</em>, bin-boundary set.</p>
+<section id="imaginary-observations">
+<h4>Imaginary observations<a class="headerlink" href="#imaginary-observations" title="Link to this heading">#</a></h4>
+<p>The closest BIFROST data can get to ‘standard’ <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> <em>E</em> binning is to stitch
+together the single <em>E</em><sub>i</sub> ranges offset by each <em>E</em><sub>f</sub>.
+This has three drawbacks</p>
+<ol class="arabic simple">
+<li><p>The number of bins per detector element will consequently be larger</p></li>
+<li><p>The sizes of the bins may not match well to the ‘natural’ incident energy bin sizes for all detector elements</p></li>
+<li><p>Imaginary observations will be created for all detector elements.</p></li>
+</ol>
+<blockquote>
+<div><p><strong>Note:</strong>
+The term imaginary is used here to indicate that no measurement was performed
+for the incident neutron energies needed to produce the <em>E</em> in one or more bin.</p>
+</div></blockquote>
+</section>
+<section id="natural-e-binning">
+<h4>Natural <em>E</em> binning<a class="headerlink" href="#natural-e-binning" title="Link to this heading">#</a></h4>
+<p>Instead, by keeping per-detector-element <em>E</em> binning the adherence to
+the <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> standard can be maintained but software like <code class="docutils literal notranslate"><span class="pre">Horace</span></code> struggle to handle
+such data —
+the required <code class="docutils literal notranslate"><span class="pre">/entry/data/energy</span></code> becomes 2-D but <code class="docutils literal notranslate"><span class="pre">Horace</span></code> expects (and reshapes) this
+data to be 1-D.</p>
+<p>One symptom of this incompatibility is excessive memory usage.
+For the 13500 BIFROST detector elements, with energy transfer binned into 103 bins,
+in an early conversion step <code class="docutils literal notranslate"><span class="pre">Horace</span></code> requires a 13500 × 104 × 13500 array
+of double values, and while ∼ 141 GB is not an insurmountable value it’s also
+not necessary.</p>
+<p>In testing, moving to a machine with 256 GB of memory was not sufficient for the
+conversion to proceed. And it seems likely there are more incompatible assumptions
+made about the content of the data for <code class="docutils literal notranslate"><span class="pre">Horace</span></code> to successfully produce an <code class="docutils literal notranslate"><span class="pre">SQW</span></code> object
+from the ‘<code class="docutils literal notranslate"><span class="pre">BIFROST</span></code>-<code class="docutils literal notranslate"><span class="pre">NXspe</span></code>’ files.</p>
+</section>
+</section>
+</section>
+<section id="decision">
+<h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
+<p>It is now possible to make <code class="docutils literal notranslate"><span class="pre">BIFROST</span></code> data conform to the <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> standard published by
+the NeXus Foundation, but community software that <em>reads</em> <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> is likely to have
+made similar assumptions about the shape of required data as <code class="docutils literal notranslate"><span class="pre">Horace</span></code>.
+So the utility of <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> as a common data format is likely limited.</p>
+<p><em>Producing</em> <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> may still be useful, but it can not replace direct output of
+<code class="docutils literal notranslate"><span class="pre">SQW</span></code> data files.</p>
+<p>∴ Relegate <code class="docutils literal notranslate"><span class="pre">NXspe</span></code> to lesser-supported output formats.</p>
+</section>
+<section id="consequences">
+<h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
+<p>A fully-fledged <code class="docutils literal notranslate"><span class="pre">SQW</span></code> output method is still required, which will still pose the same
+problems of construction and maintainability.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../architecture-decision-records.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Architecture Decision Records</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../bifrost-encountered-issues.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Issues encountered during workflow development</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSspectroscopy version: 0.1.dev5834+g27179d6b7 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

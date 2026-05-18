@@ -1,0 +1,888 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.bifrost.detector &#8212; ESSspectroscopy</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../../_static/documentation_options.js?v=3eff4b7d"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/bifrost/detector';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev5834+g27179d6b7" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="ESSspectroscopy - Home"/>
+    <img src="../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSspectroscopy - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essspectroscopy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essspectroscopy/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essspectroscopy" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essspectroscopy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essspectroscopy/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essspectroscopy" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.bifrost.detector</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.bifrost.detector</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
+
+<span class="sd">&quot;&quot;&quot;Detector handling for BIFROST.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.spectroscopy.indirect.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_spectrometer_coords</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.spectroscopy.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Analyzer</span><span class="p">,</span>
+    <span class="n">DetectorPositionOffset</span><span class="p">,</span>
+    <span class="n">EmptyDetector</span><span class="p">,</span>
+    <span class="n">NeXusComponent</span><span class="p">,</span>
+    <span class="n">NeXusTransformation</span><span class="p">,</span>
+    <span class="n">PrimarySpecCoordTransformGraph</span><span class="p">,</span>
+    <span class="n">RunType</span><span class="p">,</span>
+    <span class="n">SecondarySpecCoordTransformGraph</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Position</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArcNumber</span>
+
+
+<div class="viewcode-block" id="arc_number">
+<a class="viewcode-back" href="../../../generated/modules/ess.bifrost.detector.arc_number.html#ess.bifrost.detector.arc_number">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">arc_number</span><span class="p">(</span>
+    <span class="n">beamline</span><span class="p">:</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArcNumber</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate BIFROST arc index number from pixel final energy</span>
+
+<span class="sd">    The BIFROST analyzers are each set to diffract an</span>
+<span class="sd">    energy in the set (2.7, 3.2, 3.8, 4.4. 5.0) meV.</span>
+<span class="sd">    This energy is only valid for the central point of the center</span>
+<span class="sd">    tube of the associated detector triplet. All other pixels</span>
+<span class="sd">    will have a final energy slightly higher or lower.</span>
+
+<span class="sd">    This function assigns the closest arc number indexing the</span>
+<span class="sd">    ordered set above.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    beamline:</span>
+<span class="sd">        A data array with a &#39;final_energy&#39; coordinate which is the</span>
+<span class="sd">        per-pixel (or event) final neutron energy.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The arc index of the analyzer from which the neutron scattered</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">minimum</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">2.7</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">)</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.575</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;meV&#39;</span><span class="p">)</span>
+    <span class="n">final_energy</span> <span class="o">=</span> <span class="n">beamline</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;final_energy&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ArcNumber</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">sc</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">final_energy</span> <span class="o">-</span> <span class="n">minimum</span><span class="p">)</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="arc_and_channel_from_detector_number">
+<a class="viewcode-back" href="../../../generated/modules/ess.bifrost.detector.arc_and_channel_from_detector_number.html#ess.bifrost.detector.arc_and_channel_from_detector_number">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">arc_and_channel_from_detector_number</span><span class="p">(</span>
+    <span class="n">detector_number</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate arc number and channel from detector number.</span>
+
+<span class="sd">    Calculate arc and channel for this triplet based on detector_number layout.</span>
+<span class="sd">    BIFROST detector_number ordering is (arc, tube, channel, pixel).</span>
+<span class="sd">    Each triplet contains 3 tubes of 100 pixels for a single arc-channel pair.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">det_num</span> <span class="o">=</span> <span class="n">detector_number</span><span class="p">[</span><span class="s1">&#39;tube&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">pixels_per_tube</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">tubes_per_channel</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">channels_per_arc</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">pixels_per_arc</span> <span class="o">=</span> <span class="n">pixels_per_tube</span> <span class="o">*</span> <span class="n">tubes_per_channel</span> <span class="o">*</span> <span class="n">channels_per_arc</span>  <span class="c1"># 2700</span>
+
+    <span class="c1"># detector_number is 1-indexed</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">det_num</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">arc</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">//</span> <span class="n">pixels_per_arc</span>
+    <span class="n">remainder</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">%</span> <span class="n">pixels_per_arc</span>
+    <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">remainder</span> <span class="o">%</span> <span class="p">(</span><span class="n">pixels_per_tube</span> <span class="o">*</span> <span class="n">channels_per_arc</span><span class="p">))</span> <span class="o">//</span> <span class="n">pixels_per_tube</span>
+
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">arc</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_calibrated_detector_bifrost">
+<a class="viewcode-back" href="../../../generated/modules/ess.bifrost.detector.get_calibrated_detector_bifrost.html#ess.bifrost.detector.get_calibrated_detector_bifrost">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_calibrated_detector_bifrost</span><span class="p">(</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">analyzer</span><span class="p">:</span> <span class="n">Analyzer</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">transform</span><span class="p">:</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="n">DetectorPositionOffset</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">primary_graph</span><span class="p">:</span> <span class="n">PrimarySpecCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">secondary_graph</span><span class="p">:</span> <span class="n">SecondarySpecCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the data array corresponding to a detector&#39;s signal field.</span>
+
+<span class="sd">    This includes:</span>
+
+<span class="sd">    - Reshaping the data array is reshaped to the logical detector shape.</span>
+<span class="sd">    - Assigning geometry coordinate &quot;position&quot;.</span>
+<span class="sd">    - Assigning spectrometer coordinates such as &quot;final_energy&quot;,</span>
+<span class="sd">      &quot;secondary_flight_time&quot;, and &quot;L1&quot;.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    detector:</span>
+<span class="sd">        Loaded NeXus detector.</span>
+<span class="sd">    analyzer:</span>
+<span class="sd">        Loaded analyzer parameters.</span>
+<span class="sd">    transform:</span>
+<span class="sd">        Transformation that determines the detector position.</span>
+<span class="sd">    offset:</span>
+<span class="sd">        Offset to add to the detector position.</span>
+<span class="sd">    primary_graph:</span>
+<span class="sd">        Coordinate transformation graph for the primary spectrometer.</span>
+<span class="sd">    secondary_graph:</span>
+<span class="sd">        Coordinate transformation graph for the secondary spectrometer.</span>
+<span class="sd">        Must be a closure over analyzer parameters.</span>
+<span class="sd">        And those parameters must have a compatible shape with ``data``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Detector geometry and spectrometer coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">da</span> <span class="o">=</span> <span class="n">get_base_calibrated_detector_bifrost</span><span class="p">(</span>
+        <span class="n">detector</span><span class="p">,</span> <span class="n">analyzer</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
+    <span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">dim_0</span><span class="o">=</span><span class="s1">&#39;tube&#39;</span><span class="p">,</span> <span class="n">dim_1</span><span class="o">=</span><span class="s1">&#39;length&#39;</span><span class="p">)</span>
+
+    <span class="n">arc</span><span class="p">,</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">arc_and_channel_from_detector_number</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;detector_number&#39;</span><span class="p">])</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;arc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">arc</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;channel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">channel</span>
+
+    <span class="n">da</span> <span class="o">=</span> <span class="n">add_spectrometer_coords</span><span class="p">(</span>
+        <span class="n">da</span><span class="p">,</span>
+        <span class="n">primary_graph</span><span class="p">,</span>
+        <span class="n">SecondarySpecCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+            <span class="p">{</span><span class="o">**</span><span class="n">secondary_graph</span><span class="p">,</span> <span class="o">**</span><span class="n">_make_analyzer_coord_graph</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">analyzer</span><span class="p">)}</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">da</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_base_calibrated_detector_bifrost">
+<a class="viewcode-back" href="../../../generated/modules/ess.bifrost.detector.get_base_calibrated_detector_bifrost.html#ess.bifrost.detector.get_base_calibrated_detector_bifrost">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_base_calibrated_detector_bifrost</span><span class="p">(</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">analyzer</span><span class="p">:</span> <span class="n">Analyzer</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">transform</span><span class="p">:</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="n">DetectorPositionOffset</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the data array corresponding to a detector&#39;s signal field.</span>
+
+<span class="sd">    This function is specific to BIFROST and differs from the generic</span>
+<span class="sd">    :func:`ess.reduce.nexus.workflow.get_calibrated_detector` in that it</span>
+<span class="sd">    assigns time-dependent positions by broadcasting the data into the &#39;time&#39; dimension.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    detector:</span>
+<span class="sd">        Loaded NeXus detector.</span>
+<span class="sd">    analyzer:</span>
+<span class="sd">        Loaded analyzer parameters.</span>
+<span class="sd">    transform:</span>
+<span class="sd">        Transformation that determines the detector position.</span>
+<span class="sd">    offset:</span>
+<span class="sd">        Offset to add to the detector position.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Detector with geometry coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_detector_position</span><span class="p">,</span> <span class="n">extract_signal_data_array</span>
+
+    <span class="n">da</span> <span class="o">=</span> <span class="n">extract_signal_data_array</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">compute_detector_position</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_assign_detector_position</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_assign_detector_position</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>  <span class="c1"># time-dependent transform</span>
+        <span class="c1"># Store position and time as separate coords because we can&#39;t store data arrays.</span>
+        <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span>
+            <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">da</span><span class="o">.</span><span class="n">dims</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">position</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">da</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">position</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
+
+
+<span class="c1"># We insert the analyzer coords into the graph so that they don&#39;t end up as coords</span>
+<span class="c1"># in the output. This could be done in the provider of SecondarySpecCoordTransformGraph</span>
+<span class="c1"># but that provider would then have to request the detector component to check</span>
+<span class="c1"># the time coordinates.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_analyzer_coord_graph</span><span class="p">(</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">analyzer</span><span class="p">:</span> <span class="n">Analyzer</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]]:</span>
+    <span class="n">ana_pos</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXcrystal</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]</span> <span class="o">=</span> <span class="n">analyzer</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ana_pos</span><span class="o">.</span><span class="n">is_dynamic</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;time&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">detector</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">sc</span><span class="o">.</span><span class="n">CoordError</span><span class="p">(</span>
+                <span class="s2">&quot;The analyzer position is time-dependent but the detector is not&quot;</span>
+            <span class="p">)</span>
+        <span class="n">analyzer_positions</span> <span class="o">=</span> <span class="n">ana_pos</span><span class="o">.</span><span class="n">positions</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sc</span><span class="o">.</span><span class="n">identical</span><span class="p">(</span><span class="n">analyzer_positions</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">detector</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="n">sc</span><span class="o">.</span><span class="n">CoordError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The analyzer and detector positions are not at the same times.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Analyzer: </span><span class="si">{</span><span class="n">analyzer_positions</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Detector: </span><span class="si">{</span><span class="n">detector</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;This is likely due to a change in the NeXus structure. It used to &quot;</span>
+                <span class="s2">&quot;guarantee that the times are identical.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">analyzer_position</span> <span class="o">=</span> <span class="n">analyzer_positions</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">analyzer_transform</span> <span class="o">=</span> <span class="n">analyzer</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">analyzer_position</span> <span class="o">=</span> <span class="n">ana_pos</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">analyzer_transform</span> <span class="o">=</span> <span class="n">analyzer</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;analyzer_dspacing&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">analyzer</span><span class="p">[</span><span class="s1">&#39;dspacing&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;analyzer_position&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">analyzer_position</span><span class="p">,</span>
+        <span class="s1">&#39;analyzer_transform&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">analyzer_transform</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<div class="viewcode-block" id="merge_triplets">
+<a class="viewcode-back" href="../../../generated/modules/ess.bifrost.detector.merge_triplets.html#ess.bifrost.detector.merge_triplets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge_triplets</span><span class="p">(</span>
+    <span class="o">*</span><span class="n">triplets</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge BIFROST detector triplets into a single data array.</span>
+
+<span class="sd">    This function folds the triplets into (arc, channel) dimensions based on</span>
+<span class="sd">    the scalar &#39;arc&#39; and &#39;channel&#39; coordinates assigned to each triplet. If the</span>
+<span class="sd">    triplets form a regular rectangular subset of the full 5x9 detector array,</span>
+<span class="sd">    they will be folded into those dimensions. Otherwise, they are concatenated</span>
+<span class="sd">    along a &#39;triplet&#39; dimension.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    triplets:</span>
+<span class="sd">        Data arrays to merge. Each must have scalar &#39;arc&#39; and &#39;channel&#39; coordinates.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Input data arrays either folded into (arc, channel) dimensions or</span>
+<span class="sd">        stacked along the &quot;triplet&quot; dimension.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">triplets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one triplet is required&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Extract arc and channel from scalar coordinates</span>
+    <span class="n">arc_channel_pairs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">triplet</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;arc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">triplet</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;channel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplets</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Sort triplets by (arc, channel)</span>
+    <span class="n">sorted_indices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">triplets</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">arc_channel_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">sorted_triplets</span> <span class="o">=</span> <span class="p">[</span><span class="n">triplets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorted_indices</span><span class="p">]</span>
+    <span class="n">sorted_pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">arc_channel_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorted_indices</span><span class="p">]</span>
+
+    <span class="c1"># Check if the pairs form a regular rectangular grid</span>
+    <span class="n">unique_arcs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">sorted_pairs</span><span class="p">})</span>
+    <span class="n">unique_channels</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">sorted_pairs</span><span class="p">})</span>
+
+    <span class="c1"># Check if we have a complete rectangular subset</span>
+    <span class="n">expected_pairs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">arc</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span> <span class="k">for</span> <span class="n">arc</span> <span class="ow">in</span> <span class="n">unique_arcs</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">unique_channels</span>
+    <span class="p">]</span>
+    <span class="n">concatenated</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sorted_triplets</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;triplet&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sorted_pairs</span> <span class="o">==</span> <span class="n">expected_pairs</span><span class="p">:</span>
+        <span class="c1"># We have a regular grid, fold it</span>
+        <span class="k">return</span> <span class="n">concatenated</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span>
+            <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;triplet&#39;</span><span class="p">,</span>
+            <span class="n">sizes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;arc&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_arcs</span><span class="p">),</span> <span class="s1">&#39;channel&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_channels</span><span class="p">)},</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Fall back to simple concatenation if not a regular grid</span>
+    <span class="k">return</span> <span class="n">concatenated</span></div>
+
+
+
+<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span><span class="n">arc_number</span><span class="p">,</span> <span class="n">get_calibrated_detector_bifrost</span><span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSspectroscopy version: 0.1.dev5834+g27179d6b7 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

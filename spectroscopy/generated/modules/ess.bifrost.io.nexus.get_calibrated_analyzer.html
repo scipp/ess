@@ -1,0 +1,810 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ess.bifrost.io.nexus.get_calibrated_analyzer &#8212; ESSspectroscopy</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../_static/documentation_options.js?v=3eff4b7d"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/modules/ess.bifrost.io.nexus.get_calibrated_analyzer';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ess.bifrost.io.nexus.load_analyzer_for_detector" href="ess.bifrost.io.nexus.load_analyzer_for_detector.html" />
+    <link rel="prev" title="ess.bifrost.io.nexus" href="ess.bifrost.io.nexus.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev5834+g27179d6b7" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSspectroscopy - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSspectroscopy - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essspectroscopy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essspectroscopy/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essspectroscopy" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essspectroscopy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essspectroscopy/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essspectroscopy" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.bifrost.BifrostWorkflow.html">ess.bifrost.BifrostWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.bifrost.BifrostSimulationWorkflow.html">ess.bifrost.BifrostSimulationWorkflow</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.html">ess.spectroscopy.indirect</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.html">ess.spectroscopy.indirect.conversion</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.add_incident_energy.html">ess.spectroscopy.indirect.conversion.add_incident_energy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.add_inelastic_coordinates.html">ess.spectroscopy.indirect.conversion.add_inelastic_coordinates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.add_spectrometer_coords.html">ess.spectroscopy.indirect.conversion.add_spectrometer_coords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.energy_transfer.html">ess.spectroscopy.indirect.conversion.energy_transfer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.incident_energy_from_wavelength.html">ess.spectroscopy.indirect.conversion.incident_energy_from_wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.incident_wavevector_from_incident_wavelength.html">ess.spectroscopy.indirect.conversion.incident_wavevector_from_incident_wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.inelastic_coordinate_transformation_graph_at_sample.html">ess.spectroscopy.indirect.conversion.inelastic_coordinate_transformation_graph_at_sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.lab_momentum_transfer_from_incident_energy.html">ess.spectroscopy.indirect.conversion.lab_momentum_transfer_from_incident_energy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.lab_momentum_transfer_from_wavevectors.html">ess.spectroscopy.indirect.conversion.lab_momentum_transfer_from_wavevectors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.monitor_coordinate_transformation_graph.html">ess.spectroscopy.indirect.conversion.monitor_coordinate_transformation_graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer.html">ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.io.html">ess.spectroscopy.indirect.io</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.io.to_nxspe.html">ess.spectroscopy.indirect.io.to_nxspe</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.kf.html">ess.spectroscopy.indirect.kf</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.analyzer_detector_vector.html">ess.spectroscopy.indirect.kf.analyzer_detector_vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.detector_geometric_a4.html">ess.spectroscopy.indirect.kf.detector_geometric_a4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.final_energy.html">ess.spectroscopy.indirect.kf.final_energy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.final_wavenumber.html">ess.spectroscopy.indirect.kf.final_wavenumber</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.final_wavevector.html">ess.spectroscopy.indirect.kf.final_wavevector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.move_time_to_sample.html">ess.spectroscopy.indirect.kf.move_time_to_sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.sample_analyzer_vector.html">ess.spectroscopy.indirect.kf.sample_analyzer_vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.secondary_flight_path_length.html">ess.spectroscopy.indirect.kf.secondary_flight_path_length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.secondary_flight_time.html">ess.spectroscopy.indirect.kf.secondary_flight_time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.kf.secondary_spectrometer_coordinate_transformation_graph.html">ess.spectroscopy.indirect.kf.secondary_spectrometer_coordinate_transformation_graph</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.ki.html">ess.spectroscopy.indirect.ki</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.ki.primary_spectrometer_coordinate_transformation_graph.html">ess.spectroscopy.indirect.ki.primary_spectrometer_coordinate_transformation_graph</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.time_of_flight.html">ess.spectroscopy.indirect.time_of_flight</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.time_of_flight.providers.html">ess.spectroscopy.indirect.time_of_flight.providers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.time_of_flight.TofWorkflow.html">ess.spectroscopy.indirect.time_of_flight.TofWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.time_of_flight.compute_monitor_ltotal.html">ess.spectroscopy.indirect.time_of_flight.compute_monitor_ltotal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.time_of_flight.detector_wavelength_data.html">ess.spectroscopy.indirect.time_of_flight.detector_wavelength_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.time_of_flight.mask_large_uncertainty_in_lut_detector.html">ess.spectroscopy.indirect.time_of_flight.mask_large_uncertainty_in_lut_detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.time_of_flight.monitor_wavelength_data.html">ess.spectroscopy.indirect.time_of_flight.monitor_wavelength_data</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.spectroscopy.types.html">ess.spectroscopy.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.Analyzer.html">ess.spectroscopy.types.Analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.DataAtSample.html">ess.spectroscopy.types.DataAtSample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.DataGroupedByRotation.html">ess.spectroscopy.types.DataGroupedByRotation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.ElasticCoordTransformGraph.html">ess.spectroscopy.types.ElasticCoordTransformGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.EnergyData.html">ess.spectroscopy.types.EnergyData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.EnergyQDetector.html">ess.spectroscopy.types.EnergyQDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.IncidentEnergyDetector.html">ess.spectroscopy.types.IncidentEnergyDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.InstrumentAngle.html">ess.spectroscopy.types.InstrumentAngle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.MonitorCoordTransformGraph.html">ess.spectroscopy.types.MonitorCoordTransformGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.NormalizedIncidentEnergyDetector.html">ess.spectroscopy.types.NormalizedIncidentEnergyDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.PrimarySpecCoordTransformGraph.html">ess.spectroscopy.types.PrimarySpecCoordTransformGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.ProtonCharge.html">ess.spectroscopy.types.ProtonCharge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.QDetector.html">ess.spectroscopy.types.QDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.SampleAngle.html">ess.spectroscopy.types.SampleAngle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.SecondarySpecCoordTransformGraph.html">ess.spectroscopy.types.SecondarySpecCoordTransformGraph</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.cutting.html">ess.bifrost.cutting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.cutting.group_by_rotation.html">ess.bifrost.cutting.group_by_rotation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.data.html">ess.bifrost.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.data.computed_energy_data_simulated_5x2.html">ess.bifrost.data.computed_energy_data_simulated_5x2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.data.get_path.html">ess.bifrost.data.get_path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.data.lookup_table_simulation.html">ess.bifrost.data.lookup_table_simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.data.simulated_elastic_incoherent_with_phonon.html">ess.bifrost.data.simulated_elastic_incoherent_with_phonon</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.detector.html">ess.bifrost.detector</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.arc_and_channel_from_detector_number.html">ess.bifrost.detector.arc_and_channel_from_detector_number</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.arc_number.html">ess.bifrost.detector.arc_number</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.get_base_calibrated_detector_bifrost.html">ess.bifrost.detector.get_base_calibrated_detector_bifrost</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.get_calibrated_detector_bifrost.html">ess.bifrost.detector.get_calibrated_detector_bifrost</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.merge_triplets.html">ess.bifrost.detector.merge_triplets</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="ess.bifrost.io.html">ess.bifrost.io</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.mcstas.html">ess.bifrost.io.mcstas</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.assemble_detector_data.html">ess.bifrost.io.mcstas.assemble_detector_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset.html">ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="ess.bifrost.io.nexus.html">ess.bifrost.io.nexus</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">ess.bifrost.io.nexus.get_calibrated_analyzer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_analyzer_for_detector.html">ess.bifrost.io.nexus.load_analyzer_for_detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_instrument_angle.html">ess.bifrost.io.nexus.load_instrument_angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_sample_angle.html">ess.bifrost.io.nexus.load_sample_angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.moderator_class_for_source.html">ess.bifrost.io.nexus.moderator_class_for_source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.stepwise_transformation_time_filter.html">ess.bifrost.io.nexus.stepwise_transformation_time_filter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.sqw.html">ess.bifrost.io.sqw</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.sqw.save_sqw.html">ess.bifrost.io.sqw.save_sqw</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.live.html">ess.bifrost.live</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.live.CutAxis1.html">ess.bifrost.live.CutAxis1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.live.CutAxis2.html">ess.bifrost.live.CutAxis2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.live.BifrostQCutWorkflow.html">ess.bifrost.live.BifrostQCutWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.live.arc_energy.html">ess.bifrost.live.arc_energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.live.cut.html">ess.bifrost.live.cut</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.live.CutAxis.html">ess.bifrost.live.CutAxis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.live.CutData.html">ess.bifrost.live.CutData</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.normalization.html">ess.bifrost.normalization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.normalization.normalize_by_monitor_and_proton_charge.html">ess.bifrost.normalization.normalize_by_monitor_and_proton_charge</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.types.html">ess.bifrost.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.ArcNumber.html">ess.bifrost.types.ArcNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.McStasRawDetector.html">ess.bifrost.types.McStasRawDetector</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.workflow.html">ess.bifrost.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.BifrostSimulationWorkflow.html">ess.bifrost.workflow.BifrostSimulationWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.BifrostWorkflow.html">ess.bifrost.workflow.BifrostWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.concat_event_lists.html">ess.bifrost.workflow.concat_event_lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.default_parameters.html">ess.bifrost.workflow.default_parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.simulation_default_parameters.html">ess.bifrost.workflow.simulation_default_parameters</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ess.bifrost.io.nexus.get_calibrated_analyzer"><code class="docutils literal notranslate"><span class="pre">get_calibrated_analyzer()</span></code></a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/generated/modules/ess.bifrost.io.nexus.get_calibrated_analyzer.rst">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../api-reference/index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="ess.bifrost.io.html" class="nav-link">ess.bifrost.io</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="ess.bifrost.io.nexus.html" class="nav-link">ess.bifrost.io.nexus</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.bifrost.io.nexus.get_calibrated_analyzer</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="ess-bifrost-io-nexus-get-calibrated-analyzer">
+<h1>ess.bifrost.io.nexus.get_calibrated_analyzer<a class="headerlink" href="#ess-bifrost-io-nexus-get-calibrated-analyzer" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="ess.bifrost.io.nexus.get_calibrated_analyzer">
+<span class="sig-prename descclassname"><span class="pre">ess.bifrost.io.nexus.</span></span><span class="sig-name descname"><span class="pre">get_calibrated_analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyzer_component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer_transform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer_position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/bifrost/io/nexus.html#get_calibrated_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.bifrost.io.nexus.get_calibrated_analyzer" title="Link to this definition">#</a></dt>
+<dd><p>Collect the data for a single analyzer.</p>
+<p>This provider works together with <a class="reference internal" href="ess.bifrost.io.nexus.load_analyzer_for_detector.html#ess.bifrost.io.nexus.load_analyzer_for_detector" title="ess.bifrost.io.nexus.load_analyzer_for_detector"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_analyzer_for_detector()</span></code></a> and the
+generic NeXus workflow from ESSreduce.
+<code class="docutils literal notranslate"><span class="pre">load_analyzer_for_detector</span></code> loads a raw analyzer component.
+Then the default providers from ESSreduce extract a transform and position like
+for any other component.
+Finally, this provider combines the data into a single Analyzer object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>analyzer_component</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/essreduce/generated/modules/ess.reduce.nexus.types.NeXusComponent.html#ess.reduce.nexus.types.NeXusComponent" title="(in ESSreduce v26.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusComponent</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Data group of loaded analyzers.</p></li>
+<li><p><strong>analyzer_transform</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/essreduce/generated/modules/ess.reduce.nexus.types.NeXusTransformation.html#ess.reduce.nexus.types.NeXusTransformation" title="(in ESSreduce v26.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusTransformation</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Transformation matrix of the analyzer.</p></li>
+<li><p><strong>analyzer_position</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicPosition</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – The computed position vector of the analyzer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.spectroscopy.types.Analyzer.html#ess.spectroscopy.types.Analyzer" title="ess.spectroscopy.types.Analyzer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Analyzer</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span> – A given analyzer.
+Only a subset of fields is returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ess.bifrost.io.nexus.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">ess.bifrost.io.nexus</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ess.bifrost.io.nexus.load_analyzer_for_detector.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ess.bifrost.io.nexus.load_analyzer_for_detector</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSspectroscopy version: 0.1.dev5834+g27179d6b7 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

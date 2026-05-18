@@ -1,0 +1,927 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ess.spectroscopy.indirect.conversion &#8212; ESSspectroscopy</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../../../_static/documentation_options.js?v=3eff4b7d"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/spectroscopy/indirect/conversion';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev5834+g27179d6b7" />
+  
+    
+    <script src="../../../../_static/searchtools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    <script src="../../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/logo.svg" class="logo__image only-light" alt="ESSspectroscopy - Home"/>
+    <img src="../../../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSspectroscopy - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essspectroscopy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essspectroscopy/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essspectroscopy" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+    ESSreduce
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essspectroscopy" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essspectroscopy/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essspectroscopy" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.spectroscopy.indirect.conversion</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ess.spectroscopy.indirect.conversion</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
+
+<span class="sd">&quot;&quot;&quot;Coordinate conversions for indirect spectroscopy.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp.constants</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.conversion.tof</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">energy_from_wavelength</span><span class="p">,</span>
+    <span class="n">wavevector_from_wavelength</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EnergyQDetector</span><span class="p">,</span>
+    <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">IncidentEnergyDetector</span><span class="p">,</span>
+    <span class="n">InelasticCoordTransformGraph</span><span class="p">,</span>
+    <span class="n">MonitorCoordTransformGraph</span><span class="p">,</span>
+    <span class="n">NormalizedIncidentEnergyDetector</span><span class="p">,</span>
+    <span class="n">Position</span><span class="p">,</span>
+    <span class="n">PrimarySpecCoordTransformGraph</span><span class="p">,</span>
+    <span class="n">RunType</span><span class="p">,</span>
+    <span class="n">SecondarySpecCoordTransformGraph</span><span class="p">,</span>
+    <span class="n">WavelengthDetector</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="incident_energy_from_wavelength">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.incident_energy_from_wavelength.html#ess.spectroscopy.indirect.conversion.incident_energy_from_wavelength">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">incident_energy_from_wavelength</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">incident_wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">energy_from_wavelength</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">incident_wavelength</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="incident_wavevector_from_incident_wavelength">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.incident_wavevector_from_incident_wavelength.html#ess.spectroscopy.indirect.conversion.incident_wavevector_from_incident_wavelength">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">incident_wavevector_from_incident_wavelength</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">incident_wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">incident_beam</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">wavevector_from_wavelength</span><span class="p">(</span>
+        <span class="n">wavelength</span><span class="o">=</span><span class="n">incident_wavelength</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="n">incident_beam</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="energy_transfer">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.energy_transfer.html#ess.spectroscopy.indirect.conversion.energy_transfer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">energy_transfer</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">incident_energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">final_energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the energy transfer.</span>
+
+<span class="sd">    Here, the energy transfer is defined the same as in ScippNeutron</span>
+<span class="sd">    (https://scipp.github.io/scippneutron/user-guide/coordinate-transformations.html)</span>
+<span class="sd">    to be</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \Delta E = E_i - E_f</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    incident_energy:</span>
+<span class="sd">        The neutron energy :math:`E_i` before scattering.</span>
+<span class="sd">    final_energy:</span>
+<span class="sd">        The neutron energy :math:`E_f` after scattering.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The energy transfer :math:`\Delta E`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">incident_energy</span> <span class="o">-</span> <span class="n">final_energy</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">incident_energy</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="lab_momentum_transfer_from_wavevectors">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.lab_momentum_transfer_from_wavevectors.html#ess.spectroscopy.indirect.conversion.lab_momentum_transfer_from_wavevectors">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">lab_momentum_transfer_from_wavevectors</span><span class="p">(</span>
+    <span class="n">incident_wavevector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">final_wavevector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the momentum transfer in the lab frame.</span>
+
+<span class="sd">    Here, the momentum transfer is defined as</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \vec{Q} = \vec{k_i} - \vec{k_f}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    incident_wavevector:</span>
+<span class="sd">        The neutron wavevector :math:`\vec{k_i}` before scattering.</span>
+<span class="sd">    final_wavevector:</span>
+<span class="sd">        The neutron wavevector :math:`\vec{k_f}` after scattering.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The momentum transfer :math:`\vec{Q}` in the lab frame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">incident_wavevector</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">final_wavevector</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">final_wavevector</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="lab_momentum_transfer_from_incident_energy">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.lab_momentum_transfer_from_incident_energy.html#ess.spectroscopy.indirect.conversion.lab_momentum_transfer_from_incident_energy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">lab_momentum_transfer_from_incident_energy</span><span class="p">(</span>
+    <span class="n">incident_energy</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">incident_beam</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">final_wavevector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the momentum transfer in the lab frame.</span>
+
+<span class="sd">    Here, the momentum transfer is defined as</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \vec{Q} = \vec{k_i} - \vec{k_f}</span>
+
+<span class="sd">    with</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \vec{k_i} = \frac{2\pi}{h} \hat{b}_i \sqrt{2 M_n E_i}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    incident_energy:</span>
+<span class="sd">        The neutron energy :math:`E_i` before scattering.</span>
+<span class="sd">    incident_beam:</span>
+<span class="sd">        The vector of the incident beam in the lab frame :math:`\vec{b}_i`.</span>
+<span class="sd">    final_wavevector:</span>
+<span class="sd">        The neutron wavevector :math:`\vec{k_f}` after scattering.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The momentum transfer :math:`\vec{Q}` in the lab frame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Typical shapes:</span>
+    <span class="c1">#  - incident_beam: ()</span>
+    <span class="c1">#  - incident_energy: (incident_energy,)  (small)</span>
+    <span class="c1">#  - final_wavevector: (detector,)  (large-ish but 1D)</span>
+    <span class="c1">#  - result: (detector, incident_energy)</span>
+    <span class="n">incident_wavevector</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">h</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">incident_beam</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">incident_beam</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_n</span> <span class="o">*</span> <span class="n">incident_energy</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="c1"># Order of operations such that the final result has dim order described above.</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">final_wavevector</span> <span class="o">+</span> <span class="n">incident_wavevector</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">final_wavevector</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="rotate_to_sample_table_momentum_transfer">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer.html#ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rotate_to_sample_table_momentum_transfer</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">a3</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">lab_momentum_transfer</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rotate the momentum transfer vector into the sample-table coordinate system</span>
+
+<span class="sd">    Here, the momentum transfer is defined as</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \vec{Q} = \vec{k_i} - \vec{k_f}</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    When a3 is zero, the sample-table and lab coordinate systems are the same.</span>
+<span class="sd">    That is, Z is along the incident beam, Y is opposite the gravitational force,</span>
+<span class="sd">    and X completes the right-handed coordinate system. The sample-table angle, a3,</span>
+<span class="sd">    has a rotation vector along Y, such that a positive 90-degree rotation places the</span>
+<span class="sd">    sample-table Z along the lab X.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a3:</span>
+<span class="sd">        The rotation angle of the sample table around the laboratory Y axis</span>
+<span class="sd">    lab_momentum_transfer:</span>
+<span class="sd">        The momentum transfer in the laboratory coordinate system</span>
+<span class="sd">    gravity:</span>
+<span class="sd">        The gravity vector which indicates the vertical axis.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        The momentum transfer in the sample-table coordinate system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="o">-</span><span class="n">gravity</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">gravity</span><span class="p">)</span>
+    <span class="c1"># negative a3 since we rotate coordinates, not axes here</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">rotations_from_rotvecs</span><span class="p">(</span><span class="o">-</span><span class="n">a3</span> <span class="o">*</span> <span class="n">vertical</span><span class="p">)</span> <span class="o">*</span> <span class="n">lab_momentum_transfer</span></div>
+
+
+
+<div class="viewcode-block" id="inelastic_coordinate_transformation_graph_at_sample">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.inelastic_coordinate_transformation_graph_at_sample.html#ess.spectroscopy.indirect.conversion.inelastic_coordinate_transformation_graph_at_sample">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inelastic_coordinate_transformation_graph_at_sample</span><span class="p">(</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InelasticCoordTransformGraph</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">InelasticCoordTransformGraph</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;energy_transfer&#39;</span><span class="p">:</span> <span class="n">energy_transfer</span><span class="p">,</span>
+            <span class="s1">&#39;incident_energy&#39;</span><span class="p">:</span> <span class="n">incident_energy_from_wavelength</span><span class="p">,</span>
+            <span class="s1">&#39;incident_wavevector&#39;</span><span class="p">:</span> <span class="n">incident_wavevector_from_incident_wavelength</span><span class="p">,</span>
+            <span class="s1">&#39;gravity&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">gravity</span><span class="p">,</span>
+            <span class="s1">&#39;lab_momentum_transfer&#39;</span><span class="p">:</span> <span class="n">lab_momentum_transfer_from_wavevectors</span><span class="p">,</span>
+            <span class="s1">&#39;sample_table_momentum_transfer&#39;</span><span class="p">:</span> <span class="n">rotate_to_sample_table_momentum_transfer</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_inelastic_coordinates">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.add_inelastic_coordinates.html#ess.spectroscopy.indirect.conversion.add_inelastic_coordinates">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_inelastic_coordinates</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">NormalizedIncidentEnergyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span> <span class="n">graph</span><span class="p">:</span> <span class="n">InelasticCoordTransformGraph</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnergyQDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+    <span class="n">transformed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s1">&#39;energy_transfer&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;sample_table_momentum_transfer&#39;</span><span class="p">,</span>
+            <span class="c1"># These are inputs, but we want to preserve them</span>
+            <span class="s1">&#39;a3&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;a4&#39;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span>
+        <span class="n">keep_aliases</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">keep_inputs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">keep_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">rename_dims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">EnergyQDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">transformed</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_incident_energy">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.add_incident_energy.html#ess.spectroscopy.indirect.conversion.add_incident_energy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_incident_energy</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span> <span class="n">graph</span><span class="p">:</span> <span class="n">InelasticCoordTransformGraph</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IncidentEnergyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+    <span class="n">transformed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s1">&#39;incident_energy&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;incident_wavelength&#39;</span><span class="p">,</span>
+            <span class="c1"># These are inputs, but we need them for binning:</span>
+            <span class="s1">&#39;a3&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;a4&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;final_energy&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;final_wavevector&#39;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span>
+        <span class="n">keep_aliases</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">keep_inputs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">keep_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">rename_dims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">IncidentEnergyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">transformed</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_spectrometer_coords">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.add_spectrometer_coords.html#ess.spectroscopy.indirect.conversion.add_spectrometer_coords">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_spectrometer_coords</span><span class="p">(</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">primary_graph</span><span class="p">:</span> <span class="n">PrimarySpecCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">secondary_graph</span><span class="p">:</span> <span class="n">SecondarySpecCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute and add coordinates for the spectrometer.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    detector:</span>
+<span class="sd">        Data array with a &quot;position&quot; coordinate.</span>
+<span class="sd">        Does not need to contain events, wavelength, or flight times.</span>
+<span class="sd">    primary_graph:</span>
+<span class="sd">        Coordinate transformation graph for the primary spectrometer.</span>
+<span class="sd">    secondary_graph:</span>
+<span class="sd">        Coordinate transformation graph for the secondary spectrometer.</span>
+<span class="sd">        Must be a closure over analyzer parameters.</span>
+<span class="sd">        And those parameters must have a compatible shape with ``data``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Input data with added spectrometer coordinates.</span>
+<span class="sd">        This includes &quot;final_energy&quot;, &quot;secondary_flight_time&quot;, and &quot;L1&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">detector</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="s1">&#39;final_energy&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;final_wavevector&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;incident_beam&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;L1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;secondary_flight_time&#39;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">graph</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">primary_graph</span><span class="p">,</span> <span class="o">**</span><span class="n">secondary_graph</span><span class="p">},</span>
+        <span class="n">keep_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">keep_aliases</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">rename_dims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="monitor_coordinate_transformation_graph">
+<a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.conversion.monitor_coordinate_transformation_graph.html#ess.spectroscopy.indirect.conversion.monitor_coordinate_transformation_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">monitor_coordinate_transformation_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MonitorCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.conversion.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">beamline</span><span class="p">,</span> <span class="n">tof</span>
+
+    <span class="k">return</span> <span class="n">MonitorCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="p">{</span>
+            <span class="o">**</span><span class="n">beamline</span><span class="o">.</span><span class="n">beamline</span><span class="p">(</span><span class="n">scatter</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">tof</span><span class="o">.</span><span class="n">elastic_wavelength</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;tof&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;source_position&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">source_position</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">add_inelastic_coordinates</span><span class="p">,</span>
+    <span class="n">add_incident_energy</span><span class="p">,</span>
+    <span class="n">inelastic_coordinate_transformation_graph_at_sample</span><span class="p">,</span>
+    <span class="n">monitor_coordinate_transformation_graph</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSspectroscopy version: 0.1.dev5834+g27179d6b7 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
