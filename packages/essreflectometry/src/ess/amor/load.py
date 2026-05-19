@@ -117,7 +117,7 @@ def load_amor_proton_charge(
     fp: Filename[RunType],
 ) -> ProtonCharge[RunType]:
     """Load proton charge log from the NeXus detector group."""
-    (pc,) = load_nx(fp, 'NXentry/NXinstrument/NXdetector/proton_charge')
+    (pc,) = load_nx(fp, 'NXentry/NXinstrument/NXdetector/proton_current')
     pc = pc['value']['dim_1', 0]
     pc.data.unit = 'mA/s'
     return pc
