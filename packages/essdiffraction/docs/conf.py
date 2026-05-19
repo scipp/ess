@@ -191,7 +191,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/scipp/essdiffraction",
+            "url": "https://github.com/scipp/ess/tree/main/packages/essdiffraction",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },

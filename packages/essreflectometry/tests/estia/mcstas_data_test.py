@@ -24,13 +24,13 @@ from ess.estia.mcstas import (
 )
 from ess.estia.types import WavelengthMonitor
 from ess.reflectometry import orso
-from ess.reflectometry.corrections import correct_by_proton_current
+from ess.reflectometry.corrections import correct_by_proton_charge
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
     Filename,
     LookupTableFilename,
-    ProtonCurrent,
+    ProtonCharge,
     QBins,
     ReducibleData,
     ReferenceRun,
@@ -55,12 +55,12 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
 
     wf[LookupTableFilename] = estia_wavelength_lookup_table()
 
-    wf[ProtonCurrent[SampleRun]] = sc.DataArray(
-        sc.array(dims=('time',), values=[]),
+    wf[ProtonCharge[SampleRun]] = sc.DataArray(
+        sc.array(dims=('time',), values=[], unit='uC'),
         coords={'time': sc.array(dims=('time',), values=[], unit='s')},
     )
-    wf[ProtonCurrent[ReferenceRun]] = sc.DataArray(
-        sc.array(dims=('time',), values=[]),
+    wf[ProtonCharge[ReferenceRun]] = sc.DataArray(
+        sc.array(dims=('time',), values=[], unit='uC'),
         coords={'time': sc.array(dims=('time',), values=[], unit='s')},
     )
     wf[orso.OrsoCreator] = orso.OrsoCreator(
@@ -124,25 +124,25 @@ def test_compute_reducible_data_with_monitor(estia_mcstas_pipeline: sciline.Pipe
     )
 
 
-def test_compute_reducible_data_with_proton_current(
+def test_compute_reducible_data_with_proton_charge(
     estia_mcstas_pipeline: sciline.Pipeline,
 ):
     wf = estia_mcstas_pipeline
     wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    without_proton_current = wf.compute(ReducibleData[SampleRun])
-    wf[ProtonCurrent[SampleRun]] = sc.DataArray(
+    without_proton_charge = wf.compute(ReducibleData[SampleRun])
+    wf[ProtonCharge[SampleRun]] = sc.DataArray(
         sc.array(dims=['time'], values=[2.0], variances=[1.0]),
         coords={'time': sc.datetimes(dims=['time'], values=[0], unit='s')},
     )
     corrections = wf.compute(CorrectionsToApply)
-    wf[CorrectionsToApply] = {*corrections, 'proton_current'}
-    with_proton_current = wf.compute(ReducibleData[SampleRun])
+    wf[CorrectionsToApply] = {*corrections, 'proton_charge'}
+    with_proton_charge = wf.compute(ReducibleData[SampleRun])
     scipp.testing.assert_allclose(
-        correct_by_proton_current(
-            without_proton_current,
-            proton_current=wf.compute(ProtonCurrent[SampleRun]),
+        correct_by_proton_charge(
+            without_proton_charge,
+            proton_charge=wf.compute(ProtonCharge[SampleRun]),
         ),
-        with_proton_current,
+        with_proton_charge,
     )
 
 

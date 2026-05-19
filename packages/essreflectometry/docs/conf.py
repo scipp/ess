@@ -176,7 +176,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/scipp/essreflectometry",
+            "url": "https://github.com/scipp/ess/tree/main/packages/essreflectometry",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },

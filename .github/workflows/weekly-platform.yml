@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: "0 2 * * 1"
 
+env:
+  PIXI_FROZEN: true
+  PIXI_NO_INSTALL: true
+
 jobs:
   test:
     name: ${{ matrix.package }} on ${{ matrix.os }}
@@ -19,6 +23,7 @@ jobs:
           - essdiffraction
           - essreflectometry
           - esssans
+          - essspectroscopy
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
@@ -26,6 +31,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
+          pixi-version: v0.68.0
           frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests

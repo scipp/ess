@@ -170,6 +170,15 @@ class WorkflowConfig(BaseModel):
         description="Random seed for TOF simulation.",
         default=42,  # No reason.
     )
+    result_time_bin_unit: TimeBinUnit = Field(
+        title="Output Time Bin Unit",
+        description="Time bin unit of the histogram after reduction. "
+        "If the input time bin is different from the result time bin unit, "
+        "the unit will be converted to the result time bin "
+        "before the result is returned.",
+        default=TimeBinUnit.ns,
+        # DIALS expects [ns] by default.
+    )
 
 
 class OutputConfig(BaseModel):

@@ -1,9 +1,9 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from ..reflectometry.corrections import correct_by_footprint, correct_by_proton_current
+from ..reflectometry.corrections import correct_by_footprint, correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
-    ProtonCurrent,
+    ProtonCharge,
     RawDetector,
     ReducibleData,
     RunType,
@@ -20,7 +20,7 @@ def add_coords_masks_and_apply_corrections(
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-    proton_current: ProtonCurrent[RunType],
+    proton_charge: ProtonCharge[RunType],
     graph: CoordTransformationGraph[RunType],
 ) -> ReducibleData[RunType]:
     """
@@ -32,9 +32,9 @@ def add_coords_masks_and_apply_corrections(
 
     da = correct_by_footprint(da)
 
-    # For some older Amor files there are no entries in the proton current log
-    if len(proton_current) != 0:
-        da = correct_by_proton_current(da, proton_current=proton_current)
+    # For some older Amor files there are no entries in the proton charge log
+    if len(proton_charge) != 0:
+        da = correct_by_proton_charge(da, proton_charge=proton_charge)
 
     return ReducibleData[RunType](da)
 

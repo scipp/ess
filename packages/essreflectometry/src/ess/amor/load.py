@@ -13,7 +13,7 @@ from ..reflectometry.types import (
     Measurement,
     NeXusComponent,
     NeXusDetectorName,
-    ProtonCurrent,
+    ProtonCharge,
     RawChopper,
     RawDetector,
     RawSampleRotation,
@@ -113,11 +113,11 @@ def load_amor_detector_rotation(fp: Filename[RunType]) -> DetectorRotation[RunTy
     return sc.scalar(nu['value'].data['dim_1', 0]['time', 0].value, unit='deg')
 
 
-def load_amor_proton_current(
+def load_amor_proton_charge(
     fp: Filename[RunType],
-) -> ProtonCurrent[RunType]:
-    """Load proton current log from the NeXus detector group."""
-    (pc,) = load_nx(fp, 'NXentry/NXinstrument/NXdetector/proton_current')
+) -> ProtonCharge[RunType]:
+    """Load proton charge log from the NeXus detector group."""
+    (pc,) = load_nx(fp, 'NXentry/NXinstrument/NXdetector/proton_charge')
     pc = pc['value']['dim_1', 0]
     pc.data.unit = 'mA/s'
     return pc
@@ -146,7 +146,7 @@ providers = (
     load_amor_chopper_separation,
     load_amor_sample_rotation,
     load_amor_detector_rotation,
-    load_amor_proton_current,
+    load_amor_proton_charge,
     amor_chopper,
     load_beamline_metadata,
     load_measurement_metadata,

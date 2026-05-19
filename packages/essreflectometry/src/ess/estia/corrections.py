@@ -4,12 +4,12 @@ import ess.reduce
 import scipp as sc
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
-from ..reflectometry.corrections import correct_by_proton_current
+from ..reflectometry.corrections import correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
     CorrectionsToApply,
-    ProtonCurrent,
+    ProtonCharge,
     ReducibleData,
     RunType,
     WavelengthBins,
@@ -69,7 +69,7 @@ def add_coords_masks_and_apply_corrections(
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-    proton_current: ProtonCurrent[RunType],
+    proton_charge: ProtonCharge[RunType],
     monitor: WavelengthMonitor[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
     graph: CoordTransformationGraph[RunType],
@@ -89,8 +89,8 @@ def add_coords_masks_and_apply_corrections(
                 monitor=monitor,
                 uncertainty_broadcast_mode=uncertainty_broadcast_mode,
             )
-        elif correction == 'proton_current':
-            da = correct_by_proton_current(da, proton_current=proton_current)
+        elif correction == 'proton_charge':
+            da = correct_by_proton_charge(da, proton_charge=proton_charge)
         else:
             da = correction(da)
 
@@ -108,6 +108,6 @@ def assume_time_series_constant_with_zero_default_value_if_empty(da: sc.DataArra
     return da.mean() if len(da) > 0 else sc.scalar(0.0, unit=da.unit)
 
 
-default_corrections = {correct_by_footprint, 'proton_current'}
+default_corrections = {correct_by_footprint, 'proton_charge'}
 
 providers = (add_coords_masks_and_apply_corrections,)

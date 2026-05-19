@@ -55,8 +55,8 @@
 
 ## Get in touch
 
-- If you have questions that are not answered by these documentation pages, ask on [discussions](https://github.com/scipp/esssans/discussions). Please include a self-contained reproducible example if possible.
-- Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code [on GitHub](https://github.com/scipp/esssans).
+- If you have questions that are not answered by these documentation pages, ask on [discussions](https://github.com/scipp/ess/discussions). Please include a self-contained reproducible example if possible.
+- Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code [on GitHub](https://github.com/scipp/ess/tree/main/packages/esssans).
 
 ```{toctree}
 ---

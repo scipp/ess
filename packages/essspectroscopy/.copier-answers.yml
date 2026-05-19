@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 024a41b
+_src_path: gh:scipp/copier_template
+description: 'Spectroscopy data reduction for the European Spallation Source '
+max_python: '3.13'
+min_python: '3.11'
+namespace_package: ess
+nightly_deps: scipp,scippneutron,sciline,plopp,scippnexus,essreduce
+orgname: scipp
+prettyname: ESSspectroscopy
+projectname: essspectroscopy
+related_projects: Scipp,ScippNeutron,ScippNexus,Plopp,Sciline,ESSreduce
+year: 2025

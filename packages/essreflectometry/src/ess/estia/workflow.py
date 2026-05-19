@@ -71,7 +71,7 @@ def mcstas_default_parameters() -> dict:
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: (
-            corrections.default_corrections - {'monitor', 'proton_current'}
+            corrections.default_corrections - {'monitor', 'proton_charge'}
         ),
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": 0.06,
@@ -87,7 +87,7 @@ def default_parameters() -> dict:
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: corrections.default_corrections
-        - {'monitor', 'proton_current'},
+        - {'monitor', 'proton_charge'},
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),

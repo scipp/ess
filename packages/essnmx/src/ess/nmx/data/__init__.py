@@ -29,6 +29,9 @@ _registry = make_registry(
         "small_nmx_nexus.hdf.zip": Entry(
             alg="md5", chk="96877cddc9f6392c96890069657710ca", extractor="unzip"
         ),
+        "essnmx-reduced-26.4.1.hdf.zip": Entry(
+            alg="md5", chk="f7877cce3967dec0aa51461c1100824d", extractor="unzip"
+        ),
     },
 )
 
@@ -75,3 +78,15 @@ def get_small_nmx_nexus() -> pathlib.Path:
     """Return the path to a small NMX NeXus file."""
 
     return get_path("small_nmx_nexus.hdf.zip")
+
+
+def get_small_nmx_reduced() -> pathlib.Path:
+    """Return the path to a reduced NXlauetof file.
+
+    It is reduced from the small nmx nexus file
+    using specific version of essnmx.
+    It is frozen as reference file to check if the output
+    of essnmx-reduce changed.
+    """
+
+    return get_path("essnmx-reduced-26.4.1.hdf.zip")

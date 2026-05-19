@@ -5,21 +5,23 @@ Monorepo for ESS neutron scattering data reduction packages, managed with [pixi]
 | Package | Description |
 |---------|-------------|
 | [essreduce](packages/essreduce/) | Common data reduction tools (core) |
-| [essimaging](packages/essimaging/) | Neutron imaging (ODIN, TBL, YMIR) |
-| [essreflectometry](packages/essreflectometry/) | Reflectometry data reduction for the European Spallation Source |
 | [essdiffraction](packages/essdiffraction/) | Diffraction data reduction for the European Spallation Source |
+| [essimaging](packages/essimaging/) | Neutron imaging (ODIN, TBL, YMIR) |
 | [essnmx](packages/essnmx/) | Data reduction for NMX at the European Spallation Source. |
+| [essreflectometry](packages/essreflectometry/) | Reflectometry data reduction for the European Spallation Source |
 | [esssans](packages/esssans/) | Data reduction for SANS at the European Spallation Source. |
+| [essspectroscopy](packages/essspectroscopy/) | Data reduction for SANS at the European Spallation Source. |
 
 ## Dependency graph
 
 ```
 essreduce
-├── essimaging
-├── essreflectometry
 ├── essdiffraction
+├── essimaging
 ├── essnmx
+├── essreflectometry
 └── esssans
+└── essspectroscopy
 ```
 
 ---
@@ -59,6 +61,7 @@ pixi run test essreflectometry
 pixi run test essdiffraction
 pixi run test essnmx
 pixi run test esssans
+pixi run test essspectroscopy
 
 # Test a single file:
 pixi run -e essreduce pytest packages/essreduce/tests/normalization_test.py
@@ -81,6 +84,7 @@ pixi run docs-essreflectometry
 pixi run docs-essdiffraction
 pixi run docs-essnmx
 pixi run docs-esssans
+pixi run docs-essspectroscopy
 ```
 
 ### Adding or changing dependencies
@@ -113,33 +117,48 @@ The `release.yml` workflow builds, publishes to PyPI, and deploys docs.
 ### Repo structure
 
 ```
-pixi.toml                  ← workspace root (features, tasks, environments)
-pixi.lock                  ← single lockfile for all packages
-.pre-commit-config.yaml    ← shared linting hooks
+pixi.toml                   ← workspace root (features, tasks, environments)
+pixi.lock                   ← single lockfile for all packages
+.pre-commit-config.yaml     ← shared linting hooks
 packages/
-  essreduce/
-    pyproject.toml          ← package deps, version, pytest config
-    src/ess/reduce/         ← source code (ess.reduce namespace)
+  essdiffraction/
+    pyproject.toml
+    src/ess/
+      diffraction/          ← source code (ess.diffraction namespace)
+      dream/                ← source code (ess.dream namespace)
+      ...
     tests/
     docs/
   essimaging/
     pyproject.toml
-    src/ess/imaging/        ← source code (ess.imaging namespace)
-    ...
-  essreflectometry/
-    pyproject.toml
-    src/ess/reflectometry/  ← source code (ess.reflectometry namespace)
-    ...
-  essdiffraction/
-    pyproject.toml
-    src/ess/diffraction/    ← source code (ess.diffraction namespace)
+    src/ess/
+      imaging/              ← source code (ess.imaging namespace)
+      odin/                 ← source code (ess.odin namespace)
+      ...
     ...
   essnmx/
     pyproject.toml
     src/ess/nmx/            ← source code (ess.nmx namespace)
     ...
+  essreduce/
+    pyproject.toml          ← package deps, version, pytest config
+    src/ess/reduce/         ← source code (ess.reduce namespace)
+    ...
+  essreflectometry/
+    pyproject.toml
+    src/ess/
+       reflectometry/       ← source code (ess.reflectometry namespace)
+       ...
+    ...
   esssans/
     pyproject.toml
-    src/ess/nmx/            ← source code (ess.nmx namespace)
+    src/ess/
+      sans/                 ← source code (ess.sans namespace)
+      ...
+    ...
+  essspectroscopy/
+    pyproject.toml
+    src/ess/
+      spectroscopy          ← source code (ess.spectroscopy namespace)
     ...
 ```

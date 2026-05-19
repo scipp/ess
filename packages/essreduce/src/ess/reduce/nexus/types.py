@@ -37,6 +37,16 @@ PreopenNeXusFile = NewType('PreopenNeXusFile', bool)
 """Whether to preopen NeXus files before passing them to the rest of the workflow."""
 
 
+class ProductionInfo(snx.NXsource):
+    """A specialized NXsource for neutron production information (accelerator).
+
+    This differs from the regular NXsource in that it
+    encodes information about the accelerator, not the target.
+    So its position is not relevant for data reduction.
+    But it encodes, among others, the proton charge.
+    """
+
+
 # 1  TypeVars used to parametrize the generic parts of the workflow
 
 # 1.1  Run types
@@ -128,13 +138,14 @@ ESSreduce provides the following but custom types can be used:
 
 
 Component = TypeVar('Component')
-"""A beamline component in a neXus file."""
+"""A beamline component in a NeXus file."""
 COMPONENT_CONSTRAINTS = (
     snx.NXdetector,
     snx.NXsample,
     snx.NXsource,
     snx.NXdisk_chopper,
     snx.NXcrystal,
+    ProductionInfo,
 )
 """Base constraints for the Component type variable.
 
@@ -142,7 +153,11 @@ This list will be supplemented with monitor types when creating a pipeline.
 """
 
 UniqueComponent = TypeVar('UniqueComponent', snx.NXsample, snx.NXsource)
-"""Components that can be identified by their type as there will only be one."""
+"""Components that can be identified by their type as there will only be one.
+
+This applies for a given parent for these components, not the entire file.
+E.g., NXsource appears in both `/entry/instrument` and `/entry` directly.
+"""
 
 
 class Beamline(scn_meta.Beamline, Generic[RunType]):
@@ -267,6 +282,13 @@ class RawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 class RawMonitor(sciline.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
     """Calibrated monitor merged with neutron event or histogram data."""
+
+
+class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Time-dependent proton charge.
+
+    The time resolution can vary between files and even within a file.
+    """
 
 
 class Filename(sciline.Scope[RunType, Path], Path): ...
