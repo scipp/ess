@@ -3,9 +3,10 @@
 
 import sciline
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
+from ess.reduce.workflow import register_workflow
 
 from ..reflectometry import providers as reflectometry_providers
-from ..reflectometry.corrections import correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -25,6 +26,7 @@ from . import (
     normalization,
     orso,
 )
+from .corrections import RunNormalization, insert_run_normalization
 
 _general_providers = (
     *reflectometry_providers,
@@ -62,11 +64,11 @@ def mcstas_default_parameters() -> dict:
             sc.scalar(0.75, unit='deg'),
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections
-        - {correct_by_proton_charge},
+        CorrectionsToApply: corrections.default_corrections,
         LookupTableRelativeErrorThreshold: {
             "detector": 0.06,
         },
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
@@ -80,24 +82,99 @@ def default_parameters() -> dict:
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
         },
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
-def FreiaMcStasWorkflow() -> sciline.Pipeline:
+def FreiaMcStasWorkflow(
+    *,
+    run_norm: RunNormalization = RunNormalization.none,
+    **kwargs,
+) -> sciline.Pipeline:
     """Workflow for reduction of McStas data for the Freia instrument."""
-    workflow = beamline.LoadNeXusWorkflow()
+    workflow = beamline.LoadNeXusWorkflow(**kwargs)
     for provider in mcstas_providers:
         workflow.insert(provider)
+    insert_run_normalization(workflow, run_norm)
     for name, param in mcstas_default_parameters().items():
         workflow[name] = param
     return workflow
 
 
-def FreiaWorkflow() -> sciline.Pipeline:
+def FreiaWorkflow(
+    *,
+    run_norm: RunNormalization = RunNormalization.proton_charge,
+    **kwargs,
+) -> sciline.Pipeline:
     """Workflow for reduction of data for the Freia instrument."""
-    workflow = beamline.LoadNeXusWorkflow()
+    workflow = beamline.LoadNeXusWorkflow(**kwargs)
     for provider in providers:
         workflow.insert(provider)
+    insert_run_normalization(workflow, run_norm)
     for name, param in default_parameters().items():
         workflow[name] = param
     return workflow
+
+
+@register_workflow
+def FreiaMcStasUnnormalizedWorkflow() -> sciline.Pipeline:
+    """Workflow for Freia McStas data without run normalization."""
+    return FreiaMcStasWorkflow(run_norm=RunNormalization.none)
+
+
+@register_workflow
+def FreiaMcStasMonitorHistogramWorkflow() -> sciline.Pipeline:
+    """Workflow for Freia McStas data using histogrammed monitor normalization."""
+    return FreiaMcStasWorkflow(run_norm=RunNormalization.monitor_histogram)
+
+
+@register_workflow
+def FreiaMcStasMonitorIntegratedWorkflow() -> sciline.Pipeline:
+    """Workflow for Freia McStas data using integrated monitor normalization."""
+    return FreiaMcStasWorkflow(run_norm=RunNormalization.monitor_integrated)
+
+
+@register_workflow
+def FreiaMcStasProtonChargeWorkflow() -> sciline.Pipeline:
+    """Workflow for Freia McStas data using proton charge normalization."""
+    return FreiaMcStasWorkflow(run_norm=RunNormalization.proton_charge)
+
+
+@register_workflow
+def FreiaUnnormalizedWorkflow() -> sciline.Pipeline:
+    """Workflow for Freia NeXus data without run normalization."""
+    return FreiaWorkflow(run_norm=RunNormalization.none)
+
+
+@register_workflow
+def FreiaMonitorHistogramWorkflow() -> sciline.Pipeline:
+    """Workflow for Freia NeXus data using histogrammed monitor normalization."""
+    return FreiaWorkflow(run_norm=RunNormalization.monitor_histogram)
+
+
+@register_workflow
+def FreiaMonitorIntegratedWorkflow() -> sciline.Pipeline:
+    """Workflow for Freia NeXus data using integrated monitor normalization."""
+    return FreiaWorkflow(run_norm=RunNormalization.monitor_integrated)
+
+
+@register_workflow
+def FreiaProtonChargeWorkflow() -> sciline.Pipeline:
+    """Workflow for Freia NeXus data using proton charge normalization."""
+    return FreiaWorkflow(run_norm=RunNormalization.proton_charge)
+
+
+__all__ = [
+    'FreiaMcStasMonitorHistogramWorkflow',
+    'FreiaMcStasMonitorIntegratedWorkflow',
+    'FreiaMcStasProtonChargeWorkflow',
+    'FreiaMcStasUnnormalizedWorkflow',
+    'FreiaMcStasWorkflow',
+    'FreiaMonitorHistogramWorkflow',
+    'FreiaMonitorIntegratedWorkflow',
+    'FreiaProtonChargeWorkflow',
+    'FreiaUnnormalizedWorkflow',
+    'FreiaWorkflow',
+    'default_parameters',
+    'mcstas_default_parameters',
+]

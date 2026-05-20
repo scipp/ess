@@ -1,17 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-import ess.reduce
+import sciline
 import scipp as sc
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
-from ..reflectometry.corrections import correct_by_proton_charge
+from ..reflectometry import corrections as common_corrections
+from ..reflectometry.corrections import RunNormalization
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
     CorrectionsToApply,
-    ProtonCharge,
     ReducibleData,
     RunType,
+    RunUnnormalizedData,
     WavelengthBins,
     WavelengthDetector,
     YIndexLimits,
@@ -23,7 +24,7 @@ from .types import WavelengthMonitor
 
 
 def normalize_by_monitor_histogram(
-    detector: ReducibleData[RunType],
+    detector: RunUnnormalizedData[RunType],
     *,
     monitor: WavelengthMonitor[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -55,11 +56,36 @@ def normalize_by_monitor_histogram(
     ess.reduce.normalization.normalize_by_monitor_histogram:
         For details and the actual implementation.
     """
-    return ess.reduce.normalization.normalize_by_monitor_histogram(
+    return common_corrections.normalize_by_monitor_histogram(
         detector=detector,
         monitor=monitor,
         uncertainty_broadcast_mode=uncertainty_broadcast_mode,
-        skip_range_check=False,
+    )
+
+
+def normalize_by_monitor_integrated(
+    detector: RunUnnormalizedData[RunType],
+    *,
+    monitor: WavelengthMonitor[RunType],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> ReducibleData[RunType]:
+    """Normalize detector data by an integrated wavelength monitor."""
+    return common_corrections.normalize_by_monitor_integrated(
+        detector=detector,
+        monitor=monitor,
+        uncertainty_broadcast_mode=uncertainty_broadcast_mode,
+    )
+
+
+def insert_run_normalization(
+    workflow: sciline.Pipeline, run_norm: RunNormalization
+) -> None:
+    """Insert providers for a specific ESTIA run normalization into a workflow."""
+    common_corrections.insert_run_normalization(
+        workflow,
+        run_norm,
+        monitor_histogram_provider=normalize_by_monitor_histogram,
+        monitor_integrated_provider=normalize_by_monitor_integrated,
     )
 
 
@@ -69,12 +95,9 @@ def add_coords_masks_and_apply_corrections(
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-    proton_charge: ProtonCharge[RunType],
-    monitor: WavelengthMonitor[RunType],
-    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
-) -> ReducibleData[RunType]:
+) -> RunUnnormalizedData[RunType]:
     """
     Computes coordinates, masks and corrections that are
     the same for the sample measurement and the reference measurement.
@@ -83,18 +106,9 @@ def add_coords_masks_and_apply_corrections(
     da = add_masks(da, ylim, zlims, bdlim, wbins)
 
     for correction in corrections_to_apply:
-        if correction == 'monitor':
-            da = normalize_by_monitor_histogram(
-                da,
-                monitor=monitor,
-                uncertainty_broadcast_mode=uncertainty_broadcast_mode,
-            )
-        elif correction == 'proton_charge':
-            da = correct_by_proton_charge(da, proton_charge=proton_charge)
-        else:
-            da = correction(da)
+        da = correction(da)
 
-    return ReducibleData[RunType](da)
+    return RunUnnormalizedData[RunType](da)
 
 
 def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
@@ -108,6 +122,6 @@ def assume_time_series_constant_with_zero_default_value_if_empty(da: sc.DataArra
     return da.mean() if len(da) > 0 else sc.scalar(0.0, unit=da.unit)
 
 
-default_corrections = {correct_by_footprint, 'proton_charge'}
+default_corrections = {correct_by_footprint}
 
 providers = (add_coords_masks_and_apply_corrections,)

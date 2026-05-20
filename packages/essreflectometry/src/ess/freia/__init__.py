@@ -9,7 +9,18 @@ from .types import (
     SampleSizeResolution,
     WavelengthResolution,
 )
-from .workflow import FreiaMcStasWorkflow, FreiaWorkflow
+from .workflow import (
+    FreiaMcStasMonitorHistogramWorkflow,
+    FreiaMcStasMonitorIntegratedWorkflow,
+    FreiaMcStasProtonChargeWorkflow,
+    FreiaMcStasUnnormalizedWorkflow,
+    FreiaMcStasWorkflow,
+    FreiaMonitorHistogramWorkflow,
+    FreiaMonitorIntegratedWorkflow,
+    FreiaProtonChargeWorkflow,
+    FreiaUnnormalizedWorkflow,
+    FreiaWorkflow,
+)
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -18,7 +29,15 @@ except importlib.metadata.PackageNotFoundError:
 
 __all__ = [
     "AngularResolution",
+    "FreiaMcStasMonitorHistogramWorkflow",
+    "FreiaMcStasMonitorIntegratedWorkflow",
+    "FreiaMcStasProtonChargeWorkflow",
+    "FreiaMcStasUnnormalizedWorkflow",
     "FreiaMcStasWorkflow",
+    "FreiaMonitorHistogramWorkflow",
+    "FreiaMonitorIntegratedWorkflow",
+    "FreiaProtonChargeWorkflow",
+    "FreiaUnnormalizedWorkflow",
     "FreiaWorkflow",
     "SampleSizeResolution",
     "WavelengthResolution",

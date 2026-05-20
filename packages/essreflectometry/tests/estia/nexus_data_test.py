@@ -9,11 +9,15 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
-from ess.reduce.normalization import normalize_by_monitor_histogram
+from ess.reduce.normalization import (
+    normalize_by_monitor_histogram,
+    normalize_by_monitor_integrated,
+)
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from orsopy import fileio
 
 from ess.estia import EstiaWorkflow
+from ess.estia.corrections import RunNormalization
 from ess.estia.data import (
     estia_mcstas_nexus_reference_example,
     estia_mcstas_nexus_sample_example,
@@ -23,7 +27,6 @@ from ess.estia.types import WavelengthMonitor
 from ess.reflectometry import orso, supermirror
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
-    CorrectionsToApply,
     Filename,
     LookupTableFilename,
     ProtonCharge,
@@ -38,9 +41,10 @@ from ess.reflectometry.types import (
 )
 
 
-@pytest.fixture
-def estia_pipeline() -> sciline.Pipeline:
-    wf = EstiaWorkflow()
+def _make_estia_pipeline(
+    *, run_norm: RunNormalization = RunNormalization.none
+) -> sciline.Pipeline:
+    wf = EstiaWorkflow(run_norm=run_norm)
     wf[Filename[ReferenceRun]] = estia_mcstas_nexus_reference_example()
 
     wf[YIndexLimits] = sc.scalar(35), sc.scalar(64)
@@ -87,9 +91,12 @@ def estia_pipeline() -> sciline.Pipeline:
         )
     )
     wf[orso.OrsoSample] = orso.OrsoSample(fileio.data_source.Sample.empty())
-    wf[WavelengthMonitor[SampleRun]] = None
-    wf[WavelengthMonitor[ReferenceRun]] = None
     return wf
+
+
+@pytest.fixture
+def estia_pipeline() -> sciline.Pipeline:
+    return _make_estia_pipeline()
 
 
 def test_compute_reducible_data(estia_pipeline: sciline.Pipeline):
@@ -107,19 +114,31 @@ def test_compute_reducible_data(estia_pipeline: sciline.Pipeline):
     assert 'Q' in da.bins.coords
 
 
-def test_compute_reducible_data_with_monitor(estia_pipeline: sciline.Pipeline):
-    wf = estia_pipeline
-    wf[Filename[SampleRun]] = estia_mcstas_nexus_sample_example('Ni/Ti-multilayer')[0]
-    without_monitor = wf.compute(ReducibleData[SampleRun])
+@pytest.mark.parametrize(
+    ("run_norm", "normalize"),
+    [
+        (RunNormalization.monitor_histogram, normalize_by_monitor_histogram),
+        (RunNormalization.monitor_integrated, normalize_by_monitor_integrated),
+    ],
+)
+def test_compute_reducible_data_with_monitor(
+    estia_pipeline: sciline.Pipeline,
+    run_norm: RunNormalization,
+    normalize,
+):
+    filename = estia_mcstas_nexus_sample_example('Ni/Ti-multilayer')[0]
+    estia_pipeline[Filename[SampleRun]] = filename
+    without_monitor = estia_pipeline.compute(ReducibleData[SampleRun])
+
+    wf = _make_estia_pipeline(run_norm=run_norm)
+    wf[Filename[SampleRun]] = filename
     wf[WavelengthMonitor[SampleRun]] = sc.DataArray(
         sc.array(dims=['wavelength'], values=[30.0], variances=[1.0]),
         coords={'wavelength': sc.linspace('wavelength', 0, 15, 2, unit='angstrom')},
     )
-    corrections = wf.compute(CorrectionsToApply)
-    wf[CorrectionsToApply] = {*corrections, 'monitor'}
     with_monitor = wf.compute(ReducibleData[SampleRun])
     scipp.testing.assert_allclose(
-        normalize_by_monitor_histogram(
+        normalize(
             without_monitor,
             monitor=wf.compute(WavelengthMonitor[SampleRun]),
             uncertainty_broadcast_mode=UncertaintyBroadcastMode.drop,

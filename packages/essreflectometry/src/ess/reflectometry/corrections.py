@@ -1,8 +1,30 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import enum
+
+import ess.reduce
+import sciline
 import scipp as sc
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
 from .tools import fwhm_to_std
-from .types import RawSampleRotation, RunType, SampleRotation, SampleRotationOffset
+from .types import (
+    ProtonCharge,
+    RawSampleRotation,
+    ReducibleData,
+    RunType,
+    RunUnnormalizedData,
+    SampleRotation,
+    SampleRotationOffset,
+)
+
+
+class RunNormalization(enum.Enum):
+    """Type of normalization applied to each run."""
+
+    none = enum.auto()
+    monitor_histogram = enum.auto()
+    monitor_integrated = enum.auto()
+    proton_charge = enum.auto()
 
 
 def footprint_on_sample(
@@ -60,6 +82,76 @@ def correct_by_proton_charge(
     # The test is "not larger than" because that masks nan values as well.
     da = da.bins.assign_masks(proton_charge_too_low=~(pc >= median_pc / 4))
     return da / pc
+
+
+def no_run_normalization(
+    detector: RunUnnormalizedData[RunType],
+) -> ReducibleData[RunType]:
+    """Use prepared detector data without applying a run normalization."""
+    return ReducibleData[RunType](detector)
+
+
+def normalize_by_monitor_histogram(
+    detector: RunUnnormalizedData[RunType],
+    *,
+    monitor: sc.DataArray,
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> ReducibleData[RunType]:
+    """Normalize detector data by a histogrammed monitor."""
+    return ReducibleData[RunType](
+        ess.reduce.normalization.normalize_by_monitor_histogram(
+            detector=detector,
+            monitor=monitor,
+            uncertainty_broadcast_mode=uncertainty_broadcast_mode,
+            skip_range_check=False,
+        )
+    )
+
+
+def normalize_by_monitor_integrated(
+    detector: RunUnnormalizedData[RunType],
+    *,
+    monitor: sc.DataArray,
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> ReducibleData[RunType]:
+    """Normalize detector data by an integrated wavelength monitor."""
+    return ReducibleData[RunType](
+        ess.reduce.normalization.normalize_by_monitor_integrated(
+            detector=detector,
+            monitor=monitor,
+            uncertainty_broadcast_mode=uncertainty_broadcast_mode,
+            skip_range_check=False,
+        )
+    )
+
+
+def normalize_by_proton_charge(
+    detector: RunUnnormalizedData[RunType],
+    proton_charge: ProtonCharge[RunType],
+) -> ReducibleData[RunType]:
+    """Normalize detector data by time-dependent proton charge."""
+    return ReducibleData[RunType](
+        correct_by_proton_charge(detector, proton_charge=proton_charge)
+    )
+
+
+def insert_run_normalization(
+    workflow: sciline.Pipeline,
+    run_norm: RunNormalization,
+    *,
+    monitor_histogram_provider,
+    monitor_integrated_provider,
+) -> None:
+    """Insert providers for a specific normalization into a workflow."""
+    match run_norm:
+        case RunNormalization.none:
+            workflow.insert(no_run_normalization)
+        case RunNormalization.monitor_histogram:
+            workflow.insert(monitor_histogram_provider)
+        case RunNormalization.monitor_integrated:
+            workflow.insert(monitor_integrated_provider)
+        case RunNormalization.proton_charge:
+            workflow.insert(normalize_by_proton_charge)
 
 
 def correct_sample_rotation(

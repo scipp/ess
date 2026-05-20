@@ -9,11 +9,15 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
-from ess.reduce.normalization import normalize_by_monitor_histogram
+from ess.reduce.normalization import (
+    normalize_by_monitor_histogram,
+    normalize_by_monitor_integrated,
+)
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from orsopy import fileio
 
 from ess.estia import EstiaMcStasWorkflow
+from ess.estia.corrections import RunNormalization
 from ess.estia.data import (
     estia_mcstas_reference_run,
     estia_mcstas_sample_run,
@@ -27,7 +31,6 @@ from ess.reflectometry import orso
 from ess.reflectometry.corrections import correct_by_proton_charge
 from ess.reflectometry.types import (
     BeamDivergenceLimits,
-    CorrectionsToApply,
     Filename,
     LookupTableFilename,
     ProtonCharge,
@@ -42,9 +45,10 @@ from ess.reflectometry.types import (
 )
 
 
-@pytest.fixture
-def estia_mcstas_pipeline() -> sciline.Pipeline:
-    wf = EstiaMcStasWorkflow()
+def _make_estia_mcstas_pipeline(
+    *, run_norm: RunNormalization = RunNormalization.none
+) -> sciline.Pipeline:
+    wf = EstiaMcStasWorkflow(run_norm=run_norm)
     wf[Filename[ReferenceRun]] = estia_mcstas_reference_run()
 
     wf[YIndexLimits] = sc.scalar(35), sc.scalar(64)
@@ -90,6 +94,11 @@ def estia_mcstas_pipeline() -> sciline.Pipeline:
     return wf
 
 
+@pytest.fixture
+def estia_mcstas_pipeline() -> sciline.Pipeline:
+    return _make_estia_mcstas_pipeline()
+
+
 def test_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
     estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
     da = estia_mcstas_pipeline.compute(ReducibleData[SampleRun])
@@ -103,19 +112,31 @@ def test_compute_reducible_data(estia_mcstas_pipeline: sciline.Pipeline):
     assert 'Q' in da.bins.coords
 
 
-def test_compute_reducible_data_with_monitor(estia_mcstas_pipeline: sciline.Pipeline):
-    wf = estia_mcstas_pipeline
-    wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    without_monitor = wf.compute(ReducibleData[SampleRun])
+@pytest.mark.parametrize(
+    ("run_norm", "normalize"),
+    [
+        (RunNormalization.monitor_histogram, normalize_by_monitor_histogram),
+        (RunNormalization.monitor_integrated, normalize_by_monitor_integrated),
+    ],
+)
+def test_compute_reducible_data_with_monitor(
+    estia_mcstas_pipeline: sciline.Pipeline,
+    run_norm: RunNormalization,
+    normalize,
+):
+    filename = estia_mcstas_sample_run(11)
+    estia_mcstas_pipeline[Filename[SampleRun]] = filename
+    without_monitor = estia_mcstas_pipeline.compute(ReducibleData[SampleRun])
+
+    wf = _make_estia_mcstas_pipeline(run_norm=run_norm)
+    wf[Filename[SampleRun]] = filename
     wf[WavelengthMonitor[SampleRun]] = sc.DataArray(
         sc.array(dims=['wavelength'], values=[30.0], variances=[1.0]),
         coords={'wavelength': sc.linspace('wavelength', 0, 15, 2, unit='angstrom')},
     )
-    corrections = wf.compute(CorrectionsToApply)
-    wf[CorrectionsToApply] = {*corrections, 'monitor'}
     with_monitor = wf.compute(ReducibleData[SampleRun])
     scipp.testing.assert_allclose(
-        normalize_by_monitor_histogram(
+        normalize(
             without_monitor,
             monitor=wf.compute(WavelengthMonitor[SampleRun]),
             uncertainty_broadcast_mode=UncertaintyBroadcastMode.drop,
@@ -127,15 +148,16 @@ def test_compute_reducible_data_with_monitor(estia_mcstas_pipeline: sciline.Pipe
 def test_compute_reducible_data_with_proton_charge(
     estia_mcstas_pipeline: sciline.Pipeline,
 ):
-    wf = estia_mcstas_pipeline
-    wf[Filename[SampleRun]] = estia_mcstas_sample_run(11)
-    without_proton_charge = wf.compute(ReducibleData[SampleRun])
+    filename = estia_mcstas_sample_run(11)
+    estia_mcstas_pipeline[Filename[SampleRun]] = filename
+    without_proton_charge = estia_mcstas_pipeline.compute(ReducibleData[SampleRun])
+
+    wf = _make_estia_mcstas_pipeline(run_norm=RunNormalization.proton_charge)
+    wf[Filename[SampleRun]] = filename
     wf[ProtonCharge[SampleRun]] = sc.DataArray(
         sc.array(dims=['time'], values=[2.0], variances=[1.0]),
         coords={'time': sc.datetimes(dims=['time'], values=[0], unit='s')},
     )
-    corrections = wf.compute(CorrectionsToApply)
-    wf[CorrectionsToApply] = {*corrections, 'proton_charge'}
     with_proton_charge = wf.compute(ReducibleData[SampleRun])
     scipp.testing.assert_allclose(
         correct_by_proton_charge(

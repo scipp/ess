@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import scipp as sc
 from ess.reduce.nexus.types import Position
-from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from scippnexus import NXsample, NXsource
 
 from ..reflectometry.load import load_h5
@@ -17,10 +16,9 @@ from ..reflectometry.types import (
     DetectorLtotal,
     DetectorRotation,
     Filename,
-    ProtonCharge,
     RawDetector,
-    ReducibleData,
     RunType,
+    RunUnnormalizedData,
     SampleRotation,
     SampleRotationOffset,
     WavelengthBins,
@@ -29,7 +27,6 @@ from ..reflectometry.types import (
 )
 from .beamline import DETECTOR_BANK_SIZES
 from .corrections import add_coords_masks_and_apply_corrections
-from .types import WavelengthMonitor
 
 
 def parse_metadata_ascii(lines) -> dict:
@@ -295,28 +292,22 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-    proton_charge: ProtonCharge[RunType],
-    monitor: WavelengthMonitor[RunType],
-    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
-) -> ReducibleData[RunType]:
+) -> RunUnnormalizedData[RunType]:
     out = add_coords_masks_and_apply_corrections(
         da=da,
         ylim=ylim,
         zlims=zlims,
         bdlim=bdlim,
         wbins=wbins,
-        monitor=monitor,
-        uncertainty_broadcast_mode=uncertainty_broadcast_mode,
-        proton_charge=proton_charge,
         graph={
             **graph,
             "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
         },
         corrections_to_apply=corrections_to_apply,
     )
-    return ReducibleData[RunType](out)
+    return RunUnnormalizedData[RunType](out)
 
 
 providers = (
