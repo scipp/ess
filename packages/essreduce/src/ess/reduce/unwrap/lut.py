@@ -485,98 +485,37 @@ def LookupTableWorkflow():
     return wf
 
 
-# def _polygon_edges(polygons: list[np.ndarray]) -> np.ndarray:
-#     """
-#     Convert a list of polygons (N_i, 2) arrays to a single array of edges (E, 2, 2).
-#     """
-#     # polygons: list of (N_i, 2) arrays
-#     edges = []
-#     for poly in polygons:
-#         p1 = poly
-#         p2 = np.roll(poly, -1, axis=0)
-#         edges.append(np.stack([p1, p2], axis=1))  # (N, 2, 2)
-#     return np.concatenate(edges, axis=0)  # (E, 2, 2)
-
-
-# def _polygon_intersections(polygons: list[np.ndarray], xs: np.ndarray) -> np.ndarray:
-#     """
-#     Find the intersections of a list of polygons with vertical lines at specified x
-#     coordinates.
-#     We then take the mean of the minimum and maximum intersection points as an estimate
-#     of the mean wavelength in each bin. This handles the case where there are multiple
-#     subframes overlapping in a single time bin.
-
-#     Parameters
-#     ----------
-#     polygons:
-#         List of polygons, each represented as an (N_i, 2) array of vertices.
-#     xs:
-#         Array of x coordinates where intersections should be computed.
-
-#     Returns
-#     -------
-#     Array of intersection y coordinates, one for each x in `xs`.
-#     """
-#     edges = _polygon_edges(polygons)
-
-#     x1 = edges[:, 0, 0][:, None]  # (E, 1)
-#     y1 = edges[:, 0, 1][:, None]
-#     x2 = edges[:, 1, 0][:, None]
-#     y2 = edges[:, 1, 1][:, None]
-
-#     xs = xs[None, :]  # (1, N)
-
-#     # mask: edge crosses vertical line at x
-#     mask = ((x1 <= xs) & (x2 > xs)) | ((x2 <= xs) & (x1 > xs))
-
-#     # avoid division by zero (vertical edges won't pass mask anyway)
-#     denom = x2 - x1
-#     denom = np.where(denom == 0, np.nan, denom)
-
-#     t = (xs - x1) / denom
-#     y = y1 + t * (y2 - y1)
-
-#     # keep only valid intersections
-#     y = np.where(mask, y, np.nan)
-
-#     # now reduce along edges axis
-#     with warnings.catch_warnings():
-#         warnings.filterwarnings(
-#             "ignore", category=RuntimeWarning, message="All-NaN slice encountered"
-#         )
-#         y_min = np.nanmin(y, axis=0)
-#         y_max = np.nanmax(y, axis=0)
-
-#     # Median value and spread estimate
-#     return 0.5 * (y_min + y_max), 0.5 * (y_max - y_min)
-
-
-# instead of polygon_edges:
-def _polygon_bounds(polygons: list[np.ndarray]) -> list[np.ndarray]:
+def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndarray:
+    # Decompose the polygons into two 1D lines: the upper and lower bounds
     bounds = []
 
     for polygon in polygons:
         left = polygon[:, 0].argmin()
         right = polygon[:, 0].argmax()
-
         k = (right - left) % len(polygon)
-
         p = np.roll(polygon, -left, axis=0)
-
         bounds.extend(
             (
                 p[: k + 1],
                 np.concatenate((p[k:], p[:1]))[::-1],
             )
         )
-    return bounds
 
-
-def _polygon_intersections(polygons: list[np.ndarray], xs: np.ndarray) -> np.ndarray:
-    bounds = _polygon_bounds(polygons)
-
+    # Now find intersections of the vertical lines at x with the bounds.
+    #
+    # In the case of an exactly vertical left or right edge of a polygon, the argmin
+    # and argmax would pick one of the points, and then one edge of the polygon
+    # (say the upper) would contain one of the vertical points, while the lower edge
+    # would contain both. Then the np.interp would give us the one vertical point from
+    # the upper edge, but it's undefined what the lower edge would give us, because
+    # you could get either of the two points.
+    # To fix, we add vertices of the polygons that fall exactly on the vertical lines
+    # to the list of intersections. It does not matter if an intersection is added
+    # twice, because we will take the min and max later. We pad with NaNs to ensure
+    # that the resulting arrays have the same shape.
     y = np.vstack(
-        [np.interp(xs, b[:, 0], b[:, 1], left=np.nan, right=np.nan) for b in bounds]
+        [np.interp(x, b[:, 0], b[:, 1], left=np.nan, right=np.nan) for b in bounds]
+        + [np.where(p[:, 0:1] == x, p[:, 1:2], np.nan) for p in polygons]
     )
     with warnings.catch_warnings():
         warnings.filterwarnings(
