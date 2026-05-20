@@ -81,10 +81,11 @@ jobs:
       - name: Prepare site
         run: |
           PACKAGE=${{ needs.determine-package.outputs.package }}
+          SUBPATH=${PACKAGE#ess}
           git fetch origin gh-pages:gh-pages || true
           git worktree add gh-pages-site gh-pages || mkdir -p gh-pages-site
-          rm -rf gh-pages-site/$PACKAGE
-          cp -r packages/$PACKAGE/html gh-pages-site/$PACKAGE
+          rm -rf gh-pages-site/$SUBPATH
+          cp -r packages/$PACKAGE/html gh-pages-site/$SUBPATH
           cp docs/index.html gh-pages-site/index.html
           touch gh-pages-site/.nojekyll
       - name: Build search index
