@@ -488,34 +488,34 @@ def LookupTableWorkflow():
 def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndarray:
     # Decompose the polygons into two 1D lines: the upper and lower bounds
     bounds = []
-
     for polygon in polygons:
         left = polygon[:, 0].argmin()
         right = polygon[:, 0].argmax()
         k = (right - left) % len(polygon)
         p = np.roll(polygon, -left, axis=0)
-        bounds.extend(
-            (
-                p[: k + 1],
-                np.concatenate((p[k:], p[:1]))[::-1],
-            )
-        )
+
+        bound1 = p[: k + 1]
+        bound2 = np.concatenate((p[k:], p[:1]))[::-1]
+
+        # In the case of an exactly vertical left or right edge of a polygon, the argmin
+        # and argmax would pick one of the points, and then one edge of the polygon
+        # (say the upper) would contain one of the vertical points, while the lower edge
+        # would contain both. Then the np.interp would give us the one vertical point
+        # from the upper edge, but it's undefined what the lower edge would give us,
+        # because you could get either of the two points.
+        # To fix, if the two leftmost or rightmost points have the same x value, we set
+        # the y value of the first point to be the same as the second point.
+        for b in (bound1, bound2):
+            if b[0, 0] == b[1, 0]:
+                b[0, 1] = b[1, 1]
+            if b[-1, 0] == b[-2, 0]:
+                b[-1, 1] = b[-2, 1]
+
+        bounds.extend((bound1, bound2))
 
     # Now find intersections of the vertical lines at x with the bounds.
-    #
-    # In the case of an exactly vertical left or right edge of a polygon, the argmin
-    # and argmax would pick one of the points, and then one edge of the polygon
-    # (say the upper) would contain one of the vertical points, while the lower edge
-    # would contain both. Then the np.interp would give us the one vertical point from
-    # the upper edge, but it's undefined what the lower edge would give us, because
-    # you could get either of the two points.
-    # To fix, we add vertices of the polygons that fall exactly on the vertical lines
-    # to the list of intersections. It does not matter if an intersection is added
-    # twice, because we will take the min and max later. We pad with NaNs to ensure
-    # that the resulting arrays have the same shape.
     y = np.vstack(
         [np.interp(x, b[:, 0], b[:, 1], left=np.nan, right=np.nan) for b in bounds]
-        + [np.where(p[:, 0:1] == x, p[:, 1:2], np.nan) for p in polygons]
     )
     with warnings.catch_warnings():
         warnings.filterwarnings(
