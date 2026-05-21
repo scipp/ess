@@ -16,10 +16,9 @@ from ..reflectometry.types import (
     DetectorLtotal,
     DetectorRotation,
     Filename,
-    ProtonCharge,
     RawDetector,
-    ReducibleData,
     RunType,
+    RunUnnormalizedData,
     SampleRotation,
     SampleRotationOffset,
     WavelengthBins,
@@ -223,10 +222,11 @@ def load_mcstas(
 
     da.bins.coords['event_time_zero'] = (
         sc.scalar(0, unit='s') * da.bins.coords['t']
-    ).to(unit='ns')
+    ).to(unit='ns', dtype='int64') + sc.datetime(0, unit='ns')
     da.bins.coords['event_time_offset'] = (
-        sc.scalar(1, unit='s') * da.bins.coords['t']
-    ).to(unit='ns') % sc.scalar(1 / 14, unit='s').to(unit='ns')
+        (sc.scalar(1, unit='s') * da.bins.coords['t']).to(unit='ns')
+        % sc.scalar(1 / 14, unit='s').to(unit='ns')
+    ).to(dtype='int32')
     da.bins.coords.pop('t')
 
     if 'L' in da.bins.coords:
@@ -292,24 +292,22 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
     zlims: ZIndexLimits,
     bdlim: BeamDivergenceLimits,
     wbins: WavelengthBins,
-    proton_charge: ProtonCharge[RunType],
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
-) -> ReducibleData[RunType]:
+) -> RunUnnormalizedData[RunType]:
     out = add_coords_masks_and_apply_corrections(
         da=da,
         ylim=ylim,
         zlims=zlims,
         bdlim=bdlim,
         wbins=wbins,
-        proton_charge=proton_charge,
         graph={
             **graph,
             "wavelength": lambda wavelength_from_mcstas: wavelength_from_mcstas,
         },
         corrections_to_apply=corrections_to_apply,
     )
-    return ReducibleData[RunType](out)
+    return RunUnnormalizedData[RunType](out)
 
 
 providers = (

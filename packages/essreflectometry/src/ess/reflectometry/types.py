@@ -43,6 +43,10 @@ class ReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Event data with common coordinates added"""
 
 
+class RunUnnormalizedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data prepared for reduction, before run normalization."""
+
+
 ReducedReference = NewType("ReducedReference", sc.DataArray)
 """Intensity distribution on the detector for a sample with :math`R(Q) = 1`"""
 

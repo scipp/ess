@@ -199,12 +199,10 @@ def test_proton_charge(amor_pipeline: sciline.Pipeline):
     )
     da_with_proton_charge = amor_pipeline.compute(ReducibleData[SampleRun])
 
-    assert "proton_charge" in da_with_proton_charge.bins.coords
     assert "proton_charge_too_low" in da_with_proton_charge.bins.masks
     assert da_with_proton_charge.bins.masks["proton_charge_too_low"].any()
     assert not da_with_proton_charge.bins.masks["proton_charge_too_low"].all()
 
-    assert "proton_charge" not in da_without_proton_charge.bins.coords
     assert "proton_charge_too_low" not in da_without_proton_charge.bins.masks
 
     t = (

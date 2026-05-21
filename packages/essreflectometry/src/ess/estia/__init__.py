@@ -9,7 +9,18 @@ from .types import (
     SampleSizeResolution,
     WavelengthResolution,
 )
-from .workflow import EstiaMcStasWorkflow, EstiaWorkflow
+from .workflow import (
+    EstiaMcStasMonitorHistogramWorkflow,
+    EstiaMcStasMonitorIntegratedWorkflow,
+    EstiaMcStasProtonChargeWorkflow,
+    EstiaMcStasUnnormalizedWorkflow,
+    EstiaMcStasWorkflow,
+    EstiaMonitorHistogramWorkflow,
+    EstiaMonitorIntegratedWorkflow,
+    EstiaProtonChargeWorkflow,
+    EstiaUnnormalizedWorkflow,
+    EstiaWorkflow,
+)
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -18,7 +29,15 @@ except importlib.metadata.PackageNotFoundError:
 
 __all__ = [
     "AngularResolution",
+    "EstiaMcStasMonitorHistogramWorkflow",
+    "EstiaMcStasMonitorIntegratedWorkflow",
+    "EstiaMcStasProtonChargeWorkflow",
+    "EstiaMcStasUnnormalizedWorkflow",
     "EstiaMcStasWorkflow",
+    "EstiaMonitorHistogramWorkflow",
+    "EstiaMonitorIntegratedWorkflow",
+    "EstiaProtonChargeWorkflow",
+    "EstiaUnnormalizedWorkflow",
     "EstiaWorkflow",
     "SampleSizeResolution",
     "WavelengthResolution",

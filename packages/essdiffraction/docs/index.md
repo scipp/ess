@@ -43,6 +43,11 @@
 
 :::
 
+:::{grid-item-card} MAGIC
+:link: user-guide/magic/index.md
+
+:::
+
 :::{grid-item-card} SNS instruments
 :link: user-guide/sns-instruments/index.md
 

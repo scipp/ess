@@ -140,6 +140,34 @@
    workflow
 ```
 
+## MAGIC
+
+### Workflows
+
+
+```{eval-rst}
+.. currentmodule:: ess.magic
+
+.. autosummary::
+   :toctree: ../generated/functions
+
+   MagicWorkflow
+```
+
+### Submodules
+
+```{eval-rst}
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   beamline
+   data
+   types
+   workflow
+```
+
 ## SNS powder
 
 ```{eval-rst}
