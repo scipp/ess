@@ -65,7 +65,6 @@
       MonitorCoordTransformGraph
       MonitorFilename
       NormalizedDspacing
-      ProtonCharge
       RawDataAndMetadata
    
    
