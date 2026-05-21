@@ -498,11 +498,11 @@ def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndar
         bound2 = np.concatenate((p[k:], p[:1]))[::-1]
 
         # In the case of an exactly vertical left or right edge of a polygon, the argmin
-        # and argmax would pick one of the points, and then one edge of the polygon
-        # (say the upper) would contain one of the vertical points, while the lower edge
-        # would contain both. Then the np.interp would give us the one vertical point
-        # from the upper edge, but it's undefined what the lower edge would give us,
-        # because you could get either of the two points.
+        # and argmax would pick one of the points, and then one bound of the polygon
+        # (say the upper) would contain one of the vertical points, while the lower
+        # bound would contain both. Then the np.interp would give us the one vertical
+        # point from the upper bound, but it's undefined what the lower bound would
+        # give us, because you could get either of the two points.
         # To fix, if the two leftmost or rightmost points have the same x value, we set
         # the y value of the first point to be the same as the second point.
         for b in (bound1, bound2):
