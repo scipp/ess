@@ -209,7 +209,7 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
         positions['MCC'],
     )
     data = (
-        next(_find_all_h5(data_dir, f'.*{north_or_south}{number}'))
+        next(_find_all_h5(data_dir, f'.*{north_or_south}{number}_events'))
         if north_or_south is not None and number is not None
         else next(_find_all_h5(data_dir, f'.*{north_or_south}'))
         if north_or_south is not None
@@ -222,7 +222,7 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
     ]
     detector_rotation = _find_h5(
         f['/entry1/instrument/components'],
-        f'.*nD_Mantid_?{north_or_south}_{number}.*'
+        f'.*nD_Mantid_?{north_or_south}_{number}$'
         if north_or_south is not None and number is not None
         else f'.*nD_Mantid_?{north_or_south}.*'
         if north_or_south is not None
