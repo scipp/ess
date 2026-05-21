@@ -15,18 +15,13 @@ from ess.reduce.nexus.types import (
     RawMonitor,
     SampleRun,
 )
-from ess.reduce.unwrap import (
-    FastLookupTableWorkflow,
-    GenericUnwrapWorkflow,
-    LookupTableWorkflow,
-    fakes,
-)
+from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
 
 sl = pytest.importorskip("sciline")
 
 
 def make_lut_workflow(engine, choppers, pulse_stride, neutrons=None, seed=None):
-    lut_wf = LookupTableWorkflow() if engine == "tof" else FastLookupTableWorkflow()
+    lut_wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     lut_wf[unwrap.DiskChoppers[AnyRun]] = choppers
     lut_wf[unwrap.SourcePosition] = fakes.source_position()
     lut_wf[unwrap.NumberOfSimulatedNeutrons] = neutrons
