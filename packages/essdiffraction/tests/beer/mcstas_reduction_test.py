@@ -105,7 +105,7 @@ def test_can_load_3d_detector():
         mcstas_few_neutrons_3d_detector_example(), DetectorBank.south, sizes
     )
     assert 'panel' in da.dims
-    # Detector position is monotone in x.
+    # Detector position.x is monotone in panel dimension.
     panel_x_diff = np.diff(da.coords['detector_position'].fields.x.values)
     assert (panel_x_diff > 0).all() or (panel_x_diff < 0).all()
 
