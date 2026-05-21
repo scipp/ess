@@ -771,7 +771,7 @@ def make_wavelength_lut_from_polygons(
             - table.coords["distance"][0],
             time_resolution=table.coords["event_time_offset"][1]
             - table.coords["event_time_offset"][0],
-            # TODO: Do we still want to store the chopper information in the lookup table?
+            # TODO: Do we still want to store the chopper info in the lookup table?
         )
     )
 
@@ -791,7 +791,7 @@ def default_parameters() -> dict:
         PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
         PulseStride: 1,
         DistanceResolution: sc.scalar(0.1, unit="m"),
-        TimeResolution: sc.scalar(250.0, unit='us'),
+        TimeResolution: sc.scalar(50.0, unit='us'),
         SourceBounds: SourceBounds(
             time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
             wavelength=(
@@ -799,6 +799,7 @@ def default_parameters() -> dict:
                 sc.scalar(15.0, unit='angstrom'),
             ),
         ),
+        LtotalRange: (sc.scalar(5.0, unit='m'), sc.scalar(180.0, unit='m')),
     }
 
 
