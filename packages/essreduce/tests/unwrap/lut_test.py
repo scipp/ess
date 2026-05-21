@@ -6,14 +6,14 @@ from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import AnyRun
-from ess.reduce.unwrap import FastLookupTableWorkflow, LookupTableWorkflow
+from ess.reduce.unwrap import LookupTableWorkflow
 
 sl = pytest.importorskip("sciline")
 
 
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
 def test_lut_workflow_computes_table(engine):
-    wf = FastLookupTableWorkflow() if engine == "analytical" else LookupTableWorkflow()
+    wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride] = 1
@@ -45,7 +45,7 @@ def test_lut_workflow_computes_table(engine):
 
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
 def test_lut_workflow_pulse_skipping(engine):
-    wf = FastLookupTableWorkflow() if engine == "analytical" else LookupTableWorkflow()
+    wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
     if engine == "tof":
@@ -70,7 +70,7 @@ def test_lut_workflow_pulse_skipping(engine):
 
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
 def test_lut_workflow_non_exact_distance_range(engine):
-    wf = FastLookupTableWorkflow() if engine == "analytical" else LookupTableWorkflow()
+    wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
     if engine == "tof":
@@ -154,7 +154,7 @@ def _make_choppers():
 
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
 def test_lut_workflow_computes_table_with_choppers(engine):
-    wf = FastLookupTableWorkflow() if engine == "analytical" else LookupTableWorkflow()
+    wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
     if engine == "tof":
@@ -190,7 +190,7 @@ def test_lut_workflow_computes_table_with_choppers(engine):
 
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
 def test_lut_workflow_computes_table_with_choppers_full_beamline_range(engine):
-    wf = FastLookupTableWorkflow() if engine == "analytical" else LookupTableWorkflow()
+    wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
     if engine == "tof":
@@ -242,7 +242,7 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range(engine):
 
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
 def test_lut_workflow_raises_for_distance_before_source(engine):
-    wf = FastLookupTableWorkflow() if engine == "analytical" else LookupTableWorkflow()
+    wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[unwrap.SourcePosition] = sc.vector([0, 0, 10], unit='m')
     if engine == "tof":
