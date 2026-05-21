@@ -1,8 +1,4 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from ..reflectometry.conversions import (
-    add_proton_charge_coord,
-    add_proton_charge_mask,
-)
 from ..reflectometry.corrections import correct_by_footprint, correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
@@ -38,9 +34,7 @@ def add_coords_masks_and_apply_corrections(
 
     # For some older Amor files there are no entries in the proton charge log
     if len(proton_charge) != 0:
-        da = add_proton_charge_coord(da, proton_charge)
-        da = add_proton_charge_mask(da)
-        da = correct_by_proton_charge(da)
+        da = correct_by_proton_charge(da, proton_charge=proton_charge)
 
     return ReducibleData[RunType](da)
 

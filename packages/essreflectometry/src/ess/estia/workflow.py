@@ -5,10 +5,11 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import TransformationTimeFilter
+from ess.reduce.uncertainty import UncertaintyBroadcastMode
+from ess.reduce.workflow import register_workflow
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry import supermirror
-from ..reflectometry.corrections import correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CorrectionsToApply,
@@ -28,6 +29,7 @@ from . import (
     normalization,
     orso,
 )
+from .corrections import RunNormalization, insert_run_normalization
 
 _general_providers = (
     *reflectometry_providers,
@@ -69,11 +71,11 @@ def mcstas_default_parameters() -> dict:
             sc.scalar(0.75, unit='deg'),
         ),
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections
-        - {correct_by_proton_charge},
+        CorrectionsToApply: corrections.default_corrections,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": 0.06,
         },
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
@@ -87,24 +89,35 @@ def default_parameters() -> dict:
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
         },
+        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
-def EstiaMcStasWorkflow() -> sciline.Pipeline:
+def EstiaMcStasWorkflow(
+    *,
+    run_norm: RunNormalization = RunNormalization.none,
+    **kwargs,
+) -> sciline.Pipeline:
     """Workflow for reduction of McStas data for the Estia instrument."""
-    workflow = beamline.LoadNeXusWorkflow()
+    workflow = beamline.LoadNeXusWorkflow(**kwargs)
     for provider in mcstas_providers:
         workflow.insert(provider)
+    insert_run_normalization(workflow, run_norm)
     for name, param in mcstas_default_parameters().items():
         workflow[name] = param
     return workflow
 
 
-def EstiaWorkflow() -> sciline.Pipeline:
+def EstiaWorkflow(
+    *,
+    run_norm: RunNormalization = RunNormalization.proton_charge,
+    **kwargs,
+) -> sciline.Pipeline:
     """Workflow for reduction of data for the Estia instrument."""
-    workflow = beamline.LoadNeXusWorkflow()
+    workflow = beamline.LoadNeXusWorkflow(**kwargs)
     for provider in providers:
         workflow.insert(provider)
+    insert_run_normalization(workflow, run_norm)
     for name, param in default_parameters().items():
         workflow[name] = param
 
@@ -116,3 +129,67 @@ def EstiaWorkflow() -> sciline.Pipeline:
         corrections.assume_time_series_constant_with_zero_default_value_if_empty
     )
     return workflow
+
+
+@register_workflow
+def EstiaMcStasUnnormalizedWorkflow() -> sciline.Pipeline:
+    """Workflow for Estia McStas data without run normalization."""
+    return EstiaMcStasWorkflow(run_norm=RunNormalization.none)
+
+
+@register_workflow
+def EstiaMcStasMonitorHistogramWorkflow() -> sciline.Pipeline:
+    """Workflow for Estia McStas data using histogrammed monitor normalization."""
+    return EstiaMcStasWorkflow(run_norm=RunNormalization.monitor_histogram)
+
+
+@register_workflow
+def EstiaMcStasMonitorIntegratedWorkflow() -> sciline.Pipeline:
+    """Workflow for Estia McStas data using integrated monitor normalization."""
+    return EstiaMcStasWorkflow(run_norm=RunNormalization.monitor_integrated)
+
+
+@register_workflow
+def EstiaMcStasProtonChargeWorkflow() -> sciline.Pipeline:
+    """Workflow for Estia McStas data using proton charge normalization."""
+    return EstiaMcStasWorkflow(run_norm=RunNormalization.proton_charge)
+
+
+@register_workflow
+def EstiaUnnormalizedWorkflow() -> sciline.Pipeline:
+    """Workflow for Estia NeXus data without run normalization."""
+    return EstiaWorkflow(run_norm=RunNormalization.none)
+
+
+@register_workflow
+def EstiaMonitorHistogramWorkflow() -> sciline.Pipeline:
+    """Workflow for Estia NeXus data using histogrammed monitor normalization."""
+    return EstiaWorkflow(run_norm=RunNormalization.monitor_histogram)
+
+
+@register_workflow
+def EstiaMonitorIntegratedWorkflow() -> sciline.Pipeline:
+    """Workflow for Estia NeXus data using integrated monitor normalization."""
+    return EstiaWorkflow(run_norm=RunNormalization.monitor_integrated)
+
+
+@register_workflow
+def EstiaProtonChargeWorkflow() -> sciline.Pipeline:
+    """Workflow for Estia NeXus data using proton charge normalization."""
+    return EstiaWorkflow(run_norm=RunNormalization.proton_charge)
+
+
+__all__ = [
+    'EstiaMcStasMonitorHistogramWorkflow',
+    'EstiaMcStasMonitorIntegratedWorkflow',
+    'EstiaMcStasProtonChargeWorkflow',
+    'EstiaMcStasUnnormalizedWorkflow',
+    'EstiaMcStasWorkflow',
+    'EstiaMonitorHistogramWorkflow',
+    'EstiaMonitorIntegratedWorkflow',
+    'EstiaProtonChargeWorkflow',
+    'EstiaUnnormalizedWorkflow',
+    'EstiaWorkflow',
+    'default_parameters',
+    'mcstas_default_parameters',
+]
