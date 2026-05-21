@@ -8,12 +8,7 @@ from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
-from ess.reduce.unwrap import (
-    FastLookupTableWorkflow,
-    GenericUnwrapWorkflow,
-    LookupTableWorkflow,
-    fakes,
-)
+from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
 
 sl = pytest.importorskip("sciline")
 
@@ -113,12 +108,12 @@ def dream_source_position() -> sc.Variable:
 
 
 def make_workflows(choppers, source_position) -> dict[str, sl.Pipeline]:
-    lut_wf = FastLookupTableWorkflow()
+    lut_wf = LookupTableWorkflow(use_simulation=False)
     lut_wf[unwrap.DiskChoppers[AnyRun]] = choppers
     lut_wf[unwrap.SourcePosition] = source_position
     lut_wf[unwrap.PulseStride] = 1
 
-    tof_wf = LookupTableWorkflow()
+    tof_wf = LookupTableWorkflow(use_simulation=True)
     tof_wf[unwrap.DiskChoppers[AnyRun]] = choppers
     tof_wf[unwrap.SourcePosition] = source_position
     tof_wf[unwrap.NumberOfSimulatedNeutrons] = 300_000
