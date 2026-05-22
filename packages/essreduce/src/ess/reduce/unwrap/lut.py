@@ -930,7 +930,6 @@ def default_parameters() -> dict:
                 sc.scalar(15.0, unit='angstrom'),
             ),
         ),
-        # LtotalRange: (sc.scalar(5.0, unit='m'), sc.scalar(180.0, unit='m')),
     }
 
 
