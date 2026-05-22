@@ -35,6 +35,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essimaging:
@@ -44,6 +45,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essnmx:
@@ -53,6 +55,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essreflectometry:
@@ -62,6 +65,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essdiffraction:
@@ -71,6 +75,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             esssans:
@@ -80,6 +85,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essspectroscopy:
@@ -89,6 +95,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
 
