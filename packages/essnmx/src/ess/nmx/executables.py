@@ -424,18 +424,26 @@ def save_auxiliary_output(
         y_axis = f"max-count: {max_value} [{da.unit}]".ljust(da.sizes[t_dim], '-')
         bars = y_axis + "\n" + bars
         display(
-            "\n┌──TOF DISTRIBUTION (ALL PANELS SUMMED)".ljust(da.sizes[t_dim] + 2, '─')
+            "\n┌──TOF DISTRIBUTION (ALL PANELS SUMMED)".ljust(da.sizes[t_dim] + 1, '─')
+            + '─┐'
         )
-        bars = "\n".join('│' + row for row in bars.split("\n"))
+        bars = "\n".join('│' + row + '│' for row in bars.split("\n"))
         if t_dim in da.coords:
             t_coord = da.coords[t_dim]
             t_unit = str(t_coord.unit)
             t_min, t_max = int(t_coord.min().value), int(t_coord.max().value)
             xaxis = f"{t_min:.3g} [{t_unit}]".ljust(da.sizes[t_dim])
             max_t_label = f"{t_max:.3g} [{t_unit}]"
-            xaxis = xaxis[:-10] + max_t_label
-            bars += f"\n{xaxis} ({da.sizes[t_dim]} {t_dim} bins)"
-        bars += "\n└".ljust(da.sizes[t_dim] + 2, '─')
+            xaxis = xaxis[: -len(max_t_label) + 2] + max_t_label
+            bars += f"\n{xaxis}"
+            num_bins_label = f"({da.sizes[t_dim]} {t_dim} bins)"
+            bars += (
+                "\n└".ljust(da.sizes[t_dim] + 1 - len(num_bins_label), '─')
+                + num_bins_label
+                + '─┘'
+            )
+        else:
+            bars += "\n└".ljust(da.sizes[t_dim] + 1, '─') + '┘'
         display(bars)
 
 
