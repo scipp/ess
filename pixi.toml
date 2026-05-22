@@ -89,44 +89,65 @@ python-graphviz = "*"
 essreduce = { path = "packages/essreduce", editable = true, extras = ["test", "docs"] }
 
 [feature.docs-essreduce.tasks.docs-essreduce]
-cmd = "python -m sphinx -v -b html -d packages/essreduce/.docs_doctrees packages/essreduce/docs packages/essreduce/html"
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }} -d packages/essreduce/.docs_doctrees packages/essreduce/docs packages/essreduce/html"
 default-environment = "docs-essreduce"
 
 [feature.docs-essimaging.pypi-dependencies]
 essimaging = { path = "packages/essimaging", editable = true, extras = ["test", "docs"] }
 
 [feature.docs-essimaging.tasks.docs-essimaging]
-cmd = "python -m sphinx -v -b html -d packages/essimaging/.docs_doctrees packages/essimaging/docs packages/essimaging/html"
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }} -d packages/essimaging/.docs_doctrees packages/essimaging/docs packages/essimaging/html"
 
 [feature.docs-essnmx.pypi-dependencies]
 essnmx = { path = "packages/essnmx", editable = true, extras = ["test", "docs"] }
 
 [feature.docs-essnmx.tasks.docs-essnmx]
-cmd = "python -m sphinx -v -b html -d packages/essnmx/.docs_doctrees packages/essnmx/docs packages/essnmx/html"
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }} -d packages/essnmx/.docs_doctrees packages/essnmx/docs packages/essnmx/html"
 
 [feature.docs-essreflectometry.pypi-dependencies]
 essreflectometry = { path = "packages/essreflectometry", editable = true, extras = ["test", "docs"] }
 
 [feature.docs-essreflectometry.tasks.docs-essreflectometry]
-cmd = "python -m sphinx -v -b html -d packages/essreflectometry/.docs_doctrees packages/essreflectometry/docs packages/essreflectometry/html"
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }} -d packages/essreflectometry/.docs_doctrees packages/essreflectometry/docs packages/essreflectometry/html"
 
 [feature.docs-essdiffraction.pypi-dependencies]
 essdiffraction = { path = "packages/essdiffraction", editable = true, extras = ["test", "docs"] }
 
 [feature.docs-essdiffraction.tasks.docs-essdiffraction]
-cmd = "python -m sphinx -v -b html -d packages/essdiffraction/.docs_doctrees packages/essdiffraction/docs packages/essdiffraction/html"
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }} -d packages/essdiffraction/.docs_doctrees packages/essdiffraction/docs packages/essdiffraction/html"
 
 [feature.docs-esssans.pypi-dependencies]
 esssans = { path = "packages/esssans", editable = true, extras = ["test", "docs"] }
 
 [feature.docs-esssans.tasks.docs-esssans]
-cmd = "python -m sphinx -v -b html -d packages/esssans/.docs_doctrees packages/esssans/docs packages/esssans/html"
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }} -d packages/esssans/.docs_doctrees packages/esssans/docs packages/esssans/html"
 
 [feature.docs-essspectroscopy.pypi-dependencies]
 essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["test", "docs"] }
 
 [feature.docs-essspectroscopy.tasks.docs-essspectroscopy]
-cmd = "python -m sphinx -v -b html -d packages/essspectroscopy/.docs_doctrees packages/essspectroscopy/docs packages/essspectroscopy/html"
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }} -d packages/essspectroscopy/.docs_doctrees packages/essspectroscopy/docs packages/essspectroscopy/html"
 
 # ==================== Environments ====================
 
