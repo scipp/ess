@@ -260,13 +260,13 @@ def _compute_mean_wavelength(
     return mean_wavelength
 
 
-def _make_wavelength_lookup_table_from_simulation(
-    simulation: SimulationResults[RunType],
-    ltotal_range: LtotalRange,
-    distance_resolution: DistanceResolution,
-    time_resolution: TimeResolution,
-    pulse_period: PulsePeriod,
-    pulse_stride: PulseStride,
+def _make_wavelength_lut_from_simulation(
+    simulation: SimulationResultsBaseClass,
+    ltotal_range: tuple[sc.Variable, sc.Variable],
+    distance_resolution: sc.Variable,
+    time_resolution: sc.Variable,
+    pulse_period: sc.Variable,
+    pulse_stride: int,
 ) -> Lut:
     """
     Compute a lookup table for wavelength as a function of distance and
@@ -427,6 +427,54 @@ def _make_wavelength_lookup_table_from_simulation(
         )
         if simulation.choppers is not None
         else None,
+    )
+
+
+def make_wavelength_lut_from_simulation_detector(
+    simulation: SimulationResults[RunType],
+    ltotal_range: LtotalRange[RunType, snx.NXdetector],
+    distance_resolution: DistanceResolution,
+    time_resolution: TimeResolution,
+    pulse_period: PulsePeriod,
+    pulse_stride: PulseStride,
+) -> LookupTable[RunType, snx.NXdetector]:
+    """
+    Wrapper around _make_wavelength_lut_from_simulation to specify the Component as
+    snx.NXdetector, for use in the detector workflow.
+    """
+    return LookupTable[RunType, snx.NXdetector](
+        _make_wavelength_lut_from_simulation(
+            simulation=simulation,
+            ltotal_range=ltotal_range,
+            distance_resolution=distance_resolution,
+            time_resolution=time_resolution,
+            pulse_period=pulse_period,
+            pulse_stride=pulse_stride,
+        )
+    )
+
+
+def make_wavelength_lut_from_simulation_monitor(
+    simulation: SimulationResults[RunType],
+    ltotal_range: LtotalRange[RunType, MonitorType],
+    distance_resolution: DistanceResolution,
+    time_resolution: TimeResolution,
+    pulse_period: PulsePeriod,
+    pulse_stride: PulseStride,
+) -> LookupTable[RunType, MonitorType]:
+    """
+    Wrapper around _make_wavelength_lut_from_simulation to specify the Component as
+    snx.NXmonitor, for use in the monitor workflow.
+    """
+    return LookupTable[RunType, MonitorType](
+        _make_wavelength_lut_from_simulation(
+            simulation=simulation,
+            ltotal_range=ltotal_range,
+            distance_resolution=distance_resolution,
+            time_resolution=time_resolution,
+            pulse_period=pulse_period,
+            pulse_stride=pulse_stride,
+        )
     )
 
 
@@ -796,7 +844,7 @@ def ltotal_range_from_ltotal_detector(
 
 
 def ltotal_range_from_ltotal_monitor(
-    ltotal: MonitorLtotal[RunType],
+    ltotal: MonitorLtotal[RunType, MonitorType],
 ) -> LtotalRange[RunType, MonitorType]:
     """
     Compute the range of total flight path lengths from the source to the detector from
@@ -861,6 +909,8 @@ def providers() -> tuple[Callable]:
     default.
     """
     return (
+        ltotal_range_from_ltotal_detector,
+        ltotal_range_from_ltotal_monitor,
         make_wavelength_lut_from_polygons_detector,
         make_wavelength_lut_from_polygons_monitor,
         compute_frame_sequence,
@@ -880,7 +930,7 @@ def default_parameters() -> dict:
                 sc.scalar(15.0, unit='angstrom'),
             ),
         ),
-        LtotalRange: (sc.scalar(5.0, unit='m'), sc.scalar(180.0, unit='m')),
+        # LtotalRange: (sc.scalar(5.0, unit='m'), sc.scalar(180.0, unit='m')),
     }
 
 
@@ -902,7 +952,13 @@ def LookupTableWorkflow(use_simulation: bool = True):
     """
     default_params = default_parameters()
     if use_simulation:
-        provs = (make_wavelength_lookup_table, simulate_chopper_cascade_using_tof)
+        provs = (
+            ltotal_range_from_ltotal_detector,
+            ltotal_range_from_ltotal_monitor,
+            make_wavelength_lut_from_simulation_detector,
+            make_wavelength_lut_from_simulation_monitor,
+            simulate_chopper_cascade_using_tof,
+        )
         default_params.update(
             {
                 NumberOfSimulatedNeutrons: 1_000_000,

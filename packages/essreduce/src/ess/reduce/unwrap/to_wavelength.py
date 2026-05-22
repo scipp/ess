@@ -451,13 +451,11 @@ def _mask_large_uncertainty_in_lut(table: Lut, error_threshold: float) -> Lut:
     da = table.array
     relative_error = sc.stddevs(da.data) / sc.values(da.data)
     mask = relative_error > sc.scalar(error_threshold)
-    return LookupTable[RunType](
-        Lut(
-            **{
-                **asdict(table),
-                "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
-            }
-        )
+    return Lut(
+        **{
+            **asdict(table),
+            "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
+        }
     )
 
 
