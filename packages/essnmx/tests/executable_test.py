@@ -15,14 +15,19 @@ import scippnexus as snx
 from scipp.testing import assert_identical
 
 from ess.nmx._executable_helper import (
-    InputConfig,
-    OutputConfig,
-    ReductionConfig,
-    WorkflowConfig,
     build_reduction_argument_parser,
     reduction_config_from_args,
 )
-from ess.nmx.configurations import TimeBinCoordinate, TimeBinUnit, to_command_arguments
+from ess.nmx.configurations import (
+    AuxilaryOutputConfig,
+    InputConfig,
+    OutputConfig,
+    ReductionConfig,
+    TimeBinCoordinate,
+    TimeBinUnit,
+    WorkflowConfig,
+    to_command_arguments,
+)
 from ess.nmx.executables import reduction
 from ess.nmx.types import Compression, NMXLauetof
 
@@ -55,6 +60,7 @@ def _default_config() -> ReductionConfig:
         inputs=InputConfig(input_file=['']),
         workflow=WorkflowConfig(),
         output=OutputConfig(),
+        aux=AuxilaryOutputConfig(),
     )
 
 
@@ -109,16 +115,21 @@ def test_reduction_config() -> None:
         verbose=True,
         skip_file_output=True,
         overwrite=True,
+        no_tof_histogram=True,
     )
+    auxilary_options = AuxilaryOutputConfig(output_dir='test-aux-output', no_png=True)
     expected_config = ReductionConfig(
-        inputs=input_options, workflow=workflow_options, output=output_options
+        inputs=input_options,
+        workflow=workflow_options,
+        output=output_options,
+        aux=auxilary_options,
     )
     # Check if all values are non-default.
     _check_non_default_config(expected_config)
 
     # Build argument list manually, not using `to_command_arguments` to test it.
     arg_list = _build_arg_list_from_pydantic_instance(
-        input_options, workflow_options, output_options
+        input_options, workflow_options, output_options, auxilary_options
     )
     assert arg_list == to_command_arguments(config=expected_config, one_line=False)
 

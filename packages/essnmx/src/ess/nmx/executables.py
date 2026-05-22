@@ -19,6 +19,7 @@ from ._executable_helper import (
     reduction_config_from_args,
 )
 from .configurations import (
+    AuxilaryOutputConfig,
     OutputConfig,
     ReductionConfig,
     TimeBinCoordinate,
@@ -237,6 +238,8 @@ def reduction(
     # Check the file output configuration before we start heavy computation.
     if not config.output.skip_file_output:
         _check_file(config.output.output_file, config.output.overwrite)
+    elif not (config.output.skip_file_output or config.aux.no_axilaries):
+        config.aux.check_output_dir()
 
     display = _retrieve_display(logger, display)
     input_file_path = _retrieve_input_file(config.inputs.input_file).resolve()
@@ -244,6 +247,9 @@ def reduction(
 
     output_file_path = pathlib.Path(config.output.output_file).resolve()
     display(f"Output file: {output_file_path}")
+
+    auxilary_output_dir = config.aux.build_target_dir(output_file_path.as_posix())
+    display(f"Auxiliary output dir: {auxilary_output_dir}")
 
     detector_names = select_detector_names(detector_ids=config.inputs.detector_ids)
 
@@ -324,6 +330,14 @@ def reduction(
 
     if not config.output.skip_file_output:
         save_results(results=results, output_config=config.output)
+        if not config.aux.no_axilaries:
+            save_plots(
+                results=results,
+                output_config=config.output,
+                aux_config=config.aux,
+                output_dir=auxilary_output_dir,
+                display=display,
+            )
 
     return results
 
@@ -355,6 +369,62 @@ def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
             )
         else:
             raise ValueError(f"Detector counts histogram missing in {detector_name}")
+
+
+def save_plots(
+    *,
+    results: NMXLauetof,
+    output_config: OutputConfig,
+    aux_config: AuxilaryOutputConfig,
+    output_dir: pathlib.Path,
+    display: Callable | None = None,
+) -> None:
+    output_dir.mkdir(exist_ok=True)
+    tof_histogram = sc.reduce(
+        det_res.data.sum(["x_pixel_offset", "y_pixel_offset"])
+        for det_res in results.instrument.detectors.values()
+        if isinstance(det_res.data, sc.DataArray)
+    ).sum()
+    if isinstance(tof_histogram, sc.DataArray) and not aux_config.no_png:
+        tof_histogram.plot(
+            title="Tof Distribution (All Panels Summed)",
+            grid=True,
+        ).save(output_dir / aux_config.tof_1d_png_filename)
+    if (
+        isinstance(tof_histogram, sc.DataArray)
+        and output_config.verbose
+        and display is not None
+    ):
+        da = tof_histogram
+        t_dim = da.dim
+        n_row = min(da.sizes[t_dim] // 4, 50)
+        max_value = da.max().value
+        row_size = int(max_value // n_row)
+        bars = [
+            list(("*" * int(val // row_size)).rjust(n_row)) for val in da.data.values
+        ]
+        bars = [
+            [bars[col_i][row_i] for col_i in range(len(bars))]
+            for row_i in range(len(bars[0]))
+        ]
+        bars = "\n".join("".join(c for c in row) for row in bars)
+
+        y_axis = f"max-count: {max_value} [{da.unit}]".ljust(da.sizes[t_dim], '-')
+        bars = y_axis + "\n" + bars
+        display(
+            "\n┌──TOF DISTRIBUTION (ALL PANELS SUMMED)".ljust(da.sizes[t_dim] + 2, '─')
+        )
+        bars = "\n".join('│' + row for row in bars.split("\n"))
+        if t_dim in da.coords:
+            t_coord = da.coords[t_dim]
+            t_unit = str(t_coord.unit)
+            t_min, t_max = int(t_coord.min().value), int(t_coord.max().value)
+            xaxis = f"{t_min:.3g} [{t_unit}]".ljust(da.sizes[t_dim])
+            max_t_label = f"{t_max:.3g} [{t_unit}]"
+            xaxis = xaxis[:-10] + max_t_label
+            bars += f"\n{xaxis} ({da.sizes[t_dim]} {t_dim} bins)"
+        bars += "\n└".ljust(da.sizes[t_dim] + 2, '─')
+        display(bars)
 
 
 def main() -> None:
