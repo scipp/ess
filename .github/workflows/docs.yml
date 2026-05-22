@@ -67,8 +67,6 @@ jobs:
           pixi-version: v0.68.0
           frozen: true
           environments: docs-${{ inputs.package }}
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -r requirements/ci.txt
       - name: Build docs
         run: pixi run docs-${{ inputs.package }}
       - name: Test docs
