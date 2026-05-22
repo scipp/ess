@@ -64,6 +64,8 @@ jobs:
   docs:
     name: Build and publish docs
     needs: [ determine-package, publish ]
+    permissions:
+      contents: write
     uses: ./.github/workflows/docs.yml
     with:
       package: ${{ needs.determine-package.outputs.package }}
