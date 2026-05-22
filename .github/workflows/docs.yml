@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch == '' && github.ref_name || inputs.branch }}
+          ref: ${{ inputs.branch == '' && github.ref || inputs.branch }}
           fetch-depth: 0  # history required to determine version
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
