@@ -135,6 +135,8 @@ jobs:
       fail-fast: false
       matrix:
         package: ${{ fromJSON(needs.changes.outputs.packages) }}
+    permissions:
+      contents: write
     uses: ./.github/workflows/docs.yml
     with:
       package: ${{ matrix.package }}
