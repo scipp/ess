@@ -10,13 +10,12 @@ from functools import partial
 from types import UnionType
 from typing import Literal, TypeGuard, TypeVar, Union, get_args, get_origin
 
-import scipp as sc
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 
 from .configurations import (
-    AuxilaryOutputConfig,
+    AuxiliaryOutputConfig,
     InputConfig,
     OutputConfig,
     ReductionConfig,
@@ -196,7 +195,9 @@ def build_reduction_argument_parser() -> argparse.ArgumentParser:
     parser = add_args_from_pydantic_model(model_cls=InputConfig, parser=parser)
     parser = add_args_from_pydantic_model(model_cls=WorkflowConfig, parser=parser)
     parser = add_args_from_pydantic_model(model_cls=OutputConfig, parser=parser)
-    parser = add_args_from_pydantic_model(model_cls=AuxilaryOutputConfig, parser=parser)
+    parser = add_args_from_pydantic_model(
+        model_cls=AuxiliaryOutputConfig, parser=parser
+    )
     return parser
 
 
@@ -205,7 +206,7 @@ def reduction_config_from_args(args: argparse.Namespace) -> ReductionConfig:
         inputs=from_args(InputConfig, args),
         workflow=from_args(WorkflowConfig, args),
         output=from_args(OutputConfig, args),
-        aux=from_args(AuxilaryOutputConfig, args),
+        aux=from_args(AuxiliaryOutputConfig, args),
     )
 
 
@@ -226,30 +227,3 @@ def collect_matching_input_files(*input_file_patterns: str) -> list[pathlib.Path
 
     # Remove duplicates and sort
     return sorted({pathlib.Path(f).resolve() for f in input_files})
-
-
-def not_ascii_art(da: sc.DataArray, display):
-    t_dim = da.dim
-    n_row = min(da.sizes[t_dim] // 4, 50)
-    max_value = da.max().value
-    row_size = int(max_value // n_row)
-    stars = [list(("*" * int(val // row_size)).rjust(n_row)) for val in da.data.values]
-    stars = [
-        [stars[col_i][row_i] for col_i in range(len(stars))]
-        for row_i in range(len(stars[0]))
-    ]
-    stars = "\n".join("".join(c for c in row) for row in stars)
-
-    y_axis = f"max-count: {max_value} [{da.unit}]".ljust(da.sizes[t_dim], '-')
-    stars = y_axis + "\n" + stars
-    display("\n┌──TOF DISTRIBUTION (ALL PANELS SUMMED)".ljust(da.sizes[t_dim] + 2, '-'))
-    stars = "\n".join('│' + row for row in stars.split("\n"))
-    if t_dim in da.coords:
-        t_coord = da.coords[t_dim]
-        t_unit = str(t_coord.unit)
-        t_min, t_max = int(t_coord.min().value), int(t_coord.max().value)
-        xaxis = f"{t_min:.3g} [{t_unit}]".ljust(da.sizes[t_dim])
-        max_t_label = f"{t_max:.3g} [{t_unit}]"
-        xaxis += max_t_label
-        stars += f"\n{xaxis}"
-    display(stars)

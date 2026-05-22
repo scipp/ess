@@ -323,3 +323,29 @@ def export_reduced_data_as_nxlauetof(
             root_entry=nx_detector,
             var=da.coords[time_coord_name],
         )
+
+
+def export_tof_distribution_nxlauetof(
+    tof_histogram: sc.DataArray,
+    output_file: str | pathlib.Path | io.BytesIO,
+    append_mode: bool = True,
+) -> None:
+    """Export Tof Distribution to a NeXus file.
+
+    Parameters
+    ----------
+    tof_histogram:
+        Tof 1D histogram.
+    output_file:
+        Output file path.
+
+    """
+
+    if not append_mode:
+        raise NotImplementedError("Only append mode is supported for now.")
+
+    with h5py.File(output_file, "r+") as f:
+        nx_instrument: h5py.Group = f["entry/instrument"]
+        _create_dataset_from_var(
+            root_entry=nx_instrument, name="tof-1d", var=tof_histogram.data, dtype=int
+        )

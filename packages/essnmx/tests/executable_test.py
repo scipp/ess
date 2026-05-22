@@ -19,7 +19,7 @@ from ess.nmx._executable_helper import (
     reduction_config_from_args,
 )
 from ess.nmx.configurations import (
-    AuxilaryOutputConfig,
+    AuxiliaryOutputConfig,
     InputConfig,
     OutputConfig,
     ReductionConfig,
@@ -60,7 +60,7 @@ def _default_config() -> ReductionConfig:
         inputs=InputConfig(input_file=['']),
         workflow=WorkflowConfig(),
         output=OutputConfig(),
-        aux=AuxilaryOutputConfig(),
+        aux=AuxiliaryOutputConfig(),
     )
 
 
@@ -117,7 +117,7 @@ def test_reduction_config() -> None:
         overwrite=True,
         no_tof_histogram=True,
     )
-    auxilary_options = AuxilaryOutputConfig(output_dir='test-aux-output', no_png=True)
+    auxilary_options = AuxiliaryOutputConfig(output_dir='test-aux-output', no_png=True)
     expected_config = ReductionConfig(
         inputs=input_options,
         workflow=workflow_options,

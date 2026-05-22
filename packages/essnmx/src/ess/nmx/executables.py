@@ -19,7 +19,7 @@ from ._executable_helper import (
     reduction_config_from_args,
 )
 from .configurations import (
-    AuxilaryOutputConfig,
+    AuxiliaryOutputConfig,
     OutputConfig,
     ReductionConfig,
     TimeBinCoordinate,
@@ -330,8 +330,8 @@ def reduction(
 
     if not config.output.skip_file_output:
         save_results(results=results, output_config=config.output)
-        if not config.aux.no_axilaries:
-            save_plots(
+        if not (config.aux.no_axilaries and config.output.no_tof_histogram):
+            save_auxiliary_output(
                 results=results,
                 output_config=config.output,
                 aux_config=config.aux,
@@ -371,11 +371,11 @@ def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
             raise ValueError(f"Detector counts histogram missing in {detector_name}")
 
 
-def save_plots(
+def save_auxiliary_output(
     *,
     results: NMXLauetof,
     output_config: OutputConfig,
-    aux_config: AuxilaryOutputConfig,
+    aux_config: AuxiliaryOutputConfig,
     output_dir: pathlib.Path,
     display: Callable | None = None,
 ) -> None:
@@ -385,6 +385,18 @@ def save_plots(
         for det_res in results.instrument.detectors.values()
         if isinstance(det_res.data, sc.DataArray)
     ).sum()
+    if (
+        isinstance(tof_histogram, sc.DataArray)
+        and not output_config.skip_file_output
+        and not output_config.no_tof_histogram
+    ):
+        from .nexus import export_tof_distribution_nxlauetof
+
+        export_tof_distribution_nxlauetof(
+            tof_histogram=tof_histogram,
+            output_file=output_config.output_file,
+        )
+
     if isinstance(tof_histogram, sc.DataArray) and not aux_config.no_png:
         tof_histogram.plot(
             title="Tof Distribution (All Panels Summed)",
