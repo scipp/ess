@@ -16,8 +16,8 @@ import scippnexus as snx
 from scippneutron.chopper import DiskChopper
 from scippneutron.tof import chopper_cascade
 
-from ..nexus.types import DiskChoppers, Position, RunType
-from .types import LookupTable, Lut
+from ..nexus.types import Component, DiskChoppers, MonitorType, Position, RunType
+from .types import DetectorLtotal, LookupTable, Lut, MonitorLtotal
 
 
 @dataclass
@@ -109,18 +109,26 @@ Number of neutrons simulated in the simulation that is used to create the lookup
 This is typically a large number, e.g., 1e6 or 1e7.
 """
 
-LtotalRange = NewType("LtotalRange", tuple[sc.Variable, sc.Variable])
-"""
-Range (min, max) of the total length of the flight path from the source to the detector.
-This is used to create the lookup table to compute the neutron time-of-flight.
-Note that the resulting table will extend slightly beyond this range, as the supplied
-range is not necessarily a multiple of the distance resolution.
 
-Note also that the range of total flight paths is supplied manually to the workflow
-instead of being read from the input data, as it allows us to compute the expensive part
-of the workflow in advance (the lookup table) and does not need to be repeated for each
-run, or for new data coming in in the case of live data collection.
-"""
+class LtotalRange(
+    sl.Scope[RunType, Component, tuple[sc.Variable, sc.Variable]],
+    tuple[sc.Variable, sc.Variable],
+):
+    """
+        Range (min, max) of the total length of the flight path from the source to the
+        detector.
+        This is used to create the lookup table to compute the neutron time-of-flight.
+        Note that the resulting table will extend slightly beyond this range, as the
+        supplied
+    range is not necessarily a multiple of the distance resolution.
+
+        Note also that the range of total flight paths is supplied manually to the
+        workflow instead of being read from the input data, as it allows us to compute
+        the expensive part of the workflow in advance (the lookup table) and does not
+        need to be repeated for each run, or for new data coming in in the case of live
+        data collection.
+    """
+
 
 DistanceResolution = NewType("DistanceResolution", sc.Variable)
 """
@@ -252,14 +260,14 @@ def _compute_mean_wavelength(
     return mean_wavelength
 
 
-def make_wavelength_lookup_table(
+def _make_wavelength_lookup_table_from_simulation(
     simulation: SimulationResults[RunType],
     ltotal_range: LtotalRange,
     distance_resolution: DistanceResolution,
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride,
-) -> LookupTable[RunType]:
+) -> Lut:
     """
     Compute a lookup table for wavelength as a function of distance and
     time-of-arrival.
@@ -669,14 +677,14 @@ def compute_frame_sequence(
     return ChopperFrameSequence[RunType](frames)
 
 
-def make_wavelength_lut_from_polygons(
-    ltotal_range: LtotalRange,
-    distance_resolution: DistanceResolution,
-    time_resolution: TimeResolution,
-    pulse_period: PulsePeriod,
-    pulse_stride: PulseStride,
+def _make_wavelength_lut_from_polygons(
+    ltotal_range: tuple[sc.Variable, sc.Variable],
+    distance_resolution: sc.Variable,
+    time_resolution: sc.Variable,
+    pulse_period: sc.Variable,
+    pulse_stride: int,
     frames: ChopperFrameSequence,
-) -> LookupTable[RunType]:
+) -> Lut:
     """
     Compute a lookup table for wavelength as a function of distance and
     time-of-arrival.
@@ -762,16 +770,85 @@ def make_wavelength_lut_from_polygons(
         coords={"distance": distances, "event_time_offset": time_edges},
     )
 
-    return LookupTable[RunType](
-        Lut(
-            array=table,
+    return Lut(
+        array=table,
+        pulse_period=pulse_period,
+        pulse_stride=pulse_stride,
+        distance_resolution=table.coords["distance"][1] - table.coords["distance"][0],
+        time_resolution=table.coords["event_time_offset"][1]
+        - table.coords["event_time_offset"][0],
+        # TODO: Do we still want to store the chopper info in the lookup table?
+    )
+
+
+def _ltotal_range_from_ltotal(ltotal: sc.Variable) -> tuple[sc.Variable, sc.Variable]:
+    return (ltotal.min(), ltotal.max())
+
+
+def ltotal_range_from_ltotal_detector(
+    ltotal: DetectorLtotal[RunType],
+) -> LtotalRange[RunType, snx.NXdetector]:
+    """
+    Compute the range of total flight path lengths from the source to the detector from
+    the ltotal variable in the input data for the detector workflow.
+    """
+    return LtotalRange[RunType, snx.NXdetector](_ltotal_range_from_ltotal(ltotal))
+
+
+def ltotal_range_from_ltotal_monitor(
+    ltotal: MonitorLtotal[RunType],
+) -> LtotalRange[RunType, MonitorType]:
+    """
+    Compute the range of total flight path lengths from the source to the detector from
+    the ltotal variable in the input data for the monitor workflow.
+    """
+    return LtotalRange[RunType, MonitorType](_ltotal_range_from_ltotal(ltotal))
+
+
+def make_wavelength_lut_from_polygons_detector(
+    ltotal_range: LtotalRange[RunType, snx.NXdetector],
+    distance_resolution: DistanceResolution,
+    time_resolution: TimeResolution,
+    pulse_period: PulsePeriod,
+    pulse_stride: PulseStride,
+    frames: ChopperFrameSequence,
+) -> LookupTable[RunType, snx.NXdetector]:
+    """
+    Wrapper around _make_wavelength_lut_from_polygons to specify the Component as
+    snx.NXdetector, for use in the detector workflow.
+    """
+    return LookupTable[RunType, snx.NXdetector](
+        _make_wavelength_lut_from_polygons(
+            ltotal_range=ltotal_range,
+            distance_resolution=distance_resolution,
+            time_resolution=time_resolution,
             pulse_period=pulse_period,
             pulse_stride=pulse_stride,
-            distance_resolution=table.coords["distance"][1]
-            - table.coords["distance"][0],
-            time_resolution=table.coords["event_time_offset"][1]
-            - table.coords["event_time_offset"][0],
-            # TODO: Do we still want to store the chopper info in the lookup table?
+            frames=frames,
+        )
+    )
+
+
+def make_wavelength_lut_from_polygons_monitor(
+    ltotal_range: LtotalRange[RunType, MonitorType],
+    distance_resolution: DistanceResolution,
+    time_resolution: TimeResolution,
+    pulse_period: PulsePeriod,
+    pulse_stride: PulseStride,
+    frames: ChopperFrameSequence,
+) -> LookupTable[RunType, MonitorType]:
+    """
+    Wrapper around _make_wavelength_lut_from_polygons to specify the Component as
+    snx.NXmonitor, for use in the monitor workflow.
+    """
+    return LookupTable[RunType, MonitorType](
+        _make_wavelength_lut_from_polygons(
+            ltotal_range=ltotal_range,
+            distance_resolution=distance_resolution,
+            time_resolution=time_resolution,
+            pulse_period=pulse_period,
+            pulse_stride=pulse_stride,
+            frames=frames,
         )
     )
 
@@ -783,7 +860,11 @@ def providers() -> tuple[Callable]:
     to compute the lookup table is expensive and not something we want to do by
     default.
     """
-    return (make_wavelength_lut_from_polygons, compute_frame_sequence)
+    return (
+        make_wavelength_lut_from_polygons_detector,
+        make_wavelength_lut_from_polygons_monitor,
+        compute_frame_sequence,
+    )
 
 
 def default_parameters() -> dict:

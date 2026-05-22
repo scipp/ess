@@ -45,9 +45,9 @@ class Lut:
         return self.array.plot(*args, **kwargs)
 
 
-class LookupTable(sl.Scope[RunType, Lut], Lut):
+class LookupTable(sl.Scope[RunType, Component, Lut], Lut):
     """Lookup table giving wavelength as a function of distance and
-    ``event_time_offset``."""
+    ``event_time_offset`` for each beamline component (detector, monitor)."""
 
 
 class ErrorLimitedLookupTable(sl.Scope[RunType, Component, Lut], Lut):

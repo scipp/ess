@@ -462,7 +462,7 @@ def _mask_large_uncertainty_in_lut(table: Lut, error_threshold: float) -> Lut:
 
 
 def mask_large_uncertainty_in_lut_detector(
-    table: LookupTable[RunType],
+    table: LookupTable[RunType, snx.NXdetector],
     error_threshold: LookupTableRelativeErrorThreshold,
     detector_name: NeXusDetectorName,
 ) -> ErrorLimitedLookupTable[RunType, snx.NXdetector]:
@@ -488,7 +488,7 @@ def mask_large_uncertainty_in_lut_detector(
 
 
 def mask_large_uncertainty_in_lut_monitor(
-    table: LookupTable[RunType],
+    table: LookupTable[RunType, MonitorType],
     error_threshold: LookupTableRelativeErrorThreshold,
     monitor_name: NeXusName[MonitorType],
 ) -> ErrorLimitedLookupTable[RunType, MonitorType]:
