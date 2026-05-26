@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from collections.abc import Iterable
+from typing import Literal
 
 import sciline
 import scipp as sc
@@ -48,6 +49,7 @@ def GenericUnwrapWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
+    mode: Literal["analytical", "simulation", "file"] = "analytical",
 ) -> sciline.Pipeline:
     """
     Generic workflow for computing the neutron wavelength for detector and monitor
@@ -77,6 +79,17 @@ def GenericUnwrapWorkflow(
         List of monitor types to include in the workflow.
         Constrains the possible values of :class:`ess.reduce.nexus.types.MonitorType`
         and :class:`ess.reduce.nexus.types.Component`.
+    mode:
+        Mode for how the lookup table is created. Options are:
+        - "analytical": Create the lookup table using analytical formulas to propagate
+          and chop a pulse of neutrons through the chopper cascade. This is fast and
+          accurate.
+        - "simulation": Create the lookup table by simulating individual neutrons
+          traveling through the chopper system using the `tof` package. This is slower
+          but can be more accurate if the spread in neutron wavelengths is large at
+          the detector.
+        - "file": Load the lookup table from a file. In this case, the workflow will
+          expect a :class:`LookupTableFilename` to be provided as input.
 
     Returns
     -------
@@ -87,6 +100,12 @@ def GenericUnwrapWorkflow(
 
     for provider in (*to_wavelength.providers(), *lut.providers()):
         wf.insert(provider)
+
+    if mode == "file":
+        wf.insert(load_lookup_table_from_file)
+    elif mode == "simulation":
+        for provider in lut.lut_from_simulation_providers():
+            wf.insert(provider)
 
     # wf.insert(load_lookup_table)
 
