@@ -4,45 +4,9 @@ from collections.abc import Iterable
 from typing import Literal
 
 import sciline
-import scipp as sc
 
 from ..nexus import GenericNeXusWorkflow
-from ..nexus.types import Component, RunType
 from . import lut, to_wavelength
-from .types import LookupTable, LookupTableFilename, Lut, PulseStrideOffset
-
-
-def load_lookup_table_from_file(
-    filename: LookupTableFilename[RunType, Component],
-) -> LookupTable[RunType, Component]:
-    """Load a wavelength lookup table from an HDF5 file."""
-    table = sc.io.load_hdf5(filename)
-
-    # Support old format where the metadata were stored as coordinates of the DataArray.
-    # Note that no chopper info was saved in the old format.
-    if isinstance(table, sc.DataArray):
-        to_be_dropped = {
-            "pulse_period",
-            "pulse_stride",
-            "distance_resolution",
-            "time_resolution",
-            "error_threshold",
-        } & set(table.coords)
-        table = {
-            "array": table.drop_coords(list(to_be_dropped)),
-            "pulse_period": table.coords["pulse_period"],
-            "pulse_stride": table.coords["pulse_stride"].value,
-            "distance_resolution": table.coords["distance_resolution"],
-            "time_resolution": table.coords["time_resolution"],
-        }
-
-    # Some old tables have the error_threshold stored as an entry in the data group.
-    # The masking based on uncertainty is now done later, as part of the tof workflow,
-    # so we need to remove this entry if it exists.
-    if "error_threshold" in table:
-        del table["error_threshold"]
-
-    return LookupTable[RunType, Component](Lut(**table))
 
 
 def GenericUnwrapWorkflow(
@@ -98,20 +62,9 @@ def GenericUnwrapWorkflow(
     """
     wf = GenericNeXusWorkflow(run_types=run_types, monitor_types=monitor_types)
 
-    for provider in (*to_wavelength.providers(), *lut.providers()):
+    for provider in (*to_wavelength.providers(), *lut.providers(mode=mode)):
         wf.insert(provider)
-
-    if mode == "file":
-        wf.insert(load_lookup_table_from_file)
-    elif mode == "simulation":
-        for provider in lut.lut_from_simulation_providers():
-            wf.insert(provider)
-
-    # wf.insert(load_lookup_table)
-
-    # Default parameters
-    wf[PulseStrideOffset] = None
-    for key, value in lut.default_parameters().items():
+    for key, value in lut.default_parameters(mode=mode).items():
         wf[key] = value
 
     return wf

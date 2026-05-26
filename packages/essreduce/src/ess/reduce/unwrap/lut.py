@@ -7,7 +7,7 @@ Utilities for computing wavelength lookup tables.
 import warnings
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import NewType
+from typing import Literal, NewType
 
 import numpy as np
 import sciline as sl
@@ -25,7 +25,14 @@ from ..nexus.types import (
     Position,
     RunType,
 )
-from .types import DetectorLtotal, LookupTable, Lut, MonitorLtotal
+from .types import (
+    DetectorLtotal,
+    LookupTable,
+    LookupTableFilename,
+    Lut,
+    MonitorLtotal,
+    PulseStrideOffset,
+)
 
 
 @dataclass
@@ -565,19 +572,6 @@ def simulate_chopper_cascade_using_tof(
     )
 
 
-def lut_from_simulation_providers() -> tuple[Callable, ...]:
-    """
-    Return the functions that can be used to create lookup tables using a ``tof``
-    simulation.
-    """
-    return (
-        ltotal_range_from_ltotal_detector,
-        ltotal_range_from_ltotal_monitor,
-        make_wavelength_lut_from_simulation,
-        simulate_chopper_cascade_using_tof,
-    )
-
-
 def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndarray:
     # Decompose the polygons into two 1D lines: the upper and lower bounds
     bounds = []
@@ -956,75 +950,132 @@ def ltotal_range_from_ltotal_monitor(
 #     )
 
 
-def providers() -> tuple[Callable]:
-    """
-    Return the providers for creating the wavelength lookup table. We only include the
-    provider for computing the lookup table from the polygons, as using the simulation
-    to compute the lookup table is expensive and not something we want to do by
-    default.
-    """
-    return (
-        ltotal_range_from_ltotal_detector,
-        ltotal_range_from_ltotal_monitor,
-        # make_wavelength_lut_from_polygons_detector,
-        # make_wavelength_lut_from_polygons_monitor,
-        make_wavelength_lut_from_polygons,
-        compute_frame_sequence,
-    )
+def load_lookup_table_from_file(
+    filename: LookupTableFilename[RunType, Component],
+) -> LookupTable[RunType, Component]:
+    """Load a wavelength lookup table from an HDF5 file."""
+    table = sc.io.load_hdf5(filename)
+
+    # Support old format where the metadata were stored as coordinates of the DataArray.
+    # Note that no chopper info was saved in the old format.
+    if isinstance(table, sc.DataArray):
+        to_be_dropped = {
+            "pulse_period",
+            "pulse_stride",
+            "distance_resolution",
+            "time_resolution",
+            "error_threshold",
+        } & set(table.coords)
+        table = {
+            "array": table.drop_coords(list(to_be_dropped)),
+            "pulse_period": table.coords["pulse_period"],
+            "pulse_stride": table.coords["pulse_stride"].value,
+            "distance_resolution": table.coords["distance_resolution"],
+            "time_resolution": table.coords["time_resolution"],
+        }
+
+    # Some old tables have the error_threshold stored as an entry in the data group.
+    # The masking based on uncertainty is now done later, as part of the tof workflow,
+    # so we need to remove this entry if it exists.
+    if "error_threshold" in table:
+        del table["error_threshold"]
+
+    return LookupTable[RunType, Component](Lut(**table))
 
 
-def default_parameters() -> dict:
-    return {
-        PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
-        PulseStride: 1,
-        DistanceResolution: sc.scalar(0.1, unit="m"),
-        TimeResolution: sc.scalar(50.0, unit='us'),
-        SourceBounds: SourceBounds(
-            time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
-            wavelength=(
-                sc.scalar(0.0, unit='angstrom'),
-                sc.scalar(15.0, unit='angstrom'),
+def providers(
+    mode: Literal["analytical", "simulation", "file"] = "analytical",
+) -> tuple[Callable, ...]:
+    match mode:
+        case "analytical":
+            return (
+                ltotal_range_from_ltotal_detector,
+                ltotal_range_from_ltotal_monitor,
+                make_wavelength_lut_from_polygons,
+                compute_frame_sequence,
+            )
+        case "simulation":
+            return (
+                ltotal_range_from_ltotal_detector,
+                ltotal_range_from_ltotal_monitor,
+                make_wavelength_lut_from_simulation,
+                simulate_chopper_cascade_using_tof,
+            )
+        case "file":
+            return (load_lookup_table_from_file,)
+        case _:
+            raise ValueError(f"Unknown lookup table provider mode: {mode}")
+
+
+def default_parameters(
+    mode: Literal["analytical", "simulation", "file"] = "analytical",
+) -> dict:
+    params = {PulseStrideOffset: None}
+    if mode == "file":
+        return params
+
+    params.update(
+        {
+            PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
+            PulseStride: 1,
+            DistanceResolution: sc.scalar(0.1, unit="m"),
+            TimeResolution: sc.scalar(50.0, unit='us'),
+            SourceBounds: SourceBounds(
+                time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+                wavelength=(
+                    sc.scalar(0.0, unit='angstrom'),
+                    sc.scalar(15.0, unit='angstrom'),
+                ),
             ),
-        ),
-    }
-
-
-def LookupTableWorkflow(
-    use_simulation: bool = True, constraints: dict[type, Iterable[type]] = None
-) -> sl.Pipeline:
-    """
-    Create a workflow for computing a wavelength lookup table.
-    If ``use_simulation`` is True, the workflow will compute the lookup table from a
-    simulation of neutrons propagating through a chopper cascade using the ``tof``
-    package.
-    If ``use_simulation`` is False, the workflow will compute the lookup table from
-    the acceptance diagram polygons generated by the ``chopper_cascade`` module.
-
-    Parameters
-    ----------
-    use_simulation:
-        Whether to compute the lookup table from a simulation of neutrons propagating
-        through a chopper cascade using the ``tof`` package, or from the acceptance
-        diagram polygons generated by the ``chopper_cascade`` module.
-    """
-    default_params = default_parameters()
-    if use_simulation:
-        provs = lut_from_simulation_providers()
-        default_params.update(
+        }
+    )
+    if mode == "simulation":
+        params.update(
             {
                 NumberOfSimulatedNeutrons: 1_000_000,
                 SimulationSeed: None,
                 SimulationFacility: 'ess',
             }
         )
-    else:
-        provs = providers()
+    return params
 
-    if constraints is None:
-        constraints = {
-            RunType: [AnyRun],
-            MonitorType: [FrameMonitor0],
-            Component: [snx.NXdetector, FrameMonitor0],
-        }
 
-    return sl.Pipeline(provs, params=default_params, constraints=constraints)
+# def LookupTableWorkflow(
+#     use_simulation: bool = True, constraints: dict[type, Iterable[type]] = None
+# ) -> sl.Pipeline:
+#     """
+#     Create a workflow for computing a wavelength lookup table.
+#     If ``use_simulation`` is True, the workflow will compute the lookup table from a
+#     simulation of neutrons propagating through a chopper cascade using the ``tof``
+#     package.
+#     If ``use_simulation`` is False, the workflow will compute the lookup table from
+#     the acceptance diagram polygons generated by the ``chopper_cascade`` module.
+
+#     Parameters
+#     ----------
+#     use_simulation:
+#         Whether to compute the lookup table from a simulation of neutrons propagating
+#         through a chopper cascade using the ``tof`` package, or from the acceptance
+#         diagram polygons generated by the ``chopper_cascade`` module.
+#     """
+#     default_params = default_parameters()
+#     if use_simulation:
+#         provs = lut_from_simulation_providers()
+#         default_params.update(
+#             {
+#                 NumberOfSimulatedNeutrons: 1_000_000,
+#                 SimulationSeed: None,
+#                 SimulationFacility: 'ess',
+#             }
+#         )
+#     else:
+#         provs = providers()
+
+#     if constraints is None:
+#         constraints = {
+#             RunType: [AnyRun],
+#             MonitorType: [FrameMonitor0],
+#             Component: [snx.NXdetector, FrameMonitor0],
+#         }
+
+#     return sl.Pipeline(provs, params=default_params, constraints=constraints)

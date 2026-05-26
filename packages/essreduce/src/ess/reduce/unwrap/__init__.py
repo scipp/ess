@@ -11,7 +11,6 @@ from .lut import (
     BeamlineComponentReading,
     ChopperFrameSequence,
     DistanceResolution,
-    LookupTableWorkflow,
     LtotalRange,
     NumberOfSimulatedNeutrons,
     PulsePeriod,
@@ -35,7 +34,7 @@ from .types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
-from .workflow import GenericUnwrapWorkflow, load_lookup_table_from_file
+from .workflow import GenericUnwrapWorkflow
 
 __all__ = [
     "BeamlineComponentReading",
@@ -48,7 +47,6 @@ __all__ = [
     "LookupTable",
     "LookupTableFilename",
     "LookupTableRelativeErrorThreshold",
-    "LookupTableWorkflow",
     "LtotalRange",
     "MonitorLtotal",
     "NumberOfSimulatedNeutrons",
@@ -62,7 +60,6 @@ __all__ = [
     "TimeResolution",
     "WavelengthDetector",
     "WavelengthMonitor",
-    "load_lookup_table_from_file",
     "providers",
     "simulate_chopper_cascade_using_tof",
 ]
