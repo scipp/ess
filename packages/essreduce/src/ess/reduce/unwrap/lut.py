@@ -5,7 +5,7 @@ Utilities for computing wavelength lookup tables.
 """
 
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from typing import NewType
 
@@ -16,7 +16,15 @@ import scippnexus as snx
 from scippneutron.chopper import DiskChopper
 from scippneutron.tof import chopper_cascade
 
-from ..nexus.types import Component, DiskChoppers, MonitorType, Position, RunType
+from ..nexus.types import (
+    AnyRun,
+    Component,
+    DiskChoppers,
+    FrameMonitor0,
+    MonitorType,
+    Position,
+    RunType,
+)
 from .types import DetectorLtotal, LookupTable, Lut, MonitorLtotal
 
 
@@ -968,7 +976,9 @@ def default_parameters() -> dict:
     }
 
 
-def LookupTableWorkflow(use_simulation: bool = True, **kwargs) -> sl.Pipeline:
+def LookupTableWorkflow(
+    use_simulation: bool = True, constraints: dict[type, Iterable[type]] = None
+) -> sl.Pipeline:
     """
     Create a workflow for computing a wavelength lookup table.
     If ``use_simulation`` is True, the workflow will compute the lookup table from a
@@ -1002,4 +1012,11 @@ def LookupTableWorkflow(use_simulation: bool = True, **kwargs) -> sl.Pipeline:
     else:
         provs = providers()
 
-    return sl.Pipeline(provs, params=default_params, **kwargs)
+    if constraints is None:
+        constraints = {
+            RunType: [AnyRun],
+            MonitorType: [FrameMonitor0],
+            Component: [snx.NXdetector, FrameMonitor0],
+        }
+
+    return sl.Pipeline(provs, params=default_params, constraints=constraints)

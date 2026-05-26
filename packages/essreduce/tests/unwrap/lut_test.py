@@ -6,14 +6,7 @@ import scippnexus as snx
 from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
-from ess.reduce.nexus.types import (
-    AnyRun,
-    Component,
-    FrameMonitor0,
-    MonitorType,
-    Position,
-    RunType,
-)
+from ess.reduce.nexus.types import AnyRun, FrameMonitor0, Position
 from ess.reduce.unwrap import LookupTableWorkflow
 
 sl = pytest.importorskip("sciline")
@@ -22,16 +15,9 @@ sl = pytest.importorskip("sciline")
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
 def test_lut_workflow_computes_table(detector_or_monitor, engine):
-    wf = LookupTableWorkflow(
-        use_simulation=(engine == "tof"),
-        constraints={
-            RunType: [AnyRun],
-            MonitorType: [FrameMonitor0],
-            Component: [snx.NXdetector, FrameMonitor0],
-        },
-    )
+    wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[Position[snx.NXsource, RunType]] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride] = 1
 
     if engine == "tof":
@@ -61,11 +47,12 @@ def test_lut_workflow_computes_table(detector_or_monitor, engine):
     assert sc.isclose(table.time_resolution, tres, rtol=sc.scalar(0.01))
 
 
+@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
-def test_lut_workflow_pulse_skipping(engine):
+def test_lut_workflow_pulse_skipping(detector_or_monitor, engine):
     wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if engine == "tof":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 62
@@ -75,11 +62,13 @@ def test_lut_workflow_pulse_skipping(engine):
     dres = sc.scalar(0.1, unit='m')
     tres = sc.scalar(250.0, unit='us')
 
-    wf[unwrap.LtotalRange] = lmin, lmax
+    Comp = snx.NXdetector if detector_or_monitor == "detector" else FrameMonitor0
+
+    wf[unwrap.LtotalRange[AnyRun, Comp]] = lmin, lmax
     wf[unwrap.DistanceResolution] = dres
     wf[unwrap.TimeResolution] = tres
 
-    table = wf.compute(unwrap.LookupTable)
+    table = wf.compute(unwrap.LookupTable[AnyRun, Comp])
 
     assert table.array.coords['event_time_offset'].max() == 2 * sc.scalar(
         1 / 14, unit='s'
@@ -90,7 +79,7 @@ def test_lut_workflow_pulse_skipping(engine):
 def test_lut_workflow_non_exact_distance_range(engine):
     wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if engine == "tof":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 63
@@ -100,11 +89,11 @@ def test_lut_workflow_non_exact_distance_range(engine):
     dres = sc.scalar(0.33, unit='m')
     tres = sc.scalar(250.0, unit='us')
 
-    wf[unwrap.LtotalRange] = lmin, lmax
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = lmin, lmax
     wf[unwrap.DistanceResolution] = dres
     wf[unwrap.TimeResolution] = tres
 
-    table = wf.compute(unwrap.LookupTable)
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
 
     assert table.array.coords['distance'].min() < lmin
     assert table.array.coords['distance'].max() > lmax
@@ -170,24 +159,27 @@ def _make_choppers():
     }
 
 
+@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
-def test_lut_workflow_computes_table_with_choppers(engine):
+def test_lut_workflow_computes_table_with_choppers(detector_or_monitor, engine):
     wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
-    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if engine == "tof":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 64
     wf[unwrap.PulseStride] = 1
 
-    wf[unwrap.LtotalRange] = (
+    Comp = snx.NXdetector if detector_or_monitor == "detector" else FrameMonitor0
+
+    wf[unwrap.LtotalRange[AnyRun, Comp]] = (
         sc.scalar(35.0, unit='m'),
         sc.scalar(65.0, unit='m'),
     )
     wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
     wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
 
-    table = wf.compute(unwrap.LookupTable)
+    table = wf.compute(unwrap.LookupTable[AnyRun, Comp])
 
     # At low distance, the rays are more focussed
     low_dist = table.array['distance', 2]
@@ -210,20 +202,20 @@ def test_lut_workflow_computes_table_with_choppers(engine):
 def test_lut_workflow_computes_table_with_choppers_full_beamline_range(engine):
     wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
-    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if engine == "tof":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 64
     wf[unwrap.PulseStride] = 1
 
-    wf[unwrap.LtotalRange] = (
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
         sc.scalar(5.0, unit='m'),
         sc.scalar(65.0, unit='m'),
     )
     wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
     wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
 
-    table = wf.compute(unwrap.LookupTable)
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
 
     # Close to source: early times and large spread
     da = table.array['distance', 2]
@@ -262,7 +254,7 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range(engine):
 def test_lut_workflow_raises_for_distance_before_source(engine):
     wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[unwrap.SourcePosition] = sc.vector([0, 0, 10], unit='m')
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 10], unit='m')
     if engine == "tof":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 65
@@ -270,7 +262,7 @@ def test_lut_workflow_raises_for_distance_before_source(engine):
 
     # Setting the starting point at zero will make a table that would cover a range
     # from -0.2m to 65.0m
-    wf[unwrap.LtotalRange] = (
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
         sc.scalar(0.0, unit='m'),
         sc.scalar(65.0, unit='m'),
     )
@@ -278,4 +270,4 @@ def test_lut_workflow_raises_for_distance_before_source(engine):
     wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
 
     with pytest.raises(ValueError, match="Building the lookup table failed"):
-        _ = wf.compute(unwrap.LookupTable)
+        _ = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
