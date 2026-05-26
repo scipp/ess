@@ -5,7 +5,7 @@ Utilities for computing wavelength lookup tables.
 """
 
 import warnings
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal, NewType
 
@@ -16,15 +16,7 @@ import scippnexus as snx
 from scippneutron.chopper import DiskChopper
 from scippneutron.tof import chopper_cascade
 
-from ..nexus.types import (
-    AnyRun,
-    Component,
-    DiskChoppers,
-    FrameMonitor0,
-    MonitorType,
-    Position,
-    RunType,
-)
+from ..nexus.types import Component, DiskChoppers, MonitorType, Position, RunType
 from .types import (
     DetectorLtotal,
     LookupTable,
@@ -169,15 +161,12 @@ PulsePeriod = NewType("PulsePeriod", sc.Variable)
 Period of the source pulses, i.e., time between consecutive pulse starts.
 """
 
-PulseStride = NewType("PulseStride", int)
-"""
-Stride of used pulses. Usually 1, but may be a small integer when pulse-skipping.
-"""
 
-# SourcePosition = NewType("SourcePosition", sc.Variable)
-# """
-# Position of the neutron source in the coordinate system of the choppers.
-# """
+class PulseStride(sl.Scope[RunType, int], int):
+    """
+    Stride of used pulses. Usually 1, but may be a small integer when pulse-skipping.
+    """
+
 
 SimulationSeed = NewType("SimulationSeed", int | None)
 """Seed for the random number generator used in the simulation.
@@ -281,7 +270,7 @@ def make_wavelength_lut_from_simulation(
     distance_resolution: DistanceResolution,
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
-    pulse_stride: PulseStride,
+    pulse_stride: PulseStride[RunType],
 ) -> LookupTable[RunType, Component]:
     """
     Compute a lookup table for wavelength as a function of distance and
@@ -448,54 +437,6 @@ def make_wavelength_lut_from_simulation(
     )
 
 
-# def make_wavelength_lut_from_simulation_detector(
-#     simulation: SimulationResults[RunType],
-#     ltotal_range: LtotalRange[RunType, snx.NXdetector],
-#     distance_resolution: DistanceResolution,
-#     time_resolution: TimeResolution,
-#     pulse_period: PulsePeriod,
-#     pulse_stride: PulseStride,
-# ) -> LookupTable[RunType, snx.NXdetector]:
-#     """
-#     Wrapper around _make_wavelength_lut_from_simulation to specify the Component as
-#     snx.NXdetector, for use in the detector workflow.
-#     """
-#     return LookupTable[RunType, snx.NXdetector](
-#         _make_wavelength_lut_from_simulation(
-#             simulation=simulation,
-#             ltotal_range=ltotal_range,
-#             distance_resolution=distance_resolution,
-#             time_resolution=time_resolution,
-#             pulse_period=pulse_period,
-#             pulse_stride=pulse_stride,
-#         )
-#     )
-
-
-# def make_wavelength_lut_from_simulation_monitor(
-#     simulation: SimulationResults[RunType],
-#     ltotal_range: LtotalRange[RunType, MonitorType],
-#     distance_resolution: DistanceResolution,
-#     time_resolution: TimeResolution,
-#     pulse_period: PulsePeriod,
-#     pulse_stride: PulseStride,
-# ) -> LookupTable[RunType, MonitorType]:
-#     """
-#     Wrapper around _make_wavelength_lut_from_simulation to specify the Component as
-#     snx.NXmonitor, for use in the monitor workflow.
-#     """
-#     return LookupTable[RunType, MonitorType](
-#         _make_wavelength_lut_from_simulation(
-#             simulation=simulation,
-#             ltotal_range=ltotal_range,
-#             distance_resolution=distance_resolution,
-#             time_resolution=time_resolution,
-#             pulse_period=pulse_period,
-#             pulse_stride=pulse_stride,
-#         )
-#     )
-
-
 def _to_component_reading(component) -> BeamlineComponentReading:
     events = component.data.squeeze().flatten(to='event')
     sel = sc.full(value=True, sizes=events.sizes)
@@ -518,7 +459,7 @@ def simulate_chopper_cascade_using_tof(
     choppers: DiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
     neutrons: NumberOfSimulatedNeutrons,
-    pulse_stride: PulseStride,
+    pulse_stride: PulseStride[RunType],
     seed: SimulationSeed,
     facility: SimulationFacility,
 ) -> SimulationResults[RunType]:
@@ -684,7 +625,7 @@ def compute_frame_sequence(
     disk_choppers: DiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
     source_bounds: SourceBounds,
-    pulse_stride: PulseStride,
+    pulse_stride: PulseStride[RunType],
 ) -> ChopperFrameSequence[RunType]:
     """
     Compute the chopper frame sequence for a given set of disk choppers and source pulse
@@ -752,7 +693,7 @@ def make_wavelength_lut_from_polygons(
     distance_resolution: DistanceResolution,
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
-    pulse_stride: PulseStride,
+    pulse_stride: PulseStride[RunType],
     frames: ChopperFrameSequence,
 ) -> LookupTable[RunType, Component]:
     """
@@ -878,76 +819,22 @@ def ltotal_range_from_ltotal_monitor(
     return LtotalRange[RunType, MonitorType](_ltotal_range_from_ltotal(ltotal))
 
 
-# def make_wavelength_lut_from_polygons(
-#     ltotal_range: LtotalRange[RunType, Component],
-#     distance_resolution: DistanceResolution,
-#     time_resolution: TimeResolution,
-#     pulse_period: PulsePeriod,
-#     pulse_stride: PulseStride,
-#     frames: ChopperFrameSequence,
-# ) -> LookupTable[RunType, Component]:
-#     """
-#     Wrapper around _make_wavelength_lut_from_polygons to specify the Component as
-#     snx.NXdetector, for use in the detector workflow.
-#     """
-#     return LookupTable[RunType, Component](
-#         _make_wavelength_lut_from_polygons(
-#             ltotal_range=ltotal_range,
-#             distance_resolution=distance_resolution,
-#             time_resolution=time_resolution,
-#             pulse_period=pulse_period,
-#             pulse_stride=pulse_stride,
-#             frames=frames,
-#         )
-#     )
-
-
-# def make_wavelength_lut_from_polygons_detector(
-#     ltotal_range: LtotalRange[RunType, snx.NXdetector],
-#     distance_resolution: DistanceResolution,
-#     time_resolution: TimeResolution,
-#     pulse_period: PulsePeriod,
-#     pulse_stride: PulseStride,
-#     frames: ChopperFrameSequence,
-# ) -> LookupTable[RunType, snx.NXdetector]:
-#     """
-#     Wrapper around _make_wavelength_lut_from_polygons to specify the Component as
-#     snx.NXdetector, for use in the detector workflow.
-#     """
-#     return LookupTable[RunType, snx.NXdetector](
-#         _make_wavelength_lut_from_polygons(
-#             ltotal_range=ltotal_range,
-#             distance_resolution=distance_resolution,
-#             time_resolution=time_resolution,
-#             pulse_period=pulse_period,
-#             pulse_stride=pulse_stride,
-#             frames=frames,
-#         )
-#     )
-
-
-# def make_wavelength_lut_from_polygons_monitor(
-#     ltotal_range: LtotalRange[RunType, MonitorType],
-#     distance_resolution: DistanceResolution,
-#     time_resolution: TimeResolution,
-#     pulse_period: PulsePeriod,
-#     pulse_stride: PulseStride,
-#     frames: ChopperFrameSequence,
-# ) -> LookupTable[RunType, MonitorType]:
-#     """
-#     Wrapper around _make_wavelength_lut_from_polygons to specify the Component as
-#     snx.NXmonitor, for use in the monitor workflow.
-#     """
-#     return LookupTable[RunType, MonitorType](
-#         _make_wavelength_lut_from_polygons(
-#             ltotal_range=ltotal_range,
-#             distance_resolution=distance_resolution,
-#             time_resolution=time_resolution,
-#             pulse_period=pulse_period,
-#             pulse_stride=pulse_stride,
-#             frames=frames,
-#         )
-#     )
+def guess_pulse_stride_from_choppers(
+    choppers: DiskChoppers[RunType], pulse_period: PulsePeriod
+) -> PulseStride[RunType]:
+    """
+    If the pulse stride is not provided, we try to guess it from the chopper parameters.
+    If there is a chopper rotating slower than the pulse_period, we use its rotation
+    frequency to estimate the pulse stride.
+    We omit choppers with a zero rotation frequency, as they are considered inactive.
+    """
+    stride = 1
+    for chopper in choppers.values():
+        f = sc.abs(chopper.frequency)
+        if f.value == 0:
+            continue
+        stride = max(stride, round((1 / pulse_period / f).to(unit="").value))
+    return PulseStride[RunType](stride)
 
 
 def load_lookup_table_from_file(
@@ -986,25 +873,30 @@ def load_lookup_table_from_file(
 def providers(
     mode: Literal["analytical", "simulation", "file"] = "analytical",
 ) -> tuple[Callable, ...]:
-    match mode:
-        case "analytical":
-            return (
-                ltotal_range_from_ltotal_detector,
-                ltotal_range_from_ltotal_monitor,
-                make_wavelength_lut_from_polygons,
-                compute_frame_sequence,
-            )
-        case "simulation":
-            return (
-                ltotal_range_from_ltotal_detector,
-                ltotal_range_from_ltotal_monitor,
-                make_wavelength_lut_from_simulation,
-                simulate_chopper_cascade_using_tof,
-            )
-        case "file":
-            return (load_lookup_table_from_file,)
-        case _:
-            raise ValueError(f"Unknown lookup table provider mode: {mode}")
+    if mode == "file":
+        return (load_lookup_table_from_file,)
+
+    common = (
+        ltotal_range_from_ltotal_detector,
+        ltotal_range_from_ltotal_monitor,
+        guess_pulse_stride_from_choppers,
+    )
+
+    if mode == "analytical":
+        extra = (
+            make_wavelength_lut_from_polygons,
+            compute_frame_sequence,
+        )
+
+    elif mode == "simulation":
+        extra = (
+            make_wavelength_lut_from_simulation,
+            simulate_chopper_cascade_using_tof,
+        )
+    else:
+        raise ValueError(f"Unknown lookup table provider mode: {mode}")
+
+    return common + extra
 
 
 def default_parameters(
@@ -1017,7 +909,6 @@ def default_parameters(
     params.update(
         {
             PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
-            PulseStride: 1,
             DistanceResolution: sc.scalar(0.1, unit="m"),
             TimeResolution: sc.scalar(50.0, unit='us'),
             SourceBounds: SourceBounds(
@@ -1038,44 +929,3 @@ def default_parameters(
             }
         )
     return params
-
-
-# def LookupTableWorkflow(
-#     use_simulation: bool = True, constraints: dict[type, Iterable[type]] = None
-# ) -> sl.Pipeline:
-#     """
-#     Create a workflow for computing a wavelength lookup table.
-#     If ``use_simulation`` is True, the workflow will compute the lookup table from a
-#     simulation of neutrons propagating through a chopper cascade using the ``tof``
-#     package.
-#     If ``use_simulation`` is False, the workflow will compute the lookup table from
-#     the acceptance diagram polygons generated by the ``chopper_cascade`` module.
-
-#     Parameters
-#     ----------
-#     use_simulation:
-#         Whether to compute the lookup table from a simulation of neutrons propagating
-#         through a chopper cascade using the ``tof`` package, or from the acceptance
-#         diagram polygons generated by the ``chopper_cascade`` module.
-#     """
-#     default_params = default_parameters()
-#     if use_simulation:
-#         provs = lut_from_simulation_providers()
-#         default_params.update(
-#             {
-#                 NumberOfSimulatedNeutrons: 1_000_000,
-#                 SimulationSeed: None,
-#                 SimulationFacility: 'ess',
-#             }
-#         )
-#     else:
-#         provs = providers()
-
-#     if constraints is None:
-#         constraints = {
-#             RunType: [AnyRun],
-#             MonitorType: [FrameMonitor0],
-#             Component: [snx.NXdetector, FrameMonitor0],
-#         }
-
-#     return sl.Pipeline(provs, params=default_params, constraints=constraints)
