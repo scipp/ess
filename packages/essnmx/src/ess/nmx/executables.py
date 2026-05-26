@@ -330,7 +330,7 @@ def reduction(
 
     if not config.output.skip_file_output:
         save_results(results=results, output_config=config.output)
-        if not (config.aux.no_axilaries and config.output.no_tof_histogram):
+        if not config.aux.no_axilaries:
             save_auxiliary_output(
                 results=results,
                 output_config=config.output,
@@ -374,21 +374,31 @@ def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
 def save_auxiliary_output(
     *,
     results: NMXLauetof,
-    output_config: OutputConfig,
+    output_config: OutputConfig | None = None,
     aux_config: AuxiliaryOutputConfig,
     output_dir: pathlib.Path,
     display: Callable | None = None,
 ) -> None:
+    """Export or print(log) auxiliary information such as 1D tof distribution.
+
+    The auxiliary output can be configured by `aux_config`(`AuxiliaryOutputConfig`).
+    `output_config`(`OutputConfig`) is only needed when the auxiliary output
+    should be stored in the `NXlauetof` file.
+    """
     output_dir.mkdir(exist_ok=True)
+    # TOF 1D distribution for all panels
     tof_histogram = sc.reduce(
         det_res.data.sum(["x_pixel_offset", "y_pixel_offset"])
         for det_res in results.instrument.detectors.values()
         if isinstance(det_res.data, sc.DataArray)
     ).sum()
+
+    # Export TOF 1D distribution into entry/aux
     if (
-        isinstance(tof_histogram, sc.DataArray)
+        output_config
+        and isinstance(tof_histogram, sc.DataArray)
         and not output_config.skip_file_output
-        and not output_config.no_tof_histogram
+        and not aux_config.no_tof_1d_in_file
     ):
         from .nexus import export_tof_distribution_nxlauetof
 
@@ -396,14 +406,16 @@ def save_auxiliary_output(
             tof_histogram=tof_histogram,
             output_file=output_config.output_file,
         )
-
+    # Export TOF 1D plot
     if isinstance(tof_histogram, sc.DataArray) and not aux_config.no_png:
         tof_histogram.plot(
             title="Tof Distribution (All Panels Summed)",
             grid=True,
         ).save(output_dir / aux_config.tof_1d_png_filename)
+    # Print(log) TOF 1D plot
     if (
         isinstance(tof_histogram, sc.DataArray)
+        and output_config
         and output_config.verbose
         and display is not None
     ):

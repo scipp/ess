@@ -115,9 +115,10 @@ def test_reduction_config() -> None:
         verbose=True,
         skip_file_output=True,
         overwrite=True,
-        no_tof_histogram=True,
     )
-    auxilary_options = AuxiliaryOutputConfig(output_dir='test-aux-output', no_png=True)
+    auxilary_options = AuxiliaryOutputConfig(
+        output_dir='test-aux-output', no_png=True, no_tof_1d_in_file=True
+    )
     expected_config = ReductionConfig(
         inputs=input_options,
         workflow=workflow_options,

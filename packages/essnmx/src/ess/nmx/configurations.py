@@ -191,6 +191,11 @@ class AuxiliaryOutputConfig(BaseModel):
         "If not given, stem of the output file name will be used.",
         default="",
     )
+    no_tof_1d_in_file: bool = Field(
+        title="No TOF 1D distribution",
+        description="Skip saving TOF 1D distribution at `entry/aux` in the file.",
+        default=False,
+    )
     no_png: bool = Field(
         title="Skip Saving Plots",
         description="Skip saving auxiliary plots in png files.",
@@ -199,7 +204,7 @@ class AuxiliaryOutputConfig(BaseModel):
 
     @property
     def no_axilaries(self) -> bool:
-        return self.no_png
+        return self.no_tof_1d_in_file and self.no_png
 
     @property
     def tof_1d_png_filename(self) -> str:
@@ -269,7 +274,6 @@ class OutputConfig(BaseModel):
         description="Compress option of reduced output file.",
         default=Compression.BITSHUFFLE_LZ4,
     )
-    no_tof_histogram: bool = Field(title="", description="", default=False)
 
 
 class ReductionConfig(BaseModel):

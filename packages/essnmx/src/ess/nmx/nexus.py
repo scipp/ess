@@ -345,7 +345,17 @@ def export_tof_distribution_nxlauetof(
         raise NotImplementedError("Only append mode is supported for now.")
 
     with h5py.File(output_file, "r+") as f:
-        nx_instrument: h5py.Group = f["entry/instrument"]
+        auxiliary_group: h5py.Group = f['entry'].create_group(name="aux")
+        tof1d_group = snx.create_class(
+            group=auxiliary_group, nx_class=snx.NXdata, name='tof-1d'
+        )
+        tof1d_group.attrs['axes'] = tof_histogram.dims
+        tof1d_group.attrs['signal'] = 'data'
         _create_dataset_from_var(
-            root_entry=nx_instrument, name="tof-1d", var=tof_histogram.data, dtype=int
+            root_entry=tof1d_group,
+            name=tof_histogram.dim,
+            var=tof_histogram.coords[tof_histogram.dim],
+        )
+        _create_dataset_from_var(
+            root_entry=tof1d_group, name="data", var=tof_histogram.data, dtype=int
         )
