@@ -12,7 +12,7 @@ from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow
 sl = pytest.importorskip("sciline")
 
 
-def _make_workflow(mode: str) -> sl.Pipeline:
+def _make_workflow(mode: str = "analytical") -> sl.Pipeline:
     return GenericUnwrapWorkflow(
         run_types=[AnyRun], monitor_types=[FrameMonitor0], mode=mode
     )
@@ -24,7 +24,7 @@ def test_lut_workflow_computes_table(detector_or_monitor, mode):
     wf = _make_workflow(mode)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
-    wf[unwrap.PulseStride] = 1
+    wf[unwrap.PulseStride[AnyRun]] = 1
 
     if mode == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
@@ -62,7 +62,7 @@ def test_lut_workflow_pulse_skipping(detector_or_monitor, mode):
     if mode == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 62
-    wf[unwrap.PulseStride] = 2
+    wf[unwrap.PulseStride[AnyRun]] = 2
 
     lmin, lmax = sc.scalar(55.0, unit='m'), sc.scalar(65.0, unit='m')
     dres = sc.scalar(0.1, unit='m')
@@ -89,7 +89,7 @@ def test_lut_workflow_non_exact_distance_range(mode):
     if mode == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 63
-    wf[unwrap.PulseStride] = 1
+    wf[unwrap.PulseStride[AnyRun]] = 1
 
     lmin, lmax = sc.scalar(25.0, unit='m'), sc.scalar(35.0, unit='m')
     dres = sc.scalar(0.33, unit='m')
@@ -174,7 +174,7 @@ def test_lut_workflow_computes_table_with_choppers(detector_or_monitor, mode):
     if mode == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 64
-    wf[unwrap.PulseStride] = 1
+    wf[unwrap.PulseStride[AnyRun]] = 1
 
     Comp = snx.NXdetector if detector_or_monitor == "detector" else FrameMonitor0
 
@@ -212,7 +212,7 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range(mode):
     if mode == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 64
-    wf[unwrap.PulseStride] = 1
+    wf[unwrap.PulseStride[AnyRun]] = 1
 
     wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
         sc.scalar(5.0, unit='m'),
@@ -264,7 +264,7 @@ def test_lut_workflow_raises_for_distance_before_source(mode):
     if mode == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 65
-    wf[unwrap.PulseStride] = 1
+    wf[unwrap.PulseStride[AnyRun]] = 1
 
     # Setting the starting point at zero will make a table that would cover a range
     # from -0.2m to 65.0m
@@ -281,11 +281,12 @@ def test_lut_workflow_raises_for_distance_before_source(mode):
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 @pytest.mark.parametrize("mode", ["analytical", "simulation"])
-def test_lut_workflow_computes_table_wf_alias(detector_or_monitor, mode):
+def test_lut_workflow_computes_table_using_alias(detector_or_monitor, mode):
+    # LookupTableWorkflow is an old (deprecated) alias for GenericUnwrapWorkflow
     wf = LookupTableWorkflow(use_simulation=(mode == "simulation"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
-    wf[unwrap.PulseStride] = 1
+    wf[unwrap.PulseStride[AnyRun]] = 1
 
     if mode == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
@@ -312,3 +313,24 @@ def test_lut_workflow_computes_table_wf_alias(detector_or_monitor, mode):
     # Note that the time resolution is not exactly preserved since we want the table to
     # span exactly the frame period.
     assert sc.isclose(table.time_resolution, tres, rtol=sc.scalar(0.01))
+
+
+def test_lut_workflow_guesses_pulse_stride():
+    wf = _make_workflow()
+    choppers = _make_choppers()
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+
+    for i in range(1, 4):
+        choppers["pulse-skipping"] = DiskChopper(
+            axle_position=sc.vector([0, 0, 20], unit='m'),
+            frequency=sc.scalar(-14 / i, unit='Hz'),
+            beam_position=sc.scalar(0, unit='deg'),
+            phase=sc.scalar(-10, unit='deg'),
+            slit_begin=sc.array(dims=["cutout"], values=[0.0], unit='deg'),
+            slit_end=sc.array(dims=["cutout"], values=[120.0], unit='deg'),
+            slit_height=None,
+            radius=None,
+        )
+        wf[unwrap.DiskChoppers[AnyRun]] = choppers
+
+        assert wf.compute(unwrap.PulseStride[AnyRun]) == i
