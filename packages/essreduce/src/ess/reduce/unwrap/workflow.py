@@ -6,6 +6,7 @@ from typing import Literal
 import sciline
 
 from ..nexus import GenericNeXusWorkflow
+from ..nexus.types import AnyRun, FrameMonitor0
 from . import lut, to_wavelength
 
 
@@ -68,3 +69,40 @@ def GenericUnwrapWorkflow(
         wf[key] = value
 
     return wf
+
+
+def LookupTableWorkflow(
+    *,
+    use_simulation: bool = True,
+    run_types: Iterable[sciline.typing.Key] | None = None,
+    monitor_types: Iterable[sciline.typing.Key] | None = None,
+) -> sciline.Pipeline:
+    """
+    Alias for :func:`GenericUnwrapWorkflow` with default parameters set for generating
+    a wavelength lookup table using a tof simulation or analytical calculations.
+
+    This is deprecated and will be removed in a future release. Use
+    :func:`GenericUnwrapWorkflow` instead with the desired parameters.
+
+    Parameters
+    ----------
+    use_simulation:
+        Whether to use the "simulation" or "analytical" mode for generating the lookup
+        table. See :func:`GenericUnwrapWorkflow` for details.
+    run_types:
+        List of run types to include in the workflow.
+        Constrains the possible values of :class:`ess.reduce.nexus.types.RunType`.
+    monitor_types:
+        List of monitor types to include in the workflow.
+        Constrains the possible values of :class:`ess.reduce.nexus.types.MonitorType`
+        and :class:`ess.reduce.nexus.types.Component`.
+    """
+    mode = "simulation" if use_simulation else "analytical"
+    if run_types is None:
+        run_types = [AnyRun]
+    if monitor_types is None:
+        monitor_types = [FrameMonitor0]
+
+    return GenericUnwrapWorkflow(
+        run_types=run_types, monitor_types=monitor_types, mode=mode
+    )

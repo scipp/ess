@@ -34,7 +34,7 @@ from .types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
-from .workflow import GenericUnwrapWorkflow
+from .workflow import GenericUnwrapWorkflow, LookupTableWorkflow
 
 __all__ = [
     "BeamlineComponentReading",
@@ -47,6 +47,7 @@ __all__ = [
     "LookupTable",
     "LookupTableFilename",
     "LookupTableRelativeErrorThreshold",
+    "LookupTableWorkflow",
     "LtotalRange",
     "MonitorLtotal",
     "NumberOfSimulatedNeutrons",
