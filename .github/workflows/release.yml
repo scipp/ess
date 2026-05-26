@@ -81,7 +81,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: docs_html
+          name: docs-${{ needs.determine-package.outputs.package }}
           path: docs_html
       - name: Zip documentation
         run: |
