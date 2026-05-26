@@ -421,6 +421,11 @@ def save_auxiliary_output(
     ):
         da = tof_histogram
         t_dim = da.dim
+        original_tbin_size = da.sizes[t_dim]
+        original_max_value = da.max().value
+        while (display_t_size := da.sizes[t_dim]) > 128:
+            da = da.rebin({t_dim: display_t_size // 2})
+
         n_row = min(da.sizes[t_dim] // 4, 50)
         max_value = da.max().value
         row_size = int(max_value // n_row)
@@ -433,7 +438,9 @@ def save_auxiliary_output(
         ]
         bars = "\n".join("".join(c for c in row) for row in bars)
 
-        y_axis = f"max-count: {max_value} [{da.unit}]".ljust(da.sizes[t_dim], '-')
+        y_axis = f"max-count: {original_max_value} [{da.unit}]".ljust(
+            da.sizes[t_dim], '-'
+        )
         bars = y_axis + "\n" + bars
         display(
             "\n┌──TOF DISTRIBUTION (ALL PANELS SUMMED)".ljust(da.sizes[t_dim] + 1, '─')
@@ -448,7 +455,12 @@ def save_auxiliary_output(
             max_t_label = f"{t_max:.3g} [{t_unit}]"
             xaxis = xaxis[: -len(max_t_label) + 2] + max_t_label
             bars += f"\n{xaxis}"
-            num_bins_label = f"({da.sizes[t_dim]} {t_dim} bins)"
+            num_bins_label = (
+                "*histogram rebinned for display* "
+                if da.sizes[t_dim] != original_tbin_size
+                else ""
+            )
+            num_bins_label += f"({original_tbin_size} {t_dim} bins)"
             bars += (
                 "\n└".ljust(da.sizes[t_dim] + 1 - len(num_bins_label), '─')
                 + num_bins_label
