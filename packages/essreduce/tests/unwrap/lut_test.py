@@ -2,20 +2,36 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import pytest
 import scipp as sc
+import scippnexus as snx
 from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
-from ess.reduce.nexus.types import AnyRun
+from ess.reduce.nexus.types import (
+    AnyRun,
+    Component,
+    FrameMonitor0,
+    MonitorType,
+    Position,
+    RunType,
+)
 from ess.reduce.unwrap import LookupTableWorkflow
 
 sl = pytest.importorskip("sciline")
 
 
+@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 @pytest.mark.parametrize("engine", ["analytical", "tof"])
-def test_lut_workflow_computes_table(engine):
-    wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
+def test_lut_workflow_computes_table(detector_or_monitor, engine):
+    wf = LookupTableWorkflow(
+        use_simulation=(engine == "tof"),
+        constraints={
+            RunType: [AnyRun],
+            MonitorType: [FrameMonitor0],
+            Component: [snx.NXdetector, FrameMonitor0],
+        },
+    )
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[unwrap.SourcePosition] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsource, RunType]] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride] = 1
 
     if engine == "tof":
@@ -26,11 +42,13 @@ def test_lut_workflow_computes_table(engine):
     dres = sc.scalar(0.1, unit='m')
     tres = sc.scalar(333.0, unit='us')
 
-    wf[unwrap.LtotalRange] = lmin, lmax
+    Comp = snx.NXdetector if detector_or_monitor == "detector" else FrameMonitor0
+
+    wf[unwrap.LtotalRange[AnyRun, Comp]] = lmin, lmax
     wf[unwrap.DistanceResolution] = dres
     wf[unwrap.TimeResolution] = tres
 
-    table = wf.compute(unwrap.LookupTable)
+    table = wf.compute(unwrap.LookupTable[AnyRun, Comp])
 
     assert table.array.coords['distance'].min() < lmin
     assert table.array.coords['distance'].max() > lmax

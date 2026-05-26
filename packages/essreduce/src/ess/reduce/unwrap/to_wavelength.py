@@ -27,7 +27,6 @@ from ..nexus.types import (
     EmptyMonitor,
     GravityVector,
     MonitorType,
-    NeXusDetectorName,
     NeXusName,
     Position,
     RawDetector,
@@ -436,7 +435,11 @@ def monitor_ltotal_from_straight_line_approximation(
     )
 
 
-def _mask_large_uncertainty_in_lut(table: Lut, error_threshold: float) -> Lut:
+def mask_large_uncertainty_in_lut(
+    table: LookupTable[RunType, Component],
+    error_threshold: LookupTableRelativeErrorThreshold,
+    component_name: NeXusName[Component],
+) -> ErrorLimitedLookupTable[RunType, Component]:
     """
     Mask regions in the lookup table with large uncertainty using NaNs.
 
@@ -447,66 +450,19 @@ def _mask_large_uncertainty_in_lut(table: Lut, error_threshold: float) -> Lut:
     error_threshold:
         Threshold for the relative standard deviation (coefficient of variation) of the
         projected time-of-flight above which values are masked.
+    component_name:
+        Name of the component for which to apply the error threshold. This is used to
+        get the correct error threshold from the dictionary of error thresholds.
     """
     da = table.array
     relative_error = sc.stddevs(da.data) / sc.values(da.data)
-    mask = relative_error > sc.scalar(error_threshold)
-    return Lut(
-        **{
-            **asdict(table),
-            "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
-        }
-    )
-
-
-def mask_large_uncertainty_in_lut_detector(
-    table: LookupTable[RunType, snx.NXdetector],
-    error_threshold: LookupTableRelativeErrorThreshold,
-    detector_name: NeXusDetectorName,
-) -> ErrorLimitedLookupTable[RunType, snx.NXdetector]:
-    """
-    Mask regions in the wavelength lookup table with large uncertainty using NaNs.
-
-    Parameters
-    ----------
-    table:
-        Lookup table with wavelength as a function of distance and time-of-arrival.
-    error_threshold:
-        Threshold for the relative standard deviation (coefficient of variation) of the
-        projected wavelength above which values are masked.
-    detector_name:
-        Name of the detector for which to apply the error threshold. This is used to
-        get the correct error threshold from the dictionary of error thresholds.
-    """
-    return ErrorLimitedLookupTable[RunType, snx.NXdetector](
-        _mask_large_uncertainty_in_lut(
-            table=table, error_threshold=error_threshold[detector_name]
-        )
-    )
-
-
-def mask_large_uncertainty_in_lut_monitor(
-    table: LookupTable[RunType, MonitorType],
-    error_threshold: LookupTableRelativeErrorThreshold,
-    monitor_name: NeXusName[MonitorType],
-) -> ErrorLimitedLookupTable[RunType, MonitorType]:
-    """
-    Mask regions in the wavelength lookup table with large uncertainty using NaNs.
-
-    Parameters
-    ----------
-    table:
-        Lookup table with wavelength as a function of distance and time-of-arrival.
-    error_threshold:
-        Threshold for the relative standard deviation (coefficient of variation) of the
-        projected wavelength above which values are masked.
-    monitor_name:
-        Name of the monitor for which to apply the error threshold. This is used to
-        get the correct error threshold from the dictionary of error thresholds.
-    """
-    return ErrorLimitedLookupTable[RunType, MonitorType](
-        _mask_large_uncertainty_in_lut(
-            table=table, error_threshold=error_threshold[monitor_name]
+    mask = relative_error > sc.scalar(error_threshold[component_name])
+    return ErrorLimitedLookupTable[RunType, Component](
+        Lut(
+            **{
+                **asdict(table),
+                "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
+            }
         )
     )
 
@@ -609,6 +565,5 @@ def providers() -> tuple[Callable]:
         monitor_ltotal_from_straight_line_approximation,
         detector_wavelength_data,
         monitor_wavelength_data,
-        mask_large_uncertainty_in_lut_detector,
-        mask_large_uncertainty_in_lut_monitor,
+        mask_large_uncertainty_in_lut,
     )

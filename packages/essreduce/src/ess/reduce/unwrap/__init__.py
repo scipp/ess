@@ -19,7 +19,7 @@ from .lut import (
     SimulationResults,
     SimulationSeed,
     SourceBounds,
-    SourcePosition,
+    # SourcePosition,
     TimeResolution,
     simulate_chopper_cascade_using_tof,
 )
@@ -58,7 +58,7 @@ __all__ = [
     "SimulationResults",
     "SimulationSeed",
     "SourceBounds",
-    "SourcePosition",
+    # "SourcePosition",
     "TimeResolution",
     "WavelengthDetector",
     "WavelengthMonitor",
