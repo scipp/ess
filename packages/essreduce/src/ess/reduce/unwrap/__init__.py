@@ -16,10 +16,10 @@ from .lut import (
     NumberOfSimulatedNeutrons,
     PulsePeriod,
     PulseStride,
+    SimulationFacility,
     SimulationResults,
     SimulationSeed,
     SourceBounds,
-    # SourcePosition,
     TimeResolution,
     simulate_chopper_cascade_using_tof,
 )
@@ -35,7 +35,7 @@ from .types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
-from .workflow import GenericUnwrapWorkflow
+from .workflow import GenericUnwrapWorkflow, load_lookup_table_from_file
 
 __all__ = [
     "BeamlineComponentReading",
@@ -55,13 +55,14 @@ __all__ = [
     "PulsePeriod",
     "PulseStride",
     "PulseStrideOffset",
+    "SimulationFacility",
     "SimulationResults",
     "SimulationSeed",
     "SourceBounds",
-    # "SourcePosition",
     "TimeResolution",
     "WavelengthDetector",
     "WavelengthMonitor",
+    "load_lookup_table_from_file",
     "providers",
     "simulate_chopper_cascade_using_tof",
 ]

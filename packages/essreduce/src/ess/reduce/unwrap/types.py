@@ -10,8 +10,9 @@ import scipp as sc
 
 from ..nexus.types import Component, MonitorType, RunType
 
-LookupTableFilename = NewType("LookupTableFilename", str)
-"""Filename of the wavelength lookup table."""
+
+class LookupTableFilename(sl.Scope[RunType, Component, str], str):
+    """Filename of the wavelength lookup table."""
 
 
 @dataclass

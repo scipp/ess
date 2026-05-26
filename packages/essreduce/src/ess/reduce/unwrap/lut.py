@@ -565,6 +565,19 @@ def simulate_chopper_cascade_using_tof(
     )
 
 
+def lut_from_simulation_providers() -> tuple[Callable, ...]:
+    """
+    Return the functions that can be used to create lookup tables using a ``tof``
+    simulation.
+    """
+    return (
+        ltotal_range_from_ltotal_detector,
+        ltotal_range_from_ltotal_monitor,
+        make_wavelength_lut_from_simulation,
+        simulate_chopper_cascade_using_tof,
+    )
+
+
 def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndarray:
     # Decompose the polygons into two 1D lines: the upper and lower bounds
     bounds = []
@@ -996,12 +1009,7 @@ def LookupTableWorkflow(
     """
     default_params = default_parameters()
     if use_simulation:
-        provs = (
-            ltotal_range_from_ltotal_detector,
-            ltotal_range_from_ltotal_monitor,
-            make_wavelength_lut_from_simulation,
-            simulate_chopper_cascade_using_tof,
-        )
+        provs = lut_from_simulation_providers()
         default_params.update(
             {
                 NumberOfSimulatedNeutrons: 1_000_000,

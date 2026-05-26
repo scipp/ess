@@ -6,11 +6,14 @@ import sciline
 import scipp as sc
 
 from ..nexus import GenericNeXusWorkflow
+from ..nexus.types import Component, RunType
 from . import lut, to_wavelength
-from .types import LookupTable, LookupTableFilename, PulseStrideOffset
+from .types import LookupTable, LookupTableFilename, Lut, PulseStrideOffset
 
 
-def load_lookup_table(filename: LookupTableFilename) -> LookupTable:
+def load_lookup_table_from_file(
+    filename: LookupTableFilename[RunType, Component],
+) -> LookupTable[RunType, Component]:
     """Load a wavelength lookup table from an HDF5 file."""
     table = sc.io.load_hdf5(filename)
 
@@ -38,7 +41,7 @@ def load_lookup_table(filename: LookupTableFilename) -> LookupTable:
     if "error_threshold" in table:
         del table["error_threshold"]
 
-    return LookupTable(**table)
+    return LookupTable[RunType, Component](Lut(**table))
 
 
 def GenericUnwrapWorkflow(
