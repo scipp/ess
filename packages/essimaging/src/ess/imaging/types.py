@@ -6,6 +6,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
@@ -22,6 +23,7 @@ Position = reduce_t.Position
 ProtonCharge = reduce_t.ProtonCharge
 RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
+NXdetector = snx.NXdetector
 
 DetectorLtotal = unwrap_t.DetectorLtotal
 WavelengthDetector = unwrap_t.WavelengthDetector

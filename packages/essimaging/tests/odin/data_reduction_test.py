@@ -11,6 +11,7 @@ from ess.imaging.types import (
     LookupTable,
     LookupTableFilename,
     NeXusDetectorName,
+    NXdetector,
     OpenBeamRun,
     RawDetector,
     SampleRun,
@@ -27,9 +28,14 @@ def workflow() -> sl.Pipeline:
     wf[Filename[SampleRun]] = odin.data.iron_simulation_sample_small()
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
     wf[NeXusDetectorName] = "event_mode_detectors/timepix3"
-    wf[LookupTableFilename] = odin.data.odin_wavelength_lookup_table()
-    # Cache the lookup table
-    wf[LookupTable] = wf.compute(LookupTable)
+    for run_type in (SampleRun, OpenBeamRun):
+        wf[LookupTableFilename[run_type, NXdetector]] = (
+            odin.data.odin_wavelength_lookup_table()
+        )
+        # Cache the lookup table
+        wf[LookupTable[run_type, NXdetector]] = wf.compute(
+            LookupTable[run_type, NXdetector]
+        )
     return wf
 
 
