@@ -12,12 +12,14 @@ from ess.reduce.nexus.types import (
     AnyRun,
     DiskChoppers,
     EmptyDetector,
+    EmptyMonitor,
     FrameMonitor0,
     NeXusData,
     NeXusDetectorName,
     NeXusName,
     Position,
     RawDetector,
+    RawMonitor,
     SampleRun,
 )
 from ess.reduce.unwrap import (
@@ -31,10 +33,9 @@ from ess.reduce.unwrap.lut import lut_from_simulation_providers
 sl = pytest.importorskip("sciline")
 
 
-@pytest.fixture
-def workflow() -> sciline.Pipeline:
+def _make_workflow(mode) -> sciline.Pipeline:
     sizes = {'detector_number': 10}
-    calibrated_beamline = sc.DataArray(
+    detector_geometry = sc.DataArray(
         data=sc.ones(sizes=sizes),
         coords={
             "position": sc.spatial.as_vectors(
@@ -48,7 +49,7 @@ def workflow() -> sciline.Pipeline:
         },
     )
 
-    events = sc.DataArray(
+    detector_events = sc.DataArray(
         data=sc.ones(dims=["event"], shape=[1000]),
         coords={
             "event_time_offset": sc.linspace(
@@ -59,23 +60,40 @@ def workflow() -> sciline.Pipeline:
             ),
         },
     )
-    nexus_data = sc.DataArray(
+    detector_data = sc.DataArray(
         sc.bins(
             begin=sc.array(dims=["pulse"], values=[0], unit=None),
-            data=events,
+            data=detector_events,
             dim="event",
         )
     )
 
-    wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[FrameMonitor0])
+    monitor_geometry = sc.DataArray(
+        data=sc.scalar(0.0), coords={"position": sc.vector([0, 0, 75], unit='m')}
+    )
+
+    monitor_data = sc.DataArray(
+        data=sc.ones(sizes={'time': 10})
+        * sc.arange("frame_time", 0, 20, unit='counts'),
+        coords={
+            "time": sc.array(dims=["time"], values=np.arange(10), unit=None),
+            "frame_time": sc.linspace("time", 0, 71, 21, unit='ms'),
+        },
+    )
+
+    wf = GenericUnwrapWorkflow(
+        run_types=[SampleRun], monitor_types=[FrameMonitor0], mode=mode
+    )
     wf[NeXusDetectorName] = "detector"
     wf[NeXusName[FrameMonitor0]] = "monitor"
     wf[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
         'monitor': np.inf,
     }
-    wf[EmptyDetector[SampleRun]] = calibrated_beamline
-    wf[NeXusData[snx.NXdetector, SampleRun]] = nexus_data
+    wf[EmptyDetector[SampleRun]] = detector_geometry
+    wf[NeXusData[snx.NXdetector, SampleRun]] = detector_data
+    wf[EmptyMonitor[SampleRun, FrameMonitor0]] = monitor_geometry
+    wf[NeXusData[FrameMonitor0, SampleRun]] = monitor_data
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
     wf[Position[snx.NXsource, SampleRun]] = sc.vector([0, 0, 0], unit='m')
 
@@ -100,21 +118,47 @@ def workflow() -> sciline.Pipeline:
 #     assert lut.choppers is not None
 
 
-def test_GenericUnwrapWorkflow_with_lut_from_tof_simulation(workflow):
-    for provider in lut_from_simulation_providers():
-        workflow.insert(provider)
+@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+def test_GenericUnwrapWorkflow_computes_wavelength(mode, detector_or_monitor):
+    wf = _make_workflow(mode=mode)
 
     # Should be able to compute DetectorData without chopper and simulation params
     # This contains event_time_offset (time-of-arrival).
-    _ = workflow.compute(RawDetector[SampleRun])
+    target = (
+        RawDetector[SampleRun]
+        if detector_or_monitor == "detector"
+        else RawMonitor[SampleRun, FrameMonitor0]
+    )
+    _ = wf.compute(target)
 
-    workflow[DiskChoppers[SampleRun]] = fakes.psc_choppers()
-    workflow[unwrap.NumberOfSimulatedNeutrons] = 10_000
-    workflow[unwrap.SimulationSeed] = None
-    workflow[unwrap.SimulationFacility] = 'ess'
+    wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
+    if mode == "simulation":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
 
-    detector = workflow.compute(unwrap.WavelengthDetector[SampleRun])
-    assert 'wavelength' in detector.bins.coords
+    if detector_or_monitor == "monitor":
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        assert 'wavelength' in wavs.coords
+    else:
+        wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
+        assert 'wavelength' in wavs.bins.coords
+
+
+@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+def test_GenericUnwrapWorkflow_makes_different_luts_for_detector_and_monitor(mode):
+    wf = _make_workflow(mode=mode)
+    wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
+    if mode == "simulation":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
+
+    det_table = wf.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
+    mon_table = wf.compute(unwrap.LookupTable[SampleRun, FrameMonitor0])
+
+    assert det_table.array.sizes['distance'] != mon_table.array.sizes['distance']
+    assert (
+        det_table.array.sizes['event_time_offset']
+        == mon_table.array.sizes['event_time_offset']
+    )
 
 
 def test_GenericUnwrapWorkflow_with_lut_from_polygons(workflow):
