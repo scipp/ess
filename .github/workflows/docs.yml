@@ -79,32 +79,38 @@ jobs:
         with:
           name: docs-${{ inputs.package }}
           path: packages/${{ inputs.package }}/html
+          if-no-files-found: error
       - run: echo "::notice::https://remote-unzip.scipp.deno.net/${{ github.repository }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"
 
   deploy:
     name: Deploy documentation
     needs: [ docs ]
+    if: ${{ inputs.publish }}
     runs-on: 'ubuntu-24.04'
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch == '' && github.ref || inputs.branch }}
       - uses: actions/download-artifact@v7
+        with:
+          name: docs-${{ inputs.package }}
+          path: docs_html
       - name: Prepare site
-        if: ${{ inputs.publish }}
         run: |
           PACKAGE=${{ inputs.package }}
           SUBPATH=${PACKAGE#ess}
           git fetch origin gh-pages:gh-pages || true
           git worktree add gh-pages-site gh-pages || mkdir -p gh-pages-site
           rm -rf gh-pages-site/$SUBPATH
-          cp -r packages/$PACKAGE/html gh-pages-site/$SUBPATH
+          mkdir -p gh-pages-site/$SUBPATH
+          cp -a docs_html/. gh-pages-site/$SUBPATH/
           cp docs/index.html gh-pages-site/index.html
           touch gh-pages-site/.nojekyll
       - name: Build search index
-        if: ${{ inputs.publish }}
         run: npx pagefind@latest --site gh-pages-site --bundle-dir pagefind
       - uses: JamesIves/github-pages-deploy-action@v4
-        if: ${{ inputs.publish }}
         with:
           branch: gh-pages
           folder: gh-pages-site
