@@ -1,0 +1,113 @@
+Results of doctest builder run on 2026-05-27 14:30:15
+=====================================================
+
+Document: generated/modules/ess.powder.smoothing.lowpass
+--------------------------------------------------------
+1 items passed all tests:
+   6 tests in default
+6 tests in 1 items.
+6 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.CorrectedDetector
+--------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.CorrectedDspacing
+--------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.DetectorTwoTheta
+-------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.DspacingDetector
+-------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.DspacingMonitor
+------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.FocussedDataDspacing
+-----------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.FocussedDataDspacingTwoTheta
+-------------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.IntensityDspacing
+--------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.IntensityDspacingTwoTheta
+----------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.NormalizedDspacing
+---------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.snspowder.powgen.data.TofDetector
+-----------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.snspowder.powgen.data.TofMonitor
+----------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Doctest summary
+===============
+   53 tests
+    0 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code
