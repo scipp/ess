@@ -134,7 +134,7 @@ def test_auxiliary_output(tmp_path: pathlib.Path):
     with pytest.warns(RuntimeWarning, match="No crystal rotation*"):
         results = reduction(config=config)
 
-    # Test PNG file.
+    # Test if the PNG file is generated.
     expected_png_file_path = (
         tmp_path / "scipp_output_with_auxiliary" / "essnmx-reduce-tof-1d.png"
     )
