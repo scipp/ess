@@ -9,7 +9,6 @@ from scipp.testing import assert_identical
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import (
-    AnyRun,
     DiskChoppers,
     EmptyDetector,
     EmptyMonitor,
@@ -18,17 +17,13 @@ from ess.reduce.nexus.types import (
     NeXusDetectorName,
     NeXusName,
     Position,
-    RawDetector,
-    RawMonitor,
     SampleRun,
 )
 from ess.reduce.unwrap import (
     GenericUnwrapWorkflow,
-    LookupTableWorkflow,
     fakes,
-    load_lookup_table_from_file,
+    simulate_chopper_cascade_using_tof,
 )
-from ess.reduce.unwrap.lut import lut_from_simulation_providers
 
 sl = pytest.importorskip("sciline")
 
@@ -74,10 +69,10 @@ def _make_workflow(mode) -> sciline.Pipeline:
 
     monitor_data = sc.DataArray(
         data=sc.ones(sizes={'time': 10})
-        * sc.arange("frame_time", 0, 20, unit='counts'),
+        * sc.arange("frame_time", 0, 300, unit='counts'),
         coords={
             "time": sc.array(dims=["time"], values=np.arange(10), unit=None),
-            "frame_time": sc.linspace("time", 0, 71, 21, unit='ms'),
+            "frame_time": sc.linspace("frame_time", 0, 71, 301, unit='ms'),
         },
     )
 
@@ -95,46 +90,33 @@ def _make_workflow(mode) -> sciline.Pipeline:
     wf[EmptyMonitor[SampleRun, FrameMonitor0]] = monitor_geometry
     wf[NeXusData[FrameMonitor0, SampleRun]] = monitor_data
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
-    wf[Position[snx.NXsource, SampleRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsource, SampleRun]] = fakes.source_position()
+    wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
 
     return wf
 
 
-# def test_LookupTableWorkflow_can_compute_lut():
-#     wf = LookupTableWorkflow()
-#     wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-#     wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
-#     wf[unwrap.LtotalRange] = (
-#         sc.scalar(75.0, unit="m"),
-#         sc.scalar(85.0, unit="m"),
-#     )
-#     wf[unwrap.SourcePosition] = fakes.source_position()
-#     lut = wf.compute(unwrap.LookupTable)
-#     assert lut.array is not None
-#     assert lut.distance_resolution is not None
-#     assert lut.time_resolution is not None
-#     assert lut.pulse_stride is not None
-#     assert lut.pulse_period is not None
-#     assert lut.choppers is not None
+@pytest.fixture(scope="module")
+def simulation_results_psc_choppers():
+    return simulate_chopper_cascade_using_tof(
+        choppers=fakes.psc_choppers(),
+        source_position=fakes.source_position(),
+        neutrons=1e6,
+        pulse_stride=1,
+        seed=333,
+        facility="ess",
+    )
 
 
 @pytest.mark.parametrize("mode", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_GenericUnwrapWorkflow_computes_wavelength(mode, detector_or_monitor):
+def test_GenericUnwrapWorkflow_computes_wavelength(
+    mode, detector_or_monitor, simulation_results_psc_choppers
+):
     wf = _make_workflow(mode=mode)
 
-    # Should be able to compute DetectorData without chopper and simulation params
-    # This contains event_time_offset (time-of-arrival).
-    target = (
-        RawDetector[SampleRun]
-        if detector_or_monitor == "detector"
-        else RawMonitor[SampleRun, FrameMonitor0]
-    )
-    _ = wf.compute(target)
-
-    wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
     if mode == "simulation":
-        wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
+        wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     if detector_or_monitor == "monitor":
         wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
@@ -145,11 +127,12 @@ def test_GenericUnwrapWorkflow_computes_wavelength(mode, detector_or_monitor):
 
 
 @pytest.mark.parametrize("mode", ["simulation", "analytical"])
-def test_GenericUnwrapWorkflow_makes_different_luts_for_detector_and_monitor(mode):
+def test_GenericUnwrapWorkflow_makes_different_luts_for_detector_and_monitor(
+    mode, simulation_results_psc_choppers
+):
     wf = _make_workflow(mode=mode)
-    wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
     if mode == "simulation":
-        wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
+        wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     det_table = wf.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
     mon_table = wf.compute(unwrap.LookupTable[SampleRun, FrameMonitor0])
@@ -161,38 +144,28 @@ def test_GenericUnwrapWorkflow_makes_different_luts_for_detector_and_monitor(mod
     )
 
 
-def test_GenericUnwrapWorkflow_with_lut_from_polygons(workflow):
-    # Should be able to compute DetectorData without chopper params
-    _ = workflow.compute(RawDetector[SampleRun])
-
-    workflow[DiskChoppers[SampleRun]] = fakes.psc_choppers()
-
-    detector = workflow.compute(unwrap.WavelengthDetector[SampleRun])
-    assert 'wavelength' in detector.bins.coords
-
-
-@pytest.mark.parametrize("engine", ["tof", "analytical"])
+@pytest.mark.parametrize("mode", ["simulation", "analytical"])
 def test_GenericUnwrapWorkflow_with_lut_from_file(
-    engine, workflow, tmp_path: pytest.TempPathFactory
+    mode, tmp_path: pytest.TempPathFactory, simulation_results_psc_choppers
 ):
-    lut_wf = LookupTableWorkflow(use_simulation=(engine == "tof"))
-    lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    if engine == "tof":
-        lut_wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
+    wf = _make_workflow(mode=mode)
+
+    if mode == "simulation":
+        wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
+
+    wf[unwrap.LtotalRange[SampleRun, snx.NXdetector]] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[Position[snx.NXsource, AnyRun]] = fakes.source_position()
-    lut = lut_wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+    lut = wf.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
     lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    workflow.insert(load_lookup_table_from_file)
-    workflow[unwrap.LookupTableFilename[AnyRun, snx.NXdetector]] = (
+    wf_from_file = _make_workflow(mode="file")
+    wf_from_file[unwrap.LookupTableFilename[SampleRun, snx.NXdetector]] = (
         tmp_path / "lut.h5"
     ).as_posix()
 
-    loaded_lut = workflow.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+    loaded_lut = wf_from_file.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
     assert_identical(lut.array, loaded_lut.array)
     assert_identical(lut.pulse_period, loaded_lut.pulse_period)
     assert lut.pulse_stride == loaded_lut.pulse_stride
@@ -200,22 +173,24 @@ def test_GenericUnwrapWorkflow_with_lut_from_file(
     assert_identical(lut.time_resolution, loaded_lut.time_resolution)
     assert_identical(lut.choppers, loaded_lut.choppers)
 
-    detector = workflow.compute(unwrap.WavelengthDetector[SampleRun])
+    detector = wf_from_file.compute(unwrap.WavelengthDetector[SampleRun])
     assert 'wavelength' in detector.bins.coords
 
 
+@pytest.mark.parametrize("mode", ["simulation", "analytical"])
 def test_GenericUnwrapWorkflow_with_lut_from_file_old_format(
-    workflow, tmp_path: pytest.TempPathFactory
+    mode, tmp_path: pytest.TempPathFactory, simulation_results_psc_choppers
 ):
-    lut_wf = LookupTableWorkflow(use_simulation=False)
-    lut_wf[DiskChoppers[AnyRun]] = fakes.psc_choppers()
-    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 10_000
-    lut_wf[unwrap.LtotalRange] = (
+    wf = _make_workflow(mode=mode)
+
+    if mode == "simulation":
+        wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
+
+    wf[unwrap.LtotalRange[SampleRun, snx.NXdetector]] = (
         sc.scalar(75.0, unit="m"),
         sc.scalar(85.0, unit="m"),
     )
-    lut_wf[Position[snx.NXsource, AnyRun]] = fakes.source_position()
-    lut = lut_wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+    lut = wf.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
     old_lut = sc.DataArray(
         data=lut.array.data,
         coords={
@@ -229,10 +204,11 @@ def test_GenericUnwrapWorkflow_with_lut_from_file_old_format(
     )
     old_lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    workflow[unwrap.LookupTableFilename[AnyRun, snx.NXdetector]] = (
+    wf_from_file = _make_workflow(mode="file")
+    wf_from_file[unwrap.LookupTableFilename[SampleRun, snx.NXdetector]] = (
         tmp_path / "lut.h5"
     ).as_posix()
-    loaded_lut = workflow.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+    loaded_lut = wf_from_file.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
     assert_identical(lut.array, loaded_lut.array)
     assert_identical(lut.pulse_period, loaded_lut.pulse_period)
     assert lut.pulse_stride == loaded_lut.pulse_stride
@@ -240,5 +216,5 @@ def test_GenericUnwrapWorkflow_with_lut_from_file_old_format(
     assert_identical(lut.time_resolution, loaded_lut.time_resolution)
     assert loaded_lut.choppers is None  # No chopper info in old format
 
-    detector = workflow.compute(unwrap.WavelengthDetector[SampleRun])
+    detector = wf_from_file.compute(unwrap.WavelengthDetector[SampleRun])
     assert 'wavelength' in detector.bins.coords
