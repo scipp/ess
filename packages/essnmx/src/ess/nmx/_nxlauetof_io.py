@@ -172,6 +172,15 @@ def _handle_detector_data(
 
 
 def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
+    # We need to import bitshuffle.h5 before opening the file since some files might be
+    # compressed with bitshuffle, and the import is required for the plugin to be
+    # registered in h5py.
+    # We make this a soft dependency as bitshuffle is not available on all platforms.
+    try:
+        import bitshuffle.h5  # noqa: F401
+    except ImportError:
+        pass
+
     with snx.File(file, mode='r') as f:
         with warnings.catch_warnings(action='ignore'):
             # Expecting warnings for loading NXdetectors.

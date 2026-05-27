@@ -282,8 +282,8 @@ def reduction(
         # Binning into 1 bin and getting final tof bin edges later.
         tof_das[detector_name] = results[target_type]
 
-        lut = cur_wf.compute(LookupTable[SampleRun, snx.NXdetector])
-        lut.save_hdf5(f"lut-from-polygons-{detector_name}.h5")
+        # lut = cur_wf.compute(LookupTable[SampleRun, snx.NXdetector])
+        # lut.save_hdf5(f"lut-from-polygons-{detector_name}.h5")
 
     # Make tof bin edges covering all detectors
     t_coord_name = _retrieve_time_bin_coordinate_name(wf_config=config.workflow)

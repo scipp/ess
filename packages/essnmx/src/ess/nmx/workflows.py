@@ -26,6 +26,8 @@ from ess.reduce.unwrap import (
     LookupTableWorkflow,
     LtotalRange,
     NumberOfSimulatedNeutrons,
+    SimulationMaxWavelength,
+    SimulationMinWavelength,
     SimulationResults,
     SimulationSeed,
     SourceBounds,
@@ -39,13 +41,13 @@ from .types import (
     NMXSampleMetadata,
     NMXSourceMetadata,
     TofDetector,
-    TofSimulationMaxWavelength,
-    TofSimulationMinWavelength,
+    # TofSimulationMaxWavelength,
+    # TofSimulationMinWavelength,
 )
 
 default_parameters = {
-    TofSimulationMaxWavelength: sc.scalar(3.6, unit='angstrom'),
-    TofSimulationMinWavelength: sc.scalar(1.8, unit='angstrom'),
+    SimulationMaxWavelength: sc.scalar(3.6, unit='angstrom'),
+    SimulationMinWavelength: sc.scalar(1.8, unit='angstrom'),
     LookupTableRelativeErrorThreshold: {f'detector_panel_{i}': 0.1 for i in range(5)},
 }
 
@@ -324,15 +326,17 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
         )
         # TODO: also add monitor when we have monitors in the NMXWorkflow.
     else:
-        wf = NMXWorkflow(mode="analytical")
+        wf = NMXWorkflow(mode="simulation")
         wmax = sc.scalar(config.max_wavelength, unit='angstrom')
         wmin = sc.scalar(config.min_wavelength, unit='angstrom')
-        wf[SourceBounds] = SourceBounds(
-            time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
-            wavelength=(wmin, wmax),
-        )
+        wf[SimulationMaxWavelength] = wmax
+        wf[SimulationMinWavelength] = wmin
+        # wf[SourceBounds] = SourceBounds(
+        #     time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+        #     wavelength=(wmin, wmax),
+        # )
 
-        # wf[SimulationSeed] = config.tof_simulation_seed
+        wf[SimulationSeed] = config.tof_simulation_seed
         # ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
         # ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
         # wf[LtotalRange] = LtotalRange((ltotal_min, ltotal_max))

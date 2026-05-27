@@ -177,6 +177,14 @@ SimulationFacility = NewType("SimulationFacility", str)
 Facility where the experiment is performed, e.g., 'ess'.
 """
 
+SimulationMinWavelength = NewType("SimulationMinWavelength", sc.Variable | None)
+"""Minimum wavelength of the neutrons in the simulation used to create the lookup table.
+"""
+
+SimulationMaxWavelength = NewType("SimulationMaxWavelength", sc.Variable | None)
+"""Maximum wavelength of the neutrons in the simulation used to create the lookup table.
+"""
+
 
 @dataclass
 class SourceBounds:
@@ -462,6 +470,8 @@ def simulate_chopper_cascade_using_tof(
     pulse_stride: PulseStride[RunType],
     seed: SimulationSeed,
     facility: SimulationFacility,
+    wmin: SimulationMinWavelength,
+    wmax: SimulationMaxWavelength,
 ) -> SimulationResults[RunType]:
     """
     Simulate a pulse of neutrons propagating through a chopper cascade using the
@@ -485,6 +495,10 @@ def simulate_chopper_cascade_using_tof(
         Seed for the random number generator used in the simulation.
     facility:
         Facility where the experiment is performed.
+    wmin:
+        Minimum wavelength of the neutrons in the simulation.
+    wmax:
+        Maximum wavelength of the neutrons in the simulation.
     """
     import tof
 
@@ -497,7 +511,12 @@ def simulate_chopper_cascade_using_tof(
         tof_choppers.append(chop)
 
     source = tof.Source(
-        facility=facility, neutrons=neutrons, pulses=pulse_stride, seed=seed
+        facility=facility,
+        neutrons=neutrons,
+        pulses=pulse_stride,
+        seed=seed,
+        wmin=wmin,
+        wmax=wmax,
     )
     sim_readings = {"source": _to_component_reading(source)}
     if not tof_choppers:
@@ -926,6 +945,8 @@ def default_parameters(
                 NumberOfSimulatedNeutrons: 1_000_000,
                 SimulationSeed: None,
                 SimulationFacility: 'ess',
+                SimulationMinWavelength: None,
+                SimulationMaxWavelength: None,
             }
         )
     return params
