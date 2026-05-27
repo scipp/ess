@@ -19,6 +19,7 @@ from ess.reduce.nexus.types import (
 )
 from ess.reduce.unwrap import (
     BeamlineComponentReading,
+    DiskChoppers,
     GenericUnwrapWorkflow,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
@@ -318,7 +319,10 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
     # wf = NMXWorkflow()
     if config.lookup_table_file_path is not None:
         wf = NMXWorkflow(mode="file")
-        wf[LookupTableFilename] = config.lookup_table_file_path
+        wf[LookupTableFilename[SampleRun, snx.NXdetector]] = (
+            config.lookup_table_file_path
+        )
+        # TODO: also add monitor when we have monitors in the NMXWorkflow.
     else:
         wf = NMXWorkflow(mode="analytical")
         wmax = sc.scalar(config.max_wavelength, unit='angstrom')
@@ -332,6 +336,9 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
         # ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
         # ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
         # wf[LtotalRange] = LtotalRange((ltotal_min, ltotal_max))
+
+    if not config.use_choppers_from_file:
+        wf[DiskChoppers[SampleRun]] = {}
 
     return wf
 

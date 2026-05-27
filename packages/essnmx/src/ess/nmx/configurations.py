@@ -155,6 +155,12 @@ class WorkflowConfig(BaseModel):
         description="Maximum wavelength for wavelength lookup table in Angstrom.",
         default=3.6,
     )
+    use_choppers_from_file: bool = Field(
+        title="Use Chopper Parameters from File",
+        description="Whether to use chopper parameters from the input file. "
+        "If False, no choppers will be used when computing the wavelength lookup table.",
+        default=False,
+    )
     # tof_simulation_min_ltotal: float = Field(
     #     title="TOF Simulation Minimum Ltotal",
     #     description="Minimum total flight path for TOF simulation in meters.",
