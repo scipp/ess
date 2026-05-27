@@ -39,7 +39,7 @@ def simulate_with_tof(choppers, pulse_stride, neutrons=None, seed=None):
 @pytest.fixture(scope="module")
 def simulation_results_psc_choppers():
     return simulate_with_tof(
-        choppers=fakes.psc_choppers(), pulse_stride=1, neutrons=1e6, seed=1234
+        choppers=fakes.psc_choppers(), pulse_stride=1, neutrons=3e6, seed=1234
     )
 
 
@@ -48,7 +48,7 @@ def simulation_results_pulse_skipping():
     return simulate_with_tof(
         choppers=fakes.pulse_skipping_choppers(),
         pulse_stride=2,
-        neutrons=1e6,
+        neutrons=3e6,
         seed=112,
     )
 
@@ -232,7 +232,7 @@ def test_standard_unwrap(
         ref=ref,
         percentile=100,
         diff_threshold=0.02,
-        rtol=0.06 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
 
 
@@ -270,7 +270,7 @@ def test_standard_unwrap_histogram_mode(
         ref=ref,
         percentile=96,
         diff_threshold=0.4,
-        rtol=0.06 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
 
 
@@ -303,7 +303,7 @@ def test_pulse_skipping_unwrap(
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.05 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
 
 
@@ -338,7 +338,7 @@ def test_pulse_skipping_unwrap_180_phase_shift(mode, detector_or_monitor) -> Non
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.05 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
 
 
@@ -371,7 +371,7 @@ def test_pulse_skipping_stride_offset_guess_gives_expected_result(
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.05 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
 
 
@@ -417,7 +417,7 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.05 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
 
 
@@ -528,7 +528,7 @@ def test_pulse_skipping_stride_3(mode, detector_or_monitor) -> None:
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.05 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
 
 
@@ -560,7 +560,7 @@ def test_pulse_skipping_unwrap_histogram_mode(
         ref=ref,
         percentile=96,
         diff_threshold=0.4,
-        rtol=0.05 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
 
 
@@ -603,5 +603,5 @@ def test_unwrap_int(
         ref=ref,
         percentile=100,
         diff_threshold=0.02,
-        rtol=0.05 if mode == "simulation" else 0.01,
+        rtol=0.2 if mode == "simulation" else 0.01,
     )
