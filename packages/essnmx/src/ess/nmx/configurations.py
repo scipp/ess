@@ -140,36 +140,36 @@ class WorkflowConfig(BaseModel):
         "time-of-flight. If None, the lookup table will be computed on-the-fly.",
         default=None,
     )
-    tof_simulation_num_neutrons: int = Field(
-        title="Number of Neutrons for TOF Simulation",
-        description="Number of neutrons to simulate for TOF lookup table calculation.",
-        default=1_000_000,
-    )
-    tof_simulation_min_wavelength: float = Field(
-        title="TOF Simulation Minimum Wavelength",
-        description="Minimum wavelength for TOF simulation in Angstrom.",
+    # tof_simulation_num_neutrons: int = Field(
+    #     title="Number of Neutrons for TOF Simulation",
+    #     description="Number of neutrons to simulate for TOF lookup table calculation.",
+    #     default=1_000_000,
+    # )
+    min_wavelength: float = Field(
+        title="Minimum wavelength of neutrons for wavelength lookup table",
+        description="Minimum wavelength for wavelength lookup table in Angstrom.",
         default=1.8,
     )
-    tof_simulation_max_wavelength: float = Field(
-        title="TOF Simulation Maximum Wavelength",
-        description="Maximum wavelength for TOF simulation in Angstrom.",
+    max_wavelength: float = Field(
+        title="Maximum wavelength of neutrons for wavelength lookup table",
+        description="Maximum wavelength for wavelength lookup table in Angstrom.",
         default=3.6,
     )
-    tof_simulation_min_ltotal: float = Field(
-        title="TOF Simulation Minimum Ltotal",
-        description="Minimum total flight path for TOF simulation in meters.",
-        default=150.0,
-    )
-    tof_simulation_max_ltotal: float = Field(
-        title="TOF Simulation Maximum Ltotal",
-        description="Maximum total flight path for TOF simulation in meters.",
-        default=170.0,
-    )
-    tof_simulation_seed: int = Field(
-        title="TOF Simulation Seed",
-        description="Random seed for TOF simulation.",
-        default=42,  # No reason.
-    )
+    # tof_simulation_min_ltotal: float = Field(
+    #     title="TOF Simulation Minimum Ltotal",
+    #     description="Minimum total flight path for TOF simulation in meters.",
+    #     default=150.0,
+    # )
+    # tof_simulation_max_ltotal: float = Field(
+    #     title="TOF Simulation Maximum Ltotal",
+    #     description="Maximum total flight path for TOF simulation in meters.",
+    #     default=170.0,
+    # )
+    # tof_simulation_seed: int = Field(
+    #     title="TOF Simulation Seed",
+    #     description="Random seed for TOF simulation.",
+    #     default=42,  # No reason.
+    # )
     result_time_bin_unit: TimeBinUnit = Field(
         title="Output Time Bin Unit",
         description="Time bin unit of the histogram after reduction. "

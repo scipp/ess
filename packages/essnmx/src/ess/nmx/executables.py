@@ -252,11 +252,11 @@ def reduction(
     # Insert parameters and cache intermediate results
     base_wf[Filename[SampleRun]] = input_file_path
 
-    if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
-        # We cache the lookup table only if we need to calculate time-of-flight
-        # coordinates. If `event_time_offset` was requested,
-        # we do not have to calculate the lookup table at all.
-        base_wf[LookupTable] = base_wf.compute(LookupTable)
+    # if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
+    #     # We cache the lookup table only if we need to calculate time-of-flight
+    #     # coordinates. If `event_time_offset` was requested,
+    #     # we do not have to calculate the lookup table at all.
+    #     base_wf[LookupTable] = base_wf.compute(LookupTable)
 
     metadatas = base_wf.compute((NMXSampleMetadata, NMXSourceMetadata))
 
