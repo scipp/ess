@@ -929,7 +929,7 @@ def default_parameters(
         {
             PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
             DistanceResolution: sc.scalar(0.1, unit="m"),
-            TimeResolution: sc.scalar(50.0, unit='us'),
+            TimeResolution: sc.scalar(250.0, unit='us'),
             SourceBounds: SourceBounds(
                 time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
                 wavelength=(

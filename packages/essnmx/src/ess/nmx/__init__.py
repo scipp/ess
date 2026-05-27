@@ -12,5 +12,6 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 from .mcstas import NMXMcStasWorkflow
+from .workflows import NMXWorkflow
 
-__all__ = ["NMXMcStasWorkflow"]
+__all__ = ["NMXMcStasWorkflow", "NMXWorkflow"]
