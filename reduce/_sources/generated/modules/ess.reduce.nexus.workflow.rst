@@ -44,6 +44,7 @@ ess.reduce.nexus.workflow
       load_nexus_component
       load_nexus_data
       load_nexus_sample
+      load_proton_charge
       load_source_metadata_from_nexus
       no_detector_position_offset
       no_monitor_position_offset
@@ -51,6 +52,7 @@ ess.reduce.nexus.workflow
       nx_class_for_detector
       nx_class_for_disk_chopper
       nx_class_for_monitor
+      nx_class_for_production_info
       nx_class_for_sample
       nx_class_for_source
       parse_disk_choppers

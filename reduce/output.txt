@@ -1,0 +1,185 @@
+Results of doctest builder run on 2026-05-27 14:58:31
+=====================================================
+
+Document: generated/modules/ess.reduce.nexus.types.DetectorPositionOffset
+-------------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.nexus.types.EmptyDetector
+----------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.nexus.types.EmptyMonitor
+---------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.nexus.types.MonitorPositionOffset
+------------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.nexus.types.NeXusData
+------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.nexus.types.Position
+-----------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.nexus.types.ProtonCharge
+---------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.nexus.types.RawDetector
+--------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.nexus.types.RawMonitor
+-------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.base.CellInBeamLog
+----------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.base.CellSpinLog
+--------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3AnalyzerTransmissionFractionIncomingPolarized
+--------------------------------------------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3CellLength
+---------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3CellPressure
+-----------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3CellTemperature
+--------------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3CellTransmissionFractionIncomingUnpolarized
+------------------------------------------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3DirectBeam
+---------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3FillingTime
+----------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3Opacity0
+-------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.He3TransmissionEmptyGlass
+---------------------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.he3.ReducedDirectBeamData
+-----------------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.polarization.types.ReducedSampleDataBySpinChannel
+----------------------------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Doctest summary
+===============
+   79 tests
+    0 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code
