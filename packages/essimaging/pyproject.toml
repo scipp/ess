@@ -46,7 +46,7 @@ dependencies = [
 test = [
     "pytest>=8.0",
     "pooch>=1.5",
-    "tof>=25.3.0",
+    "tof>=26.3.0",
     "scitiff>=24.6.0",
 ]
 docs = [
