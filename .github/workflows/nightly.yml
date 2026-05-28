@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: "30 1 * * 1-5"
 
+permissions:
+  contents: read
+
 env:
   PIXI_FROZEN: true
   PIXI_NO_INSTALL: true
@@ -154,3 +157,32 @@ jobs:
       - name: Test with latest dependencies
         working-directory: packages/${{ matrix.package }}
         run: uv run --extra=test --resolution=highest pytest
+
+  publish-badges:
+    name: Publish nightly badges
+    needs:
+      - test
+      - lower-bound
+      - latest-dependencies
+    if: ${{ always() && github.ref_name == github.event.repository.default_branch }}
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: write
+    concurrency:
+      group: nightly-badges-${{ github.repository }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Generate badge SVGs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          python3 .github/scripts/generate-nightly-badges.py
+          --output-dir badge_site/badges/nightly
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: badge_site/badges/nightly
+          target-folder: badges/nightly
+          clean: false
