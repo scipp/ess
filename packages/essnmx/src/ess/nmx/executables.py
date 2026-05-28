@@ -396,7 +396,6 @@ def save_auxiliary_output(
     # Export TOF 1D distribution into entry/aux
     if (
         output_config
-        and isinstance(tof_histogram, sc.DataArray)
         and not output_config.skip_file_output
         and not aux_config.no_tof_1d_in_file
     ):
