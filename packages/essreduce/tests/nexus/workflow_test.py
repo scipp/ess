@@ -13,9 +13,7 @@ from scippneutron.metadata import RadiationProbe, SourceType
 
 from ess.reduce.nexus import compute_component_position, load_from_path, workflow
 from ess.reduce.nexus.types import (
-    BackgroundRun,
     Beamline,
-    EmptyBeamRun,
     EmptyDetector,
     Filename,
     Measurement,
@@ -39,6 +37,9 @@ from ess.reduce.nexus.workflow import (
     LoadDetectorWorkflow,
     LoadMonitorWorkflow,
 )
+
+BackgroundRun = NewType('BackgroundRun', int)
+EmptyBeamRun = NewType('EmptyBeamRun', int)
 
 Monitor1 = NewType('Monitor1', int)
 Monitor2 = NewType('Monitor2', int)

@@ -58,6 +58,11 @@ This can be used in cases where it makes no sense to use an 'actual' run type
 like ``SampleRun`` or ``BackgroundRun``.
 """
 
+SampleRun = NewType('SampleRun', int)
+"""Sample run."""
+
+# The following are legacy types and will be removed in the future.
+# Use the types defined in technique packages instead.
 BackgroundRun = NewType('BackgroundRun', int)
 """Background run such as a run with only a solvent which the sample is placed in."""
 EmptyBeamRun = NewType('EmptyBeamRun', int)
@@ -66,8 +71,6 @@ Run with empty sample holder, sometimes called 'direct run'.
 
 It is used for reading the data from the transmission monitor.
 """
-SampleRun = NewType('SampleRun', int)
-"""Sample run."""
 VanadiumRun = NewType('VanadiumRun', int)
 """Vanadium run."""
 
@@ -104,12 +107,6 @@ ESSreduce provides the following but custom types can be used:
 """
 
 # 1.2  Monitor types
-IncidentMonitor = NewType('IncidentMonitor', int)
-"""Incident monitor"""
-TransmissionMonitor = NewType('TransmissionMonitor', int)
-"""Transmission monitor"""
-CaveMonitor = NewType('CaveMonitor', int)
-"""A monitor located in the instrument cave"""
 MonitorType = TypeVar('MonitorType')
 """TypeVar for specifying what monitor some data belongs to.
 
@@ -117,6 +114,16 @@ This type must be constrained when used in a Sciline pipeline.
 E.g., by passing ``monitor_types`` to :class:`ess.reduce.nexus.GenericNeXusWorkflow`.
 """
 
+# The following are legacy types and will be removed in the future.
+# Use the types defined in technique packages instead.
+IncidentMonitor = NewType('IncidentMonitor', int)
+"""Incident monitor"""
+TransmissionMonitor = NewType('TransmissionMonitor', int)
+"""Transmission monitor"""
+CaveMonitor = NewType('CaveMonitor', int)
+"""A monitor located in the instrument cave"""
+
+# 1.3 Other component types
 Component = TypeVar('Component')
 """A beamline component in a NeXus file."""
 COMPONENT_CONSTRAINTS = (
