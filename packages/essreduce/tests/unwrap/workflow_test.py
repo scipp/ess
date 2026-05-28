@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from typing import NewType
+
 import numpy as np
 import pytest
 import sciline
@@ -12,7 +14,6 @@ from ess.reduce.nexus.types import (
     DiskChoppers,
     EmptyDetector,
     EmptyMonitor,
-    FrameMonitor0,
     NeXusData,
     NeXusDetectorName,
     NeXusName,
@@ -26,6 +27,8 @@ from ess.reduce.unwrap import (
 )
 
 sl = pytest.importorskip("sciline")
+
+Monitor0 = NewType("Monitor0", int)
 
 
 def _make_workflow(wavelength_from) -> sciline.Pipeline:
@@ -78,19 +81,19 @@ def _make_workflow(wavelength_from) -> sciline.Pipeline:
 
     wf = GenericUnwrapWorkflow(
         run_types=[SampleRun],
-        monitor_types=[FrameMonitor0],
+        monitor_types=[Monitor0],
         wavelength_from=wavelength_from,
     )
     wf[NeXusDetectorName] = "detector"
-    wf[NeXusName[FrameMonitor0]] = "monitor"
+    wf[NeXusName[Monitor0]] = "monitor"
     wf[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
         'monitor': np.inf,
     }
     wf[EmptyDetector[SampleRun]] = detector_geometry
     wf[NeXusData[snx.NXdetector, SampleRun]] = detector_data
-    wf[EmptyMonitor[SampleRun, FrameMonitor0]] = monitor_geometry
-    wf[NeXusData[FrameMonitor0, SampleRun]] = monitor_data
+    wf[EmptyMonitor[SampleRun, Monitor0]] = monitor_geometry
+    wf[NeXusData[Monitor0, SampleRun]] = monitor_data
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
     wf[Position[snx.NXsource, SampleRun]] = fakes.source_position()
     wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
@@ -123,7 +126,7 @@ def test_GenericUnwrapWorkflow_computes_wavelength(
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     if detector_or_monitor == "monitor":
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
         assert 'wavelength' in wavs.coords
     else:
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
@@ -139,7 +142,7 @@ def test_GenericUnwrapWorkflow_makes_different_luts_for_detector_and_monitor(
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     det_table = wf.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
-    mon_table = wf.compute(unwrap.LookupTable[SampleRun, FrameMonitor0])
+    mon_table = wf.compute(unwrap.LookupTable[SampleRun, Monitor0])
 
     assert det_table.array.sizes['distance'] != mon_table.array.sizes['distance']
     assert (

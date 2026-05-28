@@ -103,20 +103,11 @@ ESSreduce provides the following but custom types can be used:
 - :class:`VanadiumRun`
 """
 
-
 # 1.2  Monitor types
 IncidentMonitor = NewType('IncidentMonitor', int)
 """Incident monitor"""
 TransmissionMonitor = NewType('TransmissionMonitor', int)
 """Transmission monitor"""
-FrameMonitor0 = NewType('FrameMonitor0', int)
-"""Frame monitor number 0"""
-FrameMonitor1 = NewType('FrameMonitor1', int)
-"""Frame monitor number 1"""
-FrameMonitor2 = NewType('FrameMonitor2', int)
-"""Frame monitor number 2"""
-FrameMonitor3 = NewType('FrameMonitor3', int)
-"""Frame monitor number 3"""
 CaveMonitor = NewType('CaveMonitor', int)
 """A monitor located in the instrument cave"""
 MonitorType = TypeVar('MonitorType')
@@ -124,18 +115,7 @@ MonitorType = TypeVar('MonitorType')
 
 This type must be constrained when used in a Sciline pipeline.
 E.g., by passing ``monitor_types`` to :class:`ess.reduce.nexus.GenericNeXusWorkflow`.
-
-ESSreduce provides the following but custom types can be used:
-
-- :class:`IncidentMonitor`
-- :class:`TransmissionMonitor`
-- :class:`FrameMonitor0`
-- :class:`FrameMonitor1`
-- :class:`FrameMonitor2`
-- :class:`FrameMonitor3`
-- :class:`CaveMonitor`
 """
-
 
 Component = TypeVar('Component')
 """A beamline component in a NeXus file."""

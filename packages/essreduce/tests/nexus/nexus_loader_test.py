@@ -5,7 +5,7 @@ import sys
 from contextlib import contextmanager
 from io import BytesIO
 from pathlib import Path
-from typing import Any
+from typing import Any, NewType
 
 import h5py as h5
 import numpy as np
@@ -19,6 +19,8 @@ from ess.reduce.nexus._nexus_loader import NoLockingIfNeeded
 from ess.reduce.nexus.types import FilePath, NeXusLocationSpec
 
 year_zero = sc.datetime('1970-01-01T00:00:00')
+
+Monitor1 = NewType('Monitor1', int)
 
 
 def _event_data_components() -> sc.DataGroup:
@@ -282,7 +284,7 @@ def test_load_data_loads_expected_event_data(nexus_file, expected_bank12):
 def test_load_data_loads_expected_histogram_data(nexus_file, expected_monitor):
     histogram = nexus.load_data(
         nexus_file,
-        component_name=nexus.types.NeXusName[nexus.types.CaveMonitor]('monitor'),
+        component_name=nexus.types.NeXusName[Monitor1]('monitor'),
     )
     sc.testing.assert_identical(histogram, expected_monitor)
 
@@ -514,7 +516,7 @@ def test_load_monitor(nexus_file, expected_monitor, entry_name, selection):
     loc = NeXusLocationSpec(
         filename=nexus_file,
         entry_name=entry_name,
-        component_name=nexus.types.NeXusName[nexus.types.FrameMonitor1]('monitor'),
+        component_name=nexus.types.NeXusName[Monitor1]('monitor'),
     )
     if selection is not None:
         loc.selection = selection

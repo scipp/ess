@@ -1,21 +1,25 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from typing import NewType
+
 import pytest
 import scipp as sc
 import scippnexus as snx
 from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
-from ess.reduce.nexus.types import AnyRun, FrameMonitor0, Position
+from ess.reduce.nexus.types import AnyRun, Position
 from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, SourceBounds
 
 sl = pytest.importorskip("sciline")
+
+Monitor0 = NewType("Monitor0", int)
 
 
 def _make_workflow(wavelength_from: str = "analytical") -> sl.Pipeline:
     return GenericUnwrapWorkflow(
         run_types=[AnyRun],
-        monitor_types=[FrameMonitor0],
+        monitor_types=[Monitor0],
         wavelength_from=wavelength_from,
     )
 
@@ -36,7 +40,7 @@ def test_lut_workflow_computes_table(detector_or_monitor, wavelength_from):
     dres = sc.scalar(0.1, unit='m')
     tres = sc.scalar(333.0, unit='us')
 
-    Comp = snx.NXdetector if detector_or_monitor == "detector" else FrameMonitor0
+    Comp = snx.NXdetector if detector_or_monitor == "detector" else Monitor0
 
     wf[unwrap.LtotalRange[AnyRun, Comp]] = lmin, lmax
     wf[unwrap.DistanceResolution] = dres
@@ -70,7 +74,7 @@ def test_lut_workflow_pulse_skipping(detector_or_monitor, wavelength_from):
     dres = sc.scalar(0.1, unit='m')
     tres = sc.scalar(250.0, unit='us')
 
-    Comp = snx.NXdetector if detector_or_monitor == "detector" else FrameMonitor0
+    Comp = snx.NXdetector if detector_or_monitor == "detector" else Monitor0
 
     wf[unwrap.LtotalRange[AnyRun, Comp]] = lmin, lmax
     wf[unwrap.DistanceResolution] = dres
@@ -180,7 +184,7 @@ def test_lut_workflow_computes_table_with_choppers(
         wf[unwrap.SimulationSeed] = 64
     wf[unwrap.PulseStride[AnyRun]] = 1
 
-    Comp = snx.NXdetector if detector_or_monitor == "detector" else FrameMonitor0
+    Comp = snx.NXdetector if detector_or_monitor == "detector" else Monitor0
 
     wf[unwrap.LtotalRange[AnyRun, Comp]] = (
         sc.scalar(35.0, unit='m'),
@@ -287,7 +291,9 @@ def test_lut_workflow_raises_for_distance_before_source(wavelength_from):
 @pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
 def test_lut_workflow_computes_table_using_alias(detector_or_monitor, wavelength_from):
     # LookupTableWorkflow is an old (deprecated) alias for GenericUnwrapWorkflow
-    wf = LookupTableWorkflow(use_simulation=(wavelength_from == "simulation"))
+    wf = LookupTableWorkflow(
+        use_simulation=(wavelength_from == "simulation"), monitor_types=[Monitor0]
+    )
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
@@ -300,7 +306,7 @@ def test_lut_workflow_computes_table_using_alias(detector_or_monitor, wavelength
     dres = sc.scalar(0.1, unit='m')
     tres = sc.scalar(333.0, unit='us')
 
-    Comp = snx.NXdetector if detector_or_monitor == "detector" else FrameMonitor0
+    Comp = snx.NXdetector if detector_or_monitor == "detector" else Monitor0
 
     wf[unwrap.LtotalRange[AnyRun, Comp]] = lmin, lmax
     wf[unwrap.DistanceResolution] = dres

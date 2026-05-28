@@ -5,7 +5,7 @@ from collections.abc import Iterable
 import sciline
 
 from ..nexus import GenericNeXusWorkflow
-from ..nexus.types import AnyRun, FrameMonitor0
+from ..nexus.types import AnyRun
 from . import WavelengthLutMode, lut, to_wavelength
 
 
@@ -95,7 +95,7 @@ def LookupTableWorkflow(
     if run_types is None:
         run_types = [AnyRun]
     if monitor_types is None:
-        monitor_types = [FrameMonitor0]
+        monitor_types = []
 
     return GenericUnwrapWorkflow(
         run_types=run_types,
