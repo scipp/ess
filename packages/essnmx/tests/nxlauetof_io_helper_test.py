@@ -7,7 +7,11 @@ import pytest
 from scipp.testing.assertions import assert_allclose, assert_identical
 
 from ess.nmx._nxlauetof_io import load_essnmx_nxlauetof
-from ess.nmx.configurations import InputConfig, OutputConfig, ReductionConfig
+from ess.nmx.configurations import (
+    InputConfig,
+    OutputConfig,
+    ReductionConfig,
+)
 from ess.nmx.executables import reduction
 from ess.nmx.types import Compression
 

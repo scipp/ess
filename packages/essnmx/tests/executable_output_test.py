@@ -15,6 +15,9 @@ import bitshuffle.h5  # noqa: F401
 import h5py
 import numpy as np
 import pytest
+import scipp as sc
+import scippnexus as snx
+from scipp.testing import assert_identical
 
 from ess.nmx.configurations import (
     InputConfig,
@@ -94,6 +97,7 @@ def test_compare_output_file_with_frozen(tmp_path: pathlib.Path):
             output_file=output_file.as_posix(),
             compression=Compression.NONE,
             skip_file_output=False,
+            # Auxiliary output does not need to be part of the regression tests.
         ),
     )
     with pytest.warns(RuntimeWarning, match="No crystal rotation*"):
@@ -102,8 +106,44 @@ def test_compare_output_file_with_frozen(tmp_path: pathlib.Path):
     entry_path = pathlib.Path('/entry')
     excluded_paths = (
         entry_path / 'reducer/program',  # version should be different
+        entry_path / 'aux',  # downstream sw must not depend on the auxiliary output
     )
     ref_file_path = get_small_nmx_reduced()
     with h5py.File(output_file) as cur_file:
         with h5py.File(ref_file_path) as reference_file:
             assert_h5obj_equal(reference_file, cur_file, excluded_paths=excluded_paths)
+
+
+def test_auxiliary_output(tmp_path: pathlib.Path):
+    """Test that the executable runs and returns the expected output."""
+
+    # Make a new output file from current implementation.
+    input_file = get_small_nmx_nexus()
+    output_file = tmp_path / "scipp_output_with_auxiliary.h5"
+    assert not output_file.exists()
+    config = ReductionConfig(
+        inputs=InputConfig(input_file=[input_file.as_posix()]),
+        workflow=WorkflowConfig(),
+        output=OutputConfig(
+            output_file=output_file.as_posix(),
+            compression=Compression.NONE,
+            skip_file_output=False,
+        ),
+    )
+    with pytest.warns(RuntimeWarning, match="No crystal rotation*"):
+        results = reduction(config=config)
+
+    # Test if the PNG file is generated.
+    expected_png_file_path = (
+        tmp_path / "scipp_output_with_auxiliary" / "essnmx-reduce-tof-1d.png"
+    )
+    assert expected_png_file_path.exists()
+    tof1d_path = "/entry/aux/tof-1d"
+    tof1d_saved: sc.Variable = snx.load(filename=output_file, root=tof1d_path)
+    tof1d_computed = sc.reduce(
+        det_res.data.sum(["x_pixel_offset", "y_pixel_offset"])
+        for det_res in results.instrument.detectors.values()
+        if isinstance(det_res.data, sc.DataArray)
+    ).sum()
+
+    assert_identical(tof1d_saved, tof1d_computed)
