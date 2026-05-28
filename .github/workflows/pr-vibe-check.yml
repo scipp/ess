@@ -28,10 +28,6 @@ jobs:
   check-pr:
     name: Check Labels
     runs-on: ubuntu-slim
-    permissions:
-      # Read access for `actions/checkout` and `gh pr view`.
-      contents: read
-      pull-requests: read
     outputs:
       all_labels: ${{ steps.all-labels.outputs.all_labels }}
       new_labels: ${{ steps.new-labels.outputs.new_labels }}
@@ -60,18 +56,12 @@ jobs:
         id: new-labels
         env:
            all_labels: ${{ steps.all-labels.outputs.all_labels }}
-           GH_TOKEN: ${{ github.token }}
         run: |
-          # Query the labels currently on the PR rather than reading them from
-          # the event payload. The payload is a snapshot taken when the event
-          # was created, so labels the author adds right after opening the PR
-          # (a common case) would be missing from it and wrongly reported as
-          # newly added by the bot. See issue #584.
-          EXISTING_LABELS="$(gh pr view ${PR_NUM} --json labels --jq '.labels[].name')";
+          EXISTING_LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}';
           new_labels=();
           for label in ${all_labels[@]}; do
-            if grep -qxF "${label}" <<< "$EXISTING_LABELS"; then
-              echo "${label} is already added to the current PR.";
+            if [[ "$EXISTING_LABELS" == *"${label}"* ]]; then
+          	  echo "${label} is already added to the current PR.";
             else
               echo "Found a new label to be added: ${label}";
               new_labels+=("${label}");
