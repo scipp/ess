@@ -24,7 +24,6 @@ DetectorPositionOffset = reduce_t.DetectorPositionOffset
 EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
 GravityVector = reduce_t.GravityVector
-Incident = reduce_t.IncidentMonitor
 RawMonitor = reduce_t.RawMonitor
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 NeXusMonitorName = reduce_t.NeXusName
@@ -32,7 +31,6 @@ NeXusComponent = reduce_t.NeXusComponent
 NeXusTransformation = reduce_t.NeXusTransformation
 Position = reduce_t.Position
 SampleRun = reduce_t.SampleRun
-Transmission = reduce_t.TransmissionMonitor
 TransmissionRun = reduce_t.TransmissionRun
 
 LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
@@ -43,6 +41,9 @@ WavelengthDetector = unwrap_t.WavelengthDetector
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
+
+Incident = NewType('Incident', int)
+Transmission = NewType('Transmission', int)
 
 MonitorType = TypeVar('MonitorType', Incident, Transmission)
 RunType = reduce_t.RunType
