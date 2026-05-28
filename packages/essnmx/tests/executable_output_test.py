@@ -20,7 +20,6 @@ import scippnexus as snx
 from scipp.testing import assert_identical
 
 from ess.nmx.configurations import (
-    AuxiliaryOutputConfig,
     InputConfig,
     OutputConfig,
     ReductionConfig,
@@ -107,6 +106,7 @@ def test_compare_output_file_with_frozen(tmp_path: pathlib.Path):
     entry_path = pathlib.Path('/entry')
     excluded_paths = (
         entry_path / 'reducer/program',  # version should be different
+        entry_path / 'aux',  # downstream sw must not depend on the auxiliary output
     )
     ref_file_path = get_small_nmx_reduced()
     with h5py.File(output_file) as cur_file:
@@ -129,7 +129,6 @@ def test_auxiliary_output(tmp_path: pathlib.Path):
             compression=Compression.NONE,
             skip_file_output=False,
         ),
-        aux=AuxiliaryOutputConfig(no_png=False, no_tof_1d_in_file=False),
     )
     with pytest.warns(RuntimeWarning, match="No crystal rotation*"):
         results = reduction(config=config)
@@ -148,30 +147,3 @@ def test_auxiliary_output(tmp_path: pathlib.Path):
     ).sum()
 
     assert_identical(tof1d_saved, tof1d_computed)
-
-
-def test_auxiliary_output_dir_not_made_if_not_needed(tmp_path: pathlib.Path):
-    """Test that the executable runs and returns the expected output."""
-
-    # Make a new output file from current implementation.
-    input_file = get_small_nmx_nexus()
-    output_file = tmp_path / "scipp_output_with_auxiliary.h5"
-    assert not output_file.exists()
-    config = ReductionConfig(
-        inputs=InputConfig(input_file=[input_file.as_posix()]),
-        workflow=WorkflowConfig(nbins=2),
-        output=OutputConfig(
-            output_file=output_file.as_posix(),
-            compression=Compression.NONE,
-            skip_file_output=False,
-        ),
-        aux=AuxiliaryOutputConfig(no_png=True, no_tof_1d_in_file=True),
-    )
-    with pytest.warns(RuntimeWarning, match="No crystal rotation*"):
-        _ = reduction(config=config)
-
-    assert config.aux.no_axilaries
-    assert output_file.exists()
-    assert len(tuple(output_file.parent.iterdir())) == 1
-    with h5py.File(output_file) as f:
-        assert "entry/aux" not in f

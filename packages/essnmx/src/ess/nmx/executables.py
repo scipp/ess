@@ -238,18 +238,11 @@ def reduction(
     # Check the file output configuration before we start heavy computation.
     if not config.output.skip_file_output:
         _check_file(config.output.output_file, config.output.overwrite)
-    elif not (config.output.skip_file_output or config.aux.no_axilaries):
         config.aux.check_output_dir()
 
     display = _retrieve_display(logger, display)
     input_file_path = _retrieve_input_file(config.inputs.input_file).resolve()
     display(f"Input file: {input_file_path}")
-
-    output_file_path = pathlib.Path(config.output.output_file).resolve()
-    display(f"Output file: {output_file_path}")
-
-    auxilary_output_dir = config.aux.build_target_dir(output_file_path.as_posix())
-    display(f"Auxiliary output dir: {auxilary_output_dir}")
 
     detector_names = select_detector_names(detector_ids=config.inputs.detector_ids)
 
@@ -329,20 +322,27 @@ def reduction(
         results.lookup_table = base_wf.compute(LookupTable)
 
     if not config.output.skip_file_output:
-        save_results(results=results, output_config=config.output)
-        if not config.aux.no_axilaries:
-            save_auxiliary_output(
-                results=results,
-                output_config=config.output,
-                aux_config=config.aux,
-                output_dir=auxilary_output_dir,
-                display=display,
-            )
+        save_results(
+            results=results, output_config=config.output, aux_config=config.aux
+        )
 
     return results
 
 
-def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
+def save_results(
+    *,
+    results: NMXLauetof,
+    output_config: OutputConfig,
+    aux_config: AuxiliaryOutputConfig | None = None,
+    display: Callable | None = None,
+) -> None:
+    aux_config = aux_config or AuxiliaryOutputConfig()
+    output_file_path = pathlib.Path(output_config.output_file).resolve()
+    aux_output_dir = aux_config.build_target_dir(output_file_path.as_posix())
+    if display:
+        display(f"Output file: {output_file_path}")
+        display(f"Auxiliary output dir: {aux_output_dir}")
+
     # Validate if results have expected fields
     export_static_metadata_as_nxlauetof(
         sample_metadata=results.sample,
@@ -370,6 +370,14 @@ def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
         else:
             raise ValueError(f"Detector counts histogram missing in {detector_name}")
 
+    save_auxiliary_output(
+        results=results,
+        output_config=output_config,
+        aux_config=aux_config,
+        output_dir=aux_output_dir,
+        display=display,
+    )
+
 
 def save_auxiliary_output(
     *,
@@ -394,11 +402,7 @@ def save_auxiliary_output(
     ).sum()
 
     # Export TOF 1D distribution into entry/aux
-    if (
-        output_config
-        and not output_config.skip_file_output
-        and not aux_config.no_tof_1d_in_file
-    ):
+    if output_config and not output_config.skip_file_output:
         from .nexus import export_tof_distribution_nxlauetof
 
         export_tof_distribution_nxlauetof(
@@ -406,18 +410,13 @@ def save_auxiliary_output(
             output_file=output_config.output_file,
         )
     # Export TOF 1D plot
-    if isinstance(tof_histogram, sc.DataArray) and not aux_config.no_png:
-        tof_histogram.plot(
-            title="Tof Distribution (All Panels Summed)",
-            grid=True,
-        ).save(output_dir / aux_config.tof_1d_png_filename)
+    tof_histogram.plot(
+        title="Tof Distribution (All Panels Summed)",
+        grid=True,
+    ).save(output_dir / aux_config.tof_1d_png_filename)
+
     # Print(log) TOF 1D plot
-    if (
-        isinstance(tof_histogram, sc.DataArray)
-        and output_config
-        and output_config.verbose
-        and display is not None
-    ):
+    if output_config and output_config.verbose and display is not None:
         da = tof_histogram
         t_dim = da.dim
         original_tbin_size = da.sizes[t_dim]

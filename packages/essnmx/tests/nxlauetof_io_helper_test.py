@@ -8,7 +8,6 @@ from scipp.testing.assertions import assert_allclose, assert_identical
 
 from ess.nmx._nxlauetof_io import load_essnmx_nxlauetof
 from ess.nmx.configurations import (
-    AuxiliaryOutputConfig,
     InputConfig,
     OutputConfig,
     ReductionConfig,
@@ -35,8 +34,7 @@ def reduction_config(temp_output_file: pathlib.Path) -> ReductionConfig:
         compression=Compression.NONE,
         skip_file_output=False,
     )
-    aux_config = AuxiliaryOutputConfig(no_tof_1d_in_file=True, no_png=True)
-    return ReductionConfig(inputs=input_config, output=output_config, aux=aux_config)
+    return ReductionConfig(inputs=input_config, output=output_config)
 
 
 @contextmanager
