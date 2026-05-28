@@ -24,7 +24,8 @@ from ess.nmx._executable_helper import (
 )
 from ess.nmx.configurations import TimeBinCoordinate, TimeBinUnit, to_command_arguments
 from ess.nmx.executables import reduction
-from ess.nmx.types import Compression, NMXLauetof
+from ess.nmx.types import Compression, NMXLauetof, SampleRun
+from ess.reduce.nexus.types import Position
 
 
 def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> list[str]:
@@ -73,9 +74,9 @@ def _check_non_default_config(testing_config: ReductionConfig) -> None:
                 # This value may be None or default, so we skip the check.
                 continue
             default_value = default_model[key]
-            assert (
-                testing_value != default_value
-            ), f"Value for '{key}' is default: {testing_value}"
+            assert testing_value != default_value, (
+                f"Value for '{key}' is default: {testing_value}"
+            )
 
 
 def test_reduction_config() -> None:
@@ -419,7 +420,8 @@ def lut_file_path(tmp_path: pathlib.Path):
 
     # Simply use the default workflow for testing.
     workflow = initialize_nmx_workflow(config=WorkflowConfig())
-    lut: LookupTable = workflow.compute(LookupTable)
+    workflow[Position[snx.NXsource, SampleRun]] = sc.vector(value=[0, 0, 0], unit='m')
+    lut = workflow.compute(LookupTable[SampleRun, snx.NXdetector])
 
     # Change the tof range a bit for testing.
     if isinstance(lut, sc.DataArray):
