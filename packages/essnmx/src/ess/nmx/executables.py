@@ -264,6 +264,9 @@ def reduction(
     #     # we do not have to calculate the lookup table at all.
     #     base_wf[LookupTable] = base_wf.compute(LookupTable)
 
+    table = base_wf.compute(LookupTable[SampleRun, snx.NXdetector])
+    table.save_hdf5("lut.h5")
+
     metadatas = base_wf.compute((NMXSampleMetadata, NMXSourceMetadata))
 
     tof_das = sc.DataGroup()

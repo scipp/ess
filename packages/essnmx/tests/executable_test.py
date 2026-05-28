@@ -73,9 +73,9 @@ def _check_non_default_config(testing_config: ReductionConfig) -> None:
                 # This value may be None or default, so we skip the check.
                 continue
             default_value = default_model[key]
-            assert testing_value != default_value, (
-                f"Value for '{key}' is default: {testing_value}"
-            )
+            assert (
+                testing_value != default_value
+            ), f"Value for '{key}' is default: {testing_value}"
 
 
 def test_reduction_config() -> None:
@@ -102,6 +102,7 @@ def test_reduction_config() -> None:
         tof_simulation_max_ltotal=200.0,
         tof_simulation_seed=12345,
         result_time_bin_unit=TimeBinUnit.us,
+        use_choppers_from_file=True,
     )
     output_options = OutputConfig(
         output_file='test-output.h5',

@@ -145,12 +145,12 @@ class WorkflowConfig(BaseModel):
         description="Number of neutrons to simulate for TOF lookup table calculation.",
         default=1_000_000,
     )
-    min_wavelength: float = Field(
+    tof_simulation_min_wavelength: float = Field(
         title="Minimum wavelength of neutrons for wavelength lookup table",
         description="Minimum wavelength for wavelength lookup table in Angstrom.",
         default=1.8,
     )
-    max_wavelength: float = Field(
+    tof_simulation_max_wavelength: float = Field(
         title="Maximum wavelength of neutrons for wavelength lookup table",
         description="Maximum wavelength for wavelength lookup table in Angstrom.",
         default=3.6,

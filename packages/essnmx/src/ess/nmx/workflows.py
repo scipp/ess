@@ -41,8 +41,6 @@ from .types import (
     NMXSampleMetadata,
     NMXSourceMetadata,
     TofDetector,
-    # TofSimulationMaxWavelength,
-    # TofSimulationMinWavelength,
 )
 
 default_parameters = {
@@ -327,22 +325,16 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
         # TODO: also add monitor when we have monitors in the NMXWorkflow.
     else:
         wf = NMXWorkflow(mode="simulation")
-        wmax = sc.scalar(config.max_wavelength, unit='angstrom')
-        wmin = sc.scalar(config.min_wavelength, unit='angstrom')
+        wmax = sc.scalar(config.tof_simulation_max_wavelength, unit='angstrom')
+        wmin = sc.scalar(config.tof_simulation_min_wavelength, unit='angstrom')
         wf[SimulationMaxWavelength] = wmax
         wf[SimulationMinWavelength] = wmin
-        # wf[SourceBounds] = SourceBounds(
-        #     time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
-        #     wavelength=(wmin, wmax),
-        # )
-
         wf[SimulationSeed] = config.tof_simulation_seed
-        # ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
-        # ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
-        # wf[LtotalRange] = LtotalRange((ltotal_min, ltotal_max))
-
-    if not config.use_choppers_from_file:
-        wf[DiskChoppers[SampleRun]] = {}
+        ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
+        ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
+        wf[LtotalRange[SampleRun, snx.NXdetector]] = ltotal_min, ltotal_max
+        if not config.use_choppers_from_file:
+            wf[DiskChoppers[SampleRun]] = {}
 
     return wf
 
