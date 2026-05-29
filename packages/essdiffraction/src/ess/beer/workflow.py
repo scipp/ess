@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import itertools
+from typing import Literal
 
 import sciline as sl
 import scipp as sc
@@ -74,7 +75,10 @@ def BeerMcStasWorkflowPulseShaping():
 
 
 def BeerPowderWorkflow(
-    *, run_norm: RunNormalization = RunNormalization.monitor_integrated, **kwargs
+    *,
+    run_norm: RunNormalization = RunNormalization.monitor_integrated,
+    mode: Literal["analytical", "simulation", "file"] = "file",
+    **kwargs,
 ) -> sl.Pipeline:
     """
     Beer powder workflow with default parameters.
@@ -83,6 +87,12 @@ def BeerPowderWorkflow(
     ----------
     run_norm:
         Select how to normalize each run (sample, vanadium, etc.).
+    mode:
+        Mode for creating the wavelength lookup table. The 'analytical' mode uses
+        analytical calculations to propagate and chop a pulse through the chopper
+        cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
+        individual neutrons through the chopper system and build the table.
+        The 'file' mode loads a pre-computed table from a file.
     kwargs:
         Additional keyword arguments are forwarded to the base
         :func:`GenericUnwrapWorkflow`.
@@ -95,6 +105,7 @@ def BeerPowderWorkflow(
     wf = GenericUnwrapWorkflow(
         run_types=[SampleRun, VanadiumRun, EmptyCanRun],
         monitor_types=[BunkerMonitor, CaveMonitor],
+        mode=mode,
         **kwargs,
     )
     wf[NeXusName[CaveMonitor]] = "monitor_cave"
