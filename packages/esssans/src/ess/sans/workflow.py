@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Hashable, Iterable
+from typing import Literal
 
 import pandas as pd
 import sciline
@@ -167,9 +168,20 @@ to setup a complete workflow.
 """
 
 
-def SansWorkflow() -> sciline.Pipeline:
+def SansWorkflow(
+    mode: Literal["analytical", "simulation", "file"] = "file",
+) -> sciline.Pipeline:
     """
     Common base for SANS workflows.
+
+    Parameters
+    ----------
+    mode:
+        Mode for creating the wavelength lookup table. The 'analytical' mode uses
+        analytical calculations to propagate and chop a pulse through the chopper
+        cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
+        individual neutrons through the chopper system and build the table.
+        The 'file' mode loads a pre-computed table from a file.
 
     Returns
     -------
@@ -185,6 +197,7 @@ def SansWorkflow() -> sciline.Pipeline:
             TransmissionRun[BackgroundRun],
         ),
         monitor_types=(Incident, Transmission),
+        mode=mode,
     )
     for provider in providers:
         workflow.insert(provider)

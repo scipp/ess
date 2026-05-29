@@ -4,6 +4,7 @@
 """Utilities for computing real neutron time-of-flight for indirect geometry."""
 
 from collections.abc import Iterable
+from typing import Literal
 
 import sciline
 import scippnexus as snx
@@ -33,10 +34,12 @@ def TofWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
+    mode: Literal["analytical", "simulation", "file"] = "file",
 ) -> sciline.Pipeline:
     workflow = reduce_unwrap.GenericUnwrapWorkflow(
         run_types=run_types,
         monitor_types=monitor_types,
+        mode=mode,
     )
     for provider in providers:
         workflow.insert(provider)
@@ -111,9 +114,9 @@ def compute_monitor_ltotal(
 
 
 def mask_large_uncertainty_in_lut_detector(
-    table: LookupTable,
+    table: LookupTable[RunType, snx.NXdetector],
     error_threshold: LookupTableRelativeErrorThreshold,
-) -> ErrorLimitedLookupTable[snx.NXdetector]:
+) -> ErrorLimitedLookupTable[RunType, snx.NXdetector]:
     """
     Mask regions in the wavelength lookup table with large uncertainty using NaNs.
 
@@ -137,7 +140,7 @@ def mask_large_uncertainty_in_lut_detector(
         mask_large_uncertainty_in_lut_detector,
     )
 
-    return ErrorLimitedLookupTable[snx.NXdetector](
+    return ErrorLimitedLookupTable[RunType, snx.NXdetector](
         mask_large_uncertainty_in_lut_detector(
             table=table,
             error_threshold=error_threshold,
