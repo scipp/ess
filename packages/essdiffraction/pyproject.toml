@@ -30,8 +30,8 @@ requires-python = ">=3.11"
 # Make sure to list one dependency per line.
 dependencies = [
   "dask>=2022.1.0",
-  "essreduce>=26.4.0",
-  "graphviz",
+  "essreduce>=26.5.0",
+  "graphviz>=0.20",
   "numpy>=2",
   "plopp>=26.2.0",
   "pythreejs>=2.4.1",
@@ -41,7 +41,7 @@ dependencies = [
   "scippnexus>=23.12.0",
   "tof>=25.12.0",
   "ncrystal[cif]>=4.1.0",
-  "spglib!=2.7",  # https://github.com/mctools/ncrystal/issues/320
+  "spglib>=2.0.0,!=2.7",  # https://github.com/mctools/ncrystal/issues/320
 ]
 
 dynamic = ["version"]
@@ -54,23 +54,23 @@ test = [
     "ipywidgets>=8.1.7",
 ]
 docs = [
-    "autodoc-pydantic",
-    "ipykernel",
-    "ipympl",
+    "autodoc-pydantic>=2.0.0",
+    "ipykernel>=6.20.0",
+    "ipympl>=0.9.0",
     # Breaks syntax highlighting in Jupyter code cells.
-    "ipython!=8.7.0",
-    "myst-parser",
-    "nbsphinx",
-    "pandas",
-    "pooch",
+    "ipython>=8.8.0,!=8.7.0",
+    "myst-parser>=2.0.0",
+    "nbsphinx>=0.9.3",
+    "pandas>=2.1.2",
+    "pooch>=1.5",
     "pydata-sphinx-theme>=0.14",
-    "sphinx",
-    "sphinx-autodoc-typehints",
-    "sphinx-copybutton",
-    "sphinx-design",
-    "sphinxcontrib-bibtex",
+    "sphinx>=7",
+    "sphinx-autodoc-typehints>=1.24.0",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.5.0",
+    "sphinxcontrib-bibtex>=2.5.0",
     # needed by pandas < 3.0
-    "pyarrow",
+    "pyarrow>=12.0.0",
 ]
 
 [project.urls]

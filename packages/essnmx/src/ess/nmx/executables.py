@@ -25,6 +25,7 @@ from ._executable_helper import (
     reduction_config_from_args,
 )
 from .configurations import (
+    AuxiliaryOutputConfig,
     OutputConfig,
     ReductionConfig,
     TimeBinCoordinate,
@@ -243,13 +244,11 @@ def reduction(
     # Check the file output configuration before we start heavy computation.
     if not config.output.skip_file_output:
         _check_file(config.output.output_file, config.output.overwrite)
+        config.aux.check_output_dir()
 
     display = _retrieve_display(logger, display)
     input_file_path = _retrieve_input_file(config.inputs.input_file).resolve()
     display(f"Input file: {input_file_path}")
-
-    output_file_path = pathlib.Path(config.output.output_file).resolve()
-    display(f"Output file: {output_file_path}")
 
     detector_names = select_detector_names(detector_ids=config.inputs.detector_ids)
 
@@ -335,12 +334,27 @@ def reduction(
     #     results.lookup_table = base_wf.compute(LookupTable[SampleRun, snx.NXdetector])
 
     if not config.output.skip_file_output:
-        save_results(results=results, output_config=config.output)
+        save_results(
+            results=results, output_config=config.output, aux_config=config.aux
+        )
 
     return results
 
 
-def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
+def save_results(
+    *,
+    results: NMXLauetof,
+    output_config: OutputConfig,
+    aux_config: AuxiliaryOutputConfig | None = None,
+    display: Callable | None = None,
+) -> None:
+    aux_config = aux_config or AuxiliaryOutputConfig()
+    output_file_path = pathlib.Path(output_config.output_file).resolve()
+    aux_output_dir = aux_config.build_target_dir(output_file_path.as_posix())
+    if display:
+        display(f"Output file: {output_file_path}")
+        display(f"Auxiliary output dir: {aux_output_dir}")
+
     # Validate if results have expected fields
     export_static_metadata_as_nxlauetof(
         sample_metadata=results.sample,
@@ -367,6 +381,104 @@ def save_results(*, results: NMXLauetof, output_config: OutputConfig) -> None:
             )
         else:
             raise ValueError(f"Detector counts histogram missing in {detector_name}")
+
+    save_auxiliary_output(
+        results=results,
+        output_config=output_config,
+        aux_config=aux_config,
+        output_dir=aux_output_dir,
+        display=display,
+    )
+
+
+def save_auxiliary_output(
+    *,
+    results: NMXLauetof,
+    output_config: OutputConfig | None = None,
+    aux_config: AuxiliaryOutputConfig,
+    output_dir: pathlib.Path,
+    display: Callable | None = None,
+) -> None:
+    """Export or print(log) auxiliary information such as 1D tof distribution.
+
+    The auxiliary output can be configured by `aux_config`(`AuxiliaryOutputConfig`).
+    `output_config`(`OutputConfig`) is only needed when the auxiliary output
+    should be stored in the `NXlauetof` file.
+    """
+    output_dir.mkdir(exist_ok=True)
+    # TOF 1D distribution for all panels
+    tof_histogram = sc.reduce(
+        det_res.data.sum(["x_pixel_offset", "y_pixel_offset"])
+        for det_res in results.instrument.detectors.values()
+        if isinstance(det_res.data, sc.DataArray)
+    ).sum()
+
+    # Export TOF 1D distribution into entry/aux
+    if output_config and not output_config.skip_file_output:
+        from .nexus import export_tof_distribution_nxlauetof
+
+        export_tof_distribution_nxlauetof(
+            tof_histogram=tof_histogram,
+            output_file=output_config.output_file,
+        )
+    # Export TOF 1D plot
+    tof_histogram.plot(
+        title="Tof Distribution (All Panels Summed)",
+        grid=True,
+    ).save(output_dir / aux_config.tof_1d_png_filename)
+
+    # Print(log) TOF 1D plot
+    if output_config and output_config.verbose and display is not None:
+        da = tof_histogram
+        t_dim = da.dim
+        original_tbin_size = da.sizes[t_dim]
+        original_max_value = da.max().value
+        while (display_t_size := da.sizes[t_dim]) > 128:
+            da = da.rebin({t_dim: display_t_size // 2})
+
+        n_row = min(da.sizes[t_dim] // 4, 50)
+        max_value = da.max().value
+        row_size = int(max_value // n_row)
+        bars = [
+            list(("*" * int(val // row_size)).rjust(n_row)) for val in da.data.values
+        ]
+        bars = [
+            [bars[col_i][row_i] for col_i in range(len(bars))]
+            for row_i in range(len(bars[0]))
+        ]
+        bars = "\n".join("".join(c for c in row) for row in bars)
+
+        y_axis = f"max-count: {original_max_value} [{da.unit}]".ljust(
+            da.sizes[t_dim], '-'
+        )
+        bars = y_axis + "\n" + bars
+        display(
+            "\n┌──TOF DISTRIBUTION (ALL PANELS SUMMED)".ljust(da.sizes[t_dim] + 1, '─')
+            + '─┐'
+        )
+        bars = "\n".join('│' + row + '│' for row in bars.split("\n"))
+        if t_dim in da.coords:
+            t_coord = da.coords[t_dim]
+            t_unit = str(t_coord.unit)
+            t_min, t_max = int(t_coord.min().value), int(t_coord.max().value)
+            xaxis = f"{t_min:.3g} [{t_unit}]".ljust(da.sizes[t_dim])
+            max_t_label = f"{t_max:.3g} [{t_unit}]"
+            xaxis = xaxis[: -len(max_t_label) + 2] + max_t_label
+            bars += f"\n{xaxis}"
+            num_bins_label = (
+                "*histogram rebinned for display* "
+                if da.sizes[t_dim] != original_tbin_size
+                else ""
+            )
+            num_bins_label += f"({original_tbin_size} {t_dim} bins)"
+            bars += (
+                "\n└".ljust(da.sizes[t_dim] + 1 - len(num_bins_label), '─')
+                + num_bins_label
+                + '─┘'
+            )
+        else:
+            bars += "\n└".ljust(da.sizes[t_dim] + 1, '─') + '┘'
+        display(bars)
 
 
 def main() -> None:

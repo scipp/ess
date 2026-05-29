@@ -47,7 +47,7 @@ jobs:
 
   publish:
     name: Publish to PyPI
-    needs: [determine-package, build]
+    needs: [ determine-package, build ]
     runs-on: ubuntu-24.04
     environment: release
     permissions:
@@ -62,52 +62,26 @@ jobs:
           packages-dir: dist/
 
   docs:
-    name: Publish docs
-    needs: [determine-package, publish]
-    runs-on: ubuntu-24.04
+    name: Build and publish docs
+    needs: [ determine-package, publish ]
     permissions:
       contents: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.9.4
-        with:
-          pixi-version: v0.68.0
-          frozen: true
-          environments: docs-${{ needs.determine-package.outputs.package }}
-      - name: Build docs
-        run: pixi run docs-${{ needs.determine-package.outputs.package }}
-      - name: Prepare site
-        run: |
-          PACKAGE=${{ needs.determine-package.outputs.package }}
-          git fetch origin gh-pages:gh-pages || true
-          git worktree add gh-pages-site gh-pages || mkdir -p gh-pages-site
-          rm -rf gh-pages-site/$PACKAGE
-          cp -r packages/$PACKAGE/html gh-pages-site/$PACKAGE
-          cp docs/index.html gh-pages-site/index.html
-          touch gh-pages-site/.nojekyll
-      - name: Build search index
-        run: npx pagefind@latest --site gh-pages-site --bundle-dir pagefind
-      - uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: gh-pages-site
-      - uses: actions/upload-artifact@v7
-        with:
-          name: docs_html
-          path: packages/${{ needs.determine-package.outputs.package }}/html
+    uses: ./.github/workflows/docs.yml
+    with:
+      package: ${{ needs.determine-package.outputs.package }}
+      publish: true
+      linkcheck: false
 
   assets:
     name: Upload docs
-    needs: [docs, determine-package]
+    needs: [ docs, determine-package ]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: docs_html
+          name: docs-${{ needs.determine-package.outputs.package }}
           path: docs_html
       - name: Zip documentation
         run: |

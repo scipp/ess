@@ -51,18 +51,18 @@ test = [
     "scipy>=1.15.0",
 ]
 docs = [
-    "autodoc-pydantic",
-    "ipykernel",
-    "ipython!=8.7.0",
-    "myst-parser",
-    "nbsphinx",
-    "pooch",
+    "autodoc-pydantic>=2.0.0",
+    "ipykernel>=6.20.0",
+    "ipython>=8.8.0,!=8.7.0",
+    "myst-parser>=2.0.0",
+    "nbsphinx>=0.9.3",
+    "pooch>=1.5",
     "pydata-sphinx-theme>=0.14",
-    "sphinx",
-    "sphinx-autodoc-typehints",
-    "sphinx-copybutton",
-    "sphinx-design",
-    "tof",
+    "sphinx>=7",
+    "sphinx-autodoc-typehints>=1.24.0",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.5.0",
+    "tof>=25.08.0",
 ]
 
 [project.urls]
