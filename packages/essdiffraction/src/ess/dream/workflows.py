@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 import itertools
+from typing import Literal
 
 import sciline
 import scipp as sc
@@ -97,7 +98,9 @@ def _collect_reducer_software() -> ReducerSoftware:
     )
 
 
-def DreamWorkflow(**kwargs) -> sciline.Pipeline:
+def DreamWorkflow(
+    mode: Literal["analytical", "simulation", "file"] = "file", **kwargs
+) -> sciline.Pipeline:
     """
     Dream generic workflow with default parameters.
     The workflow is based on the GenericUnwrapWorkflow.
@@ -109,6 +112,12 @@ def DreamWorkflow(**kwargs) -> sciline.Pipeline:
 
     Parameters
     ----------
+    mode:
+        Mode for creating the wavelength lookup table. The 'analytical' mode uses
+        analytical calculations to propagate and chop a pulse through the chopper
+        cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
+        individual neutrons through the chopper system and build the table.
+        The 'file' mode loads a pre-computed table from a file.
     kwargs:
         Additional keyword arguments are forwarded to the base
         :func:`GenericUnwrapWorkflow`.
@@ -116,12 +125,14 @@ def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     wf = GenericUnwrapWorkflow(
         run_types=[SampleRun, VanadiumRun, EmptyCanRun],
         monitor_types=[BunkerMonitor, CaveMonitor],
+        mode=mode,
         **kwargs,
     )
     wf[DetectorBankSizes] = DETECTOR_BANK_SIZES
     wf[NeXusName[BunkerMonitor]] = "monitor_bunker"
     wf[NeXusName[CaveMonitor]] = "monitor_cave"
-    wf.insert(_get_lookup_table_filename_from_configuration)
+    if mode == "file":
+        wf.insert(_get_lookup_table_filename_from_configuration)
     wf[ReducerSoftware] = _collect_reducer_software()
     wf[LookupTableRelativeErrorThreshold] = {
         "endcap_backward_detector": float('inf'),
