@@ -6,7 +6,6 @@ from typing import Literal
 import sciline
 import scipp as sc
 import scippnexus as snx
-
 from ess.reduce.nexus.types import TransformationTimeFilter
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ess.reduce.workflow import register_workflow

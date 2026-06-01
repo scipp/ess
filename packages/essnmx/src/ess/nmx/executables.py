@@ -12,7 +12,6 @@ import scippnexus as snx
 from ess.reduce.nexus.types import (
     Filename,
     NeXusName,
-    RawChoppers,
     RawDetector,
     SampleRun,
 )

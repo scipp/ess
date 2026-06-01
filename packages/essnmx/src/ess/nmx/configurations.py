@@ -158,8 +158,8 @@ class WorkflowConfig(BaseModel):
     )
     use_choppers_from_file: bool = Field(
         title="Use Chopper Parameters from File",
-        description="Whether to use chopper parameters from the input file. "
-        "If False, no choppers will be used when computing the wavelength lookup table.",
+        description="Whether to use chopper parameters from the input file. If False, "
+        "no choppers will be used when computing the wavelength lookup table.",
         default=False,
     )
     tof_simulation_min_ltotal: float = Field(

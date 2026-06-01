@@ -14,7 +14,9 @@ sl = pytest.importorskip("sciline")
 
 def _make_workflow(wavelength_from: str = "analytical") -> sl.Pipeline:
     return GenericUnwrapWorkflow(
-        run_types=[AnyRun], monitor_types=[FrameMonitor0], wavelength_from=wavelength_from
+        run_types=[AnyRun],
+        monitor_types=[FrameMonitor0],
+        wavelength_from=wavelength_from,
     )
 
 
@@ -167,7 +169,9 @@ def _make_choppers():
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 @pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
-def test_lut_workflow_computes_table_with_choppers(detector_or_monitor, wavelength_from):
+def test_lut_workflow_computes_table_with_choppers(
+    detector_or_monitor, wavelength_from
+):
     wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
