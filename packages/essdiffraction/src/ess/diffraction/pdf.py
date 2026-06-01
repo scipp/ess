@@ -10,20 +10,22 @@ Here, we use the following definitions and naming convention:
 
    * - Name
      - Definition
-   * - Pair Correlation Function
+   * - :func:`Pair correlation function <pair_correlation_function>`
      - :math:`G(r) = \frac{2}{\pi} \int_o^\infty\, Q (S(Q) - 1) \sin(Qr) \text{d}Q`
-   * - Pair Distribution Function
+   * - :func:`Pair distribution function <pair_distribution_function>`
      - :math:`g(r) = 1 + \frac{G(r)}{4 \pi \rho r}`
-   * - Radial Distribution Function
+   * - :func:`Radial distribution function <radial_distribution_function>`
      - :math:`\text{RDF}(r) = 4\pi r^2 \rho g(r)`
-   * - Linearized Radial Distribution Function
-     - :math:`T(r) = \frac{\text{RDF}(r)}{r}`
-   * - Running Coordination Number
+   * - :func:`Linearized radial distribution function <linearized_radial_distribution_function>`
+     - :math:`T(r) = \text{RDF}(r) / r`
+   * - :func:`Running coordination number <running_coordination_number>`
      - :math:`C(r) = \int_0^r\, \text{RDF}(r') \text{d}r'`
 
 Where :math:`\rho` is the atomic density.
 
-"""
+The implementations provided here are defined in terms of each other and must be called
+in the order shown in the table.
+"""  # noqa: E501
 
 import scipp as sc
 
@@ -80,12 +82,17 @@ def pair_correlation_function(
 
     Returns
     -------
-    g:
-        1D DataArray representing :math:`G(r)` with a bin-edge coordinate called
+    g: scipp.DataArray
+        1D array representing :math:`G(r)` with a bin-edge coordinate called
         ``'r'`` that is the provided output grid.
-    cov:
-        2D DataArray representing the covariance matrix of the entries in ``g``.
+    cov: scipp.DataArray
+        2D array representing the covariance matrix of the entries in ``g``.
         Only returned if ``return_covariances=True``.
+
+    See Also
+    --------
+    ess.diffraction.pdf:
+        Module with related functions.
     """  # noqa: E501
     q = s.coords['Q']
     qm = sc.midpoints(q)
@@ -109,10 +116,157 @@ def pair_correlation_function(
     return g
 
 
-def _covariance_of_matrix_vector_product(A, v):
+def pair_distribution_function(
+    g: sc.DataArray, *, atomic_density: sc.Variable
+) -> sc.DataArray:
+    r"""Compute the pair distribution function from a pair correlation function.
+
+    Computes the pair distribution function
+
+    .. math::
+
+        g(r) = 1 + \frac{G(r)}{4 \pi \rho r}
+
+    where :math:`G(r)` is the :func:`pair_correlation_function`
+    and :math:`\rho` is the atomic density.
+
+    :math:`g` and :math:`G` are both defined on bin-edges in :math:`r`.
+    The :math:`r` variable in the denominator is computed on the
+    :func:`midpoints <scipp.midpoints>` of ``r``.
+
+    Parameters
+    ----------
+    g:
+        :func:`Pair correlation function <pair_correlation_function>` :math:`G(r)`.
+    atomic_density:
+        The atomic density :math:`\rho` of the material.
+
+    Returns
+    -------
+    g: scipp.DataArray
+        1D array representing :math:`g(r)`.
+
+    See Also
+    --------
+    ess.diffraction.pdf:
+        Module with related functions.
+    """
+    return 1 + g / (4 * sc.constants.pi * atomic_density * sc.midpoints(g.coords['r']))
+
+
+def radial_distribution_function(
+    g: sc.DataArray, *, atomic_density: sc.Variable
+) -> sc.DataArray:
+    r"""Compute the radial distribution function from a pair distribution function.
+
+    Computes the radial distribution function
+
+    .. math::
+
+        \text{RDF}(r) = 4 \pi r^2 \rho g(r)
+
+    where :math:`g(r)` is the :func:`pair_distribution_function`
+    and :math:`\rho` is the atomic density.
+
+    :math:`\text{RDF}` and :math:`g` are both defined on bin-edges in :math:`r`.
+    The :math:`r^2` factor is computed on the
+    :func:`midpoints <scipp.midpoints>` of ``r``.
+
+    Parameters
+    ----------
+    g:
+        :func:`Pair distribution function <pair_distribution_function>` :math:`g(r)`.
+    atomic_density:
+        The atomic density :math:`\rho` of the material.
+
+    Returns
+    -------
+    rdf: scipp.DataArray
+        1D array representing :math:`\text{RDF}(r)`.
+
+    See Also
+    --------
+    ess.diffraction.pdf:
+        Module with related functions.
+    """
+    return 4 * sc.constants.pi * atomic_density * sc.midpoints(g.coords['r']) ** 2 * g
+
+
+def linearized_radial_distribution_function(rdf: sc.DataArray) -> sc.DataArray:
+    r"""Compute the linearized radial distribution function
+    from a radial distribution function.
+
+    Computes the linearized radial distribution function
+
+    .. math::
+
+        \text{T}(r) = \frac{\text{RDF}(r)}{r}
+
+    where :math:`\text{RDF}(r)` is the :func:`radial_distribution_function`.
+
+    :math:`\text{RDF}` and :math:`T` are both defined on bin-edges in :math:`r`.
+    The :math:`r` variable in the denominator is computed on the
+    :func:`midpoints <scipp.midpoints>` of ``r``.
+
+    Parameters
+    ----------
+    rdf:
+        :func:`Radial distribution function <radial_distribution_function>`
+        :math:`\text{RDF}(r)`.
+
+    Returns
+    -------
+    t: scipp.DataArray
+        1D array representing :math:`T(r)`.
+
+    See Also
+    --------
+    ess.diffraction.pdf:
+        Module with related functions.
+    """
+    return rdf / sc.midpoints(rdf.coords['r'])
+
+
+def running_coordination_number(rdf: sc.DataArray) -> sc.DataArray:
+    r"""Compute the running coordination number from a radial distribution function.
+
+    Computes the running coordination number
+
+    .. math::
+
+        C(r) = \int_0^r\, \text{RDF}(r') \text{d}r'
+
+    where :math:`\text{RDF}(r)` is the :func:`radial_distribution_function`.
+
+    Parameters
+    ----------
+    rdf:
+        :func:`Radial distribution function <radial_distribution_function>`
+        :math:`\text{RDF}(r)`.
+
+    Returns
+    -------
+    c: scipp.DataArray
+        1D array representing :math:`C(r)`.
+
+    See Also
+    --------
+    ess.diffraction.pdf:
+        Module with related functions.
+    """
+    r = rdf.coords['r']
+    if not sc.issorted(r, dim=r.dim, order='ascending'):
+        raise ValueError('The bin-edges in `r` must be sorted in ascending order.')
+
+    return sc.cumsum(rdf * (r[1:] - r[:-1]))
+
+
+def _covariance_of_matrix_vector_product(
+    A: sc.typing.VariableLike, v: sc.typing.VariableLike
+) -> sc.Variable:
     if A.variances is not None:
         raise ValueError('The expression is not valid if the matrix has variances.')
-    v = sc.variances(v)
+    v = sc.variances(v)  # type: ignore[arg-type] # faulty annotation in variances()?
     if A.dims[1] != v.dim:
         A = A.transpose()
     cov = (sc.sqrt(v) * A).values
