@@ -120,6 +120,8 @@ def simulate_with_tof(choppers, pulse_stride, source_position):
         pulse_stride=pulse_stride,
         seed=432,
         facility="ess",
+        wmin=None,
+        wmax=None,
     )
 
 
@@ -140,7 +142,9 @@ def setup_workflow(
     source_position: sc.Variable,
     error_threshold: float = 0.1,
 ) -> sl.Pipeline:
-    wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[], wavelength_from=wavelength_from)
+    wf = GenericUnwrapWorkflow(
+        run_types=[SampleRun], monitor_types=[], wavelength_from=wavelength_from
+    )
     wf[RawDetector[SampleRun]] = raw_data
     wf[unwrap.DetectorLtotal[SampleRun]] = ltotal
     wf[NeXusDetectorName] = "detector"
@@ -166,7 +170,11 @@ def setup_workflow(
 @pytest.mark.parametrize("time_offset_unit", ["s", "ms", "us", "ns"])
 @pytest.mark.parametrize("distance_unit", ["m", "mm"])
 def test_dream_wfm(
-    wavelength_from, ltotal, time_offset_unit, distance_unit, simulate_with_dream_choppers
+    wavelength_from,
+    ltotal,
+    time_offset_unit,
+    distance_unit,
+    simulate_with_dream_choppers,
 ):
     monitors = {
         f"detector{i}": ltot for i, ltot in enumerate(ltotal.flatten(to="detector"))

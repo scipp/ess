@@ -77,7 +77,9 @@ def _make_workflow(wavelength_from) -> sciline.Pipeline:
     )
 
     wf = GenericUnwrapWorkflow(
-        run_types=[SampleRun], monitor_types=[FrameMonitor0], wavelength_from=wavelength_from
+        run_types=[SampleRun],
+        monitor_types=[FrameMonitor0],
+        wavelength_from=wavelength_from,
     )
     wf[NeXusDetectorName] = "detector"
     wf[NeXusName[FrameMonitor0]] = "monitor"
@@ -105,6 +107,8 @@ def simulation_results_psc_choppers():
         pulse_stride=1,
         seed=333,
         facility="ess",
+        wmin=None,
+        wmax=None,
     )
 
 
