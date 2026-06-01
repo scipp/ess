@@ -5,7 +5,7 @@ import scipp as sc
 import scipp.testing
 from ess.diffraction.pdf import (
     _covariance_of_matrix_vector_product,
-    compute_pdf_from_structure_factor,
+    pair_correlation_function,
 )
 
 
@@ -13,7 +13,7 @@ def test_pdf_structure_factor_needs_q_coord():
     da = sc.DataArray(sc.ones(sizes={'Q': 3}))
     r = sc.array(dims='r', values=[2, 3, 4, 5.0])
     with pytest.raises(KeyError):
-        compute_pdf_from_structure_factor(
+        pair_correlation_function(
             da,
             r,
         )
@@ -26,7 +26,7 @@ def test_pdf_structure_factor():
     )
     da.variances = da.data.values.copy()
     r = sc.array(dims='r', values=[2, 3, 4, 5.0], unit='angstrom')
-    v = compute_pdf_from_structure_factor(
+    v = pair_correlation_function(
         da,
         r,
     )
@@ -41,7 +41,7 @@ def test_pdf_structure_factor_can_return_covariances():
     )
     da.variances = da.data.values.copy()
     r = sc.array(dims='r', values=[2, 3, 4, 5.0], unit='angstrom')
-    compute_pdf_from_structure_factor(da, r, return_covariances=True)
+    pair_correlation_function(da, r, return_covariances=True)
 
 
 def test_pdf_structure_factor_result_unchanged():
@@ -51,7 +51,7 @@ def test_pdf_structure_factor_result_unchanged():
         coords={'Q': sc.array(dims='Q', values=[0, 1, 2, 3.0], unit='1/angstrom')},
     )
     r = sc.array(dims='r', values=[2, 3, 4, 5.0], unit='angstrom')
-    v = compute_pdf_from_structure_factor(
+    v = pair_correlation_function(
         da,
         r,
     )

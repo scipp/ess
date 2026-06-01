@@ -1,34 +1,57 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-"""Pair distribution functions and related functions."""
+r"""Pair distribution functions and related functions.
+
+Here, we use the following definitions and naming convention:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Name
+     - Definition
+   * - Pair Correlation Function
+     - :math:`G(r) = \frac{2}{\pi} \int_o^\infty\, Q (S(Q) - 1) \sin(Qr) \text{d}Q`
+   * - Pair Distribution Function
+     - :math:`g(r) = 1 + \frac{G(r)}{4 \pi \rho r}`
+   * - Radial Distribution Function
+     - :math:`\text{RDF}(r) = 4\pi r^2 \rho g(r)`
+   * - Linearized Radial Distribution Function
+     - :math:`T(r) = \frac{\text{RDF}(r)}{r}`
+   * - Running Coordination Number
+     - :math:`C(r) = \int_0^r\, \text{RDF}(r') \text{d}r'`
+
+Where :math:`\rho` is the atomic density.
+
+"""
 
 import scipp as sc
 
 from ess.reduce.uncertainty import UncertaintyBroadcastMode, broadcast_uncertainties
 
 
-def compute_pdf_from_structure_factor(
+def pair_correlation_function(
     s: sc.DataArray,
     r: sc.Variable,
     *,
     uncertainty_broadcast_mode: UncertaintyBroadcastMode = UncertaintyBroadcastMode.drop,  # noqa: E501
     return_covariances: bool = False,
-) -> sc.DataArray:
-    """Compute a pair distribution function from a structure factor.
+) -> sc.DataArray | tuple[sc.DataArray, sc.DataArray]:
+    """Compute the pair correlation function from a structure factor.
 
-    Computes the pair distribution function :math:`G(r)` as defined in
-    `Review: Pair distribution functions from neutron total scattering for the study of local structure in disordered materials <https://www.sciencedirect.com/science/article/pii/S2773183922000374>`_
-    (note, in the reference, the pair distribution function is denoted :math:`D(r)`,
+    Computes the pair correlation function :math:`G(r)` from the overall
+    scattering function :math:`S(Q)`.
+    See `Review: Pair distribution functions from neutron total scattering for the study of local structure in disordered materials <https://www.sciencedirect.com/science/article/pii/S2773183922000374>`_
+    for the definition of :math:`G(r)` or :mod:`ess.diffraction.pdf`.
+    (Note, in the reference, the pair correlation function is denoted as :math:`D(r)`,
     but since :math:`G(r)` is the more common name, that is what is used here).
-    from the overall scattering function :math:`S(Q)`.
 
-    The inputs to the algorithm are:
+    The inputs to the function are:
 
     * A histogram representing :math:`S(Q)` with :math:`N` bins on a bin-edge grid with
       :math:`N+1` edges :math:`Q_j` for :math:`j=0\\ldots N`.
-    * The bin-edge grid over :math:`r` the output histogram representing :math:`G(r)`
-      will be computed on.
+    * The bin-edge grid over :math:`r`. The output histogram representing :math:`G(r)`
+      will be computed on this grid.
 
     In each output bin, the output is computed as:
 
@@ -45,23 +68,24 @@ def compute_pdf_from_structure_factor(
     ----------
     s:
         1D DataArray representing :math:`S(Q)` with
-        a bin-edge coordinate called :math:`Q`
+        a bin-edge coordinate called ``'Q'``.
     r:
-        1D array, bin-edges of output grid
+        1D array, bin-edges of output grid.
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
         Choose how uncertainties in S(Q) are broadcast to G(r).
         Defaults to ``UncertaintyBroadcastMode.drop``.
     return_covariances:
-        bool, if True the second output of the function will be a 2D array representing
+        If true the second output of the function will be a 2D array representing
         the covariance matrix of the entries in the first output.
 
     Returns
     -------
-    :
+    g:
         1D DataArray representing :math:`G(r)` with a bin-edge coordinate called
-        :math:`r` that is the provided output grid, and optionally a 2D DataArray
-        representing the covariances of :math:`G(r)`.
-
+        ``'r'`` that is the provided output grid.
+    cov:
+        2D DataArray representing the covariance matrix of the entries in ``g``.
+        Only returned if ``return_covariances=True``.
     """  # noqa: E501
     q = s.coords['Q']
     qm = sc.midpoints(q)
