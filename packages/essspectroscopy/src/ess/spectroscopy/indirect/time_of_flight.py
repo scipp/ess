@@ -137,11 +137,11 @@ def mask_large_uncertainty_in_lut_detector(
         The underlying implementation.
     """
     from ess.reduce.unwrap.to_wavelength import (
-        mask_large_uncertainty_in_lut_detector,
+        mask_large_uncertainty_in_lut,
     )
 
     return ErrorLimitedLookupTable[RunType, snx.NXdetector](
-        mask_large_uncertainty_in_lut_detector(
+        mask_large_uncertainty_in_lut(
             table=table,
             error_threshold=error_threshold,
             detector_name=NeXusDetectorName('detector'),
