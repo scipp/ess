@@ -144,7 +144,7 @@ def mask_large_uncertainty_in_lut_detector(
         mask_large_uncertainty_in_lut(
             table=table,
             error_threshold=error_threshold,
-            detector_name=NeXusDetectorName('detector'),
+            component_name=NeXusDetectorName('detector'),
         )
     )
 
