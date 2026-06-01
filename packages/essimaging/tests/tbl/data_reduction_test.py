@@ -64,7 +64,7 @@ def test_can_compute_wavelength(workflow, bank_name):
     "bank_name", ["ngem_detector", "he3_detector_bank0", "he3_detector_bank1"]
 )
 def test_can_compute_wavelength_from_on_the_fly_lut(mode, bank_name):
-    wf = tbl.TblWorkflow(mode=mode)
+    wf = tbl.TblWorkflow(wavelength_from=mode)
     wf[Filename[SampleRun]] = tbl.data.tutorial_sample_data()
     wf[unwrap.DiskChoppers[SampleRun]] = {}
     wf[NeXusDetectorName] = bank_name

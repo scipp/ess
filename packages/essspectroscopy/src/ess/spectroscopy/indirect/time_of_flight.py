@@ -34,12 +34,12 @@ def TofWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
-    mode: Literal["analytical", "simulation", "file"] = "file",
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file",
 ) -> sciline.Pipeline:
     workflow = reduce_unwrap.GenericUnwrapWorkflow(
         run_types=run_types,
         monitor_types=monitor_types,
-        mode=mode,
+        wavelength_from=wavelength_from,
     )
     for provider in providers:
         workflow.insert(provider)
