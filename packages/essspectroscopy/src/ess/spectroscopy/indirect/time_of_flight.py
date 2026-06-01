@@ -48,7 +48,7 @@ def TofWorkflow(
 
 def detector_wavelength_data(
     sample_data: DataAtSample[RunType],
-    lookup: ErrorLimitedLookupTable[snx.NXdetector],
+    lookup: ErrorLimitedLookupTable[RunType, snx.NXdetector],
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthDetector[RunType]:
     """
@@ -74,7 +74,7 @@ def detector_wavelength_data(
 
 def monitor_wavelength_data(
     monitor_data: RawMonitor[RunType, MonitorType],
-    lookup: ErrorLimitedLookupTable[MonitorType],
+    lookup: ErrorLimitedLookupTable[RunType, MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthMonitor[RunType, MonitorType]:

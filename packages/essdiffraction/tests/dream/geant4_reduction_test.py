@@ -42,10 +42,11 @@ from ess.powder.types import (
     WavelengthMask,
 )
 from scippneutron import metadata
+from scippnexus import NXdetector, NXsource
 
 from ess.reduce import unwrap
 from ess.reduce import workflow as reduce_workflow
-from ess.reduce.nexus.types import AnyRun
+from ess.reduce.nexus.types import AnyRun, Position
 
 params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
@@ -122,24 +123,24 @@ def dream_lookup_table():
     lut_wf[unwrap.DiskChoppers[AnyRun]] = dream.beamline.choppers(
         dream.beamline.InstrumentConfiguration.high_flux_BC215
     )
-    lut_wf[unwrap.SourcePosition] = sc.vector(value=[0, 0, -76.55], unit="m")
+    lut_wf[Position[NXsource, AnyRun]] = sc.vector(value=[0, 0, -76.55], unit="m")
     lut_wf[unwrap.NumberOfSimulatedNeutrons] = 500_000
     lut_wf[unwrap.SimulationSeed] = 555
     lut_wf[unwrap.PulseStride] = 1
-    lut_wf[unwrap.LtotalRange] = (
+    lut_wf[unwrap.LtotalRange[AnyRun, NXdetector]] = (
         sc.scalar(60.0, unit="m"),
         sc.scalar(80.0, unit="m"),
     )
     lut_wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit="m")
     lut_wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
-    return lut_wf.compute(unwrap.LookupTable)
+    return lut_wf.compute(unwrap.LookupTable[AnyRun, NXdetector])
 
 
 def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
     workflow, dream_lookup_table
 ):
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[LookupTable] = dream_lookup_table
+    workflow[LookupTable[SampleRun, NXdetector]] = dream_lookup_table
 
     result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}

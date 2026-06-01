@@ -169,14 +169,14 @@ to setup a complete workflow.
 
 
 def SansWorkflow(
-    mode: Literal["analytical", "simulation", "file"] = "file",
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file",
 ) -> sciline.Pipeline:
     """
     Common base for SANS workflows.
 
     Parameters
     ----------
-    mode:
+    wavelength_from:
         Mode for creating the wavelength lookup table. The 'analytical' mode uses
         analytical calculations to propagate and chop a pulse through the chopper
         cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
@@ -197,7 +197,7 @@ def SansWorkflow(
             TransmissionRun[BackgroundRun],
         ),
         monitor_types=(Incident, Transmission),
-        mode=mode,
+        wavelength_from=wavelength_from,
     )
     for provider in providers:
         workflow.insert(provider)

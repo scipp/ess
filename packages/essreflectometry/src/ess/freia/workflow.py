@@ -5,6 +5,7 @@ from typing import Literal
 
 import sciline
 import scipp as sc
+
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ess.reduce.workflow import register_workflow
 
@@ -91,7 +92,7 @@ def default_parameters() -> dict:
 def FreiaMcStasWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.none,
-    mode: Literal["analytical", "simulation", "file"] = "file",
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file",
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for reduction of McStas data for the Freia instrument.
@@ -100,14 +101,14 @@ def FreiaMcStasWorkflow(
     ----------
     run_norm:
         Normalization procedure to be used. See :class:`RunNormalization`.
-    mode:
+    wavelength_from:
         Mode for creating the wavelength lookup table. The 'analytical' mode uses
         analytical calculations to propagate and chop a pulse through the chopper
         cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
         individual neutrons through the chopper system and build the table.
         The 'file' mode loads a pre-computed table from a file.
     """
-    workflow = beamline.LoadNeXusWorkflow(mode=mode, **kwargs)
+    workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
     for provider in mcstas_providers:
         workflow.insert(provider)
     insert_run_normalization(workflow, run_norm)
@@ -119,7 +120,7 @@ def FreiaMcStasWorkflow(
 def FreiaWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.proton_charge,
-    mode: Literal["analytical", "simulation", "file"] = "file",
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file",
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for reduction of data for the Freia instrument.
@@ -128,14 +129,14 @@ def FreiaWorkflow(
     ----------
     run_norm:
         Normalization procedure to be used. See :class:`RunNormalization`.
-    mode:
+    wavelength_from:
         Mode for creating the wavelength lookup table. The 'analytical' mode uses
         analytical calculations to propagate and chop a pulse through the chopper
         cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
         individual neutrons through the chopper system and build the table.
         The 'file' mode loads a pre-computed table from a file.
     """
-    workflow = beamline.LoadNeXusWorkflow(mode=mode, **kwargs)
+    workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
     for provider in providers:
         workflow.insert(provider)
     insert_run_normalization(workflow, run_norm)
