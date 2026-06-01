@@ -100,12 +100,13 @@ def LookupTableWorkflow(
         Constrains the possible values of :class:`ess.reduce.nexus.types.MonitorType`
         and :class:`ess.reduce.nexus.types.Component`.
     """
-    mode = "simulation" if use_simulation else "analytical"
     if run_types is None:
         run_types = [AnyRun]
     if monitor_types is None:
         monitor_types = [FrameMonitor0]
 
     return GenericUnwrapWorkflow(
-        run_types=run_types, monitor_types=monitor_types, mode=mode
+        run_types=run_types,
+        monitor_types=monitor_types,
+        wavelength_from="simulation" if use_simulation else "analytical",
     )

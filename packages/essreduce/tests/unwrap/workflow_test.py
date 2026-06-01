@@ -28,7 +28,7 @@ from ess.reduce.unwrap import (
 sl = pytest.importorskip("sciline")
 
 
-def _make_workflow(mode) -> sciline.Pipeline:
+def _make_workflow(wavelength_from) -> sciline.Pipeline:
     sizes = {'detector_number': 10}
     detector_geometry = sc.DataArray(
         data=sc.ones(sizes=sizes),
@@ -77,7 +77,7 @@ def _make_workflow(mode) -> sciline.Pipeline:
     )
 
     wf = GenericUnwrapWorkflow(
-        run_types=[SampleRun], monitor_types=[FrameMonitor0], mode=mode
+        run_types=[SampleRun], monitor_types=[FrameMonitor0], wavelength_from=wavelength_from
     )
     wf[NeXusDetectorName] = "detector"
     wf[NeXusName[FrameMonitor0]] = "monitor"
@@ -108,14 +108,14 @@ def simulation_results_psc_choppers():
     )
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_GenericUnwrapWorkflow_computes_wavelength(
-    mode, detector_or_monitor, simulation_results_psc_choppers
+    wavelength_from, detector_or_monitor, simulation_results_psc_choppers
 ):
-    wf = _make_workflow(mode=mode)
+    wf = _make_workflow(wavelength_from=wavelength_from)
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     if detector_or_monitor == "monitor":
@@ -126,12 +126,12 @@ def test_GenericUnwrapWorkflow_computes_wavelength(
         assert 'wavelength' in wavs.bins.coords
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 def test_GenericUnwrapWorkflow_makes_different_luts_for_detector_and_monitor(
-    mode, simulation_results_psc_choppers
+    wavelength_from, simulation_results_psc_choppers
 ):
-    wf = _make_workflow(mode=mode)
-    if mode == "simulation":
+    wf = _make_workflow(wavelength_from=wavelength_from)
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     det_table = wf.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
@@ -144,13 +144,13 @@ def test_GenericUnwrapWorkflow_makes_different_luts_for_detector_and_monitor(
     )
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 def test_GenericUnwrapWorkflow_with_lut_from_file(
-    mode, tmp_path: pytest.TempPathFactory, simulation_results_psc_choppers
+    wavelength_from, tmp_path: pytest.TempPathFactory, simulation_results_psc_choppers
 ):
-    wf = _make_workflow(mode=mode)
+    wf = _make_workflow(wavelength_from=wavelength_from)
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     wf[unwrap.LtotalRange[SampleRun, snx.NXdetector]] = (
@@ -160,7 +160,7 @@ def test_GenericUnwrapWorkflow_with_lut_from_file(
     lut = wf.compute(unwrap.LookupTable[SampleRun, snx.NXdetector])
     lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    wf_from_file = _make_workflow(mode="file")
+    wf_from_file = _make_workflow(wavelength_from="file")
     wf_from_file[unwrap.LookupTableFilename[SampleRun, snx.NXdetector]] = (
         tmp_path / "lut.h5"
     ).as_posix()
@@ -177,13 +177,13 @@ def test_GenericUnwrapWorkflow_with_lut_from_file(
     assert 'wavelength' in detector.bins.coords
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 def test_GenericUnwrapWorkflow_with_lut_from_file_old_format(
-    mode, tmp_path: pytest.TempPathFactory, simulation_results_psc_choppers
+    wavelength_from, tmp_path: pytest.TempPathFactory, simulation_results_psc_choppers
 ):
-    wf = _make_workflow(mode=mode)
+    wf = _make_workflow(wavelength_from=wavelength_from)
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     wf[unwrap.LtotalRange[SampleRun, snx.NXdetector]] = (
@@ -204,7 +204,7 @@ def test_GenericUnwrapWorkflow_with_lut_from_file_old_format(
     )
     old_lut.save_hdf5(filename=tmp_path / "lut.h5")
 
-    wf_from_file = _make_workflow(mode="file")
+    wf_from_file = _make_workflow(wavelength_from="file")
     wf_from_file[unwrap.LookupTableFilename[SampleRun, snx.NXdetector]] = (
         tmp_path / "lut.h5"
     ).as_posix()

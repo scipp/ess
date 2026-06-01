@@ -133,14 +133,14 @@ def simulate_with_dream_choppers() -> dict[str, sl.Pipeline]:
 
 
 def setup_workflow(
-    mode: str,
+    wavelength_from: str,
     raw_data: sc.DataArray,
     ltotal: sc.Variable,
     choppers: dict[str, DiskChopper],
     source_position: sc.Variable,
     error_threshold: float = 0.1,
 ) -> sl.Pipeline:
-    wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[], mode=mode)
+    wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[], wavelength_from=wavelength_from)
     wf[RawDetector[SampleRun]] = raw_data
     wf[unwrap.DetectorLtotal[SampleRun]] = ltotal
     wf[NeXusDetectorName] = "detector"
@@ -150,7 +150,7 @@ def setup_workflow(
     return wf
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize(
     "ltotal",
     [
@@ -166,7 +166,7 @@ def setup_workflow(
 @pytest.mark.parametrize("time_offset_unit", ["s", "ms", "us", "ns"])
 @pytest.mark.parametrize("distance_unit", ["m", "mm"])
 def test_dream_wfm(
-    mode, ltotal, time_offset_unit, distance_unit, simulate_with_dream_choppers
+    wavelength_from, ltotal, time_offset_unit, distance_unit, simulate_with_dream_choppers
 ):
     monitors = {
         f"detector{i}": ltot for i, ltot in enumerate(ltotal.flatten(to="detector"))
@@ -202,14 +202,14 @@ def test_dream_wfm(
     ref = sc.sort(ref, key='id')
 
     wf = setup_workflow(
-        mode=mode,
+        wavelength_from=wavelength_from,
         raw_data=raw,
         ltotal=ltotal,
         choppers=choppers,
         source_position=source_position,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulate_with_dream_choppers
 
     wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
@@ -233,7 +233,7 @@ def simulate_with_dream_choppers_time_overlap() -> dict[str, sl.Pipeline]:
     )
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize(
     "ltotal",
     [
@@ -249,7 +249,7 @@ def simulate_with_dream_choppers_time_overlap() -> dict[str, sl.Pipeline]:
 @pytest.mark.parametrize("time_offset_unit", ["s", "ms", "us", "ns"])
 @pytest.mark.parametrize("distance_unit", ["m", "mm"])
 def test_dream_wfm_with_subframe_time_overlap(
-    mode,
+    wavelength_from,
     ltotal,
     time_offset_unit,
     distance_unit,
@@ -289,14 +289,14 @@ def test_dream_wfm_with_subframe_time_overlap(
     ref = sc.sort(ref, key='id')
 
     wf = setup_workflow(
-        mode=mode,
+        wavelength_from=wavelength_from,
         raw_data=raw,
         ltotal=ltotal,
         choppers=choppers,
         source_position=source_position,
         error_threshold=0.01,
     )
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = (
             simulate_with_dream_choppers_time_overlap
         )
@@ -427,7 +427,7 @@ def simulate_with_v20_choppers() -> dict[str, sl.Pipeline]:
     )
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize(
     "ltotal",
     [
@@ -441,7 +441,7 @@ def simulate_with_v20_choppers() -> dict[str, sl.Pipeline]:
 @pytest.mark.parametrize("time_offset_unit", ["s", "ms", "us", "ns"])
 @pytest.mark.parametrize("distance_unit", ["m", "mm"])
 def test_v20_compute_wavelengths_from_wfm(
-    mode, ltotal, time_offset_unit, distance_unit, simulate_with_v20_choppers
+    wavelength_from, ltotal, time_offset_unit, distance_unit, simulate_with_v20_choppers
 ):
     monitors = {
         f"detector{i}": ltot for i, ltot in enumerate(ltotal.flatten(to="detector"))
@@ -477,13 +477,13 @@ def test_v20_compute_wavelengths_from_wfm(
     ref = sc.sort(ref, key='id')
 
     wf = setup_workflow(
-        mode=mode,
+        wavelength_from=wavelength_from,
         raw_data=raw,
         ltotal=ltotal,
         choppers=choppers,
         source_position=source_position,
     )
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulate_with_v20_choppers
 
     wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
@@ -494,7 +494,7 @@ def test_v20_compute_wavelengths_from_wfm(
             (x.coords["wavelength"] - ref.coords["wavelength"])
             / ref.coords["wavelength"]
         )
-        if mode == "simulation":
+        if wavelength_from == "simulation":
             assert np.nanpercentile(diff.values, 99) < 0.02
         else:
             assert np.nanpercentile(diff.values, 90) < 0.05

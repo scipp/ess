@@ -12,21 +12,21 @@ from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow
 sl = pytest.importorskip("sciline")
 
 
-def _make_workflow(mode: str = "analytical") -> sl.Pipeline:
+def _make_workflow(wavelength_from: str = "analytical") -> sl.Pipeline:
     return GenericUnwrapWorkflow(
-        run_types=[AnyRun], monitor_types=[FrameMonitor0], mode=mode
+        run_types=[AnyRun], monitor_types=[FrameMonitor0], wavelength_from=wavelength_from
     )
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-@pytest.mark.parametrize("mode", ["analytical", "simulation"])
-def test_lut_workflow_computes_table(detector_or_monitor, mode):
-    wf = _make_workflow(mode)
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_computes_table(detector_or_monitor, wavelength_from):
+    wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 60
 
@@ -54,12 +54,12 @@ def test_lut_workflow_computes_table(detector_or_monitor, mode):
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-@pytest.mark.parametrize("mode", ["analytical", "simulation"])
-def test_lut_workflow_pulse_skipping(detector_or_monitor, mode):
-    wf = _make_workflow(mode)
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_pulse_skipping(detector_or_monitor, wavelength_from):
+    wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 62
     wf[unwrap.PulseStride[AnyRun]] = 2
@@ -81,12 +81,12 @@ def test_lut_workflow_pulse_skipping(detector_or_monitor, mode):
     ).to(unit=table.array.coords['event_time_offset'].unit)
 
 
-@pytest.mark.parametrize("mode", ["analytical", "simulation"])
-def test_lut_workflow_non_exact_distance_range(mode):
-    wf = _make_workflow(mode)
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_non_exact_distance_range(wavelength_from):
+    wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 63
     wf[unwrap.PulseStride[AnyRun]] = 1
@@ -166,12 +166,12 @@ def _make_choppers():
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-@pytest.mark.parametrize("mode", ["analytical", "simulation"])
-def test_lut_workflow_computes_table_with_choppers(detector_or_monitor, mode):
-    wf = _make_workflow(mode)
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_computes_table_with_choppers(detector_or_monitor, wavelength_from):
+    wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 64
     wf[unwrap.PulseStride[AnyRun]] = 1
@@ -204,12 +204,12 @@ def test_lut_workflow_computes_table_with_choppers(detector_or_monitor, mode):
     assert eto.max() < sc.scalar(6.9e4, unit="us").to(unit=eto.unit)
 
 
-@pytest.mark.parametrize("mode", ["analytical", "simulation"])
-def test_lut_workflow_computes_table_with_choppers_full_beamline_range(mode):
-    wf = _make_workflow(mode)
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_computes_table_with_choppers_full_beamline_range(wavelength_from):
+    wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 64
     wf[unwrap.PulseStride[AnyRun]] = 1
@@ -256,12 +256,12 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range(mode):
     assert eto.max() < sc.scalar(6.9e4, unit="us").to(unit=eto.unit)
 
 
-@pytest.mark.parametrize("mode", ["analytical", "simulation"])
-def test_lut_workflow_raises_for_distance_before_source(mode):
-    wf = _make_workflow(mode)
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_raises_for_distance_before_source(wavelength_from):
+    wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 10], unit='m')
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 65
     wf[unwrap.PulseStride[AnyRun]] = 1
@@ -280,15 +280,15 @@ def test_lut_workflow_raises_for_distance_before_source(mode):
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-@pytest.mark.parametrize("mode", ["analytical", "simulation"])
-def test_lut_workflow_computes_table_using_alias(detector_or_monitor, mode):
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_computes_table_using_alias(detector_or_monitor, wavelength_from):
     # LookupTableWorkflow is an old (deprecated) alias for GenericUnwrapWorkflow
-    wf = LookupTableWorkflow(use_simulation=(mode == "simulation"))
+    wf = LookupTableWorkflow(use_simulation=(wavelength_from == "simulation"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 60
 

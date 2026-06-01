@@ -33,6 +33,8 @@ def simulate_with_tof(choppers, pulse_stride, neutrons=None, seed=None):
         pulse_stride=pulse_stride,
         seed=seed,
         facility="ess",
+        wmin=None,
+        wmax=None,
     )
 
 
@@ -53,9 +55,11 @@ def simulation_results_pulse_skipping():
     )
 
 
-def _initialize_workflow(mode, distance, error_threshold, choppers):
+def _initialize_workflow(wavelength_from, distance, error_threshold, choppers):
     wf = GenericUnwrapWorkflow(
-        run_types=[SampleRun], monitor_types=[FrameMonitor0], mode=mode
+        run_types=[SampleRun],
+        monitor_types=[FrameMonitor0],
+        wavelength_from=wavelength_from,
     )
     wf[NeXusDetectorName] = "detector"
     wf[unwrap.DetectorLtotal[SampleRun]] = distance
@@ -71,8 +75,8 @@ def _initialize_workflow(mode, distance, error_threshold, choppers):
     return wf
 
 
-def _make_workflow_event_mode(
-    mode,
+def _make_workflow_event_wavelength_from(
+    wavelength_from,
     distance,
     choppers,
     seed,
@@ -90,7 +94,10 @@ def _make_workflow_event_mode(
     mon, ref = beamline.get_monitor("detector")
 
     wf = _initialize_workflow(
-        mode=mode, distance=distance, error_threshold=error_threshold, choppers=choppers
+        wavelength_from=wavelength_from,
+        distance=distance,
+        error_threshold=error_threshold,
+        choppers=choppers,
     )
 
     if detector_or_monitor == "detector":
@@ -103,8 +110,8 @@ def _make_workflow_event_mode(
     return wf, ref
 
 
-def _make_workflow_histogram_mode(
-    mode, dim, distance, choppers, seed, error_threshold, detector_or_monitor
+def _make_workflow_histogram_wavelength_from(
+    wavelength_from, dim, distance, choppers, seed, error_threshold, detector_or_monitor
 ):
     beamline = fakes.FakeBeamline(
         choppers=choppers,
@@ -121,7 +128,10 @@ def _make_workflow_histogram_mode(
     ).rename(event_time_offset=dim)
 
     wf = _initialize_workflow(
-        mode=mode, distance=distance, error_threshold=error_threshold, choppers=choppers
+        wavelength_from=wavelength_from,
+        distance=distance,
+        error_threshold=error_threshold,
+        choppers=choppers,
     )
 
     if detector_or_monitor == "detector":
@@ -151,7 +161,9 @@ def _validate_result_events(wavs, ref, percentile, diff_threshold, rtol):
     assert sc.isclose(ref.data.sum(), nevents, rtol=sc.scalar(rtol))
 
 
-def _validate_result_histogram_mode(wavs, ref, percentile, diff_threshold, rtol):
+def _validate_result_histogram_wavelength_from(
+    wavs, ref, percentile, diff_threshold, rtol
+):
     assert "tof" not in wavs.coords
     assert "time_of_flight" not in wavs.coords
     assert "frame_time" not in wavs.coords
@@ -166,16 +178,16 @@ def _validate_result_histogram_mode(wavs, ref, percentile, diff_threshold, rtol)
     assert sc.isclose(ref.data.nansum(), wavs.data.nansum(), rtol=sc.scalar(rtol))
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_unwrap_with_no_choppers(mode, detector_or_monitor) -> None:
+def test_unwrap_with_no_choppers(wavelength_from, detector_or_monitor) -> None:
     # At this small distance the frames are not overlapping (with the given wavelength
     # range), despite not using any choppers.
     distance = sc.scalar(10.0, unit="m")
     choppers = {}
 
-    wf, ref = _make_workflow_event_mode(
-        mode=mode,
+    wf, ref = _make_workflow_event_wavelength_from(
+        wavelength_from=wavelength_from,
         distance=distance,
         choppers=choppers,
         seed=1,
@@ -184,7 +196,7 @@ def test_unwrap_with_no_choppers(mode, detector_or_monitor) -> None:
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulate_with_tof(
             choppers=choppers, pulse_stride=1, neutrons=300_000, seed=1234
         )
@@ -204,13 +216,13 @@ def test_unwrap_with_no_choppers(mode, detector_or_monitor) -> None:
 # At 62m, events are split between the second and third pulse.
 # At 90m, events are split between the third and fourth pulse.
 @pytest.mark.parametrize("dist", [25.0, 50.0, 62.0, 90.0])
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_standard_unwrap(
-    dist, mode, detector_or_monitor, simulation_results_psc_choppers
+    dist, wavelength_from, detector_or_monitor, simulation_results_psc_choppers
 ) -> None:
-    wf, ref = _make_workflow_event_mode(
-        mode=mode,
+    wf, ref = _make_workflow_event_wavelength_from(
+        wavelength_from=wavelength_from,
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.psc_choppers(),
         seed=7,
@@ -219,7 +231,7 @@ def test_standard_unwrap(
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     if detector_or_monitor == "detector":
@@ -232,7 +244,7 @@ def test_standard_unwrap(
         ref=ref,
         percentile=100,
         diff_threshold=0.02,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
 
 
@@ -241,14 +253,14 @@ def test_standard_unwrap(
 # At 62m, events are split between the second and third pulse.
 # At 90m, events are split between the third and fourth pulse.
 @pytest.mark.parametrize("dist", [25.0, 50.0, 62.0, 90.0])
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("dim", ["time_of_flight", "tof", "frame_time"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_standard_unwrap_histogram_mode(
-    dist, mode, dim, detector_or_monitor, simulation_results_psc_choppers
+def test_standard_unwrap_histogram_wavelength_from(
+    dist, wavelength_from, dim, detector_or_monitor, simulation_results_psc_choppers
 ) -> None:
-    wf, ref = _make_workflow_histogram_mode(
-        mode=mode,
+    wf, ref = _make_workflow_histogram_wavelength_from(
+        wavelength_from=wavelength_from,
         dim=dim,
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.psc_choppers(),
@@ -257,7 +269,7 @@ def test_standard_unwrap_histogram_mode(
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     if detector_or_monitor == "detector":
@@ -265,23 +277,23 @@ def test_standard_unwrap_histogram_mode(
     else:
         wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
-    _validate_result_histogram_mode(
+    _validate_result_histogram_wavelength_from(
         wavs=wavs,
         ref=ref,
         percentile=96,
         diff_threshold=0.4,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
 
 
 @pytest.mark.parametrize("dist", [60.0, 100.0])
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_unwrap(
-    dist, mode, detector_or_monitor, simulation_results_pulse_skipping
+    dist, wavelength_from, detector_or_monitor, simulation_results_pulse_skipping
 ) -> None:
-    wf, ref = _make_workflow_event_mode(
-        mode=mode,
+    wf, ref = _make_workflow_event_wavelength_from(
+        wavelength_from=wavelength_from,
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.pulse_skipping_choppers(),
         seed=432,
@@ -290,7 +302,7 @@ def test_pulse_skipping_unwrap(
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_pulse_skipping
 
     if detector_or_monitor == "detector":
@@ -303,18 +315,20 @@ def test_pulse_skipping_unwrap(
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
-def test_pulse_skipping_unwrap_180_phase_shift(mode, detector_or_monitor) -> None:
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
+def test_pulse_skipping_unwrap_180_phase_shift(
+    wavelength_from, detector_or_monitor
+) -> None:
     choppers = fakes.pulse_skipping_choppers()
     choppers["pulse_skipping"].phase.value += 180.0
 
-    wf, ref = _make_workflow_event_mode(
-        mode=mode,
+    wf, ref = _make_workflow_event_wavelength_from(
+        wavelength_from=wavelength_from,
         distance=sc.scalar(100.0, unit="m"),
         choppers=choppers,
         seed=55,
@@ -323,7 +337,7 @@ def test_pulse_skipping_unwrap_180_phase_shift(mode, detector_or_monitor) -> Non
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulate_with_tof(
             choppers=choppers, pulse_stride=2, neutrons=500_000, seed=111
         )
@@ -338,18 +352,18 @@ def test_pulse_skipping_unwrap_180_phase_shift(mode, detector_or_monitor) -> Non
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
 
 
 @pytest.mark.parametrize("dist", [60.0, 100.0])
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_stride_offset_guess_gives_expected_result(
-    dist, mode, detector_or_monitor, simulation_results_pulse_skipping
+    dist, wavelength_from, detector_or_monitor, simulation_results_pulse_skipping
 ) -> None:
-    wf, ref = _make_workflow_event_mode(
-        mode=mode,
+    wf, ref = _make_workflow_event_wavelength_from(
+        wavelength_from=wavelength_from,
         distance=sc.scalar(dist, unit="m"),
         choppers=fakes.pulse_skipping_choppers(),
         seed=97,
@@ -358,7 +372,7 @@ def test_pulse_skipping_stride_offset_guess_gives_expected_result(
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_pulse_skipping
 
     if detector_or_monitor == "detector":
@@ -371,14 +385,14 @@ def test_pulse_skipping_stride_offset_guess_gives_expected_result(
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
-    mode, detector_or_monitor
+    wavelength_from, detector_or_monitor
 ) -> None:
     choppers = fakes.pulse_skipping_choppers()
     choppers['chopper'] = DiskChopper(
@@ -392,8 +406,8 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
         radius=sc.scalar(30.0, unit="cm"),
     )
 
-    wf, ref = _make_workflow_event_mode(
-        mode=mode,
+    wf, ref = _make_workflow_event_wavelength_from(
+        wavelength_from=wavelength_from,
         distance=sc.scalar(130.0, unit="m"),
         choppers=choppers,
         seed=6,
@@ -402,7 +416,7 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulate_with_tof(
             choppers=choppers, pulse_stride=2, neutrons=500_000, seed=222
         )
@@ -417,14 +431,14 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
-    mode, detector_or_monitor
+    wavelength_from, detector_or_monitor
 ) -> None:
     distance = sc.scalar(100.0, unit="m")
     choppers = fakes.pulse_skipping_choppers()
@@ -439,9 +453,12 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     mon, ref = beamline.get_monitor("detector")
 
     wf = _initialize_workflow(
-        mode=mode, distance=distance, error_threshold=np.inf, choppers=choppers
+        wavelength_from=wavelength_from,
+        distance=distance,
+        error_threshold=np.inf,
+        choppers=choppers,
     )
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulate_with_tof(
             choppers=choppers, pulse_stride=2, neutrons=300_000, seed=1234
         )
@@ -497,14 +514,14 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     )
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_pulse_skipping_stride_3(mode, detector_or_monitor) -> None:
+def test_pulse_skipping_stride_3(wavelength_from, detector_or_monitor) -> None:
     choppers = fakes.pulse_skipping_choppers()
     choppers["pulse_skipping"].frequency.value = -14.0 / 3.0
 
-    wf, ref = _make_workflow_event_mode(
-        mode=mode,
+    wf, ref = _make_workflow_event_wavelength_from(
+        wavelength_from=wavelength_from,
         distance=sc.scalar(150.0, unit="m"),
         choppers=choppers,
         seed=68,
@@ -513,7 +530,7 @@ def test_pulse_skipping_stride_3(mode, detector_or_monitor) -> None:
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulate_with_tof(
             choppers=choppers, pulse_stride=3, neutrons=500_000, seed=111
         )
@@ -528,17 +545,17 @@ def test_pulse_skipping_stride_3(mode, detector_or_monitor) -> None:
         ref=ref,
         percentile=100,
         diff_threshold=0.1,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
 
 
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
-def test_pulse_skipping_unwrap_histogram_mode(
-    mode, detector_or_monitor, simulation_results_pulse_skipping
+def test_pulse_skipping_unwrap_histogram_wavelength_from(
+    wavelength_from, detector_or_monitor, simulation_results_pulse_skipping
 ) -> None:
-    wf, ref = _make_workflow_histogram_mode(
-        mode=mode,
+    wf, ref = _make_workflow_histogram_wavelength_from(
+        wavelength_from=wavelength_from,
         dim='time_of_flight',
         distance=sc.scalar(50.0, unit="m"),
         choppers=fakes.pulse_skipping_choppers(),
@@ -547,7 +564,7 @@ def test_pulse_skipping_unwrap_histogram_mode(
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_pulse_skipping
 
     if detector_or_monitor == "detector":
@@ -555,23 +572,23 @@ def test_pulse_skipping_unwrap_histogram_mode(
     else:
         wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
 
-    _validate_result_histogram_mode(
+    _validate_result_histogram_wavelength_from(
         wavs=wavs,
         ref=ref,
         percentile=96,
         diff_threshold=0.4,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
 
 
 @pytest.mark.parametrize("dtype", ["int32", "int64"])
-@pytest.mark.parametrize("mode", ["simulation", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 def test_unwrap_int(
-    dtype, mode, detector_or_monitor, simulation_results_psc_choppers
+    dtype, wavelength_from, detector_or_monitor, simulation_results_psc_choppers
 ) -> None:
-    wf, ref = _make_workflow_event_mode(
-        mode=mode,
+    wf, ref = _make_workflow_event_wavelength_from(
+        wavelength_from=wavelength_from,
         distance=sc.scalar(62.0, unit="m"),
         choppers=fakes.psc_choppers(),
         seed=2,
@@ -580,7 +597,7 @@ def test_unwrap_int(
         detector_or_monitor=detector_or_monitor,
     )
 
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
 
     if detector_or_monitor == "detector":
@@ -603,5 +620,5 @@ def test_unwrap_int(
         ref=ref,
         percentile=100,
         diff_threshold=0.02,
-        rtol=0.2 if mode == "simulation" else 0.01,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
