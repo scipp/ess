@@ -207,14 +207,14 @@ def compute_detector_tof(da: WavelengthDetector[RunType]) -> TofDetector[RunType
 
 @register_workflow
 def NMXWorkflow(
-    mode: Literal["analytical", "simulation", "file"] = "file", **kwargs
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file", **kwargs
 ) -> sciline.Pipeline:
     """
     Workflow for reducing data from the NMX instrument at ESS.
 
     Parameters
     ----------
-    mode:
+    wavelength_from:
         Mode for creating the wavelength lookup table. The 'analytical' mode uses
         analytical calculations to propagate and chop a pulse through the chopper
         cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
@@ -222,7 +222,10 @@ def NMXWorkflow(
         The 'file' mode loads a pre-computed table from a file.
     """
     generic_wf = GenericUnwrapWorkflow(
-        run_types=[SampleRun], monitor_types=[], mode=mode, **kwargs
+        run_types=[SampleRun],
+        monitor_types=[],
+        wavelength_from=wavelength_from,
+        **kwargs,
     )
 
     generic_wf.insert(_retrieve_crystal_rotation)
@@ -255,13 +258,13 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
 
     """
     if config.lookup_table_file_path is not None:
-        wf = NMXWorkflow(mode="file")
+        wf = NMXWorkflow(wavelength_from="file")
         wf[LookupTableFilename[SampleRun, snx.NXdetector]] = (
             config.lookup_table_file_path
         )
         # TODO: also add monitor when we have monitors in the NMXWorkflow.
     else:
-        wf = NMXWorkflow(mode="simulation")
+        wf = NMXWorkflow(wavelength_from="simulation")
         wmax = sc.scalar(config.tof_simulation_max_wavelength, unit='angstrom')
         wmin = sc.scalar(config.tof_simulation_min_wavelength, unit='angstrom')
         wf[SimulationMaxWavelength] = wmax

@@ -14,7 +14,7 @@ def GenericUnwrapWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
-    mode: Literal["analytical", "simulation", "file"] = "file",
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file",
 ) -> sciline.Pipeline:
     """
     Generic workflow for computing the neutron wavelength for detector and monitor
@@ -44,7 +44,7 @@ def GenericUnwrapWorkflow(
         List of monitor types to include in the workflow.
         Constrains the possible values of :class:`ess.reduce.nexus.types.MonitorType`
         and :class:`ess.reduce.nexus.types.Component`.
-    mode:
+    wavelength_from:
         Mode for how the lookup table is created. Options are:
         - "analytical": Create the lookup table using analytical formulas to propagate
           and chop a pulse of neutrons through the chopper cascade. This is fast and
@@ -63,9 +63,12 @@ def GenericUnwrapWorkflow(
     """
     wf = GenericNeXusWorkflow(run_types=run_types, monitor_types=monitor_types)
 
-    for provider in (*to_wavelength.providers(), *lut.providers(mode=mode)):
+    for provider in (
+        *to_wavelength.providers(),
+        *lut.providers(wavelength_from=wavelength_from),
+    ):
         wf.insert(provider)
-    for key, value in lut.default_parameters(mode=mode).items():
+    for key, value in lut.default_parameters(wavelength_from=wavelength_from).items():
         wf[key] = value
 
     return wf

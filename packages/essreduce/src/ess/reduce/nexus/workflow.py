@@ -561,6 +561,15 @@ def parse_raw_choppers(
 
 
 def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
+    """
+    Convert the raw choppers (DataGroup with chopper information) to the
+    ``scippneutron.DiskChopper`` objects used for wavelength calculation.
+
+    Parameters
+    ----------
+    choppers:
+        Raw choppers loaded from the NeXus file, as a DataGroup.
+    """
     disk_choppers = {
         # If there is no beam_position, we set it to 0 by default.
         key: DiskChopper.from_nexus(

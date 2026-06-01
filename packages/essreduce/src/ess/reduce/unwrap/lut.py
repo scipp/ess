@@ -890,9 +890,9 @@ def load_lookup_table_from_file(
 
 
 def providers(
-    mode: Literal["analytical", "simulation", "file"] = "analytical",
+    wavelength_from: Literal["analytical", "simulation", "file"] = "analytical",
 ) -> tuple[Callable, ...]:
-    if mode == "file":
+    if wavelength_from == "file":
         return (load_lookup_table_from_file,)
 
     common = (
@@ -901,28 +901,28 @@ def providers(
         guess_pulse_stride_from_choppers,
     )
 
-    if mode == "analytical":
+    if wavelength_from == "analytical":
         extra = (
             make_wavelength_lut_from_polygons,
             compute_frame_sequence,
         )
 
-    elif mode == "simulation":
+    elif wavelength_from == "simulation":
         extra = (
             make_wavelength_lut_from_simulation,
             simulate_chopper_cascade_using_tof,
         )
     else:
-        raise ValueError(f"Unknown lookup table provider mode: {mode}")
+        raise ValueError(f"Unknown wavelength lookup method: {wavelength_from}")
 
     return common + extra
 
 
 def default_parameters(
-    mode: Literal["analytical", "simulation", "file"] = "analytical",
+    wavelength_from: Literal["analytical", "simulation", "file"] = "analytical",
 ) -> dict:
     params = {PulseStrideOffset: None}
-    if mode == "file":
+    if wavelength_from == "file":
         return params
 
     params.update(
@@ -939,7 +939,7 @@ def default_parameters(
             ),
         }
     )
-    if mode == "simulation":
+    if wavelength_from == "simulation":
         params.update(
             {
                 NumberOfSimulatedNeutrons: 1_000_000,

@@ -4,6 +4,8 @@
 Default parameters and workflow for Odin.
 """
 
+from typing import Literal
+
 import sciline
 
 from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
@@ -42,13 +44,27 @@ def default_parameters() -> dict:
     }
 
 
-def OdinWorkflow(**kwargs) -> sciline.Pipeline:
+def OdinWorkflow(
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file", **kwargs
+) -> sciline.Pipeline:
     """
     Workflow with default parameters for Odin.
-    """
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. The 'analytical' mode uses
+        analytical calculations to propagate and chop a pulse through the chopper
+        cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
+        individual neutrons through the chopper system and build the table.
+        The 'file' mode loads a pre-computed table from a file.
+    kwargs:
+        Additional keyword arguments are forwarded to the base
+        :func:`GenericUnwrapWorkflow`."""
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun],
         monitor_types=[BeamMonitor1, BeamMonitor2, BeamMonitor3, BeamMonitor4],
+        wavelength_from=wavelength_from,
         **kwargs,
     )
     for key, param in default_parameters().items():
@@ -56,12 +72,25 @@ def OdinWorkflow(**kwargs) -> sciline.Pipeline:
     return workflow
 
 
-def OdinBraggEdgeWorkflow(**kwargs) -> sciline.Pipeline:
+def OdinBraggEdgeWorkflow(
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file", **kwargs
+) -> sciline.Pipeline:
     """
     Workflow with default parameters and masking providers
     for Odin Bragg-edge reduction.
-    """
-    workflow = OdinWorkflow(**kwargs)
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. The 'analytical' mode uses
+        analytical calculations to propagate and chop a pulse through the chopper
+        cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
+        individual neutrons through the chopper system and build the table.
+        The 'file' mode loads a pre-computed table from a file.
+    kwargs:
+        Additional keyword arguments are forwarded to the base
+        :func:`GenericUnwrapWorkflow`."""
+    workflow = OdinWorkflow(wavelength_from=wavelength_from, **kwargs)
     for provider in (*masking_providers,):
         workflow.insert(provider)
     return workflow

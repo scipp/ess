@@ -99,7 +99,7 @@ def _collect_reducer_software() -> ReducerSoftware:
 
 
 def DreamWorkflow(
-    mode: Literal["analytical", "simulation", "file"] = "file", **kwargs
+    wavelength_from: Literal["analytical", "simulation", "file"] = "file", **kwargs
 ) -> sciline.Pipeline:
     """
     Dream generic workflow with default parameters.
@@ -112,7 +112,7 @@ def DreamWorkflow(
 
     Parameters
     ----------
-    mode:
+    wavelength_from:
         Mode for creating the wavelength lookup table. The 'analytical' mode uses
         analytical calculations to propagate and chop a pulse through the chopper
         cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
@@ -125,13 +125,13 @@ def DreamWorkflow(
     wf = GenericUnwrapWorkflow(
         run_types=[SampleRun, VanadiumRun, EmptyCanRun],
         monitor_types=[BunkerMonitor, CaveMonitor],
-        mode=mode,
+        wavelength_from=wavelength_from,
         **kwargs,
     )
     wf[DetectorBankSizes] = DETECTOR_BANK_SIZES
     wf[NeXusName[BunkerMonitor]] = "monitor_bunker"
     wf[NeXusName[CaveMonitor]] = "monitor_cave"
-    if mode == "file":
+    if wavelength_from == "file":
         wf.insert(_get_lookup_table_filename_from_configuration)
     wf[ReducerSoftware] = _collect_reducer_software()
     wf[LookupTableRelativeErrorThreshold] = {

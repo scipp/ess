@@ -257,14 +257,13 @@ def reduction(
     # Insert parameters and cache intermediate results
     base_wf[Filename[SampleRun]] = input_file_path
 
-    # if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
-    #     # We cache the lookup table only if we need to calculate time-of-flight
-    #     # coordinates. If `event_time_offset` was requested,
-    #     # we do not have to calculate the lookup table at all.
-    #     base_wf[LookupTable] = base_wf.compute(LookupTable)
-
-    table = base_wf.compute(LookupTable[SampleRun, snx.NXdetector])
-    table.save_hdf5("lut.h5")
+    if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
+        # We cache the lookup table only if we need to calculate time-of-flight
+        # coordinates. If `event_time_offset` was requested,
+        # we do not have to calculate the lookup table at all.
+        base_wf[LookupTable[SampleRun, snx.NXdetector]] = base_wf.compute(
+            LookupTable[SampleRun, snx.NXdetector]
+        )
 
     metadatas = base_wf.compute((NMXSampleMetadata, NMXSourceMetadata))
 
@@ -283,9 +282,6 @@ def reduction(
         detector_metas[detector_name] = results[NMXDetectorMetadata]
         # Binning into 1 bin and getting final tof bin edges later.
         tof_das[detector_name] = results[target_type]
-
-        # lut = cur_wf.compute(LookupTable[SampleRun, snx.NXdetector])
-        # lut.save_hdf5(f"lut-from-polygons-{detector_name}.h5")
 
     # Make tof bin edges covering all detectors
     t_coord_name = _retrieve_time_bin_coordinate_name(wf_config=config.workflow)
@@ -329,9 +325,6 @@ def reduction(
         instrument=NMXInstrument(detectors=detector_results, source=source_meta),
         sample=sample_meta,
     )
-
-    # if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
-    #     results.lookup_table = base_wf.compute(LookupTable[SampleRun, snx.NXdetector])
 
     if not config.output.skip_file_output:
         save_results(
