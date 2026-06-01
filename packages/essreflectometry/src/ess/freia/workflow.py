@@ -5,7 +5,6 @@ from typing import Literal
 
 import sciline
 import scipp as sc
-
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ess.reduce.workflow import register_workflow
 
