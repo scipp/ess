@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 import pytest
 import scipp as sc
 import scipp.testing
-from ess.powder.transform import (
+from ess.diffraction.pdf import (
     _covariance_of_matrix_vector_product,
     compute_pdf_from_structure_factor,
 )

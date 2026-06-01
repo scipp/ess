@@ -7,9 +7,13 @@ Components for diffraction experiments (powder and single crystal).
 
 import importlib.metadata
 
+from . import pdf
+
 try:
     __version__ = importlib.metadata.version("essdiffraction")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 del importlib
+
+__all__ = ["pdf"]

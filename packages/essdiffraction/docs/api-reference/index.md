@@ -1,8 +1,25 @@
 # API Reference
 
+## ESSdiffraction
+
+### Submodules
+
+```{eval-rst}
+.. currentmodule:: ess.diffraction
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   pdf
+   peaks
+```
+
 ## ESSpowder
 
 ### Module Attributes
+
 ```{eval-rst}
 .. currentmodule:: ess.powder
 
@@ -37,16 +54,13 @@
    grouping
    logging
    masking
-   peaks
    smoothing
-   transform
    types
 ```
 
 ## DREAM
 
 ### Workflows
-
 
 ```{eval-rst}
 .. currentmodule:: ess.dream
@@ -103,7 +117,6 @@
 
 ### Workflows
 
-
 ```{eval-rst}
 .. currentmodule:: ess.beer
 
@@ -143,7 +156,6 @@
 ## MAGIC
 
 ### Workflows
-
 
 ```{eval-rst}
 .. currentmodule:: ess.magic
