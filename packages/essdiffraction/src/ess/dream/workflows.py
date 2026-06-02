@@ -112,11 +112,9 @@ def DreamWorkflow(
     Parameters
     ----------
     wavelength_from:
-        Mode for creating the wavelength lookup table. The 'analytical' mode uses
-        analytical calculations to propagate and chop a pulse through the chopper
-        cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
-        individual neutrons through the chopper system and build the table.
-        The 'file' mode loads a pre-computed table from a file.
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     kwargs:
         Additional keyword arguments are forwarded to the base
         :func:`GenericUnwrapWorkflow`.

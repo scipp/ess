@@ -107,11 +107,9 @@ def EstiaMcStasWorkflow(
     run_norm:
         Normalization procedure to be used. See :class:`RunNormalization`.
     wavelength_from:
-        Mode for creating the wavelength lookup table. The 'analytical' mode uses
-        analytical calculations to propagate and chop a pulse through the chopper
-        cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
-        individual neutrons through the chopper system and build the table.
-        The 'file' mode loads a pre-computed table from a file.
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     """
     workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
     for provider in mcstas_providers:
@@ -135,11 +133,9 @@ def EstiaWorkflow(
     run_norm:
         Normalization procedure to be used. See :class:`RunNormalization`.
     wavelength_from:
-        Mode for creating the wavelength lookup table. The 'analytical' mode uses
-        analytical calculations to propagate and chop a pulse through the chopper
-        cascade and build the lookup table. The 'simulation' mode uses ``tof`` to trace
-        individual neutrons through the chopper system and build the table.
-        The 'file' mode loads a pre-computed table from a file.
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     """
     workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
     for provider in providers:

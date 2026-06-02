@@ -44,16 +44,9 @@ def GenericUnwrapWorkflow(
         Constrains the possible values of :class:`ess.reduce.nexus.types.MonitorType`
         and :class:`ess.reduce.nexus.types.Component`.
     wavelength_from:
-        Mode for how the lookup table is created. Options are:
-        - "analytical": Create the lookup table using analytical formulas to propagate
-          and chop a pulse of neutrons through the chopper cascade. This is fast and
-          accurate.
-        - "simulation": Create the lookup table by simulating individual neutrons
-          traveling through the chopper system using the `tof` package. This is slower
-          but can be more accurate if the spread in neutron wavelengths is large at
-          the detector.
-        - "file": Load the lookup table from a file. In this case, the workflow will
-          expect a :class:`LookupTableFilename` to be provided as input.
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
 
     Returns
     -------
