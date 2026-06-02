@@ -93,6 +93,14 @@ jobs:
           tag: reduced_data_nightly
           overwrite: true
           prerelease: true
+      - name: Update release notes
+        if: steps.check.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release edit reduced_data_nightly \
+            --notes "Automated nightly build from $(date -u +%Y-%m-%dT%H:%MZ) (commit ${GITHUB_SHA::7})"
 
   lower-bound:
     name: Lower bound ${{ matrix.package }}
