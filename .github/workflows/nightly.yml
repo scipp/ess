@@ -1,7 +1,6 @@
 name: Nightly Tests
 
 on:
-  pull_request:
   workflow_dispatch:
   schedule:
     - cron: "30 1 * * 1-5"
