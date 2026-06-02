@@ -9,6 +9,7 @@ neutron time-of-arrival at the detectors.
 from ..nexus.types import DiskChoppers
 from .lut import (
     BeamlineComponentReading,
+    ChopperFrameSequence,
     DistanceResolution,
     LookupTableWorkflow,
     LtotalRange,
@@ -17,6 +18,7 @@ from .lut import (
     PulseStride,
     SimulationResults,
     SimulationSeed,
+    SourceBounds,
     SourcePosition,
     TimeResolution,
     simulate_chopper_cascade_using_tof,
@@ -37,6 +39,7 @@ from .workflow import GenericUnwrapWorkflow
 
 __all__ = [
     "BeamlineComponentReading",
+    "ChopperFrameSequence",
     "DetectorLtotal",
     "DiskChoppers",
     "DistanceResolution",
@@ -54,6 +57,7 @@ __all__ = [
     "PulseStrideOffset",
     "SimulationResults",
     "SimulationSeed",
+    "SourceBounds",
     "SourcePosition",
     "TimeResolution",
     "WavelengthDetector",

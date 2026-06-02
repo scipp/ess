@@ -31,14 +31,14 @@ dynamic = ["version"]
 
 dependencies = [
   "dask>=2022.1.0",
-  "graphviz",
+  "graphviz>=0.20",
   "plopp[all]>=23.10.0",
   "sciline>=23.9.1",
   "scipp>=25.4.0",
   "scippneutron>=24.12.0",
   "scippnexus>=23.11.1",
   "tifffile>=2024.7.2",
-  "essreduce>=26.4.0",
+  "essreduce>=26.5.0",
   "scitiff>=25.7",
 ]
 
@@ -46,23 +46,23 @@ dependencies = [
 test = [
     "pytest>=8.0",
     "pooch>=1.5",
-    "tof>=25.08.0",
+    "tof>=26.3.0",
     "scitiff>=24.6.0",
 ]
 docs = [
-    "autodoc-pydantic",
-    "ipykernel",
-    "ipython!=8.7.0",
-    "myst-parser",
-    "nbsphinx",
+    "autodoc-pydantic>=2.0.0",
+    "ipykernel>=6.20.0",
+    "ipython>=8.8.0,!=8.7.0",
+    "myst-parser>=2.0.0",
+    "nbsphinx>=0.9.3",
     "pooch>=1.5",
     "pydata-sphinx-theme>=0.14",
     "sphinx>=7",
-    "sphinx-autodoc-typehints",
-    "sphinx-copybutton",
-    "sphinx-design",
+    "sphinx-autodoc-typehints>=1.24.0",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.5.0",
     "tof>=25.08.0",
-    "tqdm",
+    "tqdm>=4.64.0",
 ]
 
 [project.urls]

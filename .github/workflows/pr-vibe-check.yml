@@ -31,7 +31,6 @@ jobs:
     outputs:
       all_labels: ${{ steps.all-labels.outputs.all_labels }}
       new_labels: ${{ steps.new-labels.outputs.new_labels }}
-      title_prefix: ${{ steps.title-check.outputs.title_prefix }}
       new_title: ${{ steps.title-check.outputs.new_title }}
     if: ${{ github.event.action == 'opened' || github.event.action == 'closed' || github.event.action == 'reopened' }}
     steps:
@@ -80,7 +79,6 @@ jobs:
           # Only one label
           if [[ ${#labels[@]} -eq 1  ]]; then
             title_prefix="[${labels[0]^^}]";
-            echo "title_prefix=${title_prefix}" >> "$GITHUB_OUTPUT";
             echo "new_title=${title_prefix} ${original_title}" >> "$GITHUB_OUTPUT";
           # Ignore multiple labels
           elif [[ ${#labels[@]} -gt 1  ]]; then
@@ -93,14 +91,12 @@ jobs:
     needs:
       - check-pr
     env:
-       all_labels: ${{ needs.check-pr.outputs.all_labels }}
        new_labels: ${{ needs.check-pr.outputs.new_labels }}
-       title_prefix: ${{ needs.check-pr.outputs.title_prefix }}
        new_title: ${{ needs.check-pr.outputs.new_title }}
        # The bot needs this token for editing PR.
        GH_TOKEN: ${{ github.token }}
     permissions:
-      # The bot write comments, add labels or update the title of PR.
+      # The bot add labels or update the title of PR.
       pull-requests: write
     # If there is any new label or new title
     if: ${{ needs.check-pr.outputs.new_labels || needs.check-pr.outputs.new_title }}
@@ -114,23 +110,9 @@ jobs:
           combined_label=${labels[0]};
           for label in ${labels[@]:1}; do combined_label="${combined_label},${label}"; done
           gh pr edit ${PR_NUM} --add-label ${combined_label};
-      - name: Collect comments about the new labels
-        id: new-labels-add-to-report
-        if: ${{ needs.check-pr.outputs.new_labels }}
-        run: |
-          echo "Hi! Your PR was missing some labels 🔖 so I added them: ${new_labels}" >> pr-comment.md;
       - name: Add missing title prefix to the PR
         id: edit-title-prefix
         if: ${{ needs.check-pr.outputs.new_title }}
         run: |
           echo "Title doesn't have any relevant prefix... adding one...";
           gh pr edit ${PR_NUM} --title "${new_title}";
-      - name: Collect comments about the new title
-        id: new-title-add-to-report
-        if: ${{ needs.check-pr.outputs.new_title }}
-        run: |
-          if [[ -f pr-comment.md ]]; then greeting="Hi Again 👋!"; else greeting="Hi 👋!"; fi
-          echo "${greeting} I added the missing prefix: ${title_prefix} to the title." >> pr-comment.md;
-      - name: Leave a comment about the changes.
-        id: report
-        run: gh pr comment ${PR_NUM} -F pr-comment.md;

@@ -35,6 +35,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essimaging:
@@ -44,6 +45,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essnmx:
@@ -53,6 +55,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essreflectometry:
@@ -62,6 +65,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essdiffraction:
@@ -71,6 +75,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             esssans:
@@ -80,6 +85,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
             essspectroscopy:
@@ -89,6 +95,7 @@ jobs:
               - 'pixi.lock'
               - 'pixi.toml'
               - '.github/workflows/ci.yml'
+              - '.github/workflows/docs.yml'
               - '.pre-commit-config.yaml'
               - '.python-version'
 
@@ -108,7 +115,7 @@ jobs:
 
   test:
     name: Test ${{ matrix.package }}
-    needs: [changes, formatting]
+    needs: [ changes, formatting ]
     if: needs.changes.outputs.packages != '[]'
     strategy:
       fail-fast: false
@@ -129,34 +136,23 @@ jobs:
 
   docs:
     name: Docs ${{ matrix.package }}
-    needs: [changes, test]
+    needs: [ changes, test ]
     if: needs.changes.outputs.packages != '[]'
     strategy:
       fail-fast: false
       matrix:
         package: ${{ fromJSON(needs.changes.outputs.packages) }}
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.9.4
-        with:
-          pixi-version: v0.68.0
-          frozen: true
-          environments: docs-${{ matrix.package }}
-      - name: Build docs
-        run: pixi run docs-${{ matrix.package }}
-      - uses: actions/upload-artifact@v7
-        id: artifact-upload-step
-        with:
-          name: docs-${{ matrix.package }}
-          path: packages/${{ matrix.package }}/html
-      - run: echo "::notice::https://remote-unzip.scipp.deno.net/${{ github.repository }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }}"
+    permissions:
+      contents: write
+    uses: ./.github/workflows/docs.yml
+    with:
+      package: ${{ matrix.package }}
+      publish: false
+      linkcheck: false
 
   report:
     name: Report Job Status
-    needs: [changes, formatting, test, docs]
+    needs: [ changes, formatting, test, docs ]
     if: always()  # Should always run regardless of the state of the needs jobs.
     runs-on: ubuntu-24.04
     steps:

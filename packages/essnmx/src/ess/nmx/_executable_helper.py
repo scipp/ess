@@ -14,7 +14,13 @@ from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 
-from .configurations import InputConfig, OutputConfig, ReductionConfig, WorkflowConfig
+from .configurations import (
+    AuxiliaryOutputConfig,
+    InputConfig,
+    OutputConfig,
+    ReductionConfig,
+    WorkflowConfig,
+)
 
 
 def _validate_annotation(annotation) -> TypeGuard[type]:
@@ -189,6 +195,9 @@ def build_reduction_argument_parser() -> argparse.ArgumentParser:
     parser = add_args_from_pydantic_model(model_cls=InputConfig, parser=parser)
     parser = add_args_from_pydantic_model(model_cls=WorkflowConfig, parser=parser)
     parser = add_args_from_pydantic_model(model_cls=OutputConfig, parser=parser)
+    parser = add_args_from_pydantic_model(
+        model_cls=AuxiliaryOutputConfig, parser=parser
+    )
     return parser
 
 
@@ -197,6 +206,7 @@ def reduction_config_from_args(args: argparse.Namespace) -> ReductionConfig:
         inputs=from_args(InputConfig, args),
         workflow=from_args(WorkflowConfig, args),
         output=from_args(OutputConfig, args),
+        aux=from_args(AuxiliaryOutputConfig, args),
     )
 
 
