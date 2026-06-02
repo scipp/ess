@@ -122,18 +122,16 @@ class LtotalRange(
     tuple[sc.Variable, sc.Variable],
 ):
     """
-        Range (min, max) of the total length of the flight path from the source to the
-        detector.
-        This is used to create the lookup table to compute the neutron time-of-flight.
-        Note that the resulting table will extend slightly beyond this range, as the
-        supplied
-    range is not necessarily a multiple of the distance resolution.
+    Range (min, max) of the total length of the flight path from the source to the
+    detector. This is used to create the lookup table to compute the neutron
+    time-of-flight. Note that the resulting table will extend slightly beyond this
+    range, as the supplied range is not necessarily a multiple of the distance
+    resolution.
 
-        Note also that the range of total flight paths is supplied manually to the
-        workflow instead of being read from the input data, as it allows us to compute
-        the expensive part of the workflow in advance (the lookup table) and does not
-        need to be repeated for each run, or for new data coming in in the case of live
-        data collection.
+    Note also that the range of total flight paths is supplied manually to the workflow
+    instead of being read from the input data, as it allows us to compute the expensive
+    part of the workflow in advance (the lookup table) and does not need to be repeated
+    for each run, or for new data coming in in the case of live data collection.
     """
 
 
