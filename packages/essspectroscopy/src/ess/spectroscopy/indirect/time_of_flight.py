@@ -34,7 +34,7 @@ def TofWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
-    wavelength_from: Literal["analytical", "simulation", "file"] = "file",
+    wavelength_from: WavelengthLutMode = "file",
 ) -> sciline.Pipeline:
     workflow = reduce_unwrap.GenericUnwrapWorkflow(
         run_types=run_types,

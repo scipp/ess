@@ -45,7 +45,7 @@ def default_parameters() -> dict:
 
 
 def OdinWorkflow(
-    wavelength_from: Literal["analytical", "simulation", "file"] = "file", **kwargs
+    wavelength_from: WavelengthLutMode = "file", **kwargs
 ) -> sciline.Pipeline:
     """
     Workflow with default parameters for Odin.
@@ -73,7 +73,7 @@ def OdinWorkflow(
 
 
 def OdinBraggEdgeWorkflow(
-    wavelength_from: Literal["analytical", "simulation", "file"] = "file", **kwargs
+    wavelength_from: WavelengthLutMode = "file", **kwargs
 ) -> sciline.Pipeline:
     """
     Workflow with default parameters and masking providers

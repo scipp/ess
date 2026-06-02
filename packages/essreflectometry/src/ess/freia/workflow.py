@@ -91,7 +91,7 @@ def default_parameters() -> dict:
 def FreiaMcStasWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.none,
-    wavelength_from: Literal["analytical", "simulation", "file"] = "file",
+    wavelength_from: WavelengthLutMode = "file",
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for reduction of McStas data for the Freia instrument.
@@ -119,7 +119,7 @@ def FreiaMcStasWorkflow(
 def FreiaWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.proton_charge,
-    wavelength_from: Literal["analytical", "simulation", "file"] = "file",
+    wavelength_from: WavelengthLutMode = "file",
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for reduction of data for the Freia instrument.

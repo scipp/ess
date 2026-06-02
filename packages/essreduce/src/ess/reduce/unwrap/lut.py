@@ -883,7 +883,7 @@ def load_lookup_table_from_file(
 
 
 def providers(
-    wavelength_from: Literal["analytical", "simulation", "file"] = "analytical",
+    wavelength_from: WavelengthLutMode = "analytical",
 ) -> tuple[Callable, ...]:
     if wavelength_from == "file":
         return (load_lookup_table_from_file,)
@@ -912,7 +912,7 @@ def providers(
 
 
 def default_parameters(
-    wavelength_from: Literal["analytical", "simulation", "file"] = "analytical",
+    wavelength_from: WavelengthLutMode = "analytical",
 ) -> dict:
     params = {PulseStrideOffset: None}
     if wavelength_from == "file":

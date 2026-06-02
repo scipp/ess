@@ -99,7 +99,7 @@ def _collect_reducer_software() -> ReducerSoftware:
 
 
 def DreamWorkflow(
-    wavelength_from: Literal["analytical", "simulation", "file"] = "file", **kwargs
+    wavelength_from: WavelengthLutMode = "file", **kwargs
 ) -> sciline.Pipeline:
     """
     Dream generic workflow with default parameters.
