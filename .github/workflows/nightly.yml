@@ -60,32 +60,38 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
       - name: Download reduced data files
         uses: actions/download-artifact@v8
         with:
           path: ./artifacts
           pattern: reduced-data-*
           merge-multiple: true
-      - name: Publish to nightly release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check for reduced data files
+        id: check
         run: |
           shopt -s nullglob
           files=(./artifacts/*)
           if [ ${#files[@]} -eq 0 ]; then
             echo "No reduced data files were produced; nothing to publish."
-            exit 0
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Publishing ${#files[@]} file(s):"
+            printf '  %s\n' "${files[@]}"
+            echo "found=true" >> "$GITHUB_OUTPUT"
           fi
-          echo "Publishing ${#files[@]} file(s):"
-          printf '  %s\n' "${files[@]}"
-          gh release delete reduced_data_nightly --yes --cleanup-tag 2>/dev/null || true
-          gh release create reduced_data_nightly \
-            --target "${{ github.sha }}" \
-            --title "Nightly reduced data files" \
-            --notes "Automated nightly build from $(date -u +%Y-%m-%dT%H:%MZ) (commit ${GITHUB_SHA::7})" \
-            --prerelease \
-            "${files[@]}"
+      # Upload assets to the existing `reduced_data_nightly` release, overwriting
+      # the previous night's files. Updating assets in place (rather than
+      # deleting and recreating the release) avoids generating a release
+      # notification on every nightly run.
+      - name: Upload to nightly release
+        if: steps.check.outputs.found == 'true'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ./artifacts/*
+          file_glob: true
+          tag: reduced_data_nightly
+          overwrite: true
+          prerelease: true
 
   lower-bound:
     name: Lower bound ${{ matrix.package }}
