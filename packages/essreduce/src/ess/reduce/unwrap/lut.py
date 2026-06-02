@@ -127,11 +127,6 @@ class LtotalRange(
     time-of-flight. Note that the resulting table will extend slightly beyond this
     range, as the supplied range is not necessarily a multiple of the distance
     resolution.
-
-    Note also that the range of total flight paths is supplied manually to the workflow
-    instead of being read from the input data, as it allows us to compute the expensive
-    part of the workflow in advance (the lookup table) and does not need to be repeated
-    for each run, or for new data coming in in the case of live data collection.
     """
 
 
@@ -929,7 +924,11 @@ def default_parameters(
             DistanceResolution: sc.scalar(0.1, unit="m"),
             TimeResolution: sc.scalar(250.0, unit='us'),
             SourceBounds: SourceBounds(
+                # The ESS pulse lasts 2.86 ms, but has a long tail, so we take a wider
+                # time range to be safe.
                 time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+                # The ESS source spectrum extends beyond 15 Angstrom, but the signal
+                # beyond that is negligible.
                 wavelength=(
                     sc.scalar(0.0, unit='angstrom'),
                     sc.scalar(15.0, unit='angstrom'),

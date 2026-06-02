@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 from dataclasses import asdict, dataclass
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, NewType
 
@@ -9,6 +10,12 @@ import sciline as sl
 import scipp as sc
 
 from ..nexus.types import Component, MonitorType, RunType
+
+
+class WavelengthLutMode(StrEnum):
+    analytical = 'analytical'
+    simulation = 'simulation'
+    file = 'file'
 
 
 class LookupTableFilename(sl.Scope[RunType, Component, str], str):
