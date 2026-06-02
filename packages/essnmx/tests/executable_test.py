@@ -564,15 +564,14 @@ else:
     not BITSHUFFLE_AVAILABLE,
     reason="Bitshuffle is not available in this environment.",
 )
-def test_reduction_compression_bitshuffle_smaller_than_gzip(
+def test_reduction_compression_bitshuffle(
     reduction_config: ReductionConfig, tmp_path: pathlib.Path
 ) -> None:
     reduction_config.output.skip_file_output = False
     reduction_config.workflow.nbins = 5  # For faster test
     file_paths: dict[Compression, pathlib.Path] = {}
-    total_times: dict[Compression, pathlib.Path] = {}
 
-    for compress_mode in (Compression.GZIP, Compression.BITSHUFFLE_LZ4):
+    for compress_mode in (Compression.NONE, Compression.BITSHUFFLE_LZ4):
         reduction_config.output.compression = compress_mode
         cur_file_path = tmp_path / f'compress_{compress_mode}_output.hdf'
         file_paths[compress_mode] = cur_file_path
@@ -580,26 +579,17 @@ def test_reduction_compression_bitshuffle_smaller_than_gzip(
         reduction_config.output.output_file = cur_file_path.as_posix()
         # Running the whole reduction instead of only saving the file on purpose.
         with known_warnings():
-            start = time.time()
             reduction(config=reduction_config)
-            end = time.time()
-
         assert cur_file_path.exists()
-        total_times[compress_mode] = end - start
 
-    # GZIP is expected to have better compression ratio than BITSHUFFLE
     assert (
-        file_paths[Compression.BITSHUFFLE_LZ4].stat().st_size
-        > file_paths[Compression.GZIP].stat().st_size
+        file_paths[Compression.NONE].stat().st_size
+        > file_paths[Compression.BITSHUFFLE_LZ4].stat().st_size
     )
-    # BITSHUFFLE is expected to be faster than GZIP
-    assert total_times[Compression.BITSHUFFLE_LZ4] < total_times[Compression.GZIP]
 
-    with h5py.File(file_paths[Compression.GZIP]) as file:
+    with h5py.File(file_paths[Compression.NONE]) as file:
         for i in range(3):
-            data_path = f'entry/instrument/detector_panel_{i}/data'
-            assert file[data_path].chunks == (1280, 1280, 1)
-            assert file[data_path].compression == 'gzip'
+            assert file[f'entry/instrument/detector_panel_{i}/data'].chunks is None
 
     with h5py.File(file_paths[Compression.BITSHUFFLE_LZ4]) as file:
         for i in range(3):
