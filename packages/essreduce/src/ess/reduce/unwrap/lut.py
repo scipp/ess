@@ -779,7 +779,7 @@ def make_wavelength_lut_from_polygons(
 
 
 def _ltotal_range_from_ltotal(ltotal: sc.Variable) -> tuple[sc.Variable, sc.Variable]:
-    return (ltotal.min(), ltotal.max())
+    return (ltotal.nanmin(), ltotal.nanmax())
 
 
 def ltotal_range_from_ltotal_detector(

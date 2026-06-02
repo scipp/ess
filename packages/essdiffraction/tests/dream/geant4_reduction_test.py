@@ -48,6 +48,9 @@ from ess.reduce import unwrap
 from ess.reduce import workflow as reduce_workflow
 from ess.reduce.nexus.types import AnyRun, Position
 
+PARAMETRIZATION = ("detector_name", ["mantle", "endcap_backward", "endcap_forward"])
+
+
 params = {
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
     Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(small=True),
@@ -56,6 +59,7 @@ params = {
     MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
     MonitorFilename[EmptyCanRun]: dream.data.simulated_monitor_empty_can(),
     dream.InstrumentConfiguration: dream.beamline.InstrumentConfiguration.high_flux_BC215,  # noqa: E501
+    Position[NXsource, AnyRun]: sc.vector(value=[0, 0, -76.55], unit="m"),
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),
@@ -75,32 +79,71 @@ params = {
 }
 
 
-@pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
-def params_for_det(request):
-    # Not available in simulated data
-    return {**params, NeXusDetectorName: request.param}
+# @pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
+# def params_for_det(request):
+#     # Not available in simulated data
+#     return {**params, NeXusDetectorName: request.param}
 
 
-@pytest.fixture
-def workflow(params_for_det):
-    return make_workflow(params_for_det, run_norm=powder.RunNormalization.proton_charge)
+# @pytest.fixture
+# def workflow(params_for_det):
+#     return make_workflow(params_for_det, run_norm=powder.RunNormalization.proton_charge)
 
 
-def make_workflow(params_for_det, *, run_norm):
-    wf = dream.DreamGeant4Workflow(run_norm=run_norm)
-    for key, value in params_for_det.items():
+def _make_workflow(
+    detector_name,
+    run_norm=powder.RunNormalization.proton_charge,
+    wavelength_from="file",
+):
+    wf = dream.DreamGeant4Workflow(run_norm=run_norm, wavelength_from=wavelength_from)
+
+    # wf[Filename[SampleRun]] = dream.data.simulated_diamond_sample(small=True)
+    # wf[Filename[VanadiumRun]] = dream.data.simulated_vanadium_sample(small=True)
+    # wf[Filename[EmptyCanRun]] = dream.data.simulated_empty_can(small=True)
+    # wf[MonitorFilename[SampleRun]] = dream.data.simulated_monitor_diamond_sample()
+    # wf[MonitorFilename[VanadiumRun]] = dream.data.simulated_monitor_vanadium_sample()
+    # wf[MonitorFilename[EmptyCanRun]] = dream.data.simulated_monitor_empty_can()
+    wf[NeXusDetectorName] = detector_name
+    # wf[dream.InstrumentConfiguration] = (
+    #     dream.beamline.InstrumentConfiguration.high_flux_BC215
+    # )  # noqa: E501
+    # wf[CalibrationFilename] = None
+    # wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    # wf[DspacingBins] = sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom')
+    # wf[TofMask] = None
+    # wf[TwoThetaMask] = None
+    # wf[WavelengthMask] = None
+    # wf[CIFAuthors] = (
+    #     CIFAuthors(
+    #         [
+    #             metadata.Person(
+    #                 name="Jane Doe",
+    #                 email="jane.doe@ess.eu",
+    #                 orcid_id="0000-0000-0000-0001",
+    #                 corresponding=True,
+    #             ),
+    #         ]
+    #     ),
+    # )
+
+    for key, value in params.items():
         wf[key] = value
     return wf
 
 
-def test_pipeline_can_compute_dspacing_result(workflow):
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_pipeline_can_compute_dspacing_result(detector_name):
+    workflow = powder.with_pixel_mask_filenames(
+        _make_workflow(detector_name=detector_name), []
+    )
     result = workflow.compute(EmptyCanSubtractedIofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_pipeline_can_compute_dspacing_result_without_empty_can(detector_name):
+    workflow = _make_workflow(detector_name=detector_name)
     workflow[Filename[EmptyCanRun]] = None
     workflow[MonitorFilename[EmptyCanRun]] = None
     workflow = powder.with_pixel_mask_filenames(workflow, [])
@@ -109,51 +152,39 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(workflow):
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_pipeline_can_compute_dspacing_result_using_lookup_table_filename(workflow):
+@pytest.mark.parametrize(*PARAMETRIZATION)
+@pytest.mark.parametrize("lut_mode", ["file", "simulation", "analytical"])
+def test_pipeline_can_compute_dspacing_result_different_lookup_tables(
+    detector_name,
+    lut_mode,
+):
+    workflow = _make_workflow(detector_name=detector_name, wavelength_from=lut_mode)
+
+    if lut_mode == "file":
+        workflow[LookupTableFilename] = dream.data.lookup_table_high_flux()
+    else:
+        workflow[unwrap.DiskChoppers] = dream.beamline.choppers(
+            dream.beamline.InstrumentConfiguration.high_flux_BC215
+        )
+        workflow[unwrap.DistanceResolution] = sc.scalar(0.1, unit="m")
+        workflow[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
+        if lut_mode == "simulation":
+            workflow[unwrap.NumberOfSimulatedNeutrons] = 200_000
+            workflow[unwrap.SimulationSeed] = 555
+
     workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[LookupTableFilename] = dream.data.lookup_table_high_flux()
     result = workflow.compute(EmptyCanSubtractedIofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-@pytest.fixture(scope="module")
-def dream_lookup_table():
-    lut_wf = unwrap.LookupTableWorkflow()
-    lut_wf[unwrap.DiskChoppers[AnyRun]] = dream.beamline.choppers(
-        dream.beamline.InstrumentConfiguration.high_flux_BC215
-    )
-    lut_wf[Position[NXsource, AnyRun]] = sc.vector(value=[0, 0, -76.55], unit="m")
-    lut_wf[unwrap.NumberOfSimulatedNeutrons] = 500_000
-    lut_wf[unwrap.SimulationSeed] = 555
-    lut_wf[unwrap.PulseStride] = 1
-    lut_wf[unwrap.LtotalRange[AnyRun, NXdetector]] = (
-        sc.scalar(60.0, unit="m"),
-        sc.scalar(80.0, unit="m"),
-    )
-    lut_wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit="m")
-    lut_wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
-    return lut_wf.compute(unwrap.LookupTable[AnyRun, NXdetector])
-
-
-def test_pipeline_can_compute_dspacing_result_using_custom_built_tof_lookup(
-    workflow, dream_lookup_table
-):
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
-    workflow[LookupTable[SampleRun, NXdetector]] = dream_lookup_table
-
-    result = workflow.compute(IntensityDspacing[SampleRun])
-    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
-    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
-
-
+@pytest.mark.parametrize(*PARAMETRIZATION)
 @pytest.mark.parametrize("keep_events", [True, False])
-def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(
-    params_for_det, keep_events: bool
+@pytest.mark.parametrize("norm", ["monitor_histogram", "monitor_integrated"])
+def test_pipeline_can_compute_dspacing_result_with_different_norm(
+    detector_name, keep_events: bool, norm: str
 ):
-    workflow = make_workflow(
-        params_for_det, run_norm=powder.RunNormalization.monitor_histogram
-    )
+    workflow = _make_workflow(detector_name=detector_name, run_norm=norm)
     workflow[KeepEvents[SampleRun]] = KeepEvents[SampleRun](keep_events)
     workflow[KeepEvents[VanadiumRun]] = KeepEvents[VanadiumRun](keep_events)
     workflow = powder.with_pixel_mask_filenames(workflow, [])
@@ -162,28 +193,28 @@ def test_pipeline_can_compute_dspacing_result_with_hist_monitor_norm(
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-@pytest.mark.parametrize("keep_events", [True, False])
-def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
-    params_for_det, keep_events: bool
-):
-    workflow = make_workflow(
-        params_for_det, run_norm=powder.RunNormalization.monitor_integrated
-    )
-    workflow[KeepEvents[SampleRun]] = KeepEvents[SampleRun](keep_events)
-    workflow[KeepEvents[VanadiumRun]] = KeepEvents[VanadiumRun](keep_events)
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
-    result = workflow.compute(IntensityDspacing[SampleRun])
-    assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
-    assert sc.identical(result.coords['dspacing'], params[DspacingBins])
+# @pytest.mark.parametrize("keep_events", [True, False])
+# def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
+#     params_for_det, keep_events: bool
+# ):
+#     workflow = make_workflow(
+#         params_for_det, run_norm=powder.RunNormalization.monitor_integrated
+#     )
+#     workflow[KeepEvents[SampleRun]] = KeepEvents[SampleRun](keep_events)
+#     workflow[KeepEvents[VanadiumRun]] = KeepEvents[VanadiumRun](keep_events)
+#     workflow = powder.with_pixel_mask_filenames(workflow, [])
+#     result = workflow.compute(IntensityDspacing[SampleRun])
+#     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
+#     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
-def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(
-    workflow: sciline.Pipeline,
-) -> None:
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(detector_name) -> None:
     sample = sc.data.binned_x(13, 3)
     vanadium = sc.data.binned_x(16, 3)
     empty_can = sc.data.binned_x(9, 3)
 
+    workflow = _make_workflow(detector_name=detector_name)
     workflow[FocussedDataDspacing[SampleRun]] = sample
     workflow[FocussedDataDspacing[VanadiumRun]] = vanadium
     workflow[FocussedDataDspacing[EmptyCanRun]] = empty_can
@@ -200,8 +231,11 @@ def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(
     sc.testing.assert_allclose(result, expected)
 
 
-def test_workflow_is_deterministic(workflow):
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_workflow_is_deterministic(detector_name):
+    workflow = powder.with_pixel_mask_filenames(
+        _make_workflow(detector_name=detector_name), []
+    )
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
     graph = workflow.get(IntensityTof, scheduler=scheduler)
@@ -210,8 +244,11 @@ def test_workflow_is_deterministic(workflow):
     assert sc.identical(sc.values(result), sc.values(reference))
 
 
-def test_pipeline_can_compute_intermediate_results(workflow):
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_pipeline_can_compute_intermediate_results(detector_name):
+    workflow = powder.with_pixel_mask_filenames(
+        _make_workflow(detector_name=detector_name), []
+    )
     results = workflow.compute((CorrectedDetector[SampleRun], NeXusDetectorName))
     result = results[CorrectedDetector[SampleRun]]
 
@@ -223,10 +260,12 @@ def test_pipeline_can_compute_intermediate_results(workflow):
     assert expected_dims.issubset(set(result.dims))
 
 
-def test_pipeline_group_by_two_theta(workflow):
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_pipeline_group_by_two_theta(detector_name):
     two_theta_bins = sc.linspace(
         dim='two_theta', unit='rad', start=0.8, stop=2.4, num=17
     )
+    workflow = _make_workflow(detector_name=detector_name)
     workflow[TwoThetaBins] = two_theta_bins
     workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IntensityDspacingTwoTheta[SampleRun])
