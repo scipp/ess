@@ -4,6 +4,7 @@
 """Utilities for computing real neutron time-of-flight for indirect geometry."""
 
 from collections.abc import Iterable
+from dataclasses import asdict
 
 import sciline
 import scippnexus as snx
@@ -140,10 +141,12 @@ def mask_large_uncertainty_in_lut_detector(
     )
 
     return ErrorLimitedLookupTable[RunType, snx.NXdetector](
-        mask_large_uncertainty_in_lut(
-            table=table,
-            error_threshold=error_threshold,
-            component_name=NeXusDetectorName('detector'),
+        **asdict(
+            mask_large_uncertainty_in_lut(
+                table=table,
+                error_threshold=error_threshold,
+                component_name=NeXusDetectorName('detector'),
+            )
         )
     )
 
