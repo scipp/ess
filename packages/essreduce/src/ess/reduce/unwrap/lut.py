@@ -7,7 +7,7 @@ Utilities for computing wavelength lookup tables.
 import warnings
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Literal, NewType
+from typing import NewType
 
 import numpy as np
 import sciline as sl
@@ -24,6 +24,7 @@ from .types import (
     Lut,
     MonitorLtotal,
     PulseStrideOffset,
+    WavelengthLutMode,
 )
 
 

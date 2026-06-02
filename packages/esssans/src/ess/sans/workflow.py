@@ -1,14 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Hashable, Iterable
-from typing import Literal
 
 import pandas as pd
 import sciline
 import scipp as sc
 
 from ess.reduce.parameter import parameter_mappers
-from ess.reduce.unwrap import GenericUnwrapWorkflow
+from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
 from . import common, conversions, i_of_q, masking, normalization
 from .types import (

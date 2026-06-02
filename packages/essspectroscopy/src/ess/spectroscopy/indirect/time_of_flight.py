@@ -4,13 +4,12 @@
 """Utilities for computing real neutron time-of-flight for indirect geometry."""
 
 from collections.abc import Iterable
-from typing import Literal
 
 import sciline
 import scippnexus as snx
 
 from ess.reduce import unwrap as reduce_unwrap
-from ess.reduce.unwrap.types import DetectorLtotal
+from ess.reduce.unwrap.types import DetectorLtotal, WavelengthLutMode
 
 from ..types import (
     DataAtSample,

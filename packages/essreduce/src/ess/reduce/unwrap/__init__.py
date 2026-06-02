@@ -34,6 +34,7 @@ from .types import (
     MonitorLtotal,
     PulseStrideOffset,
     WavelengthDetector,
+    WavelengthLutMode,
     WavelengthMonitor,
 )
 from .workflow import GenericUnwrapWorkflow, LookupTableWorkflow
@@ -64,6 +65,7 @@ __all__ = [
     "SourceBounds",
     "TimeResolution",
     "WavelengthDetector",
+    "WavelengthLutMode",
     "WavelengthMonitor",
     "providers",
     "simulate_chopper_cascade_using_tof",

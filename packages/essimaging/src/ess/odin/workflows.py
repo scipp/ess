@@ -4,11 +4,9 @@
 Default parameters and workflow for Odin.
 """
 
-from typing import Literal
-
 import sciline
 
-from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
+from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
 from ..imaging.types import (
     BeamMonitor1,

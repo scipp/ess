@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 import itertools
-from typing import Literal
 
 import sciline
 import scipp as sc
@@ -33,7 +32,7 @@ from scippneutron.metadata import Software
 
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.parameter import parameter_mappers
-from ess.reduce.unwrap import GenericUnwrapWorkflow
+from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
 from .beamline import InstrumentConfiguration

@@ -1,13 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from collections.abc import Iterable
-from typing import Literal
 
 import sciline
 
 from ..nexus import GenericNeXusWorkflow
 from ..nexus.types import AnyRun, FrameMonitor0
-from . import lut, to_wavelength
+from . import WavelengthLutMode, lut, to_wavelength
 
 
 def GenericUnwrapWorkflow(

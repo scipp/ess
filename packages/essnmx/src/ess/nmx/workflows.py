@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from collections.abc import Iterable
-from typing import Literal
 
 import sciline
 import scipp as sc
@@ -27,6 +26,7 @@ from ess.reduce.unwrap import (
     SimulationMinWavelength,
     SimulationSeed,
     WavelengthDetector,
+    WavelengthLutMode,
 )
 from ess.reduce.workflow import register_workflow
 

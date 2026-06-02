@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
-from typing import Literal
-
 import sciline
 import scipp as sc
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
+from ess.reduce.unwrap import WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
 from ..reflectometry import providers as reflectometry_providers
