@@ -4,7 +4,7 @@
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, NewType
+from typing import Any, Generic, NewType
 
 import sciline as sl
 import scipp as sc
@@ -23,10 +23,10 @@ class LookupTableFilename(sl.Scope[RunType, Component, str], str):
 
 
 @dataclass
-class Lut:
+class LookupTable(Generic[RunType, Component]):
     """
-    Base class for a lookup table giving wavelength as a function of distance and
-    ``event_time_offset``.
+    Lookup table giving wavelength as a function of distance and
+    ``event_time_offset`` for each beamline component (detector, monitor).
     """
 
     array: sc.DataArray
@@ -53,12 +53,7 @@ class Lut:
         return self.array.plot(*args, **kwargs)
 
 
-class LookupTable(sl.Scope[RunType, Component, Lut], Lut):
-    """Lookup table giving wavelength as a function of distance and
-    ``event_time_offset`` for each beamline component (detector, monitor)."""
-
-
-class ErrorLimitedLookupTable(sl.Scope[RunType, Component, Lut], Lut):
+class ErrorLimitedLookupTable(LookupTable[RunType, Component]):
     """Lookup table that is masked with NaNs in regions where the standard deviation of
     the wavelength is above a certain threshold."""
 

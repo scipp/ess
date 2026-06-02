@@ -7,7 +7,7 @@ Utilities for computing wavelength lookup tables.
 import warnings
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import NewType
+from typing import Generic, NewType
 
 import numpy as np
 import sciline as sl
@@ -21,7 +21,7 @@ from .types import (
     DetectorLtotal,
     LookupTable,
     LookupTableFilename,
-    Lut,
+    # Lut,
     MonitorLtotal,
     PulseStrideOffset,
     WavelengthLutMode,
@@ -63,7 +63,7 @@ class BeamlineComponentReading:
 
 
 @dataclass
-class SimulationResultsBaseClass:
+class SimulationResults(Generic[RunType]):
     """
     Results of a time-of-flight simulation used to create a lookup table.
     It should contain readings at various positions along the beamline, e.g., at
@@ -85,30 +85,6 @@ class SimulationResultsBaseClass:
 
     readings: dict[str, BeamlineComponentReading]
     choppers: dict[str, DiskChopper] | None = None
-
-
-class SimulationResults(
-    sl.Scope[RunType, SimulationResultsBaseClass],
-    SimulationResultsBaseClass,
-):
-    """
-    Results of a time-of-flight simulation used to create a lookup table.
-    It should contain readings at various positions along the beamline, e.g., at
-    the source and after each chopper.
-    It also contains the chopper parameters used in the simulation, so it can be
-    determined if this simulation is compatible with a given experiment.
-
-    Parameters
-    ----------
-    readings:
-        A dict of :class:`BeamlineComponentReading` objects representing the readings at
-        various positions along the beamline. The keys in the dict should correspond to
-        the names of the components (e.g., 'source', 'chopper1', etc.).
-    choppers:
-        The chopper parameters used in the simulation (if any). These are used to verify
-        that the simulation is compatible with a given experiment (comparing chopper
-        openings, frequencies, phases, etc.).
-    """
 
 
 NumberOfSimulatedNeutrons = NewType("NumberOfSimulatedNeutrons", int)
@@ -422,20 +398,17 @@ def make_wavelength_lut_from_simulation(
     )
 
     return LookupTable[RunType, Component](
-        Lut(
-            array=table,
-            pulse_period=pulse_period,
-            pulse_stride=pulse_stride,
-            distance_resolution=table.coords["distance"][1]
-            - table.coords["distance"][0],
-            time_resolution=table.coords["event_time_offset"][1]
-            - table.coords["event_time_offset"][0],
-            choppers=sc.DataGroup(
-                {k: sc.DataGroup(ch.as_dict()) for k, ch in simulation.choppers.items()}
-            )
-            if simulation.choppers is not None
-            else None,
+        array=table,
+        pulse_period=pulse_period,
+        pulse_stride=pulse_stride,
+        distance_resolution=table.coords["distance"][1] - table.coords["distance"][0],
+        time_resolution=table.coords["event_time_offset"][1]
+        - table.coords["event_time_offset"][0],
+        choppers=sc.DataGroup(
+            {k: sc.DataGroup(ch.as_dict()) for k, ch in simulation.choppers.items()}
         )
+        if simulation.choppers is not None
+        else None,
     )
 
 
@@ -514,16 +487,13 @@ def simulate_chopper_cascade_using_tof(
     )
     sim_readings = {"source": _to_component_reading(source)}
     if not tof_choppers:
-        return SimulationResults[RunType](
-            SimulationResultsBaseClass(readings=sim_readings, choppers=None)
-        )
+        return SimulationResults[RunType](readings=sim_readings, choppers=None)
+
     model = tof.Model(source=source, choppers=tof_choppers)
     results = model.run()
     for name, ch in results.choppers.items():
         sim_readings[name] = _to_component_reading(ch)
-    return SimulationResults[RunType](
-        SimulationResultsBaseClass(readings=sim_readings, choppers=choppers)
-    )
+    return SimulationResults[RunType](readings=sim_readings, choppers=choppers)
 
 
 def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndarray:
@@ -799,16 +769,13 @@ def make_wavelength_lut_from_polygons(
     )
 
     return LookupTable[RunType, Component](
-        Lut(
-            array=table,
-            pulse_period=pulse_period,
-            pulse_stride=pulse_stride,
-            distance_resolution=table.coords["distance"][1]
-            - table.coords["distance"][0],
-            time_resolution=table.coords["event_time_offset"][1]
-            - table.coords["event_time_offset"][0],
-            # TODO: Do we still want to store the chopper info in the lookup table?
-        )
+        array=table,
+        pulse_period=pulse_period,
+        pulse_stride=pulse_stride,
+        distance_resolution=table.coords["distance"][1] - table.coords["distance"][0],
+        time_resolution=table.coords["event_time_offset"][1]
+        - table.coords["event_time_offset"][0],
+        # TODO: Do we still want to store the chopper info in the lookup table?
     )
 
 
@@ -884,7 +851,7 @@ def load_lookup_table_from_file(
     if "error_threshold" in table:
         del table["error_threshold"]
 
-    return LookupTable[RunType, Component](Lut(**table))
+    return LookupTable[RunType, Component](**table)
 
 
 def providers(

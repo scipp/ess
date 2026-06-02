@@ -39,7 +39,6 @@ from .types import (
     ErrorLimitedLookupTable,
     LookupTable,
     LookupTableRelativeErrorThreshold,
-    Lut,
     MonitorLtotal,
     PulseStrideOffset,
     WavelengthDetector,
@@ -137,7 +136,7 @@ class WavelengthInterpolator:
 
 
 def _compute_wavelength_histogram(
-    da: sc.DataArray, lookup: Lut, ltotal: sc.Variable
+    da: sc.DataArray, lookup: LookupTable, ltotal: sc.Variable
 ) -> sc.DataArray:
     # In NeXus, 'time_of_flight' is the canonical name in NXmonitor, but in some files,
     # it may be called 'tof' or 'frame_time'.
@@ -243,7 +242,7 @@ def _guess_pulse_stride_offset(
 
 def _prepare_wavelength_interpolation_inputs(
     da: sc.DataArray,
-    lookup: Lut,
+    lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
 ) -> dict:
@@ -336,7 +335,7 @@ def _prepare_wavelength_interpolation_inputs(
 
 def _compute_wavelength_events(
     da: sc.DataArray,
-    lookup: Lut,
+    lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
 ) -> sc.DataArray:
@@ -458,12 +457,10 @@ def mask_large_uncertainty_in_lut(
     relative_error = sc.stddevs(da.data) / sc.values(da.data)
     mask = relative_error > sc.scalar(error_threshold[component_name])
     return ErrorLimitedLookupTable[RunType, Component](
-        Lut(
-            **{
-                **asdict(table),
-                "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
-            }
-        )
+        **{
+            **asdict(table),
+            "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
+        }
     )
 
 
