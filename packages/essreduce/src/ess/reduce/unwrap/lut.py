@@ -21,7 +21,6 @@ from .types import (
     DetectorLtotal,
     LookupTable,
     LookupTableFilename,
-    # Lut,
     MonitorLtotal,
     PulseStrideOffset,
     WavelengthLutMode,
