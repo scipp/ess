@@ -547,6 +547,10 @@ def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndar
         # To fix, if the two leftmost or rightmost points have the same x value, we set
         # the y value of the first point to be the same as the second point.
         for b in (bound1, bound2):
+            if len(b) < 2:
+                # This can happen if the polygon is degenerate (collapsed to a single
+                # vertex).
+                continue
             if b[0, 0] == b[1, 0]:
                 b[0, 1] = b[1, 1]
             if b[-1, 0] == b[-2, 0]:
