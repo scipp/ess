@@ -7,7 +7,7 @@ from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import AnyRun, FrameMonitor0, Position
-from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow
+from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, SourceBounds
 
 sl = pytest.importorskip("sciline")
 
@@ -338,3 +338,79 @@ def test_lut_workflow_guesses_pulse_stride():
         wf[unwrap.DiskChoppers[AnyRun]] = choppers
 
         assert wf.compute(unwrap.PulseStride[AnyRun]) == i
+
+
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
+    wf = _make_workflow(wavelength_from)
+    # Add a very slowly rotating chopper that will block all neutrons.
+    wf[unwrap.DiskChoppers[AnyRun]] = {
+        'chopper1': DiskChopper(
+            axle_position=sc.vector([0, 0, -15.0], unit='m'),
+            frequency=sc.scalar(0.1, unit='Hz'),
+            beam_position=sc.scalar(0.0, unit='deg'),
+            phase=sc.scalar(0.0, unit='rad'),
+            slit_begin=sc.array(dims=['cutout'], values=[0.0], unit='deg'),
+            slit_end=sc.array(dims=['cutout'], values=[90.0], unit='deg'),
+            slit_height=None,
+            radius=sc.scalar(0.35, unit='m'),
+        )
+    }
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
+    # Need to force the pulse stride so that it doesn't get set to a large value due to
+    # the slow chopper.
+    wf[unwrap.PulseStride[AnyRun]] = 1
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
+        sc.scalar(15.0, unit='m'),
+        sc.scalar(30.0, unit='m'),
+    )
+    wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
+    wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
+
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+
+    # Chopper is 10m from the source, LUT starts at 15m, so no neutrons should make it
+    # through. The table should be full of NaNs but should not raise an error.
+    assert sc.all(sc.isnan(table.array.data))
+
+
+def test_analytical_lut_does_not_raise_with_degenerate_polygon():
+    wf = _make_workflow("analytical")
+    # This chopper is open slightly before t=0 and closes exactly at t=0. Only
+    # unphysical wavelengths of 0 (infinite speed) could go through. A degenerate
+    # polygon (all vertices are 0) is created from the chopper cascade, and we need to
+    # ensure that this does not cause the LUT computation to fail. It should just drop
+    # this polygon and return NaNs for the corresponding wavelengths.
+    wf[unwrap.DiskChoppers[AnyRun]] = {
+        'chopper1': DiskChopper(
+            axle_position=sc.vector([0, 0, -15.0], unit='m'),
+            frequency=sc.scalar(14.0, unit='Hz'),
+            beam_position=sc.scalar(0.0, unit='deg'),
+            phase=sc.scalar(0.0, unit='rad'),
+            slit_begin=sc.array(dims=['cutout'], values=[0.0], unit='deg'),
+            slit_end=sc.array(dims=['cutout'], values=[90.0], unit='deg'),
+            slit_height=None,
+            radius=sc.scalar(0.35, unit='m'),
+        )
+    }
+    wf[SourceBounds] = SourceBounds(
+        time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+        wavelength=(
+            sc.scalar(0.0, unit='angstrom'),  #  Min wavelength to 0
+            sc.scalar(15.0, unit='angstrom'),
+        ),
+    )
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
+    wf[unwrap.PulseStride[AnyRun]] = 1
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
+        sc.scalar(15.0, unit='m'),
+        sc.scalar(30.0, unit='m'),
+    )
+    wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
+    wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
+
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+
+    # Chopper is 10m from the source, LUT starts at 15m, so no neutrons should make it
+    # through. The table should be full of NaNs but should not raise an error.
+    assert sc.all(sc.isnan(table.array.data))

@@ -501,6 +501,10 @@ def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndar
     for polygon in polygons:
         left = polygon[:, 0].argmin()
         right = polygon[:, 0].argmax()
+        if left == right:
+            # This can happen if the polygon is degenerate. In this case, we can just
+            # skip this polygon, as it does not contribute any information.
+            continue
         k = (right - left) % len(polygon)
         p = np.roll(polygon, -left, axis=0)
 
@@ -516,16 +520,15 @@ def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndar
         # To fix, if the two leftmost or rightmost points have the same x value, we set
         # the y value of the first point to be the same as the second point.
         for b in (bound1, bound2):
-            if len(b) < 2:
-                # This can happen if the polygon is degenerate (collapsed to a single
-                # vertex).
-                continue
             if b[0, 0] == b[1, 0]:
                 b[0, 1] = b[1, 1]
             if b[-1, 0] == b[-2, 0]:
                 b[-1, 1] = b[-2, 1]
 
         bounds.extend((bound1, bound2))
+
+    if not bounds:
+        return np.full((2, len(x)), np.nan)
 
     # Now find intersections of the vertical lines at x with the bounds.
     y = np.vstack(
@@ -546,6 +549,7 @@ def _estimate_wavelength_by_polygon_centers(
     subframes: list[chopper_cascade.Subframe],
     time_edges: sc.Variable,
     time_unit: str,
+    wavelength_unit: str,
     frame_period: sc.Variable,
 ) -> sc.DataArray:
     """
@@ -569,9 +573,16 @@ def _estimate_wavelength_by_polygon_centers(
         1D variable with a unit of time.
     time_unit:
         Unit to use for all time quantities.
+    wavelength_unit:
+        Unit to use for all wavelength quantities.
     frame_period:
         Period of the source pulses, used to handle the periodicity of the subframes.
     """
+
+    if len(subframes) == 0:
+        return sc.full(
+            value=np.nan, variance=np.nan, sizes=time_edges.sizes, unit=wavelength_unit
+        )
 
     # Here, the frame could be offset by more than one frame period (if the neutron
     # flight path is very long). So we shift the frame back enough times so that
@@ -588,7 +599,7 @@ def _estimate_wavelength_by_polygon_centers(
         np.stack(
             [
                 (f.time.to(unit=time_unit) - (noffset + i) * frame_period).values,
-                f.wavelength.values,
+                f.wavelength.to(unit=wavelength_unit).values,
             ],
             axis=1,
         )
@@ -599,10 +610,7 @@ def _estimate_wavelength_by_polygon_centers(
     wavs, stddevs = _polygon_intersections(polygons, time_edges.values)
 
     return sc.array(
-        dims=time_edges.dims,
-        values=wavs,
-        variances=stddevs**2,
-        unit=subframes[0].wavelength.unit,
+        dims=time_edges.dims, values=wavs, variances=stddevs**2, unit=wavelength_unit
     )
 
 
@@ -705,6 +713,7 @@ def make_wavelength_lut_from_polygons(
     """
     distance_unit = "m"
     time_unit = "us"
+    wavelength_unit = "angstrom"
     res = distance_resolution.to(unit=distance_unit)
     pulse_period = pulse_period.to(unit=time_unit)
     frame_period = pulse_period * pulse_stride
@@ -758,6 +767,7 @@ def make_wavelength_lut_from_polygons(
                 subframes=subframes,
                 time_edges=time_edges,
                 time_unit=time_unit,
+                wavelength_unit=wavelength_unit,
                 frame_period=frame_period,
             )
         )
@@ -901,7 +911,7 @@ def default_parameters(
                 # The ESS source spectrum extends beyond 15 Angstrom, but the signal
                 # beyond that is negligible.
                 wavelength=(
-                    sc.scalar(0.0, unit='angstrom'),
+                    sc.scalar(0.001, unit='angstrom'),
                     sc.scalar(15.0, unit='angstrom'),
                 ),
             ),
