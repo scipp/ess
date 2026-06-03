@@ -29,6 +29,7 @@ from ess.spectroscopy.types import (
 from scippnexus import NXdetector
 
 from .cutting import providers as cutting_providers
+from .detector import detector_names as default_detector_names
 from .detector import merge_triplets
 from .detector import providers as detector_providers
 from .io import mcstas, nexus
@@ -79,7 +80,8 @@ _SIMULATION_PROVIDERS = (
 
 
 def BifrostSimulationWorkflow(
-    detector_names: list[NeXusDetectorName],
+    *,
+    detector_names: list[str] | None = None,
 ) -> sciline.Pipeline:
     """Data reduction workflow for simulated BIFROST data.
 
@@ -87,6 +89,7 @@ def BifrostSimulationWorkflow(
     ----------
     detector_names:
         Names of ``NXdetector`` groups in the input NeXus file.
+        If ``Nonw``, all detector will be processed and merged.
 
     Returns
     -------
@@ -117,9 +120,21 @@ def BifrostSimulationWorkflow(
 
 
 def BifrostWorkflow(
-    detector_names: list[NeXusDetectorName],
+    *,
+    detector_names: list[str] | None = None,
 ) -> sciline.Pipeline:
-    """Data reduction workflow for BIFROST."""
+    """Data reduction workflow for BIFROST.
+
+    Parameters
+    ----------
+    detector_names:
+        Names of ``NXdetector`` groups in the input NeXus file.
+        If ``Nonw``, all detector will be processed and merged.
+
+    Returns
+    -------
+    :
+        A pipeline for reducing simulated BIFROST data."""
     workflow = TofWorkflow(
         run_types=(SampleRun,),
         monitor_types=(
@@ -176,13 +191,13 @@ def concat_event_lists(
     return sc.concat(data, dim="event_time_zero")
 
 
-def _make_detector_name_mapping(detector_names: list[NeXusDetectorName]) -> Any:
+def _make_detector_name_mapping(detector_names: list[str] | None) -> Any:
+    names = detector_names if detector_names is not None else default_detector_names()
+
     # Use Pandas if possible to label the index.
     try:
         import pandas
 
-        return pandas.DataFrame({NeXusDetectorName: detector_names}).rename_axis(
-            index='triplet'
-        )
+        return pandas.DataFrame({NeXusDetectorName: names}).rename_axis(index='triplet')
     except ModuleNotFoundError:
-        return {NeXusDetectorName: detector_names}
+        return {NeXusDetectorName: names}

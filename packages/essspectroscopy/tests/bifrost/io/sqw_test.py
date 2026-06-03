@@ -17,7 +17,6 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
-import scippnexus as snx
 from ess import bifrost
 from ess.bifrost.data import (
     lookup_table_simulation,
@@ -53,10 +52,8 @@ N_PIXELS_PER_DETECTOR = 300  # Fixed, not a parameter!
 
 
 @pytest.fixture(scope='module')
-def detector_names() -> list[NeXusDetectorName]:
-    with snx.File(simulated_elastic_incoherent_with_phonon()) as f:
-        detector_names = list(f['entry/instrument'][snx.NXdetector])
-    return detector_names[:N_DETECTORS]
+def detector_names() -> list[str]:
+    return bifrost.detector_names()[:N_DETECTORS]
 
 
 @pytest.fixture(scope='module')
@@ -72,7 +69,7 @@ def sample() -> sqw.SqwIXSample:
 def common_workflow(
     detector_names: list[NeXusDetectorName], sample: sqw.SqwIXSample
 ) -> sciline.Pipeline:
-    wf = bifrost.BifrostSimulationWorkflow(detector_names)
+    wf = bifrost.BifrostSimulationWorkflow(detector_names=detector_names)
 
     wf[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     wf[LookupTableFilename] = lookup_table_simulation()
