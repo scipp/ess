@@ -367,6 +367,10 @@ def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
     wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
     wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
 
+    if wavelength_from == "simulation":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 200_000
+        wf[unwrap.SimulationSeed] = 66
+
     table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
 
     # Chopper is 10m from the source, LUT starts at 15m, so no neutrons should make it
