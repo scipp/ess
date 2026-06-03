@@ -28,7 +28,6 @@ from ess.powder.types import (
     IntensityDspacingTwoTheta,
     IntensityTof,
     KeepEvents,
-    LookupTable,
     LookupTableFilename,
     MonitorFilename,
     NeXusDetectorName,
@@ -42,7 +41,7 @@ from ess.powder.types import (
     WavelengthMask,
 )
 from scippneutron import metadata
-from scippnexus import NXdetector, NXsource
+from scippnexus import NXsource
 
 from ess.reduce import unwrap
 from ess.reduce import workflow as reduce_workflow
@@ -79,52 +78,13 @@ params = {
 }
 
 
-# @pytest.fixture(params=["mantle", "endcap_backward", "endcap_forward"])
-# def params_for_det(request):
-#     # Not available in simulated data
-#     return {**params, NeXusDetectorName: request.param}
-
-
-# @pytest.fixture
-# def workflow(params_for_det):
-#     return make_workflow(params_for_det, run_norm=powder.RunNormalization.proton_charge)
-
-
 def _make_workflow(
     detector_name,
     run_norm=powder.RunNormalization.proton_charge,
     wavelength_from="file",
 ):
     wf = dream.DreamGeant4Workflow(run_norm=run_norm, wavelength_from=wavelength_from)
-
-    # wf[Filename[SampleRun]] = dream.data.simulated_diamond_sample(small=True)
-    # wf[Filename[VanadiumRun]] = dream.data.simulated_vanadium_sample(small=True)
-    # wf[Filename[EmptyCanRun]] = dream.data.simulated_empty_can(small=True)
-    # wf[MonitorFilename[SampleRun]] = dream.data.simulated_monitor_diamond_sample()
-    # wf[MonitorFilename[VanadiumRun]] = dream.data.simulated_monitor_vanadium_sample()
-    # wf[MonitorFilename[EmptyCanRun]] = dream.data.simulated_monitor_empty_can()
     wf[NeXusDetectorName] = detector_name
-    # wf[dream.InstrumentConfiguration] = (
-    #     dream.beamline.InstrumentConfiguration.high_flux_BC215
-    # )  # noqa: E501
-    # wf[CalibrationFilename] = None
-    # wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    # wf[DspacingBins] = sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom')
-    # wf[TofMask] = None
-    # wf[TwoThetaMask] = None
-    # wf[WavelengthMask] = None
-    # wf[CIFAuthors] = (
-    #     CIFAuthors(
-    #         [
-    #             metadata.Person(
-    #                 name="Jane Doe",
-    #                 email="jane.doe@ess.eu",
-    #                 orcid_id="0000-0000-0000-0001",
-    #                 corresponding=True,
-    #             ),
-    #         ]
-    #     ),
-    # )
 
     for key, value in params.items():
         wf[key] = value
@@ -191,21 +151,6 @@ def test_pipeline_can_compute_dspacing_result_with_different_norm(
     result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
-
-
-# @pytest.mark.parametrize("keep_events", [True, False])
-# def test_pipeline_can_compute_dspacing_result_with_integrated_monitor_norm(
-#     params_for_det, keep_events: bool
-# ):
-#     workflow = make_workflow(
-#         params_for_det, run_norm=powder.RunNormalization.monitor_integrated
-#     )
-#     workflow[KeepEvents[SampleRun]] = KeepEvents[SampleRun](keep_events)
-#     workflow[KeepEvents[VanadiumRun]] = KeepEvents[VanadiumRun](keep_events)
-#     workflow = powder.with_pixel_mask_filenames(workflow, [])
-#     result = workflow.compute(IntensityDspacing[SampleRun])
-#     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
-#     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
 
 
 @pytest.mark.parametrize(*PARAMETRIZATION)
@@ -275,7 +220,9 @@ def test_pipeline_group_by_two_theta(detector_name):
     assert sc.allclose(result.coords['two_theta'], two_theta_bins)
 
 
-def test_pipeline_wavelength_masking(workflow):
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_pipeline_wavelength_masking(detector_name):
+    workflow = _make_workflow(detector_name=detector_name)
     wmin = sc.scalar(0.18, unit="angstrom")
     wmax = sc.scalar(0.21, unit="angstrom")
     workflow[WavelengthMask] = lambda x: (x > wmin) & (x < wmax)
@@ -293,7 +240,9 @@ def test_pipeline_wavelength_masking(workflow):
     )
 
 
-def test_pipeline_two_theta_masking(workflow):
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_pipeline_two_theta_masking(detector_name):
+    workflow = _make_workflow(detector_name=detector_name)
     tmin = sc.scalar(1.0, unit="rad")
     tmax = sc.scalar(1.2, unit="rad")
     workflow[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
@@ -309,8 +258,11 @@ def test_pipeline_two_theta_masking(workflow):
     )
 
 
-def test_pipeline_can_save_data(workflow):
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
+@pytest.mark.parametrize(*PARAMETRIZATION)
+def test_pipeline_can_save_data(detector_name):
+    workflow = powder.with_pixel_mask_filenames(
+        _make_workflow(detector_name=detector_name), []
+    )
     result = workflow.compute(ReducedTofCIF)
 
     buffer = io.StringIO()
@@ -333,9 +285,8 @@ def test_pipeline_save_data_to_disk(output_folder: Path):
     to have enough signal: we thus use the large files instead of small, and use the
     mantle detector bank.
     """
-    wf = make_workflow(
-        {**params, NeXusDetectorName: "mantle"},
-        run_norm=powder.RunNormalization.proton_charge,
+    wf = _make_workflow(
+        detector_name="mantle", run_norm=powder.RunNormalization.proton_charge
     )
 
     wf[Filename[SampleRun]] = dream.data.simulated_diamond_sample(small=False)
