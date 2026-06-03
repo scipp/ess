@@ -23,6 +23,16 @@ jobs:
           - essreflectometry
           - esssans
           - essspectroscopy
+        # Packages whose tests write reduced data files via the --file-output
+        # pytest option. Their output is collected and published to the
+        # `reduced_data_nightly` release by the `publish` job below. To publish data
+        # from another package, add a `--file-output`/`output_folder` fixture to
+        # its conftest and list it here.
+        include:
+          - package: essdiffraction
+            file_output: true
+          - package: essreflectometry
+            file_output: true
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -34,7 +44,62 @@ jobs:
           frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests
-        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
+        run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }} ${{ matrix.file_output && '-- --file-output=tests_outputs' || '' }}
+      - name: Upload reduced data files
+        if: matrix.file_output
+        uses: actions/upload-artifact@v7
+        with:
+          name: reduced-data-${{ matrix.package }}
+          path: tests_outputs/
+          if-no-files-found: warn
+
+  publish:
+    name: Publish nightly reduced data
+    needs: test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download reduced data files
+        uses: actions/download-artifact@v8
+        with:
+          path: ./artifacts
+          pattern: reduced-data-*
+          merge-multiple: true
+      - name: Check for reduced data files
+        id: check
+        run: |
+          shopt -s nullglob
+          files=(./artifacts/*)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No reduced data files were produced; nothing to publish."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Publishing ${#files[@]} file(s):"
+            printf '  %s\n' "${files[@]}"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+      # Upload assets to the existing `reduced_data_nightly` release, overwriting
+      # the previous night's files. Updating assets in place (rather than
+      # deleting and recreating the release) avoids generating a release
+      # notification on every nightly run.
+      - name: Upload to nightly release
+        if: steps.check.outputs.found == 'true'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ./artifacts/*
+          file_glob: true
+          tag: reduced_data_nightly
+          overwrite: true
+          prerelease: true
+      - name: Update release notes
+        if: steps.check.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release edit reduced_data_nightly \
+            --notes "Automated nightly build from $(date -u +%Y-%m-%dT%H:%MZ) (commit ${GITHUB_SHA::7})"
 
   lower-bound:
     name: Lower bound ${{ matrix.package }}
