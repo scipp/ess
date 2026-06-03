@@ -38,7 +38,7 @@ from ess.spectroscopy.types import (
 from scippneutron.io import sqw
 
 N_DETECTORS = 3
-N_ANGLES = 178
+N_ANGLES = 180
 N_DET_ROTATIONS = 2
 
 BIN_SIZES = {'u1': 6, 'u2': 7, 'u3': 8, 'u4': 9}
