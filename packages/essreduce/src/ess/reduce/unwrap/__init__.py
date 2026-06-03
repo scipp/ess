@@ -11,15 +11,16 @@ from .lut import (
     BeamlineComponentReading,
     ChopperFrameSequence,
     DistanceResolution,
-    LookupTableWorkflow,
     LtotalRange,
     NumberOfSimulatedNeutrons,
     PulsePeriod,
     PulseStride,
+    SimulationFacility,
+    SimulationMaxWavelength,
+    SimulationMinWavelength,
     SimulationResults,
     SimulationSeed,
     SourceBounds,
-    SourcePosition,
     TimeResolution,
     simulate_chopper_cascade_using_tof,
 )
@@ -33,9 +34,10 @@ from .types import (
     MonitorLtotal,
     PulseStrideOffset,
     WavelengthDetector,
+    WavelengthLutMode,
     WavelengthMonitor,
 )
-from .workflow import GenericUnwrapWorkflow
+from .workflow import GenericUnwrapWorkflow, LookupTableWorkflow
 
 __all__ = [
     "BeamlineComponentReading",
@@ -55,12 +57,15 @@ __all__ = [
     "PulsePeriod",
     "PulseStride",
     "PulseStrideOffset",
+    "SimulationFacility",
+    "SimulationMaxWavelength",
+    "SimulationMinWavelength",
     "SimulationResults",
     "SimulationSeed",
     "SourceBounds",
-    "SourcePosition",
     "TimeResolution",
     "WavelengthDetector",
+    "WavelengthLutMode",
     "WavelengthMonitor",
     "providers",
     "simulate_chopper_cascade_using_tof",

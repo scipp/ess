@@ -7,7 +7,7 @@ import sciline
 import scipp as sc
 
 from ess.reduce.parameter import parameter_mappers
-from ess.reduce.unwrap import GenericUnwrapWorkflow
+from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
 from . import common, conversions, i_of_q, masking, normalization
 from .types import (
@@ -167,9 +167,18 @@ to setup a complete workflow.
 """
 
 
-def SansWorkflow() -> sciline.Pipeline:
+def SansWorkflow(
+    wavelength_from: WavelengthLutMode = "file",
+) -> sciline.Pipeline:
     """
     Common base for SANS workflows.
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
 
     Returns
     -------
@@ -185,6 +194,7 @@ def SansWorkflow() -> sciline.Pipeline:
             TransmissionRun[BackgroundRun],
         ),
         monitor_types=(Incident, Transmission),
+        wavelength_from=wavelength_from,
     )
     for provider in providers:
         workflow.insert(provider)

@@ -2,22 +2,31 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 from dataclasses import asdict, dataclass
+from enum import StrEnum
 from pathlib import Path
-from typing import Any, NewType
+from typing import Any, Generic, NewType
 
 import sciline as sl
 import scipp as sc
 
 from ..nexus.types import Component, MonitorType, RunType
 
-LookupTableFilename = NewType("LookupTableFilename", str)
-"""Filename of the wavelength lookup table."""
+
+class WavelengthLutMode(StrEnum):
+    analytical = 'analytical'
+    simulation = 'simulation'
+    file = 'file'
+
+
+class LookupTableFilename(sl.Scope[RunType, Component, str], str):
+    """Filename of the wavelength lookup table."""
 
 
 @dataclass
-class LookupTable:
+class LookupTable(Generic[RunType, Component]):
     """
-    Lookup table giving wavelength as a function of distance and ``event_time_offset``.
+    Lookup table giving wavelength as a function of distance and
+    ``event_time_offset`` for each beamline component (detector, monitor).
     """
 
     array: sc.DataArray
@@ -44,7 +53,7 @@ class LookupTable:
         return self.array.plot(*args, **kwargs)
 
 
-class ErrorLimitedLookupTable(sl.Scope[Component, LookupTable], LookupTable):
+class ErrorLimitedLookupTable(LookupTable[RunType, Component]):
     """Lookup table that is masked with NaNs in regions where the standard deviation of
     the wavelength is above a certain threshold."""
 

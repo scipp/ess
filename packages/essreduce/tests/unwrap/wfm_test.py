@@ -5,10 +5,15 @@ import numpy as np
 import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
+from scippnexus import NXsource
 
 from ess.reduce import unwrap
-from ess.reduce.nexus.types import AnyRun, NeXusDetectorName, RawDetector, SampleRun
-from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, fakes
+from ess.reduce.nexus.types import NeXusDetectorName, Position, RawDetector, SampleRun
+from ess.reduce.unwrap import (
+    GenericUnwrapWorkflow,
+    fakes,
+    simulate_chopper_cascade_using_tof,
+)
 
 sl = pytest.importorskip("sciline")
 
@@ -107,50 +112,49 @@ def dream_source_position() -> sc.Variable:
     return sc.vector(value=[0, 0, -76.55], unit="m")
 
 
-def make_workflows(choppers, source_position) -> dict[str, sl.Pipeline]:
-    lut_wf = LookupTableWorkflow(use_simulation=False)
-    lut_wf[unwrap.DiskChoppers[AnyRun]] = choppers
-    lut_wf[unwrap.SourcePosition] = source_position
-    lut_wf[unwrap.PulseStride] = 1
-
-    tof_wf = LookupTableWorkflow(use_simulation=True)
-    tof_wf[unwrap.DiskChoppers[AnyRun]] = choppers
-    tof_wf[unwrap.SourcePosition] = source_position
-    tof_wf[unwrap.NumberOfSimulatedNeutrons] = 300_000
-    tof_wf[unwrap.SimulationSeed] = 432
-    tof_wf[unwrap.PulseStride] = 1
-    tof_wf[unwrap.SimulationResults] = tof_wf.compute(unwrap.SimulationResults)
-    return {'analytical': lut_wf, 'tof': tof_wf}
+def simulate_with_tof(choppers, pulse_stride, source_position):
+    return simulate_chopper_cascade_using_tof(
+        choppers=choppers,
+        source_position=source_position,
+        neutrons=300_000,
+        pulse_stride=pulse_stride,
+        seed=432,
+        facility="ess",
+        wmin=None,
+        wmax=None,
+    )
 
 
 @pytest.fixture(scope="module")
-def lut_workflow_dream_choppers() -> dict[str, sl.Pipeline]:
-    return make_workflows(
+def simulate_with_dream_choppers() -> dict[str, sl.Pipeline]:
+    return simulate_with_tof(
         choppers=dream_choppers(),
+        pulse_stride=1,
         source_position=dream_source_position(),
     )
 
 
 def setup_workflow(
+    wavelength_from: str,
     raw_data: sc.DataArray,
     ltotal: sc.Variable,
-    lut_workflow: sl.Pipeline,
+    choppers: dict[str, DiskChopper],
+    source_position: sc.Variable,
     error_threshold: float = 0.1,
 ) -> sl.Pipeline:
-    pl = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
-    pl[RawDetector[SampleRun]] = raw_data
-    pl[unwrap.DetectorLtotal[SampleRun]] = ltotal
-    pl[NeXusDetectorName] = "detector"
-    pl[unwrap.LookupTableRelativeErrorThreshold] = {"detector": error_threshold}
+    wf = GenericUnwrapWorkflow(
+        run_types=[SampleRun], monitor_types=[], wavelength_from=wavelength_from
+    )
+    wf[RawDetector[SampleRun]] = raw_data
+    wf[unwrap.DetectorLtotal[SampleRun]] = ltotal
+    wf[NeXusDetectorName] = "detector"
+    wf[unwrap.LookupTableRelativeErrorThreshold] = {"detector": error_threshold}
+    wf[unwrap.DiskChoppers[SampleRun]] = choppers
+    wf[Position[NXsource, SampleRun]] = source_position
+    return wf
 
-    lut_wf = lut_workflow.copy()
-    lut_wf[unwrap.LtotalRange] = ltotal.min(), ltotal.max()
 
-    pl[unwrap.LookupTable] = lut_wf.compute(unwrap.LookupTable)
-    return pl
-
-
-@pytest.mark.parametrize("engine", ["tof", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize(
     "ltotal",
     [
@@ -166,20 +170,27 @@ def setup_workflow(
 @pytest.mark.parametrize("time_offset_unit", ["s", "ms", "us", "ns"])
 @pytest.mark.parametrize("distance_unit", ["m", "mm"])
 def test_dream_wfm(
-    lut_workflow_dream_choppers, engine, ltotal, time_offset_unit, distance_unit
+    wavelength_from,
+    ltotal,
+    time_offset_unit,
+    distance_unit,
+    simulate_with_dream_choppers,
 ):
     monitors = {
         f"detector{i}": ltot for i, ltot in enumerate(ltotal.flatten(to="detector"))
     }
 
+    choppers = dream_choppers()
+    source_position = dream_source_position()
+
     # Create some neutron events
     beamline = fakes.FakeBeamline(
-        choppers=dream_choppers(),
+        choppers=choppers,
         monitors=monitors,
         run_length=sc.scalar(1 / 14, unit="s") * 4,
         events_per_pulse=10_000,
         seed=77,
-        source_position=dream_source_position(),
+        source_position=source_position,
     )
 
     raw = sc.concat(
@@ -198,11 +209,18 @@ def test_dream_wfm(
     ref = beamline.get_monitor(next(iter(monitors)))[1].squeeze()
     ref = sc.sort(ref, key='id')
 
-    pl = setup_workflow(
-        raw_data=raw, ltotal=ltotal, lut_workflow=lut_workflow_dream_choppers[engine]
+    wf = setup_workflow(
+        wavelength_from=wavelength_from,
+        raw_data=raw,
+        ltotal=ltotal,
+        choppers=choppers,
+        source_position=source_position,
     )
 
-    wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
+    if wavelength_from == "simulation":
+        wf[unwrap.SimulationResults[SampleRun]] = simulate_with_dream_choppers
+
+    wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')
@@ -215,14 +233,15 @@ def test_dream_wfm(
 
 
 @pytest.fixture(scope="module")
-def lut_workflow_dream_choppers_time_overlap() -> dict[str, sl.Pipeline]:
-    return make_workflows(
+def simulate_with_dream_choppers_time_overlap() -> dict[str, sl.Pipeline]:
+    return simulate_with_tof(
         choppers=dream_choppers_with_frame_overlap(),
+        pulse_stride=1,
         source_position=dream_source_position(),
     )
 
 
-@pytest.mark.parametrize("engine", ["tof", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize(
     "ltotal",
     [
@@ -238,24 +257,27 @@ def lut_workflow_dream_choppers_time_overlap() -> dict[str, sl.Pipeline]:
 @pytest.mark.parametrize("time_offset_unit", ["s", "ms", "us", "ns"])
 @pytest.mark.parametrize("distance_unit", ["m", "mm"])
 def test_dream_wfm_with_subframe_time_overlap(
-    lut_workflow_dream_choppers_time_overlap,
-    engine,
+    wavelength_from,
     ltotal,
     time_offset_unit,
     distance_unit,
+    simulate_with_dream_choppers_time_overlap,
 ):
     monitors = {
         f"detector{i}": ltot for i, ltot in enumerate(ltotal.flatten(to="detector"))
     }
 
+    choppers = dream_choppers_with_frame_overlap()
+    source_position = dream_source_position()
+
     # Create some neutron events
     beamline = fakes.FakeBeamline(
-        choppers=dream_choppers_with_frame_overlap(),
+        choppers=choppers,
         monitors=monitors,
         run_length=sc.scalar(1 / 14, unit="s") * 4,
         events_per_pulse=10_000,
         seed=88,
-        source_position=dream_source_position(),
+        source_position=source_position,
     )
 
     raw = sc.concat(
@@ -274,14 +296,20 @@ def test_dream_wfm_with_subframe_time_overlap(
     ref = beamline.get_monitor(next(iter(monitors)))[1].squeeze()
     ref = sc.sort(ref, key='id')
 
-    pl = setup_workflow(
+    wf = setup_workflow(
+        wavelength_from=wavelength_from,
         raw_data=raw,
         ltotal=ltotal,
-        lut_workflow=lut_workflow_dream_choppers_time_overlap[engine],
+        choppers=choppers,
+        source_position=source_position,
         error_threshold=0.01,
     )
+    if wavelength_from == "simulation":
+        wf[unwrap.SimulationResults[SampleRun]] = (
+            simulate_with_dream_choppers_time_overlap
+        )
 
-    wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
+    wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')
@@ -399,13 +427,15 @@ def v20_source_position():
 
 
 @pytest.fixture(scope="module")
-def lut_workflow_v20_choppers():
-    return make_workflows(
-        choppers=v20_choppers(), source_position=v20_source_position()
+def simulate_with_v20_choppers() -> dict[str, sl.Pipeline]:
+    return simulate_with_tof(
+        choppers=v20_choppers(),
+        pulse_stride=1,
+        source_position=v20_source_position(),
     )
 
 
-@pytest.mark.parametrize("engine", ["tof", "analytical"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize(
     "ltotal",
     [
@@ -419,19 +449,23 @@ def lut_workflow_v20_choppers():
 @pytest.mark.parametrize("time_offset_unit", ["s", "ms", "us", "ns"])
 @pytest.mark.parametrize("distance_unit", ["m", "mm"])
 def test_v20_compute_wavelengths_from_wfm(
-    lut_workflow_v20_choppers, engine, ltotal, time_offset_unit, distance_unit
+    wavelength_from, ltotal, time_offset_unit, distance_unit, simulate_with_v20_choppers
 ):
     monitors = {
         f"detector{i}": ltot for i, ltot in enumerate(ltotal.flatten(to="detector"))
     }
 
+    choppers = v20_choppers()
+    source_position = v20_source_position()
+
     # Create some neutron events
     beamline = fakes.FakeBeamline(
-        choppers=v20_choppers(),
+        choppers=choppers,
         monitors=monitors,
         run_length=sc.scalar(1 / 14, unit="s") * 4,
         events_per_pulse=10_000,
         seed=99,
+        source_position=source_position,
     )
 
     raw = sc.concat(
@@ -450,11 +484,17 @@ def test_v20_compute_wavelengths_from_wfm(
     ref = beamline.get_monitor(next(iter(monitors)))[1].squeeze()
     ref = sc.sort(ref, key='id')
 
-    pl = setup_workflow(
-        raw_data=raw, ltotal=ltotal, lut_workflow=lut_workflow_v20_choppers[engine]
+    wf = setup_workflow(
+        wavelength_from=wavelength_from,
+        raw_data=raw,
+        ltotal=ltotal,
+        choppers=choppers,
+        source_position=source_position,
     )
+    if wavelength_from == "simulation":
+        wf[unwrap.SimulationResults[SampleRun]] = simulate_with_v20_choppers
 
-    wavs = pl.compute(unwrap.WavelengthDetector[SampleRun])
+    wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
 
     for da in wavs.flatten(to='pixel'):
         x = sc.sort(da.value, key='id')
@@ -462,7 +502,7 @@ def test_v20_compute_wavelengths_from_wfm(
             (x.coords["wavelength"] - ref.coords["wavelength"])
             / ref.coords["wavelength"]
         )
-        if engine == "tof":
+        if wavelength_from == "simulation":
             assert np.nanpercentile(diff.values, 99) < 0.02
         else:
             assert np.nanpercentile(diff.values, 90) < 0.05

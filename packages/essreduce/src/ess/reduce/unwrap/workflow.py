@@ -3,48 +3,17 @@
 from collections.abc import Iterable
 
 import sciline
-import scipp as sc
 
 from ..nexus import GenericNeXusWorkflow
-from . import to_wavelength
-from .types import LookupTable, LookupTableFilename, PulseStrideOffset
-
-
-def load_lookup_table(filename: LookupTableFilename) -> LookupTable:
-    """Load a wavelength lookup table from an HDF5 file."""
-    table = sc.io.load_hdf5(filename)
-
-    # Support old format where the metadata were stored as coordinates of the DataArray.
-    # Note that no chopper info was saved in the old format.
-    if isinstance(table, sc.DataArray):
-        to_be_dropped = {
-            "pulse_period",
-            "pulse_stride",
-            "distance_resolution",
-            "time_resolution",
-            "error_threshold",
-        } & set(table.coords)
-        table = {
-            "array": table.drop_coords(list(to_be_dropped)),
-            "pulse_period": table.coords["pulse_period"],
-            "pulse_stride": table.coords["pulse_stride"].value,
-            "distance_resolution": table.coords["distance_resolution"],
-            "time_resolution": table.coords["time_resolution"],
-        }
-
-    # Some old tables have the error_threshold stored as an entry in the data group.
-    # The masking based on uncertainty is now done later, as part of the tof workflow,
-    # so we need to remove this entry if it exists.
-    if "error_threshold" in table:
-        del table["error_threshold"]
-
-    return LookupTable(**table)
+from ..nexus.types import AnyRun, FrameMonitor0
+from . import WavelengthLutMode, lut, to_wavelength
 
 
 def GenericUnwrapWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
+    wavelength_from: WavelengthLutMode = "file",
 ) -> sciline.Pipeline:
     """
     Generic workflow for computing the neutron wavelength for detector and monitor
@@ -74,6 +43,10 @@ def GenericUnwrapWorkflow(
         List of monitor types to include in the workflow.
         Constrains the possible values of :class:`ess.reduce.nexus.types.MonitorType`
         and :class:`ess.reduce.nexus.types.Component`.
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
 
     Returns
     -------
@@ -82,12 +55,50 @@ def GenericUnwrapWorkflow(
     """
     wf = GenericNeXusWorkflow(run_types=run_types, monitor_types=monitor_types)
 
-    for provider in to_wavelength.providers():
+    for provider in (
+        *to_wavelength.providers(),
+        *lut.providers(wavelength_from=wavelength_from),
+    ):
         wf.insert(provider)
-
-    wf.insert(load_lookup_table)
-
-    # Default parameters
-    wf[PulseStrideOffset] = None
+    for key, value in lut.default_parameters(wavelength_from=wavelength_from).items():
+        wf[key] = value
 
     return wf
+
+
+def LookupTableWorkflow(
+    *,
+    use_simulation: bool = True,
+    run_types: Iterable[sciline.typing.Key] | None = None,
+    monitor_types: Iterable[sciline.typing.Key] | None = None,
+) -> sciline.Pipeline:
+    """
+    Alias for :func:`GenericUnwrapWorkflow` with default parameters set for generating
+    a wavelength lookup table using a tof simulation or analytical calculations.
+
+    This is deprecated and will be removed in a future release. Use
+    :func:`GenericUnwrapWorkflow` instead with the desired parameters.
+
+    Parameters
+    ----------
+    use_simulation:
+        Whether to use the "simulation" or "analytical" mode for generating the lookup
+        table. See :func:`GenericUnwrapWorkflow` for details.
+    run_types:
+        List of run types to include in the workflow.
+        Constrains the possible values of :class:`ess.reduce.nexus.types.RunType`.
+    monitor_types:
+        List of monitor types to include in the workflow.
+        Constrains the possible values of :class:`ess.reduce.nexus.types.MonitorType`
+        and :class:`ess.reduce.nexus.types.Component`.
+    """
+    if run_types is None:
+        run_types = [AnyRun]
+    if monitor_types is None:
+        monitor_types = [FrameMonitor0]
+
+    return GenericUnwrapWorkflow(
+        run_types=run_types,
+        monitor_types=monitor_types,
+        wavelength_from="simulation" if use_simulation else "analytical",
+    )

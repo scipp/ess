@@ -5,7 +5,6 @@ from collections.abc import Iterable
 import sciline
 import scipp as sc
 import scippnexus as snx
-import tof
 from scippneutron.conversion.tof import tof_from_wavelength
 
 from ess.reduce.nexus.types import (
@@ -18,16 +17,16 @@ from ess.reduce.nexus.types import (
     SampleRun,
 )
 from ess.reduce.unwrap import (
-    BeamlineComponentReading,
+    DiskChoppers,
     GenericUnwrapWorkflow,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
-    LookupTableWorkflow,
     LtotalRange,
-    NumberOfSimulatedNeutrons,
-    SimulationResults,
+    SimulationMaxWavelength,
+    SimulationMinWavelength,
     SimulationSeed,
     WavelengthDetector,
+    WavelengthLutMode,
 )
 from ess.reduce.workflow import register_workflow
 
@@ -37,66 +36,13 @@ from .types import (
     NMXSampleMetadata,
     NMXSourceMetadata,
     TofDetector,
-    TofSimulationMaxWavelength,
-    TofSimulationMinWavelength,
 )
 
 default_parameters = {
-    TofSimulationMaxWavelength: sc.scalar(3.6, unit='angstrom'),
-    TofSimulationMinWavelength: sc.scalar(1.8, unit='angstrom'),
+    SimulationMaxWavelength: sc.scalar(3.6, unit='angstrom'),
+    SimulationMinWavelength: sc.scalar(1.8, unit='angstrom'),
     LookupTableRelativeErrorThreshold: {f'detector_panel_{i}': 0.1 for i in range(5)},
 }
-
-
-def _simulate_fixed_wavelength_tof(
-    wmin: TofSimulationMinWavelength,
-    wmax: TofSimulationMaxWavelength,
-    neutrons: NumberOfSimulatedNeutrons,
-    seed: SimulationSeed,
-) -> SimulationResults:
-    """
-    Simulate a pulse of neutrons propagating through the instrument using the
-    ``tof`` package (https://scipp.github.io/tof/).
-    This runs a simulation assuming there are no choppers in the instrument.
-
-    Parameters
-    ----------
-    wmin:
-        Minimum wavelength of the simulated neutrons.
-    wmax:
-        Maximum wavelength of the simulated neutrons.
-    neutrons:
-        Number of neutrons to simulate.
-    seed:
-        Random seed for the simulation.
-    """
-    source = tof.Source(
-        facility="ess",
-        neutrons=neutrons,
-        pulses=1,
-        seed=seed,
-        wmax=wmax,
-        wmin=wmin,
-    )
-    events = source.data.squeeze().flatten(to="event")
-
-    return SimulationResults(
-        readings={
-            "source": BeamlineComponentReading(
-                time_of_arrival=events.coords["birth_time"],
-                wavelength=events.coords["wavelength"],
-                weight=events.data,
-                distance=source.distance,
-            )
-        },
-        choppers=None,
-    )
-
-
-def _merge_panels(*da: sc.DataArray) -> sc.DataArray:
-    """Merge multiple DataArrays representing different panels into one."""
-    merged = sc.concat(da, dim='panel')
-    return merged
 
 
 def select_detector_names(*, detector_ids: Iterable[int] = (0, 1, 2)):
@@ -260,8 +206,25 @@ def compute_detector_tof(da: WavelengthDetector[RunType]) -> TofDetector[RunType
 
 
 @register_workflow
-def NMXWorkflow() -> sciline.Pipeline:
-    generic_wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
+def NMXWorkflow(
+    wavelength_from: WavelengthLutMode = "file", **kwargs
+) -> sciline.Pipeline:
+    """
+    Workflow for reducing data from the NMX instrument at ESS.
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    """
+    generic_wf = GenericUnwrapWorkflow(
+        run_types=[SampleRun],
+        monitor_types=[],
+        wavelength_from=wavelength_from,
+        **kwargs,
+    )
 
     generic_wf.insert(_retrieve_crystal_rotation)
     generic_wf.insert(assemble_sample_metadata)
@@ -272,26 +235,6 @@ def NMXWorkflow() -> sciline.Pipeline:
         generic_wf[key] = value
 
     return generic_wf
-
-
-def _validate_mergable_workflow(wf: sciline.Pipeline):
-    if wf.indices:
-        raise NotImplementedError("Only flat workflow can be merged.")
-
-
-def _merge_workflows(
-    base_wf: sciline.Pipeline, merged_wf: sciline.Pipeline
-) -> sciline.Pipeline:
-    _validate_mergable_workflow(base_wf)
-    _validate_mergable_workflow(merged_wf)
-
-    for key, spec in merged_wf.underlying_graph.nodes.items():
-        if 'value' in spec:
-            base_wf[key] = spec['value']
-        elif (provider_spec := spec.get('provider')) is not None:
-            base_wf.insert(provider_spec.func)
-
-    return base_wf
 
 
 def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
@@ -312,20 +255,25 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
         Additional parameters to set in the workflow.
 
     """
-    wf = NMXWorkflow()
     if config.lookup_table_file_path is not None:
-        wf[LookupTableFilename] = config.lookup_table_file_path
+        wf = NMXWorkflow(wavelength_from="file")
+        wf[LookupTableFilename[SampleRun, snx.NXdetector]] = (
+            config.lookup_table_file_path
+        )
+        # TODO: also add monitor when we have monitors in the NMXWorkflow.
     else:
-        wf = _merge_workflows(base_wf=wf, merged_wf=LookupTableWorkflow())
-        wf.insert(_simulate_fixed_wavelength_tof)
+        wf = NMXWorkflow(wavelength_from="simulation")
         wmax = sc.scalar(config.tof_simulation_max_wavelength, unit='angstrom')
         wmin = sc.scalar(config.tof_simulation_min_wavelength, unit='angstrom')
-        wf[TofSimulationMaxWavelength] = wmax
-        wf[TofSimulationMinWavelength] = wmin
+        wf[SimulationMaxWavelength] = wmax
+        wf[SimulationMinWavelength] = wmin
         wf[SimulationSeed] = config.tof_simulation_seed
         ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
         ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
-        wf[LtotalRange] = LtotalRange((ltotal_min, ltotal_max))
+        wf[LtotalRange[SampleRun, snx.NXdetector]] = ltotal_min, ltotal_max
+        if not config.use_choppers_from_file:
+            wf[DiskChoppers[SampleRun]] = {}
+        # TODO: replace the simulation mode with the 'analytical' (polygons) mode.
 
     return wf
 

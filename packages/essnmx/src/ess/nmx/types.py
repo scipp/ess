@@ -9,10 +9,13 @@ import scipp as sc
 import scippnexus as snx
 from scippneutron.metadata import RadiationProbe, SourceType
 
-from ess.reduce.nexus.types import RunType
+from ess.reduce.nexus import types as nexus_types
 from ess.reduce.unwrap.types import LookupTable
 
 from ._display_helper import to_datagroup
+
+RunType = nexus_types.RunType
+SampleRun = nexus_types.SampleRun
 
 
 class Compression(enum.StrEnum):

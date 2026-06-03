@@ -27,7 +27,6 @@ from ..nexus.types import (
     EmptyMonitor,
     GravityVector,
     MonitorType,
-    NeXusDetectorName,
     NeXusName,
     Position,
     RawDetector,
@@ -137,7 +136,7 @@ class WavelengthInterpolator:
 
 
 def _compute_wavelength_histogram(
-    da: sc.DataArray, lookup: ErrorLimitedLookupTable, ltotal: sc.Variable
+    da: sc.DataArray, lookup: LookupTable, ltotal: sc.Variable
 ) -> sc.DataArray:
     # In NeXus, 'time_of_flight' is the canonical name in NXmonitor, but in some files,
     # it may be called 'tof' or 'frame_time'.
@@ -243,7 +242,7 @@ def _guess_pulse_stride_offset(
 
 def _prepare_wavelength_interpolation_inputs(
     da: sc.DataArray,
-    lookup: ErrorLimitedLookupTable,
+    lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
 ) -> dict:
@@ -336,7 +335,7 @@ def _prepare_wavelength_interpolation_inputs(
 
 def _compute_wavelength_events(
     da: sc.DataArray,
-    lookup: ErrorLimitedLookupTable,
+    lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
 ) -> sc.DataArray:
@@ -435,9 +434,11 @@ def monitor_ltotal_from_straight_line_approximation(
     )
 
 
-def _mask_large_uncertainty_in_lut(
-    table: LookupTable, error_threshold: float
-) -> LookupTable:
+def mask_large_uncertainty_in_lut(
+    table: LookupTable[RunType, Component],
+    error_threshold: LookupTableRelativeErrorThreshold,
+    component_name: NeXusName[Component],
+) -> ErrorLimitedLookupTable[RunType, Component]:
     """
     Mask regions in the lookup table with large uncertainty using NaNs.
 
@@ -448,11 +449,14 @@ def _mask_large_uncertainty_in_lut(
     error_threshold:
         Threshold for the relative standard deviation (coefficient of variation) of the
         projected time-of-flight above which values are masked.
+    component_name:
+        Name of the component for which to apply the error threshold. This is used to
+        get the correct error threshold from the dictionary of error thresholds.
     """
     da = table.array
     relative_error = sc.stddevs(da.data) / sc.values(da.data)
-    mask = relative_error > sc.scalar(error_threshold)
-    return LookupTable(
+    mask = relative_error > sc.scalar(error_threshold[component_name])
+    return ErrorLimitedLookupTable[RunType, Component](
         **{
             **asdict(table),
             "array": sc.where(mask, sc.scalar(np.nan, unit=da.unit), da),
@@ -460,61 +464,9 @@ def _mask_large_uncertainty_in_lut(
     )
 
 
-def mask_large_uncertainty_in_lut_detector(
-    table: LookupTable,
-    error_threshold: LookupTableRelativeErrorThreshold,
-    detector_name: NeXusDetectorName,
-) -> ErrorLimitedLookupTable[snx.NXdetector]:
-    """
-    Mask regions in the wavelength lookup table with large uncertainty using NaNs.
-
-    Parameters
-    ----------
-    table:
-        Lookup table with wavelength as a function of distance and time-of-arrival.
-    error_threshold:
-        Threshold for the relative standard deviation (coefficient of variation) of the
-        projected wavelength above which values are masked.
-    detector_name:
-        Name of the detector for which to apply the error threshold. This is used to
-        get the correct error threshold from the dictionary of error thresholds.
-    """
-    return ErrorLimitedLookupTable[snx.NXdetector](
-        _mask_large_uncertainty_in_lut(
-            table=table, error_threshold=error_threshold[detector_name]
-        )
-    )
-
-
-def mask_large_uncertainty_in_lut_monitor(
-    table: LookupTable,
-    error_threshold: LookupTableRelativeErrorThreshold,
-    monitor_name: NeXusName[MonitorType],
-) -> ErrorLimitedLookupTable[MonitorType]:
-    """
-    Mask regions in the wavelength lookup table with large uncertainty using NaNs.
-
-    Parameters
-    ----------
-    table:
-        Lookup table with wavelength as a function of distance and time-of-arrival.
-    error_threshold:
-        Threshold for the relative standard deviation (coefficient of variation) of the
-        projected wavelength above which values are masked.
-    monitor_name:
-        Name of the monitor for which to apply the error threshold. This is used to
-        get the correct error threshold from the dictionary of error thresholds.
-    """
-    return ErrorLimitedLookupTable[MonitorType](
-        _mask_large_uncertainty_in_lut(
-            table=table, error_threshold=error_threshold[monitor_name]
-        )
-    )
-
-
 def _compute_wavelength_data(
     da: sc.DataArray,
-    lookup: ErrorLimitedLookupTable[Component],
+    lookup: ErrorLimitedLookupTable[RunType, Component],
     ltotal: sc.Variable,
     pulse_stride_offset: int,
 ) -> sc.DataArray:
@@ -533,7 +485,7 @@ def _compute_wavelength_data(
 
 def detector_wavelength_data(
     detector_data: RawDetector[RunType],
-    lookup: ErrorLimitedLookupTable[snx.NXdetector],
+    lookup: ErrorLimitedLookupTable[RunType, snx.NXdetector],
     ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthDetector[RunType]:
@@ -568,7 +520,7 @@ def detector_wavelength_data(
 
 def monitor_wavelength_data(
     monitor_data: RawMonitor[RunType, MonitorType],
-    lookup: ErrorLimitedLookupTable[MonitorType],
+    lookup: ErrorLimitedLookupTable[RunType, MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthMonitor[RunType, MonitorType]:
@@ -610,6 +562,5 @@ def providers() -> tuple[Callable]:
         monitor_ltotal_from_straight_line_approximation,
         detector_wavelength_data,
         monitor_wavelength_data,
-        mask_large_uncertainty_in_lut_detector,
-        mask_large_uncertainty_in_lut_monitor,
+        mask_large_uncertainty_in_lut,
     )

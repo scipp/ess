@@ -32,7 +32,7 @@ from scippneutron.metadata import Software
 
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.parameter import parameter_mappers
-from ess.reduce.unwrap import GenericUnwrapWorkflow
+from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
 from .beamline import InstrumentConfiguration
@@ -97,7 +97,9 @@ def _collect_reducer_software() -> ReducerSoftware:
     )
 
 
-def DreamWorkflow(**kwargs) -> sciline.Pipeline:
+def DreamWorkflow(
+    wavelength_from: WavelengthLutMode = "file", **kwargs
+) -> sciline.Pipeline:
     """
     Dream generic workflow with default parameters.
     The workflow is based on the GenericUnwrapWorkflow.
@@ -109,6 +111,10 @@ def DreamWorkflow(**kwargs) -> sciline.Pipeline:
 
     Parameters
     ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     kwargs:
         Additional keyword arguments are forwarded to the base
         :func:`GenericUnwrapWorkflow`.
@@ -116,12 +122,14 @@ def DreamWorkflow(**kwargs) -> sciline.Pipeline:
     wf = GenericUnwrapWorkflow(
         run_types=[SampleRun, VanadiumRun, EmptyCanRun],
         monitor_types=[BunkerMonitor, CaveMonitor],
+        wavelength_from=wavelength_from,
         **kwargs,
     )
     wf[DetectorBankSizes] = DETECTOR_BANK_SIZES
     wf[NeXusName[BunkerMonitor]] = "monitor_bunker"
     wf[NeXusName[CaveMonitor]] = "monitor_cave"
-    wf.insert(_get_lookup_table_filename_from_configuration)
+    if wavelength_from == "file":
+        wf.insert(_get_lookup_table_filename_from_configuration)
     wf[ReducerSoftware] = _collect_reducer_software()
     wf[LookupTableRelativeErrorThreshold] = {
         "endcap_backward_detector": float('inf'),

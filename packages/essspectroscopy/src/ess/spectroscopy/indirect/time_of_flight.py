@@ -4,12 +4,13 @@
 """Utilities for computing real neutron time-of-flight for indirect geometry."""
 
 from collections.abc import Iterable
+from dataclasses import asdict
 
 import sciline
 import scippnexus as snx
 
 from ess.reduce import unwrap as reduce_unwrap
-from ess.reduce.unwrap.types import DetectorLtotal
+from ess.reduce.unwrap.types import DetectorLtotal, WavelengthLutMode
 
 from ..types import (
     DataAtSample,
@@ -33,10 +34,12 @@ def TofWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
+    wavelength_from: WavelengthLutMode = "file",
 ) -> sciline.Pipeline:
     workflow = reduce_unwrap.GenericUnwrapWorkflow(
         run_types=run_types,
         monitor_types=monitor_types,
+        wavelength_from=wavelength_from,
     )
     for provider in providers:
         workflow.insert(provider)
@@ -45,7 +48,7 @@ def TofWorkflow(
 
 def detector_wavelength_data(
     sample_data: DataAtSample[RunType],
-    lookup: ErrorLimitedLookupTable[snx.NXdetector],
+    lookup: ErrorLimitedLookupTable[RunType, snx.NXdetector],
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthDetector[RunType]:
     """
@@ -71,7 +74,7 @@ def detector_wavelength_data(
 
 def monitor_wavelength_data(
     monitor_data: RawMonitor[RunType, MonitorType],
-    lookup: ErrorLimitedLookupTable[MonitorType],
+    lookup: ErrorLimitedLookupTable[RunType, MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthMonitor[RunType, MonitorType]:
@@ -111,9 +114,9 @@ def compute_monitor_ltotal(
 
 
 def mask_large_uncertainty_in_lut_detector(
-    table: LookupTable,
+    table: LookupTable[RunType, snx.NXdetector],
     error_threshold: LookupTableRelativeErrorThreshold,
-) -> ErrorLimitedLookupTable[snx.NXdetector]:
+) -> ErrorLimitedLookupTable[RunType, snx.NXdetector]:
     """
     Mask regions in the wavelength lookup table with large uncertainty using NaNs.
 
@@ -134,14 +137,16 @@ def mask_large_uncertainty_in_lut_detector(
         The underlying implementation.
     """
     from ess.reduce.unwrap.to_wavelength import (
-        mask_large_uncertainty_in_lut_detector,
+        mask_large_uncertainty_in_lut,
     )
 
-    return ErrorLimitedLookupTable[snx.NXdetector](
-        mask_large_uncertainty_in_lut_detector(
-            table=table,
-            error_threshold=error_threshold,
-            detector_name=NeXusDetectorName('detector'),
+    return ErrorLimitedLookupTable[RunType, snx.NXdetector](
+        **asdict(
+            mask_large_uncertainty_in_lut(
+                table=table,
+                error_threshold=error_threshold,
+                component_name=NeXusDetectorName('detector'),
+            )
         )
     )
 

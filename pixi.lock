@@ -21650,8 +21650,8 @@ packages:
   name: essdiffraction
   requires_dist:
   - dask>=2022.1.0
-  - essreduce>=26.4.0
-  - graphviz
+  - essreduce>=26.5.0
+  - graphviz>=0.20
   - numpy>=2
   - plopp>=26.2.0
   - pythreejs>=2.4.1
@@ -21661,64 +21661,64 @@ packages:
   - scippnexus>=23.12.0
   - tof>=25.12.0
   - ncrystal[cif]>=4.1.0
-  - spglib!=2.7
+  - spglib>=2.0.0,!=2.7
   - pandas>=2.1.2 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
   - pytest>=7.0 ; extra == 'test'
   - ipywidgets>=8.1.7 ; extra == 'test'
-  - autodoc-pydantic ; extra == 'docs'
-  - ipykernel ; extra == 'docs'
-  - ipympl ; extra == 'docs'
-  - ipython!=8.7.0 ; extra == 'docs'
-  - myst-parser ; extra == 'docs'
-  - nbsphinx ; extra == 'docs'
-  - pandas ; extra == 'docs'
-  - pooch ; extra == 'docs'
+  - autodoc-pydantic>=2.0.0 ; extra == 'docs'
+  - ipykernel>=6.20.0 ; extra == 'docs'
+  - ipympl>=0.9.0 ; extra == 'docs'
+  - ipython!=8.7.0,>=8.8.0 ; extra == 'docs'
+  - myst-parser>=2.0.0 ; extra == 'docs'
+  - nbsphinx>=0.9.3 ; extra == 'docs'
+  - pandas>=2.1.2 ; extra == 'docs'
+  - pooch>=1.5 ; extra == 'docs'
   - pydata-sphinx-theme>=0.14 ; extra == 'docs'
-  - sphinx ; extra == 'docs'
-  - sphinx-autodoc-typehints ; extra == 'docs'
-  - sphinx-copybutton ; extra == 'docs'
-  - sphinx-design ; extra == 'docs'
-  - sphinxcontrib-bibtex ; extra == 'docs'
-  - pyarrow ; extra == 'docs'
+  - sphinx>=7 ; extra == 'docs'
+  - sphinx-autodoc-typehints>=1.24.0 ; extra == 'docs'
+  - sphinx-copybutton>=0.5.2 ; extra == 'docs'
+  - sphinx-design>=0.5.0 ; extra == 'docs'
+  - sphinxcontrib-bibtex>=2.5.0 ; extra == 'docs'
+  - pyarrow>=12.0.0 ; extra == 'docs'
   requires_python: '>=3.11'
 - pypi: packages/essimaging
   name: essimaging
   requires_dist:
   - dask>=2022.1.0
-  - graphviz
+  - graphviz>=0.20
   - plopp[all]>=23.10.0
   - sciline>=23.9.1
   - scipp>=25.4.0
   - scippneutron>=24.12.0
   - scippnexus>=23.11.1
   - tifffile>=2024.7.2
-  - essreduce>=26.4.0
+  - essreduce>=26.5.0
   - scitiff>=25.7
   - pytest>=8.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
-  - tof>=25.8.0 ; extra == 'test'
+  - tof>=26.3.0 ; extra == 'test'
   - scitiff>=24.6.0 ; extra == 'test'
-  - autodoc-pydantic ; extra == 'docs'
-  - ipykernel ; extra == 'docs'
-  - ipython!=8.7.0 ; extra == 'docs'
-  - myst-parser ; extra == 'docs'
-  - nbsphinx ; extra == 'docs'
+  - autodoc-pydantic>=2.0.0 ; extra == 'docs'
+  - ipykernel>=6.20.0 ; extra == 'docs'
+  - ipython!=8.7.0,>=8.8.0 ; extra == 'docs'
+  - myst-parser>=2.0.0 ; extra == 'docs'
+  - nbsphinx>=0.9.3 ; extra == 'docs'
   - pooch>=1.5 ; extra == 'docs'
   - pydata-sphinx-theme>=0.14 ; extra == 'docs'
   - sphinx>=7 ; extra == 'docs'
-  - sphinx-autodoc-typehints ; extra == 'docs'
-  - sphinx-copybutton ; extra == 'docs'
-  - sphinx-design ; extra == 'docs'
+  - sphinx-autodoc-typehints>=1.24.0 ; extra == 'docs'
+  - sphinx-copybutton>=0.5.2 ; extra == 'docs'
+  - sphinx-design>=0.5.0 ; extra == 'docs'
   - tof>=25.8.0 ; extra == 'docs'
-  - tqdm ; extra == 'docs'
+  - tqdm>=4.64.0 ; extra == 'docs'
   requires_python: '>=3.11'
 - pypi: packages/essnmx
   name: essnmx
   requires_dist:
   - dask>=2022.1.0
   - essreduce>=26.4.0
-  - graphviz
+  - graphviz>=0.20
   - plopp>=24.7.0
   - sciline>=24.6.0
   - scipp>=25.3.0
@@ -21733,18 +21733,18 @@ packages:
   - numpy>=2.0.0
   - pytest>=8.0 ; extra == 'test'
   - bitshuffle>=0.5.2 ; os_name == 'posix' and extra == 'test'
-  - autodoc-pydantic ; extra == 'docs'
-  - ipykernel ; extra == 'docs'
-  - ipython!=8.7.0 ; extra == 'docs'
-  - myst-parser ; extra == 'docs'
-  - nbsphinx ; extra == 'docs'
+  - autodoc-pydantic>=2.0.0 ; extra == 'docs'
+  - ipykernel>=6.20.0 ; extra == 'docs'
+  - ipython!=8.7.0,>=8.8.0 ; extra == 'docs'
+  - myst-parser>=2.0.0 ; extra == 'docs'
+  - nbsphinx>=0.9.3 ; extra == 'docs'
   - pydata-sphinx-theme>=0.14 ; extra == 'docs'
-  - sphinx<9.0.0 ; extra == 'docs'
-  - sphinx-autodoc-typehints ; extra == 'docs'
-  - sphinx-copybutton ; extra == 'docs'
-  - sphinx-design ; extra == 'docs'
-  - pythreejs ; extra == 'docs'
-  - scippneutron ; extra == 'docs'
+  - sphinx>=7,<9.0.0 ; extra == 'docs'
+  - sphinx-autodoc-typehints>=1.24.0 ; extra == 'docs'
+  - sphinx-copybutton>=0.5.2 ; extra == 'docs'
+  - sphinx-design>=0.5.0 ; extra == 'docs'
+  - pythreejs>=2.4.1 ; extra == 'docs'
+  - scippneutron>=26.3.0 ; extra == 'docs'
   requires_python: '>=3.11'
 - pypi: packages/essreduce
   name: essreduce
@@ -21763,62 +21763,62 @@ packages:
   - pytest>=7.0 ; extra == 'test'
   - tof>=25.12.0 ; extra == 'test'
   - pandas>=2.1.2 ; extra == 'test'
-  - autodoc-pydantic ; extra == 'docs'
+  - autodoc-pydantic>=2.0.0 ; extra == 'docs'
   - graphviz>=0.20 ; extra == 'docs'
-  - ipykernel ; extra == 'docs'
-  - ipython!=8.7.0 ; extra == 'docs'
+  - ipykernel>=6.20.0 ; extra == 'docs'
+  - ipython!=8.7.0,>=8.8.0 ; extra == 'docs'
   - ipywidgets>=8.1 ; extra == 'docs'
-  - myst-parser ; extra == 'docs'
-  - nbsphinx ; extra == 'docs'
+  - myst-parser>=2.0.0 ; extra == 'docs'
+  - nbsphinx>=0.9.3 ; extra == 'docs'
   - numba>=0.63 ; extra == 'docs'
-  - plopp ; extra == 'docs'
+  - plopp>=24.7.0 ; extra == 'docs'
   - pydata-sphinx-theme>=0.14 ; extra == 'docs'
   - sphinx>=7 ; extra == 'docs'
-  - sphinx-autodoc-typehints ; extra == 'docs'
-  - sphinx-copybutton ; extra == 'docs'
-  - sphinx-design ; extra == 'docs'
+  - sphinx-autodoc-typehints>=1.24.0 ; extra == 'docs'
+  - sphinx-copybutton>=0.5.2 ; extra == 'docs'
+  - sphinx-design>=0.5.0 ; extra == 'docs'
   - tof>=25.12.0 ; extra == 'docs'
-  - sphinxcontrib-mermaid ; extra == 'docs'
-  - sympy ; extra == 'docs'
+  - sphinxcontrib-mermaid>=0.9.2 ; extra == 'docs'
+  - sympy>=1.11 ; extra == 'docs'
   requires_python: '>=3.11'
 - pypi: packages/essreflectometry
   name: essreflectometry
   requires_dist:
   - dask>=2022.1.0
-  - python-dateutil
-  - graphviz
+  - python-dateutil>=2.8.2
+  - graphviz>=0.20
   - plopp>=24.7.0
   - orsopy>=1.2
   - sciline>=24.6.0
   - scipp>=24.9.1
   - scippneutron>=24.10.0
   - scippnexus>=24.9.1
-  - essreduce>26.4.0
+  - essreduce>=26.5.0
   - esspolarization>=25.7.0
   - pandas>=2.1.2
   - pytest>=7.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
-  - ipywidgets ; extra == 'gui'
-  - ipydatagrid ; extra == 'gui'
-  - ipytree ; extra == 'gui'
-  - pythreejs ; extra == 'gui'
-  - autodoc-pydantic ; extra == 'docs'
-  - ipykernel ; extra == 'docs'
-  - ipython!=8.7.0 ; extra == 'docs'
-  - myst-parser ; extra == 'docs'
-  - nbsphinx ; extra == 'docs'
+  - ipywidgets>=8.0.0 ; extra == 'gui'
+  - ipydatagrid>=1.3.0 ; extra == 'gui'
+  - ipytree>=0.2.2 ; extra == 'gui'
+  - pythreejs>=2.4.1 ; extra == 'gui'
+  - autodoc-pydantic>=2.0.0 ; extra == 'docs'
+  - ipykernel>=6.20.0 ; extra == 'docs'
+  - ipython!=8.7.0,>=8.8.0 ; extra == 'docs'
+  - myst-parser>=2.0.0 ; extra == 'docs'
+  - nbsphinx>=0.9.3 ; extra == 'docs'
   - pydata-sphinx-theme>=0.14 ; extra == 'docs'
-  - sphinx ; extra == 'docs'
-  - sphinx-autodoc-typehints ; extra == 'docs'
-  - sphinx-copybutton ; extra == 'docs'
-  - sphinx-design ; extra == 'docs'
-  - sphinxcontrib-bibtex ; extra == 'docs'
-  - pooch ; extra == 'docs'
-  - ipympl ; extra == 'docs'
-  - ipywidgets ; extra == 'docs'
-  - ipytree ; extra == 'docs'
-  - ipydatagrid ; extra == 'docs'
-  - tof ; extra == 'docs'
+  - sphinx>=7 ; extra == 'docs'
+  - sphinx-autodoc-typehints>=1.24.0 ; extra == 'docs'
+  - sphinx-copybutton>=0.5.2 ; extra == 'docs'
+  - sphinx-design>=0.5.0 ; extra == 'docs'
+  - sphinxcontrib-bibtex>=2.5.0 ; extra == 'docs'
+  - pooch>=1.5 ; extra == 'docs'
+  - ipympl>=0.9.0 ; extra == 'docs'
+  - ipywidgets>=8.0.0 ; extra == 'docs'
+  - ipytree>=0.2.2 ; extra == 'docs'
+  - ipydatagrid>=1.3.0 ; extra == 'docs'
+  - tof>=25.8.0 ; extra == 'docs'
   - essreflectometry[gui] ; extra == 'all'
   requires_python: '>=3.11'
 - pypi: packages/esssans
@@ -21839,18 +21839,18 @@ packages:
   - pytest>=7.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
   - scipy>=1.15.0 ; extra == 'test'
-  - autodoc-pydantic ; extra == 'docs'
-  - ipykernel ; extra == 'docs'
-  - ipython!=8.7.0 ; extra == 'docs'
-  - myst-parser ; extra == 'docs'
-  - nbsphinx ; extra == 'docs'
-  - pooch ; extra == 'docs'
+  - autodoc-pydantic>=2.0.0 ; extra == 'docs'
+  - ipykernel>=6.20.0 ; extra == 'docs'
+  - ipython!=8.7.0,>=8.8.0 ; extra == 'docs'
+  - myst-parser>=2.0.0 ; extra == 'docs'
+  - nbsphinx>=0.9.3 ; extra == 'docs'
+  - pooch>=1.5 ; extra == 'docs'
   - pydata-sphinx-theme>=0.14 ; extra == 'docs'
-  - sphinx ; extra == 'docs'
-  - sphinx-autodoc-typehints ; extra == 'docs'
-  - sphinx-copybutton ; extra == 'docs'
-  - sphinx-design ; extra == 'docs'
-  - tof ; extra == 'docs'
+  - sphinx>=7 ; extra == 'docs'
+  - sphinx-autodoc-typehints>=1.24.0 ; extra == 'docs'
+  - sphinx-copybutton>=0.5.2 ; extra == 'docs'
+  - sphinx-design>=0.5.0 ; extra == 'docs'
+  - tof>=25.8.0 ; extra == 'docs'
   requires_python: '>=3.11'
 - pypi: packages/essspectroscopy
   name: essspectroscopy
@@ -21865,18 +21865,18 @@ packages:
   - tof>=25.11.0
   - pooch>=1.5 ; extra == 'test'
   - pytest>=7.0 ; extra == 'test'
-  - autodoc-pydantic ; extra == 'docs'
-  - ipykernel ; extra == 'docs'
-  - ipympl ; extra == 'docs'
-  - ipython!=8.7.0 ; extra == 'docs'
-  - ipywidgets ; extra == 'docs'
-  - myst-parser ; extra == 'docs'
-  - nbsphinx ; extra == 'docs'
-  - pandas ; extra == 'docs'
-  - pooch ; extra == 'docs'
+  - autodoc-pydantic>=2.0.0 ; extra == 'docs'
+  - ipykernel>=6.20.0 ; extra == 'docs'
+  - ipympl>=0.9.0 ; extra == 'docs'
+  - ipython!=8.7.0,>=8.8.0 ; extra == 'docs'
+  - ipywidgets>=8.0.0 ; extra == 'docs'
+  - myst-parser>=2.0.0 ; extra == 'docs'
+  - nbsphinx>=0.9.3 ; extra == 'docs'
+  - pandas>=2.1.2 ; extra == 'docs'
+  - pooch>=1.5 ; extra == 'docs'
   - pydata-sphinx-theme>=0.14 ; extra == 'docs'
-  - sphinx ; extra == 'docs'
-  - sphinx-autodoc-typehints ; extra == 'docs'
-  - sphinx-copybutton ; extra == 'docs'
-  - sphinx-design ; extra == 'docs'
+  - sphinx>=7 ; extra == 'docs'
+  - sphinx-autodoc-typehints>=1.24.0 ; extra == 'docs'
+  - sphinx-copybutton>=0.5.2 ; extra == 'docs'
+  - sphinx-design>=0.5.0 ; extra == 'docs'
   requires_python: '>=3.11'

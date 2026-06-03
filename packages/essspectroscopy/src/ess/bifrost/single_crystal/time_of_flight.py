@@ -19,7 +19,7 @@ from ess.reduce.unwrap.types import DetectorLtotal
 
 def detector_wavelength_data(
     sample_data: DataGroupedByRotation[RunType],
-    lookup: ErrorLimitedLookupTable[snx.NXdetector],
+    lookup: ErrorLimitedLookupTable[RunType, snx.NXdetector],
     ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthDetector[RunType]:

@@ -15,7 +15,7 @@ import scipp as sc
 import scippnexus as snx
 from scipp.constants import g
 from scipp.core import label_based_index_to_positional_index
-from scippneutron.chopper import extract_chopper_from_nexus
+from scippneutron.chopper import DiskChopper, extract_chopper_from_nexus
 from scippneutron.metadata import RadiationProbe, SourceType
 
 from . import _nexus_loader as nexus
@@ -26,6 +26,7 @@ from .types import (
     Component,
     DetectorBankSizes,
     DetectorPositionOffset,
+    DiskChoppers,
     DynamicPosition,
     EmptyDetector,
     EmptyMonitor,
@@ -537,7 +538,7 @@ def assemble_monitor_data(
     return RawMonitor[RunType, MonitorType](_add_variances(da))
 
 
-def parse_disk_choppers(
+def parse_raw_choppers(
     choppers: AllNeXusComponents[snx.NXdisk_chopper, RunType],
 ) -> RawChoppers[RunType]:
     """Convert the NeXus representation of a chopper to ours.
@@ -557,6 +558,26 @@ def parse_disk_choppers(
             )
         )
     )
+
+
+def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
+    """
+    Convert the raw choppers (DataGroup with chopper information) to the
+    ``scippneutron.DiskChopper`` objects used for wavelength calculation.
+
+    Parameters
+    ----------
+    choppers:
+        Raw choppers loaded from the NeXus file, as a DataGroup.
+    """
+    disk_choppers = {
+        # If there is no beam_position, we set it to 0 by default.
+        key: DiskChopper.from_nexus(
+            {**{'beam_position': sc.scalar(0.0, unit='deg')}, **ch}
+        )
+        for key, ch in choppers.items()
+    }
+    return DiskChoppers[RunType](disk_choppers)
 
 
 def load_proton_charge(
@@ -789,7 +810,7 @@ _detector_providers = (
     assemble_detector_data,
 )
 
-_chopper_providers = (parse_disk_choppers,)
+_chopper_providers = (parse_raw_choppers, to_disk_choppers)
 
 _metadata_providers = (
     load_beamline_metadata_from_nexus,

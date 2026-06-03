@@ -9,7 +9,12 @@ import numpy as np
 import scipp as sc
 import scippnexus as snx
 
-from ess.reduce.nexus.types import Filename, NeXusName, RawDetector, SampleRun
+from ess.reduce.nexus.types import (
+    Filename,
+    NeXusName,
+    RawDetector,
+    SampleRun,
+)
 from ess.reduce.unwrap.types import LookupTable
 
 from ._executable_helper import (
@@ -255,7 +260,9 @@ def reduction(
         # We cache the lookup table only if we need to calculate time-of-flight
         # coordinates. If `event_time_offset` was requested,
         # we do not have to calculate the lookup table at all.
-        base_wf[LookupTable] = base_wf.compute(LookupTable)
+        base_wf[LookupTable[SampleRun, snx.NXdetector]] = base_wf.compute(
+            LookupTable[SampleRun, snx.NXdetector]
+        )
 
     metadatas = base_wf.compute((NMXSampleMetadata, NMXSourceMetadata))
 
@@ -317,9 +324,6 @@ def reduction(
         instrument=NMXInstrument(detectors=detector_results, source=source_meta),
         sample=sample_meta,
     )
-
-    if config.workflow.time_bin_coordinate == TimeBinCoordinate.time_of_flight:
-        results.lookup_table = base_wf.compute(LookupTable)
 
     if not config.output.skip_file_output:
         save_results(

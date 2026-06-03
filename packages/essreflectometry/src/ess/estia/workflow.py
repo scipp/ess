@@ -6,6 +6,7 @@ import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import TransformationTimeFilter
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
+from ess.reduce.unwrap import WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
 from ..reflectometry import providers as reflectometry_providers
@@ -96,10 +97,21 @@ def default_parameters() -> dict:
 def EstiaMcStasWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.none,
+    wavelength_from: WavelengthLutMode = "file",
     **kwargs,
 ) -> sciline.Pipeline:
-    """Workflow for reduction of McStas data for the Estia instrument."""
-    workflow = beamline.LoadNeXusWorkflow(**kwargs)
+    """Workflow for reduction of McStas data for the Estia instrument.
+
+    Parameters
+    ----------
+    run_norm:
+        Normalization procedure to be used. See :class:`RunNormalization`.
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    """
+    workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
     for provider in mcstas_providers:
         workflow.insert(provider)
     insert_run_normalization(workflow, run_norm)
@@ -111,10 +123,21 @@ def EstiaMcStasWorkflow(
 def EstiaWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.proton_charge,
+    wavelength_from: WavelengthLutMode = "file",
     **kwargs,
 ) -> sciline.Pipeline:
-    """Workflow for reduction of data for the Estia instrument."""
-    workflow = beamline.LoadNeXusWorkflow(**kwargs)
+    """Workflow for reduction of data for the Estia instrument.
+
+    Parameters
+    ----------
+    run_norm:
+        Normalization procedure to be used. See :class:`RunNormalization`.
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    """
+    workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
     for provider in providers:
         workflow.insert(provider)
     insert_run_normalization(workflow, run_norm)

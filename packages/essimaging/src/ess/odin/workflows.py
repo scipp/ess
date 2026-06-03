@@ -6,7 +6,7 @@ Default parameters and workflow for Odin.
 
 import sciline
 
-from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
+from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
 from ..imaging.types import (
     BeamMonitor1,
@@ -42,13 +42,25 @@ def default_parameters() -> dict:
     }
 
 
-def OdinWorkflow(**kwargs) -> sciline.Pipeline:
+def OdinWorkflow(
+    wavelength_from: WavelengthLutMode = "file", **kwargs
+) -> sciline.Pipeline:
     """
     Workflow with default parameters for Odin.
-    """
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    kwargs:
+        Additional keyword arguments are forwarded to the base
+        :func:`GenericUnwrapWorkflow`."""
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun],
         monitor_types=[BeamMonitor1, BeamMonitor2, BeamMonitor3, BeamMonitor4],
+        wavelength_from=wavelength_from,
         **kwargs,
     )
     for key, param in default_parameters().items():
@@ -56,12 +68,23 @@ def OdinWorkflow(**kwargs) -> sciline.Pipeline:
     return workflow
 
 
-def OdinBraggEdgeWorkflow(**kwargs) -> sciline.Pipeline:
+def OdinBraggEdgeWorkflow(
+    wavelength_from: WavelengthLutMode = "file", **kwargs
+) -> sciline.Pipeline:
     """
     Workflow with default parameters and masking providers
     for Odin Bragg-edge reduction.
-    """
-    workflow = OdinWorkflow(**kwargs)
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    kwargs:
+        Additional keyword arguments are forwarded to the base
+        :func:`GenericUnwrapWorkflow`."""
+    workflow = OdinWorkflow(wavelength_from=wavelength_from, **kwargs)
     for provider in (*masking_providers,):
         workflow.insert(provider)
     return workflow

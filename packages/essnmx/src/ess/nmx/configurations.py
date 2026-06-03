@@ -147,14 +147,20 @@ class WorkflowConfig(BaseModel):
         default=1_000_000,
     )
     tof_simulation_min_wavelength: float = Field(
-        title="TOF Simulation Minimum Wavelength",
-        description="Minimum wavelength for TOF simulation in Angstrom.",
+        title="Minimum wavelength of neutrons for wavelength lookup table",
+        description="Minimum wavelength for wavelength lookup table in Angstrom.",
         default=1.8,
     )
     tof_simulation_max_wavelength: float = Field(
-        title="TOF Simulation Maximum Wavelength",
-        description="Maximum wavelength for TOF simulation in Angstrom.",
+        title="Maximum wavelength of neutrons for wavelength lookup table",
+        description="Maximum wavelength for wavelength lookup table in Angstrom.",
         default=3.6,
+    )
+    use_choppers_from_file: bool = Field(
+        title="Use Chopper Parameters from File",
+        description="Whether to use chopper parameters from the input file. If False, "
+        "no choppers will be used when computing the wavelength lookup table.",
+        default=False,
     )
     tof_simulation_min_ltotal: float = Field(
         title="TOF Simulation Minimum Ltotal",
