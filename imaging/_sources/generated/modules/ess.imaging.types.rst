@@ -39,7 +39,6 @@
       CorrectedDetector
       ExposureTime
       FluxNormalizedDetector
-      ProtonCharge
    
    
 

@@ -1,0 +1,41 @@
+Results of doctest builder run on 2026-06-04 13:31:17
+=====================================================
+
+Document: generated/modules/ess.imaging.types.BackgroundSubtractedDetector
+--------------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.imaging.types.CorrectedDetector
+---------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.imaging.types.ExposureTime
+----------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.imaging.types.FluxNormalizedDetector
+--------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Doctest summary
+===============
+   16 tests
+    0 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code
