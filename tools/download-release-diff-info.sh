@@ -51,6 +51,7 @@ download_commit_and_pr_info() {
 	  echo "${RELEASE_COMMITS_LIST} already exists. Cleaning up first...";
 	  rm ${RELEASE_COMMITS_LIST};
 	fi
+	mkdir --parent ${CACHE_DIR};
 	touch ${RELEASE_COMMITS_LIST};
 
 	for commit in ${commits_between[@]}; do
