@@ -62,6 +62,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cur-tag", help="Current Tag for Release")
     parser.add_argument("--compare-tag", help="Last Tag for Comparison")
+    parser.add_argument(
+        "--maybe-relevant", help="Discard irrelevant PRs from the note."
+    )
     parser.add_argument("--output-file-path", help="Path to save the output.")
 
     args = parser.parse_args()
@@ -70,15 +73,16 @@ if __name__ == "__main__":
     package_name = cur_tag.split('/')[0]
     commit_list_file = get_commits_file(cur_tag, compare_tag)
 
+    commit_cache_dir = CACHE_DIR / "commits"
     commits = commit_list_file.read_text().splitlines()
     merge_logs = []
     for commit in commits:
-        pr_json = CACHE_DIR / commit / "all-prs.json"
+        pr_json = commit_cache_dir / commit / "all-prs.json"
         pr_list = json.loads(pr_json.read_text())
         for pr in pr_list:
             pr_obj = PRDescription(**pr)
             pr_commits_list_json = (
-                CACHE_DIR / commit / f"pr-{pr_obj.number}-commits.json"
+                commit_cache_dir / commit / f"pr-{pr_obj.number}-commits.json"
             )
             pr_commits_list = json.loads(pr_commits_list_json.read_text())
             authors = set()
@@ -103,8 +107,12 @@ if __name__ == "__main__":
     ]
     release_note.extend([f"* {relevant_log}" for relevant_log in relevant_logs])
 
-    release_note.extend(['', '### Maybe Related Changes', ''])
-    release_note.extend([f"* {relevant_log}" for relevant_log in maybe_relevant_logs])
+    if args.maybe_relevant:
+        release_note.extend(['', '### Maybe Related Changes', ''])
+        release_note.extend(
+            [f"* {relevant_log}" for relevant_log in maybe_relevant_logs]
+        )
+
     release_note.extend(
         [
             '',
