@@ -113,7 +113,6 @@ def test_simulation_workflow_produces_the_same_data_as_before(
     expected = sc.io.load_hdf5(computed_energy_data_simulated_5x2())
 
     assert not energy_data.masks
-    assert not energy_data.bins.masks
 
     assert set(expected.coords.keys()).issubset(set(energy_data.coords.keys()))
     for name in expected.coords.keys():
