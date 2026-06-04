@@ -5,7 +5,7 @@
 
 import importlib.metadata
 
-from .detector import detector_names
+from .detector import default_detector_names
 from .io import nexus
 from .workflow import BifrostSimulationWorkflow, BifrostWorkflow
 
@@ -16,4 +16,9 @@ except importlib.metadata.PackageNotFoundError:
 
 del importlib
 
-__all__ = ['BifrostSimulationWorkflow', 'BifrostWorkflow', 'detector_names', 'nexus']
+__all__ = [
+    'BifrostSimulationWorkflow',
+    'BifrostWorkflow',
+    'default_detector_names',
+    'nexus',
+]

@@ -53,7 +53,7 @@ N_PIXELS_PER_DETECTOR = 300  # Fixed, not a parameter!
 
 @pytest.fixture(scope='module')
 def detector_names() -> list[str]:
-    return bifrost.detector_names()[:N_DETECTORS]
+    return bifrost.default_detector_names()[:N_DETECTORS]
 
 
 @pytest.fixture(scope='module')

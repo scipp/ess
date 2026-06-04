@@ -29,7 +29,7 @@ from ess.spectroscopy.types import (
 @pytest.fixture(scope='module')
 def detector_names() -> list[str]:
     # First 10 detectors form a 5x2 grid (arc=5, channel=2)
-    return bifrost.detector_names()[:10]
+    return bifrost.default_detector_names()[:10]
 
 
 @pytest.fixture

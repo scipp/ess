@@ -282,7 +282,7 @@ def merge_triplets(
     return concatenated
 
 
-def detector_names() -> list[str]:
+def default_detector_names() -> list[str]:
     """Return the list of detector names in a BIFROST NeXus file.
 
     These names are based on the names in the NeXus schema.

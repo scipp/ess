@@ -29,8 +29,7 @@ from ess.spectroscopy.types import (
 from scippnexus import NXdetector
 
 from .cutting import providers as cutting_providers
-from .detector import detector_names as default_detector_names
-from .detector import merge_triplets
+from .detector import default_detector_names, merge_triplets
 from .detector import providers as detector_providers
 from .io import mcstas, nexus
 from .normalization import providers as normalisation_providers

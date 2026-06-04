@@ -23,7 +23,7 @@ from ess.spectroscopy.types import (
 @pytest.fixture
 def energy_data() -> EnergyQDetector[SampleRun]:
     workflow = bifrost.BifrostSimulationWorkflow(
-        detector_names=bifrost.detector_names()[:10]
+        detector_names=bifrost.default_detector_names()[:10]
     )
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[LookupTableFilename] = lookup_table_simulation()
