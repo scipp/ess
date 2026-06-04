@@ -80,7 +80,7 @@ jobs:
   #     contents: write
   #   steps:
   #     - uses: actions/download-artifact@v8
-  #       with:
+  #     with:
   #         name: docs-${{ needs.determine-package.outputs.package }}
   #         path: docs_html
   #     - name: Zip documentation
@@ -94,7 +94,7 @@ jobs:
   #       with:
   #         file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
   #         overwrite: false
-  
+
   determine-last-release:
     name: Determine last release of the package
     needs: [ determine-package ]
@@ -103,24 +103,24 @@ jobs:
       PACKAGE: ${{ needs.determine-package.outputs.package }}
       VERSION: ${{ needs.determine-package.outputs.version }}
     outputs:
-      lastversion: ${{ steps.parse.outputs.lastversion }}
+      lastversion: ${{ steps.last-version-parse.outputs.lastversion }}
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-tags: true 
-      - id: parse
+          fetch-tags: true
+      - id: last-version-parse
         run: |
-	      previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate));
-	      echo "Previous releases: ${previous_releases[@]}";
-	      if [[ ${#previous_releases[@]} -gt 1 ]]; then
-	      	LAST_RELEASE=${previous_releases[-2]};
+          previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
+          echo "Previous releases: ${previous_releases[@]}"
+          if [[ ${#previous_releases[@]} -gt 1 ]]; then
+          	LAST_RELEASE=${previous_releases[-2]}
             if [[ "${LAST_RELEASE}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-              echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT";
-              echo "Found last release version: ${BASH_REMATCH[2]}";
+              echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+              echo "Found last release version: ${BASH_REMATCH[2]}"
             fi
-	      else
-	      	echo "No previous release found for the package.";
-	      fi
+          else
+          	echo "No previous release found for the package."
+          fi
 
   notes:
     name: Update notes
@@ -132,7 +132,7 @@ jobs:
     env:
       PACKAGE: ${{ needs.determine-package.outputs.package }}
       VERSION: ${{ needs.determine-package.outputs.version }}
-      LAST_VERSION: ${{ needs.determin-last-release.outputs.lastversion }}
+      LAST_VERSION: ${{ needs.determine-last-release.outputs.lastversion }}
     steps:
       - name: Download PR metadata cache
         uses: actions/download-artifact@v8
@@ -141,7 +141,7 @@ jobs:
           path: .ess_release_cache
       - uses: actions/checkout@v6
         with:
-          fetch-tags: true 
+          fetch-tags: true
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
         with:
           python-version: "3.11"
