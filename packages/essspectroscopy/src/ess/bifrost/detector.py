@@ -3,6 +3,7 @@
 
 """Detector handling for BIFROST."""
 
+import itertools
 from collections.abc import Callable
 
 import scipp as sc
@@ -279,6 +280,19 @@ def merge_triplets(
 
     # Fall back to simple concatenation if not a regular grid
     return concatenated
+
+
+def default_detector_names() -> list[str]:
+    """Return the list of detector names in a BIFROST NeXus file.
+
+    These names are based on the names in the NeXus schema.
+    """
+    # c is the channel number
+    # a is the arc number
+    return [
+        f"channel_{c}_{a}_triplet"
+        for c, a in itertools.product(range(1, 10), range(1, 6))
+    ]
 
 
 providers = (arc_number, get_calibrated_detector_bifrost)

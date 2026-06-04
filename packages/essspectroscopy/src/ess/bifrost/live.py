@@ -9,11 +9,7 @@ from typing import NewType
 
 import sciline
 import scipp as sc
-from ess.spectroscopy.types import (
-    EnergyQDetector,
-    NeXusDetectorName,
-    RunType,
-)
+from ess.spectroscopy.types import EnergyQDetector, RunType
 
 from .types import ArcEnergy
 from .workflow import BifrostWorkflow
@@ -170,9 +166,9 @@ def cut(
     )
 
 
-def BifrostQCutWorkflow(detector_names: list[NeXusDetectorName]) -> sciline.Pipeline:
+def BifrostQCutWorkflow(detector_names: list[str] | None = None) -> sciline.Pipeline:
     """Workflow for BIFROST to compute cuts in Q-E-space."""
-    workflow = BifrostWorkflow(detector_names)
+    workflow = BifrostWorkflow(detector_names=detector_names)
     workflow.insert(arc_energy)
     workflow.insert(cut)
     return workflow

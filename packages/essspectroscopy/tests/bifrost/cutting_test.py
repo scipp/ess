@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 import scipp as sc
 import scipp.testing
-import scippnexus as snx
 from ess import bifrost
 from ess.bifrost.data import (
     lookup_table_simulation,
@@ -16,24 +15,16 @@ from ess.spectroscopy.types import (
     Filename,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
-    NeXusDetectorName,
     SampleRun,
     UncertaintyBroadcastMode,
 )
 
 
-@pytest.fixture(scope='module')
-def simulation_detector_names() -> list[NeXusDetectorName]:
-    with snx.File(simulated_elastic_incoherent_with_phonon()) as f:
-        names = list(f['entry']['instrument'][snx.NXdetector].keys())
-    return names[:10]  # First 10 detectors form a 5x2 grid (arc=5, channel=2)
-
-
 @pytest.fixture
-def energy_data(
-    simulation_detector_names: list[NeXusDetectorName],
-) -> EnergyQDetector[SampleRun]:
-    workflow = bifrost.BifrostSimulationWorkflow(simulation_detector_names)
+def energy_data() -> EnergyQDetector[SampleRun]:
+    workflow = bifrost.BifrostSimulationWorkflow(
+        detector_names=bifrost.default_detector_names()[:10]
+    )
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {
