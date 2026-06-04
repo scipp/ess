@@ -135,9 +135,10 @@ jobs:
       LAST_VERSION: ${{ needs.determine-last-release.outputs.lastversion }}
     steps:
       - name: Download PR metadata cache
-        uses: actions/download-artifact@v8
+        uses: actions/cache@v5
         with:
-          name: ess_release_cache
+          key: ess_release_cache-${PACKAGE}-${VERSION}
+          restore-keys: ess_release_cache
           path: .ess_release_cache
       - uses: actions/checkout@v6
         with:
@@ -153,9 +154,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release edit ${PACKAGE}/${VERSION} --notes-file ".ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md"
-      - uses: actions/upload-artifact@v7
-        id: artifact-upload-step
+      - name: Update PR metadata cache
+        uses: actions/cache/save@v5
         with:
-          name: ess_release_cache
+          key: ess_release_cache-${PACKAGE}-${VERSION}
           path: .ess_release_cache
-          if-no-files-found: warn
