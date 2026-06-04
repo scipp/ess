@@ -42,7 +42,8 @@ else
 fi
 echo "Found the last previous release on the package ${PACKAGE}: ${LAST_RELEASE}"
 
-commits_between=($(git log --first-parent --merges --pretty=format:%H ${LAST_RELEASE}...${CUR_TAG}))
+commits_between=($(git log --first-parent --merges --pretty=format:%H ${LAST_RELEASE}...${CUR_TAG}));
+echo "${#commits_between[@]} commits found in between.";
 
 download_commit_and_pr_info() {
 	local RELEASE_COMMITS_LIST=${CACHE_DIR}/${CUR_TAG/\//-}-${LAST_RELEASE/\//-}-commits.txt
@@ -50,6 +51,7 @@ download_commit_and_pr_info() {
 	  echo "${RELEASE_COMMITS_LIST} already exists. Cleaning up first...";
 	  rm ${RELEASE_COMMITS_LIST};
 	fi
+	touch ${RELEASE_COMMITS_LIST};
 
 	for commit in ${commits_between[@]}; do
 		echo ${commit} >>${RELEASE_COMMITS_LIST}
