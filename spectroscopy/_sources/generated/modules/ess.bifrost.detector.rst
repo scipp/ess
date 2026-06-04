@@ -16,6 +16,7 @@
    
       arc_and_channel_from_detector_number
       arc_number
+      default_detector_names
       get_base_calibrated_detector_bifrost
       get_calibrated_detector_bifrost
       merge_triplets

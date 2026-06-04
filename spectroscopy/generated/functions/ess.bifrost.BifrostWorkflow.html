@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=3eff4b7d"></script>
+    <script src="../../_static/documentation_options.js?v=379d82f2"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="API Reference" href="../../api-reference/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev5834+g27179d6b7" />
+  <meta name="docsearch:version" content="26.6.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -554,6 +554,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../modules/ess.bifrost.detector.html">ess.bifrost.detector</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../modules/ess.bifrost.detector.arc_and_channel_from_detector_number.html">ess.bifrost.detector.arc_and_channel_from_detector_number</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../modules/ess.bifrost.detector.arc_number.html">ess.bifrost.detector.arc_number</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/ess.bifrost.detector.default_detector_names.html">ess.bifrost.detector.default_detector_names</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../modules/ess.bifrost.detector.get_base_calibrated_detector_bifrost.html">ess.bifrost.detector.get_base_calibrated_detector_bifrost</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../modules/ess.bifrost.detector.get_calibrated_detector_bifrost.html">ess.bifrost.detector.get_calibrated_detector_bifrost</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../modules/ess.bifrost.detector.merge_triplets.html">ess.bifrost.detector.merge_triplets</a></li>
@@ -683,11 +684,15 @@
 <h1>ess.bifrost.BifrostWorkflow<a class="headerlink" href="#ess-bifrost-bifrostworkflow" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="ess.bifrost.BifrostWorkflow">
-<span class="sig-prename descclassname"><span class="pre">ess.bifrost.</span></span><span class="sig-name descname"><span class="pre">BifrostWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detector_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/bifrost/workflow.html#BifrostWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.bifrost.BifrostWorkflow" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ess.bifrost.</span></span><span class="sig-name descname"><span class="pre">BifrostWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/bifrost/workflow.html#BifrostWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.bifrost.BifrostWorkflow" title="Link to this definition">#</a></dt>
 <dd><p>Data reduction workflow for BIFROST.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>detector_names</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Names of <code class="docutils literal notranslate"><span class="pre">NXdetector</span></code> groups in the input NeXus file.
+If <code class="docutils literal notranslate"><span class="pre">Nonw</span></code>, all detector will be processed and merged.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></span> – A pipeline for reducing simulated BIFROST data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -773,7 +778,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 0.1.dev5834+g27179d6b7 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

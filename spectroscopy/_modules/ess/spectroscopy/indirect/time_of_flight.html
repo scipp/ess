@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../../../_static/documentation_options.js?v=3eff4b7d"></script>
+    <script src="../../../../_static/documentation_options.js?v=379d82f2"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev5834+g27179d6b7" />
+  <meta name="docsearch:version" content="26.6.0" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -516,12 +516,13 @@
 <span class="sd">&quot;&quot;&quot;Utilities for computing real neutron time-of-flight for indirect geometry.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce</span><span class="w"> </span><span class="kn">import</span> <span class="n">unwrap</span> <span class="k">as</span> <span class="n">reduce_unwrap</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorLtotal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorLtotal</span><span class="p">,</span> <span class="n">WavelengthLutMode</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DataAtSample</span><span class="p">,</span>
@@ -547,10 +548,12 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">run_types</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">],</span>
     <span class="n">monitor_types</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">],</span>
+    <span class="n">wavelength_from</span><span class="p">:</span> <span class="n">WavelengthLutMode</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">reduce_unwrap</span><span class="o">.</span><span class="n">GenericUnwrapWorkflow</span><span class="p">(</span>
         <span class="n">run_types</span><span class="o">=</span><span class="n">run_types</span><span class="p">,</span>
         <span class="n">monitor_types</span><span class="o">=</span><span class="n">monitor_types</span><span class="p">,</span>
+        <span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">providers</span><span class="p">:</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
@@ -562,7 +565,7 @@
 <a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.time_of_flight.detector_wavelength_data.html#ess.spectroscopy.indirect.time_of_flight.detector_wavelength_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">detector_wavelength_data</span><span class="p">(</span>
     <span class="n">sample_data</span><span class="p">:</span> <span class="n">DataAtSample</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">lookup</span><span class="p">:</span> <span class="n">ErrorLimitedLookupTable</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">],</span>
+    <span class="n">lookup</span><span class="p">:</span> <span class="n">ErrorLimitedLookupTable</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">],</span>
     <span class="n">pulse_stride_offset</span><span class="p">:</span> <span class="n">PulseStrideOffset</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -591,7 +594,7 @@
 <a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.time_of_flight.monitor_wavelength_data.html#ess.spectroscopy.indirect.time_of_flight.monitor_wavelength_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">monitor_wavelength_data</span><span class="p">(</span>
     <span class="n">monitor_data</span><span class="p">:</span> <span class="n">RawMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">],</span>
-    <span class="n">lookup</span><span class="p">:</span> <span class="n">ErrorLimitedLookupTable</span><span class="p">[</span><span class="n">MonitorType</span><span class="p">],</span>
+    <span class="n">lookup</span><span class="p">:</span> <span class="n">ErrorLimitedLookupTable</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">],</span>
     <span class="n">ltotal</span><span class="p">:</span> <span class="n">MonitorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">],</span>
     <span class="n">pulse_stride_offset</span><span class="p">:</span> <span class="n">PulseStrideOffset</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">]:</span>
@@ -637,9 +640,9 @@
 <div class="viewcode-block" id="mask_large_uncertainty_in_lut_detector">
 <a class="viewcode-back" href="../../../../generated/modules/ess.spectroscopy.indirect.time_of_flight.mask_large_uncertainty_in_lut_detector.html#ess.spectroscopy.indirect.time_of_flight.mask_large_uncertainty_in_lut_detector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mask_large_uncertainty_in_lut_detector</span><span class="p">(</span>
-    <span class="n">table</span><span class="p">:</span> <span class="n">LookupTable</span><span class="p">,</span>
+    <span class="n">table</span><span class="p">:</span> <span class="n">LookupTable</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">],</span>
     <span class="n">error_threshold</span><span class="p">:</span> <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ErrorLimitedLookupTable</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ErrorLimitedLookupTable</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mask regions in the wavelength lookup table with large uncertainty using NaNs.</span>
 
@@ -660,14 +663,16 @@
 <span class="sd">        The underlying implementation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.to_wavelength</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-        <span class="n">mask_large_uncertainty_in_lut_detector</span><span class="p">,</span>
+        <span class="n">mask_large_uncertainty_in_lut</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">ErrorLimitedLookupTable</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">](</span>
-        <span class="n">mask_large_uncertainty_in_lut_detector</span><span class="p">(</span>
-            <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">,</span>
-            <span class="n">error_threshold</span><span class="o">=</span><span class="n">error_threshold</span><span class="p">,</span>
-            <span class="n">detector_name</span><span class="o">=</span><span class="n">NeXusDetectorName</span><span class="p">(</span><span class="s1">&#39;detector&#39;</span><span class="p">),</span>
+    <span class="k">return</span> <span class="n">ErrorLimitedLookupTable</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">](</span>
+        <span class="o">**</span><span class="n">asdict</span><span class="p">(</span>
+            <span class="n">mask_large_uncertainty_in_lut</span><span class="p">(</span>
+                <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">,</span>
+                <span class="n">error_threshold</span><span class="o">=</span><span class="n">error_threshold</span><span class="p">,</span>
+                <span class="n">component_name</span><span class="o">=</span><span class="n">NeXusDetectorName</span><span class="p">(</span><span class="s1">&#39;detector&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
         <span class="p">)</span>
     <span class="p">)</span></div>
 
@@ -747,7 +752,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 0.1.dev5834+g27179d6b7 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
