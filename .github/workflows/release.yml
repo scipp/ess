@@ -146,10 +146,12 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
         with:
           python-version: "3.11"
+      - name: Install dependencise
+        run: pip install pydantic
       - name: Download PR metadata
         run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LAST_VERSION}
       - name: Generate release note
-        run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
+        run: pip install pydantic && python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
       - name: Upload release note
         env:
           GH_TOKEN: ${{ github.token }}
