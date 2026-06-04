@@ -21650,7 +21650,7 @@ packages:
   name: essdiffraction
   requires_dist:
   - dask>=2022.1.0
-  - essreduce>=26.5.0
+  - essreduce>=26.6.0
   - graphviz>=0.20
   - numpy>=2
   - plopp>=26.2.0
@@ -21693,7 +21693,7 @@ packages:
   - scippneutron>=24.12.0
   - scippnexus>=23.11.1
   - tifffile>=2024.7.2
-  - essreduce>=26.5.0
+  - essreduce>=26.6.0
   - scitiff>=25.7
   - pytest>=8.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
@@ -21717,7 +21717,7 @@ packages:
   name: essnmx
   requires_dist:
   - dask>=2022.1.0
-  - essreduce>=26.4.0
+  - essreduce>=26.6.0
   - graphviz>=0.20
   - plopp>=24.7.0
   - sciline>=24.6.0
@@ -21793,7 +21793,7 @@ packages:
   - scipp>=24.9.1
   - scippneutron>=24.10.0
   - scippnexus>=24.9.1
-  - essreduce>=26.5.0
+  - essreduce>=26.6.0
   - esspolarization>=25.7.0
   - pandas>=2.1.2
   - pytest>=7.0 ; extra == 'test'
@@ -21826,7 +21826,7 @@ packages:
   requires_dist:
   - dask>=2022.1.0
   - graphviz>=0.20
-  - essreduce>=26.4.0
+  - essreduce>=26.6.0
   - numpy>=1.26.4
   - pandas>=2.1.2
   - plopp>=25.10.0
@@ -21855,7 +21855,7 @@ packages:
 - pypi: packages/essspectroscopy
   name: essspectroscopy
   requires_dist:
-  - essreduce>=26.4.1
+  - essreduce>=26.6.0
   - graphviz>=0.20
   - pandas>=2.1.2
   - sciline>=25.4.1
