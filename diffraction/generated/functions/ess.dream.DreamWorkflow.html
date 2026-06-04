@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=450ad8fc"></script>
+    <script src="../../_static/documentation_options.js?v=379d82f2"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.dream.DreamPowderWorkflow" href="ess.dream.DreamPowderWorkflow.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.5.2" />
+  <meta name="docsearch:version" content="26.6.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -853,7 +853,7 @@
 <h1>ess.dream.DreamWorkflow<a class="headerlink" href="#ess-dream-dreamworkflow" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="ess.dream.DreamWorkflow">
-<span class="sig-prename descclassname"><span class="pre">ess.dream.</span></span><span class="sig-name descname"><span class="pre">DreamWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/dream/workflows.html#DreamWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.dream.DreamWorkflow" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ess.dream.</span></span><span class="sig-name descname"><span class="pre">DreamWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength_from</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'file'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/dream/workflows.html#DreamWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.dream.DreamWorkflow" title="Link to this definition">#</a></dt>
 <dd><p>Dream generic workflow with default parameters.
 The workflow is based on the GenericUnwrapWorkflow.
 It can load data from a NeXus file recorded on the DREAM instrument, and can
@@ -862,8 +862,13 @@ compute time-of-flight for the neutron events.</p>
 <code class="docutils literal notranslate"><span class="pre">DreamPowderWorkflow</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>kwargs</strong> – Additional keyword arguments are forwarded to the base
-<code class="xref py py-func docutils literal notranslate"><span class="pre">GenericUnwrapWorkflow()</span></code>.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wavelength_from</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">WavelengthLutMode</span></code></span>, default: <code class="docutils literal notranslate"><span class="pre">'file'</span></code>) – Mode for creating the wavelength lookup table. Possible values are
+‘analytical’, ‘simulation’, and ‘file’. See
+<a class="reference external" href="https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html">https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html</a></p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments are forwarded to the base
+<code class="xref py py-func docutils literal notranslate"><span class="pre">GenericUnwrapWorkflow()</span></code>.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/sciline/generated/classes/sciline.Pipeline.html#sciline.Pipeline" title="(in Sciline v25.11.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a></span></p>
@@ -953,7 +958,7 @@ compute time-of-flight for the neutron events.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.5.2 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
