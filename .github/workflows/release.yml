@@ -25,72 +25,137 @@ jobs:
           echo "package=${PACKAGE}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-  build:
-    name: Build ${{ needs.determine-package.outputs.package }}
-    needs: determine-package
-    runs-on: ubuntu-24.04
+  # build:
+  #   name: Build ${{ needs.determine-package.outputs.package }}
+  #   needs: determine-package
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-python@v6
+  #       with:
+  #         python-version: "3.11"
+  #     - name: Copy LICENSE into package
+  #       run: cp LICENSE packages/${{ needs.determine-package.outputs.package }}/LICENSE
+  #     - name: Build package
+  #       run: pip install build && python -m build packages/${{ needs.determine-package.outputs.package }}
+  #     - uses: actions/upload-artifact@v7
+  #       with:
+  #         name: dist
+  #         path: packages/${{ needs.determine-package.outputs.package }}/dist/
+
+  # publish:
+  #   name: Publish to PyPI
+  #   needs: [ determine-package, build ]
+  #   runs-on: ubuntu-24.04
+  #   environment: release
+  #   permissions:
+  #     id-token: write
+  #   steps:
+  #     - uses: actions/download-artifact@v8
+  #       with:
+  #         name: dist
+  #         path: dist/
+  #     - uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         packages-dir: dist/
+  #
+  # docs:
+  #   name: Build and publish docs
+  #   needs: [ determine-package, publish ]
+  #   permissions:
+  #     contents: write
+  #   uses: ./.github/workflows/docs.yml
+  #   with:
+  #     package: ${{ needs.determine-package.outputs.package }}
+  #     publish: true
+  #     linkcheck: false
+  #
+  # assets:
+  #   name: Upload docs
+  #   needs: [ docs, determine-package ]
+  #   runs-on: ubuntu-24.04
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - uses: actions/download-artifact@v8
+  #       with:
+  #         name: docs-${{ needs.determine-package.outputs.package }}
+  #         path: docs_html
+  #     - name: Zip documentation
+  #       run: |
+  #         PACKAGE=${{ needs.determine-package.outputs.package }}
+  #         VERSION=${{ needs.determine-package.outputs.version }}
+  #         mv docs_html documentation-${PACKAGE}-${VERSION}
+  #         zip -r documentation-${PACKAGE}-${VERSION}.zip documentation-${PACKAGE}-${VERSION}
+  #     - name: Upload release assets
+  #       uses: svenstaro/upload-release-action@v2
+  #       with:
+  #         file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
+  #         overwrite: false
+  
+  determine-last-release:
+    name: Determine last release of the package
+    needs: [ determine-package ]
+    runs-on: ubuntu-slim
+    env:
+      PACKAGE: ${{ needs.determine-package.outputs.package }}
+      VERSION: ${{ needs.determine-package.outputs.version }}
+    outputs:
+      lastversion: ${{ steps.parse.outputs.lastversion }}
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v6
+          fetch-tags: true 
+      - id: parse
+        run: |
+	      previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate));
+	      echo "Previous releases: ${previous_releases[@]}";
+	      if [[ ${#previous_releases[@]} -gt 1 ]]; then
+	      	LAST_RELEASE=${previous_releases[-2]};
+            if [[ "${LAST_RELEASE}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+              echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT";
+              echo "Found last release version: ${BASH_REMATCH[2]}";
+            fi
+	      else
+	      	echo "No previous release found for the package.";
+	      fi
+
+  notes:
+    name: Update notes
+    # needs: [ determine-package, publish, determine-last-release ]
+    needs: [ determine-package, determine-last-release ]
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+    env:
+      PACKAGE: ${{ needs.determine-package.outputs.package }}
+      VERSION: ${{ needs.determine-package.outputs.version }}
+      LAST_VERSION: ${{ needs.determin-last-release.outputs.lastversion }}
+    steps:
+      - name: Download PR metadata cache
+        uses: actions/download-artifact@v8
+        with:
+          name: ess_release_cache
+          path: .ess_release_cache
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true 
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
         with:
           python-version: "3.11"
-      - name: Copy LICENSE into package
-        run: cp LICENSE packages/${{ needs.determine-package.outputs.package }}/LICENSE
-      - name: Build package
-        run: pip install build && python -m build packages/${{ needs.determine-package.outputs.package }}
+      - name: Download PR metadata
+        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LAST_VERSION}
+      - name: Generate release note
+        run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
+      - name: Upload release note
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit ${PACKAGE}/${VERSION} --notes-file ".ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md"
       - uses: actions/upload-artifact@v7
+        id: artifact-upload-step
         with:
-          name: dist
-          path: packages/${{ needs.determine-package.outputs.package }}/dist/
-
-  publish:
-    name: Publish to PyPI
-    needs: [ determine-package, build ]
-    runs-on: ubuntu-24.04
-    environment: release
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v8
-        with:
-          name: dist
-          path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
-
-  docs:
-    name: Build and publish docs
-    needs: [ determine-package, publish ]
-    permissions:
-      contents: write
-    uses: ./.github/workflows/docs.yml
-    with:
-      package: ${{ needs.determine-package.outputs.package }}
-      publish: true
-      linkcheck: false
-
-  assets:
-    name: Upload docs
-    needs: [ docs, determine-package ]
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v8
-        with:
-          name: docs-${{ needs.determine-package.outputs.package }}
-          path: docs_html
-      - name: Zip documentation
-        run: |
-          PACKAGE=${{ needs.determine-package.outputs.package }}
-          VERSION=${{ needs.determine-package.outputs.version }}
-          mv docs_html documentation-${PACKAGE}-${VERSION}
-          zip -r documentation-${PACKAGE}-${VERSION}.zip documentation-${PACKAGE}-${VERSION}
-      - name: Upload release assets
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
-          overwrite: false
+          name: ess_release_cache
+          path: .ess_release_cache
+          if-no-files-found: warn
