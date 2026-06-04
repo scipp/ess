@@ -151,17 +151,15 @@ jobs:
       - name: Download PR metadata
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LAST_VERSION}
+        # run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LAST_VERSION}
+        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} essnmx/26.4.0
       - name: Check downloaded cache
         run: ls .ess_release_cache
       - name: Generate release note
-        run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
+        # run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
+        run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag essnmx/26.4.0
       - name: Upload release note
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release edit ${PACKAGE}/${VERSION} --notes-file ".ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md"
-      - name: Update PR metadata cache
-        uses: actions/cache/save@v5
-        with:
-          key: ess_release_cache-${PACKAGE}-${VERSION}
-          path: .ess_release_cache
+        # run: gh release edit ${PACKAGE}/${VERSION} --notes-file ".ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md"
+        run: gh release edit ${PACKAGE}/${VERSION} --notes-file ".ess_release_cache/${PACKAGE}-${VERSION}-essnmx-26.4.0-releasenote.md"
