@@ -136,7 +136,7 @@ jobs:
 
   docs:
     name: Docs ${{ matrix.package }}
-    needs: [ changes, test ]
+    needs: [ changes, formatting ]
     if: needs.changes.outputs.packages != '[]'
     strategy:
       fail-fast: false

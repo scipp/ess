@@ -92,7 +92,7 @@ essreduce = { path = "packages/essreduce", editable = true, extras = ["test", "d
 args = [
     { "arg" = "builder", "default" = "html" },
 ]
-cmd = "python -m sphinx -v -b {{ builder }} -d packages/essreduce/.docs_doctrees packages/essreduce/docs packages/essreduce/html"
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/essreduce/.docs_doctrees packages/essreduce/docs packages/essreduce/html"
 default-environment = "docs-essreduce"
 
 [feature.docs-essimaging.pypi-dependencies]
@@ -102,7 +102,7 @@ essimaging = { path = "packages/essimaging", editable = true, extras = ["test", 
 args = [
     { "arg" = "builder", "default" = "html" },
 ]
-cmd = "python -m sphinx -v -b {{ builder }} -d packages/essimaging/.docs_doctrees packages/essimaging/docs packages/essimaging/html"
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/essimaging/.docs_doctrees packages/essimaging/docs packages/essimaging/html"
 
 [feature.docs-essnmx.pypi-dependencies]
 essnmx = { path = "packages/essnmx", editable = true, extras = ["test", "docs"] }
@@ -111,7 +111,7 @@ essnmx = { path = "packages/essnmx", editable = true, extras = ["test", "docs"] 
 args = [
     { "arg" = "builder", "default" = "html" },
 ]
-cmd = "python -m sphinx -v -b {{ builder }} -d packages/essnmx/.docs_doctrees packages/essnmx/docs packages/essnmx/html"
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/essnmx/.docs_doctrees packages/essnmx/docs packages/essnmx/html"
 
 [feature.docs-essreflectometry.pypi-dependencies]
 essreflectometry = { path = "packages/essreflectometry", editable = true, extras = ["test", "docs"] }
@@ -120,7 +120,7 @@ essreflectometry = { path = "packages/essreflectometry", editable = true, extras
 args = [
     { "arg" = "builder", "default" = "html" },
 ]
-cmd = "python -m sphinx -v -b {{ builder }} -d packages/essreflectometry/.docs_doctrees packages/essreflectometry/docs packages/essreflectometry/html"
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/essreflectometry/.docs_doctrees packages/essreflectometry/docs packages/essreflectometry/html"
 
 [feature.docs-essdiffraction.pypi-dependencies]
 essdiffraction = { path = "packages/essdiffraction", editable = true, extras = ["test", "docs"] }
@@ -129,7 +129,7 @@ essdiffraction = { path = "packages/essdiffraction", editable = true, extras = [
 args = [
     { "arg" = "builder", "default" = "html" },
 ]
-cmd = "python -m sphinx -v -b {{ builder }} -d packages/essdiffraction/.docs_doctrees packages/essdiffraction/docs packages/essdiffraction/html"
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/essdiffraction/.docs_doctrees packages/essdiffraction/docs packages/essdiffraction/html"
 
 [feature.docs-esssans.pypi-dependencies]
 esssans = { path = "packages/esssans", editable = true, extras = ["test", "docs"] }
@@ -138,7 +138,7 @@ esssans = { path = "packages/esssans", editable = true, extras = ["test", "docs"
 args = [
     { "arg" = "builder", "default" = "html" },
 ]
-cmd = "python -m sphinx -v -b {{ builder }} -d packages/esssans/.docs_doctrees packages/esssans/docs packages/esssans/html"
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/esssans/.docs_doctrees packages/esssans/docs packages/esssans/html"
 
 [feature.docs-essspectroscopy.pypi-dependencies]
 essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["test", "docs"] }
@@ -147,7 +147,7 @@ essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras =
 args = [
     { "arg" = "builder", "default" = "html" },
 ]
-cmd = "python -m sphinx -v -b {{ builder }} -d packages/essspectroscopy/.docs_doctrees packages/essspectroscopy/docs packages/essspectroscopy/html"
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/essspectroscopy/.docs_doctrees packages/essspectroscopy/docs packages/essspectroscopy/html"
 
 # ==================== Environments ====================
 
