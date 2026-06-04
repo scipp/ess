@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=e982da87"></script>
+    <script src="../../_static/documentation_options.js?v=379d82f2"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,10 +56,10 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="ess.reduce.nexus.workflow.unique_component_spec" href="ess.reduce.nexus.workflow.unique_component_spec.html" />
-    <link rel="prev" title="ess.reduce.nexus.workflow.reject_time_dependent_transform" href="ess.reduce.nexus.workflow.reject_time_dependent_transform.html" />
+    <link rel="prev" title="ess.reduce.nexus.workflow.to_disk_choppers" href="ess.reduce.nexus.workflow.to_disk_choppers.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.5.0" />
+  <meta name="docsearch:version" content="26.6.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -625,8 +625,9 @@
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_production_info.html">ess.reduce.nexus.workflow.nx_class_for_production_info</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_sample.html">ess.reduce.nexus.workflow.nx_class_for_sample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_source.html">ess.reduce.nexus.workflow.nx_class_for_source</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.parse_disk_choppers.html">ess.reduce.nexus.workflow.parse_disk_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.parse_raw_choppers.html">ess.reduce.nexus.workflow.parse_raw_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.reject_time_dependent_transform.html">ess.reduce.nexus.workflow.reject_time_dependent_transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.to_disk_choppers.html">ess.reduce.nexus.workflow.to_disk_choppers</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">ess.reduce.nexus.workflow.to_transformation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.unique_component_spec.html">ess.reduce.nexus.workflow.unique_component_spec</a></li>
 </ul>
@@ -876,7 +877,7 @@ exception. Provide a different filter to customize how time-dependence is handle
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>chain</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.reduce.nexus.types.NeXusTransformationChain.html#ess.reduce.nexus.types.NeXusTransformationChain" title="ess.reduce.nexus.types.NeXusTransformationChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusTransformationChain</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">Component</span></code>), <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>)]</span>) – Transformation chain.</p></li>
 <li><p><strong>interval</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.reduce.nexus.types.TimeInterval.html#ess.reduce.nexus.types.TimeInterval" title="ess.reduce.nexus.types.TimeInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeInterval</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>)]</span>) – Time interval to select from the transformation chain.</p></li>
-<li><p><strong>time_filter</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.reduce.nexus.types.TransformationTimeFilter.html#ess.reduce.nexus.types.TransformationTimeFilter" title="ess.reduce.nexus.types.TransformationTimeFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformationTimeFilter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">Component</span></code>), <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>)]</span>, default: <code class="docutils literal notranslate"><span class="pre">&lt;function</span> <span class="pre">reject_time_dependent_transform</span> <span class="pre">at</span> <span class="pre">0x7fe93410e520&gt;</span></code>) – Callable to apply to time-dependent transformations.
+<li><p><strong>time_filter</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.reduce.nexus.types.TransformationTimeFilter.html#ess.reduce.nexus.types.TransformationTimeFilter" title="ess.reduce.nexus.types.TransformationTimeFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformationTimeFilter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">Component</span></code>), <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>)]</span>, default: <code class="docutils literal notranslate"><span class="pre">&lt;function</span> <span class="pre">reject_time_dependent_transform</span> <span class="pre">at</span> <span class="pre">0x7f1624a22660&gt;</span></code>) – Callable to apply to time-dependent transformations.
 Defaults to raising a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p></li>
 </ul>
 </dd>
@@ -900,12 +901,12 @@ Defaults to raising a <a class="reference external" href="https://docs.python.or
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="ess.reduce.nexus.workflow.reject_time_dependent_transform.html"
+       href="ess.reduce.nexus.workflow.to_disk_choppers.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ess.reduce.nexus.workflow.reject_time_dependent_transform</p>
+        <p class="prev-next-title">ess.reduce.nexus.workflow.to_disk_choppers</p>
       </div>
     </a>
     <a class="right-next"
@@ -968,7 +969,7 @@ Defaults to raising a <a class="reference external" href="https://docs.python.or
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.5.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

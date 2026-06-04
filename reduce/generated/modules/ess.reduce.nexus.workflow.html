@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=e982da87"></script>
+    <script src="../../_static/documentation_options.js?v=379d82f2"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.reduce.nexus.types.TransmissionRun" href="ess.reduce.nexus.types.TransmissionRun.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.5.0" />
+  <meta name="docsearch:version" content="26.6.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -625,8 +625,9 @@
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_production_info.html">ess.reduce.nexus.workflow.nx_class_for_production_info</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_sample.html">ess.reduce.nexus.workflow.nx_class_for_sample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_source.html">ess.reduce.nexus.workflow.nx_class_for_source</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.parse_disk_choppers.html">ess.reduce.nexus.workflow.parse_disk_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.parse_raw_choppers.html">ess.reduce.nexus.workflow.parse_raw_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.reject_time_dependent_transform.html">ess.reduce.nexus.workflow.reject_time_dependent_transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.to_disk_choppers.html">ess.reduce.nexus.workflow.to_disk_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.to_transformation.html">ess.reduce.nexus.workflow.to_transformation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.unique_component_spec.html">ess.reduce.nexus.workflow.unique_component_spec</a></li>
 </ul>
@@ -964,16 +965,19 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_source.html#ess.reduce.nexus.workflow.nx_class_for_source" title="ess.reduce.nexus.workflow.nx_class_for_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nx_class_for_source</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.parse_disk_choppers.html#ess.reduce.nexus.workflow.parse_disk_choppers" title="ess.reduce.nexus.workflow.parse_disk_choppers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_disk_choppers</span></code></a>(choppers)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.parse_raw_choppers.html#ess.reduce.nexus.workflow.parse_raw_choppers" title="ess.reduce.nexus.workflow.parse_raw_choppers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_raw_choppers</span></code></a>(choppers)</p></td>
 <td><p>Convert the NeXus representation of a chopper to ours.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.reject_time_dependent_transform.html#ess.reduce.nexus.workflow.reject_time_dependent_transform" title="ess.reduce.nexus.workflow.reject_time_dependent_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reject_time_dependent_transform</span></code></a>(transform)</p></td>
 <td><p>Raise a value error to forbid time-dependent transformations by default.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.to_transformation.html#ess.reduce.nexus.workflow.to_transformation" title="ess.reduce.nexus.workflow.to_transformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_transformation</span></code></a>(chain, interval[, time_filter])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.to_disk_choppers.html#ess.reduce.nexus.workflow.to_disk_choppers" title="ess.reduce.nexus.workflow.to_disk_choppers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_disk_choppers</span></code></a>(choppers)</p></td>
+<td><p>Convert the raw choppers (DataGroup with chopper information) to the <code class="docutils literal notranslate"><span class="pre">scippneutron.DiskChopper</span></code> objects used for wavelength calculation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.to_transformation.html#ess.reduce.nexus.workflow.to_transformation" title="ess.reduce.nexus.workflow.to_transformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_transformation</span></code></a>(chain, interval[, time_filter])</p></td>
 <td><p>Convert a transformation chain into a single transformation matrix.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.unique_component_spec.html#ess.reduce.nexus.workflow.unique_component_spec" title="ess.reduce.nexus.workflow.unique_component_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unique_component_spec</span></code></a>(filename)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.reduce.nexus.workflow.unique_component_spec.html#ess.reduce.nexus.workflow.unique_component_spec" title="ess.reduce.nexus.workflow.unique_component_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unique_component_spec</span></code></a>(filename)</p></td>
 <td><p>Create a location spec for a unique component group in a NeXus file.</p></td>
 </tr>
 </tbody>
@@ -1061,7 +1065,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.5.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

@@ -55,8 +55,9 @@ ess.reduce.nexus.workflow
       nx_class_for_production_info
       nx_class_for_sample
       nx_class_for_source
-      parse_disk_choppers
+      parse_raw_choppers
       reject_time_dependent_transform
+      to_disk_choppers
       to_transformation
       unique_component_spec
    
