@@ -22,7 +22,15 @@
    .. autosummary::
       :toctree:
    
+      EstiaMcStasMonitorHistogramWorkflow
+      EstiaMcStasMonitorIntegratedWorkflow
+      EstiaMcStasProtonChargeWorkflow
+      EstiaMcStasUnnormalizedWorkflow
       EstiaMcStasWorkflow
+      EstiaMonitorHistogramWorkflow
+      EstiaMonitorIntegratedWorkflow
+      EstiaProtonChargeWorkflow
+      EstiaUnnormalizedWorkflow
       EstiaWorkflow
       default_parameters
       mcstas_default_parameters

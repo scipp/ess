@@ -17,6 +17,9 @@
       add_coords_masks_and_apply_corrections
       assume_time_series_constant_with_zero_default_value_if_empty
       correct_by_footprint
+      insert_run_normalization
+      normalize_by_monitor_histogram
+      normalize_by_monitor_integrated
    
    
 

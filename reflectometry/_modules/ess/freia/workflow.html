@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -35,12 +35,12 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../../_static/documentation_options.js?v=f1d3ac69"></script>
+    <script src="../../../_static/documentation_options.js?v=379d82f2"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,27 +49,34 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/freia/workflow';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.5.2" />
+  <meta name="docsearch:version" content="26.6.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -95,7 +102,7 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
   <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
@@ -245,7 +252,7 @@
           
           
           
-          <a href="https://github.com/scipp/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -407,7 +414,7 @@
           
           
           
-          <a href="https://github.com/scipp/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -496,9 +503,11 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">UncertaintyBroadcastMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">WavelengthLutMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_workflow</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">providers</span> <span class="k">as</span> <span class="n">reflectometry_providers</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.corrections</span><span class="w"> </span><span class="kn">import</span> <span class="n">correct_by_proton_charge</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BeamDivergenceLimits</span><span class="p">,</span>
     <span class="n">CorrectionsToApply</span><span class="p">,</span>
@@ -518,6 +527,7 @@
     <span class="n">normalization</span><span class="p">,</span>
     <span class="n">orso</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.corrections</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunNormalization</span><span class="p">,</span> <span class="n">insert_run_normalization</span>
 
 <span class="n">_general_providers</span> <span class="o">=</span> <span class="p">(</span>
     <span class="o">*</span><span class="n">reflectometry_providers</span><span class="p">,</span>
@@ -557,11 +567,11 @@
             <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
         <span class="p">),</span>
         <span class="n">SampleRotationOffset</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
-        <span class="n">CorrectionsToApply</span><span class="p">:</span> <span class="n">corrections</span><span class="o">.</span><span class="n">default_corrections</span>
-        <span class="o">-</span> <span class="p">{</span><span class="n">correct_by_proton_charge</span><span class="p">},</span>
+        <span class="n">CorrectionsToApply</span><span class="p">:</span> <span class="n">corrections</span><span class="o">.</span><span class="n">default_corrections</span><span class="p">,</span>
         <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;detector&quot;</span><span class="p">:</span> <span class="mf">0.06</span><span class="p">,</span>
         <span class="p">},</span>
+        <span class="n">UncertaintyBroadcastMode</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="o">.</span><span class="n">drop</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 
@@ -578,17 +588,34 @@
         <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;multiblade_detector&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
         <span class="p">},</span>
+        <span class="n">UncertaintyBroadcastMode</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="o">.</span><span class="n">drop</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 
 
 <div class="viewcode-block" id="FreiaMcStasWorkflow">
 <a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaMcStasWorkflow.html#ess.freia.workflow.FreiaMcStasWorkflow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">FreiaMcStasWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for reduction of McStas data for the Freia instrument.&quot;&quot;&quot;</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">beamline</span><span class="o">.</span><span class="n">LoadNeXusWorkflow</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaMcStasWorkflow</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">none</span><span class="p">,</span>
+    <span class="n">wavelength_from</span><span class="p">:</span> <span class="n">WavelengthLutMode</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for reduction of McStas data for the Freia instrument.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    run_norm:</span>
+<span class="sd">        Normalization procedure to be used. See :class:`RunNormalization`.</span>
+<span class="sd">    wavelength_from:</span>
+<span class="sd">        Mode for creating the wavelength lookup table. Possible values are</span>
+<span class="sd">        &#39;analytical&#39;, &#39;simulation&#39;, and &#39;file&#39;. See</span>
+<span class="sd">        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">beamline</span><span class="o">.</span><span class="n">LoadNeXusWorkflow</span><span class="p">(</span><span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">mcstas_providers</span><span class="p">:</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+    <span class="n">insert_run_normalization</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">mcstas_default_parameters</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">workflow</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span>
     <span class="k">return</span> <span class="n">workflow</span></div>
@@ -597,15 +624,119 @@
 
 <div class="viewcode-block" id="FreiaWorkflow">
 <a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaWorkflow.html#ess.freia.workflow.FreiaWorkflow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">FreiaWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for reduction of data for the Freia instrument.&quot;&quot;&quot;</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">beamline</span><span class="o">.</span><span class="n">LoadNeXusWorkflow</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaWorkflow</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">proton_charge</span><span class="p">,</span>
+    <span class="n">wavelength_from</span><span class="p">:</span> <span class="n">WavelengthLutMode</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for reduction of data for the Freia instrument.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    run_norm:</span>
+<span class="sd">        Normalization procedure to be used. See :class:`RunNormalization`.</span>
+<span class="sd">    wavelength_from:</span>
+<span class="sd">        Mode for creating the wavelength lookup table. Possible values are</span>
+<span class="sd">        &#39;analytical&#39;, &#39;simulation&#39;, and &#39;file&#39;. See</span>
+<span class="sd">        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">beamline</span><span class="o">.</span><span class="n">LoadNeXusWorkflow</span><span class="p">(</span><span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">providers</span><span class="p">:</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+    <span class="n">insert_run_normalization</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">default_parameters</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">workflow</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span>
     <span class="k">return</span> <span class="n">workflow</span></div>
 
+
+
+<div class="viewcode-block" id="FreiaMcStasUnnormalizedWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaMcStasUnnormalizedWorkflow.html#ess.freia.workflow.FreiaMcStasUnnormalizedWorkflow">[docs]</a>
+<span class="nd">@register_workflow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaMcStasUnnormalizedWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for Freia McStas data without run normalization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FreiaMcStasWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">none</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FreiaMcStasMonitorHistogramWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaMcStasMonitorHistogramWorkflow.html#ess.freia.workflow.FreiaMcStasMonitorHistogramWorkflow">[docs]</a>
+<span class="nd">@register_workflow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaMcStasMonitorHistogramWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for Freia McStas data using histogrammed monitor normalization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FreiaMcStasWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_histogram</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FreiaMcStasMonitorIntegratedWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaMcStasMonitorIntegratedWorkflow.html#ess.freia.workflow.FreiaMcStasMonitorIntegratedWorkflow">[docs]</a>
+<span class="nd">@register_workflow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaMcStasMonitorIntegratedWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for Freia McStas data using integrated monitor normalization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FreiaMcStasWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FreiaMcStasProtonChargeWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaMcStasProtonChargeWorkflow.html#ess.freia.workflow.FreiaMcStasProtonChargeWorkflow">[docs]</a>
+<span class="nd">@register_workflow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaMcStasProtonChargeWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for Freia McStas data using proton charge normalization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FreiaMcStasWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">proton_charge</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FreiaUnnormalizedWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaUnnormalizedWorkflow.html#ess.freia.workflow.FreiaUnnormalizedWorkflow">[docs]</a>
+<span class="nd">@register_workflow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaUnnormalizedWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for Freia NeXus data without run normalization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FreiaWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">none</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FreiaMonitorHistogramWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaMonitorHistogramWorkflow.html#ess.freia.workflow.FreiaMonitorHistogramWorkflow">[docs]</a>
+<span class="nd">@register_workflow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaMonitorHistogramWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for Freia NeXus data using histogrammed monitor normalization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FreiaWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_histogram</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FreiaMonitorIntegratedWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaMonitorIntegratedWorkflow.html#ess.freia.workflow.FreiaMonitorIntegratedWorkflow">[docs]</a>
+<span class="nd">@register_workflow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaMonitorIntegratedWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for Freia NeXus data using integrated monitor normalization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FreiaWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FreiaProtonChargeWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.FreiaProtonChargeWorkflow.html#ess.freia.workflow.FreiaProtonChargeWorkflow">[docs]</a>
+<span class="nd">@register_workflow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FreiaProtonChargeWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for Freia NeXus data using proton charge normalization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FreiaWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">proton_charge</span><span class="p">)</span></div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;FreiaMcStasMonitorHistogramWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaMcStasMonitorIntegratedWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaMcStasProtonChargeWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaMcStasUnnormalizedWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaMcStasWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaMonitorHistogramWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaMonitorIntegratedWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaProtonChargeWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaUnnormalizedWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FreiaWorkflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;default_parameters&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;mcstas_default_parameters&#39;</span><span class="p">,</span>
+<span class="p">]</span>
 </pre></div>
 
                 </article>
@@ -636,8 +767,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -669,12 +800,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.5.2 (<a href="https://github.com/scipp/essreflectometry/releases">older versions</a>).</div>
+Current ESSreflectometry version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>

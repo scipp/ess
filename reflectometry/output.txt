@@ -1,0 +1,121 @@
+Results of doctest builder run on 2026-06-04 13:40:48
+=====================================================
+
+Document: generated/modules/ess.amor.types.ChopperDistance
+----------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.amor.types.ChopperFrequency
+-----------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.amor.types.ChopperPhase
+-------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.amor.types.ChopperSeparation
+------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.offspec.types.MonitorData
+---------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.BeamSize
+------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.DetectorRotation
+--------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.RawSampleRotation
+---------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.ReducibleData
+-----------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.RunUnnormalizedData
+-----------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.SampleRotation
+------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.SampleRotationOffset
+------------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.SampleSize
+--------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reflectometry.types.ThetaBins
+-------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Doctest summary
+===============
+   45 tests
+    0 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code

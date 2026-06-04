@@ -44,6 +44,7 @@
       RawChopper
       RawSampleRotation
       ReducibleData
+      RunUnnormalizedData
       SampleRotation
       SampleRotationOffset
       SampleSize

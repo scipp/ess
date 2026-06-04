@@ -22,7 +22,15 @@
    .. autosummary::
       :toctree:
    
+      FreiaMcStasMonitorHistogramWorkflow
+      FreiaMcStasMonitorIntegratedWorkflow
+      FreiaMcStasProtonChargeWorkflow
+      FreiaMcStasUnnormalizedWorkflow
       FreiaMcStasWorkflow
+      FreiaMonitorHistogramWorkflow
+      FreiaMonitorIntegratedWorkflow
+      FreiaProtonChargeWorkflow
+      FreiaUnnormalizedWorkflow
       FreiaWorkflow
       default_parameters
       mcstas_default_parameters
