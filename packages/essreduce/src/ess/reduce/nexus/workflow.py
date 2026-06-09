@@ -577,12 +577,6 @@ def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
     """
     disk_choppers = {}
     for key, ch in choppers.items():
-        print(key)
-        print(
-            ch['rotation_speed_setpoint'].shape,
-            ch['rotation_speed_setpoint'].size,
-            _size_or_0(ch, "rotation_speed_setpoint"),
-        )
         if (
             (_size_or_0(ch, "rotation_speed_setpoint") == 0)
             and (_size_or_0(ch, "rotation_speed") == 0)
@@ -599,13 +593,6 @@ def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
             {**{'beam_position': sc.scalar(0.0, unit='deg')}, **ch}
         )
 
-    # disk_choppers = {
-    #     # If there is no beam_position, we set it to 0 by default.
-    #     key: DiskChopper.from_nexus(
-    #         {**{'beam_position': sc.scalar(0.0, unit='deg')}, **ch}
-    #     )
-    #     for key, ch in choppers.items()
-    # }
     return DiskChoppers[RunType](disk_choppers)
 
 
