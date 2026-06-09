@@ -9,6 +9,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from typing import Any, Never, TypeVar
 
+import numpy as np
 import sciline
 import sciline.typing
 import scipp as sc
@@ -560,6 +561,10 @@ def parse_raw_choppers(
     )
 
 
+def _size_or_0(dg, key) -> int:
+    return dg.get(key, np.array([])).size
+
+
 def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
     """
     Convert the raw choppers (DataGroup with chopper information) to the
@@ -570,13 +575,37 @@ def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
     choppers:
         Raw choppers loaded from the NeXus file, as a DataGroup.
     """
-    disk_choppers = {
+    disk_choppers = {}
+    for key, ch in choppers.items():
+        print(key)
+        print(
+            ch['rotation_speed_setpoint'].shape,
+            ch['rotation_speed_setpoint'].size,
+            _size_or_0(ch, "rotation_speed_setpoint"),
+        )
+        if (
+            (_size_or_0(ch, "rotation_speed_setpoint") == 0)
+            and (_size_or_0(ch, "rotation_speed") == 0)
+        ) or ((_size_or_0(ch, "phase") == 0) and (_size_or_0(ch, "delay") == 0)):
+            warnings.warn(
+                f"Chopper '{key}' was skipped because of some empty logs. "
+                "It is considered parked.",
+                stacklevel=2,
+            )
+            continue
+
         # If there is no beam_position, we set it to 0 by default.
-        key: DiskChopper.from_nexus(
+        disk_choppers[key] = DiskChopper.from_nexus(
             {**{'beam_position': sc.scalar(0.0, unit='deg')}, **ch}
         )
-        for key, ch in choppers.items()
-    }
+
+    # disk_choppers = {
+    #     # If there is no beam_position, we set it to 0 by default.
+    #     key: DiskChopper.from_nexus(
+    #         {**{'beam_position': sc.scalar(0.0, unit='deg')}, **ch}
+    #     )
+    #     for key, ch in choppers.items()
+    # }
     return DiskChoppers[RunType](disk_choppers)
 
 
