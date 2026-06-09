@@ -739,7 +739,7 @@ def position_noise_for_cylindrical_pixel(
     # fulfill this. However, the rest of the data reduction currently assumes that
     # the pixel offset corresponds to the pixel center, so if it is not fulfilled
     # there are bigger problems elsewhere anywhere.
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed=1234)
     dims = ('position',)
     size = _noise_size
     z_hat = axis / sc.norm(axis)  # Unit vector along the cylinder axis
