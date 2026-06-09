@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from typing import NewType
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -8,7 +10,6 @@ from scippnexus import NXsource
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import (
-    FrameMonitor0,
     NeXusDetectorName,
     NeXusName,
     Position,
@@ -23,6 +24,8 @@ from ess.reduce.unwrap import (
 )
 
 sl = pytest.importorskip("sciline")
+
+Monitor0 = NewType("Monitor0", int)
 
 
 def simulate_with_tof(choppers, pulse_stride, neutrons=None, seed=None):
@@ -58,13 +61,13 @@ def simulation_results_pulse_skipping():
 def _initialize_workflow(wavelength_from, distance, error_threshold, choppers):
     wf = GenericUnwrapWorkflow(
         run_types=[SampleRun],
-        monitor_types=[FrameMonitor0],
+        monitor_types=[Monitor0],
         wavelength_from=wavelength_from,
     )
     wf[NeXusDetectorName] = "detector"
     wf[unwrap.DetectorLtotal[SampleRun]] = distance
-    wf[NeXusName[FrameMonitor0]] = "monitor"
-    wf[unwrap.MonitorLtotal[SampleRun, FrameMonitor0]] = distance
+    wf[NeXusName[Monitor0]] = "monitor"
+    wf[unwrap.MonitorLtotal[SampleRun, Monitor0]] = distance
 
     wf[unwrap.LookupTableRelativeErrorThreshold] = {
         'detector': error_threshold,
@@ -103,7 +106,7 @@ def _make_workflow_event_wavelength_from(
     if detector_or_monitor == "detector":
         wf[RawDetector[SampleRun]] = mon
     else:
-        wf[RawMonitor[SampleRun, FrameMonitor0]] = mon
+        wf[RawMonitor[SampleRun, Monitor0]] = mon
 
     wf[unwrap.PulseStrideOffset] = pulse_stride_offset
 
@@ -137,7 +140,7 @@ def _make_workflow_histogram_wavelength_from(
     if detector_or_monitor == "detector":
         wf[RawDetector[SampleRun]] = mon
     else:
-        wf[RawMonitor[SampleRun, FrameMonitor0]] = mon
+        wf[RawMonitor[SampleRun, Monitor0]] = mon
 
     return wf, ref
 
@@ -204,7 +207,7 @@ def test_unwrap_with_no_choppers(wavelength_from, detector_or_monitor) -> None:
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_events(
         wavs=wavs, ref=ref, percentile=96, diff_threshold=1.0, rtol=0.02
@@ -237,7 +240,7 @@ def test_standard_unwrap(
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_events(
         wavs=wavs,
@@ -275,7 +278,7 @@ def test_standard_unwrap_histogram_wavelength_from(
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_histogram_wavelength_from(
         wavs=wavs,
@@ -308,7 +311,7 @@ def test_pulse_skipping_unwrap(
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_events(
         wavs=wavs,
@@ -345,7 +348,7 @@ def test_pulse_skipping_unwrap_180_phase_shift(
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_events(
         wavs=wavs,
@@ -378,7 +381,7 @@ def test_pulse_skipping_stride_offset_guess_gives_expected_result(
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_events(
         wavs=wavs,
@@ -424,7 +427,7 @@ def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_events(
         wavs=wavs,
@@ -472,8 +475,8 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
         wf[RawDetector[SampleRun]] = concatenated
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wf[RawMonitor[SampleRun, FrameMonitor0]] = concatenated
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wf[RawMonitor[SampleRun, Monitor0]] = concatenated
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     wavs = wavs.bins.concat().value
     # Bin the events in toa starting from the pulse period to skip the first pulse.
@@ -506,7 +509,7 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
     if detector_or_monitor == "detector":
         target = RawDetector[SampleRun]
     else:
-        target = RawMonitor[SampleRun, FrameMonitor0]
+        target = RawMonitor[SampleRun, Monitor0]
     assert sc.isclose(
         wf.compute(target).data.nansum(),
         wavs.data.nansum(),
@@ -538,7 +541,7 @@ def test_pulse_skipping_stride_3(wavelength_from, detector_or_monitor) -> None:
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_events(
         wavs=wavs,
@@ -570,7 +573,7 @@ def test_pulse_skipping_unwrap_histogram_wavelength_from(
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_histogram_wavelength_from(
         wavs=wavs,
@@ -603,7 +606,7 @@ def test_unwrap_int(
     if detector_or_monitor == "detector":
         target = RawDetector[SampleRun]
     else:
-        target = RawMonitor[SampleRun, FrameMonitor0]
+        target = RawMonitor[SampleRun, Monitor0]
     mon = wf.compute(target).copy()
     mon.bins.coords["event_time_offset"] = mon.bins.coords["event_time_offset"].to(
         dtype=dtype, unit="ns"
@@ -613,7 +616,7 @@ def test_unwrap_int(
     if detector_or_monitor == "detector":
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
     else:
-        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, FrameMonitor0])
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
 
     _validate_result_events(
         wavs=wavs,

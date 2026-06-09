@@ -7,7 +7,7 @@ The domain types are used to define parameters and to request results from a Sci
 pipeline."""
 
 from collections.abc import Sequence
-from typing import NewType, TypeVar
+from typing import Generic, NewType, TypeVar
 
 import sciline
 import scipp as sc
@@ -16,15 +16,12 @@ from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 from ess.reduce.unwrap import types as unwrap_t
 
-BackgroundRun = reduce_t.BackgroundRun
 EmptyDetector = reduce_t.EmptyDetector
 EmptyMonitor = reduce_t.EmptyMonitor
 RawDetector = reduce_t.RawDetector
 DetectorPositionOffset = reduce_t.DetectorPositionOffset
-EmptyBeamRun = reduce_t.EmptyBeamRun
 Filename = reduce_t.Filename
 GravityVector = reduce_t.GravityVector
-Incident = reduce_t.IncidentMonitor
 RawMonitor = reduce_t.RawMonitor
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
 NeXusMonitorName = reduce_t.NeXusName
@@ -32,8 +29,6 @@ NeXusComponent = reduce_t.NeXusComponent
 NeXusTransformation = reduce_t.NeXusTransformation
 Position = reduce_t.Position
 SampleRun = reduce_t.SampleRun
-Transmission = reduce_t.TransmissionMonitor
-TransmissionRun = reduce_t.TransmissionRun
 
 LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 LookupTableFilename = unwrap_t.LookupTableFilename
@@ -43,6 +38,29 @@ WavelengthDetector = unwrap_t.WavelengthDetector
 
 DetectorBankSizes = reduce_t.DetectorBankSizes
 NeXusDetectorName = reduce_t.NeXusDetectorName
+
+BackgroundRun = NewType("BackgroundRun", int)
+EmptyBeamRun = NewType("EmptyBeamRun", int)
+
+Incident = NewType('Incident', int)
+Transmission = NewType('Transmission', int)
+
+
+ScatteringRunType = TypeVar(
+    'ScatteringRunType',
+    BackgroundRun,
+    SampleRun,
+)
+
+
+class TransmissionRun(Generic[ScatteringRunType]):
+    """
+    Mapping between ScatteringRunType and transmission run.
+
+    In the case where no transmission run is provided, the transmission run should be
+    the same as the measurement (sample or background) run.
+    """
+
 
 MonitorType = TypeVar('MonitorType', Incident, Transmission)
 RunType = reduce_t.RunType

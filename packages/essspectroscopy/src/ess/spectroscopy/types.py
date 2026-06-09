@@ -35,7 +35,7 @@ RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 
 SampleRun = reduce_t.SampleRun
-VanadiumRun = reduce_t.VanadiumRun
+VanadiumRun = NewType("VanadiumRun", int)
 
 # BIFROST monitors
 ElasticMonitor = NewType('ElasticMonitor', int)

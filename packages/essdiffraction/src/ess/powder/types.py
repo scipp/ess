@@ -46,10 +46,10 @@ LookupTableFilename = unwrap_t.LookupTableFilename
 LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 
 SampleRun = reduce_t.SampleRun
-VanadiumRun = reduce_t.VanadiumRun
+VanadiumRun = NewType("VanadiumRun", int)
 EmptyCanRun = NewType("EmptyCanRun", int)
 
-CaveMonitor = reduce_t.CaveMonitor
+CaveMonitor = NewType("CaveMonitor", int)
 BunkerMonitor = NewType("BunkerMonitor", int)
 
 RunType = TypeVar("RunType", SampleRun, VanadiumRun, EmptyCanRun)

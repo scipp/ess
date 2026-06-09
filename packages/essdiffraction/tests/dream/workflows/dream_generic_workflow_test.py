@@ -5,8 +5,7 @@ import pytest
 import sciline
 import scipp as sc
 from ess import dream
-
-from ess.reduce.nexus.types import (
+from ess.powder.types import (
     CaveMonitor,
     DetectorBankSizes,
     EmptyDetector,
@@ -16,6 +15,7 @@ from ess.reduce.nexus.types import (
     RawDetector,
     SampleRun,
 )
+
 from ess.reduce.nexus.types import NeXusName as NeXusMonitorName
 
 bank_dims = {'wire', 'module', 'segment', 'strip', 'counter'}
