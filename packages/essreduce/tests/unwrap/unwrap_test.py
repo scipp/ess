@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
-from scippnexus import NXsource
+from scippnexus import NXsample, NXsource
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import (
@@ -29,6 +29,7 @@ def simulate_with_tof(choppers, pulse_stride, neutrons=None, seed=None):
     return simulate_chopper_cascade_using_tof(
         choppers=choppers,
         source_position=fakes.source_position(),
+        sample_position=fakes.sample_position(),
         neutrons=neutrons,
         pulse_stride=pulse_stride,
         seed=seed,
@@ -72,6 +73,7 @@ def _initialize_workflow(wavelength_from, distance, error_threshold, choppers):
     }
     wf[unwrap.DiskChoppers[SampleRun]] = choppers
     wf[Position[NXsource, SampleRun]] = fakes.source_position()
+    wf[Position[NXsample, SampleRun]] = fakes.sample_position()
     return wf
 
 

@@ -8,16 +8,21 @@ from scippneutron.chopper import DiskChopper
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import AnyRun, FrameMonitor0, Position
 from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, SourceBounds
+from ess.reduce.unwrap.lut import chopper_distance_along_beam
 
 sl = pytest.importorskip("sciline")
 
 
 def _make_workflow(wavelength_from: str = "analytical") -> sl.Pipeline:
-    return GenericUnwrapWorkflow(
+    wf = GenericUnwrapWorkflow(
         run_types=[AnyRun],
         monitor_types=[FrameMonitor0],
         wavelength_from=wavelength_from,
     )
+    # Choppers sit on the beam axis (+z); the sample only fixes the incident-beam
+    # direction onto which chopper axle positions are projected.
+    wf[Position[snx.NXsample, AnyRun]] = sc.vector([0, 0, 77], unit='m')
+    return wf
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
@@ -167,6 +172,51 @@ def _make_choppers():
     }
 
 
+def _single_slit_chopper(axle_position: sc.Variable) -> DiskChopper:
+    return DiskChopper(
+        frequency=sc.scalar(-14.0, unit='Hz'),
+        beam_position=sc.scalar(0.0, unit='deg'),
+        phase=sc.scalar(0.0, unit='deg'),
+        axle_position=axle_position,
+        slit_begin=sc.array(dims=['cutout'], values=[0.0], unit='deg'),
+        slit_end=sc.array(dims=['cutout'], values=[10.0], unit='deg'),
+        slit_height=sc.scalar(10.0, unit='cm'),
+        radius=sc.scalar(30.0, unit='cm'),
+    )
+
+
+def test_chopper_distance_along_beam_projects_offset_axle_onto_beam():
+    source = sc.vector([0, 0, 0], unit='m')
+    sample = sc.vector([0, 0, 30], unit='m')
+    # Axle sits 3 m above the beam and 10 m downstream of the source.
+    axle = sc.vector([0, 3, 10], unit='m')
+    distance = chopper_distance_along_beam(axle, source, sample)
+    assert sc.isclose(distance, sc.scalar(10.0, unit='m'))
+    # The straight-line distance to the offset axle would overestimate this.
+    assert sc.norm(axle - source) > sc.scalar(10.0, unit='m')
+
+
+def test_chopper_cascade_orders_offset_axle_by_beam_projection():
+    # Two closely-spaced choppers; the upstream one's axle is offset far enough
+    # from the beam that ``norm(axle - source)`` (6.185 m) exceeds the downstream
+    # chopper's distance (6.155 m). Ordering must follow the beam-projected
+    # distance, otherwise the upstream chopper is wrongly applied last (or, for a
+    # narrow distance range, never at all).
+    wf = _make_workflow("analytical")
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsample, AnyRun]] = sc.vector([0, 0, 30], unit='m')
+    wf[unwrap.PulseStride[AnyRun]] = 1
+    wf[unwrap.DiskChoppers[AnyRun]] = {
+        'near': _single_slit_chopper(sc.vector([0, 0.7, 6.145], unit='m')),
+        'far': _single_slit_chopper(sc.vector([0, 0, 6.155], unit='m')),
+    }
+
+    frames = wf.compute(unwrap.ChopperFrameSequence[AnyRun])
+
+    distances = sorted(f.distance.to(unit='m').value for f in frames)
+    assert distances == pytest.approx([0.0, 6.145, 6.155])
+
+
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
 @pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
 def test_lut_workflow_computes_table_with_choppers(
@@ -290,6 +340,7 @@ def test_lut_workflow_computes_table_using_alias(detector_or_monitor, wavelength
     wf = LookupTableWorkflow(use_simulation=(wavelength_from == "simulation"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[Position[snx.NXsample, AnyRun]] = sc.vector([0, 0, 77], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
 
     if wavelength_from == "simulation":
