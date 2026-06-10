@@ -42,7 +42,7 @@ else
 fi
 echo "Found the last previous release on the package ${PACKAGE}: ${LAST_RELEASE}"
 
-commits_between=($(git log --first-parent --merges --pretty=format:%H ${LAST_RELEASE}...${CUR_TAG}));
+commits_between=($(git log --pretty=format:%H ${LAST_RELEASE}...${CUR_TAG}));
 echo "${#commits_between[@]} commits found in between.";
 
 download_commit_and_pr_info() {
@@ -52,7 +52,7 @@ download_commit_and_pr_info() {
 	  rm ${RELEASE_COMMITS_LIST};
 	fi
 	# Make an empty commit list file in case there is no commits at all.
-	mkdir --parent ${CACHE_DIR};
+	mkdir -p ${CACHE_DIR};
 	touch ${RELEASE_COMMITS_LIST};
 
 	for commit in ${commits_between[@]}; do
@@ -61,7 +61,7 @@ download_commit_and_pr_info() {
 		if [ -d ${commit_dir} ]; then
 			echo "commit cache directory already exists with these files: $(ls ${commit_dir})"
 		else
-			mkdir --parent ${commit_dir}
+			mkdir -p ${commit_dir}
 		fi
 
 		pr_json=${commit_dir}/all-prs.json

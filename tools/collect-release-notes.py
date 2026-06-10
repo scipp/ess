@@ -63,7 +63,7 @@ if __name__ == "__main__":
     parser.add_argument("--cur-tag", help="Current Tag for Release")
     parser.add_argument("--compare-tag", help="Last Tag for Comparison")
     parser.add_argument(
-        "--maybe-relevant", help="Discard irrelevant PRs from the note."
+        "--maybe-relevant", help="Kepp irrelevant PRs in the note.", action='store_true'
     )
     parser.add_argument("--output-file-path", help="Path to save the output.")
 
