@@ -14,15 +14,11 @@ sl = pytest.importorskip("sciline")
 
 
 def _make_workflow(wavelength_from: str = "analytical") -> sl.Pipeline:
-    wf = GenericUnwrapWorkflow(
+    return GenericUnwrapWorkflow(
         run_types=[AnyRun],
         monitor_types=[FrameMonitor0],
         wavelength_from=wavelength_from,
     )
-    # Choppers sit on the beam axis (+z); the sample only fixes the incident-beam
-    # direction onto which chopper axle positions are projected.
-    wf[Position[snx.NXsample, AnyRun]] = sc.vector([0, 0, 77], unit='m')
-    return wf
 
 
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
@@ -187,10 +183,9 @@ def _single_slit_chopper(axle_position: sc.Variable) -> DiskChopper:
 
 def test_chopper_distance_along_beam_projects_offset_axle_onto_beam():
     source = sc.vector([0, 0, 0], unit='m')
-    sample = sc.vector([0, 0, 30], unit='m')
     # Axle sits 3 m above the beam and 10 m downstream of the source.
     axle = sc.vector([0, 3, 10], unit='m')
-    distance = chopper_distance_along_beam(axle, source, sample)
+    distance = chopper_distance_along_beam(axle, source)
     assert sc.isclose(distance, sc.scalar(10.0, unit='m'))
     # The straight-line distance to the offset axle would overestimate this.
     assert sc.norm(axle - source) > sc.scalar(10.0, unit='m')
@@ -204,7 +199,6 @@ def test_chopper_cascade_orders_offset_axle_by_beam_projection():
     # narrow distance range, never at all).
     wf = _make_workflow("analytical")
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
-    wf[Position[snx.NXsample, AnyRun]] = sc.vector([0, 0, 30], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
     wf[unwrap.DiskChoppers[AnyRun]] = {
         'near': _single_slit_chopper(sc.vector([0, 0.7, 6.145], unit='m')),
@@ -340,7 +334,6 @@ def test_lut_workflow_computes_table_using_alias(detector_or_monitor, wavelength
     wf = LookupTableWorkflow(use_simulation=(wavelength_from == "simulation"))
     wf[unwrap.DiskChoppers[AnyRun]] = {}
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
-    wf[Position[snx.NXsample, AnyRun]] = sc.vector([0, 0, 77], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
 
     if wavelength_from == "simulation":

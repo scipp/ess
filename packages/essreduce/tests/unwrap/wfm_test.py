@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
-from scippnexus import NXsample, NXsource
+from scippnexus import NXsource
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import NeXusDetectorName, Position, RawDetector, SampleRun
@@ -112,17 +112,10 @@ def dream_source_position() -> sc.Variable:
     return sc.vector(value=[0, 0, -76.55], unit="m")
 
 
-def _downstream_sample(source_position: sc.Variable) -> sc.Variable:
-    # Choppers sit on the beam axis (+z); the sample only fixes the incident-beam
-    # direction onto which chopper axle positions are projected.
-    return source_position + sc.vector([0, 0, 100], unit=source_position.unit)
-
-
 def simulate_with_tof(choppers, pulse_stride, source_position):
     return simulate_chopper_cascade_using_tof(
         choppers=choppers,
         source_position=source_position,
-        sample_position=_downstream_sample(source_position),
         neutrons=300_000,
         pulse_stride=pulse_stride,
         seed=432,
@@ -158,7 +151,6 @@ def setup_workflow(
     wf[unwrap.LookupTableRelativeErrorThreshold] = {"detector": error_threshold}
     wf[unwrap.DiskChoppers[SampleRun]] = choppers
     wf[Position[NXsource, SampleRun]] = source_position
-    wf[Position[NXsample, SampleRun]] = _downstream_sample(source_position)
     return wf
 
 

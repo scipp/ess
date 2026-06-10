@@ -103,7 +103,6 @@ def simulation_results_psc_choppers():
     return simulate_chopper_cascade_using_tof(
         choppers=fakes.psc_choppers(),
         source_position=fakes.source_position(),
-        sample_position=fakes.sample_position(),
         neutrons=1e6,
         pulse_stride=1,
         seed=333,

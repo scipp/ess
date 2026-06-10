@@ -117,7 +117,3 @@ def pulse_skipping_choppers():
 
 def source_position():
     return sc.vector([0, 0, 0], unit='m')
-
-
-def sample_position():
-    return sc.vector([0, 0, 77], unit='m')

@@ -432,19 +432,19 @@ def _to_component_reading(component) -> BeamlineComponentReading:
 def chopper_distance_along_beam(
     axle_position: sc.Variable,
     source_position: sc.Variable,
-    sample_position: sc.Variable,
 ) -> sc.Variable:
     """Flight distance from the source to a chopper along the incident beam.
 
-    A disk chopper's axle is offset from the beam (the disk sits above or below
-    it), so the straight-line distance ``norm(axle_position - source_position)``
-    overestimates the flight distance, and for closely-spaced choppers can even
-    place them in the wrong order along the cascade. The neutron crosses the disk
-    where the incident beam (source to sample) intersects it, so the flight
-    distance is the projection of the axle position onto the incident-beam
-    direction. This matches the straight-line ``Ltotal`` used for detectors and
-    monitors, where the component lies on the beam and the projection reduces to
-    the norm.
+    A disk chopper's axle is offset from the beam (the disk sits above, below, or
+    to the side of it), so the straight-line distance
+    ``norm(axle_position - source_position)`` overestimates the flight distance,
+    and for closely-spaced choppers can even place them in the wrong order along
+    the cascade. The neutron crosses the disk where the incident beam intersects
+    it, so the flight distance is the projection of the axle position onto the
+    incident-beam direction. Assuming the incident beam runs along the z axis,
+    this is the z-component of the offset from the source. This matches the
+    straight-line ``Ltotal`` used for detectors and monitors, where the component
+    lies on the beam and the projection reduces to the norm.
 
     Parameters
     ----------
@@ -452,21 +452,14 @@ def chopper_distance_along_beam(
         Position of the chopper's rotation axle.
     source_position:
         Position of the neutron source.
-    sample_position:
-        Position of the sample, defining the incident-beam direction together
-        with the source.
     """
     source_position = source_position.to(unit=axle_position.unit)
-    incident_beam = sample_position.to(unit=axle_position.unit) - source_position
-    return sc.dot(
-        axle_position - source_position, incident_beam / sc.norm(incident_beam)
-    )
+    return (axle_position - source_position).fields.z
 
 
 def simulate_chopper_cascade_using_tof(
     choppers: DiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
-    sample_position: Position[snx.NXsample, RunType],
     neutrons: NumberOfSimulatedNeutrons,
     pulse_stride: PulseStride[RunType],
     seed: SimulationSeed,
@@ -487,10 +480,6 @@ def simulate_chopper_cascade_using_tof(
     source_position:
         A scalar variable with ``dtype=vector3`` that defines the source position.
         Must be in the same coordinate system as the choppers' axle positions.
-    sample_position:
-        A scalar variable with ``dtype=vector3`` that defines the sample position.
-        Together with the source it defines the incident-beam direction onto which
-        chopper axle positions are projected to obtain their flight distance.
     neutrons:
         Number of neutrons to simulate.
     pulse_stride:
@@ -510,9 +499,7 @@ def simulate_chopper_cascade_using_tof(
     tof_choppers = []
     for name, ch in choppers.items():
         chop = tof.Chopper.from_diskchopper(ch, name=name)
-        chop.distance = chopper_distance_along_beam(
-            ch.axle_position, source_position, sample_position
-        )
+        chop.distance = chopper_distance_along_beam(ch.axle_position, source_position)
         tof_choppers.append(chop)
 
     source = tof.Source(
@@ -657,7 +644,6 @@ def compute_frame_sequence(
     pulse_period: PulsePeriod,
     disk_choppers: DiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
-    sample_position: Position[snx.NXsample, RunType],
     source_bounds: SourceBounds,
     pulse_stride: PulseStride[RunType],
 ) -> ChopperFrameSequence[RunType]:
@@ -673,9 +659,6 @@ def compute_frame_sequence(
         Disk chopper parameters.
     source_position:
         Position of the neutron source.
-    sample_position:
-        Position of the sample, defining the incident-beam direction onto which
-        chopper axle positions are projected to obtain their flight distance.
     source_bounds:
         Time and wavelength range of the source pulse.
     pulse_stride:
@@ -700,9 +683,7 @@ def compute_frame_sequence(
 
     chops = {
         key: chopper_cascade.Chopper(
-            distance=chopper_distance_along_beam(
-                ch.axle_position, source_position, sample_position
-            ),
+            distance=chopper_distance_along_beam(ch.axle_position, source_position),
             time_open=ch.time_offset_open(
                 pulse_frequency=frequency_for_chopper_rotation
             ),
