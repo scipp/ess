@@ -146,7 +146,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencise
-        run: pip install pydantic
+        run: pip install pydantic==2.13.3
       - name: Download PR metadata
         env:
           GH_TOKEN: ${{ github.token }}
