@@ -13,4 +13,5 @@ Data reduction for NMX at the European Spallation Source.
 
 ```sh
 python -m pip install essnmx
+conda install essnmx
 ```
