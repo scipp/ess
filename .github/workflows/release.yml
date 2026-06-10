@@ -25,75 +25,75 @@ jobs:
           echo "package=${PACKAGE}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-  # build:
-  #   name: Build ${{ needs.determine-package.outputs.package }}
-  #   needs: determine-package
-  #   runs-on: ubuntu-24.04
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #       with:
-  #         fetch-depth: 0
-  #     - uses: actions/setup-python@v6
-  #       with:
-  #         python-version: "3.11"
-  #     - name: Copy LICENSE into package
-  #       run: cp LICENSE packages/${{ needs.determine-package.outputs.package }}/LICENSE
-  #     - name: Build package
-  #       run: pip install build && python -m build packages/${{ needs.determine-package.outputs.package }}
-  #     - uses: actions/upload-artifact@v7
-  #       with:
-  #         name: dist
-  #         path: packages/${{ needs.determine-package.outputs.package }}/dist/
+  build:
+    name: Build ${{ needs.determine-package.outputs.package }}
+    needs: determine-package
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Copy LICENSE into package
+        run: cp LICENSE packages/${{ needs.determine-package.outputs.package }}/LICENSE
+      - name: Build package
+        run: pip install build && python -m build packages/${{ needs.determine-package.outputs.package }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: packages/${{ needs.determine-package.outputs.package }}/dist/
 
-  # publish:
-  #   name: Publish to PyPI
-  #   needs: [ determine-package, build ]
-  #   runs-on: ubuntu-24.04
-  #   environment: release
-  #   permissions:
-  #     id-token: write
-  #   steps:
-  #     - uses: actions/download-artifact@v8
-  #       with:
-  #         name: dist
-  #         path: dist/
-  #     - uses: pypa/gh-action-pypi-publish@release/v1
-  #       with:
-  #         packages-dir: dist/
-  #
-  # docs:
-  #   name: Build and publish docs
-  #   needs: [ determine-package, publish ]
-  #   permissions:
-  #     contents: write
-  #   uses: ./.github/workflows/docs.yml
-  #   with:
-  #     package: ${{ needs.determine-package.outputs.package }}
-  #     publish: true
-  #     linkcheck: false
-  #
-  # assets:
-  #   name: Upload docs
-  #   needs: [ docs, determine-package ]
-  #   runs-on: ubuntu-24.04
-  #   permissions:
-  #     contents: write
-  #   steps:
-  #     - uses: actions/download-artifact@v8
-  #     with:
-  #         name: docs-${{ needs.determine-package.outputs.package }}
-  #         path: docs_html
-  #     - name: Zip documentation
-  #       run: |
-  #         PACKAGE=${{ needs.determine-package.outputs.package }}
-  #         VERSION=${{ needs.determine-package.outputs.version }}
-  #         mv docs_html documentation-${PACKAGE}-${VERSION}
-  #         zip -r documentation-${PACKAGE}-${VERSION}.zip documentation-${PACKAGE}-${VERSION}
-  #     - name: Upload release assets
-  #       uses: svenstaro/upload-release-action@v2
-  #       with:
-  #         file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
-  #         overwrite: false
+  publish:
+    name: Publish to PyPI
+    needs: [ determine-package, build ]
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+
+  docs:
+    name: Build and publish docs
+    needs: [ determine-package, publish ]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/docs.yml
+    with:
+      package: ${{ needs.determine-package.outputs.package }}
+      publish: true
+      linkcheck: false
+
+  assets:
+    name: Upload docs
+    needs: [ docs, determine-package ]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-${{ needs.determine-package.outputs.package }}
+          path: docs_html
+      - name: Zip documentation
+        run: |
+          PACKAGE=${{ needs.determine-package.outputs.package }}
+          VERSION=${{ needs.determine-package.outputs.version }}
+          mv docs_html documentation-${PACKAGE}-${VERSION}
+          zip -r documentation-${PACKAGE}-${VERSION}.zip documentation-${PACKAGE}-${VERSION}
+      - name: Upload release assets
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
+          overwrite: false
 
   determine-last-release:
     name: Determine last release of the package
@@ -124,8 +124,7 @@ jobs:
 
   notes:
     name: Update notes
-    # needs: [ determine-package, publish, determine-last-release ]
-    needs: [ determine-package, determine-last-release ]
+    needs: [ determine-package, publish, determine-last-release ]
     runs-on: ubuntu-slim
     permissions:
       contents: write
