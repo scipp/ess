@@ -151,8 +151,7 @@ jobs:
       - name: Download PR metadata
         env:
           GH_TOKEN: ${{ github.token }}
-        # run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LAST_VERSION}
-        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} essnmx/26.4.0
+        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LAST_VERSION}
       - name: Check downloaded cache
         run: ls .ess_release_cache
       - name: Generate release note
