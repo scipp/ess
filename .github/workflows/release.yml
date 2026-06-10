@@ -94,3 +94,68 @@ jobs:
         with:
           file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
           overwrite: false
+
+  determine-last-release:
+    name: Determine last release of the package
+    needs: [ determine-package ]
+    runs-on: ubuntu-slim
+    env:
+      PACKAGE: ${{ needs.determine-package.outputs.package }}
+      VERSION: ${{ needs.determine-package.outputs.version }}
+    outputs:
+      lastversion: ${{ steps.last-version-parse.outputs.lastversion }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+      - id: last-version-parse
+        run: |
+          previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
+          echo "Previous releases: ${previous_releases[@]}"
+          if [[ ${#previous_releases[@]} -gt 1 ]]; then
+          	LAST_RELEASE=${previous_releases[-2]}
+            if [[ "${LAST_RELEASE}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+              echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+              echo "Found last release version: ${BASH_REMATCH[2]}"
+            fi
+          else
+          	echo "No previous release found for the package."
+          fi
+
+  notes:
+    name: Update notes
+    needs: [ determine-package, publish, determine-last-release ]
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+    env:
+      PACKAGE: ${{ needs.determine-package.outputs.package }}
+      VERSION: ${{ needs.determine-package.outputs.version }}
+      LAST_VERSION: ${{ needs.determine-last-release.outputs.lastversion }}
+    steps:
+      - name: Download PR metadata cache
+        uses: actions/cache@v5
+        with:
+          key: ess_release_cache-${PACKAGE}-${VERSION}
+          restore-keys: ess_release_cache
+          path: .ess_release_cache
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
+        with:
+          python-version: "3.11"
+      - name: Install dependencise
+        run: pip install pydantic==2.13.3
+      - name: Download PR metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LAST_VERSION}
+      - name: Check downloaded cache
+        run: ls .ess_release_cache
+      - name: Generate release note
+        run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
+      - name: Upload release note
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit ${PACKAGE}/${VERSION} --notes-file ".ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md"
