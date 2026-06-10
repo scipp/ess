@@ -11,8 +11,7 @@ except importlib.metadata.PackageNotFoundError:
 
 del importlib
 
-from ._nxlauetof_io import load_essnmx_nxlauetof
 from .mcstas import NMXMcStasWorkflow
 from .workflows import NMXWorkflow
 
-__all__ = ["NMXMcStasWorkflow", "NMXWorkflow", "load_essnmx_nxlauetof"]
+__all__ = ["NMXMcStasWorkflow", "NMXWorkflow"]
