@@ -19,6 +19,14 @@ def test_gaussian_position_noise_is_sigma_unit_independent(sigma: sc.Variable) -
     assert sc.identical(noise, reference)
 
 
+def test_position_noise_for_cylindrical_pixel_is_deterministic() -> None:
+    axis = raw.PixelCylinderAxis(sc.vector([0.0, 0.0, 1.0], unit='m'))
+    radius = raw.PixelCylinderRadius(sc.vector([0.5, 0.0, 0.0], unit='m'))
+    reference = raw.position_noise_for_cylindrical_pixel(axis=axis, radius=radius)
+    noise = raw.position_noise_for_cylindrical_pixel(axis=axis, radius=radius)
+    assert sc.identical(noise, reference)
+
+
 def test_clear_counts_resets_counts_to_zero() -> None:
     detector_number = sc.array(dims=['pixel'], values=[1, 2, 3], unit=None)
     det = raw.Detector(detector_number)
