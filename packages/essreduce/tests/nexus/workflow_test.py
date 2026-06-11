@@ -14,6 +14,7 @@ from scippneutron.metadata import RadiationProbe, SourceType
 from ess.reduce.nexus import compute_component_position, load_from_path, workflow
 from ess.reduce.nexus.types import (
     Beamline,
+    DiskChoppers,
     EmptyDetector,
     Filename,
     Measurement,
@@ -987,3 +988,206 @@ def test_generic_nexus_workflow_load_custom_group_user(
     user_info = wf.compute(UserInfo[SampleRun])
     assert user_info['affiliation'] == 'ESS'
     assert user_info['name'] == 'John Doe'
+
+
+def _make_chopper_log(values):
+    if values.size == 1:
+        values = sc.concat([values], dim='time')
+
+    return sc.DataArray(
+        data=values.rename_dims({values.dim: 'time'}),
+        coords={
+            'time': sc.datetime('2022-01-01T00:00:00'),
+            'average_value': values.mean(),
+            'minimum_value': values.min(),
+            'maximum_value': values.max(),
+        },
+    )
+
+
+def _make_empty_log():
+    return sc.DataArray(
+        data=sc.array(dims=['time'], values=[]),
+        coords={
+            'time': sc.datetime('2022-01-01T00:00:00'),
+            'average_value': sc.scalar(0.0),
+            'minimum_value': sc.scalar(0.0),
+            'maximum_value': sc.scalar(0.0),
+        },
+    )
+
+
+def test_convert_raw_to_disk_choppers():
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    choppers = sc.DataGroup(
+        {
+            'chopper1': sc.DataGroup(
+                {
+                    'position': sc.vector([0, 0, 6], unit='m'),
+                    'delay': _make_chopper_log(sc.scalar(0, unit='ns')),
+                    'radius': sc.scalar(0.5, unit='m'),
+                    'rotation_speed_setpoint': _make_chopper_log(
+                        sc.scalar(14.0, unit='Hz')
+                    ),
+                    'rotation_speed': _make_chopper_log(
+                        sc.array(dims=['time'], values=[14.1, 13.9, 14.001], unit='Hz')
+                    ),
+                    'slit_edges': sc.array(
+                        dims=['edge'], values=[7.35, 54.08], unit='deg'
+                    ),
+                    'beam_position': sc.scalar(0.0, unit='deg'),
+                }
+            )
+        }
+    )
+    wf[RawChoppers[SampleRun]] = choppers
+    disk_choppers = wf.compute(DiskChoppers[SampleRun])
+    assert 'chopper1' in disk_choppers
+    chopper1 = disk_choppers['chopper1']
+    assert sc.identical(chopper1.axle_position, sc.vector([0, 0, 6], unit='m'))
+    assert sc.identical(chopper1.phase, sc.scalar(0.0, unit='rad'))
+    assert sc.identical(chopper1.radius, sc.scalar(0.5, unit='m'))
+    assert sc.identical(chopper1.frequency, sc.scalar(14.0, unit='Hz'))
+
+
+def test_convert_raw_to_disk_choppers_no_beam_position():
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    choppers = sc.DataGroup(
+        {
+            'chopper1': sc.DataGroup(
+                {
+                    'position': sc.vector([0, 0, 6], unit='m'),
+                    'delay': _make_chopper_log(sc.scalar(0, unit='ns')),
+                    'radius': sc.scalar(0.5, unit='m'),
+                    'rotation_speed_setpoint': _make_chopper_log(
+                        sc.scalar(14.0, unit='Hz')
+                    ),
+                    'rotation_speed': _make_chopper_log(
+                        sc.array(dims=['time'], values=[14.1, 13.9, 14.001], unit='Hz')
+                    ),
+                    'slit_edges': sc.array(
+                        dims=['edge'], values=[7.35, 54.08], unit='deg'
+                    ),
+                }
+            )
+        }
+    )
+    wf[RawChoppers[SampleRun]] = choppers
+    disk_choppers = wf.compute(DiskChoppers[SampleRun])
+
+    assert disk_choppers['chopper1'].beam_position == sc.scalar(0.0, unit='deg'), (
+        "Expected default beam position of 0.0 deg when 'beam_position' is missing"
+    )
+
+
+def test_choppers_with_empty_logs_are_dropped_in_conversion_to_disk_choppers():
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    choppers = sc.DataGroup(
+        {
+            'chopper1': sc.DataGroup(
+                {
+                    'position': sc.vector([0, 0, 6], unit='m'),
+                    'delay': _make_chopper_log(sc.scalar(0, unit='ns')),
+                    'radius': sc.scalar(0.5, unit='m'),
+                    'rotation_speed_setpoint': _make_chopper_log(
+                        sc.scalar(14.0, unit='Hz')
+                    ),
+                    'rotation_speed': _make_chopper_log(
+                        sc.array(dims=['time'], values=[14.1, 13.9, 14.001], unit='Hz')
+                    ),
+                    'slit_edges': sc.array(
+                        dims=['edge'], values=[7.35, 54.08], unit='deg'
+                    ),
+                }
+            ),
+            'chopper2': sc.DataGroup(
+                {
+                    'position': sc.vector([0, 0, 8], unit='m'),
+                    'delay': _make_empty_log(),
+                    'radius': sc.scalar(0.5, unit='m'),
+                    'rotation_speed_setpoint': _make_empty_log(),
+                    'rotation_speed': _make_empty_log(),
+                    'slit_edges': sc.array(
+                        dims=['edge'], values=[7.35, 54.08], unit='deg'
+                    ),
+                }
+            ),
+        }
+    )
+
+    wf[RawChoppers[SampleRun]] = choppers
+    disk_choppers = wf.compute(DiskChoppers[SampleRun])
+    assert 'chopper1' in disk_choppers, "Expected 'chopper1'"
+    assert 'chopper2' not in disk_choppers, (
+        "Expected 'chopper2' to be dropped due to empty logs"
+    )
+
+
+def test_convert_raw_to_disk_choppers_no_setpoint_fallsback_to_rotation_speed():
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    choppers = sc.DataGroup(
+        {
+            'chopper1': sc.DataGroup(
+                {
+                    'position': sc.vector([0, 0, 6], unit='m'),
+                    'delay': _make_chopper_log(sc.scalar(0, unit='ns')),
+                    'radius': sc.scalar(0.5, unit='m'),
+                    'rotation_speed': _make_chopper_log(
+                        sc.array(dims=['time'], values=[14.0], unit='Hz')
+                    ),
+                    'slit_edges': sc.array(
+                        dims=['edge'], values=[7.35, 54.08], unit='deg'
+                    ),
+                    'beam_position': sc.scalar(0.0, unit='deg'),
+                }
+            )
+        }
+    )
+    wf[RawChoppers[SampleRun]] = choppers
+    disk_choppers = wf.compute(DiskChoppers[SampleRun])
+    assert 'chopper1' in disk_choppers
+    chopper1 = disk_choppers['chopper1']
+    assert sc.identical(chopper1.frequency, sc.scalar(14.0, unit='Hz'))
+
+
+def test_convert_raw_to_disk_choppers_moving_position():
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+
+    pos = sc.vector([0, 0, 6], unit="m")
+
+    choppers = sc.DataGroup(
+        {
+            'chopper1': sc.DataGroup(
+                {
+                    'position': sc.DataArray(
+                        data=sc.concat([pos], dim='time'),
+                        coords={
+                            'time': sc.datetime('2022-01-01T00:00:00'),
+                            'average_value': pos,
+                            'minimum_value': pos,
+                            'maximum_value': pos,
+                        },
+                    ),
+                    'delay': _make_chopper_log(sc.scalar(0, unit='ns')),
+                    'radius': sc.scalar(0.5, unit='m'),
+                    'rotation_speed_setpoint': _make_chopper_log(
+                        sc.scalar(14.0, unit='Hz')
+                    ),
+                    'rotation_speed': _make_chopper_log(
+                        sc.array(dims=['time'], values=[14.1, 13.9, 14.001], unit='Hz')
+                    ),
+                    'slit_edges': sc.array(
+                        dims=['edge'], values=[7.35, 54.08], unit='deg'
+                    ),
+                    'beam_position': sc.scalar(0.0, unit='deg'),
+                }
+            )
+        }
+    )
+
+    wf[RawChoppers[SampleRun]] = choppers
+    disk_choppers = wf.compute(DiskChoppers[SampleRun])
+    assert sc.identical(
+        disk_choppers['chopper1'].axle_position,
+        sc.vector([0, 0, 6], unit='m'),
+    ), "Expected position to be taken from the first time point of the log"
