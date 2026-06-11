@@ -581,11 +581,6 @@ def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
             (_size_or_0(ch, "rotation_speed_setpoint") == 0)
             and (_size_or_0(ch, "rotation_speed") == 0)
         ) or ((_size_or_0(ch, "phase") == 0) and (_size_or_0(ch, "delay") == 0)):
-            warnings.warn(
-                f"Chopper '{key}' was skipped because of some empty logs. "
-                "It is considered parked.",
-                stacklevel=2,
-            )
             continue
 
         # If there is no beam_position, we set it to 0 by default.

@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import NewType
@@ -1117,11 +1116,7 @@ def test_choppers_with_empty_logs_are_dropped_in_conversion_to_disk_choppers():
     )
 
     wf[RawChoppers[SampleRun]] = choppers
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore", r"Chopper 'chopper2' was skipped because of some empty logs"
-        )
-        disk_choppers = wf.compute(DiskChoppers[SampleRun])
+    disk_choppers = wf.compute(DiskChoppers[SampleRun])
     assert 'chopper1' in disk_choppers, "Expected 'chopper1'"
     assert 'chopper2' not in disk_choppers, (
         "Expected 'chopper2' to be dropped due to empty logs"
