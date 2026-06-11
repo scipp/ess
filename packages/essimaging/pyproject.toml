@@ -30,6 +30,8 @@ requires-python = ">=3.11"
 dynamic = ["version"]
 
 dependencies = [
+  "dask>=2022.1.0",
+  "graphviz>=0.20",
   "plopp[all]>=23.10.0",
   "tifffile>=2024.7.2",
   "essreduce>=26.6.0",
