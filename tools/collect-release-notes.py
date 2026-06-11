@@ -60,12 +60,20 @@ def has_label(label: str, pr: PRDescription) -> bool:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cur-tag", help="Current Tag for Release")
-    parser.add_argument("--compare-tag", help="Last Tag for Comparison")
+    parser.add_argument("--cur-tag", help="Current Tag for Release", required=True)
+    parser.add_argument("--compare-tag", help="Last Tag for Comparison", required=True)
     parser.add_argument(
-        "--maybe-relevant", help="Keep irrelevant PRs in the note.", action='store_true'
+        "--maybe-relevant",
+        help="Keep irrelevant PRs in the note.",
+        action='store_true',
+        default=False,
     )
-    parser.add_argument("--output-file-path", help="Path to save the output.")
+    parser.add_argument(
+        "--output-file-path",
+        help="Path to save the output.",
+        required=False,
+        default=None,
+    )
 
     args = parser.parse_args()
     cur_tag = args.cur_tag

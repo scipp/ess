@@ -42,7 +42,7 @@ else
 fi
 echo "Found the last previous release on the package ${PACKAGE}: ${LAST_RELEASE}"
 
-commits_between=($(git log --pretty=format:%H ${LAST_RELEASE}...${CUR_TAG}));
+commits_between=($(git log --first-parent --pretty=format:%H ${LAST_RELEASE}...${CUR_TAG}));
 echo "${#commits_between[@]} commits found in between.";
 
 download_commit_and_pr_info() {
