@@ -4,6 +4,7 @@ from .types import (
     CorrectedDetector,
     DspacingDetector,
     MaskedDetectorIDs,
+    WavelengthDetector,
     RunType,
     TofMask,
     TwoThetaMask,
@@ -12,7 +13,7 @@ from .types import (
 
 
 def add_masks_and_corrections(
-    da: DspacingDetector[RunType],
+    da: WavelengthDetector[RunType],
     masked_pixel_ids: MaskedDetectorIDs,
     tof_mask_func: TofMask,
     wavelength_mask_func: WavelengthMask,

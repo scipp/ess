@@ -9,6 +9,7 @@ from .types import (
     CorrectedDetector,
     CorrectedDspacing,
     DspacingBins,
+    DperpBins,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     KeepEvents,
@@ -176,6 +177,64 @@ def focus_data_dspacing_and_two_theta(
                 dspacing_bins=dspacing_bins, two_theta_bins=twotheta_bins
             )
         )
+
+    return CorrectedDspacing[RunType](result)
+
+
+def focus_data_dspacing_and_dperp_mlz(
+    data: CorrectedDetector[RunType],
+    dspacing_bins: DspacingBins,
+    dperp_bins: DperpBins,
+    keep_events: KeepEvents[RunType],
+) -> CorrectedDspacing[RunType]:
+    """
+    Reduce the pixel-based data to d-spacing and dperp dimensions.
+
+    ...
+
+    Parameters
+    ----------
+    data:
+        The input data to be reduced, which must have 'wavelength', 'dspacing',
+        'two_theta', 'dperp' coordinates.
+    dspacing_bins:
+        The bins to use for the d-spacing dimension.
+    dperp_bins:
+        The bins to use for the dperp dimension.
+    keep_events:
+        Whether to keep the events in the output. If `False`, the output will be
+        histogrammed instead of binned.
+
+    Returns
+    -------
+    :
+        The reduced data with 'dspacing' and 'dperp' dimensions.
+    """
+    # ttheta = data.coords['two_theta']
+    # ttheta_min = ttheta.nanmin()
+    # ttheta_max = ttheta.nanmax()
+    # ttheta_max.value = np.nextafter(ttheta_max.value, np.inf)
+    # twotheta_bins = sc.linspace(
+    #     'two_theta',
+    #     start=ttheta_min,
+    #     stop=ttheta_max,
+    #     num=1024,
+    #     unit=ttheta.unit,
+    # )
+    args = {dperp_bins.dim: dperp_bins, dspacing_bins.dim: dspacing_bins}
+    if keep_events.value:
+        result = data.bin(args)
+    else:
+        # Reconstructing the wavelength results in an inconsistency if dspacing was
+        # computed with a calibration table. Another option would be to use, e.g., the
+        # mean wavelength in each bin, but this leads to random wavelength values that
+        # break stream processing.
+        print("needs to be worked out")
+        # result = data.hist(args).assign_coords(
+        #     wavelength=_reconstruct_wavelength(
+        #         dspacing_bins=dspacing_bins, two_theta_bins=twotheta_bins
+        #     )
+        # )
 
     return CorrectedDspacing[RunType](result)
 

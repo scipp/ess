@@ -26,7 +26,10 @@ from .types import (
     RunType,
     SampleRun,
     WavelengthDetector,
+    TofDetector
 )
+
+#from ess.packages.essdiffraction.src.ess.snspowder.powgen.data import TofDetector
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
@@ -92,6 +95,18 @@ def _consume_positions(position, sample_position, source_position):
     _ = sample_position
     _ = source_position
     return sc.scalar(0)
+
+
+def d_perp_from_lambda_and_theta(*, wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
+    """Compute the coordinate d_perp, which is suggested to be used instead of two_theta in http://dx.doi.org/10.1107/S1600576715016520"""
+    return sc.sqrt(wavelength**2 - 2.0 * sc.Unit('angstrom')**2 * sc.log(sc.cos(two_theta / 2)))
+
+
+def get_modified_tof_graph() -> dict:
+    """Get a modified version of the standard tof to elastic scattering graph that includes the additional coordinate d_perp"""
+    modified_graph = scn.conversion.graph.tof.elastic("tof").copy()
+    modified_graph["dperp"] = d_perp_from_lambda_and_theta
+    return modified_graph
 
 
 def to_dspacing_with_calibration(
@@ -177,6 +192,40 @@ def powder_coordinate_transformation_graph(
     )
 
 
+def powder_coordinate_transformation_graph_mlz(
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+) -> ElasticCoordTransformGraph[RunType]:
+    """
+    Generate a coordinate transformation graph for powder diffraction.
+    The graph includes the additional coordinate dperp, which is needed in MLZ workflows.
+
+    Parameters
+    ----------
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
+
+    Returns
+    -------
+    :
+        A dictionary with the graph for the transformation.
+    """
+    return ElasticCoordTransformGraph(
+        {
+            **scn.conversion.graph.beamline.beamline(scatter=True),
+            **get_modified_tof_graph(),
+            'source_position': lambda: source_position,
+            'sample_position': lambda: sample_position,
+            'gravity': lambda: gravity,
+        }
+    )
+
+
 def add_scattering_coordinates_from_positions(
     data: WavelengthDetector[RunType],
     graph: ElasticCoordTransformGraph[RunType],
@@ -201,6 +250,33 @@ def add_scattering_coordinates_from_positions(
     )
     out = convert_to_dspacing(out, graph, calibration)
     return DspacingDetector[RunType](out)
+
+
+def add_scattering_coordinates_from_positions_mlz(
+    data: TofDetector[RunType],
+    graph: ElasticCoordTransformGraph[RunType],
+    calibration: CalibrationData,
+) -> WavelengthDetector[RunType]:
+    """
+    Add ``wavelength``, ``two_theta``, ``dspacing`` and ``dperp`` coordinates to the data.
+    The input ``data`` must have a ``tof`` coordinate, as well as the necessary
+    positions of the beamline components (source, sample, detectors) to compute
+    the scattering coordinates.
+
+    Parameters
+    ----------
+    data:
+        Input data with a ``tof`` coordinate.
+    graph:
+        Coordinate transformation graph.
+    """
+    out = data.transform_coords(
+        ["two_theta", "wavelength", "Ltotal", "dperp"],
+        graph=graph,
+        keep_intermediate=False,
+    )
+    out = convert_to_dspacing_mlz(out, graph, calibration)
+    return WavelengthDetector[RunType](out)
 
 
 def convert_to_dspacing(
@@ -292,6 +368,7 @@ providers = (
     add_q_coordinate,
     convert_reduced_to_tof,
     convert_reduced_to_empty_can_subtracted_tof,
-    powder_coordinate_transformation_graph,
+    # powder_coordinate_transformation_graph,
+    powder_coordinate_transformation_graph_mlz,
     powder_monitor_coordinate_transformation_graph,
 )

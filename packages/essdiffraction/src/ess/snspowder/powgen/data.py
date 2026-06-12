@@ -9,7 +9,8 @@ import sciline as sl
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
-from ess.powder.types import (
+import os
+from ess.packages.essdiffraction.src.ess.powder.types import (
     AccumulatedProtonCharge,
     CalibrationData,
     CalibrationFilename,
@@ -23,21 +24,27 @@ from ess.powder.types import (
     ProtonCharge,
     RawDataAndMetadata,
     RunType,
+    GeneralRunType,
+    TofDetector,
     WavelengthDetector,
     WavelengthMonitor,
+    FilenameMLZ,
+    FilepathMLZ,
+    CalibrationRun,
+    #RawTofDataMLZ
 )
 
-from ess.reduce.data import Entry, make_registry
+from ess.packages.essreduce.src.ess.reduce.data import Entry, make_registry
 
 
-class TofDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """
-    Detector with a time-of-flight coordinate
-    """
+# class TofDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
+#     """
+#     Detector with a time-of-flight coordinate
+#     """
 
 
-class TofMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
-    """Monitor data with time-of-flight coordinate."""
+# class TofMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
+#     """Monitor data with time-of-flight coordinate."""
 
 
 _registry = make_registry(
@@ -201,6 +208,24 @@ def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
     return RawDataAndMetadata[RunType](sc.io.load_hdf5(filename))
 
 
+def load_powgen_mlz(
+    filename: FilenameMLZ[RunType], datapath: FilepathMLZ[RunType]
+) -> RawDataAndMetadata[RunType]:
+    """Load a file.
+
+    The loaded data holds both the events and useful metadata from the file.
+    This loader can be applied to already preprocessed POWGEN event files,
+    not the raw files from the instrument. To generate an appropriate file,
+    the following steps should be taken:
+    - use convert_to_scipp_nxs() defined in utils.py to extract appropriate
+    fields from the original NeXus files.
+    - the appropriate fields (including 'positions') are oextracted from
+    the outcome of scn.load_with_mantid().
+    """
+    filepath = Path(os.path.join(datapath, filename))
+    return RawDataAndMetadata[RunType](sc.io.load_hdf5(filepath))
+
+
 def pooch_load_calibration(
     filename: CalibrationFilename,
     detector_dimensions: DetectorBankSizes,
@@ -218,6 +243,27 @@ def pooch_load_calibration(
     return CalibrationData(ds)
 
 
+def load_powgen_calibration_mlz(
+    filename: FilenameMLZ[CalibrationRun],
+    datapath: FilepathMLZ[CalibrationRun]
+) -> CalibrationData:
+    """Load a diamond calibration file.
+
+    The loaded data holds ...
+    """
+    filepath = Path(os.path.join(datapath, filename))
+    ds = sc.io.load_hdf5(filepath)
+    # print(f"Loading calibration data from {filepath}")
+    det_size = {"bank": 40, "column": 154, "row": 7}
+    ds = sc.Dataset(
+        {
+            key: da.fold(dim='spectrum', sizes=det_size)
+            for key, da in ds.items()
+        }
+    )
+    return CalibrationData(ds)
+
+
 def extract_raw_data(
     dg: RawDataAndMetadata[RunType], sizes: DetectorBankSizes
 ) -> TofDetector[RunType]:
@@ -227,6 +273,19 @@ def extract_raw_data(
     out = dg["data"].squeeze()
     out.coords.pop("tof", None)
     out = out.fold(dim="spectrum", sizes=sizes)
+    return TofDetector[RunType](out)
+
+
+def extract_raw_data_mlz(
+    dg: RawDataAndMetadata[RunType] #, sizes: DetectorBankSizes
+) -> TofDetector[RunType]:
+    """Return the events from a loaded data group."""
+    # Remove the tof binning and dimension, as it is not needed and it gets in the way
+    # of masking.
+    out = dg["data"].squeeze()
+    out.coords.pop("tof", None)
+    det_size = {"bank": 40, "column": 154, "row": 7}
+    out = out.fold(dim="spectrum", sizes=det_size)
     return TofDetector[RunType](out)
 
 
