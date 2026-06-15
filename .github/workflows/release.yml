@@ -155,7 +155,14 @@ jobs:
         run: ls .ess_release_cache
       - name: Generate release note
         run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
+      - name: Merge existing release note with generated note
+        run: |
+          gh release view ${PACKAGE}/${VERSION} -R scipp/ess --json body -q .body >> existing-note.md
+          if [ -s existing-note.md ]; then
+            cat existing-note.md >> new-release-note.md
+          fi
+          cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md >> new-release-note.md
       - name: Upload release note
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release edit ${PACKAGE}/${VERSION} --notes-file ".ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md"
+        run: gh release edit ${PACKAGE}/${VERSION} --notes-file "new-release-note.md"
