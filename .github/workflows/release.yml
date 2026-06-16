@@ -163,6 +163,8 @@ jobs:
       - name: Generate release note
         run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LASTVERSION}
       - name: Download existing release note
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |  # If release does not exist yet, `existing-note.md` will be empty.
           gh release view ${PACKAGE}/${VERSION} -R scipp/ess --json body -q .body > existing-note.md
           if [ -s existing-note.md ]; then
