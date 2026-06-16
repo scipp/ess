@@ -129,7 +129,7 @@ jobs:
           previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
           echo "Previous releases: ${previous_releases[@]}"
           if [[ ${#previous_releases[@]} -gt 1 ]]; then
-          	LAST_RELEASE=${previous_releases[-2]}
+          	LAST_RELEASE=${previous_releases[-1]}
             if [[ "${LAST_RELEASE}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
               echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
               echo "Found last release version: ${BASH_REMATCH[2]}"
@@ -142,6 +142,7 @@ jobs:
     name: Update notes
     needs: [ determine-package, publish, determine-last-release ]
     runs-on: ubuntu-slim
+    if: always()
     permissions:
       contents: write
     env:
