@@ -21,12 +21,12 @@ jobs:
   determine-package:
     name: Determine package and version, last-version.
     runs-on: ubuntu-slim
-    env:
-      DRYRUN: ${{ github.event_name == 'workflow_dispatch' }}
     outputs:
       package: ${{ steps.parse.outputs.package }}
       version: ${{ steps.parse.outputs.version }}
       lastversion: ${{ steps.last-version-parse.outputs.lastversion }}
+    env:
+      DRYRUN: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - id: parse
         name: Parse package and version name.
@@ -86,7 +86,7 @@ jobs:
     needs: [ determine-package, build ]
     runs-on: ubuntu-24.04
     environment: release
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    if: ${{ startsWith(github.ref, 'refs/tags/') && github.event_name != 'workflow_dispatch' }}
     permissions:
       id-token: write
     steps:
@@ -106,7 +106,7 @@ jobs:
     uses: ./.github/workflows/docs.yml
     with:
       package: ${{ needs.determine-package.outputs.package }}
-      publish: ${{ github.event_name != 'workflow_dispatch' }}
+      publish: true
       linkcheck: false
 
   assets:
@@ -128,7 +128,6 @@ jobs:
           zip -r documentation-${PACKAGE}-${VERSION}.zip documentation-${PACKAGE}-${VERSION}
       - name: Upload release assets
         uses: svenstaro/upload-release-action@v2
-        if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
           file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
           overwrite: false
@@ -179,7 +178,6 @@ jobs:
       - name: Merge existing release note with generated note
         run: cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LASTVERSION}-releasenote.md >> new-release-note.md
       - name: Check the generated note
-        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: cat new-release-note.md
       - name: Upload release note
         if: ${{ github.event_name != 'workflow_dispatch' }}
