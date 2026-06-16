@@ -21,11 +21,12 @@ env:
 
 jobs:
   determine-package:
-    name: Determine package
-    runs-on: ubuntu-24.04
+    name: Determine package and version, last-version.
+    runs-on: ubuntu-slim
     outputs:
       package: ${{ steps.parse.outputs.package }}
       version: ${{ steps.parse.outputs.version }}
+      lastversion: ${{ steps.last-version-parse.outputs.lastversion }}
     steps:
       - id: parse
         run: |
@@ -38,6 +39,22 @@ jobs:
           VERSION="${TAG#*/}"
           echo "package=${PACKAGE}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+      - id: last-version-parse
+        run: |
+          previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
+          echo "Previous releases: ${previous_releases[@]}"
+          if [[ ${#previous_releases[@]} -gt 1 ]]; then
+          	LAST_RELEASE=${previous_releases[-1]}
+            if [[ "${LAST_RELEASE}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+              echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+              echo "Found last release version: ${BASH_REMATCH[2]}"
+            fi
+          else
+          	echo "No previous release found for the package."
+          fi
 
   build:
     name: Build ${{ needs.determine-package.outputs.package }}
@@ -111,36 +128,9 @@ jobs:
           file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
           overwrite: false
 
-  determine-last-release:
-    name: Determine last release of the package
-    needs: [ determine-package ]
-    runs-on: ubuntu-slim
-    env:
-      PACKAGE: ${{ needs.determine-package.outputs.package }}
-      VERSION: ${{ needs.determine-package.outputs.version }}
-    outputs:
-      lastversion: ${{ steps.last-version-parse.outputs.lastversion }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-tags: true
-      - id: last-version-parse
-        run: |
-          previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
-          echo "Previous releases: ${previous_releases[@]}"
-          if [[ ${#previous_releases[@]} -gt 1 ]]; then
-          	LAST_RELEASE=${previous_releases[-1]}
-            if [[ "${LAST_RELEASE}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-              echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
-              echo "Found last release version: ${BASH_REMATCH[2]}"
-            fi
-          else
-          	echo "No previous release found for the package."
-          fi
-
   notes:
     name: Update notes
-    needs: [ determine-package, publish, determine-last-release ]
+    needs: [ determine-package, publish ]
     runs-on: ubuntu-slim
     if: always()
     permissions:
@@ -148,7 +138,7 @@ jobs:
     env:
       PACKAGE: ${{ needs.determine-package.outputs.package }}
       VERSION: ${{ needs.determine-package.outputs.version }}
-      LAST_VERSION: ${{ needs.determine-last-release.outputs.lastversion }}
+      LASTVERSION: ${{ needs.determine-package.outputs.lastversion }}
     steps:
       - name: Download PR metadata cache
         uses: actions/cache@v5.0.5
@@ -167,11 +157,11 @@ jobs:
       - name: Download PR metadata
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LAST_VERSION}
+        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LASTVERSION}
       - name: Check downloaded cache
         run: ls .ess_release_cache
       - name: Generate release note
-        run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
+        run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LASTVERSION}
       - name: Download existing release note
         run: |  # If release does not exist yet, `existing-note.md` will be empty.
           gh release view ${PACKAGE}/${VERSION} -R scipp/ess --json body -q .body > existing-note.md
@@ -179,7 +169,7 @@ jobs:
             cat existing-note.md >> new-release-note.md
           fi
       - name: Merge existing release note with generated note
-        run: cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md >> new-release-note.md
+        run: cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LASTVERSION}-releasenote.md >> new-release-note.md
       - name: Check the generated note
         if: ${{ inputs.dry-run }}
         run: cat new-release-note.md
