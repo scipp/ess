@@ -5,6 +5,8 @@ on:
     tags:
       - "*/[0-9]*"
   workflow_dispatch:
+    # Trigger the action with workflow_dispatch.
+    # Any steps or jobs that make side-effect should be skipped on the workflow_dispatch.
     inputs:
       tag:
         description: 'Release tag - hardcoded for dry-run test.'
@@ -174,7 +176,7 @@ jobs:
       - name: Merge existing release note with generated note
         run: cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LASTVERSION}-releasenote.md >> new-release-note.md
       - name: Check the generated note
-        if: ${{ github.event_name != 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: cat new-release-note.md
       - name: Upload release note
         if: ${{ github.event_name != 'workflow_dispatch' }}
