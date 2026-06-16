@@ -27,6 +27,7 @@ NXdetector = snx.NXdetector
 NXsource = snx.NXsource
 
 DetectorLtotal = unwrap_t.DetectorLtotal
+TofDetector = unwrap_t.TofDetector
 WavelengthDetector = unwrap_t.WavelengthDetector
 PulseStrideOffset = unwrap_t.PulseStrideOffset
 LookupTable = unwrap_t.LookupTable
