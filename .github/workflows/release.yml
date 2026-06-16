@@ -40,8 +40,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-tags: true
-      - id: last-version-parse
+      - id: last-version-parse          
         run: |
+          PACKAGE=${{ steps.parse.outputs.package }}
+          VERSION=${{ steps.parse.outputs.package }}
           previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
           echo "Previous releases: ${previous_releases[@]}"
           if [[ ${#previous_releases[@]} -gt 1 ]]; then
@@ -163,6 +165,7 @@ jobs:
       - name: Download existing release note
         env:
           GH_TOKEN: ${{ github.token }}
+        continue-on-error: true  # Release note might not exist yet.
         run: |  # If release does not exist yet, `existing-note.md` will be empty.
           gh release view ${PACKAGE}/${VERSION} -R scipp/ess --json body -q .body > existing-note.md
           if [ -s existing-note.md ]; then
