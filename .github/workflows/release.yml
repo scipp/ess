@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - "*/[0-9]*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag - hardcoded.'
+        required: true
+        type: string
+      dry-run:
+        description: 'Dry run the release action.'
+        default: false
+        type: boolean
 
 env:
   PIXI_FROZEN: true
@@ -19,7 +29,11 @@ jobs:
     steps:
       - id: parse
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
+          if [ ${{ inputs.dry-run }} = true ]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            TAG=${{ inputs.tag }}
+          fi
           PACKAGE="${TAG%%/*}"
           VERSION="${TAG#*/}"
           echo "package=${PACKAGE}" >> "$GITHUB_OUTPUT"
@@ -50,6 +64,7 @@ jobs:
     needs: [ determine-package, build ]
     runs-on: ubuntu-24.04
     environment: release
+    if: ${{ !inputs.dry-run }}
     permissions:
       id-token: write
     steps:
@@ -69,7 +84,7 @@ jobs:
     uses: ./.github/workflows/docs.yml
     with:
       package: ${{ needs.determine-package.outputs.package }}
-      publish: true
+      publish: ${{ !inputs.dry-run }}
       linkcheck: false
 
   assets:
@@ -91,6 +106,7 @@ jobs:
           zip -r documentation-${PACKAGE}-${VERSION}.zip documentation-${PACKAGE}-${VERSION}
       - name: Upload release assets
         uses: svenstaro/upload-release-action@v2
+        if: ${{ !inputs.dry-run }}
         with:
           file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
           overwrite: false
@@ -134,10 +150,10 @@ jobs:
       LAST_VERSION: ${{ needs.determine-last-release.outputs.lastversion }}
     steps:
       - name: Download PR metadata cache
-        uses: actions/cache@v5
+        uses: actions/cache@v5.0.5
         with:
-          key: ess_release_cache-${PACKAGE}-${VERSION}
-          restore-keys: ess_release_cache
+          key: ess-release-cache-${PACKAGE}-${VERSION}
+          restore-keys: ess-release-cache
           path: .ess_release_cache
       - uses: actions/checkout@v6
         with:
@@ -155,14 +171,19 @@ jobs:
         run: ls .ess_release_cache
       - name: Generate release note
         run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LAST_VERSION}
-      - name: Merge existing release note with generated note
-        run: |
-          gh release view ${PACKAGE}/${VERSION} -R scipp/ess --json body -q .body >> existing-note.md
+      - name: Download existing release note
+        run: |  # If release does not exist yet, `existing-note.md` will be empty.
+          gh release view ${PACKAGE}/${VERSION} -R scipp/ess --json body -q .body > existing-note.md
           if [ -s existing-note.md ]; then
             cat existing-note.md >> new-release-note.md
           fi
-          cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md >> new-release-note.md
+      - name: Merge existing release note with generated note
+        run: cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LAST_VERSION}-releasenote.md >> new-release-note.md
+      - name: Check the generated note
+        if: ${{ inputs.dry-run }}
+        run: cat new-release-note.md
       - name: Upload release note
+        if: ${{ !inputs.dry-run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release edit ${PACKAGE}/${VERSION} --notes-file "new-release-note.md"
