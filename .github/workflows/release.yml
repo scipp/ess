@@ -153,7 +153,7 @@ jobs:
           path: .ess_release_cache
       - uses: actions/checkout@v6
         with:
-          fetch-tags: true
+          fetch-depth: 0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
         with:
           python-version: "3.11"
@@ -162,9 +162,7 @@ jobs:
       - name: Download PR metadata
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          git log --first-parent --pretty=format:%H ${PACKAGE}/${LASTVERSION}...${PACKAGE}/${VERSION}
-          bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LASTVERSION}
+        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LASTVERSION}
       - name: Check downloaded cache
         run: ls .ess_release_cache
       - name: Generate release note
