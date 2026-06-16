@@ -162,7 +162,9 @@ jobs:
       - name: Download PR metadata
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LASTVERSION}
+        run: |
+          git log --first-parent --pretty=format:%H ${PACKAGE}/${LASTVERSION}...${PACKAGE}/${VERSION}
+          bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LASTVERSION}
       - name: Check downloaded cache
         run: ls .ess_release_cache
       - name: Generate release note
