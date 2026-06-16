@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
     # Trigger the action with workflow_dispatch.
     # Any steps or jobs that make side-effect should be skipped on the workflow_dispatch.
+    # Note generating steps only work if the hardcoded tag is the latest version of the package.
     inputs:
       tag:
         description: 'Release tag - hardcoded for dry-run test.'
@@ -52,7 +53,7 @@ jobs:
           previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
           echo "Previous releases: ${previous_releases[@]}"
           if [[ ${#previous_releases[@]} -gt 1 ]]; then
-          	LAST_RELEASE=${previous_releases[-1]}
+          	LAST_RELEASE=${previous_releases[-2]}
             if [[ "${LAST_RELEASE}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
               echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
               echo "Found last release version: ${BASH_REMATCH[2]}"
