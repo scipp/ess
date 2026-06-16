@@ -29,6 +29,7 @@ jobs:
       lastversion: ${{ steps.last-version-parse.outputs.lastversion }}
     steps:
       - id: parse
+        name: Parse package and version name.
         run: |
           if [ ${DRYRUN} = true ]; then
             TAG=${{ inputs.tag }}
@@ -42,7 +43,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-tags: true
-      - id: last-version-parse          
+      - id: last-version-parse
+        name: Parse the previous version if possible.
+        continue-on-error: true  # Previous version may not exist.
         run: |
           PACKAGE=${{ steps.parse.outputs.package }}
           VERSION=${{ steps.parse.outputs.package }}
@@ -134,7 +137,7 @@ jobs:
     name: Update notes
     needs: [ determine-package, publish ]
     runs-on: ubuntu-slim
-    if: always()
+    if: ${{ always() && needs.determine-package.outputs.lastversion }}
     permissions:
       contents: write
     env:
