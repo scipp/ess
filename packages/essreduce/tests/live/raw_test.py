@@ -290,6 +290,29 @@ def test_project_onto_cylinder_y_is_z_result_under_axis_relabeling() -> None:
     )
 
 
+def test_project_onto_cylinder_x_is_z_result_under_axis_relabeling() -> None:
+    # For axis='x' the in-plane axes are (y, z): phi=0 along +y, phi=90deg along +z.
+    radius = sc.scalar(2.0, unit='m')
+    # Points chosen so the (y, z) in-plane radii are 4 and 1, mirroring the z-test.
+    result = raw.project_onto_cylinder(
+        sc.vectors(dims=['point'], values=[[3.0, 0.0, 4.0], [6.0, 1.0, 0.0]], unit='m'),
+        axis='x',
+        radius=radius,
+    )
+    assert sc.identical(result['r'], radius)
+    # The axial coordinate is now x, scaled by t = radius / r_plane.
+    assert sc.identical(
+        result['x'], sc.array(dims=['point'], values=[1.5, 12.0], unit='m')
+    )
+    assert sc.identical(
+        result['phi'], sc.array(dims=['point'], values=[90.0, 0.0], unit='deg')
+    )
+    assert sc.identical(
+        result['arc_length'],
+        sc.array(dims=['point'], values=[radius.value * np.pi * 0.5, 0.0], unit='m'),
+    )
+
+
 def make_grid_cube(
     nx: int = 5,
     ny: int = 5,
