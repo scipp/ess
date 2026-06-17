@@ -254,16 +254,34 @@ def test_project_xy_defaults_to_scale_to_zmin() -> None:
     )
 
 
-def test_project_onto_cylinder_z() -> None:
+@pytest.mark.parametrize(
+    ('axis', 'values'),
+    [
+        # For each axis the in-plane axes follow the cyclic order, with phi=0 along
+        # the first and phi=90deg along the second. Points are chosen so the in-plane
+        # radii are 4 and 1 (=> scale by 1/2 and 2), giving identical results under
+        # axis relabeling.
+        # axis='z': in-plane (x, y), axial z.
+        ('z', [[0.0, 4.0, 3.0], [1.0, 0.0, 6.0]]),
+        # axis='y': in-plane (z, x), axial y.
+        ('y', [[4.0, 3.0, 0.0], [0.0, 6.0, 1.0]]),
+        # axis='x': in-plane (y, z), axial x.
+        ('x', [[3.0, 0.0, 4.0], [6.0, 1.0, 0.0]]),
+    ],
+)
+def test_project_onto_cylinder_is_invariant_under_axis_relabeling(
+    axis: str, values: list[list[float]]
+) -> None:
     radius = sc.scalar(2.0, unit='m')
-    # Input radii are 4 and 1 => scale by 1/2 and 2.
-    result = raw.project_onto_cylinder_z(
-        sc.vectors(dims=['point'], values=[[0.0, 4.0, 3.0], [1.0, 0.0, 6.0]], unit='m'),
+    result = raw.project_onto_cylinder(
+        sc.vectors(dims=['point'], values=values, unit='m'),
+        axis=axis,
         radius=radius,
     )
     assert sc.identical(result['r'], radius)
+    # The axial coordinate, scaled by t = radius / r_plane.
     assert sc.identical(
-        result['z'], sc.array(dims=['point'], values=[1.5, 12.0], unit='m')
+        result[axis], sc.array(dims=['point'], values=[1.5, 12.0], unit='m')
     )
     assert sc.identical(
         result['phi'], sc.array(dims=['point'], values=[90.0, 0.0], unit='deg')
