@@ -315,6 +315,54 @@ def collect_detectors(*detectors: sc.DataArray) -> sc.DataGroup:
     return sc.DataGroup({da.coords.pop('detector').value: da for da in detectors})
 
 
+def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None):
+    """
+    Geometric range as a Scipp Variable using an explicit relative step.
+
+    Parameters
+    ----------
+    dim:
+        Dimension label, e.g. "x", "energy", "wavelength".
+    start:
+        First value. Can be a float or a scipp scalar.
+    stop:
+        Upper bound. Can be a float or a scipp scalar.
+    relative_step:
+        Relative multiplicative increment, i.e. ratio - 1.
+        x(i+1) = x(i) * (1 + relative_step)
+    endpoint:
+        If True, append stop if it is not already included.
+    unit:
+        Unit for numeric start/stop. Ignored if start/stop are Scipp scalars.
+
+    Returns
+    -------
+    scipp.Variable
+    """
+    ratio = 1.0 + relative_step
+
+    if ratio <= 0.0:
+        raise ValueError("1 + relative_step must be positive")
+    if ratio == 1.0:
+        raise ValueError("relative_step must not be 0")
+
+    start_var = start if isinstance(start, sc.Variable) else sc.scalar(start, unit=unit)
+    stop_var = stop if isinstance(stop, sc.Variable) else sc.scalar(stop, unit=unit)
+
+    if start_var.value <= 0 or stop_var.value <= 0:
+        raise ValueError("start and stop must be positive")
+
+    n = int(np.floor(np.log(stop_var.value / start_var.value) / np.log(ratio))) + 1
+
+    values = start_var.value * ratio ** np.arange(n)
+    out = sc.array(dims=[dim], values=values, unit=start_var.unit)
+
+    if endpoint and not np.isclose(out.values[-1], stop_var.value):
+        out = sc.concat([out, sc.array(dims=[dim], values=[stop_var.value], unit=stop_var.unit)], dim)
+
+    return out
+
+
 providers = (
     focus_data_dspacing_and_two_theta,
     integrate_two_theta,
