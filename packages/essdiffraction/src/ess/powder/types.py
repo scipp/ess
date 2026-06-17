@@ -59,6 +59,20 @@ RunType = TypeVar("RunType", SampleRun, VanadiumRun, EmptyCanRun)
 GeneralRunType = TypeVar("GeneralRunType", SampleRun, VanadiumRun, EmptyCanRun, CalibrationRun)
 MonitorType = TypeVar("MonitorType", CaveMonitor, BunkerMonitor)
 
+TofMask = NewType("TofMask", Callable | None)
+"""TofMask is a callable that returns a mask for masking time-of-flight regions."""
+
+TwoThetaMask = NewType("TwoThetaMask", Callable | None)
+"""TwoThetaMask is a callable that returns a mask for a given TwoThetaData."""
+
+WavelengthMask = NewType("WavelengthMask", Callable | None)
+"""WavelengthMask is a callable that returns a mask for a given WavelengthData."""
+
+MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
+"""1-D variable listing all masked detector IDs."""
+
+MaskType = TypeVar("MaskType", TwoThetaMask, TofMask, WavelengthMask)
+
 CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
 
@@ -180,9 +194,6 @@ class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """
 
 
-MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
-"""1-D variable listing all masked detector IDs."""
-
 CaveMonitorPosition = NewType("CaveMonitorPosition", sc.Variable)
 """Position of DREAM's cave monitor."""
 
@@ -221,16 +232,8 @@ class FilenameMLZ(sciline.Scope[GeneralRunType, Path], Path): ...
 class FilepathMLZ(sciline.Scope[GeneralRunType, Path], Path): ...
 
 
-TofMask = NewType("TofMask", Callable | None)
-"""TofMask is a callable that returns a mask for masking time-of-flight regions."""
+class MaskingData(sciline.Scope[MaskType, type], type): ...
 
-
-TwoThetaMask = NewType("TwoThetaMask", Callable | None)
-"""TwoThetaMask is a callable that returns a mask for a given TwoThetaData."""
-
-
-WavelengthMask = NewType("WavelengthMask", Callable | None)
-"""WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
 Beamline = reduce_t.Beamline
 """Beamline metadata."""

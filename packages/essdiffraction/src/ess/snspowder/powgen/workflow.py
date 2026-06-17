@@ -13,7 +13,7 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     VanadiumRun,
     CalibrationRun,
     FilepathMLZ,
-    FilenameMLZ
+    FilenameMLZ,
 )
 
 from ess.packages.essreduce.src.ess.reduce.nexus.workflow import gravity_vector_neg_y
@@ -37,7 +37,8 @@ from ess.packages.essdiffraction.src.ess.powder.conversion import (
 )
 
 from ess.packages.essdiffraction.src.ess.powder.workflow import (
-    add_masks_and_corrections
+    add_masks_and_corrections,
+    add_masks_and_corrections_mlz
 )
 
 from ess.packages.essdiffraction.src.ess.powder.grouping import (
@@ -102,20 +103,15 @@ def PowgenMantidWorkflow() -> sciline.Pipeline:
                 extract_raw_data_mlz,
                 #add_scattering_coordinates_from_positions,
                 add_scattering_coordinates_from_positions_mlz,
-                add_masks_and_corrections,
+                #add_masks_and_corrections,
+                add_masks_and_corrections_mlz,
                 #focus_data_dspacing_and_two_theta,
                 focus_data_dspacing_and_dperp_mlz,
                 extract_accumulated_proton_charge,
                 normalize_by_proton_charge,
                 integrate_two_theta,
                 normalize_by_vanadium_dspacing,
-            #load_powgen_xml_mask_mlz,
-            #apply_powgen_mask_mlz,
             ]
-            #*powder_providers,
-            #*beamline.providers,
-            #*data.providers,
-            #gravity_vector_neg_y,
         ),
         params={
             FilepathMLZ[SampleRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',

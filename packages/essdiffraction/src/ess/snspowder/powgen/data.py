@@ -31,9 +31,15 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     FilenameMLZ,
     FilepathMLZ,
     CalibrationRun,
+    MaskingData,
+    TofMask,
+    TwoThetaMask,
+    WavelengthMask,
+    MaskedDetectorIDs,
     #RawTofDataMLZ
 )
 
+from ess.packages.essdiffraction.src.ess.powder.masking import with_pixel_mask_filenames
 from ess.packages.essreduce.src.ess.reduce.data import Entry, make_registry
 
 
@@ -262,6 +268,59 @@ def load_powgen_calibration_mlz(
         }
     )
     return CalibrationData(ds)
+
+
+def load_powgen_tof_mask_mlz() -> MaskingData[TofMask]:
+    """Load the TOF mask for POWGEN."""
+    mask_function = None
+    #mask_function = lambda x: (x < sc.scalar(0.0, unit="us")) | (x > sc.scalar(16666.67, unit="us"))
+    return MaskingData[TofMask](mask_function)
+
+
+def load_powgen_wavelength_mask_mlz() -> MaskingData[WavelengthMask]:
+    """Load the wavelength mask for POWGEN."""
+    mask_function = lambda x: (
+        x < sc.scalar(0.3, unit="angstrom") # extra cut as in powtex
+    ) | (
+        x > sc.scalar(1.25, unit="angstrom") # extra cut as in powtex
+    ) | (
+        (x > sc.scalar(1.03, unit="angstrom")) & (x < sc.scalar(1.07, unit="angstrom"))
+    )
+    return MaskingData[WavelengthMask](mask_function)
+
+
+def load_powgen_two_theta_mask_mlz() -> MaskingData[TwoThetaMask]:
+    """Load the two-theta mask for POWGEN."""
+
+    deg = lambda value: sc.scalar(value, unit="degree").to(unit="rad")
+
+    mask_function = lambda x: (
+        x < deg(10.0) # extra cut as in powtex
+    ) | (
+        x > deg(150.0) ) | (
+        (x > deg(13.6)) & (x < deg(16.6))
+    ) | (
+        (x > deg(23.6)) & (x < deg(26.6))
+    ) | (
+        (x > deg(34.3)) & (x < deg(37.3))
+    ) | (
+        (x > deg(45.2)) & (x < deg(48.2))
+    ) | (
+        (x > deg(56.0)) & (x < deg(61.0))
+    ) | (
+        (x > deg(69.8)) & (x < deg(72.8))
+    ) | (
+        (x > deg(83.5)) & (x < deg(86.5))
+    ) | (
+        (x > deg(97.1)) & (x < deg(101.1))
+    ) | (
+        (x > deg(113.0)) & (x < deg(116.0))
+    ) | (
+        (x > deg(131.0)) & (x < deg(134.0))
+    ) | (
+        (x > deg(146.0)) & (x < deg(150.0))
+    )
+    return MaskingData[TwoThetaMask](mask_function)
 
 
 def extract_raw_data(

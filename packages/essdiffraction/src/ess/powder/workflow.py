@@ -1,5 +1,5 @@
 from .correction import apply_lorentz_correction
-from .masking import apply_masks
+from .masking import apply_masks, apply_masks_mlz
 from .types import (
     CorrectedDetector,
     DspacingDetector,
@@ -9,6 +9,7 @@ from .types import (
     TofMask,
     TwoThetaMask,
     WavelengthMask,
+    MaskingData
 )
 
 
@@ -22,6 +23,22 @@ def add_masks_and_corrections(
     masked = apply_masks(
         data=da,
         masked_pixel_ids=masked_pixel_ids,
+        tof_mask_func=tof_mask_func,
+        wavelength_mask_func=wavelength_mask_func,
+        two_theta_mask_func=two_theta_mask_func,
+    )
+    out = apply_lorentz_correction(masked)
+    return CorrectedDetector[RunType](out)
+
+
+def add_masks_and_corrections_mlz(
+    da: WavelengthDetector[RunType],
+    tof_mask_func: MaskingData[TofMask],
+    wavelength_mask_func: MaskingData[WavelengthMask],
+    two_theta_mask_func: MaskingData[TwoThetaMask],
+) -> CorrectedDetector[RunType]:
+    masked = apply_masks_mlz(
+        data=da,
         tof_mask_func=tof_mask_func,
         wavelength_mask_func=wavelength_mask_func,
         two_theta_mask_func=two_theta_mask_func,

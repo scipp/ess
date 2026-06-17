@@ -70,6 +70,44 @@ def apply_masks(
     return out
 
 
+def apply_masks_mlz(
+    data: WavelengthDetector[RunType],
+    # masked_pixel_ids: MaskedDetectorIDs,
+    tof_mask_func: TofMask,
+    wavelength_mask_func: WavelengthMask,
+    two_theta_mask_func: TwoThetaMask,
+) -> sc.DataArray:
+    """ """
+    out = data.copy(deep=False)
+    # if len(masked_pixel_ids) > 0:
+    #     key = (
+    #         set(out.coords.keys()) & {"detector_number", "detector_id", "spectrum"}
+    #     ).pop()
+    #     ids = out.coords[key]
+    #     for name, masked in masked_pixel_ids.items():
+    #         mask = sc.zeros(sizes=ids.sizes, dtype="bool")
+    #         mask.values[np.isin(ids.values, masked.values)] = True
+    #         out.masks[name] = mask
+
+    for dim, mask in {
+        "tof": tof_mask_func,
+        "wavelength": wavelength_mask_func,
+        "two_theta": two_theta_mask_func,
+    }.items():
+        if mask is not None:
+            if (out.bins is not None) and (dim in out.bins.coords):
+                out.bins.masks[dim] = mask(out.bins.coords[dim])
+            else:
+                coord = (
+                    sc.midpoints(out.coords[dim])
+                    if out.coords.is_edges(dim, dim)
+                    else out.coords[dim]
+                )
+                out.masks[dim] = mask(coord)
+
+    return out
+
+
 providers = (read_pixel_masks,)
 
 
