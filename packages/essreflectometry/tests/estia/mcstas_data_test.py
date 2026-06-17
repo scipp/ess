@@ -223,5 +223,5 @@ def test_save_reduced_orso_file(
     estia_mcstas_pipeline[Filename[SampleRun]] = estia_mcstas_sample_run(11)
     res = estia_mcstas_pipeline.compute(orso.OrsoIofQDataset)
     fileio.orso.save_orso(
-        datasets=[res], fname=output_folder / 'estia_reduced_iofq.ort'
+        datasets=[res], fname=output_folder / 'estia_mcstas_reduced_iofq.ort'
     )
