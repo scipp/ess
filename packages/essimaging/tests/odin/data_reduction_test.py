@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+from pathlib import Path
+
 import ess.odin.data  # noqa: F401
 import pytest
 import sciline as sl
@@ -70,7 +72,16 @@ def test_can_compute_wavelength(run_type, wavelength_mode):
     assert "wavelength" in da.bins.coords
 
 
-def test_publish_reduced_scitiff(output_folder):
+@pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
+@pytest.mark.parametrize("wavelength_mode", ["file", "analytical"])
+def test_can_compute_tof(run_type, wavelength_mode):
+    wf = _make_workflow(wavelength_mode)
+    da = wf.compute(TofDetector[run_type])
+
+    assert "tof" in da.bins.coords
+
+
+def test_publish_reduced_scitiff(output_folder: Path):
     wf = _make_workflow("analytical")
     wf[MaskingRules] = {}
     new_sizes = {'dim_0': 64, 'dim_1': 64}
