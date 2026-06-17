@@ -18951,7 +18951,6 @@ packages:
   - pandas>=2.1.2
   - pytest>=7.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
-  - ipywidgets>=8.1.7 ; extra == 'test'
   - ipywidgets>=8.1.7 ; extra == 'gui'
   - ipydatagrid>=1.3.0 ; extra == 'gui'
   - ipytree>=0.2.2 ; extra == 'gui'
