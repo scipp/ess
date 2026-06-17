@@ -147,6 +147,10 @@ class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """Graph for transforming coordinates in elastic scattering."""
 
 
+class ElasticCoordTransformGraphMLZ(sciline.Scope[dict], dict):
+    """Graph for transforming coordinates in elastic scattering."""
+
+
 class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """Graph for transforming coordinates of a monitor."""
 

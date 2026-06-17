@@ -216,7 +216,7 @@ def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
 
 def load_powgen_mlz(
     filename: FilenameMLZ[RunType], datapath: FilepathMLZ[RunType]
-) -> RawDataAndMetadata[RunType]:
+) -> TofDetector[RunType]: #RawDataAndMetadata[RunType]:
     """Load a file.
 
     The loaded data holds both the events and useful metadata from the file.
@@ -229,7 +229,12 @@ def load_powgen_mlz(
     the outcome of scn.load_with_mantid().
     """
     filepath = Path(os.path.join(datapath, filename))
-    return RawDataAndMetadata[RunType](sc.io.load_hdf5(filepath))
+    dg = sc.io.load_hdf5(filepath)
+    out = dg["data"].squeeze()
+    out.coords.pop("tof", None)
+    det_size = {"bank": 40, "column": 154, "row": 7}
+    out = out.fold(dim="spectrum", sizes=det_size)
+    return TofDetector[RunType](out) #RawDataAndMetadata[RunType](sc.io.load_hdf5(filepath))
 
 
 def pooch_load_calibration(
@@ -366,6 +371,16 @@ def source_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsource, R
 
 
 def sample_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsample, RunType]:
+    """Return the sample position from a loaded data group."""
+    return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
+
+
+def source_position_mlz(dg: TofDetector[RunType]) -> Position[snx.NXsource, RunType]:
+    """Return the source position from a loaded data group."""
+    return Position[snx.NXsource, RunType](dg["data"].coords["source_position"])
+
+
+def sample_position_mlz(dg: TofDetector[RunType]) -> Position[snx.NXsample, RunType]:
     """Return the sample position from a loaded data group."""
     return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
 

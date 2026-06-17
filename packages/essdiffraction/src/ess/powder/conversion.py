@@ -15,6 +15,7 @@ from .types import (
     CorrectedDetector,
     DspacingDetector,
     ElasticCoordTransformGraph,
+    ElasticCoordTransformGraphMLZ,
     EmptyCanSubtractedIntensityTof,
     EmptyCanSubtractedIofDspacing,
     GravityVector,
@@ -254,7 +255,7 @@ def add_scattering_coordinates_from_positions(
 
 def add_scattering_coordinates_from_positions_mlz(
     data: TofDetector[RunType],
-    graph: ElasticCoordTransformGraph[RunType],
+    graph: ElasticCoordTransformGraphMLZ, #ElasticCoordTransformGraph[RunType],
     calibration: CalibrationData,
 ) -> WavelengthDetector[RunType]:
     """

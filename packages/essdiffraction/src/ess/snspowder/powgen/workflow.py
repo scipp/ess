@@ -24,7 +24,9 @@ from ess.packages.essdiffraction.src.ess.snspowder.powgen.data import (
     load_powgen_mlz,
     load_powgen_calibration_mlz,
     sample_position,
+    sample_position_mlz,
     source_position,
+    source_position_mlz,
     extract_raw_data_mlz,
     extract_accumulated_proton_charge,
 )
@@ -95,12 +97,14 @@ def PowgenMantidWorkflow() -> sciline.Pipeline:
             [
                 load_powgen_mlz,
                 load_powgen_calibration_mlz,
-                sample_position,
-                source_position,
+                # sample_position,
+                #sample_position_mlz,
+                # source_position,
+                #source_position_mlz,
                 gravity_vector_neg_y,
                 #powder_coordinate_transformation_graph,
-                powder_coordinate_transformation_graph_mlz, # includes evaluation of dperp
-                extract_raw_data_mlz,
+                #powder_coordinate_transformation_graph_mlz, # includes evaluation of dperp
+                #extract_raw_data_mlz,
                 #add_scattering_coordinates_from_positions,
                 add_scattering_coordinates_from_positions_mlz,
                 #add_masks_and_corrections,
