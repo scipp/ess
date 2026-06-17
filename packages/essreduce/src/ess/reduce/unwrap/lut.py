@@ -429,6 +429,34 @@ def _to_component_reading(component) -> BeamlineComponentReading:
     )
 
 
+def chopper_distance_along_beam(
+    axle_position: sc.Variable,
+    source_position: sc.Variable,
+) -> sc.Variable:
+    """Flight distance from the source to a chopper along the incident beam.
+
+    A disk chopper's axle is offset from the beam (the disk sits above, below, or
+    to the side of it), so the straight-line distance
+    ``norm(axle_position - source_position)`` overestimates the flight distance,
+    and for closely-spaced choppers can even place them in the wrong order along
+    the cascade. The neutron crosses the disk where the incident beam intersects
+    it, so the flight distance is the projection of the axle position onto the
+    incident-beam direction. Assuming the incident beam runs along the z axis,
+    this is the z-component of the offset from the source. This matches the
+    straight-line ``Ltotal`` used for detectors and monitors, where the component
+    lies on the beam and the projection reduces to the norm.
+
+    Parameters
+    ----------
+    axle_position:
+        Position of the chopper's rotation axle.
+    source_position:
+        Position of the neutron source.
+    """
+    source_position = source_position.to(unit=axle_position.unit)
+    return (axle_position - source_position).fields.z
+
+
 def simulate_chopper_cascade_using_tof(
     choppers: DiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
@@ -471,9 +499,7 @@ def simulate_chopper_cascade_using_tof(
     tof_choppers = []
     for name, ch in choppers.items():
         chop = tof.Chopper.from_diskchopper(ch, name=name)
-        chop.distance = sc.norm(
-            ch.axle_position - source_position.to(unit=ch.axle_position.unit)
-        )
+        chop.distance = chopper_distance_along_beam(ch.axle_position, source_position)
         tof_choppers.append(chop)
 
     source = tof.Source(
@@ -657,9 +683,7 @@ def compute_frame_sequence(
 
     chops = {
         key: chopper_cascade.Chopper(
-            distance=sc.norm(
-                ch.axle_position - source_position.to(unit=ch.axle_position.unit)
-            ),
+            distance=chopper_distance_along_beam(ch.axle_position, source_position),
             time_open=ch.time_offset_open(
                 pulse_frequency=frequency_for_chopper_rotation
             ),
