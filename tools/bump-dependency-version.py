@@ -6,6 +6,40 @@ import re
 
 import tomllib
 
+"""Minimum dependency updating script.
+
+This script updates minimum dependency to the given version
+if any matching package depends on it(dependency-name).
+
+Example 1 - update minimum version of plopp to 26.5.0 for all packages:
+```
+pixi run --frozen python tools/bump-dependency-version.py \
+  --package ess* \
+  --dependency-name plopp \
+  --version 26.5.0
+```
+
+Example 2 - update minimum version of pytest to 8.0 for all packages:
+```
+pixi run --frozen python tools/bump-dependency-version.py \
+  --package ess* \
+  --dependency-name pytest \
+  --extra test \
+  --version 8.0
+```
+
+Example 3 - update minimum version of ipywidgets to 30.0 for essnmx and essdiffraction:
+```
+pixi run --frozen python tools/bump-dependency-version.py \
+  --package essnmx \
+  --package essdiffraction \
+  --dependency-name ipywidgets \
+  --extra docs \
+  --version 30.0
+```
+
+"""
+
 
 def _setup_logger() -> logging.Logger:
     logger = logging.getLogger(__file__)
