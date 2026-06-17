@@ -82,7 +82,7 @@ def pair_correlation_function(
 
     Returns
     -------
-    g: scipp.DataArray
+    G: scipp.DataArray
         1D array representing :math:`G(r)` with a bin-edge coordinate called
         ``'r'`` that is the provided output grid.
     cov: scipp.DataArray
@@ -117,7 +117,7 @@ def pair_correlation_function(
 
 
 def pair_distribution_function(
-    g: sc.DataArray, *, atomic_density: sc.Variable
+    G: sc.DataArray, *, atomic_density: sc.Variable
 ) -> sc.DataArray:
     r"""Compute the pair distribution function from a pair correlation function.
 
@@ -136,7 +136,7 @@ def pair_distribution_function(
 
     Parameters
     ----------
-    g:
+    G:
         :func:`Pair correlation function <pair_correlation_function>` :math:`G(r)`.
     atomic_density:
         The atomic density :math:`\rho` of the material.
@@ -151,7 +151,7 @@ def pair_distribution_function(
     ess.diffraction.pdf:
         Module with related functions.
     """
-    return 1 + g / (4 * sc.constants.pi * atomic_density * sc.midpoints(g.coords['r']))
+    return 1 + G / (4 * sc.constants.pi * atomic_density * sc.midpoints(G.coords['r']))
 
 
 def radial_distribution_function(
