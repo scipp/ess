@@ -1,10 +1,12 @@
 #!bin/bash
-
-CUR_TAG=$(git describe --tags --abbrev=0)
+if [[ -z $1 ]]; then
+  CUR_TAG=$(git describe --tags --abbrev=0);
+else
+  CUR_TAG=$1;
+fi
 # Prepare Cache Folder
 GIT_TOP_DIR=$(git rev-parse --show-toplevel)
 CACHE_DIR=${GIT_TOP_DIR}/.ess_release_cache
-
 
 echo "Current tag: ${CUR_TAG}"
 
@@ -12,42 +14,54 @@ PACKAGE=""
 VERSION=""
 
 if [[ "${CUR_TAG}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-	PACKAGE=${BASH_REMATCH[1]}
-	VERSION=${BASH_REMATCH[2]}
+	PACKAGE=${BASH_REMATCH[1]};
+	VERSION=${BASH_REMATCH[2]};
 else
-	echo "Tag name unexpected..."
-	exit 1
+	echo "Tag name unexpected...";
+	exit 1;
 fi
 
-echo "Package: ${PACKAGE}"
-echo "Version: ${VERSION}"
+echo "Package: ${PACKAGE}";
+echo "Version: ${VERSION}";
 
 find_last_release() {
-	previous_releases=($(git tag -l ${PACKAGE}* --sort creatordate))
-	echo $previous_releases
+	previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
+	echo "Previous releases: ${previous_releases[@]}";
 	if [[ ${#previous_releases[@]} -gt 1 ]]; then
-		LAST_RELEASE=${previous_releases[-2]}
+		LAST_RELEASE=${previous_releases[-2]};
 	else
-		echo "No previous release found on the package yet. Can't collect release notes automatically..."
-		exit 1
+		echo "No previous release found on the package yet. Can't collect release notes automatically...";
+		exit 1;
 	fi
 }
 
-find_last_release
-echo "Found the previous release on the package ${PACKAGE}: ${LAST_RELEASE}"
+if [[ -z $2 ]]; then
+  find_last_release
+else
+  LAST_RELEASE=$2;
+fi
+echo "Found the last previous release on the package ${PACKAGE}: ${LAST_RELEASE}"
 
-commits_between=($(git log --first-parent --merges --pretty=format:%H ${LAST_RELEASE}...${CUR_TAG}))
+commits_between=($(git log --first-parent --pretty=format:%H ${LAST_RELEASE}...${CUR_TAG}));
+echo "${#commits_between[@]} commits found in between.";
 
 download_commit_and_pr_info() {
 	local RELEASE_COMMITS_LIST=${CACHE_DIR}/${CUR_TAG/\//-}-${LAST_RELEASE/\//-}-commits.txt
-	rm ${RELEASE_COMMITS_LIST};
+	if [ -f ${RELEASE_COMMITS_LIST} ]; then
+	  echo "${RELEASE_COMMITS_LIST} already exists. Cleaning up first...";
+	  rm ${RELEASE_COMMITS_LIST};
+	fi
+	# Make an empty commit list file in case there is no commits at all.
+	mkdir -p ${CACHE_DIR};
+	touch ${RELEASE_COMMITS_LIST};
+
 	for commit in ${commits_between[@]}; do
 		echo ${commit} >>${RELEASE_COMMITS_LIST}
-		commit_dir=${CACHE_DIR}/${commit}
+		commit_dir=${CACHE_DIR}/commits/${commit}
 		if [ -d ${commit_dir} ]; then
 			echo "commit cache directory already exists with these files: $(ls ${commit_dir})"
 		else
-			mkdir --parent ${commit_dir}
+			mkdir -p ${commit_dir}
 		fi
 
 		pr_json=${commit_dir}/all-prs.json

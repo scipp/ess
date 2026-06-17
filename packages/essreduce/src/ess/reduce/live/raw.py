@@ -14,7 +14,9 @@ options:
 
 - `'xy_plane'`: Project the data onto the x-y plane, i.e., perpendicular to the beam.
 - `'cylinder_mantle_z'`: Project the data onto the mantle of a cylinder aligned with the
-   z-axis.
+   z-axis (along the beam).
+- `'cylinder_mantle_y'`: Project the data onto the mantle of a cylinder aligned with the
+   y-axis (vertical).
 - A callable, e.g., to select and flatten dimensions of the data.
 """
 
@@ -521,7 +523,7 @@ class RollingDetectorView(Detector):
         *,
         detector_name: str,
         window: int,
-        projection: Literal['xy_plane', 'cylinder_mantle_z']
+        projection: Literal['xy_plane', 'cylinder_mantle_y', 'cylinder_mantle_z']
         | Callable[[sc.DataArray], sc.DataArray]
         | None = None,
         resolution: dict[str, int] | None = None,
@@ -545,11 +547,11 @@ class RollingDetectorView(Detector):
         projection:
             Projection to use for the detector data. This can be a string selecting a
             predefined projection or a function that takes a DataArray and returns a
-            DataArray. The predefined projections are 'xy_plane' and
-            'cylinder_mantle_z'.
+            DataArray. The predefined projections are 'xy_plane', 'cylinder_mantle_y',
+            and 'cylinder_mantle_z'.
         resolution:
             Resolution to use for histogramming the detector data. Only required for
-            'xy_plane' and 'cylinder_mantle_z' projections.
+            'xy_plane', 'cylinder_mantle_y', and 'cylinder_mantle_z' projections.
         pixel_noise:
             Noise to add to the pixel positions. This can be a scalar value to add
             Gaussian noise to the pixel positions or the string 'cylindrical' to add
@@ -564,8 +566,15 @@ class RollingDetectorView(Detector):
             noise_replica_count = 4
         wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
         wf[RollingDetectorViewWindow] = window
-        if projection == 'cylinder_mantle_z':
-            wf.insert(make_cylinder_mantle_coords)
+        if projection in ('cylinder_mantle_y', 'cylinder_mantle_z'):
+            axis: Literal['y', 'z'] = 'y' if projection == 'cylinder_mantle_y' else 'z'
+
+            def cylinder_coords(
+                position: CalibratedPositionWithNoisyReplicas,
+            ) -> ProjectedCoords:
+                return make_cylinder_mantle_coords(position, axis=axis)
+
+            wf.insert(cylinder_coords)
             wf.insert(RollingDetectorView.from_detector_and_histogrammer)
             wf[DetectorViewResolution] = resolution
         elif projection == 'xy_plane':
@@ -675,25 +684,44 @@ def project_xy(
     return sc.DataGroup(x=position.fields.x * t, y=position.fields.y * t, z=zplane)
 
 
-def project_onto_cylinder_z(
-    position: sc.Variable, *, radius: sc.Variable | None = None
+# Right-handed cyclic in-plane axes for each cylinder axis. The first element is the
+# reference direction (phi=0), the second is phi=90 deg.
+_cylinder_in_plane_axes = {'x': ('y', 'z'), 'y': ('z', 'x'), 'z': ('x', 'y')}
+
+
+def project_onto_cylinder(
+    position: sc.Variable,
+    *,
+    axis: Literal['x', 'y', 'z'] = 'z',
+    radius: sc.Variable | None = None,
 ) -> dict[str, sc.Variable]:
     """
-    Project positions onto the mantle of a cylinder aligned with the z axis.
+    Project positions onto the mantle of an axis-aligned cylinder.
 
-    This is useful for cylindrical detectors, provided they are aligned along the beam.
+    This is useful for cylindrical detectors. The cylinder axis is one of the
+    coordinate axes; for ``axis='z'`` the cylinder is aligned along the beam.
+
+    Parameters
+    ----------
+    position:
+        Positions to project.
+    axis:
+        Coordinate axis the cylinder is aligned with. ``phi`` is measured in the
+        perpendicular plane, increasing right-handed about ``axis``.
+    radius:
+        Radius of the cylinder. If None, the minimum radius of the positions is used.
     """
-    x = position.fields.x
-    y = position.fields.y
-    r_xy = sc.sqrt(x**2 + y**2)
+    a, b = _cylinder_in_plane_axes[axis]
+    u = getattr(position.fields, a)
+    v = getattr(position.fields, b)
+    w = getattr(position.fields, axis)
+    r_plane = sc.sqrt(u**2 + v**2)
     if radius is None:
-        radius = r_xy.min()
-    t = radius / r_xy
-    phi = sc.atan2(y=y, x=x).to(unit='deg')
+        radius = r_plane.min()
+    t = radius / r_plane
+    phi = sc.atan2(y=v, x=u).to(unit='deg')
     arc_length = radius * (phi * sc.scalar(np.pi / 180.0, unit='1/deg'))
-    return sc.DataGroup(
-        phi=phi, r=radius, z=position.fields.z * t, arc_length=arc_length
-    )
+    return sc.DataGroup(phi=phi, r=radius, arc_length=arc_length, **{axis: w * t})
 
 
 def pixel_shape(component: NeXusComponent[snx.NXdetector, SampleRun]) -> PixelShape:
@@ -810,6 +838,12 @@ def make_xy_plane_coords(
 
 def make_cylinder_mantle_coords(
     position: CalibratedPositionWithNoisyReplicas,
+    *,
+    axis: Literal['x', 'y', 'z'] = 'z',
 ) -> ProjectedCoords:
-    radius = project_onto_cylinder_z(position['replica', 0])['r']
-    return project_onto_cylinder_z(position, radius=radius)
+    """Project positions onto the mantle of a cylinder aligned with ``axis``."""
+    # The first slice is the original data, so we use it to determine the radius.
+    # This avoids noise in the radius which could later cause trouble when
+    # combining the data.
+    radius = project_onto_cylinder(position['replica', 0], axis=axis)['r']
+    return project_onto_cylinder(position, axis=axis, radius=radius)
