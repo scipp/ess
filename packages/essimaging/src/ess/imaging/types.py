@@ -24,6 +24,7 @@ ProtonCharge = reduce_t.ProtonCharge
 RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 NXdetector = snx.NXdetector
+NXsource = snx.NXsource
 
 DetectorLtotal = unwrap_t.DetectorLtotal
 WavelengthDetector = unwrap_t.WavelengthDetector

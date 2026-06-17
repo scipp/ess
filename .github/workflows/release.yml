@@ -4,6 +4,15 @@ on:
   push:
     tags:
       - "*/[0-9]*"
+  workflow_dispatch:
+    # Trigger the action with workflow_dispatch.
+    # Any steps or jobs that make side-effect should be skipped on the workflow_dispatch.
+    # Note generating steps only work if the hardcoded tag is the latest version of the package.
+    inputs:
+      tag:
+        description: 'Release tag - hardcoded for dry-run test.'
+        required: true
+        type: string
 
 env:
   PIXI_FROZEN: true
@@ -11,19 +20,47 @@ env:
 
 jobs:
   determine-package:
-    name: Determine package
-    runs-on: ubuntu-24.04
+    name: Determine package and version, last-version.
+    runs-on: ubuntu-slim
     outputs:
       package: ${{ steps.parse.outputs.package }}
       version: ${{ steps.parse.outputs.version }}
+      lastversion: ${{ steps.last-version-parse.outputs.lastversion }}
+    env:
+      DRYRUN: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - id: parse
+        name: Parse package and version name.
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
+          if [ ${DRYRUN} = true ]; then
+            TAG=${{ inputs.tag }}
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
           PACKAGE="${TAG%%/*}"
           VERSION="${TAG#*/}"
           echo "package=${PACKAGE}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+      - id: last-version-parse
+        name: Parse the previous version if possible.
+        continue-on-error: true  # Previous version may not exist.
+        run: |
+          PACKAGE=${{ steps.parse.outputs.package }}
+          VERSION=${{ steps.parse.outputs.package }}
+          previous_releases=($(git tag -l ${PACKAGE}/* --sort creatordate))
+          echo "Previous releases: ${previous_releases[@]}"
+          if [[ ${#previous_releases[@]} -gt 1 ]]; then
+          	LAST_RELEASE=${previous_releases[-2]}
+            if [[ "${LAST_RELEASE}" =~ ^(^ess[^@]+)\/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+              echo "lastversion=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+              echo "Found last release version: ${BASH_REMATCH[2]}"
+            fi
+          else
+          	echo "No previous release found for the package."
+          fi
 
   build:
     name: Build ${{ needs.determine-package.outputs.package }}
@@ -50,6 +87,7 @@ jobs:
     needs: [ determine-package, build ]
     runs-on: ubuntu-24.04
     environment: release
+    if: ${{ startsWith(github.ref, 'refs/tags/') && github.event_name != 'workflow_dispatch' }}
     permissions:
       id-token: write
     steps:
@@ -94,3 +132,56 @@ jobs:
         with:
           file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
           overwrite: false
+
+  notes:
+    name: Update notes
+    needs: [ determine-package, publish ]
+    runs-on: ubuntu-slim
+    if: ${{ always() && needs.determine-package.outputs.lastversion }}
+    permissions:
+      contents: write
+    env:
+      PACKAGE: ${{ needs.determine-package.outputs.package }}
+      VERSION: ${{ needs.determine-package.outputs.version }}
+      LASTVERSION: ${{ needs.determine-package.outputs.lastversion }}
+    steps:
+      - name: Download PR metadata cache
+        uses: actions/cache@v5.0.5
+        with:
+          key: ess-release-cache-${PACKAGE}-${VERSION}
+          restore-keys: ess-release-cache
+          path: .ess_release_cache
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Fetch depth must be 0 otherwise the git log comment won't find all relevant commits between tags.
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
+        with:
+          python-version: "3.11"
+      - name: Install dependencise
+        run: pip install pydantic==2.13.3
+      - name: Download PR metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tools/download-release-diff-info.sh ${PACKAGE}/${VERSION} ${PACKAGE}/${LASTVERSION}
+      - name: Check downloaded cache
+        run: ls .ess_release_cache
+      - name: Generate release note
+        run: python tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LASTVERSION}
+      - name: Download existing release note
+        env:
+          GH_TOKEN: ${{ github.token }}
+        continue-on-error: true  # Release note might not exist yet.
+        run: |  # If release does not exist yet, `existing-note.md` will be empty.
+          gh release view ${PACKAGE}/${VERSION} -R scipp/ess --json body -q .body > existing-note.md
+          if [ -s existing-note.md ]; then
+            cat existing-note.md >> new-release-note.md
+          fi
+      - name: Merge existing release note with generated note
+        run: cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LASTVERSION}-releasenote.md >> new-release-note.md
+      - name: Check the generated note
+        run: cat new-release-note.md
+      - name: Upload release note
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit ${PACKAGE}/${VERSION} --notes-file "new-release-note.md"

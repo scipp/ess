@@ -164,15 +164,6 @@ essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "de
 esssans = { features = ["esssans", "essreduce"], solve-group = "default" }
 essspectroscopy = { features = ["essspectroscopy", "essreduce"], solve-group = "default" }
 
-# Lower-bound test environments (separate resolution)
-lb-essreduce = { features = ["essreduce"], solve-group = "lower-bound" }
-lb-essimaging = { features = ["essimaging", "essreduce"], solve-group = "lower-bound" }
-lb-essnmx = { features = ["essnmx", "essreduce"], solve-group = "lower-bound" }
-lb-essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group = "lower-bound" }
-lb-essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "lower-bound" }
-lb-esssans = { features = ["esssans", "essreduce"], solve-group = "lower-bound" }
-lb-essspectroscopy = { features = ["essspectroscopy", "essreduce"], solve-group = "lower-bound" }
-
 # Docs environments (package with docs extra + pandoc)
 docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
 docs-essimaging = { features = ["docs-essimaging", "docs-essreduce", "docs"], solve-group = "default" }

@@ -30,14 +30,10 @@ requires-python = ">=3.11"
 # Make sure to list one dependency per line.
 dependencies = [
     "dask>=2022.1.0",
-    "python-dateutil>=2.8.2",
     "graphviz>=0.20",
+    "python-dateutil>=2.8.2",
     "plopp>=24.7.0",
     "orsopy>=1.2",
-    "sciline>=24.6.0",
-    "scipp>=24.09.1", # Fixed new hist/bin API
-    "scippneutron>=24.10.0",
-    "scippnexus>=24.9.1",
     "essreduce>=26.6.0",
     "esspolarization>=25.7.0",
     "pandas>=2.1.2",
