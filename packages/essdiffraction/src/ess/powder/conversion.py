@@ -53,6 +53,26 @@ def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
     return out
 
 
+def _dspacing_from_diff_calibration_generic_impl_mlz(tof, tzero, difa, difc):
+    """
+    This function implements the solution to
+      t = a * d^2 + c * d + t0
+    for a != 0.
+    It uses the following way of expressing the solution with an order of operations
+    that is optimized for low memory usage.
+      d = (sqrt([x-t0+t] / x) - 1) * c / (2a)
+      x = c^2 / (4a)
+    """
+    x = difc**2 / (4.0 * difa)
+    out = (x - tzero) + tof
+    out /= x
+    del x
+    sc.sqrt(out, out=out)
+    out -= 1.0
+    out *= difc / (2.0 * difa)
+    return out
+
+
 def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
     """
     This function implements the solution to
@@ -100,12 +120,15 @@ def _consume_positions(position, sample_position, source_position):
 
 def d_perp_from_lambda_and_theta(*, wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
     """Compute the coordinate d_perp, which is suggested to be used instead of two_theta in http://dx.doi.org/10.1107/S1600576715016520"""
-    return sc.sqrt(wavelength**2 - 2.0 * sc.Unit('angstrom')**2 * sc.log(sc.cos(two_theta / 2)))
+    lambda_K = sc.scalar(1.0, unit="angstrom")
+    return sc.sqrt(wavelength**2 - 2.0 * (lambda_K)**2 * sc.log(sc.cos(0.5 * two_theta)))
 
 
-def get_modified_tof_graph() -> dict:
+def d_dperp_from_tof_and_calibration_coeffs() -> dict:
     """Get a modified version of the standard tof to elastic scattering graph that includes the additional coordinate d_perp"""
-    modified_graph = scn.conversion.graph.tof.elastic("tof").copy()
+    modified_graph = {}
+    modified_graph["wavelength"] = scn.conversion.tof.wavelength_from_tof
+    modified_graph["dspacing"] = _dspacing_from_diff_calibration_generic_impl_mlz
     modified_graph["dperp"] = d_perp_from_lambda_and_theta
     return modified_graph
 
@@ -223,6 +246,24 @@ def powder_coordinate_transformation_graph_mlz(
             'source_position': lambda: source_position,
             'sample_position': lambda: sample_position,
             'gravity': lambda: gravity,
+        }
+    )
+
+
+def d_dperp_coordinate_transformation_graph_mlz() -> ElasticCoordTransformGraphMLZ:
+    """
+    Generate a coordinate transformation graph for powder diffraction.
+    The graph includes the additional coordinate dperp, which is needed in MLZ workflows.
+
+    Returns
+    -------
+    :
+        A dictionary with the graph for the transformation.
+    """
+    return ElasticCoordTransformGraphMLZ(
+        {
+           **scn.conversion.graph.beamline.beamline(scatter=True),
+           **d_dperp_from_tof_and_calibration_coeffs(), # minimal additional nodes to the beamline graph
         }
     )
 

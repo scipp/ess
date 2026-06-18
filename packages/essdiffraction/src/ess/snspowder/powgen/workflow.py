@@ -35,6 +35,7 @@ from ess.packages.essdiffraction.src.ess.powder.conversion import (
     powder_coordinate_transformation_graph,
     powder_coordinate_transformation_graph_mlz,
     add_scattering_coordinates_from_positions,
+    d_dperp_coordinate_transformation_graph_mlz,
     add_scattering_coordinates_from_positions_mlz,
 )
 
@@ -101,7 +102,9 @@ def PowgenMantidWorkflow() -> sciline.Pipeline:
                 #sample_position_mlz,
                 # source_position,
                 #source_position_mlz,
-                gravity_vector_neg_y,
+                # coordinate_transformation_graph_mlz,
+                d_dperp_coordinate_transformation_graph_mlz,
+                #gravity_vector_neg_y,
                 #powder_coordinate_transformation_graph,
                 #powder_coordinate_transformation_graph_mlz, # includes evaluation of dperp
                 #extract_raw_data_mlz,
