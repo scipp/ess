@@ -100,7 +100,7 @@ jobs:
           packages-dir: dist/
 
   draft-release:
-    name: Publish release
+    name: Draft a release
     needs: [ determine-package, publish ]
     runs-on: ubuntu-slim
     permissions:
