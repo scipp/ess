@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../../../_static/documentation_options.js?v=8c6100ef"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -492,7 +492,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.6.1" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -978,7 +978,9 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">- `&#39;xy_plane&#39;`: Project the data onto the x-y plane, i.e., perpendicular to the beam.</span>
 <span class="sd">- `&#39;cylinder_mantle_z&#39;`: Project the data onto the mantle of a cylinder aligned with the</span>
-<span class="sd">   z-axis.</span>
+<span class="sd">   z-axis (along the beam).</span>
+<span class="sd">- `&#39;cylinder_mantle_y&#39;`: Project the data onto the mantle of a cylinder aligned with the</span>
+<span class="sd">   y-axis (vertical).</span>
 <span class="sd">- A callable, e.g., to select and flatten dimensions of the data.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -1537,7 +1539,7 @@ window.runMermaid = runMermaid;</script>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">detector_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">projection</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;xy_plane&#39;</span><span class="p">,</span> <span class="s1">&#39;cylinder_mantle_z&#39;</span><span class="p">]</span>
+        <span class="n">projection</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;xy_plane&#39;</span><span class="p">,</span> <span class="s1">&#39;cylinder_mantle_y&#39;</span><span class="p">,</span> <span class="s1">&#39;cylinder_mantle_z&#39;</span><span class="p">]</span>
         <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span>
         <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resolution</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1561,11 +1563,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        projection:</span>
 <span class="sd">            Projection to use for the detector data. This can be a string selecting a</span>
 <span class="sd">            predefined projection or a function that takes a DataArray and returns a</span>
-<span class="sd">            DataArray. The predefined projections are &#39;xy_plane&#39; and</span>
-<span class="sd">            &#39;cylinder_mantle_z&#39;.</span>
+<span class="sd">            DataArray. The predefined projections are &#39;xy_plane&#39;, &#39;cylinder_mantle_y&#39;,</span>
+<span class="sd">            and &#39;cylinder_mantle_z&#39;.</span>
 <span class="sd">        resolution:</span>
 <span class="sd">            Resolution to use for histogramming the detector data. Only required for</span>
-<span class="sd">            &#39;xy_plane&#39; and &#39;cylinder_mantle_z&#39; projections.</span>
+<span class="sd">            &#39;xy_plane&#39;, &#39;cylinder_mantle_y&#39;, and &#39;cylinder_mantle_z&#39; projections.</span>
 <span class="sd">        pixel_noise:</span>
 <span class="sd">            Noise to add to the pixel positions. This can be a scalar value to add</span>
 <span class="sd">            Gaussian noise to the pixel positions or the string &#39;cylindrical&#39; to add</span>
@@ -1580,8 +1582,15 @@ window.runMermaid = runMermaid;</script>
             <span class="n">noise_replica_count</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">GenericNeXusWorkflow</span><span class="p">(</span><span class="n">run_types</span><span class="o">=</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span> <span class="n">monitor_types</span><span class="o">=</span><span class="p">[])</span>
         <span class="n">wf</span><span class="p">[</span><span class="n">RollingDetectorViewWindow</span><span class="p">]</span> <span class="o">=</span> <span class="n">window</span>
-        <span class="k">if</span> <span class="n">projection</span> <span class="o">==</span> <span class="s1">&#39;cylinder_mantle_z&#39;</span><span class="p">:</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">make_cylinder_mantle_coords</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">projection</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;cylinder_mantle_y&#39;</span><span class="p">,</span> <span class="s1">&#39;cylinder_mantle_z&#39;</span><span class="p">):</span>
+            <span class="n">axis</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;y&#39;</span> <span class="k">if</span> <span class="n">projection</span> <span class="o">==</span> <span class="s1">&#39;cylinder_mantle_y&#39;</span> <span class="k">else</span> <span class="s1">&#39;z&#39;</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">cylinder_coords</span><span class="p">(</span>
+                <span class="n">position</span><span class="p">:</span> <span class="n">CalibratedPositionWithNoisyReplicas</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProjectedCoords</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">make_cylinder_mantle_coords</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+            <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">cylinder_coords</span><span class="p">)</span>
             <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">RollingDetectorView</span><span class="o">.</span><span class="n">from_detector_and_histogrammer</span><span class="p">)</span>
             <span class="n">wf</span><span class="p">[</span><span class="n">DetectorViewResolution</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolution</span>
         <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s1">&#39;xy_plane&#39;</span><span class="p">:</span>
@@ -1705,27 +1714,46 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<div class="viewcode-block" id="project_onto_cylinder_z">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.live.raw.project_onto_cylinder_z.html#ess.reduce.live.raw.project_onto_cylinder_z">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">project_onto_cylinder_z</span><span class="p">(</span>
-    <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="c1"># Right-handed cyclic in-plane axes for each cylinder axis. The first element is the</span>
+<span class="c1"># reference direction (phi=0), the second is phi=90 deg.</span>
+<span class="n">_cylinder_in_plane_axes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">),</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">),</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">)}</span>
+
+
+<div class="viewcode-block" id="project_onto_cylinder">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.live.raw.project_onto_cylinder.html#ess.reduce.live.raw.project_onto_cylinder">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">project_onto_cylinder</span><span class="p">(</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Project positions onto the mantle of a cylinder aligned with the z axis.</span>
+<span class="sd">    Project positions onto the mantle of an axis-aligned cylinder.</span>
 
-<span class="sd">    This is useful for cylindrical detectors, provided they are aligned along the beam.</span>
+<span class="sd">    This is useful for cylindrical detectors. The cylinder axis is one of the</span>
+<span class="sd">    coordinate axes; for ``axis=&#39;z&#39;`` the cylinder is aligned along the beam.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    position:</span>
+<span class="sd">        Positions to project.</span>
+<span class="sd">    axis:</span>
+<span class="sd">        Coordinate axis the cylinder is aligned with. ``phi`` is measured in the</span>
+<span class="sd">        perpendicular plane, increasing right-handed about ``axis``.</span>
+<span class="sd">    radius:</span>
+<span class="sd">        Radius of the cylinder. If None, the minimum radius of the positions is used.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">position</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">position</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span>
-    <span class="n">r_xy</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">_cylinder_in_plane_axes</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">position</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">position</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">position</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+    <span class="n">r_plane</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">u</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">radius</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">radius</span> <span class="o">=</span> <span class="n">r_xy</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">/</span> <span class="n">r_xy</span>
-    <span class="n">phi</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">r_plane</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">/</span> <span class="n">r_plane</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">u</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
     <span class="n">arc_length</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="p">(</span><span class="n">phi</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/deg&#39;</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
-        <span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">position</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="n">arc_length</span><span class="o">=</span><span class="n">arc_length</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span><span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">arc_length</span><span class="o">=</span><span class="n">arc_length</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="n">axis</span><span class="p">:</span> <span class="n">w</span> <span class="o">*</span> <span class="n">t</span><span class="p">})</span></div>
 
 
 
@@ -1783,7 +1811,7 @@ window.runMermaid = runMermaid;</script>
     <span class="c1"># fulfill this. However, the rest of the data reduction currently assumes that</span>
     <span class="c1"># the pixel offset corresponds to the pixel center, so if it is not fulfilled</span>
     <span class="c1"># there are bigger problems elsewhere anywhere.</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">)</span>
     <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,)</span>
     <span class="n">size</span> <span class="o">=</span> <span class="n">_noise_size</span>
     <span class="n">z_hat</span> <span class="o">=</span> <span class="n">axis</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>  <span class="c1"># Unit vector along the cylinder axis</span>
@@ -1866,9 +1894,15 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.live.raw.make_cylinder_mantle_coords.html#ess.reduce.live.raw.make_cylinder_mantle_coords">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_cylinder_mantle_coords</span><span class="p">(</span>
     <span class="n">position</span><span class="p">:</span> <span class="n">CalibratedPositionWithNoisyReplicas</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProjectedCoords</span><span class="p">:</span>
-    <span class="n">radius</span> <span class="o">=</span> <span class="n">project_onto_cylinder_z</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="s1">&#39;replica&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">project_onto_cylinder_z</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Project positions onto the mantle of a cylinder aligned with ``axis``.&quot;&quot;&quot;</span>
+    <span class="c1"># The first slice is the original data, so we use it to determine the radius.</span>
+    <span class="c1"># This avoids noise in the radius which could later cause trouble when</span>
+    <span class="c1"># combining the data.</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">project_onto_cylinder</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="s1">&#39;replica&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">project_onto_cylinder</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span></div>
 
 </pre></div>
 
@@ -1933,7 +1967,7 @@ window.runMermaid = runMermaid;</script>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.6.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

@@ -22,7 +22,7 @@ ess.reduce.live.raw
       pixel_shape
       position_noise_for_cylindrical_pixel
       position_with_noisy_replicas
-      project_onto_cylinder_z
+      project_onto_cylinder
       project_xy
    
    

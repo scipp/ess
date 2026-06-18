@@ -1,4 +1,4 @@
-Results of doctest builder run on 2026-06-04 11:43:33
+Results of doctest builder run on 2026-06-18 08:06:33
 =====================================================
 
 Document: generated/modules/ess.reduce.nexus.types.DetectorPositionOffset

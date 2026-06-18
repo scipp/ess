@@ -17,19 +17,15 @@ ess.reduce.nexus.types
       NeXusSourceName
       PreopenNeXusFile
       AnyRun
+      SampleRun
       BackgroundRun
       EmptyBeamRun
-      SampleRun
       VanadiumRun
       RunType
+      MonitorType
       IncidentMonitor
       TransmissionMonitor
-      FrameMonitor0
-      FrameMonitor1
-      FrameMonitor2
-      FrameMonitor3
       CaveMonitor
-      MonitorType
       Component
       COMPONENT_CONSTRAINTS
       UniqueComponent
