@@ -107,12 +107,7 @@ if __name__ == "__main__":
         else:
             maybe_relevant_logs.append(merge_log)
 
-    release_note = [
-        "## What's Changed",
-        '',
-        f"### {package_name.replace('ess', 'ESS')}",
-        '',
-    ]
+    release_note = ["## What's Changed"]
     release_note.extend([f"* {relevant_log}" for relevant_log in relevant_logs])
 
     if args.maybe_relevant:
