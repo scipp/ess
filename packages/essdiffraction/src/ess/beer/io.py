@@ -215,18 +215,14 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
         if north_or_south is not None
         else next(_find_all_h5(data_dir, f'/entry1.*bank.*{number}'))
     )
-    events = data['events']
+    component_name = data.attrs['component'].decode('utf8')
 
+    events = data['events']
     beam_rotation = _find_h5(f['/entry1/instrument/components'], '.*sourceMantid.*')[
         'Rotation'
     ]
     detector_rotation = _find_h5(
-        f['/entry1/instrument/components'],
-        f'.*nD_Mantid_?{north_or_south}_{number}$'
-        if north_or_south is not None and number is not None
-        else f'.*nD_Mantid_?{north_or_south}.*'
-        if north_or_south is not None
-        else f'.*nD_Mantid_?{number}.*',
+        f['/entry1/instrument/components'], f'.*{component_name}.*$'
     )['Rotation']
 
     events = events[()]
