@@ -39,7 +39,7 @@ class MergeLog(BaseModel):
 
     def __str__(self) -> str:
         authors = ", ".join([f"@{author.login}" for author in self.authors])
-        return f"{self.pr.title} by {authors} in {self.pr.url}"
+        return f"{self.pr.title} by {authors} in #{self.pr.number}"
 
 
 def get_commits_file(cur_tag: str, compare_tag: str) -> pathlib.Path:
