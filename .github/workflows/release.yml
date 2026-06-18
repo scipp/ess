@@ -39,7 +39,6 @@ jobs:
           fi
           PACKAGE="${TAG%%/*}"
           VERSION="${TAG#*/}"
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "package=${PACKAGE}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v6
