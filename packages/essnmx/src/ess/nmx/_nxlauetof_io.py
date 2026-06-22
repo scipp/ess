@@ -188,7 +188,8 @@ def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
             dg = f[()]
 
         # Drop auxiliary output from the loaded result.
-        del dg['entry']['aux']
+        if 'aux' in dg['entry']:
+            del dg['entry']['aux']
         _validate_entry(entry := f['entry'])
         _handle_sample(dg['entry']['sample'], entry['sample'])
         _handle_monitor(dg['entry']['control'], entry['control'])
