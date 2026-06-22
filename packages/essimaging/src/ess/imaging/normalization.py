@@ -10,6 +10,7 @@ from .types import (
     BackgroundSubtractedDetector,
     DarkBackgroundRun,
     FluxNormalizedDetector,
+    MeanDarkFrame,
     NormalizedImage,
     OpenBeamRun,
     SampleRun,
@@ -17,9 +18,23 @@ from .types import (
 )
 
 
+def average_dark_frames(
+    dark_frames: FluxNormalizedDetector[DarkBackgroundRun],
+) -> MeanDarkFrame:
+    """
+    Average the dark frames (background runs) over time to obtain a mean dark frame.
+
+    Parameters
+    ----------
+    dark_frames:
+        Dark frames to average.
+    """
+    return MeanDarkFrame(dark_frames.mean('time'))
+
+
 def subtract_background_sample(
     data: FluxNormalizedDetector[SampleRun],
-    background: FluxNormalizedDetector[DarkBackgroundRun],
+    background: MeanDarkFrame,
     uncertainties: UncertaintyBroadcastMode,
 ) -> BackgroundSubtractedDetector[SampleRun]:
     """
@@ -42,7 +57,8 @@ def subtract_background_sample(
 
 def subtract_background_openbeam(
     data: FluxNormalizedDetector[OpenBeamRun],
-    background: FluxNormalizedDetector[DarkBackgroundRun],
+    background: MeanDarkFrame,
+    uncertainties: UncertaintyBroadcastMode,
 ) -> BackgroundSubtractedDetector[OpenBeamRun]:
     """
     Subtract background from proton-charge normalized open beam data.
@@ -53,8 +69,13 @@ def subtract_background_openbeam(
         Open beam data to process (normalized to proton charge).
     background:
         Background (dark frame) data to subtract (normalized to proton charge).
+    uncertainties:
+        Mode to use when broadcasting uncertainties from background to data (data
+        typically has multiple frames, while background usually has only one frame).
     """
-    return BackgroundSubtractedDetector[OpenBeamRun](data - background)
+    return BackgroundSubtractedDetector[OpenBeamRun](
+        data - broadcast_uncertainties(background, prototype=data, mode=uncertainties)
+    )
 
 
 def sample_over_openbeam(
@@ -78,11 +99,14 @@ def sample_over_openbeam(
     """
     return NormalizedImage(
         sample
-        / broadcast_uncertainties(open_beam, prototype=sample, mode=uncertainties)
+        / broadcast_uncertainties(
+            open_beam.mean('time'), prototype=sample, mode=uncertainties
+        )
     )
 
 
 providers = (
+    average_dark_frames,
     subtract_background_sample,
     subtract_background_openbeam,
     sample_over_openbeam,
