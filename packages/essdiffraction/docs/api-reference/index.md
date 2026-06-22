@@ -125,6 +125,10 @@
 
    BeerModMcStasWorkflowKnownPeaks
    BeerModMcStasWorkflow
+   BeerPowderWorkflow
+   BeerPowderWorkflowAnalytical
+   BeerPowderMcStasWorkflow
+   BeerPowderMcStasWorkflowAnalytical
 ```
 
 ### Top-level functions
@@ -150,6 +154,7 @@
    conversions
    data
    io
+   mcstas
    workflow
 ```
 

@@ -6,6 +6,7 @@ from ess.beer import (
     BeerMcStasWorkflowPulseShaping,
     BeerModMcStasWorkflow,
     BeerModMcStasWorkflowKnownPeaks,
+    BeerPowderMcStasWorkflowAnalytical,
 )
 from ess.beer.data import (
     duplex_peaks_array,
@@ -14,13 +15,18 @@ from ess.beer.data import (
     mcstas_more_neutrons_3d_detector_example,
     mcstas_silicon_new_model,
 )
-from ess.beer.io import (
+from ess.beer.mcstas import (
     load_beer_mcstas,
     load_beer_mcstas_monitor,
     mcstas_chopper_delay_from_mode_new_simulations,
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
-from ess.powder.types import ElasticCoordTransformGraph, RawDetector, SampleRun
+from ess.powder.types import (
+    DspacingDetector,
+    ElasticCoordTransformGraph,
+    RawDetector,
+    SampleRun,
+)
 from scipp.testing import assert_allclose
 
 from ess.reduce.nexus.types import DetectorBankSizes, Filename
@@ -96,8 +102,29 @@ def test_pulse_shaping_workflow():
     )
 
 
+def test_powder_mcstas_analytical_workflow_computes_dspacing():
+    wf = BeerPowderMcStasWorkflowAnalytical()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
+    wf[DetectorBank] = DetectorBank.north
+
+    da = wf.compute(DspacingDetector[SampleRun])
+
+    assert 'wavelength' in da.bins.coords
+    assert 'dspacing' in da.bins.coords
+    h = da.hist(dspacing=2000, dim=da.dims)
+    max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
+    assert_allclose(
+        max_peak_d,
+        sc.scalar(1.6374, unit='angstrom'),
+        atol=sc.scalar(3e-2, unit='angstrom'),
+    )
+
+
 def test_can_load_3d_detector():
-    sizes = {'north_detector': {'x': 10, 'y': 20}, 'south_detector': {'x': 10, 'y': 20}}
+    sizes = {
+        'north_detector': {'x': 500, 'y': 200},
+        'south_detector': {'x': 500, 'y': 200},
+    }
     load_beer_mcstas(
         mcstas_few_neutrons_3d_detector_example(), DetectorBank.north, sizes
     )
@@ -118,6 +145,12 @@ def test_can_load_monitor():
     assert da.coords['position'].unit == 'm'
 
 
+def test_io_module_reexports_mcstas_loaders():
+    from ess.beer.io import load_beer_mcstas as load_beer_mcstas_from_io
+
+    assert load_beer_mcstas_from_io is load_beer_mcstas
+
+
 @pytest.mark.parametrize(
     ('bank_in_sizes', 'bank'),
     [
@@ -136,7 +169,7 @@ def test_detector_bank_size_parameter_determines_loaded_detector_size(
     wf = BeerMcStasWorkflowPulseShaping()
     wf[Filename[SampleRun]] = fname
     wf[DetectorBank] = bank
-    wf[DetectorBankSizes] = {bank_in_sizes: {'x': 10, 'y': 20}}
+    wf[DetectorBankSizes] = {bank_in_sizes: {'x': 500, 'y': 200}}
     res = wf.compute(RawDetector[SampleRun])
-    assert res.sizes['x'] == 10
-    assert res.sizes['y'] == 20
+    assert res.sizes['x'] == 500
+    assert res.sizes['y'] == 200
