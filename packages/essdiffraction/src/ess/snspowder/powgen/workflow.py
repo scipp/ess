@@ -47,12 +47,18 @@ from ess.packages.essdiffraction.src.ess.powder.workflow import (
 from ess.packages.essdiffraction.src.ess.powder.grouping import (
     focus_data_dspacing_and_two_theta,
     focus_data_dspacing_and_dperp_mlz,
+    reduce_to_dspacing_dperp,
     integrate_two_theta,
 )
 
 from ess.packages.essdiffraction.src.ess.powder.correction import (
     normalize_by_proton_charge,
+    normalize_by_proton_charge_mlz,
     normalize_by_vanadium_dspacing
+)
+
+from ess.packages.essdiffraction.src.ess.powder.filtering import (
+    flatten_dims
 )
 
 def default_parameters() -> dict:
@@ -112,10 +118,12 @@ def PowgenMantidWorkflow() -> sciline.Pipeline:
                 add_scattering_coordinates_from_positions_mlz,
                 #add_masks_and_corrections,
                 add_masks_and_corrections_mlz,
+                flatten_dims,
+                reduce_to_dspacing_dperp,
                 #focus_data_dspacing_and_two_theta,
                 focus_data_dspacing_and_dperp_mlz,
                 extract_accumulated_proton_charge,
-                normalize_by_proton_charge,
+                normalize_by_proton_charge_mlz,
                 integrate_two_theta,
                 normalize_by_vanadium_dspacing,
             ]

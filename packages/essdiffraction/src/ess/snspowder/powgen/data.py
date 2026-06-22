@@ -36,6 +36,7 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     TwoThetaMask,
     WavelengthMask,
     MaskedDetectorIDs,
+    CorrectedDspacing
     #RawTofDataMLZ
 )
 
@@ -361,7 +362,7 @@ def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunTy
 
 
 def extract_accumulated_proton_charge(
-    data: TofDetector[RunType],
+    data: CorrectedDspacing[RunType],
 ) -> AccumulatedProtonCharge[RunType]:
     """Return the stored accumulated proton charge from a loaded data group."""
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])

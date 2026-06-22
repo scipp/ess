@@ -7,7 +7,11 @@ from contextlib import contextmanager
 from numbers import Real
 
 import scipp as sc
-
+from .types import (
+    CorrectedDetector,
+    SpectralDetector,
+    RunType
+)
 
 def _equivalent_bin_indices(a, b) -> bool:
     a_begin = a.bins.constituents["begin"].flatten(to="")
@@ -64,6 +68,13 @@ def remove_bad_pulses(
     filtered = filtered.squeeze("good_pulse").copy(deep=False)
     del filtered.coords["good_pulse"]
     return filtered
+
+
+def flatten_dims(data: CorrectedDetector[RunType]) -> SpectralDetector[RunType]:
+    """"""
+    result = data.flatten(dims=['bank', 'column', 'row'], to='spectrum')
+    del data
+    return SpectralDetector[RunType](result)
 
 
 providers = ()

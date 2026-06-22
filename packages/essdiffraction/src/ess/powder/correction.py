@@ -20,6 +20,7 @@ from .types import (
     EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     EmptyCanSubtractedIofDspacingTwoTheta,
+    Dspacing2D,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     IntensityDspacing,
@@ -285,6 +286,27 @@ def normalize_by_vanadium_dspacing_and_two_theta(
 
 def normalize_by_proton_charge(
     data: CorrectedDspacing[RunType],
+    proton_charge: AccumulatedProtonCharge[RunType],
+) -> NormalizedDspacing[RunType]:
+    """Normalize data by an accumulated proton charge.
+
+    Parameters
+    ----------
+    data:
+        Un-normalized data array as events or a histogram.
+    proton_charge:
+        Accumulated proton charge over the entire run.
+
+    Returns
+    -------
+    :
+        ``data / proton_charge``
+    """
+    return NormalizedDspacing[RunType](data / proton_charge)
+
+
+def normalize_by_proton_charge_mlz(
+    data: Dspacing2D[RunType],
     proton_charge: AccumulatedProtonCharge[RunType],
 ) -> NormalizedDspacing[RunType]:
     """Normalize data by an accumulated proton charge.

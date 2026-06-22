@@ -7,6 +7,8 @@ import scipp as sc
 
 from .types import (
     CorrectedDetector,
+    SpectralDetector,
+    Dspacing2D,
     CorrectedDspacing,
     DspacingBins,
     DperpBins,
@@ -182,7 +184,7 @@ def focus_data_dspacing_and_two_theta(
 
 
 def focus_data_dspacing_and_dperp_mlz(
-    data: CorrectedDetector[RunType],
+    data: SpectralDetector[RunType],
     dspacing_bins: DspacingBins,
     dperp_bins: DperpBins,
     keep_events: KeepEvents[RunType],
@@ -222,8 +224,8 @@ def focus_data_dspacing_and_dperp_mlz(
     #     unit=ttheta.unit,
     # )
     args = {dperp_bins.dim: dperp_bins, dspacing_bins.dim: dspacing_bins}
-    if keep_events.value:
-        result = data.bin(args)
+    if keep_events: #.value:
+        data = data.bin(args)
     else:
         # Reconstructing the wavelength results in an inconsistency if dspacing was
         # computed with a calibration table. Another option would be to use, e.g., the
@@ -236,7 +238,15 @@ def focus_data_dspacing_and_dperp_mlz(
         #     )
         # )
 
-    return CorrectedDspacing[RunType](result)
+    return CorrectedDspacing[RunType](data)
+
+
+def reduce_to_dspacing_dperp(
+    data: CorrectedDspacing[RunType]
+) -> Dspacing2D[RunType]:
+    data = data.sum(['spectrum'])
+    return Dspacing2D[RunType](data)
+
 
 
 def integrate_two_theta(
