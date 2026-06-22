@@ -41,7 +41,7 @@ dependencies = [
   "msgpack>=1.0.8",
   "tof>=25.12.1",
   "numpy>=2.0.0",
-  "tof>=26.4.0",  # Simulation sampling improvement.
+  "tof>=26.6.0",  # Simulation sampling improvement.
 ]
 
 dynamic = ["version"]
