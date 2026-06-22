@@ -7,13 +7,8 @@ Contains the providers for the orca workflow.
 import sciline as sl
 import scipp as sc
 
-from ess.reduce.nexus import GenericNeXusWorkflow, load_from_path
-from ess.reduce.nexus.types import (
-    NeXusDetectorName,
-    NeXusFileSpec,
-    NeXusLocationSpec,
-    NeXusName,
-)
+from ess.reduce.nexus import GenericNeXusWorkflow
+from ess.reduce.nexus.types import NeXusDetectorName, NeXusName
 
 from .. import imaging
 from ..imaging.types import (
@@ -26,19 +21,6 @@ from ..imaging.types import (
     RunType,
     SampleRun,
 )
-
-
-def load_exposure_time(
-    file: NeXusFileSpec[RunType], path: NeXusName[ExposureTime[RunType]]
-) -> ExposureTime[RunType]:
-    # Note that putting '/value' at the end of the 'path' in the default_parameters
-    # yields different results as it can return a Variable instead of a DataArray,
-    # depending on the contents of the NeXus file.
-    return ExposureTime[RunType](
-        load_from_path(NeXusLocationSpec(filename=file.value, component_name=path))[
-            "value"
-        ].squeeze()
-    )
 
 
 def normalize_by_proton_charge_orca(
@@ -65,14 +47,19 @@ def normalize_by_proton_charge_orca(
     # target). We need to shift the proton charge time to account for the time it takes
     # for neutrons to travel from the target to the detector. Does this mean we cannot
     # do the normalization without computing time of flight?
-    proton_charge_lookup = sc.lookup(proton_charge, 'time', mode='previous')
+    #
+    # TODO: using the 'nearest' mode for now. Because of the above, we probably need to
+    # know the start and end of the exposure, get a min and max wavelength for that
+    # exposure from a wavelength lookup table, and then trace backwards to the source
+    # to find the corresponding time range for the proton charge.
+    proton_charge_lookup = sc.lookup(proton_charge, 'time', mode='nearest')
 
     return FluxNormalizedDetector[RunType](
         data / proton_charge_lookup[data.coords['time']]
     )
 
 
-providers = (load_exposure_time, normalize_by_proton_charge_orca)
+orca_providers = (normalize_by_proton_charge_orca,)
 
 
 def default_parameters() -> dict:
@@ -97,7 +84,7 @@ def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
     for provider in (
         *imaging.normalization.providers,
         *imaging.masking.providers,
-        *providers,
+        *orca_providers,
     ):
         wf.insert(provider)
     for key, param in default_parameters().items():
