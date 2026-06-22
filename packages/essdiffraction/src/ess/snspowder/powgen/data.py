@@ -231,6 +231,7 @@ def load_powgen_mlz(
     filepath = Path(os.path.join(datapath, filename))
     dg = sc.io.load_hdf5(filepath)
     out = dg["data"].squeeze()
+    del dg
     out.coords.pop("tof", None)
     det_size = {"bank": 40, "column": 154, "row": 7}
     out = out.fold(dim="spectrum", sizes=det_size)
@@ -266,13 +267,14 @@ def load_powgen_calibration_mlz(
     ds = sc.io.load_hdf5(filepath)
     # print(f"Loading calibration data from {filepath}")
     det_size = {"bank": 40, "column": 154, "row": 7}
-    ds = sc.Dataset(
+    out = sc.Dataset(
         {
             key: da.fold(dim='spectrum', sizes=det_size)
             for key, da in ds.items()
         }
     )
-    return CalibrationData(ds)
+    del ds
+    return CalibrationData(out)
 
 
 def load_powgen_tof_mask_mlz() -> MaskingData[TofMask]:

@@ -44,6 +44,7 @@ def add_masks_and_corrections_mlz(
         two_theta_mask_func=two_theta_mask_func,
     )
     out = apply_lorentz_correction(masked)
+    del da
     return CorrectedDetector[RunType](out)
 
 

@@ -158,6 +158,8 @@ def to_dspacing_with_calibration(
     ess.powder.conversions.dspacing_from_diff_calibration
     """
     out = merge_calibration(into=data, calibration=calibration)
+    del data
+    del calibration
 
     # TODO: we should not be restoring tof here, as the calibration should be converting
     # a time of arrival to d-spacing, and not a tof.
@@ -312,12 +314,14 @@ def add_scattering_coordinates_from_positions_mlz(
     graph:
         Coordinate transformation graph.
     """
-    out = data.transform_coords(
+    data = data.transform_coords(
         ["two_theta", "wavelength", "Ltotal", "dperp"],
         graph=graph,
         keep_intermediate=False,
     )
-    out = convert_to_dspacing_mlz(out, graph, calibration)
+    out = convert_to_dspacing_mlz(data, graph, calibration)
+    del data
+    del calibration
     return WavelengthDetector[RunType](out)
 
 
