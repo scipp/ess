@@ -19,7 +19,6 @@ def compute_wavelength_in_each_cluster(
     da: StreakClusteredData[RunType],
     chopper_delay: WavelengthDefinitionChopperDelay,
     mod_period: ModulationPeriod,
-    graph: GeometryCoordTransformGraph,
 ) -> WavelengthDetector[RunType]:
     """Fits a line through each cluster, the intercept of the line is t0.
     The line is fitted using linear regression with an outlier removal procedure.
@@ -38,7 +37,7 @@ def compute_wavelength_in_each_cluster(
     if isinstance(da, sc.DataGroup):
         return sc.DataGroup(
             {
-                k: compute_wavelength_in_each_cluster(v, mod_period)
+                k: compute_wavelength_in_each_cluster(v, chopper_delay, mod_period)
                 for k, v in da.items()
             }
         )
