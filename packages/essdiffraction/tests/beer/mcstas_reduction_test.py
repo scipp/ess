@@ -169,7 +169,7 @@ def test_detector_bank_size_parameter_determines_loaded_detector_size(
     wf = BeerMcStasWorkflowPulseShaping()
     wf[Filename[SampleRun]] = fname
     wf[DetectorBank] = bank
-    wf[DetectorBankSizes] = {bank_in_sizes: {'x': 500, 'y': 200}}
+    wf[DetectorBankSizes] = {bank_in_sizes: {'x': 10, 'y': 20}}
     res = wf.compute(RawDetector[SampleRun])
-    assert res.sizes['x'] == 500
-    assert res.sizes['y'] == 200
+    assert res.sizes['x'] == 10
+    assert res.sizes['y'] == 20
