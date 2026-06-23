@@ -16,7 +16,7 @@ from ess.powder.types import CaveMonitor, RunType, WavelengthMonitor
 from ess.reduce.nexus.types import DetectorBankSizes, DiskChoppers, Position
 from ess.reduce.unwrap.types import DetectorLtotal
 
-from .beamline import PulseShapingMode, choppers
+from .beamline import PulseShapingMode, default_choppers
 from .types import (
     DetectorBank,
     Filename,
@@ -568,7 +568,7 @@ def mcstas_pulse_shaping_choppers(
 ) -> DiskChoppers[RunType]:
     """Return BEER pulse-shaping choppers for the McStas mode in the data."""
     mode = pulse_shaping_mode_from_mcstas_mode(da.coords['mode'].value)
-    return choppers(mode, source_position)
+    return default_choppers(mode, source_position)
 
 
 def mcstas_detector_ltotal(

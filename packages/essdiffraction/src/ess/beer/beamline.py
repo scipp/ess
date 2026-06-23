@@ -165,7 +165,7 @@ _parameters: dict[PulseShapingMode, dict[str, _ChopperParameters]] = {
 }
 
 
-def choppers(
+def default_choppers(
     mode: PulseShapingMode, source_position: sc.Variable
 ) -> MappingProxyType[str, DiskChopper]:
     """

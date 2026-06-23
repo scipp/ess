@@ -4,7 +4,7 @@
 import pytest
 import scipp as sc
 import scippnexus as snx
-from ess.beer.beamline import PulseShapingMode, choppers
+from ess.beer.beamline import PulseShapingMode, default_choppers
 from ess.beer.types import SampleRun
 from scipp.testing import assert_allclose
 
@@ -49,7 +49,7 @@ def test_chopper_parameters(
 ) -> None:
     source_position = sc.vector(value=[1.0, 2.0, 3.0], unit="m")
 
-    chopper = choppers(mode, source_position)[name]
+    chopper = default_choppers(mode, source_position)[name]
 
     assert_allclose(chopper.frequency, sc.scalar(frequency, unit="Hz"))
     assert_allclose(chopper.phase, sc.scalar(phase, unit="deg"))
@@ -74,7 +74,7 @@ def test_can_make_analytical_lookup_table_from_beer_choppers(
     )
     source_position = sc.vector([0.0, 0.0, 0.0], unit="m")
     wf[Position[snx.NXsource, SampleRun]] = source_position
-    wf[unwrap.DiskChoppers[SampleRun]] = choppers(mode, source_position)
+    wf[unwrap.DiskChoppers[SampleRun]] = default_choppers(mode, source_position)
     wf[lut.LtotalRange[SampleRun, snx.NXdetector]] = (
         sc.scalar(150.0, unit="m"),
         sc.scalar(151.0, unit="m"),
