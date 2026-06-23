@@ -167,10 +167,9 @@ def BeerPowderWorkflowAnalytical(
     insert_run_normalization(wf, run_norm)
     for key, value in default_parameters.items():
         wf[key] = value
+    wf[NeXusName[snx.NXdetector]] = 'detector'
     wf[LookupTableRelativeErrorThreshold] = {
         'detector': float('inf'),
-        'north_detector': float('inf'),
-        'south_detector': float('inf'),
         'monitor_bunker': float('inf'),
         'monitor_cave': float('inf'),
     }
@@ -192,5 +191,4 @@ def BeerPowderMcStasWorkflowAnalytical(**kwargs) -> sl.Pipeline:
     for provider in itertools.chain(mcstas_providers, pulse_shaping_mcstas_providers):
         wf.insert(provider)
 
-    wf[NeXusName[snx.NXdetector]] = 'detector'
     return wf
