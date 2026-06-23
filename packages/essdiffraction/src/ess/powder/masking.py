@@ -79,6 +79,7 @@ def apply_masks_mlz(
 ) -> sc.DataArray:
     """ """
     out = data.copy(deep=False)
+    del data
     # if len(masked_pixel_ids) > 0:
     #     key = (
     #         set(out.coords.keys()) & {"detector_number", "detector_id", "spectrum"}

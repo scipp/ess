@@ -353,6 +353,7 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
                 f"Coordinate {name} of calibration and target dataset do not agree."
             )
     out = into.copy(deep=False)
+    del into
     for name in ("difa", "difc", "tzero"):
         if name in out.coords:
             raise ValueError(
@@ -367,6 +368,7 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
         )
     if (mask := calibration.get("mask")) is not None:
         out.masks["calibration"] = mask.data
+    del calibration
     return out
 
 
@@ -405,6 +407,7 @@ def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
     d4 = dspacing**4
     out = da * sin_theta.to(dtype=da.bins.dtype if da.bins else da.dtype, copy=False)
     out *= d4.to(dtype=da.bins.dtype if da.bins else da.dtype, copy=False)
+    del da
     return out
 
 

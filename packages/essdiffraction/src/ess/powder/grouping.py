@@ -237,7 +237,6 @@ def focus_data_dspacing_and_dperp_mlz(
         #         dspacing_bins=dspacing_bins, two_theta_bins=twotheta_bins
         #     )
         # )
-
     return CorrectedDspacing[RunType](data)
 
 
