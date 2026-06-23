@@ -16,8 +16,7 @@ from ess.powder.types import CaveMonitor, RunType, WavelengthMonitor
 from ess.reduce.nexus.types import DetectorBankSizes, DiskChoppers, Position
 from ess.reduce.unwrap.types import DetectorLtotal
 
-from .beamline import PulseShapingMode, default_choppers
-from .types import (
+from ..types import (
     DetectorBank,
     Filename,
     ModulationPeriod,
@@ -25,6 +24,7 @@ from .types import (
     SampleRun,
     WavelengthDefinitionChopperDelay,
 )
+from .beamline import MCSTAS_T_OFFSET, PulseShapingMode, simulation_choppers
 
 __all__ = [
     'MCSTAS_PULSE_SHAPING_MODES',
@@ -267,7 +267,7 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
         if k in ('mode', 'sample_filename', 'lambda'):
             da.coords[k] = sc.scalar(v)
 
-    da.coords['wavelength_estimate'] = _center_wavelength_from_mode(
+    center_wavelength = _center_wavelength_from_mode(
         da.coords['mode'].value,
         da.coords.pop('lambda').value if 'lambda' in da.coords else '0',
     )
@@ -344,19 +344,24 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
     da.coords['source_to_wavelength_definition_chopper_distance'] = sc.norm(
         da.coords['chopper_position']
     )
+    t_offset = MCSTAS_T_OFFSET.to(unit='s')
+    da.coords['nominal_time_at_chopper'] = (
+        sc.constants.m_n
+        / sc.constants.h
+        * center_wavelength
+        * da.coords['source_to_wavelength_definition_chopper_distance'].to(
+            unit=center_wavelength.unit
+        )
+    ).to(unit='s') + t_offset
 
-    pulse_width = sc.scalar(2.86, unit='ms').to(unit='s')
-    # The `t` value in the Beer model McStas file is offset by
-    # half a pulse width (so that the pulse is centered around t=0).
-    # But that is different from the convention that we have for
-    # `event_time_offset`. We expect `event_time_offset=0` to correspond
-    # to the start of a pulse.
-    # To fix this, half a pulse width is added to `t`.
-    t = da.bins.coords['t'] + pulse_width / 2
+    # The BEER McStas model subtracts `t_offset` after the source component, so the
+    # written event times are relative to the time-focused source pulse reference.
+    # Add it back to make event_time_offset follow the usual pulse-start convention.
+    t = da.bins.coords['t'] + t_offset
     da.bins.coords['event_time_offset'] = t % sc.scalar(1 / 14, unit='s').to(
         unit=t.unit
     )
-    # Estimate of the time the neutron passed the virtual source chopper.
+    # Nominal time the neutron passed the virtual source chopper.
     # Used in pulse shaping mode to determine the wavelength.
     # Used in modulation mode automatic-peak-finding reduction to estimate d.
     # In practice this will probably be replaced by the regular tof workflow.
@@ -365,10 +370,10 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
         (
             sc.constants.m_n
             / sc.constants.h
-            * da.coords['wavelength_estimate']
+            * center_wavelength
             * da.coords['moderator_to_detector_distance'].min().to(unit='angstrom')
         ).to(unit='s')
-        + pulse_width / 2
+        + t_offset
         - sc.scalar(1 / 14, unit='s') / 2
     )
 
@@ -495,9 +500,9 @@ def mcstas_chopper_delay_from_mode(
     in the files, but that information is not in the simulation output.'''
     mode = da.coords['mode'].value
     if mode in ('7', '8', '9', '10'):
-        return sc.scalar(0.0024730158730158727, unit='s')
+        return sc.scalar(0.004068381208274471, unit='s')
     if mode == '16':
-        return sc.scalar(0.000876984126984127, unit='s')
+        return sc.scalar(0.0016, unit='s')
     raise ValueError(f'Mode {mode} is not known.')
 
 
@@ -508,15 +513,15 @@ def mcstas_chopper_delay_from_mode_new_simulations(
     For those simulations we need to adapt the chopper delay values.'''
     mode = da.coords['mode'].value
     if mode == '7':
-        return sc.scalar(0.001370158730158727, unit='s')
+        return sc.scalar(0.006536762416548942, unit='s')
     if mode == '8':
-        return sc.scalar(0.001370158730158727, unit='s')
+        return sc.scalar(0.006536762416548942, unit='s')
     if mode == '9':
-        return sc.scalar(0.0022630158730158727, unit='s')
+        return sc.scalar(0.006536762416548942, unit='s')
     if mode == '10':
-        return sc.scalar(0.0022630158730158727, unit='s')
+        return sc.scalar(0.006536762416548942, unit='s')
     if mode == '16':
-        return sc.scalar(0.000476984126984127, unit='s')
+        return sc.scalar(0.006550033283260095, unit='s')
     raise ValueError(f'Mode {mode} is not known.')
 
 
@@ -568,7 +573,7 @@ def mcstas_pulse_shaping_choppers(
 ) -> DiskChoppers[RunType]:
     """Return BEER pulse-shaping choppers for the McStas mode in the data."""
     mode = pulse_shaping_mode_from_mcstas_mode(da.coords['mode'].value)
-    return default_choppers(mode, source_position)
+    return simulation_choppers(mode, source_position)
 
 
 def mcstas_detector_ltotal(

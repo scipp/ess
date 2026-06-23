@@ -137,6 +137,22 @@ def test_can_load_3d_detector():
     assert (panel_x_diff > 0).all() or (panel_x_diff < 0).all()
 
 
+def test_load_pulse_shaping_detector_adds_nominal_time_at_chopper():
+    sizes = {
+        'north_detector': {'x': 500, 'y': 200},
+        'south_detector': {'x': 500, 'y': 200},
+    }
+
+    da = load_beer_mcstas(mcstas_silicon_new_model(6), DetectorBank.north, sizes)
+
+    assert 'wavelength_estimate' not in da.coords
+    assert_allclose(
+        da.coords['nominal_time_at_chopper'].to(unit='ms'),
+        sc.scalar(5.07692, unit='ms'),
+        atol=sc.scalar(1e-5, unit='ms'),
+    )
+
+
 def test_can_load_monitor():
     da = load_beer_mcstas_monitor(mcstas_few_neutrons_3d_detector_example())
     assert 'wavelength' in da.coords
