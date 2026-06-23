@@ -116,7 +116,7 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
     assert_allclose(
         max_peak_d,
         sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(3e-2, unit='angstrom'),
+        atol=sc.scalar(1e-2, unit='angstrom'),
     )
 
 
