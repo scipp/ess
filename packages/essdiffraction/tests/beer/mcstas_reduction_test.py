@@ -1,3 +1,6 @@
+import importlib
+import sys
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -162,9 +165,12 @@ def test_can_load_monitor():
 
 
 def test_io_module_reexports_mcstas_loaders():
-    from ess.beer.io import load_beer_mcstas as load_beer_mcstas_from_io
+    sys.modules.pop('ess.beer.io', None)
 
-    assert load_beer_mcstas_from_io is load_beer_mcstas
+    with pytest.warns(DeprecationWarning, match='ess.beer.io'):
+        io = importlib.import_module('ess.beer.io')
+
+    assert io.load_beer_mcstas is load_beer_mcstas
 
 
 @pytest.mark.parametrize(

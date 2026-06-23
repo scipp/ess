@@ -3,9 +3,17 @@
 
 """Backward-compatible import location for BEER McStas helpers."""
 
+import warnings
+
 from . import mcstas as _mcstas
 from .mcstas import *  # noqa: F403
 from .mcstas import __all__  # noqa: F401
+
+warnings.warn(
+    "ess.beer.io is deprecated; use ess.beer.mcstas instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def __getattr__(name: str):
