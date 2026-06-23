@@ -49,7 +49,7 @@ def test_can_reduce_using_known_peaks_workflow():
     assert_allclose(
         max_peak_d,
         sc.scalar(2.0407, unit='angstrom'),
-        atol=sc.scalar(1e-2, unit='angstrom'),
+        atol=sc.scalar(2e-3, unit='angstrom'),
     )
 
 
@@ -75,7 +75,7 @@ def test_can_reduce_using_unknown_peaks_workflow(fname):
         sc.scalar(1.5677, unit='angstrom')
         if max_peak_d < sc.scalar(1.6, unit='angstrom')
         else sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(1e-2, unit='angstrom'),
+        atol=sc.scalar(2e-3, unit='angstrom'),
     )
 
 
@@ -98,7 +98,7 @@ def test_pulse_shaping_workflow():
     assert_allclose(
         max_peak_d,
         sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(1e-2, unit='angstrom'),
+        atol=sc.scalar(2e-3, unit='angstrom'),
     )
 
 
@@ -116,7 +116,7 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
     assert_allclose(
         max_peak_d,
         sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(1e-2, unit='angstrom'),
+        atol=sc.scalar(2e-3, unit='angstrom'),
     )
 
 
