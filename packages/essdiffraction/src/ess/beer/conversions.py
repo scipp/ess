@@ -207,7 +207,7 @@ def t0_estimate(
         * source_to_wavelength_definition_chopper_distance.to(
             unit=wavelength_estimate.unit
         )
-    ).to(unit='s')
+    ).to(unit='s') + sc.scalar(2.86, unit='ms').to(unit='s') / 2
 
 
 def tof_from_t0_estimate_graph(

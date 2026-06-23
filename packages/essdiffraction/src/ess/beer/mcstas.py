@@ -345,7 +345,8 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
         da.coords['chopper_position']
     )
 
-    t = da.bins.coords['t']
+    pulse_width = sc.scalar(2.86, unit='ms').to(unit='s')
+    t = da.bins.coords['t'] + pulse_width / 2
     da.bins.coords['event_time_offset'] = t % sc.scalar(1 / 14, unit='s').to(
         unit=t.unit
     )
@@ -355,11 +356,15 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
     # In practice this will probably be replaced by the regular tof workflow.
     # But I'm not 100% sure.
     da.coords["frame_cutoff_time"] = (
-        sc.constants.m_n
-        / sc.constants.h
-        * da.coords['wavelength_estimate']
-        * da.coords['moderator_to_detector_distance'].min().to(unit='angstrom')
-    ).to(unit='s') - sc.scalar(1 / 14, unit='s') / 2
+        (
+            sc.constants.m_n
+            / sc.constants.h
+            * da.coords['wavelength_estimate']
+            * da.coords['moderator_to_detector_distance'].min().to(unit='angstrom')
+        ).to(unit='s')
+        + pulse_width / 2
+        - sc.scalar(1 / 14, unit='s') / 2
+    )
 
     del da.coords['x']
     del da.coords['y']
