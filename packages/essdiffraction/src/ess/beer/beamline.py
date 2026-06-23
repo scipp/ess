@@ -169,7 +169,7 @@ def choppers(
     mode: PulseShapingMode, source_position: sc.Variable
 ) -> MappingProxyType[str, DiskChopper]:
     """
-    List of ESS BEER choppers for the selected pulse-shaping mode.
+    Dict of ESS BEER choppers for the selected pulse-shaping mode.
 
     We make the chopper information available in this way as loading it directly from
     the NeXus files is currently not available for these simulated BEER data.
