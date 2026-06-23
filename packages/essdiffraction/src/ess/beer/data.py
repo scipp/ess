@@ -8,7 +8,13 @@ import scipp as sc
 
 from ess.reduce.data import make_registry
 
-__all__ = ["mcstas_duplex", "mcstas_silicon_medium_resolution"]
+__all__ = [
+    "mcstas_duplex",
+    "mcstas_powder_empty_can",
+    "mcstas_powder_silicon_in_vanadium_can",
+    "mcstas_powder_vanadium",
+    "mcstas_silicon_medium_resolution",
+]
 
 _registry = make_registry(
     "ess/beer",
@@ -46,6 +52,10 @@ _registry = make_registry(
         # - only used to verify we can load the 3D geometry.
         "few_neutrons_3d_detector_example.h5": "md5:88cbe29cb539c8acebf9fd7cee9d3c57",
         "silicon-mode9-3d-more-neutrons.h5": "md5:a6afdc4ee9827a57f88c2a3c6ef27383",
+        # Pulse-shaping powder diffraction simulation tutorial data.
+        "beer-powder-si-in-vcan-mode4.h5": "md5:7c1ba0fb0b2bb812ff59d0e4e1021ef7",
+        "beer-powder-vanadium-mode4.h5": "md5:17eed50ddf979789259b212d0be15f37",
+        "beer-powder-empty-can-mode4.h5": "md5:c374d5a8379749fb807b8f835291ce18",
     },
 )
 
@@ -77,6 +87,21 @@ def mcstas_silicon_new_model(mode: int) -> Path:
     Simulated intensity from duplex sample with ``mode`` chopper configuration.
     """
     return _registry.get_path(f'silicon-mode{mode}-new-model.h5')
+
+
+def mcstas_powder_silicon_in_vanadium_can() -> Path:
+    """Return the BEER McStas silicon-in-vanadium-can powder sample file."""
+    return _registry.get_path('beer-powder-si-in-vcan-mode4.h5')
+
+
+def mcstas_powder_vanadium() -> Path:
+    """Return the BEER McStas powder vanadium normalization file."""
+    return _registry.get_path('beer-powder-vanadium-mode4.h5')
+
+
+def mcstas_powder_empty_can() -> Path:
+    """Return the BEER McStas powder empty-can file."""
+    return _registry.get_path('beer-powder-empty-can-mode4.h5')
 
 
 def mcstas_few_neutrons_3d_detector_example():
