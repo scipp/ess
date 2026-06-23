@@ -23,6 +23,7 @@ scipp = "0m"
 scippneutron = "0m"
 scippnexus = "0m"
 plopp = "0m"
+scitiff = "0m"
 
 # ==================== Parameterized tasks ====================
 
