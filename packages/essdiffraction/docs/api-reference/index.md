@@ -123,8 +123,14 @@
 .. autosummary::
    :toctree: ../generated/functions
 
+   BeerMcStasWorkflowPulseShaping
+   BeerMcStasWorkflowPulseShapingAnalytical
    BeerModMcStasWorkflowKnownPeaks
    BeerModMcStasWorkflow
+   BeerPowderWorkflow
+   BeerPowderWorkflowAnalytical
+   BeerPowderMcStasWorkflow
+   BeerPowderMcStasWorkflowAnalytical
 ```
 
 ### Top-level functions
@@ -135,7 +141,8 @@
 .. autosummary::
    :toctree: ../generated/functions
 
-    load_beer_mcstas
+   dhkl_peaks_from_cif
+   load_beer_mcstas
 ```
 
 ### Submodules
@@ -150,6 +157,7 @@
    conversions
    data
    io
+   mcstas
    workflow
 ```
 

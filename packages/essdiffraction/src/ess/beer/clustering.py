@@ -2,7 +2,7 @@ import scipp as sc
 from ess.powder.types import RunType
 from scipy.signal import find_peaks, medfilt
 
-from .conversions import tof_from_t0_estimate_graph
+from .conversions import tof_from_nominal_time_at_chopper_graph
 from .types import (
     GeometryCoordTransformGraph,
     RawDetector,
@@ -13,7 +13,7 @@ from .types import (
 def cluster_events_by_streak(
     da: RawDetector[RunType], gg: GeometryCoordTransformGraph
 ) -> StreakClusteredData[RunType]:
-    graph = tof_from_t0_estimate_graph(da, gg)
+    graph = tof_from_nominal_time_at_chopper_graph(da, gg)
 
     da = da.transform_coords(['dspacing'], graph=graph)
     da.bins.coords['coarse_d'] = da.bins.coords.pop('dspacing').to(unit='angstrom')
