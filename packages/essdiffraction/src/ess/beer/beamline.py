@@ -62,7 +62,7 @@ _HIGH_FLUX: dict[str, _ChopperParameters] = {
     },
 }
 
-parameters: dict[PulseShapingMode, dict[str, _ChopperParameters]] = {
+_parameters: dict[PulseShapingMode, dict[str, _ChopperParameters]] = {
     PulseShapingMode.ps0: _HIGH_FLUX,
     PulseShapingMode.ps1: _HIGH_FLUX,
     PulseShapingMode.ps2: {
@@ -193,6 +193,6 @@ def choppers(
                 slit_begin=sc.array(dims=["cutout"], values=ch["open"], unit="deg"),
                 slit_end=sc.array(dims=["cutout"], values=ch["close"], unit="deg"),
             )
-            for key, ch in parameters[mode].items()
+            for key, ch in _parameters[mode].items()
         }
     )
