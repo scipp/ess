@@ -346,6 +346,12 @@ def _load_beer_mcstas(f, *, north_or_south=None, number=None, detector_sizes):
     )
 
     pulse_width = sc.scalar(2.86, unit='ms').to(unit='s')
+    # The `t` value in the Beer model McStas file is offset by
+    # half a pulse width (so that the pulse is centered around t=0).
+    # But that is different from the convention that we have for
+    # `event_time_offset`. We expect `event_time_offset=0` to correspond
+    # to the start of a pulse.
+    # To fix this, half a pulse width is added to `t`.
     t = da.bins.coords['t'] + pulse_width / 2
     da.bins.coords['event_time_offset'] = t % sc.scalar(1 / 14, unit='s').to(
         unit=t.unit
