@@ -76,6 +76,7 @@ def test_can_compute_wavelength(run_type, wavelength_mode):
 @pytest.mark.parametrize("wavelength_mode", ["file", "analytical"])
 def test_can_compute_tof(run_type, wavelength_mode):
     wf = _make_workflow(wavelength_mode)
+    wf[MaskingRules] = {}
     da = wf.compute(TofDetector[run_type])
 
     assert "tof" in da.bins.coords
