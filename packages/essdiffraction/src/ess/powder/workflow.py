@@ -43,7 +43,7 @@ def add_masks_and_corrections_mlz(
         wavelength_mask_func=wavelength_mask_func,
         two_theta_mask_func=two_theta_mask_func,
     )
-    out = apply_lorentz_correction(masked)
+    # out = apply_lorentz_correction(masked) <- seems not to be included in Mantid workflow
     del da
     return CorrectedDetector[RunType](out)
 

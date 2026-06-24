@@ -183,7 +183,7 @@ def focus_data_dspacing_and_two_theta(
     return CorrectedDspacing[RunType](result)
 
 
-def focus_data_dspacing_and_dperp_mlz(
+def bin_dspacing_dperp_mlz(
     data: SpectralDetector[RunType],
     dspacing_bins: DspacingBins,
     dperp_bins: DperpBins,
@@ -240,7 +240,7 @@ def focus_data_dspacing_and_dperp_mlz(
     return CorrectedDspacing[RunType](data)
 
 
-def reduce_to_dspacing_dperp(
+def focus_to_dspacing_dperp(
     data: CorrectedDspacing[RunType]
 ) -> Dspacing2D[RunType]:
     data = data.sum(['spectrum'])

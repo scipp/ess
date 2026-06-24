@@ -236,6 +236,7 @@ def load_powgen_mlz(
     out.coords.pop("tof", None)
     det_size = {"bank": 40, "column": 154, "row": 7}
     out = out.fold(dim="spectrum", sizes=det_size)
+
     return TofDetector[RunType](out) #RawDataAndMetadata[RunType](sc.io.load_hdf5(filepath))
 
 

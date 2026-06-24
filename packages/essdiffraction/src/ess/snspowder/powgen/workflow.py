@@ -35,7 +35,7 @@ from ess.packages.essdiffraction.src.ess.powder.conversion import (
     powder_coordinate_transformation_graph,
     powder_coordinate_transformation_graph_mlz,
     add_scattering_coordinates_from_positions,
-    d_dperp_coordinate_transformation_graph_mlz,
+    p2d_coordinate_transformation_graph_mlz,
     add_scattering_coordinates_from_positions_mlz,
 )
 
@@ -46,8 +46,8 @@ from ess.packages.essdiffraction.src.ess.powder.workflow import (
 
 from ess.packages.essdiffraction.src.ess.powder.grouping import (
     focus_data_dspacing_and_two_theta,
-    focus_data_dspacing_and_dperp_mlz,
-    reduce_to_dspacing_dperp,
+    bin_dspacing_dperp_mlz,
+    focus_to_dspacing_dperp,
     integrate_two_theta,
     integrate_dperp
 )
@@ -59,7 +59,7 @@ from ess.packages.essdiffraction.src.ess.powder.correction import (
 )
 
 from ess.packages.essdiffraction.src.ess.powder.filtering import (
-    flatten_dims
+    flatten_to_spectra
 )
 
 def default_parameters() -> dict:
@@ -110,7 +110,7 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 # source_position,
                 #source_position_mlz,
                 # coordinate_transformation_graph_mlz,
-                d_dperp_coordinate_transformation_graph_mlz,
+                p2d_coordinate_transformation_graph_mlz,
                 #gravity_vector_neg_y,
                 #powder_coordinate_transformation_graph,
                 #powder_coordinate_transformation_graph_mlz, # includes evaluation of dperp
@@ -119,13 +119,13 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 add_scattering_coordinates_from_positions_mlz,
                 #add_masks_and_corrections,
                 add_masks_and_corrections_mlz,
-                flatten_dims,
-                reduce_to_dspacing_dperp,
+                flatten_to_spectra,
+                bin_dspacing_dperp_mlz,
+                focus_to_dspacing_dperp,
                 #focus_data_dspacing_and_two_theta,
-                focus_data_dspacing_and_dperp_mlz,
                 # extract_accumulated_proton_charge,
                 # normalize_by_proton_charge_mlz, <- this and above seem to be absent in PowderReduceP2D
-                #integrate_two_theta,
+                # integrate_two_theta,
                 integrate_dperp,
                 normalize_by_vanadium_dspacing,
             ]

@@ -70,7 +70,7 @@ def remove_bad_pulses(
     return filtered
 
 
-def flatten_dims(data: CorrectedDetector[RunType]) -> SpectralDetector[RunType]:
+def flatten_to_spectra(data: CorrectedDetector[RunType]) -> SpectralDetector[RunType]:
     """"""
     result = data.flatten(dims=['bank', 'column', 'row'], to='spectrum')
     del data
