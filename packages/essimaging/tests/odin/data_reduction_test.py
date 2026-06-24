@@ -98,15 +98,12 @@ def test_publish_reduced_scitiff(output_folder: Path):
 
     normed = num / den
 
-    to_scitiff = (
-        normed.assign_coords(
-            x=normed.coords['x_pixel_offset'],
-            y=normed.coords['y_pixel_offset'],
-            t=sc.midpoints(normed.coords['tof']),
-        )
-        .rename_dims(dim_0='y', dim_1='x', tof='t')
-        .drop_coords(['position', 'tof', 'x_pixel_offset', 'y_pixel_offset'])
+    to_scitiff = normed.rename_dims(dim_0='y', dim_1='x', tof='t').drop_coords(
+        'position'
     )
+
+    assert "tof" in to_scitiff.coords
+    assert "Ltotal" in to_scitiff.coords
 
     from scitiff.io import save_scitiff
 
