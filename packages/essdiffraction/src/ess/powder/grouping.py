@@ -10,6 +10,7 @@ from .types import (
     SpectralDetector,
     Dspacing2D,
     CorrectedDspacing,
+    DspacingDetector,
     DspacingBins,
     DperpBins,
     FocussedDataDspacing,
@@ -188,7 +189,7 @@ def bin_dspacing_dperp_mlz(
     dspacing_bins: DspacingBins,
     dperp_bins: DperpBins,
     keep_events: KeepEvents[RunType],
-) -> CorrectedDspacing[RunType]:
+) -> DspacingDetector[RunType]:
     """
     Reduce the pixel-based data to d-spacing and dperp dimensions.
 
@@ -237,11 +238,11 @@ def bin_dspacing_dperp_mlz(
         #         dspacing_bins=dspacing_bins, two_theta_bins=twotheta_bins
         #     )
         # )
-    return CorrectedDspacing[RunType](data)
+    return DspacingDetector[RunType](data)
 
 
 def focus_to_dspacing_dperp(
-    data: CorrectedDspacing[RunType]
+    data: DspacingDetector[RunType]
 ) -> Dspacing2D[RunType]:
     data = data.sum(['spectrum'])
     return Dspacing2D[RunType](data)

@@ -41,7 +41,7 @@ from ess.packages.essdiffraction.src.ess.powder.conversion import (
 
 from ess.packages.essdiffraction.src.ess.powder.workflow import (
     add_masks_and_corrections,
-    add_masks_and_corrections_mlz
+    add_masks_mlz
 )
 
 from ess.packages.essdiffraction.src.ess.powder.grouping import (
@@ -118,7 +118,7 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 #add_scattering_coordinates_from_positions,
                 add_scattering_coordinates_from_positions_mlz,
                 #add_masks_and_corrections,
-                add_masks_and_corrections_mlz,
+                add_masks_mlz,
                 flatten_to_spectra,
                 bin_dspacing_dperp_mlz,
                 focus_to_dspacing_dperp,

@@ -182,6 +182,8 @@ def to_dspacing_with_calibration(
         pos_graph["_tag_positions_consumed"] = lambda: sc.scalar(0)
     out = out.transform_coords("dspacing", graph=pos_graph, keep_intermediate=False)
     out.coords.pop("_tag_positions_consumed", None)
+    for key in ["difa", "difc", "tzero", "position", "sample_position", "source_position", "Ltotal"]:
+        out.coords.pop(key, None)
     return CorrectedDetector[RunType](out)
 
 

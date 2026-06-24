@@ -216,7 +216,8 @@ def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
 
 
 def load_powgen_mlz(
-    filename: FilenameMLZ[RunType], datapath: FilepathMLZ[RunType]
+    filename: FilenameMLZ[RunType],
+    datapath: FilepathMLZ[RunType]
 ) -> TofDetector[RunType]: #RawDataAndMetadata[RunType]:
     """Load a file.
 
@@ -236,7 +237,8 @@ def load_powgen_mlz(
     out.coords.pop("tof", None)
     det_size = {"bank": 40, "column": 154, "row": 7}
     out = out.fold(dim="spectrum", sizes=det_size)
-
+    if "pulse_time" in out.data.bins.coords:
+        out.data = out.data.bins.drop_coords("pulse_time")
     return TofDetector[RunType](out) #RawDataAndMetadata[RunType](sc.io.load_hdf5(filepath))
 
 

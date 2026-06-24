@@ -31,7 +31,7 @@ def add_masks_and_corrections(
     return CorrectedDetector[RunType](out)
 
 
-def add_masks_and_corrections_mlz(
+def add_masks_mlz(
     da: WavelengthDetector[RunType],
     tof_mask_func: MaskingData[TofMask],
     wavelength_mask_func: MaskingData[WavelengthMask],
@@ -45,7 +45,10 @@ def add_masks_and_corrections_mlz(
     )
     # out = apply_lorentz_correction(masked) <- seems not to be included in Mantid workflow
     del da
-    return CorrectedDetector[RunType](out)
+    del tof_mask_func
+    del wavelength_mask_func
+    del two_theta_mask_func
+    return CorrectedDetector[RunType](masked)
 
 
 providers = (add_masks_and_corrections,)

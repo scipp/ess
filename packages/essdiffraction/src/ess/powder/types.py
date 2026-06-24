@@ -223,6 +223,10 @@ class CorrectedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data in d-spacing - 2theta space including corrections."""
 
 
+class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data in with d-spacing and dperp dimensions."""
+
+
 class Dspacing2D(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data in d-spacing - 2theta space including corrections."""
 
