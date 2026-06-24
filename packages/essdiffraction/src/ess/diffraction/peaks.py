@@ -19,7 +19,7 @@ def dspacing_peaks_from_cif(cif, intensity_threshold=None, **kwargs) -> sc.DataA
         (https://www.crystallography.net/cod/) or the Materials Project
         (https://www.materialsproject.org/).
 
-        For more details, see :py:`ncrystal.cifutils.CIFSource`.
+        For more details, see ``ncrystal.cifutils.CIFSource``.
 
     intensity_threshold:
         The minimum intensity of the peaks to return.

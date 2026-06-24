@@ -249,7 +249,11 @@ nbsphinx_execute_arguments = [
 # build already tests if those plots can be made.
 # So we simply disable plots in doctests.
 doctest_global_setup = """
+# Private import because of https://github.com/mctools/ncrystal/issues/361
+from NCrystal._common import set_ncrystal_print_fct
 import numpy as np
+
+set_ncrystal_print_fct(lambda *args, **kwargs: None)
 
 try:
     import scipp as sc

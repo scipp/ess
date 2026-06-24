@@ -1,3 +1,6 @@
+import importlib
+import sys
+
 import numpy as np
 import pytest
 import scipp as sc
@@ -6,6 +9,7 @@ from ess.beer import (
     BeerMcStasWorkflowPulseShaping,
     BeerModMcStasWorkflow,
     BeerModMcStasWorkflowKnownPeaks,
+    BeerPowderMcStasWorkflowAnalytical,
 )
 from ess.beer.data import (
     duplex_peaks_array,
@@ -14,13 +18,18 @@ from ess.beer.data import (
     mcstas_more_neutrons_3d_detector_example,
     mcstas_silicon_new_model,
 )
-from ess.beer.io import (
+from ess.beer.mcstas import (
     load_beer_mcstas,
     load_beer_mcstas_monitor,
     mcstas_chopper_delay_from_mode_new_simulations,
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
-from ess.powder.types import ElasticCoordTransformGraph, RawDetector, SampleRun
+from ess.powder.types import (
+    DspacingDetector,
+    ElasticCoordTransformGraph,
+    RawDetector,
+    SampleRun,
+)
 from scipp.testing import assert_allclose
 
 from ess.reduce.nexus.types import DetectorBankSizes, Filename
@@ -43,7 +52,7 @@ def test_can_reduce_using_known_peaks_workflow():
     assert_allclose(
         max_peak_d,
         sc.scalar(2.0407, unit='angstrom'),
-        atol=sc.scalar(1e-2, unit='angstrom'),
+        atol=sc.scalar(2e-3, unit='angstrom'),
     )
 
 
@@ -69,7 +78,7 @@ def test_can_reduce_using_unknown_peaks_workflow(fname):
         sc.scalar(1.5677, unit='angstrom')
         if max_peak_d < sc.scalar(1.6, unit='angstrom')
         else sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(1e-2, unit='angstrom'),
+        atol=sc.scalar(2e-3, unit='angstrom'),
     )
 
 
@@ -92,12 +101,33 @@ def test_pulse_shaping_workflow():
     assert_allclose(
         max_peak_d,
         sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(1e-2, unit='angstrom'),
+        atol=sc.scalar(2e-3, unit='angstrom'),
+    )
+
+
+def test_powder_mcstas_analytical_workflow_computes_dspacing():
+    wf = BeerPowderMcStasWorkflowAnalytical()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
+    wf[DetectorBank] = DetectorBank.north
+
+    da = wf.compute(DspacingDetector[SampleRun])
+
+    assert 'wavelength' in da.bins.coords
+    assert 'dspacing' in da.bins.coords
+    h = da.hist(dspacing=2000, dim=da.dims)
+    max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
+    assert_allclose(
+        max_peak_d,
+        sc.scalar(1.6374, unit='angstrom'),
+        atol=sc.scalar(2e-3, unit='angstrom'),
     )
 
 
 def test_can_load_3d_detector():
-    sizes = {'north_detector': {'x': 10, 'y': 20}, 'south_detector': {'x': 10, 'y': 20}}
+    sizes = {
+        'north_detector': {'x': 500, 'y': 200},
+        'south_detector': {'x': 500, 'y': 200},
+    }
     load_beer_mcstas(
         mcstas_few_neutrons_3d_detector_example(), DetectorBank.north, sizes
     )
@@ -110,12 +140,37 @@ def test_can_load_3d_detector():
     assert (panel_x_diff > 0).all() or (panel_x_diff < 0).all()
 
 
+def test_load_pulse_shaping_detector_adds_nominal_time_at_chopper():
+    sizes = {
+        'north_detector': {'x': 500, 'y': 200},
+        'south_detector': {'x': 500, 'y': 200},
+    }
+
+    da = load_beer_mcstas(mcstas_silicon_new_model(6), DetectorBank.north, sizes)
+
+    assert 'wavelength_estimate' not in da.coords
+    assert_allclose(
+        da.coords['nominal_time_at_chopper'].to(unit='ms'),
+        sc.scalar(5.07692, unit='ms'),
+        atol=sc.scalar(1e-5, unit='ms'),
+    )
+
+
 def test_can_load_monitor():
     da = load_beer_mcstas_monitor(mcstas_few_neutrons_3d_detector_example())
     assert 'wavelength' in da.coords
     assert 'position' in da.coords
     assert da.coords['position'].dtype == sc.DType.vector3
     assert da.coords['position'].unit == 'm'
+
+
+def test_io_module_reexports_mcstas_loaders():
+    sys.modules.pop('ess.beer.io', None)
+
+    with pytest.warns(DeprecationWarning, match='ess.beer.io'):
+        io = importlib.import_module('ess.beer.io')
+
+    assert io.load_beer_mcstas is load_beer_mcstas
 
 
 @pytest.mark.parametrize(

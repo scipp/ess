@@ -1,8 +1,25 @@
 # API Reference
 
+## ESSdiffraction
+
+### Submodules
+
+```{eval-rst}
+.. currentmodule:: ess.diffraction
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+
+   pdf
+   peaks
+```
+
 ## ESSpowder
 
 ### Module Attributes
+
 ```{eval-rst}
 .. currentmodule:: ess.powder
 
@@ -37,16 +54,13 @@
    grouping
    logging
    masking
-   peaks
    smoothing
-   transform
    types
 ```
 
 ## DREAM
 
 ### Workflows
-
 
 ```{eval-rst}
 .. currentmodule:: ess.dream
@@ -103,15 +117,20 @@
 
 ### Workflows
 
-
 ```{eval-rst}
 .. currentmodule:: ess.beer
 
 .. autosummary::
    :toctree: ../generated/functions
 
+   BeerMcStasWorkflowPulseShaping
+   BeerMcStasWorkflowPulseShapingAnalytical
    BeerModMcStasWorkflowKnownPeaks
    BeerModMcStasWorkflow
+   BeerPowderWorkflow
+   BeerPowderWorkflowAnalytical
+   BeerPowderMcStasWorkflow
+   BeerPowderMcStasWorkflowAnalytical
 ```
 
 ### Top-level functions
@@ -122,7 +141,8 @@
 .. autosummary::
    :toctree: ../generated/functions
 
-    load_beer_mcstas
+   dhkl_peaks_from_cif
+   load_beer_mcstas
 ```
 
 ### Submodules
@@ -137,13 +157,13 @@
    conversions
    data
    io
+   mcstas
    workflow
 ```
 
 ## MAGIC
 
 ### Workflows
-
 
 ```{eval-rst}
 .. currentmodule:: ess.magic
