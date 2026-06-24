@@ -1,21 +1,27 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+from pathlib import Path
+
 import ess.odin.data  # noqa: F401
 import pytest
 import sciline as sl
+import scipp as sc
 from ess import odin
 from ess.odin.beamline import choppers as odin_choppers
 
+from ess.imaging import tools
 from ess.imaging.types import (
     Filename,
     LookupTableFilename,
+    MaskingRules,
     NeXusDetectorName,
     NXsource,
     OpenBeamRun,
     Position,
     RawDetector,
     SampleRun,
+    TofDetector,
     WavelengthDetector,
 )
 from ess.reduce import unwrap
@@ -64,3 +70,43 @@ def test_can_compute_wavelength(run_type, wavelength_mode):
     da = wf.compute(WavelengthDetector[run_type])
 
     assert "wavelength" in da.bins.coords
+
+
+@pytest.mark.parametrize("run_type", [SampleRun, OpenBeamRun])
+@pytest.mark.parametrize("wavelength_mode", ["file", "analytical"])
+def test_can_compute_tof(run_type, wavelength_mode):
+    wf = _make_workflow(wavelength_mode)
+    wf[MaskingRules] = {}
+    da = wf.compute(TofDetector[run_type])
+
+    assert "tof" in da.bins.coords
+
+
+def test_publish_reduced_scitiff(output_folder: Path):
+    wf = _make_workflow("analytical")
+    wf[MaskingRules] = {}
+    new_sizes = {'dim_0': 64, 'dim_1': 64}
+    tbins = sc.linspace('tof', 1.3e4, 1.5e5, 257, unit='us')
+
+    sample = wf.compute(TofDetector[SampleRun]).drop_coords('detector_number')
+    res_sample = tools.resample(sample, sizes=new_sizes)
+    num = res_sample.hist(tof=tbins)
+
+    openbeam = wf.compute(TofDetector[OpenBeamRun]).drop_coords('detector_number')
+    res_openbeam = tools.resample(openbeam, sizes=new_sizes)
+    den = res_openbeam.hist(tof=tbins)
+
+    normed = num / den
+
+    to_scitiff = normed.rename_dims(dim_0='y', dim_1='x', tof='t').drop_coords(
+        'position'
+    )
+
+    assert "tof" in to_scitiff.coords
+    assert "Ltotal" in to_scitiff.coords
+
+    from scitiff.io import save_scitiff
+
+    save_scitiff(
+        to_scitiff, output_folder / 'bragg_edge_iron_normalized_16x16x256.tiff'
+    )

@@ -57,7 +57,7 @@ def _is_non_bin_edges(coords: sc.Coords, coord_name: str) -> bool:
 def resample(
     image: sc.Variable | sc.DataArray,
     sizes: dict[str, int],
-    method: str | Callable = 'sum',
+    method: str | Callable | None = None,
 ) -> sc.Variable | sc.DataArray:
     """
     Resample an image by folding it into blocks of specified sizes and applying a
@@ -83,6 +83,8 @@ def resample(
         signature should accept a ``scipp.Variable`` or ``scipp.DataArray`` as first
         argument and a set of dimensions to reduce over as second argument. The
         function should return a ``scipp.Variable`` or ``scipp.DataArray``.
+        By default, it will concatenate bins if the input data is binned, and sum
+        otherwise.
 
 
     Notes
@@ -105,8 +107,15 @@ def resample(
         return image.copy(deep=False)
 
     blocked = blockify(image, sizes=sizes)
-    _method = getattr(sc, method) if isinstance(method, str) else method
-    out = _method(blocked, set(blocked.dims) - set(image.dims))
+    dims_to_reduce = set(blocked.dims) - set(image.dims)
+    if method is None:
+        if image.is_binned:
+            out = blocked.bins.concat(dims_to_reduce)
+        else:
+            out = blocked.sum(dims_to_reduce)
+    else:
+        _method = getattr(sc, method) if isinstance(method, str) else method
+        out = _method(blocked, dims_to_reduce)
 
     if isinstance(image, sc.DataArray):
         # Restore the coordinates dropped by the `_method` if possible.
@@ -127,7 +136,7 @@ def resample(
 def resize(
     image: sc.Variable | sc.DataArray,
     sizes: dict[str, int],
-    method: str | Callable = 'sum',
+    method: str | Callable | None = None,
 ) -> sc.Variable | sc.DataArray:
     """
     Resize an image by folding it into blocks of specified sizes and applying a
@@ -155,6 +164,8 @@ def resize(
         signature should accept a ``scipp.Variable`` or ``scipp.DataArray`` as first
         argument and a set of dimensions to reduce over as second argument. The
         function should return a ``scipp.Variable`` or ``scipp.DataArray``.
+        By default, it will concatenate bins if the input data is binned, and sum
+        otherwise.
 
 
     Notes
