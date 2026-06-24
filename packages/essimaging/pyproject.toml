@@ -35,7 +35,7 @@ dependencies = [
   "plopp[all]>=23.10.0",
   "tifffile>=2024.7.2",
   "essreduce>=26.6.0",
-  "scitiff>=25.7",
+  "scitiff>=26.6",
 ]
 
 [project.optional-dependencies]
