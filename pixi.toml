@@ -12,12 +12,6 @@ python = "3.11.*"
 # Scipp does not support older OSX versions.
 macos = "14.0"
 
-[exclude-newer]
-scipp = "0m"
-scippneutron = "0m"
-scippnexus = "0m"
-plopp = "0m"
-
 [pypi-exclude-newer]
 scipp = "0m"
 scippneutron = "0m"
