@@ -92,7 +92,7 @@ def PowgenWorkflow() -> sciline.Pipeline:
     )
 
 
-def PowgenMantidWorkflow() -> sciline.Pipeline:
+def PowderReduceP2D() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Powgen SNS instrument.
     """
@@ -123,8 +123,8 @@ def PowgenMantidWorkflow() -> sciline.Pipeline:
                 reduce_to_dspacing_dperp,
                 #focus_data_dspacing_and_two_theta,
                 focus_data_dspacing_and_dperp_mlz,
-                extract_accumulated_proton_charge,
-                normalize_by_proton_charge_mlz,
+                # extract_accumulated_proton_charge,
+                # normalize_by_proton_charge_mlz, <- this and above seem to be absent in PowderReduceP2D
                 #integrate_two_theta,
                 integrate_dperp,
                 normalize_by_vanadium_dspacing,
@@ -143,4 +143,4 @@ def PowgenMantidWorkflow() -> sciline.Pipeline:
         }
     )
 
-__all__ = ['default_parameters', 'PowgenMantidWorkflow']
+__all__ = ['default_parameters', 'PowderReduceP2D']
