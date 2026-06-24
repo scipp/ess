@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../../_static/documentation_options.js?v=8c6100ef"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.6.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -535,7 +535,6 @@
     <span class="n">da</span><span class="p">:</span> <span class="n">StreakClusteredData</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">chopper_delay</span><span class="p">:</span> <span class="n">WavelengthDefinitionChopperDelay</span><span class="p">,</span>
     <span class="n">mod_period</span><span class="p">:</span> <span class="n">ModulationPeriod</span><span class="p">,</span>
-    <span class="n">graph</span><span class="p">:</span> <span class="n">GeometryCoordTransformGraph</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fits a line through each cluster, the intercept of the line is t0.</span>
 <span class="sd">    The line is fitted using linear regression with an outlier removal procedure.</span>
@@ -554,7 +553,7 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
             <span class="p">{</span>
-                <span class="n">k</span><span class="p">:</span> <span class="n">compute_wavelength_in_each_cluster</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">mod_period</span><span class="p">)</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">compute_wavelength_in_each_cluster</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">chopper_delay</span><span class="p">,</span> <span class="n">mod_period</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">}</span>
         <span class="p">)</span>
@@ -650,7 +649,7 @@
         <span class="o">/</span> <span class="p">(</span><span class="n">scipp</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">h</span> <span class="o">/</span> <span class="n">scipp</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_n</span><span class="p">)</span>
     <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">time_of_arrival</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">/angstrom&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">dhkl</span> <span class="ow">in</span> <span class="n">dhkl_list</span><span class="p">:</span>
-        <span class="n">dt</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">dhkl</span> <span class="o">*</span> <span class="n">const</span><span class="p">)</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">dhkl</span> <span class="o">*</span> <span class="n">const</span> <span class="o">-</span> <span class="n">pulse_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">dt_in_range</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">&lt;</span> <span class="n">pulse_length</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">no_dt_found</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dtfound</span><span class="p">)</span>
         <span class="n">dtfound</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_in_range</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">no_dt_found</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dtfound</span><span class="p">),</span> <span class="n">dtfound</span><span class="p">)</span>
@@ -711,39 +710,18 @@
     <span class="k">return</span> <span class="n">out</span>
 
 
-<div class="viewcode-block" id="t0_estimate">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.t0_estimate.html#ess.beer.conversions.t0_estimate">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">t0_estimate</span><span class="p">(</span>
-    <span class="n">wavelength_estimate</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">source_to_wavelength_definition_chopper_distance</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Computes the time a neutron reaches a chopper at</span>
-<span class="sd">    ``source_to_wavelength_chopper_distance`` distance from the source</span>
-<span class="sd">    if it has wavelength ``wavelength_estimate``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="n">sc</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_n</span>
-        <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">h</span>
-        <span class="o">*</span> <span class="n">wavelength_estimate</span>
-        <span class="o">*</span> <span class="n">source_to_wavelength_definition_chopper_distance</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">wavelength_estimate</span><span class="o">.</span><span class="n">unit</span>
-        <span class="p">)</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="tof_from_t0_estimate_graph">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.tof_from_t0_estimate_graph.html#ess.beer.conversions.tof_from_t0_estimate_graph">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tof_from_t0_estimate_graph</span><span class="p">(</span>
+<div class="viewcode-block" id="tof_from_nominal_time_at_chopper_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.tof_from_nominal_time_at_chopper_graph.html#ess.beer.conversions.tof_from_nominal_time_at_chopper_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tof_from_nominal_time_at_chopper_graph</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">gg</span><span class="p">:</span> <span class="n">GeometryCoordTransformGraph</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Graph for computing ``wavelength`` in pulse shaping chopper modes.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="o">**</span><span class="n">gg</span><span class="p">,</span>
-        <span class="s1">&#39;t0&#39;</span><span class="p">:</span> <span class="n">t0_estimate</span><span class="p">,</span>
-        <span class="s1">&#39;tof&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">time_of_arrival</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="n">time_of_arrival</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
+        <span class="s1">&#39;tof&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">time_of_arrival</span><span class="p">,</span> <span class="n">nominal_time_at_chopper</span><span class="p">:</span> <span class="p">(</span>
+            <span class="n">time_of_arrival</span> <span class="o">-</span> <span class="n">nominal_time_at_chopper</span>
+        <span class="p">),</span>
         <span class="s1">&#39;time_of_arrival&#39;</span><span class="p">:</span> <span class="n">time_of_arrival</span><span class="p">,</span>
     <span class="p">}</span></div>
 
@@ -822,7 +800,7 @@
 <span class="p">)</span>
 <span class="n">convert_pulse_shaping</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">geometry_graph</span><span class="p">,</span>
-    <span class="n">tof_from_t0_estimate_graph</span><span class="p">,</span>
+    <span class="n">tof_from_nominal_time_at_chopper_graph</span><span class="p">,</span>
     <span class="n">wavelength_detector</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">providers</span> <span class="o">=</span> <span class="p">(</span><span class="n">compute_wavelength_in_each_cluster</span><span class="p">,</span> <span class="n">geometry_graph</span><span class="p">)</span>
@@ -889,7 +867,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.6.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

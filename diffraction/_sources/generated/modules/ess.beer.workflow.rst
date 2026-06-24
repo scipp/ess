@@ -15,10 +15,13 @@
       :toctree:
    
       BeerMcStasWorkflowPulseShaping
+      BeerMcStasWorkflowPulseShapingAnalytical
       BeerModMcStasWorkflow
       BeerModMcStasWorkflowKnownPeaks
       BeerPowderMcStasWorkflow
+      BeerPowderMcStasWorkflowAnalytical
       BeerPowderWorkflow
+      BeerPowderWorkflowAnalytical
    
    
 

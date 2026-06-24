@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../../../_static/documentation_options.js?v=8c6100ef"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.6.1" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -572,6 +572,11 @@
 <span class="sd">like ``SampleRun`` or ``BackgroundRun``.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">SampleRun</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;SampleRun&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Sample run.&quot;&quot;&quot;</span>
+
+<span class="c1"># The following are legacy types and will be removed in the future.</span>
+<span class="c1"># Use the types defined in technique packages instead.</span>
 <span class="n">BackgroundRun</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;BackgroundRun&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Background run such as a run with only a solvent which the sample is placed in.&quot;&quot;&quot;</span>
 <span class="n">EmptyBeamRun</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;EmptyBeamRun&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
@@ -580,8 +585,6 @@
 
 <span class="sd">It is used for reading the data from the transmission monitor.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="n">SampleRun</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;SampleRun&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Sample run.&quot;&quot;&quot;</span>
 <span class="n">VanadiumRun</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;VanadiumRun&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Vanadium run.&quot;&quot;&quot;</span>
 
@@ -617,40 +620,24 @@
 <span class="sd">- :class:`VanadiumRun`</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-
 <span class="c1"># 1.2  Monitor types</span>
-<span class="n">IncidentMonitor</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;IncidentMonitor&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Incident monitor&quot;&quot;&quot;</span>
-<span class="n">TransmissionMonitor</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;TransmissionMonitor&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Transmission monitor&quot;&quot;&quot;</span>
-<span class="n">FrameMonitor0</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;FrameMonitor0&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Frame monitor number 0&quot;&quot;&quot;</span>
-<span class="n">FrameMonitor1</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;FrameMonitor1&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Frame monitor number 1&quot;&quot;&quot;</span>
-<span class="n">FrameMonitor2</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;FrameMonitor2&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Frame monitor number 2&quot;&quot;&quot;</span>
-<span class="n">FrameMonitor3</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;FrameMonitor3&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Frame monitor number 3&quot;&quot;&quot;</span>
-<span class="n">CaveMonitor</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;CaveMonitor&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;A monitor located in the instrument cave&quot;&quot;&quot;</span>
 <span class="n">MonitorType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;MonitorType&#39;</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;TypeVar for specifying what monitor some data belongs to.</span>
 
 <span class="sd">This type must be constrained when used in a Sciline pipeline.</span>
 <span class="sd">E.g., by passing ``monitor_types`` to :class:`ess.reduce.nexus.GenericNeXusWorkflow`.</span>
-
-<span class="sd">ESSreduce provides the following but custom types can be used:</span>
-
-<span class="sd">- :class:`IncidentMonitor`</span>
-<span class="sd">- :class:`TransmissionMonitor`</span>
-<span class="sd">- :class:`FrameMonitor0`</span>
-<span class="sd">- :class:`FrameMonitor1`</span>
-<span class="sd">- :class:`FrameMonitor2`</span>
-<span class="sd">- :class:`FrameMonitor3`</span>
-<span class="sd">- :class:`CaveMonitor`</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="c1"># The following are legacy types and will be removed in the future.</span>
+<span class="c1"># Use the types defined in technique packages instead.</span>
+<span class="n">IncidentMonitor</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;IncidentMonitor&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Incident monitor&quot;&quot;&quot;</span>
+<span class="n">TransmissionMonitor</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;TransmissionMonitor&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Transmission monitor&quot;&quot;&quot;</span>
+<span class="n">CaveMonitor</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;CaveMonitor&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;A monitor located in the instrument cave&quot;&quot;&quot;</span>
 
+<span class="c1"># 1.3 Other component types</span>
 <span class="n">Component</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Component&#39;</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;A beamline component in a NeXus file.&quot;&quot;&quot;</span>
 <span class="n">COMPONENT_CONSTRAINTS</span> <span class="o">=</span> <span class="p">(</span>
@@ -980,7 +967,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.6.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

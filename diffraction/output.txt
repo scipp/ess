@@ -1,5 +1,13 @@
-Results of doctest builder run on 2026-06-04 13:33:07
+Results of doctest builder run on 2026-06-24 08:30:36
 =====================================================
+
+Document: generated/modules/ess.diffraction.peaks.dspacing_peaks_from_cif
+-------------------------------------------------------------------------
+1 items passed all tests:
+   2 tests in default
+2 tests in 1 items.
+2 passed and 0 failed.
+Test passed.
 
 Document: generated/modules/ess.powder.smoothing.lowpass
 --------------------------------------------------------
@@ -107,7 +115,7 @@ Test passed.
 
 Doctest summary
 ===============
-   53 tests
+   55 tests
     0 failures in tests
     0 failures in setup code
     0 failures in cleanup code
