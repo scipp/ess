@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from ess import imaging as img
-from scipp.testing import assert_identical
+from scipp.testing import assert_allclose, assert_identical
 from scitiff.io import load_scitiff
 
 from ess.imaging.data import siemens_star_path
@@ -14,12 +14,30 @@ def test_blockify() -> None:
     da = load_scitiff(siemens_star_path())["image"]
     blocks = img.tools.blockify(da, {'x': 4, 'y': 4})
     assert len(blocks.dims) == len(da.dims) + 2
-    assert {da.sizes['x'] // 4, da.sizes['y'] // 4, 4}.issubset(blocks.sizes.values())
+    assert blocks.sizes['x'] == da.sizes['x'] // 4
+    assert blocks.sizes['y'] == da.sizes['y'] // 4
+
+
+def test_blockify_binned_data() -> None:
+    da = sc.data.binned_xy(1000, 16, 16)
+    blocks = img.tools.blockify(da, {'x': 2, 'y': 2})
+    assert len(blocks.dims) == len(da.dims) + 2
+    assert blocks.sizes['x'] == da.sizes['x'] // 2
+    assert blocks.sizes['y'] == da.sizes['y'] // 2
 
 
 def test_resample() -> None:
     da = load_scitiff(siemens_star_path())["image"]
     resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
+    assert len(resampled.dims) == len(da.dims)
+    assert resampled.sizes['x'] == da.sizes['x'] // 2
+    assert resampled.sizes['y'] == da.sizes['y'] // 2
+
+
+def test_resample_binned_data() -> None:
+    da = sc.data.binned_xy(1000, 16, 16)
+    resampled = img.tools.resample(da, sizes={'x': 2, 'y': 2})
+    assert len(resampled.dims) == len(da.dims)
     assert resampled.sizes['x'] == da.sizes['x'] // 2
     assert resampled.sizes['y'] == da.sizes['y'] // 2
 
@@ -107,7 +125,15 @@ def test_resize() -> None:
     resized = img.tools.resize(da, sizes={'x': 128, 'y': 128})
     assert resized.sizes['x'] == 128
     assert resized.sizes['y'] == 128
-    assert sc.identical(resized.sum(), da.sum())
+    assert_identical(resized.sum(), da.sum())
+
+
+def test_resize_binned_data() -> None:
+    da = sc.data.binned_xy(1000, 16, 16)
+    resized = img.tools.resize(da, sizes={'x': 8, 'y': 8})
+    assert resized.sizes['x'] == 8
+    assert resized.sizes['y'] == 8
+    assert_allclose(resized.sum(), da.sum())
 
 
 def test_resize_mean() -> None:
