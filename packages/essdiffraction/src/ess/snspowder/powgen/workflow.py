@@ -5,12 +5,12 @@ import sciline
 from ess.packages.essdiffraction.src.ess.powder import providers as powder_providers
 
 from ess.packages.essdiffraction.src.ess.powder.types import (
-    EmptyCanRun,
     KeepEvents,
     NeXusDetectorName,
     SampleRun,
     TwoThetaBins,
     VanadiumRun,
+    EmptyVanadiumCanRun,
     CalibrationRun,
     FilepathMLZ,
     FilenameMLZ,
@@ -55,7 +55,9 @@ from ess.packages.essdiffraction.src.ess.powder.grouping import (
 from ess.packages.essdiffraction.src.ess.powder.correction import (
     normalize_by_proton_charge,
     normalize_by_proton_charge_mlz,
-    normalize_by_vanadium_dspacing
+    normalize_by_vanadium_dspacing,
+    subtract_sample_empty_can_mlz,
+    subtract_vanadium_empty_can_mlz,
 )
 
 from ess.packages.essdiffraction.src.ess.powder.filtering import (
@@ -120,14 +122,13 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 #add_masks_and_corrections,
                 add_masks_mlz,
                 flatten_to_spectra,
-                bin_dspacing_dperp_mlz,
                 focus_to_dspacing_dperp,
                 #focus_data_dspacing_and_two_theta,
                 # extract_accumulated_proton_charge,
                 # normalize_by_proton_charge_mlz, <- this and above seem to be absent in PowderReduceP2D
                 # integrate_two_theta,
-                integrate_dperp,
-                normalize_by_vanadium_dspacing,
+                subtract_sample_empty_can_mlz,
+                subtract_vanadium_empty_can_mlz,
             ]
         ),
         params={
@@ -135,10 +136,12 @@ def PowderReduceP2D() -> sciline.Pipeline:
             FilepathMLZ[VanadiumRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
             FilepathMLZ[EmptyCanRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
             FilepathMLZ[CalibrationRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
+            FilepathMLZ[EmptyVanadiumCanRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
             # need to figute out how the below keep events works
-            KeepEvents[SampleRun]: KeepEvents[SampleRun](True),
+            KeepEvents[SampleRun]: KeepEvents[SampleRun](False),
+            KeepEvents[EmptyCanRun]: KeepEvents[EmptyCanRun](False),
             KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),
-            KeepEvents[EmptyCanRun]: KeepEvents[EmptyCanRun](True),
+            KeepEvents[EmptyVanadiumCanRun]: KeepEvents[EmptyVanadiumCanRun](False),
             # CalibrationData: None,
         }
     )

@@ -225,28 +225,42 @@ def bin_dspacing_dperp_mlz(
     #     unit=ttheta.unit,
     # )
     args = {dperp_bins.dim: dperp_bins, dspacing_bins.dim: dspacing_bins}
-    if keep_events: #.value:
-        data = data.bin(args)
+    if keep_events.value:
+        out = data.bin(args)
     else:
         # Reconstructing the wavelength results in an inconsistency if dspacing was
         # computed with a calibration table. Another option would be to use, e.g., the
         # mean wavelength in each bin, but this leads to random wavelength values that
         # break stream processing.
+        out = data.hist(args)
         print("needs to be worked out")
         # result = data.hist(args).assign_coords(
         #     wavelength=_reconstruct_wavelength(
         #         dspacing_bins=dspacing_bins, two_theta_bins=twotheta_bins
         #     )
         # )
-    return DspacingDetector[RunType](data)
+    del data
+    if out.bins is not None and "tof" in out.bins.coords:
+        out.data = out.data.bins.drop_coords("tof")
+    return DspacingDetector[RunType](out)
 
 
 def focus_to_dspacing_dperp(
-    data: DspacingDetector[RunType]
+    data: SpectralDetector[RunType],
+    dspacing_bins: DspacingBins,
+    dperp_bins: DperpBins,
+    keep_events: KeepEvents[RunType],
 ) -> Dspacing2D[RunType]:
-    data = data.sum(['spectrum'])
-    return Dspacing2D[RunType](data)
-
+    # remove no-longer needed metadata
+    for name in ("tof", "wavelength", "two_theta", "Ltotal"):
+        if data.bins is not None and name in data.bins.coords:
+            data = data.bins.drop_coords(name)
+    data = data.bins.concat()
+    args = {dspacing_bins.dim: dspacing_bins, dperp_bins.dim: dperp_bins}
+    out = data.bin(args) if keep_events.value else data.hist(args)
+    del data
+    out.coords.pop("gd_prtn_chrg", None)
+    return Dspacing2D[RunType](out)
 
 
 def integrate_two_theta(

@@ -50,13 +50,17 @@ LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 SampleRun = reduce_t.SampleRun
 VanadiumRun = NewType("VanadiumRun", int)
 EmptyCanRun = NewType("EmptyCanRun", int)
+VanadiumRun = reduce_t.VanadiumRun
+EmptyVanadiumCanRun = NewType("EmptyVanadiumCanRun", int)
 CalibrationRun = NewType("CalibrationRun", int)
 
 CaveMonitor = NewType("CaveMonitor", int)
 BunkerMonitor = NewType("BunkerMonitor", int)
 
-RunType = TypeVar("RunType", SampleRun, VanadiumRun, EmptyCanRun)
-GeneralRunType = TypeVar("GeneralRunType", SampleRun, VanadiumRun, EmptyCanRun, CalibrationRun)
+RunType = TypeVar("RunType", SampleRun, EmptyCanRun, VanadiumRun, EmptyVanadiumCanRun)
+NonEmptyCanRunType = TypeVar("NonEmptyCanRunType", SampleRun, VanadiumRun)
+EmptyCanRunType = TypeVar("EmptyCanRunType", EmptyCanRun, EmptyVanadiumCanRun)
+GeneralRunType = TypeVar("GeneralRunType", SampleRun, EmptyCanRun, VanadiumRun, EmptyVanadiumCanRun, CalibrationRun)
 MonitorType = TypeVar("MonitorType", CaveMonitor, BunkerMonitor)
 
 TofMask = NewType("TofMask", Callable | None)
@@ -223,12 +227,12 @@ class CorrectedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data in d-spacing - 2theta space including corrections."""
 
 
-class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+class Dspacing2D(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data in with d-spacing and dperp dimensions."""
 
 
-class Dspacing2D(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data in d-spacing - 2theta space including corrections."""
+class EmptyCanSubtracted2D(sciline.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataArray):
+    """..."""
 
 
 class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

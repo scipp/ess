@@ -30,7 +30,9 @@ from .types import (
     SampleRun,
     UncertaintyBroadcastMode,
     VanadiumRun,
+    EmptyVanadiumCanRun,
     WavelengthMonitor,
+    EmptyCanSubtracted2D,
 )
 
 _T = TypeVar("_T")
@@ -416,6 +418,24 @@ def subtract_empty_can(
     background: IntensityDspacing[EmptyCanRun],
 ) -> EmptyCanSubtractedIofDspacing:
     return EmptyCanSubtractedIofDspacing(data.bins.concatenate(-background))
+
+
+def subtract_sample_empty_can_mlz(
+    data: Dspacing2D[SampleRun],
+    background: Dspacing2D[EmptyCanRun],
+) -> EmptyCanSubtracted2D[SampleRun]:
+    if data.bins is None:
+        return EmptyCanSubtracted2D[SampleRun](data - background)
+    return EmptyCanSubtracted2D[SampleRun](data.bins.concatenate(-background))
+
+
+def subtract_vanadium_empty_can_mlz(
+    data: Dspacing2D[VanadiumRun],
+    background: Dspacing2D[EmptyVanadiumCanRun],
+) -> EmptyCanSubtracted2D[VanadiumRun]:
+    if data.bins is None:
+        return EmptyCanSubtracted2D[VanadiumRun](data - background)
+    return EmptyCanSubtracted2D[VanadiumRun](data.bins.concatenate(-background))
 
 
 def subtract_empty_can_two_theta(
