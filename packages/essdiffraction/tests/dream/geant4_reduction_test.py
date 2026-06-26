@@ -10,6 +10,7 @@ import sciline
 import scipp as sc
 import scipp.testing
 from ess import dream, powder
+from ess.dream.parameters import parameters as dream_parameters
 from ess.dream.workflows import (
     DreamGeant4MonitorHistogramWorkflow,
     DreamGeant4MonitorIntegratedWorkflow,
@@ -29,6 +30,7 @@ from ess.powder.types import (
     IntensityTof,
     KeepEvents,
     LookupTableFilename,
+    MaskedDetectorIDs,
     MonitorFilename,
     NeXusDetectorName,
     ReducedTofCIF,
@@ -46,6 +48,7 @@ from scippnexus import NXsource
 from ess.reduce import unwrap
 from ess.reduce import workflow as reduce_workflow
 from ess.reduce.nexus.types import AnyRun, Position
+from ess.reduce.parameter import keep_default
 
 PARAMETRIZATION = ("detector_name", ["mantle", "endcap_backward", "endcap_forward"])
 
@@ -344,8 +347,24 @@ def test_dream_workflow_registers_subclasses():
     assert len(reduce_workflow.workflow_registry) == count + 1
 
 
-def test_dream_workflow_parameters_returns_filtered_params():
+def test_dream_workflow_registers_parameter_registry():
     wf = DreamGeant4ProtonChargeWorkflow()
-    parameters = reduce_workflow.get_parameters(wf, (CorrectedDetector[SampleRun],))
-    assert Filename[SampleRun] in parameters
-    assert Filename[EmptyCanRun] not in parameters
+    assert wf.parameter_registry is dream_parameters
+
+
+def test_dream_workflow_applies_parameter_values():
+    wf = DreamGeant4ProtonChargeWorkflow()
+    specs = reduce_workflow.get_parameters(wf, (IntensityDspacingTwoTheta[SampleRun],))
+    values = {
+        key: spec.default
+        for key, spec in specs.items()
+        if spec.default is not keep_default
+    }
+    values[Filename[SampleRun]] = "sample.csv"
+
+    wf = reduce_workflow.assign_parameter_values(wf, values, specs)
+
+    assert wf.compute(Filename[SampleRun]) == "sample.csv"
+    assert wf.compute(CalibrationFilename) is None
+    assert wf.compute(MaskedDetectorIDs) == {}
+    assert wf.compute(TwoThetaBins).unit == sc.Unit('rad')

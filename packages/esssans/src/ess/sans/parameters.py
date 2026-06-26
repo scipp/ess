@@ -1,22 +1,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 """
-Default parameters, providers and utility functions for the loki workflow.
+Default parameter specs for SANS workflows.
 """
 
 from __future__ import annotations
 
+import sciline
 import scipp as sc
+from pydantic import BaseModel, Field
 
-from ess.reduce.parameter import (
-    BinEdgesParameter,
-    BooleanParameter,
-    FilenameParameter,
-    MultiFilenameParameter,
-    ParamWithOptions,
-    StringParameter,
-    Vector2dParameter,
-    parameter_registry,
+from ess.reduce.parameter import ParameterRegistry, ParameterSpec
+from ess.reduce.parameter_models import (
+    LengthUnit,
+    QEdges,
+    QUnit,
+    WavelengthEdges,
 )
 
 from ..sans.types import (
@@ -51,70 +50,206 @@ from ..sans.types import (
     WavelengthMonitor,
 )
 
-parameter_registry[CorrectForGravity] = BooleanParameter.from_type(
-    CorrectForGravity, default=False
-)
-parameter_registry[NeXusDetectorName] = StringParameter.from_type(NeXusDetectorName)
 
-parameter_registry[NeXusMonitorName[Incident]] = StringParameter.from_type(
-    NeXusMonitorName[Incident], default=''
+class QxEdges(QEdges):
+    """Model for Qx edges."""
+
+    start: float = Field(default=-0.5, description="Start of the Qx edges.")
+    stop: float = Field(default=0.5, description="Stop of the Qx edges.")
+
+    def get_edges(self) -> sc.Variable:
+        return sc.linspace(
+            dim='Qx',
+            start=self.start,
+            stop=self.stop,
+            num=self.num_bins + 1,
+            unit=self.unit.value,
+        )
+
+
+class QyEdges(QEdges):
+    """Model for Qy edges."""
+
+    start: float = Field(default=-0.5, description="Start of the Qy edges.")
+    stop: float = Field(default=0.5, description="Stop of the Qy edges.")
+
+    def get_edges(self) -> sc.Variable:
+        return sc.linspace(
+            dim='Qy',
+            start=self.start,
+            stop=self.stop,
+            num=self.num_bins + 1,
+            unit=self.unit.value,
+        )
+
+
+class BeamCenterXY(BaseModel):
+    """Beam center position in detector coordinates."""
+
+    x: float = Field(default=0.0, description="Beam center x coordinate.")
+    y: float = Field(default=0.0, description="Beam center y coordinate.")
+    unit: LengthUnit = Field(default=LengthUnit.METER, description="Beam center unit.")
+
+    def get_vector(self) -> sc.Variable:
+        return sc.vector([self.x, self.y, 0.0], unit=self.unit.value)
+
+
+def _edges(model):
+    return model.get_edges()
+
+
+def _beam_center(model: BeamCenterXY) -> sc.Variable:
+    return model.get_vector()
+
+
+def _direct_beam_filename(
+    workflow: sciline.Pipeline, filename: str | None
+) -> sciline.Pipeline:
+    workflow = workflow.copy()
+    if filename:
+        workflow[DirectBeamFilename] = filename
+    else:
+        workflow[DirectBeam] = None
+    return workflow
+
+
+parameters = ParameterRegistry()
+
+
+parameters[Filename[SampleRun]] = ParameterSpec(
+    model=tuple[str, ...],
+    category='Files',
+    title='Sample Runs',
 )
-parameter_registry[NeXusMonitorName[Transmission]] = StringParameter.from_type(
-    NeXusMonitorName[Transmission], default=''
+parameters[Filename[BackgroundRun]] = ParameterSpec(
+    model=tuple[str, ...],
+    category='Files',
+    title='Background Runs',
 )
-parameter_registry[TransformationPath] = StringParameter.from_type(
-    TransformationPath, default=''
+parameters[Filename[TransmissionRun[SampleRun]]] = ParameterSpec(
+    model=str | None,
+    category='Files',
+    title='Sample Transmission',
+    default=None,
 )
-parameter_registry[PixelMaskFilename] = MultiFilenameParameter.from_type(
-    PixelMaskFilename
+parameters[Filename[TransmissionRun[BackgroundRun]]] = ParameterSpec(
+    model=str | None,
+    category='Files',
+    title='Background Transmission',
+    default=None,
 )
-parameter_registry[PixelShapePath] = StringParameter.from_type(
-    PixelShapePath, default=''
+parameters[Filename[EmptyBeamRun]] = ParameterSpec(
+    model=str | None,
+    category='Files',
+    title='Empty Beam',
+    default=None,
 )
-# Should this be ReductionMode (EventMode/HistogramMode)?
-parameter_registry[ReturnEvents] = BooleanParameter.from_type(
-    ReturnEvents, default=False
+parameters[PixelMaskFilename] = ParameterSpec(
+    model=tuple[str, ...],
+    category='Files',
+    title='Pixel Masks',
 )
-parameter_registry[UncertaintyBroadcastMode] = ParamWithOptions.from_enum(
-    UncertaintyBroadcastMode, default=UncertaintyBroadcastMode.upper_bound
-)
-parameter_registry[Filename[SampleRun]] = MultiFilenameParameter.from_type(
-    Filename[SampleRun]
-)
-parameter_registry[Filename[BackgroundRun]] = MultiFilenameParameter.from_type(
-    Filename[BackgroundRun]
-)
-parameter_registry[Filename[TransmissionRun[SampleRun]]] = FilenameParameter.from_type(
-    Filename[TransmissionRun[SampleRun]]
-)
-parameter_registry[Filename[TransmissionRun[BackgroundRun]]] = (
-    FilenameParameter.from_type(Filename[TransmissionRun[BackgroundRun]])
-)
-parameter_registry[Filename[EmptyBeamRun]] = FilenameParameter.from_type(
-    Filename[EmptyBeamRun]
+parameters[DirectBeamFilename] = ParameterSpec(
+    model=str | None,
+    category='Files',
+    title='Direct Beam',
+    default=None,
+    apply=_direct_beam_filename,
+    filter_keys=(DirectBeam, DirectBeamFilename),
 )
 
-parameter_registry[WavelengthBins] = BinEdgesParameter(
-    WavelengthBins, dim='wavelength', start=2, stop=12.0, nbins=300, log=False
+parameters[NeXusDetectorName] = ParameterSpec(
+    model=str,
+    category='NeXus',
+    title='Detector',
 )
-parameter_registry[QBins] = BinEdgesParameter(
-    QBins, dim='Q', start=0.1, stop=0.3, nbins=100, log=False
+parameters[NeXusMonitorName[Incident]] = ParameterSpec(
+    model=str,
+    category='NeXus',
+    title='Incident Monitor',
+    default='',
 )
-parameter_registry[QxBins] = BinEdgesParameter(
-    QxBins, dim='Qx', start=-0.5, stop=0.5, nbins=100
+parameters[NeXusMonitorName[Transmission]] = ParameterSpec(
+    model=str,
+    category='NeXus',
+    title='Transmission Monitor',
+    default='',
 )
-parameter_registry[QyBins] = BinEdgesParameter(
-    QyBins, dim='Qy', start=-0.5, stop=0.5, nbins=100
+parameters[TransformationPath] = ParameterSpec(
+    model=str,
+    category='NeXus',
+    title='Transform Path',
+    default='',
 )
-parameter_registry[DirectBeam] = StringParameter.from_type(
-    DirectBeam, switchable=True, optional=True, default=None
+parameters[PixelShapePath] = ParameterSpec(
+    model=str,
+    category='NeXus',
+    title='Pixel Shape Path',
+    default='',
 )
-parameter_registry[DirectBeamFilename] = FilenameParameter.from_type(
-    DirectBeamFilename, switchable=True
+
+parameters[WavelengthBins] = ParameterSpec(
+    model=WavelengthEdges,
+    category='Binning',
+    title='Wavelength Edges',
+    default=WavelengthEdges(start=2.0, stop=12.0, num_bins=300),
+    transform=_edges,
+    use_workflow_default=False,
 )
-parameter_registry[BeamCenter] = Vector2dParameter.from_type(
-    BeamCenter, default=sc.vector([0, 0, 0], unit='m')
+parameters[QBins] = ParameterSpec(
+    model=QEdges,
+    category='Binning',
+    title='Q Edges',
+    default=QEdges(start=0.1, stop=0.3, num_bins=100, unit=QUnit.INVERSE_ANGSTROM),
+    transform=_edges,
+    use_workflow_default=False,
 )
+parameters[QxBins] = ParameterSpec(
+    model=QxEdges,
+    category='Binning',
+    title='Qx Edges',
+    default=QxEdges(),
+    transform=_edges,
+    use_workflow_default=False,
+)
+parameters[QyBins] = ParameterSpec(
+    model=QyEdges,
+    category='Binning',
+    title='Qy Edges',
+    default=QyEdges(),
+    transform=_edges,
+    use_workflow_default=False,
+)
+
+parameters[CorrectForGravity] = ParameterSpec(
+    model=bool,
+    category='Reduction',
+    title='Correct Gravity',
+    default=False,
+    transform=CorrectForGravity,
+)
+parameters[ReturnEvents] = ParameterSpec(
+    model=bool,
+    category='Reduction',
+    title='Return Events',
+    default=False,
+    transform=ReturnEvents,
+)
+parameters[UncertaintyBroadcastMode] = ParameterSpec(
+    model=UncertaintyBroadcastMode,
+    category='Reduction',
+    title='Uncertainty Broadcast',
+    default=UncertaintyBroadcastMode.upper_bound,
+)
+parameters[BeamCenter] = ParameterSpec(
+    model=BeamCenterXY,
+    category='Reduction',
+    title='Beam Center',
+    default=BeamCenterXY(),
+    transform=_beam_center,
+    use_workflow_default=False,
+)
+
 
 typical_outputs = (
     BackgroundSubtractedIofQ,

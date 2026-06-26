@@ -6,10 +6,10 @@ import pandas as pd
 import sciline
 import scipp as sc
 
-from ess.reduce.parameter import parameter_mappers
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
 from . import common, conversions, i_of_q, masking, normalization
+from .parameters import parameters
 from .types import (
     BackgroundRun,
     CorrectForGravity,
@@ -38,6 +38,14 @@ def _merge(*dicts: dict) -> dict:
     return {key: value for d in dicts for key, value in d.items()}
 
 
+def _preserve_typical_outputs(
+    source: sciline.Pipeline, target: sciline.Pipeline
+) -> sciline.Pipeline:
+    if (typical_outputs := getattr(source, 'typical_outputs', None)) is not None:
+        target.typical_outputs = typical_outputs
+    return target
+
+
 def merge_contributions(*data: sc.DataArray) -> sc.DataArray:
     if len(data) == 1:
         return data[0]
@@ -58,13 +66,18 @@ def with_pixel_mask_filenames(
     masks:
         List or tuple of pixel mask filenames to set.
     """
-    workflow = workflow.copy()
-    workflow[DetectorMasks] = (
-        workflow[DetectorMasks]
-        .map(pd.DataFrame({PixelMaskFilename: masks}).rename_axis('mask'))
-        .reduce(index='mask', func=_merge)
-    )
-    return workflow
+    source = workflow
+    masks = tuple(masks)
+    target = workflow.copy()
+    if masks:
+        target[DetectorMasks] = (
+            target[DetectorMasks]
+            .map(pd.DataFrame({PixelMaskFilename: masks}).rename_axis('mask'))
+            .reduce(index='mask', func=_merge)
+        )
+    else:
+        target[DetectorMasks] = DetectorMasks({})
+    return _preserve_typical_outputs(source, target)
 
 
 def with_banks(
@@ -89,14 +102,18 @@ def with_banks(
         Index to use for the DataFrame. If not provided, the bank names are used.
     """
     index = index or banks
-    return workflow.map(
-        pd.DataFrame({NeXusDetectorName: banks}, index=index).rename_axis('bank')
+    return _preserve_typical_outputs(
+        workflow,
+        workflow.map(
+            pd.DataFrame({NeXusDetectorName: banks}, index=index).rename_axis('bank')
+        ),
     )
 
 
 def _set_runs(
     pipeline: sciline.Pipeline, runs: Iterable[str], key: Hashable, axis_name: str
 ) -> sciline.Pipeline:
+    source = pipeline
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
     for part in (Numerator, Denominator):
@@ -106,7 +123,7 @@ def _set_runs(
                 .map(runs)
                 .reduce(index=axis_name, func=merge_contributions)
             )
-    return pipeline
+    return _preserve_typical_outputs(source, pipeline)
 
 
 def with_sample_runs(
@@ -141,13 +158,15 @@ def with_background_runs(
     return _set_runs(workflow, runs, BackgroundRun, 'background_run')
 
 
-parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
-# TODO: for now, we leave the mapping over detector banks out, because we do not have a
-# method to merge the I(Q) of different banks, and we thus cannot compute a single
-# result from the workflow. So only a single detector bank can be processed at a time.
-# parameter_mappers[NeXusDetectorName] = with_banks
-parameter_mappers[Filename[SampleRun]] = with_sample_runs
-parameter_mappers[Filename[BackgroundRun]] = with_background_runs
+parameters[PixelMaskFilename] = parameters[PixelMaskFilename].with_apply(
+    with_pixel_mask_filenames
+)
+parameters[Filename[SampleRun]] = parameters[Filename[SampleRun]].with_apply(
+    with_sample_runs
+)
+parameters[Filename[BackgroundRun]] = parameters[Filename[BackgroundRun]].with_apply(
+    with_background_runs
+)
 
 
 providers = (
@@ -204,4 +223,5 @@ def SansWorkflow(
     workflow[TransformationPath] = TransformationPath('transform')
     workflow[WavelengthBands] = WavelengthBands(None)
     workflow[WavelengthMask] = WavelengthMask(None)
+    workflow.parameter_registry = parameters
     return workflow

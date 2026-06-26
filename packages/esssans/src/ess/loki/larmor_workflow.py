@@ -176,7 +176,8 @@ def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
 
     workflow = LokiAtLarmorWorkflow()
 
-    workflow[PixelMaskFilename] = list(map(str, data.loki_tutorial_mask_filenames()))
+    (mask_filename,) = data.loki_tutorial_mask_filenames()
+    workflow[PixelMaskFilename] = str(mask_filename)
     workflow[Filename[SampleRun]] = str(data.loki_tutorial_sample_run_60339())
     workflow[Filename[BackgroundRun]] = str(data.loki_tutorial_background_run_60393())
     workflow[Filename[TransmissionRun[SampleRun]]] = str(

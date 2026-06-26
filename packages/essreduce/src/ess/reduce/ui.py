@@ -7,13 +7,20 @@ import ipywidgets as widgets
 import sciline as sl
 from IPython import display
 from ipywidgets import Layout
+from pydantic_core import PydanticUndefined
+from sciline.typing import Key
 
-from .parameter import Parameter
-from .widgets import Spinner, SwitchWidget, create_parameter_widget, default_layout
-from .widgets._base import get_fields, set_fields
+from .parameter import ParameterSpec, keep_default
+from .widgets import (
+    PydanticParameterValueWidget,
+    Spinner,
+    default_layout,
+)
 from .workflow import (
-    Key,
+    RegisteredWorkflow,
+    WorkflowFactory,
     assign_parameter_values,
+    create_workflow,
     get_parameters,
     get_possible_outputs,
     get_typical_outputs,
@@ -41,12 +48,10 @@ class OutputSelectionWidget(widgets.VBox):
             options=get_possible_outputs(workflow),
             layout=Layout(width='90%', height='auto'),
         )
-        # Wrapping the selection widget in an individual accordion.
-        # It is not possible to have multiple sections open in one ``Accordion`` widget.
         _typical_selection = _wrap_foldable(
             self.typical_outputs_widget, title='Typical Outputs'
         )
-        _typical_selection.selected_index = 0  # Open typical outputs by default
+        _typical_selection.selected_index = 0
         _possible_selection = _wrap_foldable(
             self.possible_outputs_widget, title='Extended Outputs'
         )
@@ -62,7 +67,7 @@ class OutputSelectionWidget(widgets.VBox):
 class ParameterBox(widgets.VBox):
     def __init__(
         self,
-        registry_getter: Callable[[], dict[Key, Parameter]],
+        registry_getter: Callable[[], dict[Key, ParameterSpec]],
         **kwargs,
     ):
         self.parameter_refresh_button = widgets.Button(
@@ -71,37 +76,81 @@ class ParameterBox(widgets.VBox):
             button_style='success',
             tooltip='Generate Parameter Input Widgets',
         )
-        self._input_registry = {}
-        self._input_widgets = {}
-        self._input_box = widgets.VBox()
-
-        def _refresh_input_box(_: widgets.Button):
-            new_input_parameters = registry_getter()
-            self._input_registry.clear()
-            self._input_registry.update(new_input_parameters)
-            self._input_widgets.clear()
-            self._input_widgets.update(
-                {
-                    node: create_parameter_widget(parameter)
-                    for node, parameter in new_input_parameters.items()
-                }
-            )
-            self._input_box.children = [
-                widgets.HBox([widget]) for widget in self._input_widgets.values()
-            ]
-
-        self.parameter_refresh_button.on_click(_refresh_input_box)
-
+        self._registry_getter = registry_getter
+        self._input_registry: dict[Key, ParameterSpec] = {}
+        self._input_widgets: dict[Key, PydanticParameterValueWidget] = {}
+        self._input_box = widgets.Box()
+        self.parameter_refresh_button.on_click(self._refresh_input_box)
         super().__init__([self.parameter_refresh_button, self._input_box], **kwargs)
+
+    def _refresh_input_box(self, _: widgets.Button | None = None) -> None:
+        existing_values = self.get_values()
+        new_input_parameters = self._registry_getter()
+        self._input_registry.clear()
+        self._input_registry.update(new_input_parameters)
+        self._input_widgets.clear()
+
+        grouped: dict[str, list[widgets.Widget]] = {}
+        for key, spec in new_input_parameters.items():
+            widget = _create_parameter_widget(spec)
+            if key in existing_values:
+                widget.set_value(existing_values[key])
+            self._input_widgets[key] = widget
+            grouped.setdefault(spec.category, []).append(widget)
+
+        if not grouped:
+            self._input_box.children = [widgets.HTML("<em>No parameters</em>")]
+            return
+
+        categories = list(grouped)
+        accordion = widgets.Accordion(
+            [widgets.VBox(grouped[category]) for category in categories]
+        )
+        for index, category in enumerate(categories):
+            accordion.set_title(index, category)
+        accordion.selected_index = 0
+        self._input_box.children = [accordion]
 
     @property
     def value(self) -> dict[Key, Any]:
-        """Return the current parameter values with matching types as a dictionary."""
-        return {
-            node: widget.value
-            for node, widget_box in self._input_widgets.items()
-            if (not isinstance((widget := widget_box), SwitchWidget)) or widget.enabled
-        }
+        return {key: widget.value for key, widget in self._input_widgets.items()}
+
+    @property
+    def parameters(self) -> dict[Key, ParameterSpec]:
+        return dict(self._input_registry)
+
+    def validate(self) -> tuple[bool, list[str]]:
+        errors = []
+        for key, widget in self._input_widgets.items():
+            is_valid, error_msg = widget.validate()
+            if not is_valid:
+                spec = self._input_registry[key]
+                errors.append(f"{spec.name}: {error_msg}")
+                widget.set_error_state(True, error_msg)
+            else:
+                widget.set_error_state(False, "")
+        return len(errors) == 0, errors
+
+    def set_values(self, values: dict[Key, Any]) -> None:
+        for key, value in values.items():
+            if key in self._input_widgets:
+                self._input_widgets[key].set_value(value)
+
+    def get_values(self) -> dict[Key, Any]:
+        return {key: widget.value for key, widget in self._input_widgets.items()}
+
+    def get_fields(self) -> dict[Key, dict[str, Any]]:
+        return {key: widget.get_fields() for key, widget in self._input_widgets.items()}
+
+
+def _create_parameter_widget(spec: ParameterSpec) -> PydanticParameterValueWidget:
+    default = spec.default if spec.default is not keep_default else PydanticUndefined
+    return PydanticParameterValueWidget(
+        spec.model,
+        title=spec.name,
+        description=spec.description,
+        default=default,
+    )
 
 
 class ResultBox(widgets.VBox):
@@ -128,7 +177,12 @@ class ResultBox(widgets.VBox):
             self.output.clear_output()
             with self.output:
                 display.display(Spinner())
-                compute_result = workflow_runner()
+                try:
+                    compute_result = workflow_runner()
+                except Exception as e:
+                    display.clear_output()
+                    display.display(widgets.HTML(f"<pre>{type(e).__name__}: {e}</pre>"))
+                    return
                 display.clear_output()
                 if result_registry is not None:
                     result_registry.clear()
@@ -159,7 +213,6 @@ def connect_output_selection_and_parameter_run_button(
     parameter_refresh_button: widgets.Button,
     run_button: widgets.Button,
 ) -> None:
-    # Disable run button when output selection changes
     def observe_selection_change(_) -> None:
         run_button.disabled = True
         run_button.tooltip = 'To run the workflow, refresh parameters.'
@@ -167,33 +220,41 @@ def connect_output_selection_and_parameter_run_button(
     for output_selection_widget in output_selection_widgets:
         output_selection_widget.observe(observe_selection_change)
 
-    # Enable run button when parameters are generated
     original_run_button_tooltip = run_button.tooltip
 
-    def observe_parameter_refrheshed(_) -> None:
+    def observe_parameter_refreshed(_) -> None:
         run_button.disabled = False
         run_button.tooltip = original_run_button_tooltip
 
-    parameter_refresh_button.on_click(observe_parameter_refrheshed)
+    parameter_refresh_button.on_click(observe_parameter_refreshed)
 
 
 class WorkflowWidget(widgets.TwoByTwoLayout):
     def __init__(
-        self, workflow: sl.Pipeline, result_registry: dict | None = None, **kwargs
+        self,
+        workflow: sl.Pipeline | WorkflowFactory | RegisteredWorkflow,
+        result_registry: dict | None = None,
+        **kwargs,
     ):
-        self.output_selection_box = OutputSelectionWidget(workflow)
+        self.workflow = workflow
+        self._pipeline = self._create_pipeline()
+        self.output_selection_box = OutputSelectionWidget(self._pipeline)
 
-        def registry_getter() -> dict[Key, Parameter]:
-            """Return the parameter registry for the workflow."""
-            return get_parameters(workflow, tuple(self.output_selection_box.value))
+        def registry_getter() -> dict[Key, ParameterSpec]:
+            return get_parameters(
+                self._pipeline, tuple(self.output_selection_box.value)
+            )
 
         self.parameter_box = ParameterBox(registry_getter)
 
         def workflow_runner() -> dict[type, Any]:
-            """Run the workflow with the current parameter values."""
-            return assign_parameter_values(
-                workflow.copy(), self.parameter_box.value
-            ).compute(self.output_selection_box.value)
+            is_valid, errors = self.parameter_box.validate()
+            if not is_valid:
+                raise ValueError('\n'.join(errors))
+            pipeline = assign_parameter_values(
+                self._pipeline, self.parameter_box.value, self.parameter_box.parameters
+            )
+            return pipeline.compute(self.output_selection_box.value)
 
         self.result_box = ResultBox(workflow_runner, result_registry)
         connect_refresh_button(
@@ -217,11 +278,19 @@ class WorkflowWidget(widgets.TwoByTwoLayout):
             **kwargs,
         )
 
+    def _create_pipeline(self) -> sl.Pipeline:
+        if isinstance(self.workflow, sl.Pipeline):
+            return self.workflow.copy()
+        return create_workflow(self.workflow)
+
 
 def workflow_widget(result_registry: dict | None = None) -> widgets.Widget:
     """Create a widget for a workflow selected from a dropdown."""
     workflow_select = widgets.Dropdown(
-        options=[(workflow.__name__, workflow) for workflow in workflow_registry],
+        options=[
+            (workflow.spec.title or workflow.spec.name, workflow)
+            for workflow in workflow_registry
+        ],
         description='Workflow:',
         value=None,
         layout=default_layout,
@@ -229,7 +298,7 @@ def workflow_widget(result_registry: dict | None = None) -> widgets.Widget:
     )
 
     def refresh_workflow_box(change) -> None:
-        workflow_box.children = [WorkflowWidget(change.new(), result_registry)]
+        workflow_box.children = [WorkflowWidget(change.new, result_registry)]
 
     workflow_select.observe(refresh_workflow_box, names='value')
 
@@ -251,67 +320,14 @@ def _get_parameter_box(widget: WorkflowWidget | ParameterBox) -> ParameterBox:
 
 
 def set_parameter_widget_values(
-    widget: WorkflowWidget | ParameterBox, new_parameter_values: dict[type, Any]
+    widget: WorkflowWidget | ParameterBox, new_parameter_values: dict[Key, Any]
 ) -> None:
-    """Set the values of the input widgets in the target widget.
-
-    Nodes that don't exist in the input widgets will be ignored.
-
-    Example
-    -------
-    .. code-block::
-
-        set_parameter_widget_values(widget, {
-            'WavelengthBins': {'start': 1.0, 'stop': 14.0, 'nbins': 500}
-        })
-
-    Parameters
-    ----------
-    widget:
-        The widget containing the input widgets.
-    new_parameter_values:
-        A dictionary of values/state to set each fields/state or value of input widgets.
-
-    Raises
-    ------
-    TypeError:
-        If the widget is not a WorkflowWidget or a ParameterBox.
-
-    """
-    parameter_box = _get_parameter_box(widget)
-    # Walk through the existing input widgets and set the values
-    # ``node`s that don't exist in the input widgets will be ignored.
-    for node, widget in parameter_box._input_widgets.items():
-        if node in new_parameter_values:
-            # We shouldn't use `get` here because ``None`` is a valid value.
-            set_fields(widget, new_parameter_values[node])
+    """Set the values of the input widgets in the target widget."""
+    _get_parameter_box(widget).set_values(new_parameter_values)
 
 
 def get_parameter_widget_values(
     widget: WorkflowWidget | ParameterBox,
-) -> dict[type, Any]:
-    """Return the current values of the input widgets in the target widget.
-
-    The result of this function can be used to set the values of the input widgets
-    using the :py:func:`~set_parameter_widget_values` function.
-
-    Parameters
-    ----------
-    widget:
-        The widget containing the input widgets.
-
-    Returns
-    -------
-    :
-        A dictionary of the current values/state of each input widget.
-
-    Raises
-    ------
-    TypeError:
-        If the widget is not a WorkflowWidget or a ParameterBox.
-
-    """
-    return {
-        node: get_fields(widget)
-        for node, widget in _get_parameter_box(widget)._input_widgets.items()
-    }
+) -> dict[Key, dict[str, Any]]:
+    """Return the current values of the input widgets in the target widget."""
+    return _get_parameter_box(widget).get_fields()

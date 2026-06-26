@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-"""Default parameter specs for DREAM workflows."""
+"""Default parameter specs for BEER workflows."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ from ess.powder.types import (
 from ess.reduce.parameter import ParameterRegistry, ParameterSpec
 from ess.reduce.parameter_models import AngleUnit, DspacingEdges, TwoTheta
 
-from .beamline import InstrumentConfiguration
+from .types import DetectorBank
 
 
 def _edges(model):
@@ -67,12 +67,6 @@ parameters[MonitorFilename[SampleRun]] = ParameterSpec(
     title='Sample Monitor',
     default=None,
 )
-parameters[MonitorFilename[VanadiumRun]] = ParameterSpec(
-    model=str | None,
-    category='Files',
-    title='Vanadium Monitor',
-    default=None,
-)
 parameters[PixelMaskFilename] = ParameterSpec(
     model=tuple[str, ...],
     category='Files',
@@ -86,7 +80,7 @@ parameters[NeXusDetectorName] = ParameterSpec(
     model=str,
     category='NeXus',
     title='Detector',
-    default='mantle',
+    default='detector',
 )
 
 parameters[DspacingBins] = ParameterSpec(
@@ -106,17 +100,17 @@ parameters[TwoThetaBins] = ParameterSpec(
     use_workflow_default=False,
 )
 
-parameters[InstrumentConfiguration] = ParameterSpec(
-    model=InstrumentConfiguration,
-    category='Reduction',
-    title='Instrument Configuration',
-    default=InstrumentConfiguration.high_flux_BC215,
-)
 parameters[UncertaintyBroadcastMode] = ParameterSpec(
     model=UncertaintyBroadcastMode,
     category='Reduction',
     title='Uncertainty Broadcast',
     default=UncertaintyBroadcastMode.upper_bound,
+)
+parameters[DetectorBank] = ParameterSpec(
+    model=DetectorBank,
+    category='Reduction',
+    title='Detector Bank',
+    default=DetectorBank.south,
 )
 
 
