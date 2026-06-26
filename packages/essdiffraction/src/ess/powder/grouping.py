@@ -2,6 +2,8 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 """Grouping and merging of pixels / voxels."""
 
+from typing import cast
+
 import numpy as np
 import scipp as sc
 
@@ -213,17 +215,8 @@ def bin_dspacing_dperp_mlz(
     :
         The reduced data with 'dspacing' and 'dperp' dimensions.
     """
-    # ttheta = data.coords['two_theta']
-    # ttheta_min = ttheta.nanmin()
-    # ttheta_max = ttheta.nanmax()
-    # ttheta_max.value = np.nextafter(ttheta_max.value, np.inf)
-    # twotheta_bins = sc.linspace(
-    #     'two_theta',
-    #     start=ttheta_min,
-    #     stop=ttheta_max,
-    #     num=1024,
-    #     unit=ttheta.unit,
-    # )
+    if data is None:
+        return cast(DspacingDetector[RunType], None)
     args = {dperp_bins.dim: dperp_bins, dspacing_bins.dim: dspacing_bins}
     if keep_events.value:
         out = data.bin(args)
@@ -251,6 +244,8 @@ def focus_to_dspacing_dperp(
     dperp_bins: DperpBins,
     keep_events: KeepEvents[RunType],
 ) -> Dspacing2D[RunType]:
+    if data is None:
+        return cast(Dspacing2D[RunType], None)
     # remove no-longer needed metadata
     for name in ("tof", "wavelength", "two_theta", "Ltotal"):
         if data.bins is not None and name in data.bins.coords:

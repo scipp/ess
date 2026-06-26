@@ -4,6 +4,7 @@
 """Utilities for loading example data for POWGEN."""
 
 from pathlib import Path
+from typing import cast
 
 import sciline as sl
 import scipp as sc
@@ -230,6 +231,8 @@ def load_powgen_mlz(
     - the appropriate fields (including 'positions') are oextracted from
     the outcome of scn.load_with_mantid().
     """
+    if filename is None:
+        return cast(TofDetector[RunType], None)
     filepath = Path(os.path.join(datapath, filename))
     dg = sc.io.load_hdf5(filepath)
     out = dg["data"].squeeze()
@@ -267,6 +270,8 @@ def load_powgen_calibration_mlz(
 
     The loaded data holds ...
     """
+    if filename is None:
+        return CalibrationData(None)
     filepath = Path(os.path.join(datapath, filename))
     ds = sc.io.load_hdf5(filepath)
     # print(f"Loading calibration data from {filepath}")
@@ -352,6 +357,8 @@ def extract_raw_data_mlz(
     """Return the events from a loaded data group."""
     # Remove the tof binning and dimension, as it is not needed and it gets in the way
     # of masking.
+    if dg is None:
+        return cast(TofDetector[RunType], None)
     out = dg["data"].squeeze()
     out.coords.pop("tof", None)
     det_size = {"bank": 40, "column": 154, "row": 7}
@@ -383,11 +390,15 @@ def sample_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsample, R
 
 def source_position_mlz(dg: TofDetector[RunType]) -> Position[snx.NXsource, RunType]:
     """Return the source position from a loaded data group."""
+    if dg is None:
+        return cast(Position[snx.NXsource, RunType], None)
     return Position[snx.NXsource, RunType](dg["data"].coords["source_position"])
 
 
 def sample_position_mlz(dg: TofDetector[RunType]) -> Position[snx.NXsample, RunType]:
     """Return the sample position from a loaded data group."""
+    if dg is None:
+        return cast(Position[snx.NXsample, RunType], None)
     return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
 
 

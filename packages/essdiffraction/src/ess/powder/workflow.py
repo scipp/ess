@@ -1,3 +1,5 @@
+from typing import cast
+
 from .correction import apply_lorentz_correction
 from .masking import apply_masks, apply_masks_mlz
 from .types import (
@@ -37,6 +39,8 @@ def add_masks_mlz(
     wavelength_mask_func: MaskingData[WavelengthMask],
     two_theta_mask_func: MaskingData[TwoThetaMask],
 ) -> CorrectedDetector[RunType]:
+    if da is None:
+        return cast(CorrectedDetector[RunType], None)
     masked = apply_masks_mlz(
         data=da,
         tof_mask_func=tof_mask_func,

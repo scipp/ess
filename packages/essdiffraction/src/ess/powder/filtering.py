@@ -5,6 +5,7 @@
 
 from contextlib import contextmanager
 from numbers import Real
+from typing import cast
 
 import scipp as sc
 from .types import (
@@ -72,6 +73,8 @@ def remove_bad_pulses(
 
 def flatten_to_spectra(data: CorrectedDetector[RunType]) -> SpectralDetector[RunType]:
     """"""
+    if data is None:
+        return cast(SpectralDetector[RunType], None)
     out = data.flatten(dims=['bank', 'column', 'row'], to='spectrum')
     del data
     return SpectralDetector[RunType](out)

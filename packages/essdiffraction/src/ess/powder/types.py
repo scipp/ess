@@ -250,7 +250,8 @@ class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data and associated metadata."""
 
 
-class FilenameMLZ(sciline.Scope[GeneralRunType, Path], Path): ...
+class FilenameMLZ(sciline.Scope[GeneralRunType, Path], Path):
+    """Filename for MLZ data. Set to 'None' to omit this run type."""
 
 
 class FilepathMLZ(sciline.Scope[GeneralRunType, Path], Path): ...

@@ -4,6 +4,8 @@
 Coordinate transformations for powder diffraction.
 """
 
+from typing import cast
+
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
@@ -316,6 +318,8 @@ def add_scattering_coordinates_from_positions_mlz(
     graph:
         Coordinate transformation graph.
     """
+    if data is None:
+        return cast(WavelengthDetector[RunType], None)
     data = data.transform_coords(
         ["two_theta", "wavelength", "Ltotal", "dperp"],
         graph=graph,

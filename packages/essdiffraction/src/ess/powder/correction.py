@@ -4,7 +4,7 @@
 
 import enum
 from collections.abc import Mapping, Sequence
-from typing import TypeVar
+from typing import TypeVar, cast
 
 import sciline
 import scipp as sc
@@ -247,6 +247,10 @@ def normalize_by_vanadium_2d_mlz(
     vanadium: EmptyCanSubtracted2D[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> Intensity2D:
+    if data is None:
+        return cast(Intensity2D, None)
+    if vanadium is None:
+        return Intensity2D(data)
     norm = broadcast_uncertainties(
         vanadium, prototype=data, mode=uncertainty_broadcast_mode
     )
@@ -345,6 +349,8 @@ def normalize_by_proton_charge_mlz(
     :
         ``data / proton_charge``
     """
+    if data is None:
+        return cast(NormalizedDspacing[RunType], None)
     return NormalizedDspacing[RunType](data / proton_charge)
 
 
@@ -444,6 +450,10 @@ def subtract_sample_empty_can_mlz(
     data: Dspacing2D[SampleRun],
     background: Dspacing2D[EmptyCanRun],
 ) -> EmptyCanSubtracted2D[SampleRun]:
+    if data is None:
+        return cast(EmptyCanSubtracted2D[SampleRun], None)
+    if background is None:
+        return EmptyCanSubtracted2D[SampleRun](data)
     if data.bins is None:
         return EmptyCanSubtracted2D[SampleRun](data - background)
     return EmptyCanSubtracted2D[SampleRun](data.bins.concatenate(-background))
@@ -453,6 +463,10 @@ def subtract_vanadium_empty_can_mlz(
     data: Dspacing2D[VanadiumRun],
     background: Dspacing2D[EmptyVanadiumCanRun],
 ) -> EmptyCanSubtracted2D[VanadiumRun]:
+    if data is None:
+        return cast(EmptyCanSubtracted2D[VanadiumRun], None)
+    if background is None:
+        return EmptyCanSubtracted2D[VanadiumRun](data)
     if data.bins is None:
         return EmptyCanSubtracted2D[VanadiumRun](data - background)
     return EmptyCanSubtracted2D[VanadiumRun](data.bins.concatenate(-background))
