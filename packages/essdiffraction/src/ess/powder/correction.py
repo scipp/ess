@@ -33,6 +33,7 @@ from .types import (
     EmptyVanadiumCanRun,
     WavelengthMonitor,
     EmptyCanSubtracted2D,
+    Intensity2D,
 )
 
 _T = TypeVar("_T")
@@ -239,6 +240,25 @@ def normalize_by_vanadium_dspacing(
     return IntensityDspacing(
         _normalize_by_vanadium(data, vanadium, uncertainty_broadcast_mode)
     )
+
+
+def normalize_by_vanadium_2d_mlz(
+    data: EmptyCanSubtracted2D[SampleRun],
+    vanadium: EmptyCanSubtracted2D[VanadiumRun],
+    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+) -> Intensity2D:
+    norm = broadcast_uncertainties(
+        vanadium, prototype=data, mode=uncertainty_broadcast_mode
+    )
+    # Convert the unit such that the end-result has unit 'one' because the division
+    # might otherwise produce a unit with a large scale if the proton charges in data
+    # and vanadium were measured with different units.
+    # norm = norm.to(unit=data.unit, copy=False) <- Seems not needed in our worlflow
+    normalized = data / norm
+    mask = norm.data == sc.scalar(0.0, unit=norm.unit)
+    if mask.any():
+        normalized.masks['zero_vanadium'] = mask
+    return Intensity2D(normalized)
 
 
 def normalize_by_vanadium_dspacing_and_two_theta(

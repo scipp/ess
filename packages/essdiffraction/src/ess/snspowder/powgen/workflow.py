@@ -58,6 +58,7 @@ from ess.packages.essdiffraction.src.ess.powder.correction import (
     normalize_by_vanadium_dspacing,
     subtract_sample_empty_can_mlz,
     subtract_vanadium_empty_can_mlz,
+    normalize_by_vanadium_2d_mlz
 )
 
 from ess.packages.essdiffraction.src.ess.powder.filtering import (
@@ -129,6 +130,7 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 # integrate_two_theta,
                 subtract_sample_empty_can_mlz,
                 subtract_vanadium_empty_can_mlz,
+                normalize_by_vanadium_2d_mlz
             ]
         ),
         params={

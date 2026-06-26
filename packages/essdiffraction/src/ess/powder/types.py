@@ -18,7 +18,7 @@ from scippneutron.io import cif
 from scippneutron.metadata import Person, Software
 
 from ess.packages.essreduce.src.ess.reduce.nexus import types as reduce_t
-from ess.packages.essreduce.src.ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
+from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 from ess.packages.essreduce.src.ess.reduce.unwrap import types as unwrap_t
 
 EmptyDetector = reduce_t.EmptyDetector
@@ -187,6 +187,9 @@ EmptyCanSubtractedIofDspacingTwoTheta = NewType(
 
 IntensityTof = NewType("IntensityTof", sc.DataArray)
 """Normalized data that has been converted to ToF."""
+
+Intensity2D = NewType("Intensity2D", sc.DataArray)
+"""2D Intensity of normalized sample data."""
 
 EmptyCanSubtractedIntensityTof = NewType("EmptyCanSubtractedIntensityTof", sc.DataArray)
 """Normalized and empty-can-subtracted data that has been converted to ToF."""
