@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from typing import Any, Protocol
 
-from ._config import default_layout, default_style
+from ._config import default_layout, default_style, full_width_layout
 from ._pydantic import (
     PydanticModelWidget,
     PydanticParameterValueWidget,
@@ -26,4 +26,5 @@ __all__ = [
     'Spinner',
     'default_layout',
     'default_style',
+    'full_width_layout',
 ]

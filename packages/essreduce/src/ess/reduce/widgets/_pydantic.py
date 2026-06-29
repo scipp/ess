@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from enum import Enum
+from html import escape
 from pathlib import Path
 from types import NoneType, UnionType
 from typing import Any, Literal, get_args, get_origin
@@ -14,7 +15,7 @@ from pydantic import Field
 from pydantic_core import PydanticUndefined
 
 from ._base import WidgetWithFieldsMixin
-from ._config import default_layout, default_style
+from ._config import default_style, full_width_layout
 
 
 def snake_to_camel(snake_str: str) -> str:
@@ -99,12 +100,80 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return dict(value or {})
 
 
+def _model_description(model: type[pydantic.BaseModel]) -> str | None:
+    doc = model.__doc__
+    if doc is None:
+        return None
+    first_paragraph = doc.strip().split('\n\n', maxsplit=1)[0].strip()
+    return first_paragraph or None
+
+
+def _help_icon(description: str) -> ipw.HTML:
+    escaped = escape(description, quote=True)
+    return ipw.HTML(
+        (
+            f'<span title="{escaped}" aria-label="{escaped}" '
+            'style="color: #666; cursor: help; padding-left: 0.35em;">'
+            '&#9432;</span>'
+        ),
+        layout=ipw.Layout(width='1.4em'),
+    )
+
+
+def _title_html(title: str, description: str | None = None) -> ipw.HTML:
+    escaped_title = escape(title)
+    if description is None:
+        return ipw.HTML(f"<strong>{escaped_title}</strong>")
+    escaped_description = escape(description, quote=True)
+    return ipw.HTML(
+        f'<strong title="{escaped_description}">{escaped_title}</strong>'
+        f'<span title="{escaped_description}" aria-label="{escaped_description}" '
+        'style="color: #666; cursor: help; padding-left: 0.35em;">'
+        '&#9432;</span>'
+    )
+
+
+class FieldWithHelp(ipw.HBox, ipw.ValueWidget):
+    """Add a compact hover target for a field description."""
+
+    def __init__(self, widget: ipw.Widget, description: str):
+        self.widget = widget
+        if not isinstance(widget, ipw.Checkbox):
+            widget.layout.flex = '1 1 auto'
+        super().__init__(
+            [widget, _help_icon(description)],
+            layout=full_width_layout(width='auto'),
+        )
+
+    @property
+    def value(self) -> Any:
+        return self.widget.value
+
+    @value.setter
+    def value(self, value: Any) -> None:
+        self.widget.value = value
+
+
+def _with_help(widget: ipw.Widget, description: str | None) -> ipw.Widget:
+    if description is None:
+        return widget
+    return FieldWithHelp(widget, description)
+
+
 class PydanticFieldWidget(ipw.VBox, ipw.ValueWidget):
     """Labelled wrapper for nested Pydantic model fields."""
 
-    def __init__(self, title: str, widget: PydanticParameterWidget):
+    def __init__(
+        self,
+        title: str,
+        widget: PydanticParameterWidget,
+        description: str | None = None,
+    ):
         self.widget = widget
-        super().__init__([ipw.HTML(f"<strong>{title}</strong>"), widget])
+        super().__init__(
+            [_title_html(title, description), widget],
+            layout=full_width_layout(),
+        )
 
     @property
     def value(self) -> pydantic.BaseModel:
@@ -129,6 +198,9 @@ class PydanticParameterValueWidget(ipw.VBox, ipw.ValueWidget):
         if self._returns_model:
             initial_values = default if default is not PydanticUndefined else None
             self._widget = PydanticParameterWidget(model, initial_values=initial_values)
+            child = PydanticFieldWidget(
+                title, self._widget, description or _model_description(model)
+            )
         else:
             if default is PydanticUndefined:
                 field = Field(title=title, description=description)
@@ -136,7 +208,8 @@ class PydanticParameterValueWidget(ipw.VBox, ipw.ValueWidget):
                 field = Field(default=default, title=title, description=description)
             model_class = pydantic.create_model('ParameterValue', value=(model, field))
             self._widget = PydanticParameterWidget(model_class)
-        super().__init__([self._widget])
+            child = self._widget
+        super().__init__([child], layout=full_width_layout())
 
     @property
     def value(self) -> Any:
@@ -152,12 +225,7 @@ class PydanticParameterValueWidget(ipw.VBox, ipw.ValueWidget):
             self._widget.set_values({'value': value})
 
     def get_fields(self) -> dict[str, Any]:
-        if self._returns_model:
-            value = self.value
-            return (
-                value.model_dump() if isinstance(value, pydantic.BaseModel) else value
-            )
-        return {'value': self.value}
+        return self._widget.get_values()
 
     def set_fields(self, values: dict[str, Any]) -> None:
         self.set_value(values)
@@ -178,6 +246,7 @@ class PydanticParameterWidget(ipw.VBox, ipw.ValueWidget, WidgetWithFieldsMixin):
         initial_values: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
+        kwargs.setdefault('layout', full_width_layout())
         super().__init__(**kwargs)
         self.model_class = model_class
         self.widgets: dict[str, ipw.Widget] = {}
@@ -199,26 +268,35 @@ class PydanticParameterWidget(ipw.VBox, ipw.ValueWidget, WidgetWithFieldsMixin):
     ) -> ipw.Widget:
         field_type, optional = _strip_optional(field_info.annotation)
         default_value = self._field_default(field_info)
-        description = field_info.description or field_name
         display_name = field_info.title or snake_to_camel(field_name)
+        help_text = field_info.description
+        description = help_text or display_name
         disabled = bool(field_info.frozen)
         common = {
             'description': display_name,
             'disabled': disabled,
             'tooltip': description,
-            'layout': default_layout,
+            'layout': full_width_layout(width='auto'),
             'style': default_style,
         }
 
         if field_type is float:
-            return ipw.FloatText(value=default_value or 0.0, **common)
+            return _with_help(
+                ipw.FloatText(value=default_value or 0.0, **common), help_text
+            )
         if field_type is int:
-            return ipw.IntText(value=default_value or 0, **common)
+            return _with_help(
+                ipw.IntText(value=default_value or 0, **common), help_text
+            )
         if field_type is bool:
-            return ipw.Checkbox(value=default_value or False, **common)
+            return _with_help(
+                ipw.Checkbox(value=default_value or False, **common), help_text
+            )
         if field_type in (Path, str):
             value = '' if default_value is None else str(default_value)
-            return ipw.Text(value=value, placeholder=description, **common)
+            return _with_help(
+                ipw.Text(value=value, placeholder=description, **common), help_text
+            )
         if isinstance(field_type, type) and issubclass(field_type, Enum):
             options = _enum_options(field_type)
             value = (
@@ -226,35 +304,47 @@ class PydanticParameterWidget(ipw.VBox, ipw.ValueWidget, WidgetWithFieldsMixin):
                 if default_value is not None
                 else next(iter(options.values()))
             )
-            return ipw.Dropdown(options=options, value=value, **common)
+            return _with_help(
+                ipw.Dropdown(options=options, value=value, **common), help_text
+            )
         if _is_set_of_enum(field_type):
             (enum_type,) = get_args(field_type)
             options = _enum_options(enum_type)
             value = tuple(default_value or ())
-            return ipw.SelectMultiple(
-                options=options,
-                value=value,
-                rows=min(len(options), 10),
-                **common,
+            return _with_help(
+                ipw.SelectMultiple(
+                    options=options,
+                    value=value,
+                    rows=min(len(options), 10),
+                    **common,
+                ),
+                help_text,
             )
         if get_origin(field_type) is Literal:
             literal_values = get_args(field_type)
             options = {str(val): val for val in literal_values}
             value = default_value if default_value is not None else literal_values[0]
-            return ipw.Dropdown(options=options, value=value, **common)
+            return _with_help(
+                ipw.Dropdown(options=options, value=value, **common), help_text
+            )
         if _is_string_sequence(field_type):
             value = _sequence_to_text(default_value)
-            return ipw.Text(value=value, placeholder=description, **common)
+            return _with_help(
+                ipw.Text(value=value, placeholder=description, **common), help_text
+            )
         if _is_pydantic_model(field_type):
             return PydanticFieldWidget(
                 display_name,
                 PydanticParameterWidget(
                     field_type, initial_values=_as_dict(default_value)
                 ),
+                help_text or _model_description(field_type),
             )
 
         value = '' if default_value is None and optional else str(default_value or '')
-        return ipw.Text(value=value, placeholder=description, **common)
+        return _with_help(
+            ipw.Text(value=value, placeholder=description, **common), help_text
+        )
 
     @staticmethod
     def _field_default(field_info: pydantic.fields.FieldInfo) -> Any:
@@ -270,6 +360,9 @@ class PydanticParameterWidget(ipw.VBox, ipw.ValueWidget, WidgetWithFieldsMixin):
             field_type, optional = _strip_optional(
                 self.model_class.model_fields[field_name].annotation
             )
+            if _is_pydantic_model(field_type):
+                values[field_name] = widget.widget.get_values()
+                continue
             value = widget.value
             if field_type is Path:
                 value = Path(value) if value else None
@@ -362,6 +455,7 @@ class PydanticModelWidget(ipw.VBox):
         hidden_fields: frozenset[str] = frozenset(),
         **kwargs: Any,
     ) -> None:
+        kwargs.setdefault('layout', full_width_layout())
         super().__init__(**kwargs)
         self._model_class = model_class
         self._hidden_fields = hidden_fields
@@ -406,9 +500,16 @@ class PydanticModelWidget(ipw.VBox):
             widget = PydanticParameterWidget(field_type, initial_values=values)
             self._parameter_widgets[field_name] = widget
             title = field_info.title or field_name.replace('_', ' ').title()
+            widget = PydanticFieldWidget(
+                title,
+                widget,
+                field_info.description or _model_description(field_type),
+            )
             titles.append(title)
             children.append(widget)
-        accordion = ipw.Accordion(children=children)
+        accordion = ipw.Accordion(
+            children=children, layout=full_width_layout(width='auto')
+        )
         for index, title in enumerate(titles):
             accordion.set_title(index, title)
         if children:
