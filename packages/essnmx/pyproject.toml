@@ -68,6 +68,7 @@ docs = [
   "sphinx-design>=0.5.0",
   "pythreejs>=2.4.1", # For instrument view.
   "scippneutron>=26.03.0",
+  "anywidget>=0.8.0",
 ]
 
 [project.urls]
