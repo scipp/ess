@@ -33,6 +33,8 @@ jobs:
             file_output: true
           - package: essreflectometry
             file_output: true
+          - package: essimaging
+            file_output: true
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
