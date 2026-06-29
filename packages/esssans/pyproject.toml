@@ -36,7 +36,6 @@ dependencies = [
   "numpy>=1.26.4",
   "pandas>=2.1.2",
   "plopp>=26.5.0",
-  "pythreejs>=2.4.1",
 ]
 
 [project.optional-dependencies]
@@ -46,6 +45,7 @@ test = [
     "pooch>=1.5",
     "scipy>=1.15.0",
     "anywidget>=0.8.0",
+    "pythreejs>=2.4.1",
 ]
 docs = [
     "autodoc-pydantic>=2.0.0",
@@ -60,6 +60,7 @@ docs = [
     "sphinx-copybutton>=0.5.2",
     "sphinx-design>=0.5.0",
     "tof>=25.08.0",
+    "pythreejs>=2.4.1",
 ]
 
 [project.urls]
