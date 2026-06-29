@@ -38,14 +38,6 @@ def _merge(*dicts: dict) -> dict:
     return {key: value for d in dicts for key, value in d.items()}
 
 
-def _preserve_typical_outputs(
-    source: sciline.Pipeline, target: sciline.Pipeline
-) -> sciline.Pipeline:
-    if (typical_outputs := getattr(source, 'typical_outputs', None)) is not None:
-        target.typical_outputs = typical_outputs
-    return target
-
-
 def merge_contributions(*data: sc.DataArray) -> sc.DataArray:
     if len(data) == 1:
         return data[0]
@@ -66,7 +58,6 @@ def with_pixel_mask_filenames(
     masks:
         List or tuple of pixel mask filenames to set.
     """
-    source = workflow
     masks = tuple(masks)
     target = workflow.copy()
     if masks:
@@ -77,7 +68,7 @@ def with_pixel_mask_filenames(
         )
     else:
         target[DetectorMasks] = DetectorMasks({})
-    return _preserve_typical_outputs(source, target)
+    return target
 
 
 def with_banks(
@@ -102,18 +93,14 @@ def with_banks(
         Index to use for the DataFrame. If not provided, the bank names are used.
     """
     index = index or banks
-    return _preserve_typical_outputs(
-        workflow,
-        workflow.map(
-            pd.DataFrame({NeXusDetectorName: banks}, index=index).rename_axis('bank')
-        ),
+    return workflow.map(
+        pd.DataFrame({NeXusDetectorName: banks}, index=index).rename_axis('bank')
     )
 
 
 def _set_runs(
     pipeline: sciline.Pipeline, runs: Iterable[str], key: Hashable, axis_name: str
 ) -> sciline.Pipeline:
-    source = pipeline
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
     for part in (Numerator, Denominator):
@@ -123,7 +110,7 @@ def _set_runs(
                 .map(runs)
                 .reduce(index=axis_name, func=merge_contributions)
             )
-    return _preserve_typical_outputs(source, pipeline)
+    return pipeline
 
 
 def with_sample_runs(
@@ -223,5 +210,4 @@ def SansWorkflow(
     workflow[TransformationPath] = TransformationPath('transform')
     workflow[WavelengthBands] = WavelengthBands(None)
     workflow[WavelengthMask] = WavelengthMask(None)
-    workflow.parameter_registry = parameters
     return workflow

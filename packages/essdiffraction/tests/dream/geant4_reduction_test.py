@@ -340,7 +340,7 @@ def test_dream_workflow_registers_subclasses():
         assert wf in reduce_workflow.workflow_registry
     count = len(reduce_workflow.workflow_registry)
 
-    @reduce_workflow.register_workflow
+    @reduce_workflow.register_workflow()
     class MyWorkflow: ...
 
     assert MyWorkflow in reduce_workflow.workflow_registry
@@ -348,13 +348,16 @@ def test_dream_workflow_registers_subclasses():
 
 
 def test_dream_workflow_registers_parameter_registry():
-    wf = DreamGeant4ProtonChargeWorkflow()
-    assert wf.parameter_registry is dream_parameters
+    spec = reduce_workflow.workflow_registry.get(DreamGeant4ProtonChargeWorkflow)
+    assert spec.parameters is dream_parameters
 
 
 def test_dream_workflow_applies_parameter_values():
     wf = DreamGeant4ProtonChargeWorkflow()
-    specs = reduce_workflow.get_parameters(wf, (IntensityDspacingTwoTheta[SampleRun],))
+    spec = reduce_workflow.workflow_registry.get(DreamGeant4ProtonChargeWorkflow)
+    specs = reduce_workflow.get_parameters(
+        wf, (IntensityDspacingTwoTheta[SampleRun],), spec.parameters
+    )
     values = {
         key: spec.default
         for key, spec in specs.items()

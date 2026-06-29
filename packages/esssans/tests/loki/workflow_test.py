@@ -32,7 +32,7 @@ def test_sans_workflow_registers_subclasses():
     assert LokiAtLarmorWorkflow in workflow.workflow_registry
     count = len(workflow.workflow_registry)
 
-    @workflow.register_workflow
+    @workflow.register_workflow()
     class MyWorkflow: ...
 
     assert MyWorkflow in workflow.workflow_registry
@@ -40,13 +40,14 @@ def test_sans_workflow_registers_subclasses():
 
 
 def test_loki_larmor_workflow_registers_parameter_model():
-    wf = LokiAtLarmorWorkflow()
-    assert wf.parameter_registry is sans_parameters
+    spec = workflow.workflow_registry.get(LokiAtLarmorWorkflow)
+    assert spec.parameters is sans_parameters
 
 
 def test_loki_larmor_workflow_applies_parameter_model():
     wf = LokiAtLarmorWorkflow()
-    params = workflow.get_parameters(wf, (ReturnEvents,))
+    spec = workflow.workflow_registry.get(LokiAtLarmorWorkflow)
+    params = workflow.get_parameters(wf, (ReturnEvents,), spec.parameters)
     wf = workflow.assign_parameter_values(wf, {ReturnEvents: True}, params)
 
     assert wf.compute(ReturnEvents)
@@ -54,8 +55,9 @@ def test_loki_larmor_workflow_applies_parameter_model():
 
 def test_loki_larmor_workflow_parameters_are_selected_from_graph():
     wf = LokiAtLarmorWorkflow()
+    spec = workflow.workflow_registry.get(LokiAtLarmorWorkflow)
 
-    params = workflow.get_parameters(wf, (BackgroundSubtractedIofQ,))
+    params = workflow.get_parameters(wf, (BackgroundSubtractedIofQ,), spec.parameters)
 
     assert Filename[SampleRun] in params
     assert PixelMaskFilename in params
@@ -65,8 +67,11 @@ def test_loki_larmor_workflow_parameters_are_selected_from_graph():
 
 def test_loki_larmor_tutorial_workflow_preserves_outputs_and_masks():
     wf = LokiAtLarmorTutorialWorkflow()
+    spec = workflow.workflow_registry.get(LokiAtLarmorTutorialWorkflow)
 
-    labels = [label for label, _ in workflow.get_typical_outputs(wf)]
+    labels = [
+        label for label, _ in workflow.get_typical_outputs(wf, spec.typical_outputs)
+    ]
     masks = wf.compute(DetectorMasks)
 
     assert 'IntensityQ[SampleRun]' in labels

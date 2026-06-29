@@ -14,7 +14,6 @@ from ess.powder.types import (
     EmptyCanRun,
     Filename,
     KeepEvents,
-    MaskedDetectorIDs,
     NeXusDetectorName,
     RunType,
     SampleRun,
@@ -59,7 +58,6 @@ default_parameters = {
     ),
     TofMask: None,
     WavelengthMask: None,
-    MaskedDetectorIDs: MaskedDetectorIDs({}),
     NeXusDetectorName: "detector",
     DetectorBank: DetectorBank.south,
     Filename[SampleRun]: str(mcstas_powder_silicon_in_vanadium_can()),
@@ -68,7 +66,7 @@ default_parameters = {
 }
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def BeerModMcStasWorkflow():
     """Workflow to process BEER (modulation regime) McStas files without a list
     of estimated peak positions."""
@@ -82,12 +80,10 @@ def BeerModMcStasWorkflow():
         params=default_parameters,
         constraints={RunType: (SampleRun,)},
     )
-    wf.typical_outputs = typical_outputs
-    wf.parameter_registry = parameters
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def BeerModMcStasWorkflowKnownPeaks():
     """Workflow to process BEER (modulation regime) McStas files using a list
     of estimated peak positions."""
@@ -100,12 +96,10 @@ def BeerModMcStasWorkflowKnownPeaks():
         params=default_parameters,
         constraints={RunType: (SampleRun,)},
     )
-    wf.typical_outputs = typical_outputs
-    wf.parameter_registry = parameters
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def BeerMcStasWorkflowPulseShaping():
     """Workflow to process BEER (pulse shaping modes) McStas files"""
     wf = sl.Pipeline(
@@ -113,12 +107,10 @@ def BeerMcStasWorkflowPulseShaping():
         params=default_parameters,
         constraints={RunType: (SampleRun,)},
     )
-    wf.typical_outputs = typical_outputs
-    wf.parameter_registry = parameters
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def BeerMcStasWorkflowPulseShapingAnalytical():
     """Workflow to process BEER pulse-shaping McStas files using analytical
     frame unwrapping."""
@@ -134,12 +126,10 @@ def BeerMcStasWorkflowPulseShapingAnalytical():
         wf[key] = value
     wf[NeXusName[snx.NXdetector]] = 'detector'
     wf[LookupTableRelativeErrorThreshold] = {'detector': float('inf')}
-    wf.typical_outputs = typical_outputs
-    wf.parameter_registry = parameters
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def BeerPowderWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.monitor_integrated,
@@ -174,12 +164,10 @@ def BeerPowderWorkflow(
     insert_run_normalization(wf, run_norm)
     for key, value in default_parameters.items():
         wf[key] = value
-    wf.typical_outputs = typical_outputs
-    wf.parameter_registry = parameters
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def BeerPowderWorkflowAnalytical(
     *,
     run_norm: RunNormalization = RunNormalization.monitor_integrated,
@@ -221,26 +209,22 @@ def BeerPowderWorkflowAnalytical(
         'monitor_bunker': float('inf'),
         'monitor_cave': float('inf'),
     }
-    wf.typical_outputs = typical_outputs
-    wf.parameter_registry = parameters
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def BeerPowderMcStasWorkflow(**kwargs) -> sl.Pipeline:
     """Create the BEER powder workflow with McStas loaders inserted."""
     wf = BeerPowderWorkflow(**kwargs)
     for provider in mcstas_providers:
         wf.insert(provider)
-    wf.parameter_registry = parameters
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def BeerPowderMcStasWorkflowAnalytical(**kwargs) -> sl.Pipeline:
     """Create the BEER analytical powder workflow with McStas loaders inserted."""
     wf = BeerPowderWorkflowAnalytical(**kwargs)
     for provider in itertools.chain(mcstas_providers, pulse_shaping_mcstas_providers):
         wf.insert(provider)
-    wf.parameter_registry = parameters
     return wf

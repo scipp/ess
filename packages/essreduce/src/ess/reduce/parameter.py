@@ -31,13 +31,11 @@ class ParameterSpec(Generic[T]):
     default: T | KeepDefaultType = keep_default
     transform: Callable[[T], Any] | None = None
     apply: Callable[[Pipeline, T], Pipeline] | None = None
-    filter_keys: tuple[Key, ...] = ()
     use_workflow_default: bool = True
     key: Key | None = None
 
     def bind(self, key: Key) -> ParameterSpec[T]:
-        filter_keys = self.filter_keys or (key,)
-        return replace(self, key=key, filter_keys=filter_keys)
+        return replace(self, key=key)
 
     def with_default(
         self, default: T | KeepDefaultType = keep_default

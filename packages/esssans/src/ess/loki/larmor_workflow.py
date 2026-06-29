@@ -9,7 +9,7 @@ import scipp as sc
 import scippnexus as snx
 from ess import sans
 from ess.sans.io import read_xml_detector_masking
-from ess.sans.parameters import typical_outputs
+from ess.sans.parameters import parameters, typical_outputs
 from scippneutron.conversion.graph import beamline, tof
 
 from ess.reduce.workflow import register_workflow
@@ -143,7 +143,7 @@ loki_at_larmor_providers = (
 )
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def LokiAtLarmorWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for Loki test at Larmor.
@@ -166,11 +166,10 @@ def LokiAtLarmorWorkflow() -> sciline.Pipeline:
     for key, param in larmor_default_parameters().items():
         workflow[key] = param
     workflow[NeXusDetectorName] = 'larmor_detector'
-    workflow.typical_outputs = typical_outputs
     return workflow
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
     from ess.loki import data
 

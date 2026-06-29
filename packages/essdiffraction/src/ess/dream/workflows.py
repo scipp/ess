@@ -138,7 +138,6 @@ def DreamWorkflow(
         "monitor_bunker": float('inf'),
         "monitor_cave": float('inf'),
     }
-    wf.parameter_registry = parameters
     return wf
 
 
@@ -184,8 +183,6 @@ def DreamPowderWorkflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
     insert_run_normalization(wf, run_norm)
     for key, value in default_parameters().items():
         wf[key] = value
-    wf.typical_outputs = typical_outputs
-    wf.parameter_registry = parameters
     return wf
 
 
@@ -248,12 +245,10 @@ def DreamGeant4Workflow(
     for key, value in additional_parameters.items():
         wf[key] = value
 
-    wf.typical_outputs = typical_outputs
-    wf.parameter_registry = parameters
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def DreamGeant4MonitorHistogramWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation, using a
@@ -262,7 +257,7 @@ def DreamGeant4MonitorHistogramWorkflow() -> sciline.Pipeline:
     return DreamGeant4Workflow(run_norm=RunNormalization.monitor_histogram)
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def DreamGeant4MonitorIntegratedWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation, using
@@ -271,7 +266,7 @@ def DreamGeant4MonitorIntegratedWorkflow() -> sciline.Pipeline:
     return DreamGeant4Workflow(run_norm=RunNormalization.monitor_integrated)
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def DreamGeant4ProtonChargeWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation, using

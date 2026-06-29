@@ -120,71 +120,83 @@ parameters[Filename[SampleRun]] = ParameterSpec(
     model=tuple[str, ...],
     category='Files',
     title='Sample Runs',
+    description='Comma-separated NeXus file paths for the sample runs.',
 )
 parameters[Filename[BackgroundRun]] = ParameterSpec(
     model=tuple[str, ...],
     category='Files',
     title='Background Runs',
+    description='Comma-separated NeXus file paths for the background runs.',
 )
 parameters[Filename[TransmissionRun[SampleRun]]] = ParameterSpec(
     model=str | None,
     category='Files',
     title='Sample Transmission',
+    description='NeXus file path for the sample transmission run.',
     default=None,
 )
 parameters[Filename[TransmissionRun[BackgroundRun]]] = ParameterSpec(
     model=str | None,
     category='Files',
     title='Background Transmission',
+    description='NeXus file path for the background transmission run.',
     default=None,
 )
 parameters[Filename[EmptyBeamRun]] = ParameterSpec(
     model=str | None,
     category='Files',
     title='Empty Beam',
+    description='NeXus file path for the empty-beam run.',
     default=None,
 )
 parameters[PixelMaskFilename] = ParameterSpec(
     model=tuple[str, ...],
     category='Files',
     title='Pixel Masks',
+    description='Comma-separated paths to detector pixel mask files.',
+    default=(),
 )
 parameters[DirectBeamFilename] = ParameterSpec(
     model=str | None,
     category='Files',
     title='Direct Beam',
+    description='Direct-beam file path; leave empty to skip direct-beam correction.',
     default=None,
     apply=_direct_beam_filename,
-    filter_keys=(DirectBeam, DirectBeamFilename),
 )
 
 parameters[NeXusDetectorName] = ParameterSpec(
     model=str,
     category='NeXus',
     title='Detector',
+    description='Name of the detector group in the NeXus files.',
 )
 parameters[NeXusMonitorName[Incident]] = ParameterSpec(
     model=str,
     category='NeXus',
     title='Incident Monitor',
+    description='Name of the incident monitor group in the NeXus files.',
     default='',
 )
 parameters[NeXusMonitorName[Transmission]] = ParameterSpec(
     model=str,
     category='NeXus',
     title='Transmission Monitor',
+    description='Name of the transmission monitor group in the NeXus files.',
     default='',
 )
 parameters[TransformationPath] = ParameterSpec(
     model=str,
     category='NeXus',
     title='Transform Path',
+    description='NeXus path containing detector transformation information.',
     default='',
 )
 parameters[PixelShapePath] = ParameterSpec(
     model=str,
     category='NeXus',
     title='Pixel Shape Path',
+    description='NeXus path containing detector pixel-shape information.',
     default='',
 )
 
@@ -192,6 +204,7 @@ parameters[WavelengthBins] = ParameterSpec(
     model=WavelengthEdges,
     category='Binning',
     title='Wavelength Edges',
+    description='Wavelength bin edges used for monitor and detector histograms.',
     default=WavelengthEdges(start=2.0, stop=12.0, num_bins=300),
     transform=_edges,
     use_workflow_default=False,
@@ -200,6 +213,7 @@ parameters[QBins] = ParameterSpec(
     model=QEdges,
     category='Binning',
     title='Q Edges',
+    description='Q bin edges used for one-dimensional I(Q) outputs.',
     default=QEdges(start=0.1, stop=0.3, num_bins=100, unit=QUnit.INVERSE_ANGSTROM),
     transform=_edges,
     use_workflow_default=False,
@@ -208,6 +222,7 @@ parameters[QxBins] = ParameterSpec(
     model=QxEdges,
     category='Binning',
     title='Qx Edges',
+    description='Qx bin edges used for two-dimensional I(Qx, Qy) outputs.',
     default=QxEdges(),
     transform=_edges,
     use_workflow_default=False,
@@ -216,6 +231,7 @@ parameters[QyBins] = ParameterSpec(
     model=QyEdges,
     category='Binning',
     title='Qy Edges',
+    description='Qy bin edges used for two-dimensional I(Qx, Qy) outputs.',
     default=QyEdges(),
     transform=_edges,
     use_workflow_default=False,
@@ -225,6 +241,7 @@ parameters[CorrectForGravity] = ParameterSpec(
     model=bool,
     category='Reduction',
     title='Correct Gravity',
+    description='Apply gravity correction to neutron trajectories before reduction.',
     default=False,
     transform=CorrectForGravity,
 )
@@ -232,6 +249,7 @@ parameters[ReturnEvents] = ParameterSpec(
     model=bool,
     category='Reduction',
     title='Return Events',
+    description='Keep event data in outputs where the workflow supports it.',
     default=False,
     transform=ReturnEvents,
 )
@@ -239,12 +257,14 @@ parameters[UncertaintyBroadcastMode] = ParameterSpec(
     model=UncertaintyBroadcastMode,
     category='Reduction',
     title='Uncertainty Broadcast',
+    description='How uncertainties are broadcast when reduced data are combined.',
     default=UncertaintyBroadcastMode.upper_bound,
 )
 parameters[BeamCenter] = ParameterSpec(
     model=BeamCenterXY,
     category='Reduction',
     title='Beam Center',
+    description='Detector-plane beam center used for Q conversion.',
     default=BeamCenterXY(),
     transform=_beam_center,
     use_workflow_default=False,

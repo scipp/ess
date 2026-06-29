@@ -27,11 +27,15 @@ from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import (
     DspacingDetector,
     ElasticCoordTransformGraph,
+    IntensityDspacingTwoTheta,
+    MaskedDetectorIDs,
+    PixelMaskFilename,
     RawDetector,
     SampleRun,
 )
 from scipp.testing import assert_allclose
 
+from ess.reduce import workflow as reduce_workflow
 from ess.reduce.nexus.types import DetectorBankSizes, Filename
 
 
@@ -121,6 +125,19 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
         sc.scalar(1.6374, unit='angstrom'),
         atol=sc.scalar(2e-3, unit='angstrom'),
     )
+
+
+def test_powder_mcstas_analytical_workflow_exposes_pixel_mask_parameter():
+    wf = BeerPowderMcStasWorkflowAnalytical()
+    spec = reduce_workflow.workflow_registry.get(BeerPowderMcStasWorkflowAnalytical)
+
+    specs = reduce_workflow.get_parameters(
+        wf, (IntensityDspacingTwoTheta[SampleRun],), spec.parameters
+    )
+    wf = reduce_workflow.assign_parameter_values(wf, {PixelMaskFilename: ()}, specs)
+
+    assert PixelMaskFilename in specs
+    assert wf.compute(MaskedDetectorIDs) == {}
 
 
 def test_can_load_3d_detector():
