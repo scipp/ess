@@ -19,6 +19,7 @@ from .types import (
     FocussedDataDspacingTwoTheta,
     KeepEvents,
     NormalizedDspacing,
+    KeepEventsMLZ,
     RunType,
     TwoThetaBins,
 )
@@ -186,11 +187,12 @@ def focus_data_dspacing_and_two_theta(
     return CorrectedDspacing[RunType](result)
 
 
+# Not used / needed anymore?
 def bin_dspacing_dperp_mlz(
     data: SpectralDetector[RunType],
     dspacing_bins: DspacingBins,
     dperp_bins: DperpBins,
-    keep_events: KeepEvents[RunType],
+    keep_events: KeepEventsMLZ,
 ) -> DspacingDetector[RunType]:
     """
     Reduce the pixel-based data to d-spacing and dperp dimensions.
@@ -218,7 +220,7 @@ def bin_dspacing_dperp_mlz(
     if data is None:
         return cast(DspacingDetector[RunType], None)
     args = {dperp_bins.dim: dperp_bins, dspacing_bins.dim: dspacing_bins}
-    if keep_events.value:
+    if keep_events:
         out = data.bin(args)
     else:
         # Reconstructing the wavelength results in an inconsistency if dspacing was
@@ -242,7 +244,7 @@ def focus_to_dspacing_dperp(
     data: SpectralDetector[RunType],
     dspacing_bins: DspacingBins,
     dperp_bins: DperpBins,
-    keep_events: KeepEvents[RunType],
+    keep_events: KeepEventsMLZ,
 ) -> Dspacing2D[RunType]:
     if data is None:
         return cast(Dspacing2D[RunType], None)
@@ -252,7 +254,7 @@ def focus_to_dspacing_dperp(
             data = data.bins.drop_coords(name)
     data = data.bins.concat()
     args = {dspacing_bins.dim: dspacing_bins, dperp_bins.dim: dperp_bins}
-    out = data.bin(args) if keep_events.value else data.hist(args)
+    out = data.bin(args) if keep_events else data.hist(args)
     del data
     out.coords.pop("gd_prtn_chrg", None)
     return Dspacing2D[RunType](out)

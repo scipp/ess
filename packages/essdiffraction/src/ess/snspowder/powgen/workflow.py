@@ -6,6 +6,7 @@ from ess.packages.essdiffraction.src.ess.powder import providers as powder_provi
 
 from ess.packages.essdiffraction.src.ess.powder.types import (
     KeepEvents,
+    KeepEventsMLZ,
     NeXusDetectorName,
     SampleRun,
     TwoThetaBins,
@@ -139,11 +140,7 @@ def PowderReduceP2D() -> sciline.Pipeline:
             FilepathMLZ[EmptyCanRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
             FilepathMLZ[CalibrationRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
             FilepathMLZ[EmptyVanadiumCanRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
-            # need to figute out how the below keep events works
-            KeepEvents[SampleRun]: KeepEvents[SampleRun](False),
-            KeepEvents[EmptyCanRun]: KeepEvents[EmptyCanRun](False),
-            KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),
-            KeepEvents[EmptyVanadiumCanRun]: KeepEvents[EmptyVanadiumCanRun](False),
+            KeepEventsMLZ: False,
             # CalibrationData: None,
         }
     )

@@ -292,5 +292,9 @@ class KeepEvents(Generic[RunType]):
 
     value: bool
 
+KeepEventsMLZ = NewType("KeepEventsMLZ", bool)
+"""Flag indicating whether the workflow should keep all events when focussing data. If False, data will be histogrammed when focussing."""
+
+
 
 del sc, sciline, NewType, TypeVar
