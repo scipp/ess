@@ -9,6 +9,9 @@ from typing import cast
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
+from scipy.special import lambertw
+import numpy as np
+
 
 from .calibration import OutputCalibrationData
 from .correction import merge_calibration
@@ -413,6 +416,28 @@ def powder_monitor_coordinate_transformation_graph(
             'gravity': lambda: gravity,
         }
     )
+
+
+def sc_wright_omega_real(d: sc.Variable, dp: sc.Variable, lam_K: sc.Variable) -> sc.DataArray:
+    argument = (4.0 * d**2 - lam_K**2 * sc.log(0.25 * lam_K**2 / d**2) - dp**2) / lam_K**2
+    x = argument.values
+    wright_omega_values = np.real(lambertw(np.exp(x), 0))
+
+    wright_omega_var = sc.array(dims=argument.dims, values=wright_omega_values, unit=argument.unit)
+
+    wright_omega = sc.DataArray(
+        data=wright_omega_var,
+        coords={
+            d.dim: d,
+            dp.dim: dp,
+        },
+    )
+    return wright_omega
+
+
+def lambda_from_d_dperp(d: sc.Variable, dp: sc.Variable, lam_K: sc.Variable) -> sc.DataArray:
+    lam = sc.sqrt(4.0 * d**2 - lam_K**2 * sc_wright_omega_real(d, dp, lam_K))
+    return lam
 
 
 providers = (
