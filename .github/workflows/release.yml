@@ -109,6 +109,7 @@ jobs:
       TAG: ${{ needs.determine-package.outputs.package }}/${{ needs.determine-package.outputs.version }}
       GH_TOKEN: ${{ github.token }}
     steps:
+      - uses: actions/checkout@v6
       - name: Draft a release.
         run: gh release create ${TAG} --draft --title ${TAG}  # Default title is not always the tag name.
         continue-on-error: true  # Release create can fail if there is an existing release.
