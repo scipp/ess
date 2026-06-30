@@ -4,7 +4,6 @@
 Utilities for computing wavelength lookup tables.
 """
 
-import warnings
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Generic, NewType
@@ -560,12 +559,14 @@ def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndar
     y = np.vstack(
         [np.interp(x, b[:, 0], b[:, 1], left=np.nan, right=np.nan) for b in bounds]
     )
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore", category=RuntimeWarning, message="All-NaN slice encountered"
-        )
-        y_min = np.nanmin(y, axis=0)
-        y_max = np.nanmax(y, axis=0)
+    # fmin/fmax reduce ignore NaNs, yielding NaN only for fully-NaN columns (the
+    # expected case of a time bin no subframe covers). This is what nanmin/nanmax
+    # compute internally, minus their all-NaN RuntimeWarning. Avoiding that
+    # warning here sidesteps suppressing it via the process-global, thread-unsafe
+    # warnings.catch_warnings, which races when the workflow runs under a
+    # multi-threaded scheduler.
+    y_min = np.fmin.reduce(y, axis=0)
+    y_max = np.fmax.reduce(y, axis=0)
 
     # Median value and spread estimate
     return 0.5 * (y_min + y_max), 0.5 * (y_max - y_min)
