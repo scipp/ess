@@ -114,7 +114,7 @@ jobs:
         run: gh release create ${TAG} --draft --title ${TAG}  # Default title is not always the tag name.
         continue-on-error: true  # Release create can fail if there is an existing release.
       - name: Check the release.
-        run: gh release view ${TAG}  # This command should not fail.
+        run: gh release view ${TAG}  # This command should not fail if the release already exists or was created by the previous step.
 
   docs:
     name: Build and publish docs
