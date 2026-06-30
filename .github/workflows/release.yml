@@ -101,7 +101,7 @@ jobs:
 
   draft-release:
     name: Draft a release or/and check the release
-    needs: [ determine-package, publish ]
+    needs: [ determine-package ]
     runs-on: ubuntu-slim
     permissions:
       contents: write
