@@ -84,7 +84,7 @@ jobs:
 
   publish:
     name: Publish to PyPI
-    needs: [ determine-package, build ]
+    needs: build
     runs-on: ubuntu-24.04
     environment: release
     if: ${{ startsWith(github.ref, 'refs/tags/') && github.event_name != 'workflow_dispatch' }}
@@ -99,6 +99,23 @@ jobs:
         with:
           packages-dir: dist/
 
+  draft-release:
+    name: Draft a release or/and check the release
+    needs: [ determine-package, publish ]
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ needs.determine-package.outputs.package }}/${{ needs.determine-package.outputs.version }}
+    steps:
+      - name: Draft a release.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create ${TAG} --draft --title ${TAG}  # Default title is not always the tag name.
+        continue-on-error: true  # Release create can fail if there is an existing release.
+      - name: Check the release.
+        run: gh release view ${TAG}  # This command should not fail if the release already exists or was created by the previous step.
+
   docs:
     name: Build and publish docs
     needs: [ determine-package, publish ]
@@ -112,7 +129,7 @@ jobs:
 
   assets:
     name: Upload docs
-    needs: [ docs, determine-package ]
+    needs: [ docs, determine-package, draft-release ]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -128,14 +145,15 @@ jobs:
           mv docs_html documentation-${PACKAGE}-${VERSION}
           zip -r documentation-${PACKAGE}-${VERSION}.zip documentation-${PACKAGE}-${VERSION}
       - name: Upload release assets
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
-          overwrite: false
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASSET-FILE-PATH: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
+          TAG: ${{ needs.determine-package.outputs.package }}/${{ needs.determine-package.outputs.version }}
+        run: gh release upload ${TAG} ${ASSET-FILE-PATH} --clobber  # Overwrite existing assets of the same name.
 
   notes:
     name: Update notes
-    needs: [ determine-package, publish ]
+    needs: [ determine-package, draft-release ]
     runs-on: ubuntu-slim
     if: ${{ always() && needs.determine-package.outputs.lastversion }}
     permissions:
@@ -180,8 +198,8 @@ jobs:
         run: cat .ess_release_cache/${PACKAGE}-${VERSION}-${PACKAGE}-${LASTVERSION}-releasenote.md >> new-release-note.md
       - name: Check the generated note
         run: cat new-release-note.md
-      - name: Upload release note
+      - name: Upload release note and publish the release
         if: ${{ github.event_name != 'workflow_dispatch' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release edit ${PACKAGE}/${VERSION} --notes-file "new-release-note.md"
+        run: gh release edit ${PACKAGE}/${VERSION} --notes-file "new-release-note.md" --draft=false  # Publish the release with the new note.

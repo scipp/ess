@@ -39,7 +39,7 @@ class MergeLog(BaseModel):
 
     def __str__(self) -> str:
         authors = ", ".join([f"@{author.login}" for author in self.authors])
-        return f"{self.pr.title} by {authors} in {self.pr.url}"
+        return f"{self.pr.title} by {authors} in https://github.com/scipp/ess/pull/{self.pr.number}"
 
 
 def get_commits_file(cur_tag: str, compare_tag: str) -> pathlib.Path:
@@ -107,12 +107,7 @@ if __name__ == "__main__":
         else:
             maybe_relevant_logs.append(merge_log)
 
-    release_note = [
-        "## What's Changed",
-        '',
-        f"### {package_name.replace('ess', 'ESS')}",
-        '',
-    ]
+    release_note = ["## What's Changed"]
     release_note.extend([f"* {relevant_log}" for relevant_log in relevant_logs])
 
     if args.maybe_relevant:
