@@ -100,17 +100,21 @@ jobs:
           packages-dir: dist/
 
   draft-release:
-    name: Draft a release
+    name: Draft a release or/and check the release
     needs: [ determine-package, publish ]
     runs-on: ubuntu-slim
     permissions:
       contents: write
+    env:
+      TAG: ${{ needs.determine-package.outputs.package }}/${{ needs.determine-package.outputs.version }}
     steps:
       - name: Draft a release.
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ needs.determine-package.outputs.package }}/${{ needs.determine-package.outputs.version }}
         run: gh release create ${TAG} --draft --title ${TAG}  # Default title is not always the tag name.
+        continue-on-error: true  # Release create can fail if there is an existing release.
+      - name: Check the release.
+        run: gh release view ${TAG}  # This command should not fail.
 
   docs:
     name: Build and publish docs
