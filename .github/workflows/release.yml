@@ -103,6 +103,7 @@ jobs:
     name: Draft a release or/and check the release
     needs: [ determine-package ]
     runs-on: ubuntu-slim
+    if: ${{ startsWith(github.ref, 'refs/tags/') && github.event_name != 'workflow_dispatch' }}
     permissions:
       contents: write
     env:
