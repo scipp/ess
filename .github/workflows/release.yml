@@ -107,10 +107,9 @@ jobs:
       contents: write
     env:
       TAG: ${{ needs.determine-package.outputs.package }}/${{ needs.determine-package.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Draft a release.
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: gh release create ${TAG} --draft --title ${TAG}  # Default title is not always the tag name.
         continue-on-error: true  # Release create can fail if there is an existing release.
       - name: Check the release.
