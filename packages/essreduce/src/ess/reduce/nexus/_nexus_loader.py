@@ -552,7 +552,13 @@ def load_data(
     with open_nexus_file(file_path, definitions=definitions) as f:
         entry = _unique_child_group(f, snx.NXentry, entry_name)
         instrument = _unique_child_group(entry, snx.NXinstrument, None)
+
+        # This only loads the `Group` for the component, it does not build an
+        # `NXdetector`, `NXmonitor`, etc. So this does not use the application
+        # definitions which would drop the data by default. The definitions are
+        # only applied below in `data[sel]`.
         component = instrument[component_name]
+
         if _contains_nx_class(component, snx.NXevent_data):
             data = _unique_child_group(component, snx.NXevent_data, None)
             sel = _to_snx_selection(selection, for_events=True)
