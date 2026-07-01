@@ -11,6 +11,7 @@ import scipp as sc
 from .types import (
     CorrectedDetector,
     SpectralDetector,
+    WavelengthDetector,
     RunType
 )
 
@@ -71,7 +72,8 @@ def remove_bad_pulses(
     return filtered
 
 
-def flatten_to_spectra(data: CorrectedDetector[RunType]) -> SpectralDetector[RunType]:
+#def flatten_to_spectra(data: CorrectedDetector[RunType]) -> SpectralDetector[RunType]:
+def flatten_to_spectra(data: WavelengthDetector[RunType]) -> SpectralDetector[RunType]:
     """"""
     if data is None:
         return cast(SpectralDetector[RunType], None)
