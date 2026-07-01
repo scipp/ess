@@ -34,7 +34,6 @@ dependencies = [
   "essreduce>=26.6.0",
   "numpy>=2",
   "plopp>=26.5.0",
-  "pythreejs>=2.4.1",
   "tof>=25.12.0",
   "ncrystal[cif]>=4.1.0",
   "spglib>=2.0.0,!=2.7",  # https://github.com/mctools/ncrystal/issues/320
@@ -48,6 +47,8 @@ test = [
     "pooch>=1.5",
     "pytest>=7.0",
     "ipywidgets>=8.1.7",
+    "anywidget>=0.8.0",
+    "pythreejs>=2.4.1",
 ]
 docs = [
     "autodoc-pydantic>=2.0.0",
@@ -67,6 +68,7 @@ docs = [
     "sphinxcontrib-bibtex>=2.5.0",
     # needed by pandas < 3.0
     "pyarrow>=12.0.0",
+    "pythreejs>=2.4.1",
 ]
 
 [project.urls]

@@ -5,6 +5,7 @@ Default parameters and workflow for Odin.
 """
 
 import sciline
+from scippneutron.conversion.tof import tof_from_wavelength
 
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
@@ -13,12 +14,15 @@ from ..imaging.types import (
     BeamMonitor2,
     BeamMonitor3,
     BeamMonitor4,
+    CorrectedDetector,
     DarkBackgroundRun,
     LookupTableRelativeErrorThreshold,
     NeXusMonitorName,
     OpenBeamRun,
     PulseStrideOffset,
+    RunType,
     SampleRun,
+    TofDetector,
 )
 from .masking import providers as masking_providers
 
@@ -42,6 +46,15 @@ def default_parameters() -> dict:
     }
 
 
+def compute_detector_tof(da: CorrectedDetector[RunType]) -> TofDetector[RunType]:
+    """
+    Compute the time-of-flight of neutrons from their wavelength.
+    """
+    return da.transform_coords(
+        "tof", graph={"tof": tof_from_wavelength}, keep_intermediate=False
+    )
+
+
 def OdinWorkflow(
     wavelength_from: WavelengthLutMode = "analytical", **kwargs
 ) -> sciline.Pipeline:
@@ -63,6 +76,7 @@ def OdinWorkflow(
         wavelength_from=wavelength_from,
         **kwargs,
     )
+    workflow.insert(compute_detector_tof)
     for key, param in default_parameters().items():
         workflow[key] = param
     return workflow

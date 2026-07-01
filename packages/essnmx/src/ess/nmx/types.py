@@ -4,18 +4,18 @@ from typing import Literal, NewType
 
 import h5py
 import numpy as np
-import sciline as sl
 import scipp as sc
 import scippnexus as snx
 from scippneutron.metadata import RadiationProbe, SourceType
 
 from ess.reduce.nexus import types as nexus_types
-from ess.reduce.unwrap.types import LookupTable
+from ess.reduce.unwrap import types as unwrap_types
 
 from ._display_helper import to_datagroup
 
 RunType = nexus_types.RunType
 SampleRun = nexus_types.SampleRun
+TofDetector = unwrap_types.TofDetector
 
 
 class Compression(enum.StrEnum):
@@ -275,13 +275,9 @@ class NMXLauetof:
     definitions: Literal['NXlauetof'] = 'NXlauetof'
     instrument: NMXInstrument
     sample: NMXSampleMetadata
-    lookup_table: LookupTable | None = None
+    lookup_table: unwrap_types.LookupTable | None = None
     reducer: NMXProgram = field(default_factory=NMXProgram)
     "Information of the reduction software."
 
     def to_datagroup(self) -> sc.DataGroup:
         return to_datagroup(self)
-
-
-class TofDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data with time-of-flight coordinate."""

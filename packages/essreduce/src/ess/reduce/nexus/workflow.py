@@ -281,6 +281,7 @@ def load_nexus_data(
             entry_name=location.entry_name,
             selection=location.selection,
             component_name=location.component_name,
+            definitions=definitions,
         )
     )
 
@@ -724,6 +725,28 @@ class _StrippedMonitor(snx.NXmonitor):
         super().__init__(attrs=attrs, children=children)
 
 
+class _NXdataWithoutAuxSignals(snx.NXdata):
+    """NXdata definition that drops auxiliary signals.
+
+    This allows us to load, e.g., monitors as data arrays, ignoring the
+    ``frame_total`` auxiliary signal. The frame total has different dimensions
+    from the signal and ScippNeXus would fail because of that.
+    """
+
+    def __init__(
+        self, attrs: dict[str, Any], children: dict[str, snx.Field | snx.Group]
+    ) -> None:
+        # When extending the list, consider instead detecting the signal directly
+        # from `attrs (should be simple for ESS files, no legacy signal definition).
+        # Then we can drop everything that is not the signal or a coord of the signal.
+        children = {
+            key: value
+            for key, value in children.items()
+            if key not in ('frame_total', 'reference_time')
+        }
+        super().__init__(attrs=attrs, children=children)
+
+
 def _add_variances(da: sc.DataArray) -> sc.DataArray:
     out = da.copy(deep=False)
     if out.bins is not None:
@@ -783,6 +806,7 @@ def load_source_metadata_from_nexus(
 definitions = snx.base_definitions()
 definitions["NXdetector"] = _StrippedDetector
 definitions["NXmonitor"] = _StrippedMonitor
+definitions['NXdata'] = _NXdataWithoutAuxSignals
 
 _common_providers = (
     gravity_vector_neg_y,

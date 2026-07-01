@@ -7,12 +7,17 @@ Components for BEER
 
 import importlib.metadata
 
-from .io import load_beer_mcstas
+from .mcstas import load_beer_mcstas
 from .peakfinding import dhkl_peaks_from_cif
 from .workflow import (
     BeerMcStasWorkflowPulseShaping,
+    BeerMcStasWorkflowPulseShapingAnalytical,
     BeerModMcStasWorkflow,
     BeerModMcStasWorkflowKnownPeaks,
+    BeerPowderMcStasWorkflow,
+    BeerPowderMcStasWorkflowAnalytical,
+    BeerPowderWorkflow,
+    BeerPowderWorkflowAnalytical,
     default_parameters,
 )
 
@@ -25,8 +30,13 @@ del importlib
 
 __all__ = [
     'BeerMcStasWorkflowPulseShaping',
+    'BeerMcStasWorkflowPulseShapingAnalytical',
     'BeerModMcStasWorkflow',
     'BeerModMcStasWorkflowKnownPeaks',
+    'BeerPowderMcStasWorkflow',
+    'BeerPowderMcStasWorkflowAnalytical',
+    'BeerPowderWorkflow',
+    'BeerPowderWorkflowAnalytical',
     '__version__',
     'default_parameters',
     'dhkl_peaks_from_cif',

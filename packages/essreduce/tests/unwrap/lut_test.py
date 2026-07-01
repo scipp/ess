@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 from typing import NewType
 
+import numpy as np
 import pytest
 import scipp as sc
 import scippnexus as snx
@@ -10,7 +11,7 @@ from scippneutron.chopper import DiskChopper
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import AnyRun, Position
 from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, SourceBounds
-from ess.reduce.unwrap.lut import chopper_distance_along_beam
+from ess.reduce.unwrap.lut import _polygon_intersections, chopper_distance_along_beam
 
 sl = pytest.importorskip("sciline")
 
@@ -468,3 +469,21 @@ def test_analytical_lut_does_not_raise_with_degenerate_polygon():
     # Chopper is 10m from the source, LUT starts at 15m, so no neutrons should make it
     # through. The table should be full of NaNs but should not raise an error.
     assert sc.all(sc.isnan(table.array.data))
+
+
+@pytest.mark.filterwarnings("error::RuntimeWarning")
+def test_polygon_intersections_handles_uncovered_columns_without_warning():
+    # Vertical lines that miss the polygon yield an all-NaN column. Reducing it
+    # must produce NaN (no neutrons at that time) without emitting numpy's
+    # "All-NaN slice encountered" RuntimeWarning: the suppression that warning
+    # would otherwise require is process-global and not thread-safe, so it races
+    # when the workflow runs under a multi-threaded scheduler. The marker turns
+    # any leaked RuntimeWarning into a test failure.
+    triangle = np.array([[0.0, 0.0], [2.0, 0.0], [1.0, 1.0]])
+    x = np.array([-0.5, 1.0, 2.5])  # outside, inside, outside
+
+    center, spread = _polygon_intersections([triangle], x)
+
+    # Columns 0 and 2 miss the polygon (all-NaN); column 1 is covered.
+    np.testing.assert_array_equal(np.isnan(center), [True, False, True])
+    np.testing.assert_array_equal(np.isnan(spread), [True, False, True])

@@ -19,7 +19,6 @@ def compute_wavelength_in_each_cluster(
     da: StreakClusteredData[RunType],
     chopper_delay: WavelengthDefinitionChopperDelay,
     mod_period: ModulationPeriod,
-    graph: GeometryCoordTransformGraph,
 ) -> WavelengthDetector[RunType]:
     """Fits a line through each cluster, the intercept of the line is t0.
     The line is fitted using linear regression with an outlier removal procedure.
@@ -38,7 +37,7 @@ def compute_wavelength_in_each_cluster(
     if isinstance(da, sc.DataGroup):
         return sc.DataGroup(
             {
-                k: compute_wavelength_in_each_cluster(v, mod_period)
+                k: compute_wavelength_in_each_cluster(v, chopper_delay, mod_period)
                 for k, v in da.items()
             }
         )
@@ -133,7 +132,7 @@ def _compute_d_given_list_of_peaks(
         / (scipp.constants.h / scipp.constants.m_n)
     ).to(unit=f'{time_of_arrival.unit}/angstrom')
     for dhkl in dhkl_list:
-        dt = sc.abs(t - dhkl * const)
+        dt = sc.abs(t - dhkl * const - pulse_length / 2)
         dt_in_range = dt < pulse_length / 2
         no_dt_found = sc.isnan(dtfound)
         dtfound = sc.where(dt_in_range, sc.where(no_dt_found, dt, dtfound), dtfound)
@@ -191,34 +190,16 @@ def _tof_from_dhkl(
     return out
 
 
-def t0_estimate(
-    wavelength_estimate: sc.Variable,
-    source_to_wavelength_definition_chopper_distance: sc.Variable,
-) -> sc.Variable:
-    """
-    Computes the time a neutron reaches a chopper at
-    ``source_to_wavelength_chopper_distance`` distance from the source
-    if it has wavelength ``wavelength_estimate``.
-    """
-    return (
-        sc.constants.m_n
-        / sc.constants.h
-        * wavelength_estimate
-        * source_to_wavelength_definition_chopper_distance.to(
-            unit=wavelength_estimate.unit
-        )
-    ).to(unit='s')
-
-
-def tof_from_t0_estimate_graph(
+def tof_from_nominal_time_at_chopper_graph(
     da: RawDetector[RunType],
     gg: GeometryCoordTransformGraph,
 ) -> ElasticCoordTransformGraph[RunType]:
     """Graph for computing ``wavelength`` in pulse shaping chopper modes."""
     return {
         **gg,
-        't0': t0_estimate,
-        'tof': lambda time_of_arrival, t0: time_of_arrival - t0,
+        'tof': lambda time_of_arrival, nominal_time_at_chopper: (
+            time_of_arrival - nominal_time_at_chopper
+        ),
         'time_of_arrival': time_of_arrival,
     }
 
@@ -287,7 +268,7 @@ convert_from_known_peaks_providers = (
 )
 convert_pulse_shaping = (
     geometry_graph,
-    tof_from_t0_estimate_graph,
+    tof_from_nominal_time_at_chopper_graph,
     wavelength_detector,
 )
 providers = (compute_wavelength_in_each_cluster, geometry_graph)

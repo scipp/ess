@@ -84,7 +84,10 @@ def assert_h5obj_equal(
 
 
 def test_compare_output_file_with_frozen(tmp_path: pathlib.Path):
-    """Test that the executable runs and returns the expected output."""
+    """Test that the executable runs and returns the expected output.
+
+    See developer's guide, Regression Test Dataset section for more information.
+    """
 
     # Make a new output file from current implementation.
     input_file = get_small_nmx_nexus()
