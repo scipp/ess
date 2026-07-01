@@ -87,8 +87,12 @@ def monitor_wavelength_data(
     :func:`ess.reduce.unwrap.monitor_wavelength_data`
     for indirect geometry spectrometers.
     """
+    # Support old files that use 't' instead of 'frame_time'
+    if 't' in monitor_data.dims:
+        monitor_data = monitor_data.rename(t='frame_time')
+
     result = reduce_unwrap.to_wavelength.monitor_wavelength_data(
-        monitor_data=monitor_data.rename(t='frame_time'),
+        monitor_data=monitor_data,
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
