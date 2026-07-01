@@ -47,12 +47,8 @@ def normalize_by_proton_charge_orca(
     # target). We need to shift the proton charge time to account for the time it takes
     # for neutrons to travel from the target to the detector. Does this mean we cannot
     # do the normalization without computing time of flight?
-    #
-    # TODO: using the 'nearest' mode for now. Because of the above, we probably need to
-    # know the start and end of the exposure, get a min and max wavelength for that
-    # exposure from a wavelength lookup table, and then trace backwards to the source
-    # to find the corresponding time range for the proton charge.
-    proton_charge_lookup = sc.lookup(proton_charge, 'time', mode='nearest')
+
+    proton_charge_lookup = sc.lookup(proton_charge, 'time', mode='previous')
 
     return FluxNormalizedDetector[RunType](
         data / proton_charge_lookup[data.coords['time']]
