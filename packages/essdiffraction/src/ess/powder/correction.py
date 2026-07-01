@@ -31,8 +31,12 @@ from .types import (
     UncertaintyBroadcastMode,
     VanadiumRun,
     EmptyVanadiumCanRun,
+    NonEmptyCanRunType,
     WavelengthMonitor,
     EmptyCanSubtracted2D,
+    ShiftNegativeIntensity,
+    NegativeIntensityResetValue,
+    EmptyCanSubtractedNoNegative2D,
     Intensity2D,
 )
 
@@ -242,9 +246,9 @@ def normalize_by_vanadium_dspacing(
     )
 
 
-def normalize_by_vanadium_2d_mlz(
-    data: EmptyCanSubtracted2D[SampleRun],
-    vanadium: EmptyCanSubtracted2D[VanadiumRun],
+def normalize_by_vanadium_mlz(
+    data: EmptyCanSubtractedNoNegative2D[SampleRun],
+    vanadium: EmptyCanSubtractedNoNegative2D[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> Intensity2D:
     if data is None:
@@ -470,6 +474,50 @@ def subtract_vanadium_empty_can_mlz(
     if data.bins is None:
         return EmptyCanSubtracted2D[VanadiumRun](data - background)
     return EmptyCanSubtracted2D[VanadiumRun](data.bins.concatenate(-background))
+
+
+def handle_negative_intensity_sample(
+    data: EmptyCanSubtracted2D[SampleRun],
+    shift_flag: ShiftNegativeIntensity[SampleRun],
+    reset_value: NegativeIntensityResetValue[SampleRun],
+) -> EmptyCanSubtractedNoNegative2D[SampleRun]:
+    if data is None:
+        return cast(EmptyCanSubtractedNoNegative2D[SampleRun], None)
+    if shift_flag:
+        min_intensity = sc.min(data)
+        min_value = min_intensity.value
+        if min_value < 0.0:
+            offset = sc.scalar(-min_value, unit=min_intensity.unit)
+            print(f"Sample: negative intensity values are SHIFTED by {min_value}.")
+            return EmptyCanSubtractedNoNegative2D[SampleRun](data + offset)
+    else:
+        if reset_value is not None:
+            print(f"Sample: negative intensity values are REPLACED by {reset_value}.")
+            data.values[data.values < 0.0] = reset_value
+            # Q: What to do with uncertainties? For now, we just keep them as they are.
+    return EmptyCanSubtractedNoNegative2D[SampleRun](data)
+
+
+def handle_negative_intensity_vanadium(
+    data: EmptyCanSubtracted2D[VanadiumRun],
+    shift_flag: ShiftNegativeIntensity[VanadiumRun],
+    reset_value: NegativeIntensityResetValue[VanadiumRun],
+) -> EmptyCanSubtractedNoNegative2D[VanadiumRun]:
+    if data is None:
+        return cast(EmptyCanSubtractedNoNegative2D[VanadiumRun], None)
+    if shift_flag:
+        min_intensity = sc.min(data)
+        min_value = min_intensity.value
+        if min_value < 0.0:
+            offset = sc.scalar(-min_value, unit=min_intensity.unit)
+            print(f"Vanadium: negative intensity values are SHIFTED by {min_value}.")
+            return EmptyCanSubtractedNoNegative2D[VanadiumRun](data + offset)
+    else:
+        if reset_value is not None:
+            print(f"Vanadium: negative intensity values are REPLACED by {reset_value}.")
+            data.values[data.values < 0.0] = reset_value
+            # Q: What to do with uncertainties? For now, we just keep them as they are.
+    return EmptyCanSubtractedNoNegative2D[VanadiumRun](data)
 
 
 def subtract_empty_can_two_theta(

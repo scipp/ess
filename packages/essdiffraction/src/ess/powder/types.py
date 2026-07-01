@@ -238,6 +238,21 @@ class EmptyCanSubtracted2D(sciline.Scope[NonEmptyCanRunType, sc.DataArray], sc.D
     """..."""
 
 
+class EmptyCanSubtractedNoNegative2D(sciline.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataArray):
+    """..."""
+
+
+class ShiftNegativeIntensity(sciline.Scope[NonEmptyCanRunType, int], int):
+    """Whether negative intensities should be shifted to positive values by adding the most negative value to all intensities.
+
+    Use 0 for False and 1 for True.
+    """
+
+
+class NegativeIntensityResetValue(sciline.Scope[NonEmptyCanRunType, float], float):
+    """The value to which negative intensities should be reset (mapped)."""
+
+
 class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data in d-spacing - 2theta space normalized by monitor/proton charge."""
 

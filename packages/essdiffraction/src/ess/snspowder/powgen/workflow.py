@@ -15,6 +15,8 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     CalibrationRun,
     FilepathMLZ,
     FilenameMLZ,
+    ShiftNegativeIntensity,
+    NegativeIntensityResetValue,
 )
 
 from ess.packages.essreduce.src.ess.reduce.nexus.workflow import gravity_vector_neg_y
@@ -57,9 +59,11 @@ from ess.packages.essdiffraction.src.ess.powder.correction import (
     normalize_by_proton_charge,
     normalize_by_proton_charge_mlz,
     normalize_by_vanadium_dspacing,
+    handle_negative_intensity_sample,
+    handle_negative_intensity_vanadium,
     subtract_sample_empty_can_mlz,
     subtract_vanadium_empty_can_mlz,
-    normalize_by_vanadium_2d_mlz
+    normalize_by_vanadium_mlz
 )
 
 from ess.packages.essdiffraction.src.ess.powder.filtering import (
@@ -131,7 +135,9 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 # integrate_two_theta,
                 subtract_sample_empty_can_mlz,
                 subtract_vanadium_empty_can_mlz,
-                normalize_by_vanadium_2d_mlz
+                handle_negative_intensity_sample,
+                handle_negative_intensity_vanadium,
+                normalize_by_vanadium_mlz,
             ]
         ),
         params={
@@ -141,6 +147,10 @@ def PowderReduceP2D() -> sciline.Pipeline:
             FilepathMLZ[CalibrationRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
             FilepathMLZ[EmptyVanadiumCanRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
             KeepEventsMLZ: False,
+            ShiftNegativeIntensity[SampleRun]: True,
+            ShiftNegativeIntensity[VanadiumRun]: False,
+            NegativeIntensityResetValue[SampleRun]: 0.0,
+            NegativeIntensityResetValue[VanadiumRun]: 0.0,
             # CalibrationData: None,
         }
     )
