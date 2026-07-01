@@ -10,7 +10,7 @@ Monorepo for ESS neutron scattering data reduction packages, managed with [pixi]
 | [essnmx](packages/essnmx/) | Data reduction for NMX at the European Spallation Source. |
 | [essreflectometry](packages/essreflectometry/) | Reflectometry data reduction for the European Spallation Source |
 | [esssans](packages/esssans/) | Data reduction for SANS at the European Spallation Source. |
-| [essspectroscopy](packages/essspectroscopy/) | Data reduction for SANS at the European Spallation Source. |
+| [essspectroscopy](packages/essspectroscopy/) | Data reduction for spectroscopy at the European Spallation Source. |
 
 ## Dependency graph
 
