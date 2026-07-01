@@ -116,15 +116,6 @@ if __name__ == "__main__":
             [f"* {relevant_log}" for relevant_log in maybe_relevant_logs]
         )
 
-    release_note.extend(
-        [
-            '',
-            '',
-            f"**Full Changelog**: https://github.com/scipp/ess/compare/{compare_tag}...{cur_tag}",
-            '',
-        ]
-    )
-
     if hasattr(args, 'output_file_path') and args.output_file_path:
         output_file_path = pathlib.Path(args.output_file_path)
     else:
