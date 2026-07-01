@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-"""Default parameter specs for DREAM workflows."""
+"""Default parameter specs for BEER workflows."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ from ess.powder.types import (
 from ess.reduce.parameter import ParameterRegistry, ParameterSpec
 from ess.reduce.parameter_models import AngleUnit, DspacingEdges, TwoTheta
 
-from .beamline import InstrumentConfiguration
+from .types import DetectorBank
 
 
 def _edges(model):
@@ -71,13 +71,6 @@ parameters[MonitorFilename[SampleRun]] = ParameterSpec(
     description='NeXus file path for the sample monitor data.',
     default=None,
 )
-parameters[MonitorFilename[VanadiumRun]] = ParameterSpec(
-    model=str | None,
-    category='Files',
-    title='Vanadium Monitor',
-    description='NeXus file path for the vanadium monitor data.',
-    default=None,
-)
 parameters[PixelMaskFilename] = ParameterSpec(
     model=tuple[str, ...],
     category='Files',
@@ -92,7 +85,7 @@ parameters[NeXusDetectorName] = ParameterSpec(
     category='NeXus',
     title='Detector',
     description='Name of the detector group in the NeXus files.',
-    default='mantle',
+    default='detector',
 )
 
 parameters[DspacingBins] = ParameterSpec(
@@ -114,19 +107,19 @@ parameters[TwoThetaBins] = ParameterSpec(
     use_workflow_default=False,
 )
 
-parameters[InstrumentConfiguration] = ParameterSpec(
-    model=InstrumentConfiguration,
-    category='Reduction',
-    title='Instrument Configuration',
-    description='DREAM chopper system configuration used in the measurement.',
-    default=InstrumentConfiguration.high_flux_BC215,
-)
 parameters[UncertaintyBroadcastMode] = ParameterSpec(
     model=UncertaintyBroadcastMode,
     category='Reduction',
     title='Uncertainty Broadcast',
-    description='How uncertainties are treated when uncertain quantities are combined.',
+    description='How uncertainties are broadcast when reduced data are combined.',
     default=UncertaintyBroadcastMode.upper_bound,
+)
+parameters[DetectorBank] = ParameterSpec(
+    model=DetectorBank,
+    category='Reduction',
+    title='Detector Bank',
+    description='BEER detector bank to include in the reduction.',
+    default=DetectorBank.south,
 )
 
 

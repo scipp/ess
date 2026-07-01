@@ -205,7 +205,7 @@ def compute_detector_tof(da: WavelengthDetector[RunType]) -> TofDetector[RunType
     )
 
 
-@register_workflow
+@register_workflow()
 def NMXWorkflow(
     wavelength_from: WavelengthLutMode = "file", **kwargs
 ) -> sciline.Pipeline:

@@ -2,590 +2,441 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
-from typing import Any, NewType
+from enum import Enum
+from pathlib import Path
+from typing import Literal, NewType
 
 import pytest
 import sciline as sl
-import scipp as sc
-from ipywidgets import FloatText, IntText
+from ipywidgets import VBox
+from pydantic import BaseModel, Field
 
-from ess.reduce.parameter import (
-    BinEdgesParameter,
-    FilenameParameter,
-    MultiFilenameParameter,
-    Parameter,
-    Vector3dParameter,
-    parameter_registry,
+from ess.reduce.parameter import ParameterRegistry, ParameterSpec
+from ess.reduce.ui import (
+    WorkflowWidget,
+    get_parameter_widget_values,
+    set_parameter_widget_values,
+    workflow_widget,
 )
-from ess.reduce.ui import ResultBox, WorkflowWidget, workflow_widget
-from ess.reduce.widgets import OptionalWidget, SwitchWidget, create_parameter_widget
-from ess.reduce.widgets._base import WidgetWithFieldsProtocol, get_fields, set_fields
-from ess.reduce.workflow import register_workflow, workflow_registry
+from ess.reduce.widgets import (
+    PydanticModelWidget,
+    PydanticParameterValueWidget,
+    PydanticParameterWidget,
+)
+from ess.reduce.workflow import (
+    WorkflowSpec,
+    assign_parameter_values,
+    get_parameters,
+    register_workflow,
+    workflow_registry,
+)
 
-SwitchableInt = NewType('SwitchableInt', int)
-SwitchableFloat = NewType('SwitchableFloat', float)
-OptionalInt = int | None
-OptionalFloat = float | None
 
+class Mode(Enum):
+    fast = 'fast'
+    slow = 'slow'
 
-class IntParam(Parameter): ...
 
+class FlatParams(BaseModel):
+    count: int = Field(default=1, title="Count")
+    scale: float = Field(default=2.0, title="Scale")
+    enabled: bool = Field(default=True, title="Enabled")
+    path: Path | None = Field(default=None, title="Path")
+    mode: Mode = Field(default=Mode.fast, title="Mode")
+    choice: Literal['a', 'b'] = Field(default='a', title="Choice")
+    names: tuple[str, ...] = Field(default=("sample",), title="Names")
 
-class FloatParam(Parameter): ...
 
+class GroupParams(BaseModel):
+    value: int = 2
 
-parameter_registry[SwitchableInt] = IntParam('_', '_', 1, switchable=True)
-parameter_registry[SwitchableFloat] = FloatParam('_', '_', 2.0, switchable=True)
-parameter_registry[int] = IntParam('_', '_', 1)
-parameter_registry[float] = FloatParam('_', '_', 2.0)
-parameter_registry[OptionalInt] = IntParam('_', '_', 1, optional=True)
-parameter_registry[OptionalFloat] = FloatParam('_', '_', 2.0, optional=True)
 
+class NestedParams(BaseModel):
+    group: GroupParams = Field(default_factory=GroupParams, title="Group")
 
-@create_parameter_widget.register(IntParam)
-def _(param: IntParam) -> IntText:
-    return IntText(value=param.default, description=param.name)
 
+class LimitedParams(BaseModel):
+    value: int = Field(default=1, ge=0)
 
-@create_parameter_widget.register(FloatParam)
-def _(param: FloatParam) -> FloatText:
-    return FloatText(value=param.default, description=param.name)
 
+Count = NewType("Count", int)
+Label = NewType("Label", str)
+Unused = NewType("Unused", int)
+Limited = NewType("Limited", int)
 
-def _refresh_widget_parameter(
-    *, widget: WorkflowWidget, output_selections: list[type]
-) -> None:
-    widget.output_selection_box.typical_outputs_widget.value = output_selections
-    widget.parameter_box.parameter_refresh_button.click()
 
+def test_pydantic_parameter_widget_creates_model_from_widget_values() -> None:
+    widget = PydanticParameterWidget(FlatParams)
 
-def _ready_widget(
-    *,
-    providers: list[Callable] | None = None,
-    params: dict[type, Any] | None = None,
-    output_selections: list[type],
-    result_registry: dict[type, Any] | None = None,
-) -> WorkflowWidget:
-    widget = WorkflowWidget(
-        sl.Pipeline(providers or [], params=params or {}),
-        result_registry=result_registry,
-    )
-    _refresh_widget_parameter(widget=widget, output_selections=output_selections)
-    return widget
+    widget.widgets['count'].value = 3
+    widget.widgets['scale'].value = 0.5
+    widget.widgets['enabled'].value = False
+    widget.widgets['path'].value = 'data.nxs'
+    widget.widgets['mode'].value = Mode.slow
+    widget.widgets['choice'].value = 'b'
+    widget.widgets['names'].value = 'a, b'
 
+    params = widget.create_model()
 
-def strict_provider(a: int, b: float) -> str:
-    return f"{a} + {b}"
-
-
-def provider_with_switch(a: SwitchableInt, b: SwitchableFloat) -> str:
-    return f"{a} + {b}"
-
-
-def provider_with_optional(a: OptionalInt, b: OptionalFloat) -> str:
-    parts = [] if a is None else [str(a)]
-    return ' + '.join([*parts] if b is None else [*parts, str(b)])
-
-
-def _get_param_widget(widget: WorkflowWidget, param_type: type) -> Any:
-    return widget.parameter_box._input_widgets[param_type]
-
-
-def test_parameter_default_value_test() -> None:
-    widget = _ready_widget(providers=[strict_provider], output_selections=[str])
-    assert _get_param_widget(widget, int).value == 1
-    assert _get_param_widget(widget, float).value == 2.0
-
-
-def test_parameter_registry() -> None:
-    assert isinstance(create_parameter_widget(IntParam('_a', '_a', 1)), IntText)
-    assert isinstance(create_parameter_widget(FloatParam('_b', '_b', 2.0)), FloatText)
-
-
-def test_run_not_allowed_when_parameter_not_refreshed_after_output_selected() -> None:
-    widget = _ready_widget(providers=[strict_provider], output_selections=[str])
-    # Clear the value of the output selection box
-    widget.output_selection_box.typical_outputs_widget.value = []
-    assert widget.result_box.run_button.disabled
-    # Click the refresh button
-    widget.parameter_box.parameter_refresh_button.click()
-    assert not widget.result_box.run_button.disabled
-    # Add a value to the parameter
-    widget.output_selection_box.typical_outputs_widget.value = [str]
-    assert widget.result_box.run_button.disabled
-    # Click the refresh button again
-    widget.parameter_box.parameter_refresh_button.click()
-    assert not widget.result_box.run_button.disabled
-
-
-def test_result_registry() -> None:
-    registry = {}
-    widget = _ready_widget(
-        providers=[strict_provider], output_selections=[str], result_registry=registry
-    )
-    _get_param_widget(widget, int).value = 2
-    _get_param_widget(widget, float).value = 0.1
-    assert registry == {}
-    widget.result_box.run_button.click()
-    assert registry == {str: '2 + 0.1'}
-
-
-def test_switchable_widget_dispatch() -> None:
-    switchable_param = Parameter('a', 'a', 1, switchable=True)
-    assert isinstance(create_parameter_widget(switchable_param), SwitchWidget)
-    non_switchable_param = Parameter('b', 'b', 2, switchable=False)
-    assert not isinstance(create_parameter_widget(non_switchable_param), SwitchWidget)
-
-
-def test_switchable_parameter_switch_widget() -> None:
-    widget = _ready_widget(providers=[provider_with_switch], output_selections=[str])
-
-    int_widget = _get_param_widget(widget, SwitchableInt)
-    float_widget = _get_param_widget(widget, SwitchableFloat)
-
-    assert isinstance(int_widget, SwitchWidget)
-    assert isinstance(float_widget, SwitchWidget)
-
-    assert not float_widget.enabled
-    assert not int_widget.enabled
-
-
-def test_collect_values_from_disabled_switchable_widget() -> None:
-    widget = _ready_widget(providers=[provider_with_switch], output_selections=[str])
-
-    assert not _get_param_widget(widget, SwitchableFloat).enabled
-    assert not _get_param_widget(widget, SwitchableInt).enabled
-    assert widget.parameter_box.value == {}
-
-
-def test_collect_values_from_enabled_switchable_widget() -> None:
-    widget = _ready_widget(providers=[provider_with_switch], output_selections=[str])
-
-    float_widget = _get_param_widget(widget, SwitchableFloat)
-    float_widget.enabled = True
-    float_widget.value = 0.2
-
-    assert widget.parameter_box.value == {SwitchableFloat: 0.2}
-
-
-def test_switchable_optional_parameter_switchable_first() -> None:
-    dummy_param = Parameter('a', 'a', 1, switchable=True, optional=True)
-    dummy_widget = create_parameter_widget(dummy_param)
-    assert isinstance(dummy_widget, SwitchWidget)
-    assert isinstance(dummy_widget.wrapped, OptionalWidget)
-
-
-def test_optional_widget_set_value_get_fields() -> None:
-    optional_param = IntParam('a', 'a', 1, optional=True)
-    optional_widget = create_parameter_widget(optional_param)
-    assert isinstance(optional_widget, WidgetWithFieldsProtocol)
-    assert isinstance(optional_widget, OptionalWidget)
-    # Check initial state
-    assert optional_widget._option_box.value is None
-    assert get_fields(optional_widget) == {'essreduce-opted-out': True, 'value': 1}
-    # Update the value of the wrapped widget and check the fields
-    set_fields(optional_widget, {'value': 2})
-    assert optional_widget.value is None  # Opted-out is not changed
-    assert get_fields(optional_widget) == {'essreduce-opted-out': True, 'value': 2}
-    optional_widget.value = 3
-    assert get_fields(optional_widget) == {'essreduce-opted-out': False, 'value': 3}
-
-
-def test_optional_widget_set_fields_get_fields() -> None:
-    optional_param = Vector3dParameter(
-        'a', 'a', sc.vector([1, 2, 3], unit='m'), optional=True
-    )
-    optional_widget = create_parameter_widget(optional_param)
-    assert isinstance(optional_widget, WidgetWithFieldsProtocol)
-    assert isinstance(optional_widget, OptionalWidget)
-    # Check initial state
-    assert optional_widget._option_box.value is None
-    expected = {'essreduce-opted-out': True, 'x': 1, 'y': 2, 'z': 3, 'unit': 'm'}
-    assert optional_widget.get_fields() == expected
-    # Update the value of the wrapped widget
-    optional_widget.set_fields(
-        {'essreduce-opted-out': True, 'x': 4, 'y': 5, 'z': 6, 'unit': 'm'}
-    )
-    assert optional_widget.value is None  # Opted-out is not changed
-    optional_widget.set_fields({'essreduce-opted-out': False})
-    assert optional_widget.value == sc.vector([4, 5, 6], unit='m')
-    # Check the fields and the option box value
-    expected = {'essreduce-opted-out': False, 'x': 4, 'y': 5, 'z': 6, 'unit': 'm'}
-    assert optional_widget.get_fields() == expected
-    assert optional_widget._option_box.value == optional_param.name
-
-
-def test_optional_widget_dispatch() -> None:
-    optional_param = Parameter('a', 'a', 1, optional=True)
-    assert isinstance(create_parameter_widget(optional_param), OptionalWidget)
-    non_optional_param = Parameter('b', 'b', 2, optional=False)
-    assert not isinstance(create_parameter_widget(non_optional_param), OptionalWidget)
-
-
-def test_optional_parameter_optional_widget() -> None:
-    widget = _ready_widget(providers=[provider_with_optional], output_selections=[str])
-
-    int_widget = _get_param_widget(widget, OptionalInt)
-    float_widget = _get_param_widget(widget, OptionalFloat)
-
-    assert isinstance(int_widget, OptionalWidget)
-    assert isinstance(float_widget, OptionalWidget)
-
-    assert float_widget.value is None
-    assert int_widget.value is None
-
-
-def test_collect_values_from_optional_widget() -> None:
-    widget = _ready_widget(providers=[provider_with_optional], output_selections=[str])
-
-    float_widget = _get_param_widget(widget, OptionalFloat)
-    float_widget.value = 0.2
-
-    assert widget.parameter_box.value == {OptionalFloat: 0.2, OptionalInt: None}
-
-
-def test_collect_values_from_optional_widget_compute_result() -> None:
-    result_registry = {}
-    widget = _ready_widget(
-        providers=[provider_with_optional],
-        output_selections=[str],
-        result_registry=result_registry,
+    assert params == FlatParams(
+        count=3,
+        scale=0.5,
+        enabled=False,
+        path=Path('data.nxs'),
+        mode=Mode.slow,
+        choice='b',
+        names=('a', 'b'),
     )
 
-    float_widget = _get_param_widget(widget, OptionalFloat)
-    float_widget.value = 0.2
-    widget.result_box.run_button.click()
 
-    assert result_registry == {str: '0.2'}
+def test_pydantic_parameter_widget_reports_validation_errors() -> None:
+    class Params(BaseModel):
+        value: int = Field(default=1, ge=0)
 
-    int_widget = _get_param_widget(widget, OptionalInt)
-    int_widget.value = 2
-    widget.result_box.run_button.click()
+    widget = PydanticParameterWidget(Params)
+    widget.widgets['value'].value = -1
 
-    assert result_registry == {str: '2 + 0.2'}
+    is_valid, errors = widget.validate()
+
+    assert not is_valid
+    assert 'value' in errors
 
 
-def dummy_workflow_constructor() -> sl.Pipeline:
-    return sl.Pipeline([strict_provider])
+def test_pydantic_parameter_widget_set_values_accepts_none_for_optional_text() -> None:
+    class Params(BaseModel):
+        value: str | None = None
+
+    widget = PydanticParameterWidget(Params, initial_values=Params())
+
+    assert widget.widgets['value'].value == ''
+    assert widget.create_model() == Params(value=None)
+
+
+def test_pydantic_parameter_widget_supports_nested_model_fields() -> None:
+    class Params(BaseModel):
+        group: GroupParams = Field(default_factory=GroupParams)
+
+    widget = PydanticParameterWidget(Params, initial_values=Params())
+
+    widget.widgets['group'].widget.widgets['value'].value = 5
+
+    assert widget.create_model() == Params(group=GroupParams(value=5))
+
+
+def test_pydantic_parameter_widget_exposes_field_descriptions_as_help() -> None:
+    class Params(BaseModel):
+        count: int = Field(default=1, title='Count', description='Number of items.')
+
+    widget = PydanticParameterWidget(Params)
+    field = widget.widgets['count']
+
+    assert 'Number of items.' in field.children[1].value
+    field.value = 3
+    assert widget.create_model() == Params(count=3)
+
+
+def test_pydantic_parameter_value_widget_labels_composite_parameters() -> None:
+    widget = PydanticParameterValueWidget(
+        GroupParams,
+        title='Grouped Parameter',
+        description='Controls for the grouped parameter.',
+        default=GroupParams(),
+    )
+
+    title = widget.children[0].children[0].value
+
+    assert 'Grouped Parameter' in title
+    assert 'Controls for the grouped parameter.' in title
+
+
+def test_pydantic_parameter_value_widget_uses_title_as_placeholder_fallback() -> None:
+    widget = PydanticParameterValueWidget(str | None, title='Sample Run', default=None)
+
+    assert widget._widget.widgets['value'].placeholder == 'Sample Run'
+
+
+def test_pydantic_model_widget_supports_nested_parameter_groups() -> None:
+    widget = PydanticModelWidget(NestedParams)
+    group = widget.get_parameter_widget('group')
+    assert group is not None
+    group.widgets['value'].value = 4
+
+    assert widget.parameter_values == NestedParams(group=GroupParams(value=4))
+
+
+def provider(count: Count, label: Label) -> str:
+    return f"{count}:{label}"
+
+
+test_parameters = ParameterRegistry()
+test_parameters[Count] = ParameterSpec(
+    model=int, category='General', title='Count', default=1, transform=Count
+)
+test_parameters[Label] = ParameterSpec(
+    model=str,
+    category='Text',
+    title='Label',
+    default='fallback',
+    transform=Label,
+)
+test_parameters[Unused] = ParameterSpec(
+    model=int, category='Other', title='Unused', default=2, transform=Unused
+)
+
+
+def make_workflow() -> sl.Pipeline:
+    pipeline = sl.Pipeline([provider])
+    pipeline[Label] = Label('a')
+    return pipeline
+
+
+def other_provider(unused: Unused) -> int:
+    return unused
+
+
+def limited_provider(limited: Limited) -> float:
+    return float(limited)
+
+
+def make_workflow_with_alternative_output() -> sl.Pipeline:
+    pipeline = sl.Pipeline([provider, other_provider])
+    pipeline[Label] = Label('a')
+    return pipeline
+
+
+def make_workflow_with_limited_parameter() -> sl.Pipeline:
+    pipeline = sl.Pipeline([provider, limited_provider])
+    pipeline[Label] = Label('a')
+    return pipeline
 
 
 @contextmanager
 def temporary_workflow_registry(
-    *constructors: Callable[[], sl.Pipeline],
+    *constructors: Callable[..., sl.Pipeline],
 ) -> Generator[None, None, None]:
-    existance_flags = {
+    existence_flags = {
         constructor: constructor in workflow_registry for constructor in constructors
     }
-    for constructor in constructors:
-        register_workflow(constructor)
-    yield
-    for constructor, flag in existance_flags.items():
-        if not flag:
-            workflow_registry.discard(constructor)
+    try:
+        for constructor in constructors:
+            register_workflow(
+                parameters=test_parameters,
+                typical_outputs=(str,),
+                title="Example",
+            )(constructor)
+        yield
+    finally:
+        for constructor, existed in existence_flags.items():
+            if not existed:
+                workflow_registry.discard(constructor)
 
 
-def test_register_workflow() -> None:
-    with temporary_workflow_registry(dummy_workflow_constructor):
-        assert dummy_workflow_constructor in workflow_registry
+def test_register_workflow_with_metadata() -> None:
+    with temporary_workflow_registry(make_workflow):
+        spec = workflow_registry.get(make_workflow)
+        assert spec.factory is make_workflow
+        assert spec.parameters is test_parameters
+        assert spec.typical_outputs == (str,)
+        assert spec.title == "Example"
 
-    assert dummy_workflow_constructor not in workflow_registry
+    with pytest.raises(KeyError):
+        workflow_registry.get(make_workflow)
 
 
 def _get_selection_widget(widget):
     return widget.children[0].children[0]
 
 
+def _category_sections(widget: WorkflowWidget):
+    return {
+        section.get_title(0): section
+        for section in widget.parameter_box._input_box.children
+    }
+
+
+def _category_expansion_state(widget: WorkflowWidget):
+    return {
+        title: section.selected_index
+        for title, section in _category_sections(widget).items()
+    }
+
+
 def test_workflow_registry_applied_to_selector() -> None:
-    expected_constructor_pair = (
-        'dummy_workflow_constructor',
-        dummy_workflow_constructor,
-    )
-    with temporary_workflow_registry(dummy_workflow_constructor):
+    with temporary_workflow_registry(make_workflow):
+        spec = workflow_registry.get(make_workflow)
         selection_widget = _get_selection_widget(workflow_widget())
-        assert expected_constructor_pair in selection_widget.options
 
-    selection_widget = _get_selection_widget(workflow_widget())
-    assert expected_constructor_pair not in selection_widget.options
+        assert ("Example", spec) in selection_widget.options
 
 
-def dummy_second_workflow_constructor() -> sl.Pipeline:
-    return sl.Pipeline([provider_with_switch])
-
-
-def test_workflow_selection() -> None:
-    # Prepare
-    with temporary_workflow_registry(
-        dummy_workflow_constructor, dummy_second_workflow_constructor
-    ):
+def test_workflow_selection_builds_workflow_widget() -> None:
+    with temporary_workflow_registry(make_workflow):
+        spec = workflow_registry.get(make_workflow)
         widget = workflow_widget()
         selection_widget = _get_selection_widget(widget)
-        # Before selection
-        assert len(widget.children[1].children) == 0
-        # Select first workflow
-        selection_widget.value = dummy_workflow_constructor
+
+        selection_widget.value = spec
+
         assert len(widget.children[1].children) == 1
-        # Test created WorkflowWidget
-        first_widget = widget.children[1].children[0]
-        assert isinstance(first_widget, WorkflowWidget)
-        assert first_widget.output_selection_box.typical_outputs_widget.options == (
+        selected_widget = widget.children[1].children[0]
+        assert isinstance(selected_widget, WorkflowWidget)
+        assert selected_widget.output_selection_box.typical_outputs_widget.options == (
             ('str', str),
         )
-        _refresh_widget_parameter(widget=first_widget, output_selections=[str])
-        assert first_widget.parameter_box._input_widgets.keys() == {int, float}
-        # Select second workflow
-        selection_widget.value = dummy_second_workflow_constructor
-        second_widget = widget.children[1].children[0]
-        _refresh_widget_parameter(widget=second_widget, output_selections=[str])
-        assert second_widget.parameter_box._input_widgets.keys() == {
-            SwitchableInt,
-            SwitchableFloat,
-        }
+        assert selected_widget.workflow is spec
 
 
-WavelengthBins = NewType('WavelengthBins', sc.Variable)
-WavelengthBinsWithUnit = NewType('WavelengthBinsWithUnit', sc.Variable)
-QBins = NewType('QBins', sc.Variable)
-TemperatureBinsWithUnits = NewType('TemperatureBinsWithUnits', sc.Variable)
+def test_get_parameters_filters_by_selected_output_and_uses_workflow_defaults() -> None:
+    params = get_parameters(make_workflow(), (str,), test_parameters)
+
+    assert set(params) == {Count, Label}
+    assert params[Count].default == 1
+    assert params[Label].default == 'a'
 
 
-parameter_registry[WavelengthBins] = BinEdgesParameter(WavelengthBins, dim='wavelength')
-parameter_registry[WavelengthBinsWithUnit] = BinEdgesParameter(
-    WavelengthBinsWithUnit, dim='wavelength', unit='m'
-)
-parameter_registry[QBins] = BinEdgesParameter(
-    QBins, dim='Q', start=0.01, stop=0.6, nbins=150
-)
-parameter_registry[TemperatureBinsWithUnits] = BinEdgesParameter(
-    TemperatureBinsWithUnits, dim='temperature', unit=('Kelvin', 'Celsius', 'Degrees')
-)
+def test_assign_parameter_values_uses_key_specs() -> None:
+    pipeline = make_workflow()
+    params = get_parameters(pipeline, (str,), test_parameters)
+
+    updated = assign_parameter_values(pipeline, {Count: 5, Label: 'x'}, params)
+
+    assert updated.compute(str) == '5:x'
 
 
-def wavelength_bins_print_provider(bins: WavelengthBins) -> str:
-    return str(bins)
+def test_workflow_widget_runs_with_keyed_parameter_values() -> None:
+    registry = {}
+    with temporary_workflow_registry(make_workflow):
+        spec = workflow_registry.get(make_workflow)
+        widget = WorkflowWidget(spec, result_registry=registry)
+        widget.output_selection_box.typical_outputs_widget.value = (str,)
+
+        assert not hasattr(widget.parameter_box, 'parameter_refresh_button')
+        assert set(widget.parameter_box.parameters) == {Count, Label}
+
+        set_parameter_widget_values(widget, {Count: 5, Label: 'x'})
+        widget.result_box.run_button.click()
+
+    assert registry == {str: '5:x'}
 
 
-def wavelength_bins_with_unit_print_provider(bins: WavelengthBinsWithUnit) -> str:
-    return str(bins)
+def test_workflow_widget_clears_parameters_when_no_output_is_selected() -> None:
+    with temporary_workflow_registry(make_workflow):
+        spec = workflow_registry.get(make_workflow)
+        widget = WorkflowWidget(spec)
+
+        assert widget.result_box.run_button.disabled
+        assert widget.parameter_box.parameters == {}
+
+        widget.output_selection_box.typical_outputs_widget.value = (str,)
+        assert not widget.result_box.run_button.disabled
+        assert set(widget.parameter_box.parameters) == {Count, Label}
+
+        widget.output_selection_box.typical_outputs_widget.value = ()
+        assert widget.result_box.run_button.disabled
+        assert widget.parameter_box.parameters == {}
 
 
-def q_bins_print_provider(bins: QBins) -> str:
-    return str(bins)
+def test_get_parameter_widget_values_returns_current_keyed_fields() -> None:
+    with temporary_workflow_registry(make_workflow):
+        spec = workflow_registry.get(make_workflow)
+        widget = WorkflowWidget(spec)
+        widget.output_selection_box.typical_outputs_widget.value = (str,)
+
+        set_parameter_widget_values(widget, {Count: 7})
+
+        assert get_parameter_widget_values(widget)[Count] == {'value': 7}
 
 
-def temperature_bins_print_provider(bins: TemperatureBinsWithUnits) -> str:
-    return str(bins)
+def test_parameter_categories_are_independently_open_and_full_width() -> None:
+    with temporary_workflow_registry(make_workflow):
+        spec = workflow_registry.get(make_workflow)
+        widget = WorkflowWidget(spec)
+        widget.output_selection_box.typical_outputs_widget.value = (str,)
+
+        sections = widget.parameter_box._input_box.children
+
+        assert [section.get_title(0) for section in sections] == ['General', 'Text']
+        assert [section.selected_index for section in sections] == [0, 0]
+        sections[0].selected_index = None
+        assert [section.selected_index for section in sections] == [None, 0]
+        assert isinstance(widget.parameter_box._input_box, VBox)
+        assert widget.parameter_box.layout.width == '100%'
+        assert widget.parameter_box._input_box.layout.width == '100%'
+        assert all(section.layout.width == 'auto' for section in sections)
+        assert all(section.children[0].layout.width == '100%' for section in sections)
+        assert all(
+            field.layout.width == 'auto'
+            for parameter_widget in widget.parameter_box._input_widgets.values()
+            for field in parameter_widget._widget.widgets.values()
+        )
 
 
-def test_bin_edges_widget_simple() -> None:
-    widget = _ready_widget(
-        providers=[wavelength_bins_print_provider], output_selections=[str]
+def test_parameter_category_expansion_state_is_preserved_by_category() -> None:
+    widget = WorkflowWidget(
+        WorkflowSpec.from_factory(
+            make_workflow_with_alternative_output,
+            parameters=test_parameters,
+            typical_outputs=(str, int),
+        )
     )
-    param_widget = _get_param_widget(widget, WavelengthBins)
-    assert sc.identical(
-        param_widget.value,
-        sc.linspace(dim='wavelength', start=0.0, stop=0.0, num=2, unit='angstrom'),
-    )
-    assert set(param_widget.fields['unit'].options) == {'angstrom', 'nm'}
-    assert param_widget.fields['nbins'].value == 1
-    assert param_widget.fields['spacing'].value == 'linear'
-    # Modify the values
-    param_widget.fields['start'].value = 1.0
-    param_widget.fields['stop'].value = 200.0
-    param_widget.fields['nbins'].value = 10
-    assert sc.identical(
-        param_widget.value,
-        sc.linspace(dim='wavelength', start=1.0, stop=200.0, num=11, unit='angstrom'),
-    )
+    output_widget = widget.output_selection_box.typical_outputs_widget
 
-
-def test_bin_edges_widget_override_unit() -> None:
-    widget = _ready_widget(
-        providers=[wavelength_bins_with_unit_print_provider], output_selections=[str]
-    )
-    param_widget = _get_param_widget(widget, WavelengthBinsWithUnit)
-    assert sc.identical(
-        param_widget.value,
-        sc.linspace(dim='wavelength', start=0.0, stop=0.0, num=2, unit='m'),
-    )
-    assert set(param_widget.fields['unit'].options) == {'m'}
-    assert param_widget.fields['nbins'].value == 1
-
-
-def test_bin_edges_widget_override_unit_multiple() -> None:
-    widget = _ready_widget(
-        providers=[temperature_bins_print_provider], output_selections=[str]
-    )
-    param_widget = _get_param_widget(widget, TemperatureBinsWithUnits)
-    assert sc.identical(
-        param_widget.value,
-        sc.linspace(dim='temperature', start=0.0, stop=0.0, num=2, unit='Kelvin'),
-    )
-    assert set(param_widget.fields['unit'].options) == {'Kelvin', 'Celsius', 'Degrees'}
-
-
-def test_bin_edges_widget_log_spacing() -> None:
-    widget = _ready_widget(
-        providers=[wavelength_bins_print_provider], output_selections=[str]
-    )
-    param_widget = _get_param_widget(widget, WavelengthBins)
-    param_widget.fields['spacing'].value = 'log'
-    param_widget.fields['start'].value = 1.0e3
-    param_widget.fields['stop'].value = 1.0e5
-    param_widget.fields['nbins'].value = 7
-    assert sc.identical(
-        param_widget.value,
-        sc.geomspace(dim='wavelength', start=1.0e3, stop=1.0e5, num=8, unit='angstrom'),
-    )
-    assert param_widget.fields['spacing'].value == 'log'
-
-
-def test_bin_edges_widget_with_default_values() -> None:
-    widget = _ready_widget(providers=[q_bins_print_provider], output_selections=[str])
-    param_widget = _get_param_widget(widget, QBins)
-    assert sc.identical(
-        param_widget.value,
-        sc.linspace(dim='Q', start=0.01, stop=0.6, num=151, unit='1/angstrom'),
-    )
-    assert set(param_widget.fields['unit'].options) == {'1/angstrom', '1/nm'}
-    assert param_widget.fields['start'].value == 0.01
-    assert param_widget.fields['stop'].value == 0.6
-    assert param_widget.fields['nbins'].value == 150
-    assert param_widget.fields['spacing'].value == 'linear'
-
-
-@pytest.mark.parametrize(
-    'output',
-    [
-        (sc.scalar(1), sc.scalar(2)),
-        'Test with a string',
-        sc.data.binned_xy(100, 10, 10),
-    ],
-)
-def test_result_box_can_handle_different_outputs(output):
-    was_called = False
-
-    def run_workflow():
-        nonlocal was_called
-        was_called = True
-        return dict(enumerate(output))
-
-    ResultBox(run_workflow).run_button.click()
-    assert was_called
-
-
-def test_switchable_widget_set_values() -> None:
-    param = IntParam('a', 'a', 1, switchable=True)
-    widget = create_parameter_widget(param)
-    assert isinstance(widget, SwitchWidget)
-    assert not widget.enabled
-    widget.set_fields({'enabled': True})
-    assert widget.enabled
-    widget.set_fields({'enabled': False})
-    assert not widget.enabled
-    widget.set_fields({'enabled': True, 'value': 2})
-    assert widget.enabled
-    assert widget.value == 2
-    widget.set_fields({'enabled': False, 'value': 3})
-    assert not widget.enabled
-    assert widget.value == 3
-    widget.set_fields({'value': 4})
-    assert not widget.enabled
-    assert widget.value == 4
-
-
-def test_switchable_widget_get_fields_only_value() -> None:
-    param = IntParam('a', 'a', 1, switchable=True)
-    widget = create_parameter_widget(param)
-    assert isinstance(widget, SwitchWidget)
-    assert widget.get_fields() == {'enabled': False, 'value': 1}
-    widget.enabled = True
-    assert widget.get_fields() == {'enabled': True, 'value': 1}
-    widget.value = 2
-    assert widget.get_fields() == {'enabled': True, 'value': 2}
-    widget.enabled = False
-    assert widget.get_fields() == {'enabled': False, 'value': 2}
-
-
-def test_switchable_widget_set_fields() -> None:
-    param = Vector3dParameter('a', 'a', sc.vector([1, 2, 3], unit='m'), switchable=True)
-    widget = create_parameter_widget(param)
-    assert isinstance(widget, SwitchWidget)
-    assert not widget.enabled
-    assert widget.value == sc.vector([1, 2, 3], unit='m')
-    widget.set_fields({'enabled': True, 'x': 4, 'y': 5, 'z': 6, 'unit': 'm'})
-    assert widget.enabled
-    assert widget.value == sc.vector([4, 5, 6], unit='m')
-    widget.set_fields({'x': 7, 'y': 8})
-    assert widget.enabled
-    assert widget.value == sc.vector([7, 8, 6], unit='m')
-
-
-def test_switchable_widget_get_fields_sub_fields() -> None:
-    param = Vector3dParameter('a', 'a', sc.vector([1, 2, 3], unit='m'), switchable=True)
-    widget = create_parameter_widget(param)
-    assert isinstance(widget, SwitchWidget)
-    assert widget.get_fields() == {
-        'enabled': False,
-        'x': 1,
-        'y': 2,
-        'z': 3,
-        'unit': 'm',
+    output_widget.value = (str,)
+    assert _category_expansion_state(widget) == {
+        'General': 0,
+        'Text': 0,
     }
-    widget.enabled = True
-    assert widget.get_fields() == {'enabled': True, 'x': 1, 'y': 2, 'z': 3, 'unit': 'm'}
-    widget.set_fields({'enabled': False, 'x': 4, 'y': 5, 'unit': 'mm'})
-    assert widget.get_fields() == {
-        'enabled': False,
-        'x': 4,
-        'y': 5,
-        'z': 3,
-        'unit': 'mm',
+
+    sections = _category_sections(widget)
+    sections['Text'].selected_index = None
+    output_widget.value = (str, int)
+    assert _category_expansion_state(widget) == {
+        'General': 0,
+        'Text': None,
+        'Other': 0,
+    }
+
+    sections = _category_sections(widget)
+    sections['Other'].selected_index = None
+    output_widget.value = (int,)
+    assert _category_expansion_state(widget) == {
+        'Other': None,
+    }
+
+    output_widget.value = (str, int)
+    assert _category_expansion_state(widget) == {
+        'General': 0,
+        'Text': None,
+        'Other': None,
     }
 
 
-FilenameSampleRun = NewType('FilenameSampleRun', str)
-parameter_registry[FilenameSampleRun] = FilenameParameter.from_type(
-    FilenameSampleRun, default="SampleRun.hdf"
-)
-MultiFilenameSampleRun = NewType('MultiFilenameSampleRun', list[str])
-parameter_registry[MultiFilenameSampleRun] = MultiFilenameParameter.from_type(
-    MultiFilenameSampleRun, default=["file1.hdf", "file2.hdf"]
-)
-MultiFilenameBackgroundRun = NewType('MultiFilenameBackgroundRun', list[str])
-parameter_registry[MultiFilenameBackgroundRun] = MultiFilenameParameter.from_type(
-    MultiFilenameBackgroundRun, default="background.hdf"
-)
-
-
-def filename_print_provider(fname: FilenameSampleRun) -> str:
-    return str(fname)
-
-
-def multi_filename_print_provider(fnames: MultiFilenameSampleRun) -> list[str]:
-    return [str(fname) for fname in fnames]
-
-
-def multi_filename_print_provider_bis(fnames: MultiFilenameBackgroundRun) -> list[str]:
-    return [str(fname) for fname in fnames]
-
-
-def test_filename_widget_single() -> None:
-    widget = _ready_widget(providers=[filename_print_provider], output_selections=[str])
-    param_widget = _get_param_widget(widget, FilenameSampleRun)
-    assert param_widget.value == "SampleRun.hdf"
-
-
-def test_filename_widget_multiple() -> None:
-    widget = _ready_widget(
-        providers=[multi_filename_print_provider], output_selections=[list[str]]
+def test_parameter_refresh_preserves_invalid_fields_without_validating() -> None:
+    parameters = ParameterRegistry()
+    parameters[Count] = test_parameters[Count]
+    parameters[Label] = test_parameters[Label]
+    parameters[Limited] = ParameterSpec(
+        model=LimitedParams,
+        category='Limited',
+        title='Limited',
+        default=LimitedParams(),
+        transform=lambda params: Limited(params.value),
     )
-    param_widget = _get_param_widget(widget, MultiFilenameSampleRun)
-    assert param_widget.value == ("file1.hdf", "file2.hdf")
-
-
-def test_filename_widget_multiple_initialized_with_single_string() -> None:
-    widget = _ready_widget(
-        providers=[multi_filename_print_provider_bis], output_selections=[list[str]]
+    widget = WorkflowWidget(
+        WorkflowSpec.from_factory(
+            make_workflow_with_limited_parameter,
+            parameters=parameters,
+            typical_outputs=(float, str),
+        )
     )
-    param_widget = _get_param_widget(widget, MultiFilenameBackgroundRun)
-    assert param_widget.value == ("background.hdf",)
+    output_widget = widget.output_selection_box.typical_outputs_widget
+
+    output_widget.value = (float,)
+    widget.parameter_box._input_widgets[Limited]._widget.widgets['value'].value = -1
+    output_widget.value = (float, str)
+
+    limited_widget = widget.parameter_box._input_widgets[Limited]
+    assert limited_widget._widget.widgets['value'].value == -1
+    is_valid, errors = limited_widget.validate()
+    assert not is_valid
+    assert 'greater than or equal to 0' in errors

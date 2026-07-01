@@ -8,7 +8,7 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess import sans
-from ess.sans.parameters import typical_outputs
+from ess.sans.parameters import parameters, typical_outputs
 
 from ess.reduce.workflow import register_workflow
 
@@ -72,7 +72,7 @@ def load_direct_beam(filename: DirectBeamFilename) -> DirectBeam:
 loki_providers = (detector_pixel_shape, load_direct_beam)
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def LokiWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for Loki.
@@ -87,5 +87,4 @@ def LokiWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for key, param in loki_default_parameters().items():
         workflow[key] = param
-    workflow.typical_outputs = typical_outputs
     return workflow

@@ -154,49 +154,49 @@ def EstiaWorkflow(
     return workflow
 
 
-@register_workflow
+@register_workflow()
 def EstiaMcStasUnnormalizedWorkflow() -> sciline.Pipeline:
     """Workflow for Estia McStas data without run normalization."""
     return EstiaMcStasWorkflow(run_norm=RunNormalization.none)
 
 
-@register_workflow
+@register_workflow()
 def EstiaMcStasMonitorHistogramWorkflow() -> sciline.Pipeline:
     """Workflow for Estia McStas data using histogrammed monitor normalization."""
     return EstiaMcStasWorkflow(run_norm=RunNormalization.monitor_histogram)
 
 
-@register_workflow
+@register_workflow()
 def EstiaMcStasMonitorIntegratedWorkflow() -> sciline.Pipeline:
     """Workflow for Estia McStas data using integrated monitor normalization."""
     return EstiaMcStasWorkflow(run_norm=RunNormalization.monitor_integrated)
 
 
-@register_workflow
+@register_workflow()
 def EstiaMcStasProtonChargeWorkflow() -> sciline.Pipeline:
     """Workflow for Estia McStas data using proton charge normalization."""
     return EstiaMcStasWorkflow(run_norm=RunNormalization.proton_charge)
 
 
-@register_workflow
+@register_workflow()
 def EstiaUnnormalizedWorkflow() -> sciline.Pipeline:
     """Workflow for Estia NeXus data without run normalization."""
     return EstiaWorkflow(run_norm=RunNormalization.none)
 
 
-@register_workflow
+@register_workflow()
 def EstiaMonitorHistogramWorkflow() -> sciline.Pipeline:
     """Workflow for Estia NeXus data using histogrammed monitor normalization."""
     return EstiaWorkflow(run_norm=RunNormalization.monitor_histogram)
 
 
-@register_workflow
+@register_workflow()
 def EstiaMonitorIntegratedWorkflow() -> sciline.Pipeline:
     """Workflow for Estia NeXus data using integrated monitor normalization."""
     return EstiaWorkflow(run_norm=RunNormalization.monitor_integrated)
 
 
-@register_workflow
+@register_workflow()
 def EstiaProtonChargeWorkflow() -> sciline.Pipeline:
     """Workflow for Estia NeXus data using proton charge normalization."""
     return EstiaWorkflow(run_norm=RunNormalization.proton_charge)

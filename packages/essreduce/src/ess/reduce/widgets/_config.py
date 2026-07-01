@@ -2,5 +2,11 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from ipywidgets import Layout
 
-default_layout = Layout(width='100%')
+
+def full_width_layout(**kwargs) -> Layout:
+    kwargs.setdefault('width', '100%')
+    return Layout(**kwargs)
+
+
+default_layout = full_width_layout()
 default_style = {'description_width': 'auto'}

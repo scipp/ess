@@ -7,7 +7,6 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess.powder import providers as powder_providers
-from ess.powder import with_pixel_mask_filenames
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
     AccumulatedProtonCharge,
@@ -19,7 +18,7 @@ from ess.powder.types import (
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     Measurement,
-    PixelMaskFilename,
+    NeXusDetectorName,
     Position,
     ReducerSoftware,
     SampleRun,
@@ -31,7 +30,6 @@ from ess.powder.types import (
 from scippneutron.metadata import Software
 
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
-from ess.reduce.parameter import parameter_mappers
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
@@ -42,7 +40,7 @@ from .io.cif import (
     prepare_reduced_tof_cif,
 )
 from .io.geant4 import providers as geant4_providers
-from .parameters import typical_outputs
+from .parameters import parameters, typical_outputs
 
 DETECTOR_BANK_SIZES = {
     "endcap_backward_detector": {
@@ -148,8 +146,6 @@ _cif_providers = (
     prepare_reduced_empty_can_subtracted_tof_cif,
 )
 
-parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
-
 
 def default_parameters() -> dict:
     """Return the default reduction parameters shared by DREAM powder workflows."""
@@ -160,6 +156,7 @@ def default_parameters() -> dict:
         TofMask: None,
         WavelengthMask: None,
         TwoThetaMask: None,
+        NeXusDetectorName: "mantle",
         CIFAuthors: CIFAuthors([]),
     }
 
@@ -186,11 +183,14 @@ def DreamPowderWorkflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
     insert_run_normalization(wf, run_norm)
     for key, value in default_parameters().items():
         wf[key] = value
-    wf.typical_outputs = typical_outputs
     return wf
 
 
-def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipeline:
+def DreamGeant4Workflow(
+    *,
+    run_norm: RunNormalization,
+    **kwargs,
+) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation.
 
@@ -245,11 +245,10 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
     for key, value in additional_parameters.items():
         wf[key] = value
 
-    wf.typical_outputs = typical_outputs
     return wf
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def DreamGeant4MonitorHistogramWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation, using a
@@ -258,7 +257,7 @@ def DreamGeant4MonitorHistogramWorkflow() -> sciline.Pipeline:
     return DreamGeant4Workflow(run_norm=RunNormalization.monitor_histogram)
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def DreamGeant4MonitorIntegratedWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation, using
@@ -267,7 +266,7 @@ def DreamGeant4MonitorIntegratedWorkflow() -> sciline.Pipeline:
     return DreamGeant4Workflow(run_norm=RunNormalization.monitor_integrated)
 
 
-@register_workflow
+@register_workflow(parameters=parameters, typical_outputs=typical_outputs)
 def DreamGeant4ProtonChargeWorkflow() -> sciline.Pipeline:
     """
     Workflow with default parameters for the Dream Geant4 simulation, using

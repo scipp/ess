@@ -5,17 +5,18 @@
 import pytest
 import scipp as sc
 from ess import loki
-from ess.loki import LokiAtLarmorWorkflow
+from ess.loki import LokiAtLarmorTutorialWorkflow, LokiAtLarmorWorkflow
+from ess.sans.parameters import parameters as sans_parameters
 from ess.sans.types import (
-    BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    DetectorMasks,
     Filename,
-    IntensityQ,
     LookupTableFilename,
     NeXusDetectorName,
     PixelMaskFilename,
     QBins,
+    QxBins,
     ReturnEvents,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -31,30 +32,50 @@ def test_sans_workflow_registers_subclasses():
     assert LokiAtLarmorWorkflow in workflow.workflow_registry
     count = len(workflow.workflow_registry)
 
-    @workflow.register_workflow
+    @workflow.register_workflow()
     class MyWorkflow: ...
 
     assert MyWorkflow in workflow.workflow_registry
     assert len(workflow.workflow_registry) == count + 1
 
 
-def test_loki_larmor_workflow_parameters_returns_filtered_params():
+def test_loki_larmor_workflow_registers_parameter_model():
+    spec = workflow.workflow_registry.get(LokiAtLarmorWorkflow)
+    assert spec.parameters is sans_parameters
+
+
+def test_loki_larmor_workflow_applies_parameter_model():
     wf = LokiAtLarmorWorkflow()
-    parameters = workflow.get_parameters(wf, (IntensityQ[SampleRun],))
-    assert Filename[SampleRun] in parameters
-    assert Filename[BackgroundRun] not in parameters
+    spec = workflow.workflow_registry.get(LokiAtLarmorWorkflow)
+    params = workflow.get_parameters(wf, (ReturnEvents,), spec.parameters)
+    wf = workflow.assign_parameter_values(wf, {ReturnEvents: True}, params)
+
+    assert wf.compute(ReturnEvents)
 
 
-def test_loki_larmor_workflow_parameters_returns_no_params_for_no_outputs():
+def test_loki_larmor_workflow_parameters_are_selected_from_graph():
     wf = LokiAtLarmorWorkflow()
-    parameters = workflow.get_parameters(wf, ())
-    assert not parameters
+    spec = workflow.workflow_registry.get(LokiAtLarmorWorkflow)
+
+    params = workflow.get_parameters(wf, (BackgroundSubtractedIofQ,), spec.parameters)
+
+    assert Filename[SampleRun] in params
+    assert PixelMaskFilename in params
+    assert QBins in params
+    assert QxBins not in params
 
 
-def test_loki_larmor_workflow_parameters_with_param_returns_param():
-    wf = LokiAtLarmorWorkflow()
-    parameters = workflow.get_parameters(wf, (ReturnEvents,))
-    assert parameters.keys() == {ReturnEvents}
+def test_loki_larmor_tutorial_workflow_preserves_outputs_and_masks():
+    wf = LokiAtLarmorTutorialWorkflow()
+    spec = workflow.workflow_registry.get(LokiAtLarmorTutorialWorkflow)
+
+    labels = [
+        label for label, _ in workflow.get_typical_outputs(wf, spec.typical_outputs)
+    ]
+    masks = wf.compute(DetectorMasks)
+
+    assert 'IntensityQ[SampleRun]' in labels
+    assert tuple(masks) == tuple(map(str, loki.data.loki_tutorial_mask_filenames()))
 
 
 def test_loki_larmor_workflow_compute_with_single_pixel_mask(larmor_workflow):
