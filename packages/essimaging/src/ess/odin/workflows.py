@@ -130,9 +130,7 @@ KEY_MAPPING = {
 
 
 def _extract_part_of_run(
-    data: sc.DataArray,
-    image_key: ImageKey,
-    run_type: RunType,
+    data: sc.DataArray, image_key: ImageKey, run_type: RunType
 ) -> sc.DataArray:
     """ """
     key_lookup = sc.lookup(image_key, "time", mode="previous")

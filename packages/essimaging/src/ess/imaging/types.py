@@ -110,12 +110,4 @@ ImageKey = NewType("ImageKey", sc.DataArray)
     """
 
 
-# class ImageKey(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-#     """Key mapping image image recording type to the time axis of the recording:
-#     - 0: sample run
-#     - 1: open beam run
-#     - 2: dark background run
-#     """
-
-
 del sc, sciline, NewType
