@@ -11,6 +11,7 @@ from ess.reduce.nexus import GenericNeXusWorkflow
 
 from .. import imaging
 from ..imaging.types import (
+    AllRuns,
     CorrectedDetector,
     DarkBackgroundRun,
     FluxNormalizedDetector,
@@ -62,7 +63,7 @@ def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
     """
 
     wf = GenericNeXusWorkflow(
-        run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun],
+        run_types=[SampleRun, OpenBeamRun, DarkBackgroundRun, AllRuns],
         monitor_types=[],
         **kwargs,
     )

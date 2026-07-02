@@ -36,7 +36,6 @@ LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
-
 SampleRun = NewType("SampleRun", int)
 """Sample run; a run with a sample in the beam."""
 
@@ -47,6 +46,9 @@ measure the dark current of the detector."""
 OpenBeamRun = NewType("OpenBeamRun", int)
 """Open beam run; a run with no sample in the beam, and the shutter open, to measure the
 beam profile."""
+
+AllRuns = NewType("AllRuns", int)
+"""A type to represent all runs: sample, open beam, and dark background runs."""
 
 BeamMonitor1 = NewType("BeamMonitor1", int)
 """Beam monitor number 1"""
