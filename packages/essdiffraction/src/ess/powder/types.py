@@ -86,6 +86,9 @@ MaskType = TypeVar("MaskType", TwoThetaMask, TofMask, WavelengthMask, DSpacingMa
 CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
 
+P2DOutputFilename = NewType("P2DOutputFilename", str)
+"""Filename of the P2D output file."""
+
 DspacingBins = NewType("DspacingBins", sc.Variable)
 """Bin edges for d-spacing."""
 
@@ -202,6 +205,15 @@ ExtendedIntensity2D = NewType("ExtendedIntensity2D", sc.Dataset)
 
 MaskedExtendedIntensity2D = NewType("MaskedExtendedIntensity2D", sc.Dataset)
 """2D ExtendedIntensity with masks."""
+
+MaskedIntensity2D = NewType("MaskedIntensity2D", sc.DataArray)
+"""2D Intensity with combined masks applied."""
+
+IntensityP2D = NewType("IntensityP2D", sc.DataArray)
+"""Intensity data ready for export into a .p2d file."""
+
+DataFrameP2D = NewType("DataFrameP2D", sc.DataArray)
+"""Panda dataframe with .p2d info."""
 
 EmptyCanSubtractedIntensityTof = NewType("EmptyCanSubtractedIntensityTof", sc.DataArray)
 """Normalized and empty-can-subtracted data that has been converted to ToF."""

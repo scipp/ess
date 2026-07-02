@@ -17,6 +17,7 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     FilenameMLZ,
     ShiftNegativeIntensity,
     NegativeIntensityResetValue,
+    P2DOutputFilename,
 )
 
 from ess.packages.essreduce.src.ess.reduce.nexus.workflow import gravity_vector_neg_y
@@ -32,6 +33,9 @@ from ess.packages.essdiffraction.src.ess.snspowder.powgen.data import (
     source_position_mlz,
     extract_raw_data_mlz,
     extract_accumulated_proton_charge,
+    extract_masked_intensity,
+    prepare_for_p2d_export,
+    export_to_p2d
 )
 
 from ess.packages.essdiffraction.src.ess.powder.conversion import (
@@ -142,19 +146,23 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 normalize_by_vanadium_mlz,
                 append_two_theta_lambda,
                 add_masks_p2d_data,
+                extract_masked_intensity,
+                prepare_for_p2d_export,
+                export_to_p2d
             ]
         ),
         params={
-            FilepathMLZ[SampleRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
-            FilepathMLZ[VanadiumRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
-            FilepathMLZ[EmptyCanRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
-            FilepathMLZ[CalibrationRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
-            FilepathMLZ[EmptyVanadiumCanRun]: '/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted',
+            FilepathMLZ[SampleRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
+            FilepathMLZ[VanadiumRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
+            FilepathMLZ[EmptyCanRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
+            FilepathMLZ[CalibrationRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
+            FilepathMLZ[EmptyVanadiumCanRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
             KeepEventsMLZ: False,
             ShiftNegativeIntensity[SampleRun]: True,
             ShiftNegativeIntensity[VanadiumRun]: False,
             NegativeIntensityResetValue[SampleRun]: 0.0,
             NegativeIntensityResetValue[VanadiumRun]: 0.0,
+            P2DOutputFilename: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/output/reduced.p2d"
             # CalibrationData: None,
         }
     )

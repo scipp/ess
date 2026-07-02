@@ -11,6 +11,10 @@ import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 import os
+import numpy as np
+import pandas as pd
+from pathlib import Path
+
 from ess.packages.essdiffraction.src.ess.powder.types import (
     AccumulatedProtonCharge,
     CalibrationData,
@@ -41,7 +45,10 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     MaskedDetectorIDs,
     CorrectedDspacing,
     MaskedExtendedIntensity2D,
-    #RawTofDataMLZ
+    MaskedIntensity2D,
+    IntensityP2D,
+    DataFrameP2D,
+    P2DOutputFilename
 )
 
 from ess.packages.essdiffraction.src.ess.powder.masking import with_pixel_mask_filenames
@@ -516,6 +523,90 @@ def convert_monitor_to_wavelength(
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
     )
+
+
+def extract_masked_intensity(
+    data: MaskedExtendedIntensity2D,
+) -> MaskedIntensity2D:
+    out = data["intensity"].copy()
+    combined_mask = _calculate_combined_mask(data, out.dims)
+    del data
+    out.masks["combined_mask"] = combined_mask
+    return MaskedExtendedIntensity2D(out)
+
+
+def _calculate_combined_mask(ds, target_dims):
+    combined = None
+    for var_name, da in ds.items():
+        for mask_name, mask in da.masks.items():
+
+            if set(mask.dims) != set(target_dims):
+                raise ValueError(
+                    f"Mask {mask_name!r} from {var_name!r} has dims {mask.dims}, "
+                    f"but target has dims {target_dims}."
+                )
+
+            if mask.dims != target_dims:
+                mask = mask.transpose(target_dims)
+
+            combined = mask.copy() if combined is None else combined | mask
+    del ds
+    return combined
+
+
+def prepare_for_p2d_export(
+    data2d: MaskedExtendedIntensity2D,
+) -> IntensityP2D:
+    combined_mask = _calculate_combined_mask(data2d, data2d.dims)
+    out = sc.DataArray(
+        data=data2d["intensity"].data,
+        coords={
+            "dperp": data2d["dperp_2d"].data,
+            "dspacing": data2d["dspacing_2d"].data,
+            "lambda": data2d["lambda"].data,
+            "two_theta": data2d["two_theta"].data,
+        },
+        masks={
+            "combined_mask": combined_mask,
+        }
+    )
+    del data2d
+    out = out.flatten(dims=out.dims, to="d_pixel")
+    valid = ~out.masks["combined_mask"]
+    out_valid = out[valid]
+    del out
+    return IntensityP2D(out_valid)
+
+
+def export_to_p2d(
+    data: IntensityP2D,
+    filename: P2DOutputFilename,
+) -> DataFrameP2D:
+    df = pd.DataFrame({
+        "#2theta": data.coords["two_theta"].values,
+        "lambda": data.coords["lambda"].values,
+        "d-value": data.coords["dspacing"].values,
+        "dp-value": data.coords["dperp"].values,
+        "counts": data.values,
+    })
+
+    filepath = Path(filename)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+
+
+    header = (
+        "#Title: \n"
+        "#Inst: POWGEN.prm\n"
+        "#Binning: ddperp \n"
+        "#Bank: 1\n"
+    )
+
+    formatter = "{:12.7f}".format
+
+    with open(filepath, "w") as f:
+        f.write(header + df.to_string(index=False, justify="left", formatters={column: formatter for column in df.columns}).lstrip())
+
+    return DataFrameP2D(df)
 
 
 providers = (
