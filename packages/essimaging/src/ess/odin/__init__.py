@@ -4,7 +4,7 @@
 import importlib.metadata
 
 from . import beamline
-from .workflows import OdinBraggEdgeWorkflow, OdinWorkflow, OrcaNormalizedImagesWorkflow
+from .workflows import OdinBraggEdgeWorkflow, OdinOrcaWorkflow, OdinWorkflow
 
 try:
     __version__ = importlib.metadata.version("esstbl")
@@ -15,7 +15,7 @@ del importlib
 
 __all__ = [
     "OdinBraggEdgeWorkflow",
+    "OdinOrcaWorkflow",
     "OdinWorkflow",
-    "OrcaNormalizedImagesWorkflow",
     "beamline",
 ]

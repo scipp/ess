@@ -8,13 +8,11 @@ import sciline as sl
 import scipp as sc
 
 from ess.reduce.nexus import GenericNeXusWorkflow
-from ess.reduce.nexus.types import NeXusDetectorName, NeXusName
 
 from .. import imaging
 from ..imaging.types import (
     CorrectedDetector,
     DarkBackgroundRun,
-    ExposureTime,
     FluxNormalizedDetector,
     OpenBeamRun,
     ProtonCharge,
@@ -58,14 +56,6 @@ def normalize_by_proton_charge_orca(
 orca_providers = (normalize_by_proton_charge_orca,)
 
 
-def default_parameters() -> dict:
-    """Return the default NeXus names and detector name for the ORCA workflow."""
-    return {
-        NeXusDetectorName: 'orca_detector',
-        NeXusName[ExposureTime]: '/entry/instrument/orca_detector/camera_exposure',
-    }
-
-
 def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
     """
     Workflow with default parameters for ORCA image normalization.
@@ -83,6 +73,4 @@ def OrcaNormalizedImagesWorkflow(**kwargs) -> sl.Pipeline:
         *orca_providers,
     ):
         wf.insert(provider)
-    for key, param in default_parameters().items():
-        wf[key] = param
     return wf

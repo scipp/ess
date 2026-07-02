@@ -4,8 +4,7 @@
 import importlib.metadata
 
 from ..imaging import orca
-from ..imaging.orca import OrcaNormalizedImagesWorkflow
-from .workflow import TblWorkflow, default_parameters
+from .workflow import OrcaNormalizedImagesWorkflow, TblWorkflow, default_parameters
 
 try:
     __version__ = importlib.metadata.version("esstbl")
