@@ -7,9 +7,10 @@ Default parameters and workflow for Odin.
 import sciline
 from scippneutron.conversion.tof import tof_from_wavelength
 
+from ess.reduce.nexus import NexusFileSpec, NexusLocationSpec, NexusName, load_from_path
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
-from ..imaging.orca import OrcaNormalizedImagesWorkflow
+from ..imaging import orca
 from ..imaging.types import (
     BeamMonitor1,
     BeamMonitor2,
@@ -17,6 +18,7 @@ from ..imaging.types import (
     BeamMonitor4,
     CorrectedDetector,
     DarkBackgroundRun,
+    ImageKey,
     LookupTableRelativeErrorThreshold,
     NeXusMonitorName,
     OpenBeamRun,
@@ -103,6 +105,22 @@ def OdinBraggEdgeWorkflow(
     for provider in (*masking_providers,):
         workflow.insert(provider)
     return workflow
+
+
+def load_image_key(file: NeXusFileSpec[RunType], path: NeXusName[ImageKey]) -> ImageKey:
+    # Note that putting '/value' at the end of the 'path' in the default_parameters
+    # yields different results as it can return a Variable instead of a DataArray,
+    # depending on the contents of the NeXus file.
+    return ImageKey(
+        load_from_path(NeXusLocationSpec(filename=file.value, component_name=path))[
+            "value"
+        ]
+    )
+
+
+def OdinOrcaWorkflow(**kwargs) -> sciline.Pipeline:
+    """ """
+    wf = orca.OrcaNormalizedImagesWorkflow(**kwargs)
 
 
 __all__ = [
