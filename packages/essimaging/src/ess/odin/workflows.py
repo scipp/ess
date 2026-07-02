@@ -21,12 +21,12 @@ from ..imaging.types import (
     BeamMonitor4,
     CorrectedDetector,
     DarkBackgroundRun,
+    FluxNormalizedDetector,
     ImageKey,
     LookupTableRelativeErrorThreshold,
     NeXusMonitorName,
     OpenBeamRun,
     PulseStrideOffset,
-    RawDetector,
     RunType,
     SampleRun,
     TofDetector,
@@ -122,7 +122,11 @@ def load_image_key(file: NeXusFileSpec[AllRuns], path: NeXusName[ImageKey]) -> I
     )
 
 
-KEY_MAPPING = {SampleRun: 0, OpenBeamRun: 1, DarkBackgroundRun: 2}
+KEY_MAPPING = {
+    SampleRun: sc.scalar(0, unit=None),
+    OpenBeamRun: sc.scalar(1, unit=None),
+    DarkBackgroundRun: sc.scalar(2, unit=None),
+}
 
 
 def _extract_part_of_run(
@@ -137,28 +141,28 @@ def _extract_part_of_run(
 
 
 def extract_dark_run(
-    data: RawDetector[AllRuns], image_key: ImageKey
-) -> RawDetector[DarkBackgroundRun]:
+    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
+) -> FluxNormalizedDetector[DarkBackgroundRun]:
     """ """
-    return RawDetector[DarkBackgroundRun](
+    return FluxNormalizedDetector[DarkBackgroundRun](
         _extract_part_of_run(data=data, image_key=image_key, run_type=DarkBackgroundRun)
     )
 
 
 def extract_openbeam_run(
-    data: RawDetector[AllRuns], image_key: ImageKey
-) -> RawDetector[OpenBeamRun]:
+    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
+) -> FluxNormalizedDetector[OpenBeamRun]:
     """ """
-    return RawDetector[OpenBeamRun](
+    return FluxNormalizedDetector[OpenBeamRun](
         _extract_part_of_run(data=data, image_key=image_key, run_type=OpenBeamRun)
     )
 
 
 def extract_sample_run(
-    data: RawDetector[AllRuns], image_key: ImageKey
-) -> RawDetector[SampleRun]:
+    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
+) -> FluxNormalizedDetector[SampleRun]:
     """ """
-    return RawDetector[SampleRun](
+    return FluxNormalizedDetector[SampleRun](
         _extract_part_of_run(data=data, image_key=image_key, run_type=SampleRun)
     )
 
