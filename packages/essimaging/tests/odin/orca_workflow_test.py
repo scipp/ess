@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
 import ess.odin.data  # noqa: F401
 import pytest
 import sciline as sl
 import scipp as sc
-import scippnexus as sx
 from ess import odin
 from scipp.testing import assert_identical
 
