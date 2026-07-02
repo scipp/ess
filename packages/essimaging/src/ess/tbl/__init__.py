@@ -3,8 +3,8 @@
 
 import importlib.metadata
 
-from . import orca
-from .orca import OrcaNormalizedImagesWorkflow
+from ..imaging import orca
+from ..imaging.orca import OrcaNormalizedImagesWorkflow
 from .workflow import TblWorkflow, default_parameters
 
 try:

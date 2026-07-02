@@ -9,6 +9,7 @@ from scippneutron.conversion.tof import tof_from_wavelength
 
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
+from ..imaging.orca import OrcaNormalizedImagesWorkflow
 from ..imaging.types import (
     BeamMonitor1,
     BeamMonitor2,
@@ -107,4 +108,5 @@ def OdinBraggEdgeWorkflow(
 __all__ = [
     "OdinBraggEdgeWorkflow",
     "OdinWorkflow",
+    "OrcaNormalizedImagesWorkflow",
 ]
