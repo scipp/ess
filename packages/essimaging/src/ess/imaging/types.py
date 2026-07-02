@@ -96,8 +96,4 @@ NormalizedImage = NewType("NormalizedImage", sc.DataArray)
 beam run."""
 
 
-class ExposureTime(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Exposure time of each frame recorded by the camera detector."""
-
-
 del sc, sciline, NewType

@@ -8,13 +8,12 @@ import sciline as sl
 import scipp as sc
 
 from ess.reduce.nexus import GenericNeXusWorkflow
-from ess.reduce.nexus.types import NeXusDetectorName, NeXusName
+from ess.reduce.nexus.types import NeXusDetectorName
 
 from .. import imaging
 from ..imaging.types import (
     CorrectedDetector,
     DarkBackgroundRun,
-    ExposureTime,
     FluxNormalizedDetector,
     OpenBeamRun,
     ProtonCharge,
@@ -62,7 +61,6 @@ def default_parameters() -> dict:
     """Return the default NeXus names and detector name for the ORCA workflow."""
     return {
         NeXusDetectorName: 'orca_detector',
-        NeXusName[ExposureTime]: '/entry/instrument/orca_detector/camera_exposure',
     }
 
 
