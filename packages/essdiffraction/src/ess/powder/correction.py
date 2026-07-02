@@ -37,7 +37,7 @@ from .types import (
     ShiftNegativeIntensity,
     NegativeIntensityResetValue,
     EmptyCanSubtractedNoNegative2D,
-    Intensity2D,
+    NormalizedIntensity2D,
 )
 
 _T = TypeVar("_T")
@@ -250,11 +250,11 @@ def normalize_by_vanadium_mlz(
     data: EmptyCanSubtractedNoNegative2D[SampleRun],
     vanadium: EmptyCanSubtractedNoNegative2D[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> Intensity2D:
+) -> NormalizedIntensity2D:
     if data is None:
-        return cast(Intensity2D, None)
+        return cast(NormalizedIntensity2D, None)
     if vanadium is None:
-        return Intensity2D(data)
+        return NormalizedIntensity2D(data)
     norm = broadcast_uncertainties(
         vanadium, prototype=data, mode=uncertainty_broadcast_mode
     )
@@ -266,7 +266,7 @@ def normalize_by_vanadium_mlz(
     mask = norm.data == sc.scalar(0.0, unit=norm.unit)
     if mask.any():
         normalized.masks['zero_vanadium'] = mask
-    return Intensity2D(normalized)
+    return NormalizedIntensity2D(normalized)
 
 
 def normalize_by_vanadium_dspacing_and_two_theta(

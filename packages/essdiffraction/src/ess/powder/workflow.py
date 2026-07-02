@@ -11,7 +11,8 @@ from .types import (
     TofMask,
     TwoThetaMask,
     WavelengthMask,
-    MaskingData
+    MaskingData,
+    NormalizedIntensity2D
 )
 
 

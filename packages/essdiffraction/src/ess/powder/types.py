@@ -188,8 +188,9 @@ EmptyCanSubtractedIofDspacingTwoTheta = NewType(
 IntensityTof = NewType("IntensityTof", sc.DataArray)
 """Normalized data that has been converted to ToF."""
 
-Intensity2D = NewType("Intensity2D", sc.DataArray)
+NormalizedIntensity2D = NewType("NormalizedIntensity2D", sc.DataArray)
 """2D Intensity of normalized sample data."""
+
 
 EmptyCanSubtractedIntensityTof = NewType("EmptyCanSubtractedIntensityTof", sc.DataArray)
 """Normalized and empty-can-subtracted data that has been converted to ToF."""
