@@ -5,17 +5,24 @@ Default parameters and workflow for Odin.
 """
 
 import sciline
+import scipp as sc
 from scippneutron.conversion.tof import tof_from_wavelength
 
+from ess.reduce.nexus import load_from_path
+from ess.reduce.nexus.types import NeXusFileSpec, NeXusLocationSpec, NeXusName
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
+from ..imaging import orca
 from ..imaging.types import (
+    AllRuns,
     BeamMonitor1,
     BeamMonitor2,
     BeamMonitor3,
     BeamMonitor4,
     CorrectedDetector,
     DarkBackgroundRun,
+    FluxNormalizedDetector,
+    ImageKey,
     LookupTableRelativeErrorThreshold,
     NeXusMonitorName,
     OpenBeamRun,
@@ -104,7 +111,78 @@ def OdinBraggEdgeWorkflow(
     return workflow
 
 
+def load_image_key(file: NeXusFileSpec[AllRuns], path: NeXusName[ImageKey]) -> ImageKey:
+    # Note that putting '/value' at the end of the 'path' in the default_parameters
+    # yields different results as it can return a Variable instead of a DataArray,
+    # depending on the contents of the NeXus file.
+    return ImageKey(
+        load_from_path(NeXusLocationSpec(filename=file.value, component_name=path))[
+            "value"
+        ]
+    )
+
+
+KEY_MAPPING = {
+    SampleRun: sc.scalar(0, unit=None),
+    OpenBeamRun: sc.scalar(1, unit=None),
+    DarkBackgroundRun: sc.scalar(2, unit=None),
+}
+
+
+def _extract_part_of_run(
+    data: sc.DataArray, image_key: ImageKey, run_type: RunType
+) -> sc.DataArray:
+    """ """
+    key_lookup = sc.lookup(image_key, "time", mode="previous")
+    sel = key_lookup[data.coords["time"]] == KEY_MAPPING[run_type]
+    return data[sel]
+
+
+def extract_dark_run(
+    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
+) -> FluxNormalizedDetector[DarkBackgroundRun]:
+    """ """
+    return FluxNormalizedDetector[DarkBackgroundRun](
+        _extract_part_of_run(data=data, image_key=image_key, run_type=DarkBackgroundRun)
+    )
+
+
+def extract_openbeam_run(
+    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
+) -> FluxNormalizedDetector[OpenBeamRun]:
+    """ """
+    return FluxNormalizedDetector[OpenBeamRun](
+        _extract_part_of_run(data=data, image_key=image_key, run_type=OpenBeamRun)
+    )
+
+
+def extract_sample_run(
+    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
+) -> FluxNormalizedDetector[SampleRun]:
+    """ """
+    return FluxNormalizedDetector[SampleRun](
+        _extract_part_of_run(data=data, image_key=image_key, run_type=SampleRun)
+    )
+
+
+def OdinOrcaWorkflow(**kwargs) -> sciline.Pipeline:
+    """ """
+    wf = orca.OrcaNormalizedImagesWorkflow(**kwargs)
+    for provider in (
+        load_image_key,
+        extract_dark_run,
+        extract_openbeam_run,
+        extract_sample_run,
+    ):
+        wf.insert(provider)
+    wf[NeXusName[ImageKey]] = (
+        '/entry/instrument/histogram_mode_detectors/orca/image_key'
+    )
+    return wf
+
+
 __all__ = [
     "OdinBraggEdgeWorkflow",
+    "OdinOrcaWorkflow",
     "OdinWorkflow",
 ]

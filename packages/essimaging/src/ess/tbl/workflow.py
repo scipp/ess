@@ -6,8 +6,10 @@ Default parameters, providers and utility functions for the TBL workflow.
 
 import sciline
 
+from ess.reduce.nexus.types import NeXusDetectorName
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
+from ..imaging.orca import OrcaNormalizedImagesWorkflow as _OrcaWorkflow
 from ..imaging.types import (
     BeamMonitor1,
     LookupTableRelativeErrorThreshold,
@@ -57,3 +59,12 @@ def TblWorkflow(
     for key, param in default_parameters().items():
         workflow[key] = param
     return workflow
+
+
+def OrcaNormalizedImagesWorkflow(**kwargs) -> sciline.Pipeline:
+    """
+    Workflow with default parameters for ORCA image normalization.
+    """
+    wf = _OrcaWorkflow(**kwargs)
+    wf[NeXusDetectorName] = 'orca_detector'
+    return wf
