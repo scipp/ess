@@ -44,7 +44,9 @@ from ess.packages.essdiffraction.src.ess.powder.conversion import (
 
 from ess.packages.essdiffraction.src.ess.powder.workflow import (
     add_masks_and_corrections,
-    add_masks_mlz
+    add_masks_mlz,
+    append_two_theta_lambda,
+    add_masks_p2d_data
 )
 
 from ess.packages.essdiffraction.src.ess.powder.grouping import (
@@ -126,7 +128,7 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 #add_scattering_coordinates_from_positions,
                 add_scattering_coordinates_from_positions_mlz,
                 #add_masks_and_corrections,
-                add_masks_mlz,
+                # add_masks_mlz, <- might be better to add masks in this step in future, because masking binned data can bring additional distortion
                 flatten_to_spectra,
                 focus_to_dspacing_dperp,
                 #focus_data_dspacing_and_two_theta,
@@ -138,6 +140,8 @@ def PowderReduceP2D() -> sciline.Pipeline:
                 handle_negative_intensity_sample,
                 handle_negative_intensity_vanadium,
                 normalize_by_vanadium_mlz,
+                append_two_theta_lambda,
+                add_masks_p2d_data,
             ]
         ),
         params={

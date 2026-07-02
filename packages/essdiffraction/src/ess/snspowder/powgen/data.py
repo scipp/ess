@@ -36,8 +36,11 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     TofMask,
     TwoThetaMask,
     WavelengthMask,
+    DSpacingMask,
+    DperpMask,
     MaskedDetectorIDs,
-    CorrectedDspacing
+    CorrectedDspacing,
+    MaskedExtendedIntensity2D,
     #RawTofDataMLZ
 )
 
@@ -295,21 +298,23 @@ def load_powgen_tof_mask_mlz() -> MaskingData[TofMask]:
 
 def load_powgen_wavelength_mask_mlz() -> MaskingData[WavelengthMask]:
     """Load the wavelength mask for POWGEN."""
+    # mask_function = None
     mask_function = lambda x: (
-        x < sc.scalar(0.3, unit="angstrom") # extra cut as in powtex
+        x <= sc.scalar(0.3, unit="angstrom") # extra cut as in powtex
     ) | (
-        x > sc.scalar(1.25, unit="angstrom") # extra cut as in powtex
+        x >= sc.scalar(1.25, unit="angstrom") # extra cut as in powtex
     ) | (
-        (x > sc.scalar(1.03, unit="angstrom")) & (x < sc.scalar(1.07, unit="angstrom"))
+        (x >= sc.scalar(1.03, unit="angstrom")) & (x <= sc.scalar(1.07, unit="angstrom"))
     )
     return MaskingData[WavelengthMask](mask_function)
 
 
 def load_powgen_two_theta_mask_mlz() -> MaskingData[TwoThetaMask]:
     """Load the two-theta mask for POWGEN."""
+    # mask_function = None
+    # deg = lambda value: sc.scalar(value, unit="degree").to(unit="rad")
 
-    deg = lambda value: sc.scalar(value, unit="degree").to(unit="rad")
-
+    deg = lambda value: sc.scalar(value, unit="degree")
     mask_function = lambda x: (
         x < deg(10.0) # extra cut as in powtex
     ) | (
@@ -337,6 +342,28 @@ def load_powgen_two_theta_mask_mlz() -> MaskingData[TwoThetaMask]:
         (x > deg(146.0)) & (x < deg(150.0))
     )
     return MaskingData[TwoThetaMask](mask_function)
+
+
+def load_powgen_dspacing_mask_mlz() -> MaskingData[DSpacingMask]:
+    """Load the d-spacing mask for POWGEN."""
+    # mask_function = None
+    mask_function = lambda x: (
+        x <= sc.scalar(0.4, unit="angstrom")
+    ) | (
+        x >= sc.scalar(2.0, unit="angstrom")
+    )
+    return MaskingData[DSpacingMask](mask_function)
+
+
+def load_powgen_dperp_mask_mlz() -> MaskingData[DperpMask]:
+    """Load the dperp mask for POWGEN."""
+    # mask_function = None
+    mask_function = lambda x: (
+        x <= sc.scalar(0.2, unit="angstrom")
+    ) | (
+        x >= sc.scalar(4.0, unit="angstrom")
+    )
+    return MaskingData[DperpMask](mask_function)
 
 
 def extract_raw_data(

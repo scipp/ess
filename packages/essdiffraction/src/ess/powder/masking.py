@@ -16,8 +16,12 @@ from .types import (
     RunType,
     TofMask,
     TwoThetaMask,
-    WavelengthDetector,
     WavelengthMask,
+    DSpacingMask,
+    DperpMask,
+    WavelengthDetector,
+    ExtendedIntensity2D,
+    MaskedExtendedIntensity2D
 )
 
 
@@ -108,6 +112,25 @@ def apply_masks_mlz(
 
     return out
 
+
+def apply_masks_p2d(
+    data: ExtendedIntensity2D,
+    wavelength_mask_func: WavelengthMask,
+    two_theta_mask_func: TwoThetaMask,
+    dspacing_mask_func: DSpacingMask,
+    dperp_mask_func: DperpMask,
+) -> sc.Dataset:
+    out = data.copy(deep=False)
+    del data
+    for dim, mask in {
+        "lambda": wavelength_mask_func,
+        "two_theta": two_theta_mask_func,
+        "dspacing_2d": dspacing_mask_func,
+        "dperp_2d": dperp_mask_func
+    }.items():
+        if mask is not None:
+            out[dim].masks[dim + "_mask"] = mask(out[dim].data)
+    return out
 
 providers = (read_pixel_masks,)
 

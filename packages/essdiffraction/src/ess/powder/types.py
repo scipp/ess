@@ -72,10 +72,16 @@ TwoThetaMask = NewType("TwoThetaMask", Callable | None)
 WavelengthMask = NewType("WavelengthMask", Callable | None)
 """WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
+DSpacingMask = NewType("DSpacingMask", Callable | None)
+"""DSpacingMask is a callable that returns a mask for a given DSpacingData."""
+
+DperpMask = NewType("DperpMask", Callable | None)
+"""DperpMask is a callable that returns a mask for a given DperpData."""
+
 MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
 """1-D variable listing all masked detector IDs."""
 
-MaskType = TypeVar("MaskType", TwoThetaMask, TofMask, WavelengthMask)
+MaskType = TypeVar("MaskType", TwoThetaMask, TofMask, WavelengthMask, DSpacingMask, DperpMask)
 
 CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
@@ -191,6 +197,11 @@ IntensityTof = NewType("IntensityTof", sc.DataArray)
 NormalizedIntensity2D = NewType("NormalizedIntensity2D", sc.DataArray)
 """2D Intensity of normalized sample data."""
 
+ExtendedIntensity2D = NewType("ExtendedIntensity2D", sc.Dataset)
+"""2D Intensity with additional info, including two_theta and lambda."""
+
+MaskedExtendedIntensity2D = NewType("MaskedExtendedIntensity2D", sc.Dataset)
+"""2D ExtendedIntensity with masks."""
 
 EmptyCanSubtractedIntensityTof = NewType("EmptyCanSubtractedIntensityTof", sc.DataArray)
 """Normalized and empty-can-subtracted data that has been converted to ToF."""
