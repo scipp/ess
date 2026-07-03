@@ -248,7 +248,7 @@ def load_powgen_mlz(
     out = dg["data"].squeeze()
     del dg
     out.coords.pop("tof", None)
-    det_size = {"bank": 40, "column": 154, "row": 7}
+    det_size = {"wire": 40, "strip": 154, "segment": 7}
     out = out.fold(dim="spectrum", sizes=det_size)
     if "pulse_time" in out.data.bins.coords:
         out.data = out.data.bins.drop_coords("pulse_time")
@@ -285,7 +285,7 @@ def load_powgen_calibration_mlz(
     filepath = Path(os.path.join(datapath, filename))
     ds = sc.io.load_hdf5(filepath)
     # print(f"Loading calibration data from {filepath}")
-    det_size = {"bank": 40, "column": 154, "row": 7}
+    det_size = {"wire": 40, "strip": 154, "segment": 7}
     out = sc.Dataset(
         {
             key: da.fold(dim='spectrum', sizes=det_size)

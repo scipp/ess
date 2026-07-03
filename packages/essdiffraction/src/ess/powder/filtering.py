@@ -77,7 +77,7 @@ def flatten_to_spectra(data: WavelengthDetector[RunType]) -> SpectralDetector[Ru
     """"""
     if data is None:
         return cast(SpectralDetector[RunType], None)
-    out = data.flatten(dims=['bank', 'column', 'row'], to='spectrum')
+    out = data.flatten(dims=["wire", "strip", "segment"], to="spectrum")
     del data
     return SpectralDetector[RunType](out)
 
