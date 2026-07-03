@@ -1,4 +1,4 @@
-Results of doctest builder run on 2026-06-04 13:26:39
+Results of doctest builder run on 2026-07-03 07:05:42
 =====================================================
 
 Document: generated/modules/ess.bifrost.live.CutAxis
