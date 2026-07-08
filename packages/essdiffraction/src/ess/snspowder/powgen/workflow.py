@@ -152,17 +152,17 @@ def PowderReduceP2D() -> sciline.Pipeline:
             ]
         ),
         params={
-            FilepathMLZ[SampleRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
-            FilepathMLZ[VanadiumRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
-            FilepathMLZ[EmptyCanRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
-            FilepathMLZ[CalibrationRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
-            FilepathMLZ[EmptyVanadiumCanRun]: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/yannick/converted",
+            FilepathMLZ[SampleRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
+            FilepathMLZ[VanadiumRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
+            FilepathMLZ[EmptyCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
+            FilepathMLZ[CalibrationRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
+            FilepathMLZ[EmptyVanadiumCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
             KeepEventsMLZ: False,
             ShiftNegativeIntensity[SampleRun]: True,
             ShiftNegativeIntensity[VanadiumRun]: False,
             NegativeIntensityResetValue[SampleRun]: 0.0,
             NegativeIntensityResetValue[VanadiumRun]: 0.0,
-            P2DOutputFilename: "/home/koshchii/Instruments/POWTEX/DreamScipp/data/output/reduced.p2d"
+            P2DOutputFilename: "/home/koshchii/Instruments/POWTEX/Scipp/data/output/reduced.p2d"
             # CalibrationData: None,
         }
     )

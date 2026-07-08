@@ -605,7 +605,7 @@ def export_to_p2d(
 
     with open(filepath, "w") as f:
         f.write(header + df.to_string(index=False, justify="left", formatters={column: formatter for column in df.columns}).lstrip())
-
+    print(f"The output file has been saved to {filepath}.")
     return DataFrameP2D(df)
 
 
