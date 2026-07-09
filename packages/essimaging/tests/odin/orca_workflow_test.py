@@ -67,14 +67,6 @@ def test_workflow_applies_masks(workflow):
     assert da.sum().value > masked_da.sum().value
 
 
-def test_workflow_normalizes_by_proton_charge(workflow):
-    da = workflow.compute(FluxNormalizedDetector[AllRuns])
-    assert da.ndim == 3
-    assert "time" in da.dims
-    # TODO: should it be "counts / uC"?
-    assert da.unit == "1 / uC"
-
-
 def test_workflow_computes_image_key(workflow):
     image_key = workflow.compute(ImageKey)
     assert image_key.ndim == 1
@@ -84,33 +76,41 @@ def test_workflow_computes_image_key(workflow):
 
 @pytest.mark.parametrize("run", [OpenBeamRun, DarkBackgroundRun, SampleRun])
 def test_workflow_extracts_different_runs_according_to_image_key(workflow, run):
-    da = workflow.compute(FluxNormalizedDetector[run])
+    da = workflow.compute(CorrectedDetector[run])
     assert da.ndim == 3
     assert "time" in da.dims
-    # Data should be normalized by proton charge, so unit should be "1 / uC"
-    assert da.unit == "1 / uC"
 
 
 def test_workflow_computes_mean_dark_frame(workflow):
-    dark_frames = workflow.compute(FluxNormalizedDetector[DarkBackgroundRun])
+    dark_frames = workflow.compute(CorrectedDetector[DarkBackgroundRun])
     mean_dark_frame = workflow.compute(MeanDarkFrame)
     assert mean_dark_frame.ndim == 2
     assert "time" not in mean_dark_frame.dims
     assert mean_dark_frame.unit == dark_frames.unit
+    assert_identical(mean_dark_frame, dark_frames.mean("time"))
 
 
 @pytest.mark.parametrize("run", [OpenBeamRun, SampleRun])
 def test_workflow_subtracts_dark_background(workflow, run):
     background = workflow.compute(MeanDarkFrame)
-    before = workflow.compute(FluxNormalizedDetector[run])
+    before = workflow.compute(CorrectedDetector[run])
     after = workflow.compute(BackgroundSubtractedDetector[run])
 
     assert_identical(sc.values(after), sc.values(before) - sc.values(background))
 
 
+@pytest.mark.parametrize("run", [OpenBeamRun, SampleRun])
+def test_workflow_normalizes_by_proton_charge(workflow, run):
+    da = workflow.compute(FluxNormalizedDetector[run])
+    assert da.ndim == 3
+    assert "time" in da.dims
+    # TODO: should it be "counts / uC"?
+    assert da.unit == "1 / uC"
+
+
 def test_workflow_computes_normalized_image(workflow):
-    sample = workflow.compute(BackgroundSubtractedDetector[SampleRun])
-    open_beam = workflow.compute(BackgroundSubtractedDetector[OpenBeamRun])
+    sample = workflow.compute(FluxNormalizedDetector[SampleRun])
+    open_beam = workflow.compute(FluxNormalizedDetector[OpenBeamRun])
     normalized = workflow.compute(NormalizedImage)
 
     assert_identical(

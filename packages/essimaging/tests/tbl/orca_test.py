@@ -80,6 +80,7 @@ def test_workflow_computes_mean_dark_frame(workflow):
     assert mean_dark_frame.ndim == 2
     assert "time" not in mean_dark_frame.dims
     assert mean_dark_frame.unit == dark_frames.unit
+    assert_identical(mean_dark_frame, dark_frames.mean("time"))
 
 
 @pytest.mark.parametrize("run", [OpenBeamRun, SampleRun])
