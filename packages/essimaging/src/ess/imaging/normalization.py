@@ -8,6 +8,7 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .types import (
     BackgroundSubtractedDetector,
+    CorrectedDetector,
     DarkBackgroundRun,
     FluxNormalizedDetector,
     MeanDarkFrame,
@@ -19,7 +20,7 @@ from .types import (
 
 
 def average_dark_frames(
-    dark_frames: FluxNormalizedDetector[DarkBackgroundRun],
+    dark_frames: CorrectedDetector[DarkBackgroundRun],
 ) -> MeanDarkFrame:
     """
     Average the dark frames (background runs) over time to obtain a mean dark frame.
@@ -33,19 +34,19 @@ def average_dark_frames(
 
 
 def subtract_background_sample(
-    data: FluxNormalizedDetector[SampleRun],
+    data: CorrectedDetector[SampleRun],
     background: MeanDarkFrame,
     uncertainties: UncertaintyBroadcastMode,
 ) -> BackgroundSubtractedDetector[SampleRun]:
     """
-    Subtract background from proton-charge normalized sample data.
+    Subtract background from sample data.
 
     Parameters
     ----------
     data:
-        Sample data to process (normalized to proton charge).
+        Sample data to process.
     background:
-        Background (dark frame) data to subtract (normalized to proton charge).
+        Background (dark frame) data to subtract.
     uncertainties:
         Mode to use when broadcasting uncertainties from background to data (data
         typically has multiple frames, while background usually has only one frame).
@@ -56,19 +57,19 @@ def subtract_background_sample(
 
 
 def subtract_background_openbeam(
-    data: FluxNormalizedDetector[OpenBeamRun],
+    data: CorrectedDetector[OpenBeamRun],
     background: MeanDarkFrame,
     uncertainties: UncertaintyBroadcastMode,
 ) -> BackgroundSubtractedDetector[OpenBeamRun]:
     """
-    Subtract background from proton-charge normalized open beam data.
+    Subtract background from open beam data.
 
     Parameters
     ----------
     data:
-        Open beam data to process (normalized to proton charge).
+        Open beam data to process.
     background:
-        Background (dark frame) data to subtract (normalized to proton charge).
+        Background (dark frame) data to subtract.
     uncertainties:
         Mode to use when broadcasting uncertainties from background to data (data
         typically has multiple frames, while background usually has only one frame).
@@ -79,8 +80,8 @@ def subtract_background_openbeam(
 
 
 def sample_over_openbeam(
-    sample: BackgroundSubtractedDetector[SampleRun],
-    open_beam: BackgroundSubtractedDetector[OpenBeamRun],
+    sample: FluxNormalizedDetector[SampleRun],
+    open_beam: FluxNormalizedDetector[OpenBeamRun],
     uncertainties: UncertaintyBroadcastMode,
 ) -> NormalizedImage:
     """

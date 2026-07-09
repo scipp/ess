@@ -12,7 +12,7 @@ from ess.reduce.nexus.types import NeXusDetectorName
 
 from .. import imaging
 from ..imaging.types import (
-    CorrectedDetector,
+    BackgroundSubtractedDetector,
     DarkBackgroundRun,
     FluxNormalizedDetector,
     OpenBeamRun,
@@ -23,7 +23,7 @@ from ..imaging.types import (
 
 
 def normalize_by_proton_charge_orca(
-    data: CorrectedDetector[RunType], proton_charge: ProtonCharge[RunType]
+    data: BackgroundSubtractedDetector[RunType], proton_charge: ProtonCharge[RunType]
 ) -> FluxNormalizedDetector[RunType]:
     """
     Normalize detector data by the proton charge.
@@ -34,7 +34,7 @@ def normalize_by_proton_charge_orca(
     Parameters
     ----------
     data:
-        Corrected detector data to be normalized.
+        Background-subtracted detector data to be normalized.
     proton_charge:
         Proton charge data for normalization.
     """
