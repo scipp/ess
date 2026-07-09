@@ -15,6 +15,7 @@ from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 from ..imaging import orca
 from ..imaging.types import (
     AllRuns,
+    BackgroundSubtractedDetector,
     BeamMonitor1,
     BeamMonitor2,
     BeamMonitor3,
@@ -26,6 +27,7 @@ from ..imaging.types import (
     LookupTableRelativeErrorThreshold,
     NeXusMonitorName,
     OpenBeamRun,
+    ProtonCharge,
     PulseStrideOffset,
     RunType,
     SampleRun,
@@ -139,29 +141,50 @@ def _extract_part_of_run(
 
 
 def extract_dark_run(
-    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
-) -> FluxNormalizedDetector[DarkBackgroundRun]:
+    data: CorrectedDetector[AllRuns], image_key: ImageKey
+) -> CorrectedDetector[DarkBackgroundRun]:
     """ """
-    return FluxNormalizedDetector[DarkBackgroundRun](
+    return CorrectedDetector[DarkBackgroundRun](
         _extract_part_of_run(data=data, image_key=image_key, run_type=DarkBackgroundRun)
     )
 
 
 def extract_openbeam_run(
-    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
-) -> FluxNormalizedDetector[OpenBeamRun]:
+    data: CorrectedDetector[AllRuns], image_key: ImageKey
+) -> CorrectedDetector[OpenBeamRun]:
     """ """
-    return FluxNormalizedDetector[OpenBeamRun](
+    return CorrectedDetector[OpenBeamRun](
         _extract_part_of_run(data=data, image_key=image_key, run_type=OpenBeamRun)
     )
 
 
 def extract_sample_run(
-    data: FluxNormalizedDetector[AllRuns], image_key: ImageKey
-) -> FluxNormalizedDetector[SampleRun]:
+    data: CorrectedDetector[AllRuns], image_key: ImageKey
+) -> CorrectedDetector[SampleRun]:
     """ """
-    return FluxNormalizedDetector[SampleRun](
+    return CorrectedDetector[SampleRun](
         _extract_part_of_run(data=data, image_key=image_key, run_type=SampleRun)
+    )
+
+
+def normalize_by_proton_charge_orca_all_runs(
+    data: BackgroundSubtractedDetector[RunType], proton_charge: ProtonCharge[AllRuns]
+) -> FluxNormalizedDetector[RunType]:
+    """
+    Normalize detector data by the proton charge.
+    We find the time stamps for the data, which mark the start of an exposure,
+    find the corresponding proton charge for each time stamp, and divide the data by
+    the proton charge.
+
+    Parameters
+    ----------
+    data:
+        Background-subtracted detector data to be normalized.
+    proton_charge:
+        Proton charge data for normalization.
+    """
+    return FluxNormalizedDetector[RunType](
+        orca.normalize_by_proton_charge_orca(data=data, proton_charge=proton_charge)
     )
 
 
@@ -173,6 +196,7 @@ def OdinOrcaWorkflow(**kwargs) -> sciline.Pipeline:
         extract_dark_run,
         extract_openbeam_run,
         extract_sample_run,
+        normalize_by_proton_charge_orca_all_runs,
     ):
         wf.insert(provider)
     wf[NeXusName[ImageKey]] = (
