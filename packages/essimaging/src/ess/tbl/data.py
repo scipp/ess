@@ -8,16 +8,16 @@ from ess.reduce.data import Entry, make_registry
 
 _registry = make_registry(
     'ess/tbl',
-    version="2",
+    version="3",
     files={
         "tbl_sample_data_2025-03.hdf": "md5:12db6bc06721278b3abe47992eac3e77",
         "TBL-wavelength-lookup-table-no-choppers-5m-35m.h5": "md5:e28793b7e1c12986ee63a1df68723268",  # noqa: E501
         'tbl-orca-focussing.hdf.zip': Entry(
             alg='md5', chk='f365acd9ea45dd205c0b9398d163cfa4', unzip=True
         ),
-        "ymir_lego_dark_run.hdf": "md5:c0ed089dd7663986042e29fb47514130",
-        "ymir_lego_openbeam_run.hdf": "md5:00375becd54d2ed3be096413dc30883c",
-        "ymir_lego_sample_run.hdf": "md5:ae56a335cf3d4e87ef090ec4e51da69c",
+        "ymir_lego_dark_run.hdf": "md5:2d9ae7d6f1d0502c17b0030bcb3dad1d",
+        "ymir_lego_openbeam_run.hdf": "md5:f55e6064a2602de404c535f72beb25a3",
+        "ymir_lego_sample_run.hdf": "md5:d3eb65d9b5f8b90777059ec2638297ab",
     },
 )
 

@@ -87,13 +87,13 @@ class BackgroundSubtractedDetector(sciline.Scope[RunType, sc.DataArray], sc.Data
     """Detector counts with dark background subtracted."""
 
 
+MeanDarkFrame = NewType("MeanDarkFrame", sc.DataArray)
+"""Mean dark frame: average of background (dark) frames."""
+
+
 NormalizedImage = NewType("NormalizedImage", sc.DataArray)
 """Final image: background-subtracted sample run divided by background-subtracted open
 beam run."""
-
-
-class ExposureTime(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Exposure time of each frame recorded by the camera detector."""
 
 
 del sc, sciline, NewType

@@ -17,6 +17,7 @@ from ess.imaging.types import (
     Filename,
     FluxNormalizedDetector,
     MaskingRules,
+    MeanDarkFrame,
     NeXusDetectorName,
     NormalizedImage,
     OpenBeamRun,
@@ -73,38 +74,38 @@ def test_workflow_applies_masks(workflow, run):
     assert da.sum().value > masked_da.sum().value
 
 
-@pytest.mark.parametrize("run", [OpenBeamRun, DarkBackgroundRun])
+def test_workflow_computes_mean_dark_frame(workflow):
+    dark_frames = workflow.compute(CorrectedDetector[DarkBackgroundRun])
+    mean_dark_frame = workflow.compute(MeanDarkFrame)
+    assert mean_dark_frame.ndim == 2
+    assert "time" not in mean_dark_frame.dims
+    assert mean_dark_frame.unit == dark_frames.unit
+
+
+@pytest.mark.parametrize("run", [OpenBeamRun, SampleRun])
+def test_workflow_subtracts_dark_background(workflow, run):
+    background = workflow.compute(MeanDarkFrame)
+    before = workflow.compute(CorrectedDetector[run])
+    after = workflow.compute(BackgroundSubtractedDetector[run])
+
+    assert_identical(sc.values(after), sc.values(before) - sc.values(background))
+
+
+@pytest.mark.parametrize("run", [OpenBeamRun, SampleRun])
 def test_workflow_normalizes_by_proton_charge(workflow, run):
     da = workflow.compute(FluxNormalizedDetector[run])
-    # Dark and open beam runs have been averaged over time dimension
-    assert da.ndim == 2
-    assert "time" not in da.dims
-    # TODO: should it be "counts / uC"?
-    assert da.unit == "1 / uC"
-
-
-def test_workflow_normalizes_sample_by_proton_charge(workflow):
-    da = workflow.compute(FluxNormalizedDetector[SampleRun])
-    # Sample run retains time dimension
     assert da.ndim == 3
     assert "time" in da.dims
     # TODO: should it be "counts / uC"?
     assert da.unit == "1 / uC"
 
 
-@pytest.mark.parametrize("run", [OpenBeamRun, SampleRun])
-def test_workflow_subtracts_dark_background(workflow, run):
-    background = workflow.compute(FluxNormalizedDetector[DarkBackgroundRun])
-    before = workflow.compute(FluxNormalizedDetector[run])
-    after = workflow.compute(BackgroundSubtractedDetector[run])
-
-    assert_identical(sc.values(after), sc.values(before) - sc.values(background))
-
-
 def test_workflow_computes_normalized_image(workflow):
-    sample = workflow.compute(BackgroundSubtractedDetector[SampleRun])
-    open_beam = workflow.compute(BackgroundSubtractedDetector[OpenBeamRun])
+    sample = workflow.compute(FluxNormalizedDetector[SampleRun])
+    open_beam = workflow.compute(FluxNormalizedDetector[OpenBeamRun])
     normalized = workflow.compute(NormalizedImage)
 
-    assert_identical(sc.values(normalized), sc.values(sample) / sc.values(open_beam))
+    assert_identical(
+        sc.values(normalized), sc.values(sample) / sc.values(open_beam.mean('time'))
+    )
     assert normalized.unit == sc.units.dimensionless
