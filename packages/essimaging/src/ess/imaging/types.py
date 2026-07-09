@@ -36,7 +36,6 @@ LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 
-
 SampleRun = NewType("SampleRun", int)
 """Sample run; a run with a sample in the beam."""
 
@@ -47,6 +46,9 @@ measure the dark current of the detector."""
 OpenBeamRun = NewType("OpenBeamRun", int)
 """Open beam run; a run with no sample in the beam, and the shutter open, to measure the
 beam profile."""
+
+AllRuns = NewType("AllRuns", int)
+"""A type to represent all runs: sample, open beam, and dark background runs."""
 
 BeamMonitor1 = NewType("BeamMonitor1", int)
 """Beam monitor number 1"""
@@ -94,6 +96,14 @@ MeanDarkFrame = NewType("MeanDarkFrame", sc.DataArray)
 NormalizedImage = NewType("NormalizedImage", sc.DataArray)
 """Final image: background-subtracted sample run divided by background-subtracted open
 beam run."""
+
+
+ImageKey = NewType("ImageKey", sc.DataArray)
+"""Key mapping image type to the time axis of the recording:
+    - 0: sample run
+    - 1: open beam run
+    - 2: dark background run
+    """
 
 
 del sc, sciline, NewType

@@ -1,27 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-import ess.tbl.data  # noqa: F401
+import ess.odin.data  # noqa: F401
 import pytest
 import sciline as sl
 import scipp as sc
-import scippnexus as sx
-from ess import tbl
-from ess.tbl import orca
+from ess import odin
 from scipp.testing import assert_identical
 
 from ess.imaging.types import (
+    AllRuns,
     BackgroundSubtractedDetector,
     CorrectedDetector,
     DarkBackgroundRun,
     Filename,
     FluxNormalizedDetector,
+    ImageKey,
     MaskingRules,
     MeanDarkFrame,
     NeXusDetectorName,
     NormalizedImage,
     OpenBeamRun,
-    Position,
     ProtonCharge,
     RawDetector,
     SampleRun,
@@ -32,46 +31,54 @@ from ess.imaging.types import (
 @pytest.fixture
 def workflow() -> sl.Pipeline:
     """
-    Workflow for normalizing TBL Orca images.
+    Workflow for normalizing ODIN Orca images.
     """
 
-    wf = orca.OrcaNormalizedImagesWorkflow()
-    wf[Filename[SampleRun]] = tbl.data.tbl_lego_sample_run()
-    wf[Filename[DarkBackgroundRun]] = tbl.data.tbl_lego_dark_run()
-    wf[Filename[OpenBeamRun]] = tbl.data.tbl_lego_openbeam_run()
+    wf = odin.OdinOrcaWorkflow()
+    wf[Filename[AllRuns]] = odin.data.odin_lego_images()
     wf[MaskingRules] = {}
-    wf[NeXusDetectorName] = 'orca_detector'
+    wf[NeXusDetectorName] = 'histogram_mode_detectors/orca'
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
-    wf[Position[sx.NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
     return wf
 
 
-@pytest.mark.parametrize("run", [SampleRun, OpenBeamRun, DarkBackgroundRun])
-def test_workflow_loads_raw_data(workflow, run):
-    da = workflow.compute(RawDetector[run])
+def test_workflow_loads_raw_data(workflow):
+    da = workflow.compute(RawDetector[AllRuns])
     assert "position" in da.coords
     assert "time" in da.coords
     assert da.ndim == 3
     assert "time" in da.dims
 
 
-@pytest.mark.parametrize("run", [SampleRun, OpenBeamRun, DarkBackgroundRun])
-def test_workflow_loads_proton_charge(workflow, run):
-    pc = workflow.compute(ProtonCharge[run])
+def test_workflow_loads_proton_charge(workflow):
+    pc = workflow.compute(ProtonCharge[AllRuns])
     assert "time" in pc.coords
     assert "time" in pc.dims
     assert pc.unit == "uC"
 
 
-@pytest.mark.parametrize("run", [SampleRun, OpenBeamRun, DarkBackgroundRun])
-def test_workflow_applies_masks(workflow, run):
+def test_workflow_applies_masks(workflow):
     workflow[MaskingRules] = {
         'y_pixel_offset': lambda x: x > sc.scalar(0.082, unit='m')
     }
-    da = workflow.compute(RawDetector[run])
-    masked_da = workflow.compute(CorrectedDetector[run])
+    da = workflow.compute(RawDetector[AllRuns])
+    masked_da = workflow.compute(CorrectedDetector[AllRuns])
     assert 'y_pixel_offset' in masked_da.masks
     assert da.sum().value > masked_da.sum().value
+
+
+def test_workflow_computes_image_key(workflow):
+    image_key = workflow.compute(ImageKey)
+    assert image_key.ndim == 1
+    assert "time" in image_key.dims
+    assert image_key.unit is None
+
+
+@pytest.mark.parametrize("run", [OpenBeamRun, DarkBackgroundRun, SampleRun])
+def test_workflow_extracts_different_runs_according_to_image_key(workflow, run):
+    da = workflow.compute(CorrectedDetector[run])
+    assert da.ndim == 3
+    assert "time" in da.dims
 
 
 def test_workflow_computes_mean_dark_frame(workflow):
