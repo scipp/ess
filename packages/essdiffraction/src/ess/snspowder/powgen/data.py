@@ -31,6 +31,7 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     RunType,
     GeneralRunType,
     TofDetector,
+    TofMonitor,
     WavelengthDetector,
     WavelengthMonitor,
     FilenameMLZ,
