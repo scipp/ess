@@ -10,6 +10,7 @@ import scippnexus as snx
 from ess import sans
 from ess.sans.parameters import typical_outputs
 
+from ess.reduce.unwrap import WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
 from ..sans.types import (
@@ -73,16 +74,25 @@ loki_providers = (detector_pixel_shape, load_direct_beam)
 
 
 @register_workflow
-def LokiWorkflow() -> sciline.Pipeline:
+def LokiWorkflow(
+    wavelength_from: WavelengthLutMode = "file",
+) -> sciline.Pipeline:
     """
     Workflow with default parameters for Loki.
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
 
     Returns
     -------
     :
         Loki workflow as a sciline.Pipeline
     """
-    workflow = sans.SansWorkflow()
+    workflow = sans.SansWorkflow(wavelength_from=wavelength_from)
     for provider in loki_providers:
         workflow.insert(provider)
     for key, param in loki_default_parameters().items():
