@@ -154,13 +154,11 @@ def _compute_wavelength_histogram(
         sc.concat([raw_eto, sc.scalar(0.0, unit=eto_unit), pulse_period], dim=key),
         key=key,
     )
-    # Rebin only handles float coords, but it is possible that the coordinate to be
-    # rebinned is an integer type (e.g., when the time-of-flight is stored as an
-    # integer number of nanoseconds). In that case, we need to convert the coordinate
-    # to float before rebinning.
-    if da.coords[key].dtype not in ('float32', 'float64'):
-        da = da.assign_coords({key: da.coords[key].to(dtype=float)})
-    rebinned = da.rebin({key: new_bins})
+    # Rebin only handles float64 coords, so we need to convert the coordinate
+    # on-the-fly if necessary.
+    rebinned = da.assign_coords(
+        {key: da.coords[key].to(dtype='float64', copy=False)}
+    ).rebin({key: new_bins})
     etos = rebinned.coords[key]
 
     # Create linear interpolator

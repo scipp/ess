@@ -625,3 +625,44 @@ def test_unwrap_int(
         diff_threshold=0.02,
         rtol=0.2 if wavelength_from == "simulation" else 0.01,
     )
+
+
+@pytest.mark.parametrize("dtype", ["int32", "int64", "float32", "float64"])
+@pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
+@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+def test_unwrap_histogram_other_coord_dtypes(
+    dtype, wavelength_from, detector_or_monitor, simulation_results_psc_choppers
+) -> None:
+    dist = 62.0
+    dim = "frame_time"
+    wf, ref = _make_workflow_histogram_wavelength_from(
+        wavelength_from=wavelength_from,
+        dim=dim,
+        distance=sc.scalar(dist, unit="m"),
+        choppers=fakes.psc_choppers(),
+        seed=378,
+        error_threshold=np.inf,
+        detector_or_monitor=detector_or_monitor,
+    )
+
+    if wavelength_from == "simulation":
+        wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
+
+    if detector_or_monitor == "detector":
+        da = wf.compute(RawDetector[SampleRun])
+        new = da.assign_coords({dim: da.coords[dim].to(dtype=dtype)})
+        wf[RawDetector[SampleRun]] = new
+        wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
+    else:
+        da = wf.compute(RawMonitor[SampleRun, Monitor0])
+        new = da.assign_coords({dim: da.coords[dim].to(dtype=dtype)})
+        wf[RawMonitor[SampleRun, Monitor0]] = new
+        wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
+
+    _validate_result_histogram_wavelength_from(
+        wavs=wavs,
+        ref=ref,
+        percentile=96,
+        diff_threshold=0.4,
+        rtol=0.2 if wavelength_from == "simulation" else 0.01,
+    )
