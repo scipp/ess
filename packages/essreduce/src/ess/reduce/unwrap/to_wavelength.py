@@ -154,7 +154,11 @@ def _compute_wavelength_histogram(
         sc.concat([raw_eto, sc.scalar(0.0, unit=eto_unit), pulse_period], dim=key),
         key=key,
     )
-    rebinned = da.rebin({key: new_bins})
+    # Rebin only handles float64 coords, so we need to convert the coordinate
+    # on-the-fly if necessary.
+    rebinned = da.assign_coords(
+        {key: da.coords[key].to(dtype='float64', copy=False)}
+    ).rebin({key: new_bins})
     etos = rebinned.coords[key]
 
     # Create linear interpolator

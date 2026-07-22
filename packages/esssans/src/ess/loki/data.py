@@ -59,9 +59,9 @@ _registry = make_registry(
         # Small CODA file for testing purposes (data from only 5 pulses)
         'loki-coda-5-pulses.hdf': 'md5:8368779651ccf101612b35ca075d0298',
         # Wavelength lookup table without choppers
-        'loki-wavelength-lookup-table-no-choppers.h5': 'md5:3fb133962af6554a9999a753c1724ed4',  # noqa: E501
+        'loki-wavelength-lookup-table-no-choppers.h5': 'md5:34cc975a00383653cce4b3e2356e0dc7',  # noqa: E501
     },
-    version='2',
+    version='3',
 )
 
 
@@ -178,6 +178,8 @@ def loki_lookup_table_no_choppers() -> Path:
     This table was computed using `Create a wavelength lookup table for LoKI
     <../../user-guide/loki/loki-make-wavelength-lookup-table.ipynb>`_
     with ``NumberOfSimulatedNeutrons = 5_000_000``.
+
+    Ltotal range is 5-35 meters.
     """
     return _registry.get_path("loki-wavelength-lookup-table-no-choppers.h5")
 
