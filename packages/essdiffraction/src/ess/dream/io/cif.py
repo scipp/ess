@@ -17,6 +17,7 @@ from ess.powder.types import (
     SampleRun,
     Source,
 )
+from scipp.core import irreducible_mask
 from scippneutron.io import cif
 
 
@@ -139,6 +140,16 @@ def _prepare_reduced_tof_cif_impl(
 
 
 def _prepare_data(da: sc.DataArray) -> sc.DataArray:
-    hist = da.copy(deep=False) if da.bins is None else da.hist()
+    if da.ndim != 1:
+        raise sc.DimensionError(f"Can only save 1D data, got {da.sizes}")
+
+    hist = da.hist() if da.is_binned else da.copy(deep=False)
     hist.coords[hist.dim] = sc.midpoints(hist.coords[hist.dim])
+
+    if hist.masks:
+        # No file format we use here supports masks, so the next
+        # best thing is to zero out masked data:
+        hist.data = hist.data.copy()
+        hist.values *= irreducible_mask(hist.masks, hist.dim).values
+
     return hist
