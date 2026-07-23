@@ -10,6 +10,7 @@ from ess.bifrost.data import (
     lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,
 )
+from ess.bifrost.io.mcstas import load_sample_angle
 from ess.bifrost.live import BifrostQCutWorkflow, CutAxis, CutAxis1, CutAxis2, CutData
 from ess.spectroscopy.types import (
     Filename,
@@ -35,6 +36,10 @@ class TestBifrostQCutWorkflow:
         self, simulation_detector_names: list[NeXusDetectorName]
     ) -> sciline.Pipeline:
         workflow = BifrostQCutWorkflow(simulation_detector_names)
+        # The test file is from a simulation and
+        # looks slightly different from production files.
+        workflow.insert(load_sample_angle)
+
         workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
         workflow[LookupTableFilename] = lookup_table_simulation()
         workflow[LookupTableRelativeErrorThreshold] = {
