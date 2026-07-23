@@ -7,7 +7,6 @@ import scipp as sc
 import scippnexus as snx
 from ess.spectroscopy.types import (
     EmptyDetector,
-    InstrumentAngle,
     NeXusData,
     NeXusFileSpec,
     PulsePeriod,
@@ -27,13 +26,6 @@ def load_sample_angle(
 ) -> SampleAngle[RunType]:
     """Load the rotation angle of a sample from a McStas BIFROST NeXus file."""
     return SampleAngle[RunType](_load_experiment_parameter(file_spec, "a3"))
-
-
-def load_instrument_angle(
-    file_spec: NeXusFileSpec[RunType],
-) -> InstrumentAngle[RunType]:
-    """Load the rotation angle for the BIFROST detector from a McStas NeXus file."""
-    return InstrumentAngle[RunType](_load_experiment_parameter(file_spec, "a4"))
 
 
 def _load_experiment_parameter(
@@ -105,6 +97,5 @@ def convert_simulated_time_to_event_time_offset(
 providers = (
     assemble_detector_data,
     convert_simulated_time_to_event_time_offset,
-    load_instrument_angle,
     load_sample_angle,
 )
