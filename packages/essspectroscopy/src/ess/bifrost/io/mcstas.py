@@ -8,12 +8,35 @@ import scippnexus as snx
 from ess.spectroscopy.types import (
     EmptyDetector,
     NeXusData,
+    NeXusFileSpec,
     PulsePeriod,
     RawDetector,
     RunType,
+    SampleAngle,
 )
 
+from ess.reduce.nexus import open_component_group
+from ess.reduce.nexus.types import NeXusLocationSpec
+
 from ..types import McStasRawDetector
+
+
+def load_sample_angle(
+    file_spec: NeXusFileSpec[RunType],
+) -> SampleAngle[RunType]:
+    """Load the rotation angle of a sample from a McStas BIFROST NeXus file."""
+    return SampleAngle[RunType](_load_experiment_parameter(file_spec, "a3"))
+
+
+def _load_experiment_parameter(
+    file_spec: NeXusFileSpec[RunType], param_name: str
+) -> sc.DataArray:
+    with open_component_group(
+        NeXusLocationSpec(filename=file_spec.value),
+        nx_class=snx.NXparameters,
+        parent_class=snx.NXentry,
+    ) as group:
+        return group[param_name][()]['value']
 
 
 def assemble_detector_data(
@@ -74,4 +97,5 @@ def convert_simulated_time_to_event_time_offset(
 providers = (
     assemble_detector_data,
     convert_simulated_time_to_event_time_offset,
+    load_sample_angle,
 )
