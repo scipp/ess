@@ -72,7 +72,7 @@ def _load_rotation_angle(file_spec: NeXusFileSpec[RunType], path: str) -> sc.Dat
         return transform.value  # type: ignore[return-value]
 
 
-# See https://github.com/scipp/essreduce/issues/98
+# See https://github.com/scipp/ess/issues/120
 def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
     """Select NXmoderator as the source."""
     return NeXusClass[snx.NXsource](snx.NXmoderator)
