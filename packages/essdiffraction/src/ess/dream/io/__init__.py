@@ -5,7 +5,8 @@
 
 from .cif import prepare_reduced_tof_cif
 from .geant4 import load_geant4_csv
+from .xye import save_xye
 
 providers = (prepare_reduced_tof_cif,)
 
-__all__ = ["load_geant4_csv", "prepare_reduced_tof_cif", "providers"]
+__all__ = ["load_geant4_csv", "prepare_reduced_tof_cif", "providers", "save_xye"]

@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
 """CIF writer for DREAM."""
 
-import scipp as sc
 from ess.powder.calibration import OutputCalibrationData
 from ess.powder.types import (
     Beamline,
@@ -17,8 +16,9 @@ from ess.powder.types import (
     SampleRun,
     Source,
 )
-from scipp.core import irreducible_mask
 from scippneutron.io import cif
+
+from ._common import prepare_reduced_data
 
 
 def prepare_reduced_tof_cif(
@@ -127,7 +127,7 @@ def _prepare_reduced_tof_cif_impl(
     reducers: ReducerSoftware,
     calibration: OutputCalibrationData,
 ) -> ReducedTofCIF:
-    to_save = _prepare_data(da)
+    to_save = prepare_reduced_data(da)
     return ReducedTofCIF(
         cif.CIF('reduced_tof')
         .with_measurement(measurement)
@@ -137,19 +137,3 @@ def _prepare_reduced_tof_cif_impl(
         .with_powder_calibration(calibration.to_cif_format())
         .with_reduced_powder_data(to_save)
     )
-
-
-def _prepare_data(da: sc.DataArray) -> sc.DataArray:
-    if da.ndim != 1:
-        raise sc.DimensionError(f"Can only save 1D data, got {da.sizes}")
-
-    hist = da.hist() if da.is_binned else da.copy(deep=False)
-    hist.coords[hist.dim] = sc.midpoints(hist.coords[hist.dim])
-
-    if hist.masks:
-        # No file format we use here supports masks, so the next
-        # best thing is to zero out masked data:
-        hist.data = hist.data.copy()
-        hist.values *= irreducible_mask(hist.masks, hist.dim).values
-
-    return hist
