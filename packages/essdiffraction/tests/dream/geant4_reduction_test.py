@@ -10,6 +10,7 @@ import sciline
 import scipp as sc
 import scipp.testing
 from ess import dream, powder
+from ess.dream.io import save_xye
 from ess.dream.workflows import (
     DreamGeant4MonitorHistogramWorkflow,
     DreamGeant4MonitorIntegratedWorkflow,
@@ -31,6 +32,7 @@ from ess.powder.types import (
     LookupTableFilename,
     MonitorFilename,
     NeXusDetectorName,
+    OutFilename,
     ReducedTofCIF,
     SampleRun,
     TofMask,
@@ -289,6 +291,7 @@ def test_pipeline_save_data_to_disk(output_folder: Path):
         detector_name="mantle", run_norm=powder.RunNormalization.proton_charge
     )
 
+    wf[OutFilename] = output_folder / "dream_reduced.xye"
     wf[Filename[SampleRun]] = dream.data.simulated_diamond_sample(small=False)
     wf[Filename[VanadiumRun]] = dream.data.simulated_vanadium_sample(small=False)
     wf[Filename[EmptyCanRun]] = dream.data.simulated_empty_can(small=False)
@@ -301,6 +304,8 @@ def test_pipeline_save_data_to_disk(output_folder: Path):
     See https://scipp.github.io/ess/diffraction/
     """
     result.save(output_folder / "dream_reduced.cif")
+
+    wf.bind_and_call(save_xye)
 
 
 def _assert_contains_source_info(cif_content: str) -> None:
