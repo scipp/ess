@@ -25,33 +25,57 @@ from ess.reduce.nexus import open_component_group
 from ess.reduce.nexus.types import NeXusLocationSpec, TransformationTimeFilter
 
 
-# See https://github.com/scipp/essreduce/issues/98
-def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
-    """Select NXmoderator as the source."""
-    return NeXusClass[snx.NXsource](snx.NXmoderator)
-
-
 def load_sample_angle(
     file_spec: NeXusFileSpec[RunType],
 ) -> SampleAngle[RunType]:
-    return SampleAngle[RunType](_load_experiment_parameter(file_spec, "a3"))
+    """Load the rotation angle of a sample from a BIFROST NeXus file."""
+    return SampleAngle[RunType](
+        _load_rotation_angle(
+            file_spec,
+            "114_sample_stack/rotation_stage",
+        )
+    )
 
 
 def load_instrument_angle(
     file_spec: NeXusFileSpec[RunType],
 ) -> InstrumentAngle[RunType]:
-    return InstrumentAngle[RunType](_load_experiment_parameter(file_spec, "a4"))
+    """Load the rotation angle for the BIFROST detector from a NeXus file."""
+    return InstrumentAngle[RunType](
+        _load_rotation_angle(
+            file_spec,
+            "detector_tank_angle/transformations/detector_tank_angle_r0",
+        )
+    )
 
 
-def _load_experiment_parameter(
-    file_spec: NeXusFileSpec[RunType], param_name: str
-) -> sc.DataArray:
+def _load_rotation_angle(file_spec: NeXusFileSpec[RunType], path: str) -> sc.DataArray:
     with open_component_group(
         NeXusLocationSpec(filename=file_spec.value),
-        nx_class=snx.NXparameters,
+        nx_class=snx.NXinstrument,
         parent_class=snx.NXentry,
-    ) as group:
-        return group[param_name][()]['value']
+    ) as instrument:
+        log: snx.Group = instrument[path]  # type: ignore[assignment]
+        if isinstance(log['value'], snx.Group):
+            # The NXlog is nested in this group, e.g., the group can be an NXpositioner
+            # with children 'value', 'target_value', etc.
+            transform: snx.nxtransformations.Transform = log['value'][()]  # type: ignore[assignment]
+        else:
+            # `log` is the NXlog we are looking for without further nesting.
+            transform: snx.nxtransformations.Transform = log[()]  # type: ignore[assignment]
+
+        if transform.transformation_type != 'rotation':
+            raise ValueError(
+                "Expected the instrument angle at detector_tank_angle to be a rotation,"
+                f" got '{transform.transformation_type}' instead.'"
+            )
+        return transform.value  # type: ignore[return-value]
+
+
+# See https://github.com/scipp/essreduce/issues/98
+def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
+    """Select NXmoderator as the source."""
+    return NeXusClass[snx.NXsource](snx.NXmoderator)
 
 
 def load_analyzer_for_detector(
