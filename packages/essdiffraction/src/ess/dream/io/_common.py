@@ -17,7 +17,10 @@ def prepare_reduced_data(da: sc.DataArray) -> sc.DataArray:
         # No file format we use here supports masks, so the next
         # best thing is to zero out masked data:
         hist.data = hist.data.copy()
-        hist.values *= irreducible_mask(hist.masks, hist.dim).values
+        mask_factor = ~irreducible_mask(hist.masks, hist.dim).values
+        hist.values *= mask_factor
+        if hist.variances is not None:
+            hist.variances *= mask_factor
         hist.masks.clear()
 
     return hist

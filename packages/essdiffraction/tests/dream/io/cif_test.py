@@ -4,8 +4,10 @@ import datetime
 import io
 
 import ess.dream.io.cif
+import numpy as np
 import pytest
 import scipp as sc
+import scipp.testing
 from ess.powder.calibration import OutputCalibrationData
 from ess.powder.types import (
     Beamline,
@@ -23,8 +25,11 @@ from scippneutron.metadata import ESS_SOURCE, Person
 def ioftof() -> IntensityTof:
     return IntensityTof(
         sc.DataArray(
-            sc.array(dims=['tof'], values=[2.1, 3.2], variances=[0.3, 0.4]),
-            coords={'tof': sc.linspace('tof', 0.1, 1.2, 3, unit='us')},
+            sc.array(dims=['tof'], values=[2.1, 3.2, 1.6], variances=[0.3, 0.4, 0.1]),
+            coords={
+                'tof': sc.array(dims=['tof'], values=[0.1, 0.3, 0.5, 0.7], unit='us')
+            },
+            masks={'bad': sc.array(dims=['tof'], values=[False, True, False])},
         )
     )
 
@@ -95,3 +100,42 @@ _pd_proc.intensity_norm
 _pd_proc.intensity_norm_su
 """
     assert loop_header in result
+
+
+def test_save_reduced_tof_writes_excpected_data(
+    ioftof: IntensityTof, cal: OutputCalibrationData
+) -> None:
+    cif_ = ess.dream.io.cif.prepare_reduced_tof_cif(
+        ioftof,
+        authors=CIFAuthors([]),
+        beamline=Beamline(
+            name="DREAM",
+        ),
+        source=ESS_SOURCE,
+        measurement=Measurement(
+            title="Test measurement",
+        ),
+        reducers=ReducerSoftware([]),
+        calibration=cal,
+    )
+    result = save_reduced_tof_to_str(cif_)
+
+    loop_header = """loop_
+_pd_data.point_id
+_pd_meas.time_of_flight
+_pd_proc.intensity_norm
+_pd_proc.intensity_norm_su
+"""
+    data_table = result[result.index(loop_header) + len(loop_header) :]
+    _, tof, val, std = np.loadtxt(io.StringIO(data_table), delimiter=' ').T
+    loaded = sc.DataArray(
+        sc.array(dims=['tof'], values=val, variances=std**2),
+        coords={'tof': sc.array(dims=['tof'], values=tof, unit='us')},
+    )
+
+    expected = sc.DataArray(
+        sc.array(dims=['tof'], values=[2.1, 0.0, 1.6], variances=[0.3, 0.0, 0.1]),
+        coords={'tof': sc.array(dims=['tof'], values=[0.2, 0.4, 0.6], unit='us')},
+    )
+    # Can't be identical because of conversion to standard deviations
+    sc.testing.assert_allclose(loaded, expected)
