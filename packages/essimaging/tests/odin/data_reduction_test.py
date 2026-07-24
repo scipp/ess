@@ -85,7 +85,7 @@ def test_can_compute_tof(run_type, wavelength_mode):
 def test_publish_reduced_scitiff(output_folder: Path):
     wf = _make_workflow("analytical")
     wf[MaskingRules] = {}
-    new_sizes = {'dim_0': 64, 'dim_1': 64}
+    new_sizes = {'x_pixel_offset': 64, 'y_pixel_offset': 64}
     tbins = sc.linspace('tof', 1.3e4, 1.5e5, 257, unit='us')
 
     sample = wf.compute(TofDetector[SampleRun]).drop_coords('detector_number')
@@ -98,9 +98,9 @@ def test_publish_reduced_scitiff(output_folder: Path):
 
     normed = num / den
 
-    to_scitiff = normed.rename_dims(dim_0='y', dim_1='x', tof='t').drop_coords(
-        'position'
-    )
+    to_scitiff = normed.rename_dims(
+        y_pixel_offset='y', x_pixel_offset='x', tof='t'
+    ).drop_coords('position')
 
     assert "tof" in to_scitiff.coords
     assert "Ltotal" in to_scitiff.coords
