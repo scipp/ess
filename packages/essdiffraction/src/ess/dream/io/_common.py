@@ -13,14 +13,14 @@ def prepare_reduced_data(da: sc.DataArray) -> sc.DataArray:
     hist = da.hist() if da.is_binned else da.copy(deep=False)
     hist.coords[hist.dim] = sc.midpoints(hist.coords[hist.dim])
 
-    if hist.masks:
+    if (mask := irreducible_mask(hist.masks, hist.dim)) is not None:
         # No file format we use here supports masks, so the next
         # best thing is to zero out masked data:
-        hist.data = hist.data.copy()
-        mask_factor = ~irreducible_mask(hist.masks, hist.dim).values
-        hist.values *= mask_factor
         if hist.variances is not None:
-            hist.variances *= mask_factor
+            replacement = sc.scalar(0.0, variance=0.0, unit=hist.unit, dtype=hist.dtype)
+        else:
+            replacement = sc.scalar(0.0, unit=hist.unit, dtype=hist.dtype)
+        hist.data = sc.where(mask, replacement, hist.data)
         hist.masks.clear()
 
     return hist
