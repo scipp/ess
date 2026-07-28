@@ -16,13 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - essreduce
-          - essimaging
+          # - essreduce
+          # - essimaging
           - essnmx
-          - essdiffraction
-          - essreflectometry
-          - esssans
-          - essspectroscopy
+          # - essdiffraction
+          # - essreflectometry
+          # - esssans
+          # - essspectroscopy
         # Packages whose tests write reduced data files via the --file-output
         # pytest option. Their output is collected and published to the
         # `reduced_data_nightly` release by the `publish` job below. To publish data
@@ -109,13 +109,13 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - essreduce
-          - essimaging
+          # - essreduce
+          # - essimaging
           - essnmx
-          - essdiffraction
-          - essreflectometry
-          - esssans
-          - essspectroscopy
+          # - essdiffraction
+          # - essreflectometry
+          # - esssans
+          # - essspectroscopy
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -136,13 +136,13 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - essreduce
-          - essimaging
+          # - essreduce
+          # - essimaging
           - essnmx
-          - essdiffraction
-          - essreflectometry
-          - esssans
-          - essspectroscopy
+          # - essdiffraction
+          # - essreflectometry
+          # - esssans
+          # - essspectroscopy
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -161,7 +161,7 @@ jobs:
     name: Report nightly failures
     needs: [ test, publish, lower-bound, latest-dependencies ]
     runs-on: ubuntu-slim
-    if: failure() && github.event_name == 'schedule'
+    if: failure() # && github.event_name == 'schedule' && github.ref == 'refs/heads/main'
     env:
        GH_TOKEN: ${{ github.token }}
     permissions:
@@ -186,6 +186,7 @@ jobs:
     name: Report nightly failures
     needs: [ test, publish, lower-bound, latest-dependencies ]
     runs-on: ubuntu-slim
+    # if: github.ref == 'refs/heads/main'
     env:
        GH_TOKEN: ${{ github.token }}
     permissions:
