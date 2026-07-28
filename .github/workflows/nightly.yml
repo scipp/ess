@@ -54,7 +54,7 @@ jobs:
           name: reduced-data-${{ matrix.package }}
           path: tests_outputs/
           if-no-files-found: warn
-
+  
   publish:
     name: Publish nightly reduced data
     needs: test
@@ -156,3 +156,49 @@ jobs:
       - name: Test with latest dependencies
         working-directory: packages/${{ matrix.package }}
         run: uv run --extra=test --resolution=highest pytest
+
+  report-test-failure:
+    name: Report nightly failures
+    needs: [ test, publish, lower-bound, latest-dependencies ]
+    runs-on: ubuntu-slim
+    if: failure() && github.event_name == 'schedule'
+    env:
+       GH_TOKEN: ${{ github.token }}
+    permissions:
+      # The nightly failure opens an issue.
+      issues: write
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - name: Open an issue with the link to the failing test results.
+        run: |
+          number=$(gh issue list -l nightly-failure --json number -q ".[0].number")
+          if [ -z ${number) ]; then
+            today=$(date -I)
+            title="Nightly Failures ${today}"
+            gh issue create -t "Nightly Failure ${title}" \
+              -l nightly-failure \
+              -b "See https://github.com/scipp/ess/actions/runs/${{ github.run_id }} for more details."
+          else
+            echo "An issue already exists for nightly failure: #${number}"
+          fi
+
+  report-test-success:
+    name: Report nightly failures
+    needs: [ test, publish, lower-bound, latest-dependencies ]
+    runs-on: ubuntu-slim
+    env:
+       GH_TOKEN: ${{ github.token }}
+    permissions:
+      # The nightly success closes an issue if needed.
+      issues: write
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - name: Close the issue about the nightly failure.
+        run: |
+          number=$(gh issue list -l nightly-failure --json number -q ".[0].number")
+          if [ -z ${number) ]; then
+            echo "No issue opened."
+          else
+            gh issue close -r completed \
+            -c "Nightly fixed at https://github.com/scipp/ess/actions/runs/${{ github.run_id }}"
+          fi
