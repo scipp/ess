@@ -3,20 +3,28 @@
 import sciline
 
 
+from ess.packages.essdiffraction.src.ess.powder.types import (
+    FilepathMLZ,
+    FilenameMLZ,
+    SampleRun,
+    EmptyCanRun,
+    VanadiumRun,
+    EmptyVanadiumCanRun,
+    CalibrationRun,
+)
+
+from ess.packages.mlztexture.src.powtex.data import (
+    load_powtex_csv,
+)
+
+
 def default_parameters() -> dict:
     return {
-            #FilepathMLZ[SampleRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
-            #FilepathMLZ[VanadiumRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
-            #FilepathMLZ[EmptyCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
-            #FilepathMLZ[CalibrationRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
-            #FilepathMLZ[EmptyVanadiumCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted",
-            # KeepEventsMLZ: False,
-            # ShiftNegativeIntensity[SampleRun]: True,
-            # ShiftNegativeIntensity[VanadiumRun]: False,
-            # NegativeIntensityResetValue[SampleRun]: 0.0,
-            # NegativeIntensityResetValue[VanadiumRun]: 0.0,
-            # P2DOutputFilename: "/home/koshchii/Instruments/POWTEX/Scipp/data/output/reduced.p2d"
-            # CalibrationData: None,
+            FilepathMLZ[SampleRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
+            FilepathMLZ[VanadiumRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
+            FilepathMLZ[EmptyCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
+            FilepathMLZ[CalibrationRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
+            FilepathMLZ[EmptyVanadiumCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
     }
 
 def TextureReduce() -> sciline.Pipeline:
@@ -29,7 +37,7 @@ def TextureReduce() -> sciline.Pipeline:
     return sciline.Pipeline(
         providers=(
             [
-                #load_powgen_mlz,
+                load_powtex_csv,
                 # load_powgen_calibration_mlz,
                 # # sample_position,
                 # #sample_position_mlz,

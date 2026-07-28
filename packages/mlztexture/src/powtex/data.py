@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from pathlib import Path
+from typing import cast
+import os
+import pandas as pd
+import numpy as np
+import scipp as sc
+
+from ess.packages.essdiffraction.src.ess.powder.types import (
+    FilepathMLZ,
+    FilenameMLZ,
+    RunType,
+    TofDetector
+)
+
+def load_powtex_csv(
+    filename: FilenameMLZ[RunType],
+    datapath: FilepathMLZ[RunType]
+) -> TofDetector[RunType]:
+    """Load a csv file."""
+    if filename is None:
+        return cast(TofDetector[RunType], None)
+    filepath = Path(os.path.join(datapath, filename))
+    data = pd.read_csv(filepath, sep = '\t')
+
+    event_tof = data["tof [ns]"].to_numpy()
+    event_x = data["voxel_x [mm]"].to_numpy()
+    event_y = data["voxel_y [mm]"].to_numpy()
+    event_z = data["voxel_z [mm]"].to_numpy()
+
+    event_xyz = np.dstack((event_x, event_y, event_z))
+
+    event_coords = sc.vectors(dims=["event"], values=event_xyz[0], unit="mm")
+    event_data = sc.array(dims=["event"], values=np.ones(event_coords.shape[0]), unit="counts")
+
+    # ToDo: these should be read from the file, hardcoded for now
+    sample_pos = sc.vector(value=np.array([0.0, 0.0, 0.0]), unit="mm")
+    source_pos = sc.vector(value=np.array([0.0, 0.0, -41410.0]), unit="mm")
+
+    out = sc.DataArray(
+        data=event_data,
+        coords={
+            "position": event_coords,
+            "sample_position": sample_pos,
+            "source_position": source_pos
+        },
+    )
+    return TofDetector[RunType](out)
