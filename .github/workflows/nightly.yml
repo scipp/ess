@@ -183,9 +183,10 @@ jobs:
           fi
 
   report-test-success:
-    name: Report nightly failures
+    name: Report nightly success
     needs: [ test, publish, lower-bound, latest-dependencies ]
     runs-on: ubuntu-slim
+    if: github.ref == 'refs/heads/main'
     env:
        GH_TOKEN: ${{ github.token }}
     permissions:
