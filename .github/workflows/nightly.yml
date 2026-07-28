@@ -175,7 +175,7 @@ jobs:
           if [ -z ${number} ]; then
             today=$(date -I)
             title="Nightly Failures ${today}"
-            gh issue create -t "Nightly Failure ${title}" \
+            gh issue create -t "${title}" \
               -l nightly-failure \
               -b "See https://github.com/scipp/ess/actions/runs/${{ github.run_id }} for more details."
           else
