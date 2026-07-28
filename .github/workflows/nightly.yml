@@ -172,7 +172,7 @@ jobs:
       - name: Open an issue with the link to the failing test results.
         run: |
           number=$(gh issue list -l nightly-failure --json number -q ".[0].number")
-          if [ -z ${number) ]; then
+          if [ -z ${number} ]; then
             today=$(date -I)
             title="Nightly Failures ${today}"
             gh issue create -t "Nightly Failure ${title}" \
@@ -196,7 +196,7 @@ jobs:
       - name: Close the issue about the nightly failure.
         run: |
           number=$(gh issue list -l nightly-failure --json number -q ".[0].number")
-          if [ -z ${number) ]; then
+          if [ -z ${number} ]; then
             echo "No issue opened."
           else
             gh issue close -r completed \
