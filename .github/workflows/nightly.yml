@@ -54,7 +54,7 @@ jobs:
       #     name: reduced-data-${{ matrix.package }}
       #     path: tests_outputs/
       #     if-no-files-found: warn
-  
+
   # publish:
   #   name: Publish nightly reduced data
   #   needs: test
@@ -184,7 +184,7 @@ jobs:
           fi
 
   report-test-success:
-    name: Report nightly failures
+    name: Report nightly success
     # needs: [ test, publish, lower-bound, latest-dependencies ]
     needs: [ test, lower-bound, latest-dependencies ]
     runs-on: ubuntu-slim
@@ -202,6 +202,6 @@ jobs:
           if [ -z ${number} ]; then
             echo "No issue opened."
           else
-            gh issue close -r completed \
+            gh issue close ${number} -r completed \
             -c "Nightly fixed at https://github.com/scipp/ess/actions/runs/${{ github.run_id }}"
           fi
