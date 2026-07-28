@@ -54,7 +54,7 @@ jobs:
           name: reduced-data-${{ matrix.package }}
           path: tests_outputs/
           if-no-files-found: warn
-  
+
   publish:
     name: Publish nightly reduced data
     needs: test
