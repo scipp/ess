@@ -37,9 +37,8 @@ jobs:
         #     file_output: true
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-tags: true
+      - name: Fail on purpose
+        run: exit 1
       # - uses: prefix-dev/setup-pixi@v0.9.4
       #   with:
       #     pixi-version: v0.68.0
