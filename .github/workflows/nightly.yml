@@ -200,6 +200,6 @@ jobs:
           if [ -z ${number} ]; then
             echo "No issue opened."
           else
-            gh issue close -r completed \
+            gh issue close ${number} -r completed \
             -c "Nightly fixed at https://github.com/scipp/ess/actions/runs/${{ github.run_id }}"
           fi
