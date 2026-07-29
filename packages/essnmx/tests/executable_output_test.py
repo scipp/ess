@@ -31,7 +31,10 @@ try:
     # so that h5py can use the plugin.
     import bitshuffle.h5  # noqa: F401
 except ImportError:
-    ...
+    pytest.skip(
+        allow_module_level=True,
+        reason="File output regression test cannot be done without `bitshuffle.h5`.",
+    )
 
 
 def assert_h5_attrs_equal(
