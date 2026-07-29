@@ -36,3 +36,50 @@ jobs:
           environments: ${{ matrix.package }}
       - name: Run tests
         run: pixi run -e ${{ matrix.package }} test ${{ matrix.package }}
+
+  report-test-failure:
+    name: Report weekly failures
+    needs: test
+    runs-on: ubuntu-slim
+    if: failure() && github.event_name == 'schedule'
+    env:
+       GH_TOKEN: ${{ github.token }}
+    permissions:
+      # The weekly failure opens an issue.
+      issues: write
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - name: Open an issue with the link to the failing test results.
+        run: |
+          number=$(gh issue list -l weekly-failure --json number -q ".[0].number")
+          if [ -z ${number} ]; then
+            today=$(date -I)
+            title="Weekly Platform Test Failures ${today}"
+            gh issue create -t "${title}" \
+              -l weekly-failure \
+              -b "See https://github.com/scipp/ess/actions/runs/${{ github.run_id }} for more details."
+          else
+            echo "An issue already exists for weekly failure: #${number}"
+          fi
+
+  report-test-success:
+    name: Report weekly success
+    needs: test
+    runs-on: ubuntu-slim
+    if: github.ref == 'refs/heads/main'
+    env:
+       GH_TOKEN: ${{ github.token }}
+    permissions:
+      # The weekly success closes an issue if needed.
+      issues: write
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - name: Close the issue about the weekly failure.
+        run: |
+          number=$(gh issue list -l weekly-failure --json number -q ".[0].number")
+          if [ -z ${number} ]; then
+            echo "No issue opened."
+          else
+            gh issue close ${number} -r completed \
+            -c "Weekly Platform tests fixed at https://github.com/scipp/ess/actions/runs/${{ github.run_id }}"
+          fi
