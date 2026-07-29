@@ -59,6 +59,8 @@ def _is_bitshuffle_available() -> bool:
         import bitshuffle.h5  # noqa: F401
     except ImportError:
         return False
+    else:
+        return True
 
 
 def test_mcstas_reduction_export_to_bytestream(
