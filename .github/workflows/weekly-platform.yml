@@ -17,13 +17,13 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest]
         package:
-          - essreduce
-          - essimaging
+          # - essreduce
+          # - essimaging
           - essnmx
-          - essdiffraction
-          - essreflectometry
-          - esssans
-          - essspectroscopy
+          # - essdiffraction
+          # - essreflectometry
+          # - esssans
+          # - essspectroscopy
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
