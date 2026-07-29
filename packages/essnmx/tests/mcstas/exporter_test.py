@@ -55,11 +55,10 @@ def reduced_data() -> NMXReducedDataGroup:
 
 
 def _is_bitshuffle_available() -> bool:
-    import platform
-
-    return not (
-        platform.machine().startswith("arm") or platform.platform().startswith('win')
-    )
+    try:
+        import bitshuffle.h5  # noqa: F401
+    except ImportError:
+        return False
 
 
 def test_mcstas_reduction_export_to_bytestream(
