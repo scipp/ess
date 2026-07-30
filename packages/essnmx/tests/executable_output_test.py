@@ -26,15 +26,10 @@ from ess.nmx.data import get_small_nmx_nexus, get_small_nmx_reduced
 from ess.nmx.executables import reduction
 from ess.nmx.types import Compression
 
-try:
-    # The bitshuffle plugin needs to be imported at least once in the session
-    # so that h5py can use the plugin.
-    import bitshuffle.h5  # noqa: F401
-except ImportError:
-    pytest.skip(
-        allow_module_level=True,
-        reason="File output regression test cannot be done without `bitshuffle.h5`.",
-    )
+pytest.importorskip(
+    "bitshuffle.h5",
+    reason="File output regression test cannot be done without `bitshuffle.h5`.",
+)
 
 
 def assert_h5_attrs_equal(
