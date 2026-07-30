@@ -340,6 +340,11 @@ def save_results(
     aux_config: AuxiliaryOutputConfig | None = None,
     display: Callable | None = None,
 ) -> None:
+    import matplotlib
+
+    # Plots will be saved into png files
+    # therefore it does not need to have interactive backend.
+    matplotlib.use("Agg")
     aux_config = aux_config or AuxiliaryOutputConfig()
     output_file_path = pathlib.Path(output_config.output_file).resolve()
     aux_output_dir = aux_config.build_target_dir(output_file_path.as_posix())
