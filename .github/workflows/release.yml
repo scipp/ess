@@ -72,7 +72,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Copy LICENSE into package
         run: cp LICENSE packages/${{ needs.determine-package.outputs.package }}/LICENSE
       - name: Build package
@@ -157,7 +157,7 @@ jobs:
           fetch-depth: 0  # Fetch depth must be 0 otherwise the git log comment won't find all relevant commits between tags.
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install dependencise
         run: pip install pydantic==2.13.3
       - name: Download PR metadata

@@ -2,8 +2,8 @@
 _commit: 7e41523
 _src_path: gh:scipp/copier_template
 description: SANS data reduction for the European Spallation Source
-max_python: '3.13'
-min_python: '3.11'
+max_python: '3.14'
+min_python: '3.12'
 namespace_package: ess
 nightly_deps: plopp,sciline,scippneutron,scippnexus,scipp,essreduce
 orgname: scipp

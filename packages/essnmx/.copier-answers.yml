@@ -2,8 +2,8 @@
 _commit: 0dae45f
 _src_path: gh:scipp/copier_template
 description: Data reduction for NMX at the European Spallation Source.
-max_python: '3.13'
-min_python: '3.11'
+max_python: '3.14'
+min_python: '3.12'
 namespace_package: ess
 nightly_deps: scipp,sciline,scippnexus,plopp
 orgname: scipp
