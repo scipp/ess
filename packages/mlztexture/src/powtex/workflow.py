@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import sciline
+import scipp as sc
 
 
 from ess.packages.essdiffraction.src.ess.powder.types import (
@@ -17,6 +18,14 @@ from ess.packages.mlztexture.src.powtex.data import (
     load_powtex_csv,
 )
 
+from ess.packages.mlztexture.src.texture.conversion import (
+    project_onto_cylindrical_surface,
+    cylindrical_surface_projection_graph,
+)
+
+from ess.packages.mlztexture.src.texture.types import (
+    ProjectionRadius
+)
 
 def default_parameters() -> dict:
     return {
@@ -25,6 +34,7 @@ def default_parameters() -> dict:
             FilepathMLZ[EmptyCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
             FilepathMLZ[CalibrationRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
             FilepathMLZ[EmptyVanadiumCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
+            ProjectionRadius: 800.0 * sc.units.mm
     }
 
 def TextureReduce() -> sciline.Pipeline:
@@ -38,6 +48,8 @@ def TextureReduce() -> sciline.Pipeline:
         providers=(
             [
                 load_powtex_csv,
+                cylindrical_surface_projection_graph,
+                project_onto_cylindrical_surface,
                 # load_powgen_calibration_mlz,
                 # # sample_position,
                 # #sample_position_mlz,
