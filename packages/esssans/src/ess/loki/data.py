@@ -162,7 +162,7 @@ def loki_tutorial_mask_filenames() -> list[PixelMaskFilename]:
 
 
 def loki_tutorial_poly_gauss_I0() -> Path:
-    """Return the analytical I(Q) model file for the Poly-Gauss sample."""
+    """Analytical model for the I(Q) of the Poly-Gauss sample."""
     return Path(_registry.get_path('PolyGauss_I0-50_Rg-60.h5'))
 
 
