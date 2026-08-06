@@ -6,10 +6,12 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import os
+from _thread import LockType
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from functools import cache
 from pathlib import Path
+from threading import Lock
 from typing import Any, Literal
 
 _LOCAL_CACHE_ENV_VAR = "SCIPP_DATA_DIR"
@@ -145,8 +147,9 @@ class Entry:
 class Registry(ABC):
     def __init__(self, files: Mapping[str, str | Entry]) -> None:
         self._files = _to_file_entries(files)
+        self._lock = Lock()
+        self._locks: dict[str, LockType] = {}
 
-    @cache  # noqa: B019
     def get_path(self, name: str) -> Path:
         """Get the path to a file in the registry.
 
@@ -168,6 +171,11 @@ class Registry(ABC):
         :
             The Path to the file.
         """
+        with self._get_lock(name):
+            return self._cached_get_path(name)
+
+    @cache  # noqa: B019
+    def _cached_get_path(self, name: str) -> Path:
         return Path(
             _expect_single(
                 self._fetch(name, extractor=self._extractor_processor(name)),
@@ -175,7 +183,6 @@ class Registry(ABC):
             )
         )
 
-    @cache  # noqa: B019
     def get_paths(self, name: str) -> list[Path]:
         """Get the paths to unpacked files from the registry.
 
@@ -202,9 +209,22 @@ class Registry(ABC):
         :
             The Paths to the files.
         """
+        with self._get_lock(name):
+            return self._cached_get_paths(name)
+
+    @cache  # noqa: B019
+    def _cached_get_paths(self, name: str) -> list[Path]:
         if (extractor := self._extractor_processor(name)) is None:
             raise ValueError(f"File '{name}' is not zipped or tarred.")
         return [Path(path) for path in self._fetch(name, extractor=extractor)]
+
+    def _get_lock(self, name: str) -> LockType:
+        with self._lock:
+            lock = self._locks.get(name)
+            if lock is None:
+                lock = Lock()
+                self._locks[name] = lock
+            return lock
 
     def _extractor_processor_type(self, name: str) -> Any:
         match self._files[name].extractor:
