@@ -2,6 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
 
+import numpy as np
+import scipp as sc
 from ess.sans.types import (
     BackgroundRun,
     DirectBeamFilename,
@@ -160,8 +162,33 @@ def loki_tutorial_mask_filenames() -> list[PixelMaskFilename]:
 
 
 def loki_tutorial_poly_gauss_I0() -> Path:
-    """Analytical model for the I(Q) of the Poly-Gauss sample."""
+    """Return the analytical I(Q) model file for the Poly-Gauss sample."""
     return Path(_registry.get_path('PolyGauss_I0-50_Rg-60.h5'))
+
+
+def loki_tutorial_poly_gauss_I0_data() -> sc.DataArray:
+    """Return the analytical I(Q) model for the tutorial Poly-Gauss sample.
+
+    The model is the SasView ``poly_gauss_coil`` model with an intensity at zero
+    Q of 50, a radius of gyration of 60 angstrom, a polydispersity of 1.02, and
+    a background of 0.2.
+    """
+    q = sc.geomspace(
+        dim='Q',
+        start=0.0005237261180003165,
+        stop=0.5,
+        num=150,
+        unit='1/angstrom',
+    )
+    radius_of_gyration = sc.scalar(60.0, unit='angstrom')
+    # Preserve the float32 parameter values used to compute the original reference.
+    polydispersity = float(np.float32(1.02))
+    background = float(np.float32(0.2))
+
+    u = polydispersity - 1.0
+    z = (q * radius_of_gyration) ** 2 / (1.0 + 2.0 * u)
+    form_factor = 2.0 * ((1.0 + u * z) ** (-1.0 / u) + z - 1.0) / ((1.0 + u) * z**2)
+    return sc.DataArray(50.0 * form_factor + background, coords={'Q': q})
 
 
 def loki_tutorial_direct_beam_all_pixels() -> DirectBeamFilename:
