@@ -171,7 +171,10 @@ html_theme_options = {
         {"name": "ESSdiffraction", "url": "https://scipp.github.io/ess/diffraction"},
         {"name": "ESSimaging", "url": "https://scipp.github.io/ess/imaging"},
         {"name": "ESSnmx", "url": "https://scipp.github.io/ess/nmx"},
-        {"name": "ESSpolarization", "url": "https://scipp.github.io/esspolarization"},
+        {
+            "name": "ESSpolarization",
+            "url": "https://scipp.github.io/ess/reduce/user-guide/polarization/",
+        },
         {
             "name": "ESSreflectometry",
             "url": "https://scipp.github.io/ess/reflectometry",
