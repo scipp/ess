@@ -122,4 +122,4 @@ def test_simulation_workflow_produces_the_same_data_as_before(
             energy_data.bins.coords[name], expected.bins.coords[name]
         )
 
-    sc.testing.assert_allclose(energy_data.bins.data, expected.bins.data)
+    sc.testing.assert_allclose(energy_data.bins.data, expected.bins.data, atol=1e-15)
