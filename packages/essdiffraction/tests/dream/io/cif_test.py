@@ -133,9 +133,10 @@ _pd_proc.intensity_norm_su
         coords={'tof': sc.array(dims=['tof'], values=tof, unit='us')},
     )
 
+    # Only 2 data points are expected because one of the 3 points is masked
     expected = sc.DataArray(
-        sc.array(dims=['tof'], values=[2.1, 0.0, 1.6], variances=[0.3, 0.0, 0.1]),
-        coords={'tof': sc.array(dims=['tof'], values=[0.2, 0.4, 0.6], unit='us')},
+        sc.array(dims=['tof'], values=[2.1, 1.6], variances=[0.3, 0.1]),
+        coords={'tof': sc.array(dims=['tof'], values=[0.2, 0.6], unit='us')},
     )
     # Can't be identical because of conversion to standard deviations
     sc.testing.assert_allclose(loaded, expected)

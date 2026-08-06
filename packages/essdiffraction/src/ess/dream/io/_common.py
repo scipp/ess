@@ -14,13 +14,8 @@ def prepare_reduced_data(da: sc.DataArray) -> sc.DataArray:
     hist.coords[hist.dim] = sc.midpoints(hist.coords[hist.dim])
 
     if (mask := irreducible_mask(hist.masks, hist.dim)) is not None:
-        # No file format we use here supports masks, so the next
-        # best thing is to zero out masked data:
-        if hist.variances is not None:
-            replacement = sc.scalar(0.0, variance=0.0, unit=hist.unit, dtype=hist.dtype)
-        else:
-            replacement = sc.scalar(0.0, unit=hist.unit, dtype=hist.dtype)
-        hist.data = sc.where(mask, replacement, hist.data)
+        # No file format we use here supports masks, so we remove masked data points
+        hist = hist[~mask]
         hist.masks.clear()
 
     return hist
