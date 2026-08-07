@@ -4,7 +4,6 @@ import numpy as np
 from ess.packages.mlztexture.src.texture.types import (
     CylindricalSurfaceDetector,
     CylindricalSurfaceTransformGraph,
-    ProjectionRadius
 )
 
 from ess.packages.essdiffraction.src.ess.powder.types import (
@@ -12,22 +11,25 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     RunType,
 )
 
-#from essdiffraction_new.src.ess.powder.conversion import d_perp_from_lambda_and_theta
+# Radius of the cylindrical surface onto which the detector data will be projected.
+# This is a constant value used in the projection calculations.
+PROJECTION_RADIUS = sc.scalar(800.0, unit="mm")
+
 
 def project_onto_cylindrical_surface(
     data: TofDetector[RunType],
-    graph: CylindricalSurfaceTransformGraph,
-    radius: ProjectionRadius,
 ) -> CylindricalSurfaceDetector[RunType]:
     """
     Project the detector data to a cylindrical surface.
     """
-    data.coords["projection_radius"] = radius
+    data.coords["projection_radius"] = PROJECTION_RADIUS
     data = data.transform_coords(
         ["gamma", "two_theta", "proj_position"],
-        graph=graph,
+        graph=cylindrical_surface_projection_graph(),
         keep_intermediate=False,
     )
+    for key in ["position", "tof", "sample_position", "source_position"]:
+        data.coords.pop(key, None)
     return CylindricalSurfaceDetector[RunType](data)
 
 

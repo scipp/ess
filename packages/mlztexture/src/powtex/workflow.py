@@ -24,7 +24,13 @@ from ess.packages.mlztexture.src.texture.conversion import (
 )
 
 from ess.packages.mlztexture.src.texture.types import (
-    ProjectionRadius
+    BinningSettings,
+)
+
+from ess.packages.mlztexture.src.texture.histogramming import (
+    generate_gamma_binning_data,
+    generate_two_theta_binning_data,
+    hist_3d,
 )
 
 def default_parameters() -> dict:
@@ -34,7 +40,14 @@ def default_parameters() -> dict:
             FilepathMLZ[EmptyCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
             FilepathMLZ[CalibrationRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
             FilepathMLZ[EmptyVanadiumCanRun]: "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv",
-            ProjectionRadius: 800.0 * sc.units.mm
+            BinningSettings: BinningSettings(
+                gamma_cut_start=sc.scalar(225.0, unit="deg"),
+                gamma_cut_end=sc.scalar(315.0, unit="deg"),
+                drop_partial_bins=True,
+                include_gamma_gap_bins=False,
+                two_theta_min=sc.scalar(45.0, unit="deg"),
+                two_theta_max=sc.scalar(135.0, unit="deg")
+            ),
     }
 
 def TextureReduce() -> sciline.Pipeline:
@@ -48,8 +61,10 @@ def TextureReduce() -> sciline.Pipeline:
         providers=(
             [
                 load_powtex_csv,
-                cylindrical_surface_projection_graph,
                 project_onto_cylindrical_surface,
+                generate_gamma_binning_data,
+                generate_two_theta_binning_data,
+                hist_3d,
                 # load_powgen_calibration_mlz,
                 # # sample_position,
                 # #sample_position_mlz,
