@@ -1,4 +1,4 @@
-Results of doctest builder run on 2026-06-24 08:30:36
+Results of doctest builder run on 2026-08-10 10:57:08
 =====================================================
 
 Document: generated/modules/ess.diffraction.peaks.dspacing_peaks_from_cif
