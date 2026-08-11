@@ -11,6 +11,7 @@ from ess.spectroscopy.types import (
 )
 
 from ess.reduce import unwrap as reduce_unwrap
+from ess.reduce.nexus.types import NeXusName
 
 from ..cutting import group_by_rotation
 from ..io import nexus
@@ -30,7 +31,7 @@ _PROVIDERS = (
 _SIMULATION_PROVIDERS = (
     *nexus.providers,
     *conversion.providers,
-    *detector.providers,
+    *detector.simulation_providers,
     *q_map.providers,
     *time_of_flight.providers,
     convert_simulated_time_to_event_time_offset,
@@ -45,6 +46,12 @@ def BifrostBraggPeakMonitorWorkflow() -> sciline.Pipeline:
     )
     # Use the vanilla implementation instead of the indirect geometry one:
     workflow.insert(reduce_unwrap.to_wavelength.detector_wavelength_data)
+    # The Bragg peak monitor sees the direct beam, so its flight path is a straight
+    # line rather than the analyzer-folded path of the inelastic detectors.
+    workflow.insert(
+        reduce_unwrap.to_wavelength.detector_ltotal_from_straight_line_approximation
+    )
+    workflow[NeXusName[ElasticMonitor]] = 'elastic_monitor'
     for provider in _PROVIDERS:
         workflow.insert(provider)
     for key, val in default_parameters().items():
@@ -59,6 +66,12 @@ def BifrostSimulationBraggPeakMonitorWorkflow() -> sciline.Pipeline:
     )
     # Use the vanilla implementation instead of the indirect geometry one:
     workflow.insert(reduce_unwrap.to_wavelength.detector_wavelength_data)
+    # The Bragg peak monitor sees the direct beam, so its flight path is a straight
+    # line rather than the analyzer-folded path of the inelastic detectors.
+    workflow.insert(
+        reduce_unwrap.to_wavelength.detector_ltotal_from_straight_line_approximation
+    )
+    workflow[NeXusName[ElasticMonitor]] = 'elastic_monitor'
     for provider in _SIMULATION_PROVIDERS:
         workflow.insert(provider)
     for key, val in simulation_default_parameters().items():

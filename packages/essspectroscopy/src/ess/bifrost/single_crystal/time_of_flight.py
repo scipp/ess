@@ -32,6 +32,13 @@ def detector_wavelength_data(
     :func:`ess.reduce.unwrap.detector_wavelength_data`
     for different input types.
     """
+    # A time-dependent detector position (BIFROST's tank rotates, and the Bragg peak
+    # monitor is mounted on it) makes ``ltotal`` depend on 'time'. The instrument angle
+    # is the only dynamic parameter, so ``group_by_rotation`` has already turned that
+    # same 'time' dimension into 'a4'. Rename to match, or the broadcast below rejects
+    # ``ltotal`` as having a dimension the data does not.
+    if 'time' in ltotal.dims and 'time' not in sample_data.dims:
+        ltotal = ltotal.rename_dims(time='a4')
     return reduce_unwrap.to_wavelength.detector_wavelength_data(
         detector_data=RawDetector[RunType](sample_data),
         lookup=lookup,
