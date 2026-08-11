@@ -18,6 +18,7 @@ from ess.reduce.nexus.types import (
     NeXusDetectorName,
     NeXusName,
     Position,
+    RawDetector,
     SampleRun,
 )
 from ess.reduce.unwrap import (
@@ -129,8 +130,13 @@ def test_GenericUnwrapWorkflow_computes_wavelength(
         wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
         assert 'wavelength' in wavs.coords
     else:
+        raw = wf.compute(RawDetector[SampleRun])
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
         assert 'wavelength' in wavs.bins.coords
+        assert_identical(
+            wavs.bins.coords['event_time_offset'],
+            raw.bins.coords['event_time_offset'],
+        )
 
 
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])

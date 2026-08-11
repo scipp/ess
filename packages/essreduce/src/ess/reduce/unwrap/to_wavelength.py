@@ -360,8 +360,7 @@ def _compute_wavelength_events(
 
     parts = da.bins.constituents
     parts["data"] = wavs
-    result = da.bins.assign_coords(wavelength=sc.bins(**parts, validate_indices=False))
-    out = result.bins.drop_coords("event_time_offset")
+    out = da.bins.assign_coords(wavelength=sc.bins(**parts, validate_indices=False))
 
     # The result may still have an 'event_time_zero' dimension (in the case of an
     # event monitor where events were not grouped by pixel).
