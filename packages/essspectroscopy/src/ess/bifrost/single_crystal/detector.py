@@ -82,9 +82,13 @@ def assemble_bragg_peak_monitor_data(
     :
         Events with geometry coordinates.
     """
-    from ess.reduce.nexus.workflow import assemble_detector_data
+    from ess.reduce.nexus.workflow import _add_variances
 
-    return RawDetector[RunType](assemble_detector_data(monitor, data))
+    # Not ``assemble_detector_data``: that groups events by ``event_id``, which a
+    # monitor does not carry. The Bragg peak monitor is a single pixel, so its
+    # geometry is simply assigned onto the events, as for any other monitor.
+    da = data.assign_coords(monitor.coords).assign_masks(monitor.masks)
+    return RawDetector[RunType](_add_variances(da))
 
 
 def get_calibrated_bragg_peak_detector(
