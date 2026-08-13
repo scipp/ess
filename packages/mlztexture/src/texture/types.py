@@ -7,7 +7,8 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     RunType,
 )
 
-class CylindricalSurfaceDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
+
+class DspacingCylSurfaceDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with time-of-flight coordinate."""
 
 
@@ -15,28 +16,36 @@ class CylindricalSurfaceTransformGraph(sl.Scope[dict], dict):
     """Graph for transforming projecting 3D POWTEX data onto a cylindrical surface."""
 
 
+class Texture3D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
+    """ToDo."""
+
+
+class View1D(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """ToDo."""
+
+
+class View2D(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """ToDo."""
+
+
 class View3D(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """ToDo."""
 
 
-DropPartialBins = NewType("DropPartialBins", bool)
-"""Flag indicating whether to drop partial bins."""
-
-GammaBinWidth = NewType("GammaBinWidth", sc.Variable)
-GammaBinning = NewType("GammaBinning", sc.Variable)
-
+# binning settings types
 GammaCutStart = NewType("GammaCutStart", sc.Variable)
 GammaCutEnd = NewType("GammaCutEnd", sc.Variable)
 DropPartialBins = NewType("DropPartialBins", bool)
 IncludeGapBins = NewType("IncludeGapBins", bool) # maybe not needed in future
 
+GammaBinWidth = NewType("GammaBinWidth", sc.Variable)
 TwoThetaBinWidth = NewType("TwoThetaBinWidth", sc.Variable)
-TwoThetaBinning = NewType("TwoThetaBinning", sc.Variable)
+DspacingBinWidth = NewType("DspacingBinWidth", sc.Variable)
 
 GammaBinningData = NewType("GammaBinningData", sc.DataGroup)
 TwoThetaBinningData = NewType("TwoThetaBinningData", sc.Variable)
+DspacingBinningData = NewType("DspacingBinningData", sc.Variable)
 
-BinningType = TypeVar("BinningType", GammaBinning, TwoThetaBinning)
 
 @dataclass #(frozen=True) <-- frozen makes it impossible to change the values of the fields after initialization
 class BinningSettings:
