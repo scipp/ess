@@ -16,6 +16,7 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
 
 from ess.packages.mlztexture.src.powtex.data import (
     load_powtex_csv,
+    load_powtex_calibration
 )
 
 from ess.packages.mlztexture.src.texture.conversion import (
@@ -61,6 +62,7 @@ def TextureReduce() -> sciline.Pipeline:
         providers=(
             [
                 load_powtex_csv,
+                load_powtex_calibration,
                 project_onto_cylindrical_surface,
                 generate_gamma_binning_data,
                 generate_two_theta_binning_data,

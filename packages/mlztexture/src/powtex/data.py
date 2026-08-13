@@ -11,6 +11,8 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     FilepathMLZ,
     FilenameMLZ,
     RunType,
+    CalibrationRun,
+    CalibrationData,
     TofDetector
 )
 
@@ -50,3 +52,9 @@ def load_powtex_csv(
         },
     )
     return TofDetector[RunType](out)
+
+def load_powtex_calibration(
+    filename: FilenameMLZ[CalibrationRun],
+    datapath: FilepathMLZ[CalibrationRun]
+) -> CalibrationData:
+    return CalibrationData(None)
