@@ -58,9 +58,6 @@ def get_calibrated_bragg_peak_monitor(
     position = transform.value * sc.vector([0.0, 0.0, 0.0], unit=unit) + offset.to(
         unit=unit
     )
-    # A monitor carries no detector_number; the Bragg peak monitor is a single pixel,
-    # so name it explicitly for the pixel-grouping done by the event assembly below.
-    da = da.assign_coords(detector_number=sc.index(1))
     return EmptyDetector[RunType](_assign_detector_position(da, position))
 
 
@@ -69,6 +66,13 @@ def assemble_bragg_peak_monitor_data(
     data: NeXusData[ElasticMonitor, RunType],
 ) -> RawDetector[RunType]:
     """Combine the Bragg peak monitor's geometry with its event data.
+
+    Assembled as a monitor, not as a detector: ``assemble_detector_data`` groups
+    events by ``event_id`` onto a ``detector_number`` grid, and the Bragg peak
+    monitor is a single pixel with nothing to group by. Its geometry is therefore
+    assigned straight onto the events. The result is the same whether or not the
+    events carry an ``event_id`` -- a file-loaded ``cbm5_events`` group does, a
+    stream may not -- because the coordinate is simply left untouched.
 
     Parameters
     ----------
@@ -82,13 +86,9 @@ def assemble_bragg_peak_monitor_data(
     :
         Events with geometry coordinates.
     """
-    from ess.reduce.nexus.workflow import _add_variances
+    from ess.reduce.nexus.workflow import assemble_monitor_data
 
-    # Not ``assemble_detector_data``: that groups events by ``event_id``, which a
-    # monitor does not carry. The Bragg peak monitor is a single pixel, so its
-    # geometry is simply assigned onto the events, as for any other monitor.
-    da = data.assign_coords(monitor.coords).assign_masks(monitor.masks)
-    return RawDetector[RunType](_add_variances(da))
+    return RawDetector[RunType](assemble_monitor_data(monitor, data))
 
 
 def get_calibrated_bragg_peak_detector(
