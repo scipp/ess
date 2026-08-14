@@ -14,6 +14,7 @@ def GenericUnwrapWorkflow(
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
     wavelength_from: WavelengthLutMode = "file",
+    keep_event_time_offset: bool = False,
 ) -> sciline.Pipeline:
     """
     Generic workflow for computing the neutron wavelength for detector and monitor
@@ -47,6 +48,10 @@ def GenericUnwrapWorkflow(
         Mode for creating the wavelength lookup table. Possible values are
         'analytical', 'simulation', and 'file'. See
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    keep_event_time_offset:
+        Whether to keep the ``event_time_offset`` event coordinate after converting
+        to wavelength. Keeping it uses additional memory in subsequent workflow
+        operations.
 
     Returns
     -------
@@ -60,6 +65,7 @@ def GenericUnwrapWorkflow(
         *lut.providers(wavelength_from=wavelength_from),
     ):
         wf.insert(provider)
+    wf[to_wavelength.KeepEventTimeOffset] = keep_event_time_offset
     for key, value in lut.default_parameters(wavelength_from=wavelength_from).items():
         wf[key] = value
 

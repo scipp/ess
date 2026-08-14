@@ -9,6 +9,7 @@ event_time_offset coordinates to data with a time-of-flight coordinate.
 
 from collections.abc import Callable
 from dataclasses import asdict
+from typing import NewType
 
 import numpy as np
 import scipp as sc
@@ -44,6 +45,8 @@ from .types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
+
+KeepEventTimeOffset = NewType("KeepEventTimeOffset", bool)
 
 
 class WavelengthInterpolator:
@@ -342,6 +345,7 @@ def _compute_wavelength_events(
     lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
+    keep_event_time_offset: bool,
 ) -> sc.DataArray:
     inputs = _prepare_wavelength_interpolation_inputs(
         da=da,
@@ -361,6 +365,8 @@ def _compute_wavelength_events(
     parts = da.bins.constituents
     parts["data"] = wavs
     out = da.bins.assign_coords(wavelength=sc.bins(**parts, validate_indices=False))
+    if not keep_event_time_offset:
+        out = out.bins.drop_coords("event_time_offset")
 
     # The result may still have an 'event_time_zero' dimension (in the case of an
     # event monitor where events were not grouped by pixel).
@@ -472,6 +478,7 @@ def _compute_wavelength_data(
     lookup: ErrorLimitedLookupTable[RunType, Component],
     ltotal: sc.Variable,
     pulse_stride_offset: int,
+    keep_event_time_offset: bool,
 ) -> sc.DataArray:
     if da.bins is None:
         data = _compute_wavelength_histogram(da=da, lookup=lookup, ltotal=ltotal)
@@ -482,6 +489,7 @@ def _compute_wavelength_data(
             lookup=lookup,
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
+            keep_event_time_offset=keep_event_time_offset,
         )
     return out.assign_coords(Ltotal=ltotal)
 
@@ -491,6 +499,7 @@ def detector_wavelength_data(
     lookup: ErrorLimitedLookupTable[RunType, snx.NXdetector],
     ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
+    keep_event_time_offset: KeepEventTimeOffset,
 ) -> WavelengthDetector[RunType]:
     """
     Convert the time-of-arrival (event_time_offset) data to wavelength data using a
@@ -510,6 +519,9 @@ def detector_wavelength_data(
     pulse_stride_offset:
         When pulse-skipping, the offset of the first pulse in the stride. This is
         typically zero but can be a small integer < pulse_stride.
+    keep_event_time_offset:
+        Whether to keep the event_time_offset coordinate after converting to
+        wavelength.
     """
     return WavelengthDetector[RunType](
         _compute_wavelength_data(
@@ -517,6 +529,7 @@ def detector_wavelength_data(
             lookup=lookup,
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
+            keep_event_time_offset=keep_event_time_offset,
         )
     )
 
@@ -526,6 +539,7 @@ def monitor_wavelength_data(
     lookup: ErrorLimitedLookupTable[RunType, MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
+    keep_event_time_offset: KeepEventTimeOffset,
 ) -> WavelengthMonitor[RunType, MonitorType]:
     """
     Convert the time-of-arrival (event_time_offset) data to wavelength data using a
@@ -545,6 +559,9 @@ def monitor_wavelength_data(
     pulse_stride_offset:
         When pulse-skipping, the offset of the first pulse in the stride. This is
         typically zero but can be a small integer < pulse_stride.
+    keep_event_time_offset:
+        Whether to keep the event_time_offset coordinate after converting to
+        wavelength.
     """
     return WavelengthMonitor[RunType, MonitorType](
         _compute_wavelength_data(
@@ -552,6 +569,7 @@ def monitor_wavelength_data(
             lookup=lookup,
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
+            keep_event_time_offset=keep_event_time_offset,
         )
     )
 

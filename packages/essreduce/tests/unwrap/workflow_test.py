@@ -32,7 +32,9 @@ sl = pytest.importorskip("sciline")
 Monitor0 = NewType("Monitor0", int)
 
 
-def _make_workflow(wavelength_from) -> sciline.Pipeline:
+def _make_workflow(
+    wavelength_from, *, keep_event_time_offset=False
+) -> sciline.Pipeline:
     sizes = {'detector_number': 10}
     detector_geometry = sc.DataArray(
         data=sc.ones(sizes=sizes),
@@ -84,6 +86,7 @@ def _make_workflow(wavelength_from) -> sciline.Pipeline:
         run_types=[SampleRun],
         monitor_types=[Monitor0],
         wavelength_from=wavelength_from,
+        keep_event_time_offset=keep_event_time_offset,
     )
     wf[NeXusDetectorName] = "detector"
     wf[NeXusName[Monitor0]] = "monitor"
@@ -130,13 +133,29 @@ def test_GenericUnwrapWorkflow_computes_wavelength(
         wavs = wf.compute(unwrap.WavelengthMonitor[SampleRun, Monitor0])
         assert 'wavelength' in wavs.coords
     else:
-        raw = wf.compute(RawDetector[SampleRun])
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
         assert 'wavelength' in wavs.bins.coords
+
+
+@pytest.mark.parametrize("keep_event_time_offset", [False, True])
+def test_GenericUnwrapWorkflow_optionally_keeps_event_time_offset(
+    keep_event_time_offset,
+):
+    wf = _make_workflow(
+        wavelength_from="analytical",
+        keep_event_time_offset=keep_event_time_offset,
+    )
+
+    raw = wf.compute(RawDetector[SampleRun])
+    wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
+
+    if keep_event_time_offset:
         assert_identical(
             wavs.bins.coords['event_time_offset'],
             raw.bins.coords['event_time_offset'],
         )
+    else:
+        assert 'event_time_offset' not in wavs.bins.coords
 
 
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
