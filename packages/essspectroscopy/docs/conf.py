@@ -69,7 +69,7 @@ autodoc_type_aliases = {
 }
 
 intersphinx_mapping = {
-    'essreduce': ('https://scipp.github.io/essreduce/', None),
+    'essreduce': ('https://scipp.github.io/ess/reduce/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'python': ('https://docs.python.org/3', None),
     'scipp': ('https://scipp.github.io/', None),
@@ -169,7 +169,7 @@ html_theme_options = {
         "image_dark": "_static/logo-dark.svg",
     },
     "external_links": [
-        {"name": "ESSreduce", "url": "https://scipp.github.io/essreduce"},
+        {"name": "ESSreduce", "url": "https://scipp.github.io/ess/reduce"},
         {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
         {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
         {"name": "Scipp", "url": "https://scipp.github.io"},
