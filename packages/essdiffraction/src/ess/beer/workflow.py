@@ -1,37 +1,34 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-import itertools
-
 import sciline as sl
 import scipp as sc
 import scippnexus as snx
 from ess.powder import providers as powder_providers
+from ess.powder.conversion import powder_coordinate_transformation_graph
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
     BunkerMonitor,
     CalibrationData,
     CaveMonitor,
     EmptyCanRun,
-    RunType,
     SampleRun,
     VanadiumRun,
 )
 
+from ess.reduce.nexus import GenericNeXusWorkflow
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
 from ess.reduce.unwrap import GenericUnwrapWorkflow
 from ess.reduce.unwrap.types import LookupTableRelativeErrorThreshold
 
-from .clustering import providers as clustering_providers
-from .conversions import convert_from_known_peaks_providers, convert_pulse_shaping
-from .conversions import providers as conversion_providers
-from .mcstas import (
-    mcstas_modulation_period_from_mode,
-    mcstas_providers,
-    pulse_shaping_mcstas_providers,
+from .clustering import cluster_events_by_streak
+from .conversions import (
+    automatic_coordinate_transformation_graph,
+    compute_wavelength_in_each_cluster,
+    known_peaks_coordinate_transformation_graph,
+    wavelength_detector,
 )
-from .types import (
-    PulseLength,
-)
+from .mcstas import mcstas_providers
+from .types import PulseLength
 
 default_parameters = {
     CalibrationData: None,
@@ -43,54 +40,42 @@ default_parameters = {
 }
 
 
+def _beer_modulation_workflow(graph_provider, *providers) -> sl.Pipeline:
+    workflow = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    for provider in (
+        *mcstas_providers,
+        graph_provider,
+        *providers,
+    ):
+        workflow.insert(provider)
+    for key, value in default_parameters.items():
+        workflow[key] = value
+    return workflow
+
+
 def BeerModMcStasWorkflow():
-    """Workflow to process BEER (modulation regime) McStas files without a list
-    of estimated peak positions."""
-    return sl.Pipeline(
-        (
-            *mcstas_providers,
-            mcstas_modulation_period_from_mode,
-            *clustering_providers,
-            *conversion_providers,
-        ),
-        params=default_parameters,
-        constraints={RunType: (SampleRun,)},
+    """Process modulation-mode McStas data without known peak positions."""
+    return _beer_modulation_workflow(
+        automatic_coordinate_transformation_graph,
+        cluster_events_by_streak,
+        compute_wavelength_in_each_cluster,
     )
 
 
 def BeerModMcStasWorkflowKnownPeaks():
-    """Workflow to process BEER (modulation regime) McStas files using a list
-    of estimated peak positions."""
-    return sl.Pipeline(
-        (
-            *mcstas_providers,
-            mcstas_modulation_period_from_mode,
-            *convert_from_known_peaks_providers,
-        ),
-        params=default_parameters,
-        constraints={RunType: (SampleRun,)},
+    """Process modulation-mode McStas data using known peak positions."""
+    return _beer_modulation_workflow(
+        known_peaks_coordinate_transformation_graph, wavelength_detector
     )
 
 
 def BeerMcStasWorkflowPulseShaping():
-    """Workflow to process BEER (pulse shaping modes) McStas files"""
-    return sl.Pipeline(
-        (*mcstas_providers, *convert_pulse_shaping),
-        params=default_parameters,
-        constraints={RunType: (SampleRun,)},
-    )
-
-
-def BeerMcStasWorkflowPulseShapingAnalytical():
     """Workflow to process BEER pulse-shaping McStas files using analytical
     frame unwrapping."""
     wf = GenericUnwrapWorkflow(
         run_types=[SampleRun], monitor_types=[], wavelength_from='analytical'
     )
-    for provider in (
-        *mcstas_providers,
-        *pulse_shaping_mcstas_providers,
-    ):
+    for provider in (*mcstas_providers, powder_coordinate_transformation_graph):
         wf.insert(provider)
     for key, value in default_parameters.items():
         wf[key] = value
@@ -125,7 +110,7 @@ def BeerPowderWorkflow(
     )
     wf[NeXusName[CaveMonitor]] = "monitor_cave"
 
-    for provider in itertools.chain(powder_providers, convert_pulse_shaping):
+    for provider in powder_providers:
         wf.insert(provider)
 
     insert_run_normalization(wf, run_norm)
@@ -153,20 +138,11 @@ def BeerPowderWorkflowAnalytical(
     :
         A workflow object for BEER.
     """
-    wf = GenericUnwrapWorkflow(
-        run_types=[SampleRun, VanadiumRun, EmptyCanRun],
-        monitor_types=[BunkerMonitor, CaveMonitor],
+    wf = BeerPowderWorkflow(
+        run_norm=run_norm,
         wavelength_from='analytical',
         **kwargs,
     )
-    wf[NeXusName[CaveMonitor]] = "monitor_cave"
-
-    for provider in powder_providers:
-        wf.insert(provider)
-
-    insert_run_normalization(wf, run_norm)
-    for key, value in default_parameters.items():
-        wf[key] = value
     wf[NeXusName[snx.NXdetector]] = 'detector'
     wf[LookupTableRelativeErrorThreshold] = {
         'detector': float('inf'),
@@ -177,18 +153,9 @@ def BeerPowderWorkflowAnalytical(
 
 
 def BeerPowderMcStasWorkflow(**kwargs) -> sl.Pipeline:
-    """Create the BEER powder workflow with McStas loaders inserted."""
-    wf = BeerPowderWorkflow(**kwargs)
-    for provider in mcstas_providers:
-        wf.insert(provider)
-
-    return wf
-
-
-def BeerPowderMcStasWorkflowAnalytical(**kwargs) -> sl.Pipeline:
     """Create the BEER analytical powder workflow with McStas loaders inserted."""
     wf = BeerPowderWorkflowAnalytical(**kwargs)
-    for provider in itertools.chain(mcstas_providers, pulse_shaping_mcstas_providers):
+    for provider in mcstas_providers:
         wf.insert(provider)
 
     return wf

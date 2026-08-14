@@ -41,9 +41,6 @@ class _ChopperParameters(TypedDict):
 Hz = sc.Unit("Hz")
 deg = sc.Unit("deg")
 
-MCSTAS_T_OFFSET = sc.scalar(1.6, unit="ms")
-"""Time offset applied by the BEER McStas simulation source model."""
-
 _PULSE_SHAPING_HIGH_FLUX: dict[str, _ChopperParameters] = {
     "PSC1": {
         "frequency": 168.0,
