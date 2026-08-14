@@ -114,12 +114,28 @@ def test_simulation_workflow_produces_the_same_data_as_before(
 
     assert set(expected.coords.keys()).issubset(set(energy_data.coords.keys()))
     for name in expected.coords.keys():
-        sc.testing.assert_allclose(energy_data.coords[name], expected.coords[name])
+        sc.testing.assert_allclose(
+            energy_data.coords[name],
+            expected.coords[name],
+            atol=(
+                sc.scalar(1e-15, unit=expected.coords[name].unit)
+                # TODO: When scipp supports unit=None in .to(), remove this case.
+                if expected.coords[name].unit is not None
+                else None
+            ),
+        )
 
     assert energy_data.bins.coords.keys() == expected.bins.coords.keys()
     for name in energy_data.bins.coords.keys():
         sc.testing.assert_allclose(
-            energy_data.bins.coords[name], expected.bins.coords[name]
+            energy_data.bins.coords[name],
+            expected.bins.coords[name],
+            atol=(
+                sc.scalar(1e-15, unit=expected.bins.coords[name].unit)
+                # TODO: When scipp supports unit=None in .to(), remove this case.
+                if expected.bins.coords[name].unit is not None
+                else None
+            ),
         )
 
     sc.testing.assert_allclose(

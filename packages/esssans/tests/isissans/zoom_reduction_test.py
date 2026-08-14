@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import ess.isissans.data  # noqa: F401
 import pytest
+import sciline
 import scipp as sc
 from ess import isissans as isis
 from ess import sans
@@ -72,6 +73,12 @@ def test_can_create_pipeline(pipeline):
         pipeline, isis.data.zoom_tutorial_mask_filenames()
     )
     pipeline.get(IntensityQ[SampleRun])
+
+
+def test_can_create_polarization_transmission_pipeline():
+    pipeline = isis.zoom.ZoomTransmissionFractionWorkflow(['run-1.nxs', 'run-2.nxs'])
+
+    assert isinstance(pipeline, sciline.Pipeline)
 
 
 def test_pipeline_can_compute_IofQ(pipeline):
