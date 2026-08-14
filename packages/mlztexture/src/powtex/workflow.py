@@ -32,6 +32,9 @@ from ess.packages.mlztexture.src.texture.histogramming import (
     generate_gamma_binning_data,
     generate_two_theta_binning_data,
     hist_3d,
+    view_3d,
+    view_2d,
+    view_1d
 )
 
 def default_parameters() -> dict:
@@ -67,6 +70,7 @@ def TextureReduce() -> sciline.Pipeline:
                 generate_gamma_binning_data,
                 generate_two_theta_binning_data,
                 hist_3d,
+                view_3d,
                 # load_powgen_calibration_mlz,
                 # # sample_position,
                 # #sample_position_mlz,

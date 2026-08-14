@@ -1,15 +1,19 @@
 import scipp as sc
+import scippneutron as scn
 import numpy as np
 
 from ess.packages.mlztexture.src.texture.types import (
-    CylindricalSurfaceDetector,
+    DspacingCylSurfaceDetector,
     CylindricalSurfaceTransformGraph,
 )
 
 from ess.packages.essdiffraction.src.ess.powder.types import (
     TofDetector,
     RunType,
+    CalibrationData
 )
+
+from scippneutron.conversion.tof import dspacing_from_tof
 
 # Radius of the cylindrical surface onto which the detector data will be projected.
 # This is a constant value used in the projection calculations.
@@ -18,19 +22,32 @@ PROJECTION_RADIUS = sc.scalar(800.0, unit="mm")
 
 def project_onto_cylindrical_surface(
     data: TofDetector[RunType],
-) -> CylindricalSurfaceDetector[RunType]:
+    calibration_data: CalibrationData
+) -> DspacingCylSurfaceDetector[RunType]:
     """
     Project the detector data to a cylindrical surface.
     """
+
     data.coords["projection_radius"] = PROJECTION_RADIUS
+
+    # ToDo: implement proper dspacing calculation using difc, difa, tof
+    # and add it to the graph
+    Ltotal = scn.Ltotal(data, scatter=True)
+    two_theta = scn.two_theta(data)
+    dspacing = dspacing_from_tof(tof=data.coords["tof"], Ltotal=Ltotal, two_theta=two_theta)
+
     data = data.transform_coords(
         ["gamma", "two_theta", "proj_position"],
         graph=cylindrical_surface_projection_graph(),
         keep_intermediate=False,
     )
+
     for key in ["position", "tof", "sample_position", "source_position"]:
         data.coords.pop(key, None)
-    return CylindricalSurfaceDetector[RunType](data)
+
+    data.coords["dspacing"] = dspacing
+
+    return DspacingCylSurfaceDetector[RunType](data)
 
 
 def cylindrical_surface_projection_graph() -> CylindricalSurfaceTransformGraph:

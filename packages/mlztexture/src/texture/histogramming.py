@@ -6,11 +6,16 @@ import numpy as np
 from ess.packages.mlztexture.src.texture.types import (
     GammaBinWidth,
     TwoThetaBinWidth,
+    DspacingBinWidth,
     BinningSettings,
-    View3D,
-    CylindricalSurfaceDetector,
+    DspacingCylSurfaceDetector,
     GammaBinningData,
     TwoThetaBinningData,
+    DspacingBinningData,
+    Texture3D,
+    View1D,
+    View2D,
+    View3D,
 )
 
 from ess.packages.essdiffraction.src.ess.powder.types import (
@@ -22,6 +27,7 @@ def generate_gamma_binning_data(
     bin_width: GammaBinWidth,
     binning_settings: BinningSettings
 ) -> GammaBinningData:
+    "ToDo"
     excluded_start = binning_settings.gamma_cut_start
     excluded_end = binning_settings.gamma_cut_end
     drop_partial_bins = binning_settings.drop_partial_bins
@@ -209,31 +215,68 @@ def generate_bin_edges_reverse(
 
 
 def hist_3d(
-    data: CylindricalSurfaceDetector[RunType],
+    data: DspacingCylSurfaceDetector[RunType],
     gamma_binning: GammaBinningData,
     two_theta_binning: TwoThetaBinningData,
+    dspacing_bin_width: DspacingBinWidth
+) -> Texture3D[RunType]:
+
+    # Prepare conventional dspacing binning
+    dmin = sc.min(data.coords["dspacing"])
+    dmax = sc.max(data.coords["dspacing"])
+    dspacing_binning = sc.arange("dspacing", dmin, dmax + dspacing_bin_width, dspacing_bin_width, unit="angstrom")
+
+    # Perform the histogramming
+    histogrammed_data_1 = data.hist(gamma=gamma_binning["region_1"], two_theta=two_theta_binning, dspacing=dspacing_binning)
+    histogrammed_data_2 = data.hist(gamma=gamma_binning["region_2"], two_theta=two_theta_binning, dspacing=dspacing_binning)
+
+    out = sc.DataGroup({"region_1": histogrammed_data_1, "region_2": histogrammed_data_2})
+
+    return Texture3D(out)
+
+
+def view_3d(
+    data: Texture3D[RunType],
 ) -> View3D[RunType]:
     """
-    Histogram the detector data in gamma and two_theta.
+    ToDo
+    """
+    histogrammed_2d_1 = data["region_1"].sum(dim="dspacing")
+    histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
 
-    Parameters
-    ----------
-    data
-        Detector data with time-of-flight coordinate.
-    binning
-        Tuple containing
+    out = sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
+    return View3D[RunType](out)
 
-            (bin_centers, (upper_region_edges, lower_region_edges))
 
-    Returns
-    -------
-    histogrammed_data
-        Histogrammed detector data with time-of-flight coordinate.
+def view_2d(
+    data: Texture3D[RunType],
+    gamma_binning: GammaBinningData,
+    two_theta_binning: TwoThetaBinningData,
+) -> View2D[RunType]:
+    """
+    ToDo
+    """
+    out = data
+    # Perform the histogramming operation.
+    # histogrammed_data_1 = data.hist(gamma=gamma_binning["region_1"], two_theta=two_theta_binning)
+    # histogrammed_data_2 = data.hist(gamma=gamma_binning["region_2"], two_theta=two_theta_binning)
+
+    # out = sc.DataGroup({"region_1": histogrammed_data_1, "region_2": histogrammed_data_2})
+    return View2D[RunType](out)
+
+def view_1d(
+    data: Texture3D[RunType],
+    gamma_binning: GammaBinningData,
+    two_theta_binning: TwoThetaBinningData,
+) -> View1D[RunType]:
+    """
+    ToDo
     """
 
     # Perform the histogramming operation.
-    histogrammed_data_1 = data.hist(gamma=gamma_binning["region_1"], two_theta=two_theta_binning)
-    histogrammed_data_2 = data.hist(gamma=gamma_binning["region_2"], two_theta=two_theta_binning)
+    out = data
+    # histogrammed_data_1 = data.hist(gamma=gamma_binning["region_1"], two_theta=two_theta_binning)
+    # histogrammed_data_2 = data.hist(gamma=gamma_binning["region_2"], two_theta=two_theta_binning)
 
-    out = sc.DataGroup({"region_1": histogrammed_data_1, "region_2": histogrammed_data_2})
-    return View3D[RunType](out)
+    # out = sc.DataGroup({"region_1": histogrammed_data_1, "region_2": histogrammed_data_2})
+    return View1D[RunType](out)
