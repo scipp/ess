@@ -5,7 +5,9 @@ from dataclasses import dataclass
 
 from ess.packages.essdiffraction.src.ess.powder.types import (
     RunType,
+    NonEmptyCanRunType
 )
+
 
 
 class DspacingCylSurfaceDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -20,15 +22,19 @@ class Texture3D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """ToDo."""
 
 
-class View1D(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
+class GammaSlices(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """ToDo."""
 
 
-class View2D(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
+class FlatDetectorView(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """ToDo."""
 
 
-class View3D(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
+class TwoThetaRings(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """ToDo."""
+
+
+class DetectorView(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """ToDo."""
 
 
@@ -55,3 +61,11 @@ class BinningSettings:
     include_gamma_gap_bins: bool
     two_theta_min: sc.Variable
     two_theta_max: sc.Variable
+
+
+class EmptyCanSubtracted3D(sl.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataArray):
+    """..."""
+
+
+NormalisedTexture3D = NewType("NormalisedTexture3D", sc.DataArray)
+"""3D Intensity of normalized sample data."""
