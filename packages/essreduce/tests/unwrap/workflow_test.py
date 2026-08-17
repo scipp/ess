@@ -26,6 +26,7 @@ from ess.reduce.unwrap import (
     fakes,
     simulate_chopper_cascade_using_tof,
 )
+from ess.reduce.unwrap.types import KeepEventTimeOffset
 
 sl = pytest.importorskip("sciline")
 
@@ -86,7 +87,6 @@ def _make_workflow(
         run_types=[SampleRun],
         monitor_types=[Monitor0],
         wavelength_from=wavelength_from,
-        keep_event_time_offset=keep_event_time_offset,
     )
     wf[NeXusDetectorName] = "detector"
     wf[NeXusName[Monitor0]] = "monitor"
@@ -101,6 +101,7 @@ def _make_workflow(
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
     wf[Position[snx.NXsource, SampleRun]] = fakes.source_position()
     wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
+    wf[KeepEventTimeOffset] = keep_event_time_offset
 
     return wf
 

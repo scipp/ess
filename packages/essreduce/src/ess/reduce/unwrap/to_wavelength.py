@@ -9,7 +9,6 @@ event_time_offset coordinates to data with a time-of-flight coordinate.
 
 from collections.abc import Callable
 from dataclasses import asdict
-from typing import NewType
 
 import numpy as np
 import scipp as sc
@@ -38,6 +37,7 @@ from .resample import rebin_strictly_increasing
 from .types import (
     DetectorLtotal,
     ErrorLimitedLookupTable,
+    KeepEventTimeOffset,
     LookupTable,
     LookupTableRelativeErrorThreshold,
     MonitorLtotal,
@@ -45,8 +45,6 @@ from .types import (
     WavelengthDetector,
     WavelengthMonitor,
 )
-
-KeepEventTimeOffset = NewType("KeepEventTimeOffset", bool)
 
 
 class WavelengthInterpolator:
