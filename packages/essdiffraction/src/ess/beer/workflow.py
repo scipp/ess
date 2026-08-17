@@ -28,7 +28,7 @@ from .conversions import (
     wavelength_detector,
 )
 from .mcstas import mcstas_providers
-from .types import PulseLength
+from .types import DetectorBank, PulseLength
 
 default_parameters = {
     CalibrationData: None,
@@ -37,6 +37,7 @@ default_parameters = {
         'south_detector': {'y': 200, 'x': 500},
         'north_detector': {'y': 200, 'x': 500},
     },
+    DetectorBank: DetectorBank.both,
 }
 
 
