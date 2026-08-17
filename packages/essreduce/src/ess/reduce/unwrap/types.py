@@ -106,3 +106,6 @@ class WavelengthDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
 
 class WavelengthMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
     """Monitor data with wavelength coordinate."""
+
+
+KeepEventTimeOffset = NewType("KeepEventTimeOffset", bool)
