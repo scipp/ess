@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -36,12 +36,12 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=20e90294"></script>
+    <script src="../../_static/documentation_options.js?v=dbc7823d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.reduce.live.roi.select_indices_in_polygon" href="ess.reduce.live.roi.select_indices_in_polygon.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.3" />
+  <meta name="docsearch:version" content="26.8.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -204,7 +204,7 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esspolarization">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce/user-guide/polarization/">
     ESSpolarization
   </a>
 </li>
@@ -392,7 +392,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/esspolarization">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce/user-guide/polarization/">
     ESSpolarization
   </a>
 </li>
@@ -886,7 +886,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>indices</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – Variable with indices to filter. The indices facilitate selecting a 2-D
+<li><p><strong>indices</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – Variable with indices to filter. The indices facilitate selecting a 2-D
 ROI in a projection of a 3-D dataset. Typically the indices are given by a
 2-D array. Each element in the array may correspond to a single index (when
 there is no projection) or a list of indices that were projected into an
@@ -936,10 +936,10 @@ take into account that fractions of source data point contribute to a data point
 in the projection.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">T</span></code>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>)</span>) – Data to filter.</p>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">T</span></code>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>)</span>) – Data to filter.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">T</span></code>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>), <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>]</span> – Filtered data and scale factor.</p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">T</span></code>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>), <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>]</span> – Filtered data and scale factor.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -961,7 +961,7 @@ in the projection.</p>
 <dd><p>Set the ROI from polygon vertices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>polygon</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]]</span>) – <p>Polygon vertices as a dict mapping axis names to 1-D arrays of vertex
+<dd class="field-odd"><p><strong>polygon</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]]</span>) – <p>Polygon vertices as a dict mapping axis names to 1-D arrays of vertex
 positions. Must contain exactly two entries. Each entry can be either:</p>
 <ul class="simple">
 <li><p>A scipp Variable for coordinate-based selection (uses named coordinates
@@ -1035,8 +1035,8 @@ as coordinates, no unit handling)</p></li>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1068,12 +1068,12 @@ as coordinates, no unit handling)</p></li>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.6.3 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.8.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

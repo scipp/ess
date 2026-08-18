@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -36,12 +36,12 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=20e90294"></script>
+    <script src="../../_static/documentation_options.js?v=dbc7823d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@
     <link rel="prev" title="Workflows" href="workflow.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.3" />
+  <meta name="docsearch:version" content="26.8.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -206,7 +206,7 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/esspolarization">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce/user-guide/polarization/">
     ESSpolarization
   </a>
 </li>
@@ -394,7 +394,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/esspolarization">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce/user-guide/polarization/">
     ESSpolarization
   </a>
 </li>
@@ -706,8 +706,8 @@
 \cdot
 \begin{pmatrix} S^{++}_{t,\lambda} \\ S^{+-}_{t,\lambda}  \\ S^{-+}_{t,\lambda} \\  S^{--}_{t,\lambda}\end{pmatrix}\end{split}\]</div>
 <p>Both <span class="math notranslate nohighlight">\(\hat{T^{\textup{p}}}\)</span> and <span class="math notranslate nohighlight">\(\hat{T^{\textup{a}}}\)</span> can be derived from their cell parameters (the transmission of the empty cell <span class="math notranslate nohighlight">\(T^{\textup{g}}\)</span>, and the cell opacity <span class="math notranslate nohighlight">\(O\)</span>), and the time-dependent nuclear polarization of the cell <span class="math notranslate nohighlight">\(P^{^3\textup{He}}(t)\)</span>. This general method for time-dependent 3He-cells can be adapted for other use-cases such as using supermirrors or in-situ polarized 3He-cells, see “Note” at the end of the page.</p>
-<p>First, the created test-data needs to be readout and grouped by purpose, e.g., if it describes a sample-run, a direct-beam-run, or a background measurement without cells and sample. All data will be reduced using the normalization term described in <a class="reference external" href="https://scipp.github.io/ess/techniques/sans/sans-beam-center-finder.html">https://scipp.github.io/ess/techniques/sans/sans-beam-center-finder.html</a>. Second, for the calculation of time-dependent <span class="math notranslate nohighlight">\(P^{^3\textup{He}}(t)\)</span>, the ROI’s of the direct-beam region and background region have to be defined (USING BEAMCENTER FINDER
-OPTION OF SANS2D?). Third, we will describe the data correction workflow with a calculation of <span class="math notranslate nohighlight">\(O\)</span>, <span class="math notranslate nohighlight">\(P^{^3\textup{He}}(t)\)</span>, and <span class="math notranslate nohighlight">\(T^{\pm}\)</span> of the polarizer and analyzer, and the application on the sample-data.</p>
+<p>First, the created test-data needs to be readout and grouped by purpose, e.g., if it describes a sample-run, a direct-beam-run, or a background measurement without cells and sample. All data will be reduced using the normalization term described in <a class="reference external" href="https://scipp.github.io/ess/sans/user-guide/common/beam-center-finder.html">https://scipp.github.io/ess/sans/user-guide/common/beam-center-finder.html</a>. Second, for the calculation of time-dependent <span class="math notranslate nohighlight">\(P^{^3\textup{He}}(t)\)</span>, the ROI’s of the direct-beam region and background region have to be defined (USING BEAMCENTER
+FINDER OPTION OF SANS2D?). Third, we will describe the data correction workflow with a calculation of <span class="math notranslate nohighlight">\(O\)</span>, <span class="math notranslate nohighlight">\(P^{^3\textup{He}}(t)\)</span>, and <span class="math notranslate nohighlight">\(T^{\pm}\)</span> of the polarizer and analyzer, and the application on the sample-data.</p>
 <p>To facilitate an in-situ data correction during the experiments, we have implemented two different approaches:</p>
 <ol class="arabic simple">
 <li><p>A rough data-correction based on a 3He-cell opacity calculated by its cell parameters and filling pressure (see <a class="reference internal" href="#Workflow-1"><span class="std std-ref">Workflow 1</span></a>) which can be used in-situ during the experiment.</p></li>
@@ -910,8 +910,8 @@ T^\textup{a,+}(t,\lambda) &amp;  T^\textup{a,-}(t,\lambda) &amp; 0 &amp;0\\ T^\t
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -943,12 +943,12 @@ T^\textup{a,+}(t,\lambda) &amp;  T^\textup{a,-}(t,\lambda) &amp; 0 &amp;0\\ T^\t
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.6.3 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.8.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

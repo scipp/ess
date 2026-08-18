@@ -34,5 +34,4 @@
    he3
    supermirror
    types
-   zoom
 
