@@ -130,9 +130,9 @@ jobs:
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
-          ASSET-FILE-PATH: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
+          ASSET_FILE_PATH: ./documentation-${{ needs.determine-package.outputs.package }}-${{ needs.determine-package.outputs.version }}.zip
           TAG: ${{ needs.determine-package.outputs.package }}/${{ needs.determine-package.outputs.version }}
-        run: gh release upload ${TAG} ${ASSET-FILE-PATH} --clobber  # Overwrite existing assets of the same name.
+        run: gh release upload ${TAG} ${ASSET_FILE_PATH} --clobber  # Overwrite existing assets of the same name.
 
   notes:
     name: Update notes
