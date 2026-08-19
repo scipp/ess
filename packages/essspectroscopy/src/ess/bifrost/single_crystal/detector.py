@@ -7,7 +7,6 @@ import scipp as sc
 import scippnexus as snx
 from ess.spectroscopy.types import (
     Analyzer,
-    DetectorPositionOffset,
     ElasticMonitor,
     EmptyDetector,
     NeXusComponent,
@@ -17,8 +16,6 @@ from ess.spectroscopy.types import (
     RunType,
 )
 
-from ess.reduce.nexus.types import MonitorPositionOffset
-
 from ..detector import _assign_detector_position, get_base_calibrated_detector_bifrost
 
 
@@ -26,7 +23,6 @@ def get_calibrated_bragg_peak_monitor(
     monitor: NeXusComponent[ElasticMonitor, RunType],
     *,
     transform: NeXusTransformation[ElasticMonitor, RunType],
-    offset: MonitorPositionOffset[RunType, ElasticMonitor],
 ) -> EmptyDetector[RunType]:
     """Extract the data array corresponding to the Bragg peak monitor's signal field.
 
@@ -43,8 +39,6 @@ def get_calibrated_bragg_peak_monitor(
         Loaded NeXus monitor.
     transform:
         Transformation that determines the monitor position.
-    offset:
-        Offset to add to the monitor position.
 
     Returns
     -------
@@ -55,9 +49,7 @@ def get_calibrated_bragg_peak_monitor(
 
     da = extract_signal_data_array(monitor)
     unit = transform.value.unit
-    position = transform.value * sc.vector([0.0, 0.0, 0.0], unit=unit) + offset.to(
-        unit=unit
-    )
+    position = transform.value * sc.vector([0.0, 0.0, 0.0], unit=unit)
     return EmptyDetector[RunType](_assign_detector_position(da, position))
 
 
@@ -96,7 +88,6 @@ def get_calibrated_bragg_peak_detector(
     analyzer: Analyzer[RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
-    offset: DetectorPositionOffset[RunType],
 ) -> EmptyDetector[RunType]:
     """Extract the data array corresponding to a detector's signal field.
 
@@ -112,17 +103,13 @@ def get_calibrated_bragg_peak_detector(
         Loaded analyzer parameters.
     transform:
         Transformation that determines the detector position.
-    offset:
-        Offset to add to the detector position.
 
     Returns
     -------
     :
         Detector with geometry coordinates.
     """
-    return get_base_calibrated_detector_bifrost(
-        detector, analyzer, transform=transform, offset=offset
-    )
+    return get_base_calibrated_detector_bifrost(detector, analyzer, transform=transform)
 
 
 providers = (get_calibrated_bragg_peak_monitor, assemble_bragg_peak_monitor_data)
