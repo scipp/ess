@@ -26,7 +26,8 @@ def get_calibrated_bragg_peak_monitor(
 ) -> EmptyDetector[RunType]:
     """Extract the data array corresponding to the Bragg peak monitor's signal field.
 
-    BIFROST's Bragg peak monitor is the elastic monitor (``cbm5``), written as an
+    BIFROST's Bragg peak monitor is the elastic monitor, named ``elastic_monitor``
+    in NeXus files (``cbm5`` in instrument documentation) and written as an
     ``NXmonitor``. It has no pixel offsets, so its position is the transformed origin
     as in :func:`ess.reduce.nexus.workflow.get_calibrated_monitor`, rather than the
     per-pixel computation used for detectors. The position is assigned with the
@@ -63,8 +64,8 @@ def assemble_bragg_peak_monitor_data(
     events by ``event_id`` onto a ``detector_number`` grid, and the Bragg peak
     monitor is a single pixel with nothing to group by. Its geometry is therefore
     assigned straight onto the events. The result is the same whether or not the
-    events carry an ``event_id`` -- a file-loaded ``cbm5_events`` group does, a
-    stream may not -- because the coordinate is simply left untouched.
+    events carry an ``event_id`` -- the event group in a file does, a stream may
+    not -- because the coordinate is simply left untouched.
 
     Parameters
     ----------
