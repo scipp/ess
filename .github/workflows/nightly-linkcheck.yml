@@ -1,0 +1,41 @@
+name: Nightly Linkcheck
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Offset from the main nightly workflow to avoid starting all jobs at once.
+    - cron: "30 2 * * 1-5"
+
+permissions:
+  contents: read
+
+env:
+  PIXI_FROZEN: true
+  PIXI_NO_INSTALL: true
+
+jobs:
+  linkcheck:
+    name: Linkcheck ${{ matrix.package }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - essreduce
+          - essimaging
+          - essnmx
+          - essdiffraction
+          - essreflectometry
+          - esssans
+          - essspectroscopy
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # history required to determine version
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          pixi-version: v0.68.0
+          frozen: true
+          environments: docs-${{ matrix.package }}
+      - name: Check links
+        run: pixi run docs-${{ matrix.package }} linkcheck
