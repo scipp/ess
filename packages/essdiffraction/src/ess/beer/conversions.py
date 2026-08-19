@@ -34,35 +34,37 @@ def compute_wavelength_in_each_cluster(
        of the points in the cluster, and probably should belong to another cluster or
        are part of the background.
     3. Go back to 1) and iterate until convergence. A few iterations should be enough.
-    4. Finally, round the estimated t0 to the closest known chopper opening time.
+    4. Finally, round the estimated dt to the closest known chopper opening time.
     """
     mod_period = _modulation_period(choppers)
     max_distance_from_streak_line = mod_period / 3
     sin_theta_L = sc.sin(da.bins.coords['two_theta'] / 2) * da.bins.coords['Ltotal']
+    # Time from center of chopper opening "window".
+    # The window contains all modulation sub pulses.
     t = da.bins.coords['tof']
     for _ in range(15):
-        s, t0 = _linear_regression_by_bin(sin_theta_L, t, da.data)
+        # dt is the difference between the the modulation chopper opening time
+        # and the time center of the chopper opening window.
+        s, dt = _linear_regression_by_bin(sin_theta_L, t, da.data)
 
         # Distance from point to line through cluster
-        distance_to_self = sc.abs(sc.values(t0) + sc.values(s) * sin_theta_L - t)
+        distance_to_self = sc.abs(sc.values(dt) + sc.values(s) * sin_theta_L - t)
 
         da = da.bins.assign_masks(
             too_far_from_center=(distance_to_self > max_distance_from_streak_line),
         )
 
-    # The t0 estimate from fitting is influenced by peak overlap, background,
-    # and other factors that can make the estimate offset from the true
-    # chopper opening time that it should match.
-    # We know the true chopper opening times, so instead of using the t0 estimte
-    # directly we can round the estimate to the closest chopper opening time.
-    # That way the t0 estimate becomes more robust and is guaranteed to correspond to
-    # a true chopper opening time.
-    t0 = sc.values(t0)
-    t0 /= mod_period
-    t0 += 0.5
-    sc.floor(t0, out=t0)
-    t0 *= mod_period
-    t -= t0
+    # The dt estimate from fitting is influenced by peak overlap, background,
+    # and other factors that can make the estimate worse.
+    # We know the true chopper opening times,
+    # so we can round the estimate to the closest known time.
+    dt = sc.values(dt)
+    dt /= mod_period
+    dt += 0.5
+    sc.floor(dt, out=dt)
+    dt *= mod_period
+    # Remove the offset
+    t -= dt
     da.bins.coords['wavelength'] = wavelength_from_tof(
         tof=t, Ltotal=da.bins.coords['Ltotal']
     )
