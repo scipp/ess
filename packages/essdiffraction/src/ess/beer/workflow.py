@@ -40,7 +40,7 @@ default_parameters = {
 }
 
 
-def _beer_modulation_workflow(graph_provider, *providers) -> sl.Pipeline:
+def _mcstas_beer_modulation_workflow(graph_provider, *providers) -> sl.Pipeline:
     workflow = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
     for provider in (
         *mcstas_providers,
@@ -55,7 +55,7 @@ def _beer_modulation_workflow(graph_provider, *providers) -> sl.Pipeline:
 
 def BeerModMcStasWorkflow():
     """Process modulation-mode McStas data without known peak positions."""
-    return _beer_modulation_workflow(
+    return _mcstas_beer_modulation_workflow(
         automatic_coordinate_transformation_graph,
         cluster_events_by_streak,
         compute_wavelength_in_each_cluster,
@@ -64,7 +64,7 @@ def BeerModMcStasWorkflow():
 
 def BeerModMcStasWorkflowKnownPeaks():
     """Process modulation-mode McStas data using known peak positions."""
-    return _beer_modulation_workflow(
+    return _mcstas_beer_modulation_workflow(
         known_peaks_coordinate_transformation_graph, wavelength_detector
     )
 
