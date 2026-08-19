@@ -15,6 +15,10 @@ from ess.reduce.unwrap.types import DetectorLtotal
 from ..types import DetectorBank, Filename, RawDetector
 from .beamline import ModulationMode, PulseShapingMode, simulation_choppers
 
+# The Beer McStas files use the convention that t=0 corresponds
+# to 1.6ms after the start of the pulse.
+# But in the real files the convention will be that event_time_offset=0
+# corresponds to the start of the pulse.
 _MCSTAS_T_OFFSET = sc.scalar(1.6, unit='ms')
 
 __all__ = [
