@@ -28,13 +28,9 @@ def load_powtex_csv(
     data = pd.read_csv(filepath, sep = '\t')
 
     data_tof = data["tof [ns]"].to_numpy()
-    data_x = data["voxel_x [mm]"].to_numpy()
-    data_y = data["voxel_y [mm]"].to_numpy()
-    data_z = data["voxel_z [mm]"].to_numpy()
+    data_xyz = data[["voxel_x [mm]", "voxel_y [mm]", "voxel_z [mm]"]].to_numpy()
 
-    data_xyz = np.dstack((data_x, data_y, data_z))
-
-    event_coords = sc.vectors(dims=["event"], values=data_xyz[0], unit="mm")
+    event_coords = sc.vectors(dims=["event"], values=data_xyz, unit="mm")
     event_data = sc.array(dims=["event"], values=np.ones(event_coords.shape[0]), unit="counts")
     event_tof = sc.array(dims=["event"], values=data_tof, unit="ns")
 
@@ -52,6 +48,7 @@ def load_powtex_csv(
         },
     )
     return TofDetector[RunType](out)
+
 
 def load_powtex_calibration(
     filename: FilenameMLZ[CalibrationRun],
