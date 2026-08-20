@@ -13,6 +13,7 @@ jobs:
       github.event.workflow_run.head_repository.full_name == github.repository &&
       github.event.workflow_run.head_branch == github.event.repository.default_branch
     runs-on: ubuntu-24.04
+    timeout-minutes: 120
     permissions:
       actions: read
       contents: write
@@ -65,6 +66,8 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt_file: .github/claude/prompts/linkcheck-failure.md
           claude_args: >-
+            --model opus
+            --max-budget-usd 10
             --allowedTools "Bash,Read,Edit,Write,Glob,Grep,NotebookEdit"
             --json-schema '{"type":"object","properties":{"assessment":{"type":"string"}},"required":["assessment"],"additionalProperties":false}'
 
