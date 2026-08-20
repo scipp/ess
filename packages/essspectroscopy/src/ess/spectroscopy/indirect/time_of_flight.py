@@ -65,6 +65,7 @@ def detector_wavelength_data(
         lookup=lookup,
         ltotal=DetectorLtotal(sample_data.coords['L1']),
         pulse_stride_offset=pulse_stride_offset,
+        keep_event_time_offset=False,
     )
     # This is the incident wavelength at the sample.
     result.bins.coords['incident_wavelength'] = result.bins.coords.pop('wavelength')
@@ -96,6 +97,7 @@ def monitor_wavelength_data(
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
+        keep_event_time_offset=False,
     )
     result = result.rename(wavelength='incident_wavelength')
     return result

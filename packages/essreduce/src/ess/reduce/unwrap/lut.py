@@ -18,6 +18,7 @@ from scippneutron.tof import chopper_cascade
 from ..nexus.types import Component, DiskChoppers, MonitorType, Position, RunType
 from .types import (
     DetectorLtotal,
+    KeepEventTimeOffset,
     LookupTable,
     LookupTableFilename,
     MonitorLtotal,
@@ -920,7 +921,10 @@ def providers(
 def default_parameters(
     wavelength_from: WavelengthLutMode = "analytical",
 ) -> dict:
-    params = {PulseStrideOffset: None}
+    params = {
+        PulseStrideOffset: None,
+        KeepEventTimeOffset: False,
+    }
     if wavelength_from == "file":
         return params
 

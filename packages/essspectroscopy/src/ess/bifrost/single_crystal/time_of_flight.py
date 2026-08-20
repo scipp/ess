@@ -37,6 +37,7 @@ def detector_wavelength_data(
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
+        keep_event_time_offset=False,
     )
 
 

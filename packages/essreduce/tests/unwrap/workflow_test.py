@@ -18,6 +18,7 @@ from ess.reduce.nexus.types import (
     NeXusDetectorName,
     NeXusName,
     Position,
+    RawDetector,
     SampleRun,
 )
 from ess.reduce.unwrap import (
@@ -25,13 +26,16 @@ from ess.reduce.unwrap import (
     fakes,
     simulate_chopper_cascade_using_tof,
 )
+from ess.reduce.unwrap.types import KeepEventTimeOffset
 
 sl = pytest.importorskip("sciline")
 
 Monitor0 = NewType("Monitor0", int)
 
 
-def _make_workflow(wavelength_from) -> sciline.Pipeline:
+def _make_workflow(
+    wavelength_from, *, keep_event_time_offset=False
+) -> sciline.Pipeline:
     sizes = {'detector_number': 10}
     detector_geometry = sc.DataArray(
         data=sc.ones(sizes=sizes),
@@ -97,6 +101,7 @@ def _make_workflow(wavelength_from) -> sciline.Pipeline:
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
     wf[Position[snx.NXsource, SampleRun]] = fakes.source_position()
     wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
+    wf[KeepEventTimeOffset] = keep_event_time_offset
 
     return wf
 
@@ -131,6 +136,27 @@ def test_GenericUnwrapWorkflow_computes_wavelength(
     else:
         wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
         assert 'wavelength' in wavs.bins.coords
+
+
+@pytest.mark.parametrize("keep_event_time_offset", [False, True])
+def test_GenericUnwrapWorkflow_optionally_keeps_event_time_offset(
+    keep_event_time_offset,
+):
+    wf = _make_workflow(
+        wavelength_from="analytical",
+        keep_event_time_offset=keep_event_time_offset,
+    )
+
+    raw = wf.compute(RawDetector[SampleRun])
+    wavs = wf.compute(unwrap.WavelengthDetector[SampleRun])
+
+    if keep_event_time_offset:
+        assert_identical(
+            wavs.bins.coords['event_time_offset'],
+            raw.bins.coords['event_time_offset'],
+        )
+    else:
+        assert 'event_time_offset' not in wavs.bins.coords
 
 
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
