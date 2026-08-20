@@ -93,6 +93,7 @@ addopts = """
 testpaths = "tests"
 filterwarnings = [
   "error",
+  "ignore:The global interpreter lock \\(GIL\\) has been enabled to load module 'bitshuffle\\.ext':RuntimeWarning",
 ]
 
 [tool.mypy]

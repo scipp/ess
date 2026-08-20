@@ -163,14 +163,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Excluded packages that do not work on free-threaded Python yet:
-        # - essnmx: importing bitshuffle re-enables the GIL, which
-        #   filterwarnings = error escalates to a collection error.
-        # - essdiffraction: numba-jitted code aborts the interpreter when run
-        #   from dask worker threads.
         package:
           - essreduce
           - essimaging
+          - essnmx
+          - essdiffraction
           - essreflectometry
           - esssans
           - essspectroscopy
