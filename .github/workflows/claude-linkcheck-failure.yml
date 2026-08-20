@@ -1,0 +1,75 @@
+name: Claude Code nightly linkcheck handler
+
+on:
+  workflow_run:
+    workflows: [Nightly Linkcheck]
+    types: [completed]
+
+jobs:
+  handle:
+    name: Handle linkcheck failure
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == github.event.repository.default_branch
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: write
+      issues: write
+      pull-requests: write
+    env:
+      PIXI_FROZEN: true
+    steps:
+      # Until this secret is configured, failed linkchecks end here with a
+      # warning instead of failing a second workflow.
+      - name: Check for Anthropic API key
+        id: api-key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [[ -n "$ANTHROPIC_API_KEY" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Add the ANTHROPIC_API_KEY repository secret to enable Claude Code handling."
+          fi
+
+      - uses: actions/checkout@v6
+        if: steps.api-key.outputs.configured == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        if: steps.api-key.outputs.configured == 'true'
+        with:
+          pixi-version: v0.68.0
+          run-install: false
+
+      - name: Configure Git author
+        if: steps.api-key.outputs.configured == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Handle failure with Claude Code
+        id: claude
+        if: steps.api-key.outputs.configured == 'true'
+        uses: anthropics/claude-code-action/base-action@5ee796a55f92566ecd7e39d70dd613abcbea0d7c # v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          BRANCH_NAME: claude/linkcheck-${{ github.run_id }}-${{ github.run_attempt }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt_file: .github/claude/prompts/linkcheck-failure.md
+          claude_args: >-
+            --allowedTools "Bash,Read,Edit,Write,Glob,Grep,NotebookEdit"
+            --json-schema '{"type":"object","properties":{"assessment":{"type":"string"}},"required":["assessment"],"additionalProperties":false}'
+
+      - name: Add assessment to job summary
+        if: steps.api-key.outputs.configured == 'true'
+        env:
+          ASSESSMENT: ${{ fromJSON(steps.claude.outputs.structured_output).assessment }}
+        run: printf '## Claude Code assessment\n\n%s\n' "$ASSESSMENT" >> "$GITHUB_STEP_SUMMARY"
