@@ -6,7 +6,7 @@ version = "2026.2.0"
 exclude-newer = "14d"
 
 [dependencies]
-python = "3.11.*"
+python = "3.12.*"
 
 [system-requirements]
 # Scipp does not support older OSX versions.

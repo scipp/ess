@@ -123,15 +123,43 @@ jobs:
           fetch-tags: true
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          version: "0.7.21"
-          python-version: "3.11"
+          version: "0.12.0"
+          python-version: "3.12"
           cache-suffix: ${{ matrix.package }}-lower-bound
       - name: Test with lowest direct dependencies
         working-directory: packages/${{ matrix.package }}
         run: uv run --extra=test --resolution=lowest-direct pytest
 
   latest-dependencies:
-    name: Latest dependencies ${{ matrix.package }}
+    name: Latest dependencies ${{ matrix.package }} py${{ matrix.python }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - essreduce
+          - essimaging
+          - essnmx
+          - essdiffraction
+          - essreflectometry
+          - esssans
+          - essspectroscopy
+        python: ["3.12", "3.13", "3.14"]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.12.0"
+          python-version: ${{ matrix.python }}
+          cache-suffix: ${{ matrix.package }}-latest-py${{ matrix.python }}
+      - name: Test with latest dependencies
+        working-directory: packages/${{ matrix.package }}
+        run: uv run --extra=test --resolution=highest pytest
+
+  free-threaded:
+    name: Free-threaded ${{ matrix.package }}
     strategy:
       fail-fast: false
       matrix:
@@ -150,16 +178,16 @@ jobs:
           fetch-tags: true
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          version: "0.7.21"
-          python-version: "3.11"
-          cache-suffix: ${{ matrix.package }}-latest
-      - name: Test with latest dependencies
+          version: "0.12.0"
+          python-version: "3.14t"
+          cache-suffix: ${{ matrix.package }}-free-threaded
+      - name: Test on free-threaded Python
         working-directory: packages/${{ matrix.package }}
-        run: uv run --extra=test --resolution=highest pytest
+        run: uv run --extra=test pytest
 
   report-test-failure:
     name: Report nightly failures
-    needs: [ test, publish, lower-bound, latest-dependencies ]
+    needs: [ test, publish, lower-bound, latest-dependencies, free-threaded ]
     runs-on: ubuntu-slim
     if: failure() && github.event_name == 'schedule'
     env:
@@ -184,7 +212,7 @@ jobs:
 
   report-test-success:
     name: Report nightly success
-    needs: [ test, publish, lower-bound, latest-dependencies ]
+    needs: [ test, publish, lower-bound, latest-dependencies, free-threaded ]
     runs-on: ubuntu-slim
     if: github.ref == 'refs/heads/main'
     env:
