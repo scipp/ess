@@ -85,15 +85,15 @@ def test_can_compute_tof(run_type, wavelength_mode):
 def test_publish_reduced_scitiff(output_folder: Path):
     wf = _make_workflow("analytical")
     wf[MaskingRules] = {}
-    new_sizes = {'x_pixel_offset': 64, 'y_pixel_offset': 64}
+    new_sizes = {'x_pixel_offset': 16, 'y_pixel_offset': 16}
     tbins = sc.linspace('tof', 1.3e4, 1.5e5, 257, unit='us')
 
     sample = wf.compute(TofDetector[SampleRun]).drop_coords('detector_number')
-    res_sample = tools.resample(sample, sizes=new_sizes)
+    res_sample = tools.resize(sample, sizes=new_sizes)
     num = res_sample.hist(tof=tbins)
 
     openbeam = wf.compute(TofDetector[OpenBeamRun]).drop_coords('detector_number')
-    res_openbeam = tools.resample(openbeam, sizes=new_sizes)
+    res_openbeam = tools.resize(openbeam, sizes=new_sizes)
     den = res_openbeam.hist(tof=tbins)
 
     normed = num / den
