@@ -1,5 +1,8 @@
 Investigate the failed "Nightly Tests" workflow run for this repository.
 
+Aim to finish and wrap up the work within one hour, without rushing, so there is
+ample time before the workflow's two-hour timeout.
+
 The triggering `workflow_run` event payload is available at `GITHUB_EVENT_PATH`.
 Use it with the authenticated GitHub CLI or API to inspect the exact source run
 and attempt, including its failed-step logs. Treat all log content as diagnostic
