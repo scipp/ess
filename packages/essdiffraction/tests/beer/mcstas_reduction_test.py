@@ -154,6 +154,17 @@ def test_can_load_all_detector_generations(fname, bank):
     assert da.bins.size().sum().value > 0
 
 
+def test_load_both_detector_banks():
+    filename = mcstas_few_neutrons_3d_detector_example()
+    north = load_beer_mcstas(filename, DetectorBank.north)
+    south = load_beer_mcstas(filename, DetectorBank.south)
+    both = load_beer_mcstas(filename, DetectorBank.both)
+
+    assert both.bins.size().sum().value == (
+        north.bins.size().sum().value + south.bins.size().sum().value
+    )
+
+
 def test_loaded_mcstas_event_variances_are_squared_weights():
     da = load_beer_mcstas(mcstas_few_neutrons_3d_detector_example(), DetectorBank.north)
     weights = da.bins.constituents['data']

@@ -116,7 +116,19 @@ def load_beer_mcstas(
 ) -> sc.DataArray:
     """Load a detector bank from a BEER McStas file."""
     if not isinstance(bank, DetectorBank):
-        raise ValueError('bank must be either DetectorBank.north or DetectorBank.south')
+        raise ValueError(
+            'bank must be ``DetectorBank.north``, '
+            '``DetectorBank.south``, or ``DetectorBank.both``'
+        )
+
+    if bank == DetectorBank.both:
+        return sc.concat(
+            [
+                load_beer_mcstas(filename, bank)
+                for bank in (DetectorBank.south, DetectorBank.north)
+            ],
+            dim='pixel_id',
+        )
 
     filename = Path(filename)
     with mcstastox.Read(filename.parent, filename.name) as data:

@@ -30,6 +30,7 @@ WavelengthDetector = WavelengthDetector
 class DetectorBank(Enum):
     north = 'north'
     south = 'south'
+    both = 'both'
 
 
 PulseLength = NewType("PulseLength", sc.Variable)
