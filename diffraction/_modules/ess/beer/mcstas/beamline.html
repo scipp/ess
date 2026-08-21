@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=dbc7823d"></script>
+    <script src="../../../../_static/documentation_options.js?v=603b0020"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.0" />
+  <meta name="docsearch:version" content="26.8.1" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -544,6 +544,20 @@
 
 
 
+<div class="viewcode-block" id="ModulationMode">
+<a class="viewcode-back" href="../../../../generated/modules/ess.beer.mcstas.beamline.ModulationMode.html#ess.beer.mcstas.beamline.ModulationMode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModulationMode</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modulation chopper modes for BEER.&quot;&quot;&quot;</span>
+
+    <span class="n">m0</span> <span class="o">=</span> <span class="s2">&quot;M0&quot;</span>
+    <span class="n">m1</span> <span class="o">=</span> <span class="s2">&quot;M1&quot;</span>
+    <span class="n">m2</span> <span class="o">=</span> <span class="s2">&quot;M2&quot;</span>
+    <span class="n">m3</span> <span class="o">=</span> <span class="s2">&quot;M3&quot;</span>
+    <span class="n">m4</span> <span class="o">=</span> <span class="s2">&quot;M4&quot;</span>
+    <span class="n">ds0</span> <span class="o">=</span> <span class="s2">&quot;DS0&quot;</span></div>
+
+
+
 <span class="k">class</span><span class="w"> </span><span class="nc">_ChopperParameters</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
     <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">phase</span><span class="p">:</span> <span class="nb">float</span>
@@ -554,12 +568,8 @@
 
 <span class="n">Hz</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span>
 <span class="n">deg</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span>
-<span class="n">meter</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
 
-<span class="n">MCSTAS_T_OFFSET</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">1.6</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;ms&quot;</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Time offset applied by the BEER McStas simulation source model.&quot;&quot;&quot;</span>
-
-<span class="n">_HIGH_FLUX</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_ChopperParameters</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">_PULSE_SHAPING_HIGH_FLUX</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_ChopperParameters</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;PSC1&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mf">168.0</span><span class="p">,</span>
         <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="mf">318.6929881679336</span><span class="p">,</span>
@@ -590,9 +600,34 @@
     <span class="p">},</span>
 <span class="p">}</span>
 
-<span class="n">_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">PulseShapingMode</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_ChopperParameters</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">PulseShapingMode</span><span class="o">.</span><span class="n">ps0</span><span class="p">:</span> <span class="n">_HIGH_FLUX</span><span class="p">,</span>
-    <span class="n">PulseShapingMode</span><span class="o">.</span><span class="n">ps1</span><span class="p">:</span> <span class="n">_HIGH_FLUX</span><span class="p">,</span>
+<span class="c1"># McStas modes 7--10 use the eight-opening MCA configurations.</span>
+<span class="n">_MODULATION_HIGH_FLUX</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_ChopperParameters</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;FC1A&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">28.0</span><span class="p">,</span>
+        <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">18.44878787209148</span><span class="p">,</span>
+        <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">8.283</span><span class="p">,</span>
+        <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+        <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">72.0</span><span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;MCA&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">70.0</span><span class="p">,</span>
+        <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">162.22641289703336</span><span class="p">,</span>
+        <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">9.300</span><span class="p">,</span>
+        <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">135.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">225.0</span><span class="p">,</span> <span class="mf">270.0</span><span class="p">,</span> <span class="mf">315.0</span><span class="p">],</span>
+        <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">95.0</span><span class="p">,</span> <span class="mf">140.0</span><span class="p">,</span> <span class="mf">185.0</span><span class="p">,</span> <span class="mf">230.0</span><span class="p">,</span> <span class="mf">275.0</span><span class="p">,</span> <span class="mf">320.0</span><span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;FC2A&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.0</span><span class="p">,</span>
+        <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">134.52965314925247</span><span class="p">,</span>
+        <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">79.975</span><span class="p">,</span>
+        <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+        <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">175.0</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">PulseShapingMode</span> <span class="o">|</span> <span class="n">ModulationMode</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_ChopperParameters</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">PulseShapingMode</span><span class="o">.</span><span class="n">ps0</span><span class="p">:</span> <span class="n">_PULSE_SHAPING_HIGH_FLUX</span><span class="p">,</span>
+    <span class="n">PulseShapingMode</span><span class="o">.</span><span class="n">ps1</span><span class="p">:</span> <span class="n">_PULSE_SHAPING_HIGH_FLUX</span><span class="p">,</span>
     <span class="n">PulseShapingMode</span><span class="o">.</span><span class="n">ps2</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;PSC1&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mf">168.0</span><span class="p">,</span>
@@ -690,16 +725,151 @@
             <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">85.0</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">},</span>
+    <span class="n">ModulationMode</span><span class="o">.</span><span class="n">m0</span><span class="p">:</span> <span class="n">_MODULATION_HIGH_FLUX</span><span class="p">,</span>
+    <span class="n">ModulationMode</span><span class="o">.</span><span class="n">m1</span><span class="p">:</span> <span class="n">_MODULATION_HIGH_FLUX</span><span class="p">,</span>
+    <span class="n">ModulationMode</span><span class="o">.</span><span class="n">m2</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;FC1A&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">28.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">18.44878787209148</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">8.283</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">72.0</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;MCA&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">140.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">326.9528257940667</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">9.300</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">135.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">225.0</span><span class="p">,</span> <span class="mf">270.0</span><span class="p">,</span> <span class="mf">315.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">95.0</span><span class="p">,</span> <span class="mf">140.0</span><span class="p">,</span> <span class="mf">185.0</span><span class="p">,</span> <span class="mf">230.0</span><span class="p">,</span> <span class="mf">275.0</span><span class="p">,</span> <span class="mf">320.0</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;FC2A&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">134.52965314925247</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">79.975</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">175.0</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="n">ModulationMode</span><span class="o">.</span><span class="n">m3</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;FC1A&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">28.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">18.44878787209148</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">8.283</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">72.0</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;MCA&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">280.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">656.4056515881334</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">9.300</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">135.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">225.0</span><span class="p">,</span> <span class="mf">270.0</span><span class="p">,</span> <span class="mf">315.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">95.0</span><span class="p">,</span> <span class="mf">140.0</span><span class="p">,</span> <span class="mf">185.0</span><span class="p">,</span> <span class="mf">230.0</span><span class="p">,</span> <span class="mf">275.0</span><span class="p">,</span> <span class="mf">320.0</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;FC2A&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">134.52965314925247</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">79.975</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">175.0</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="n">ModulationMode</span><span class="o">.</span><span class="n">m4</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;FC1A&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">28.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">18.44878787209148</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">8.283</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">72.0</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;MCA&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">140.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">326.9528257940667</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">9.300</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">135.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">225.0</span><span class="p">,</span> <span class="mf">270.0</span><span class="p">,</span> <span class="mf">315.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">95.0</span><span class="p">,</span> <span class="mf">140.0</span><span class="p">,</span> <span class="mf">185.0</span><span class="p">,</span> <span class="mf">230.0</span><span class="p">,</span> <span class="mf">275.0</span><span class="p">,</span> <span class="mf">320.0</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;MCB&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">280.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">659.0810583171018</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">9.350</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="mf">0.0</span><span class="p">,</span>
+                <span class="mf">22.5</span><span class="p">,</span>
+                <span class="mf">45.0</span><span class="p">,</span>
+                <span class="mf">67.5</span><span class="p">,</span>
+                <span class="mf">90.0</span><span class="p">,</span>
+                <span class="mf">112.5</span><span class="p">,</span>
+                <span class="mf">135.0</span><span class="p">,</span>
+                <span class="mf">157.5</span><span class="p">,</span>
+                <span class="mf">180.0</span><span class="p">,</span>
+                <span class="mf">202.5</span><span class="p">,</span>
+                <span class="mf">225.0</span><span class="p">,</span>
+                <span class="mf">247.5</span><span class="p">,</span>
+                <span class="mf">270.0</span><span class="p">,</span>
+                <span class="mf">292.5</span><span class="p">,</span>
+                <span class="mf">315.0</span><span class="p">,</span>
+                <span class="mf">337.5</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="mf">5.0</span><span class="p">,</span>
+                <span class="mf">27.5</span><span class="p">,</span>
+                <span class="mf">50.0</span><span class="p">,</span>
+                <span class="mf">72.5</span><span class="p">,</span>
+                <span class="mf">95.0</span><span class="p">,</span>
+                <span class="mf">117.5</span><span class="p">,</span>
+                <span class="mf">140.0</span><span class="p">,</span>
+                <span class="mf">162.5</span><span class="p">,</span>
+                <span class="mf">185.0</span><span class="p">,</span>
+                <span class="mf">207.5</span><span class="p">,</span>
+                <span class="mf">230.0</span><span class="p">,</span>
+                <span class="mf">252.5</span><span class="p">,</span>
+                <span class="mf">275.0</span><span class="p">,</span>
+                <span class="mf">297.5</span><span class="p">,</span>
+                <span class="mf">320.0</span><span class="p">,</span>
+                <span class="mf">342.5</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;FC2A&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">134.52965314925247</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">79.975</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">175.0</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="n">ModulationMode</span><span class="o">.</span><span class="n">ds0</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;FC1A&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">7.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="mf">22.86286291805168</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">8.283</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">72.0</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;MCC&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">70.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">109.43563284346213</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">9.875</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">112.5</span><span class="p">,</span> <span class="mf">135.0</span><span class="p">,</span> <span class="mf">160.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">27.5</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">72.5</span><span class="p">,</span> <span class="mf">95.0</span><span class="p">,</span> <span class="mf">117.5</span><span class="p">,</span> <span class="mf">140.0</span><span class="p">,</span> <span class="mf">340.0</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;FC2A&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">7.0</span><span class="p">,</span>
+            <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">120.30881252309756</span><span class="p">,</span>
+            <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="mf">79.975</span><span class="p">,</span>
+            <span class="s2">&quot;open&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="s2">&quot;close&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">175.0</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
 <span class="p">}</span>
 
 
 <div class="viewcode-block" id="simulation_choppers">
 <a class="viewcode-back" href="../../../../generated/modules/ess.beer.mcstas.beamline.simulation_choppers.html#ess.beer.mcstas.beamline.simulation_choppers">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">simulation_choppers</span><span class="p">(</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">PulseShapingMode</span><span class="p">,</span> <span class="n">source_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">PulseShapingMode</span> <span class="o">|</span> <span class="n">ModulationMode</span><span class="p">,</span> <span class="n">source_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MappingProxyType</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DiskChopper</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Dict of ESS BEER McStas choppers for the selected pulse-shaping mode.</span>
+<span class="sd">    Dict of ESS BEER McStas choppers for the selected chopper mode.</span>
 
 <span class="sd">    We make the chopper information available in this way as loading it directly from</span>
 <span class="sd">    the NeXus files is currently not available for these simulated BEER data.</span>
@@ -707,7 +877,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    mode:</span>
-<span class="sd">        BEER pulse-shaping chopper mode.</span>
+<span class="sd">        BEER pulse-shaping or modulation chopper mode.</span>
 <span class="sd">    source_position:</span>
 <span class="sd">        Position of the source in the coordinate system of the choppers.</span>
 <span class="sd">        The raw chopper positions are defined relative to the source position.</span>
@@ -790,7 +960,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

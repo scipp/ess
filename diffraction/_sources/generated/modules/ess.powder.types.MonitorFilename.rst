@@ -33,6 +33,7 @@ ess.powder.types.MonitorFilename
       ~MonitorFilename.is_dir
       ~MonitorFilename.is_fifo
       ~MonitorFilename.is_file
+      ~MonitorFilename.is_junction
       ~MonitorFilename.is_mount
       ~MonitorFilename.is_relative_to
       ~MonitorFilename.is_reserved
@@ -41,7 +42,6 @@ ess.powder.types.MonitorFilename
       ~MonitorFilename.iterdir
       ~MonitorFilename.joinpath
       ~MonitorFilename.lchmod
-      ~MonitorFilename.link_to
       ~MonitorFilename.lstat
       ~MonitorFilename.match
       ~MonitorFilename.mkdir
@@ -61,7 +61,9 @@ ess.powder.types.MonitorFilename
       ~MonitorFilename.symlink_to
       ~MonitorFilename.touch
       ~MonitorFilename.unlink
+      ~MonitorFilename.walk
       ~MonitorFilename.with_name
+      ~MonitorFilename.with_segments
       ~MonitorFilename.with_stem
       ~MonitorFilename.with_suffix
       ~MonitorFilename.write_bytes

@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=dbc7823d"></script>
+    <script src="../../_static/documentation_options.js?v=603b0020"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -55,11 +55,11 @@
     <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ess.beer.io.load.load_beer_mcstas" href="ess.beer.io.load.load_beer_mcstas.html" />
+    <link rel="next" title="ess.beer.io.load.chopper_mode_from_mcstas_mode" href="ess.beer.io.load.chopper_mode_from_mcstas_mode.html" />
     <link rel="prev" title="ess.beer.io.beamline.PulseShapingMode" href="ess.beer.io.beamline.PulseShapingMode.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.0" />
+  <meta name="docsearch:version" content="26.8.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -672,13 +672,11 @@
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerMcStasWorkflowPulseShaping.html">ess.beer.BeerMcStasWorkflowPulseShaping</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerMcStasWorkflowPulseShapingAnalytical.html">ess.beer.BeerMcStasWorkflowPulseShapingAnalytical</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.BeerModMcStasWorkflowKnownPeaks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflow.html">ess.beer.BeerModMcStasWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderWorkflow.html">ess.beer.BeerPowderWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderWorkflowAnalytical.html">ess.beer.BeerPowderWorkflowAnalytical</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderMcStasWorkflow.html">ess.beer.BeerPowderMcStasWorkflow</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderMcStasWorkflowAnalytical.html">ess.beer.BeerPowderMcStasWorkflowAnalytical</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.dhkl_peaks_from_cif.html">ess.beer.dhkl_peaks_from_cif</a></li>
@@ -690,11 +688,10 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.beer.conversions.html">ess.beer.conversions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.automatic_coordinate_transformation_graph.html">ess.beer.conversions.automatic_coordinate_transformation_graph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.compute_wavelength_in_each_cluster.html">ess.beer.conversions.compute_wavelength_in_each_cluster</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.geometry_graph.html">ess.beer.conversions.geometry_graph</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.time_of_arrival.html">ess.beer.conversions.time_of_arrival</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.tof_from_known_dhkl_graph.html">ess.beer.conversions.tof_from_known_dhkl_graph</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.tof_from_nominal_time_at_chopper_graph.html">ess.beer.conversions.tof_from_nominal_time_at_chopper_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.known_peaks_coordinate_transformation_graph.html">ess.beer.conversions.known_peaks_coordinate_transformation_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.modulation_time_of_arrival.html">ess.beer.conversions.modulation_time_of_arrival</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.conversions.wavelength_detector.html">ess.beer.conversions.wavelength_detector</a></li>
 </ul>
 </details></li>
@@ -718,57 +715,51 @@
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="ess.beer.io.html">ess.beer.io</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.beer.io.beamline.html">ess.beer.io.beamline</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.beamline.MCSTAS_T_OFFSET.html">ess.beer.io.beamline.MCSTAS_T_OFFSET</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.beamline.simulation_choppers.html">ess.beer.io.beamline.simulation_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.beamline.ModulationMode.html">ess.beer.io.beamline.ModulationMode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.beamline.PulseShapingMode.html">ess.beer.io.beamline.PulseShapingMode</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">ess.beer.io.load</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.chopper_mode_from_mcstas_mode.html">ess.beer.io.load.chopper_mode_from_mcstas_mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas.html">ess.beer.io.load.load_beer_mcstas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor.html">ess.beer.io.load.load_beer_mcstas_monitor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor_provider.html">ess.beer.io.load.load_beer_mcstas_monitor_provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_provider.html">ess.beer.io.load.load_beer_mcstas_provider</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_chopper_delay_from_mode.html">ess.beer.io.load.mcstas_chopper_delay_from_mode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_chopper_delay_from_mode_new_simulations.html">ess.beer.io.load.mcstas_chopper_delay_from_mode_new_simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_choppers.html">ess.beer.io.load.mcstas_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_detector_ltotal.html">ess.beer.io.load.mcstas_detector_ltotal</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_modulation_period_from_mode.html">ess.beer.io.load.mcstas_modulation_period_from_mode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_pulse_shaping_choppers.html">ess.beer.io.load.mcstas_pulse_shaping_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_sample_position.html">ess.beer.io.load.mcstas_sample_position</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_source_position.html">ess.beer.io.load.mcstas_source_position</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.pulse_shaping_mode_from_mcstas_mode.html">ess.beer.io.load.pulse_shaping_mode_from_mcstas_mode</a></li>
 </ul>
 </details></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.beer.mcstas.html">ess.beer.mcstas</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.beer.mcstas.beamline.html">ess.beer.mcstas.beamline</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.beamline.MCSTAS_T_OFFSET.html">ess.beer.mcstas.beamline.MCSTAS_T_OFFSET</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.beamline.simulation_choppers.html">ess.beer.mcstas.beamline.simulation_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.beamline.ModulationMode.html">ess.beer.mcstas.beamline.ModulationMode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.beamline.PulseShapingMode.html">ess.beer.mcstas.beamline.PulseShapingMode</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.beer.mcstas.load.html">ess.beer.mcstas.load</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.chopper_mode_from_mcstas_mode.html">ess.beer.mcstas.load.chopper_mode_from_mcstas_mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas.html">ess.beer.mcstas.load.load_beer_mcstas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_monitor.html">ess.beer.mcstas.load.load_beer_mcstas_monitor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_monitor_provider.html">ess.beer.mcstas.load.load_beer_mcstas_monitor_provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_provider.html">ess.beer.mcstas.load.load_beer_mcstas_provider</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_chopper_delay_from_mode.html">ess.beer.mcstas.load.mcstas_chopper_delay_from_mode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_chopper_delay_from_mode_new_simulations.html">ess.beer.mcstas.load.mcstas_chopper_delay_from_mode_new_simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_choppers.html">ess.beer.mcstas.load.mcstas_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_detector_ltotal.html">ess.beer.mcstas.load.mcstas_detector_ltotal</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_modulation_period_from_mode.html">ess.beer.mcstas.load.mcstas_modulation_period_from_mode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_pulse_shaping_choppers.html">ess.beer.mcstas.load.mcstas_pulse_shaping_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_sample_position.html">ess.beer.mcstas.load.mcstas_sample_position</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_source_position.html">ess.beer.mcstas.load.mcstas_source_position</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.pulse_shaping_mode_from_mcstas_mode.html">ess.beer.mcstas.load.pulse_shaping_mode_from_mcstas_mode</a></li>
 </ul>
 </details></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.beer.workflow.html">ess.beer.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerMcStasWorkflowPulseShaping.html">ess.beer.workflow.BeerMcStasWorkflowPulseShaping</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerMcStasWorkflowPulseShapingAnalytical.html">ess.beer.workflow.BeerMcStasWorkflowPulseShapingAnalytical</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModMcStasWorkflow.html">ess.beer.workflow.BeerModMcStasWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderMcStasWorkflow.html">ess.beer.workflow.BeerPowderMcStasWorkflow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderMcStasWorkflowAnalytical.html">ess.beer.workflow.BeerPowderMcStasWorkflowAnalytical</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderWorkflow.html">ess.beer.workflow.BeerPowderWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderWorkflowAnalytical.html">ess.beer.workflow.BeerPowderWorkflowAnalytical</a></li>
 </ul>
@@ -917,38 +908,32 @@
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas.html#ess.beer.io.load.load_beer_mcstas" title="ess.beer.io.load.load_beer_mcstas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beer_mcstas</span></code></a>(f, bank, detector_sizes)</p></td>
-<td><p>Load beer McStas data from a file to a data array.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.chopper_mode_from_mcstas_mode.html#ess.beer.io.load.chopper_mode_from_mcstas_mode" title="ess.beer.io.load.chopper_mode_from_mcstas_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chopper_mode_from_mcstas_mode</span></code></a>(mode)</p></td>
+<td><p>Return the BEER chopper mode matching a McStas mode value.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor.html#ess.beer.io.load.load_beer_mcstas_monitor" title="ess.beer.io.load.load_beer_mcstas_monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beer_mcstas_monitor</span></code></a>(f)</p></td>
-<td><p>Load the BEER McStas wavelength monitor from a file.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas.html#ess.beer.io.load.load_beer_mcstas" title="ess.beer.io.load.load_beer_mcstas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beer_mcstas</span></code></a>(filename, bank)</p></td>
+<td><p>Load a detector bank from a BEER McStas file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor_provider.html#ess.beer.io.load.load_beer_mcstas_monitor_provider" title="ess.beer.io.load.load_beer_mcstas_monitor_provider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beer_mcstas_monitor_provider</span></code></a>(fname)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor.html#ess.beer.io.load.load_beer_mcstas_monitor" title="ess.beer.io.load.load_beer_mcstas_monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beer_mcstas_monitor</span></code></a>(filename)</p></td>
+<td><p>Load the BEER McStas wavelength monitor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor_provider.html#ess.beer.io.load.load_beer_mcstas_monitor_provider" title="ess.beer.io.load.load_beer_mcstas_monitor_provider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beer_mcstas_monitor_provider</span></code></a>(fname)</p></td>
 <td><p>Sciline provider for loading the BEER McStas wavelength monitor.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_provider.html#ess.beer.io.load.load_beer_mcstas_provider" title="ess.beer.io.load.load_beer_mcstas_provider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beer_mcstas_provider</span></code></a>(fname, bank, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_provider.html#ess.beer.io.load.load_beer_mcstas_provider" title="ess.beer.io.load.load_beer_mcstas_provider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_beer_mcstas_provider</span></code></a>(fname, bank)</p></td>
 <td><p>Sciline provider for loading BEER McStas detector data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_chopper_delay_from_mode.html#ess.beer.io.load.mcstas_chopper_delay_from_mode" title="ess.beer.io.load.mcstas_chopper_delay_from_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_chopper_delay_from_mode</span></code></a>(da)</p></td>
-<td><p>These settings are good for the set of McStas runs that we use in the docs currently.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_choppers.html#ess.beer.io.load.mcstas_choppers" title="ess.beer.io.load.mcstas_choppers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_choppers</span></code></a>(da, source_position)</p></td>
+<td><p>Return BEER choppers for the McStas mode in the data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_chopper_delay_from_mode_new_simulations.html#ess.beer.io.load.mcstas_chopper_delay_from_mode_new_simulations" title="ess.beer.io.load.mcstas_chopper_delay_from_mode_new_simulations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_chopper_delay_from_mode_new_simulations</span></code></a>(da)</p></td>
-<td><p>Celine has a new simulation with some changes to the chopper placement(?).</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_detector_ltotal.html#ess.beer.io.load.mcstas_detector_ltotal" title="ess.beer.io.load.mcstas_detector_ltotal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_detector_ltotal</span></code></a>(da, source_position, ...)</p></td>
+<td><p>Return moderator-to-detector flight path lengths for BEER McStas data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_detector_ltotal.html#ess.beer.io.load.mcstas_detector_ltotal" title="ess.beer.io.load.mcstas_detector_ltotal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_detector_ltotal</span></code></a>(da)</p></td>
-<td><p>Return detector flight path lengths from loaded BEER McStas data.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_sample_position.html#ess.beer.io.load.mcstas_sample_position" title="ess.beer.io.load.mcstas_sample_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_sample_position</span></code></a>(fname)</p></td>
+<td><p>Return the sample position from a BEER McStas file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_modulation_period_from_mode.html#ess.beer.io.load.mcstas_modulation_period_from_mode" title="ess.beer.io.load.mcstas_modulation_period_from_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_modulation_period_from_mode</span></code></a>(da)</p></td>
-<td><p>Return the modulation period for the McStas chopper mode.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_pulse_shaping_choppers.html#ess.beer.io.load.mcstas_pulse_shaping_choppers" title="ess.beer.io.load.mcstas_pulse_shaping_choppers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_pulse_shaping_choppers</span></code></a>(da, ...)</p></td>
-<td><p>Return BEER pulse-shaping choppers for the McStas mode in the data.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_source_position.html#ess.beer.io.load.mcstas_source_position" title="ess.beer.io.load.mcstas_source_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_source_position</span></code></a>()</p></td>
-<td><p>Return the source position used for analytical McStas frame unwrapping.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.pulse_shaping_mode_from_mcstas_mode.html#ess.beer.io.load.pulse_shaping_mode_from_mcstas_mode" title="ess.beer.io.load.pulse_shaping_mode_from_mcstas_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pulse_shaping_mode_from_mcstas_mode</span></code></a>(mode)</p></td>
-<td><p>Return the BEER pulse-shaping mode matching a McStas mode value.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.beer.io.load.mcstas_source_position.html#ess.beer.io.load.mcstas_source_position" title="ess.beer.io.load.mcstas_source_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcstas_source_position</span></code></a>(fname, sample_position)</p></td>
+<td><p>Return the effective source position for the McStas geometry.</p></td>
 </tr>
 </tbody>
 </table>
@@ -976,11 +961,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="ess.beer.io.load.load_beer_mcstas.html"
+       href="ess.beer.io.load.chopper_mode_from_mcstas_mode.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ess.beer.io.load.load_beer_mcstas</p>
+        <p class="prev-next-title">ess.beer.io.load.chopper_mode_from_mcstas_mode</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1035,7 +1020,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

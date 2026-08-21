@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=dbc7823d"></script>
+    <script src="../../../_static/documentation_options.js?v=603b0020"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.0" />
+  <meta name="docsearch:version" content="26.8.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -522,17 +522,20 @@
   <h1>Source code for ess.beer.conversions</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp.constants</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">,</span> <span class="n">RunType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">graph</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">powder_coordinate_transformation_graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">,</span> <span class="n">GravityVector</span><span class="p">,</span> <span class="n">RunType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.conversion.tof</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavelength_from_tof</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiskChoppers</span><span class="p">,</span> <span class="n">Position</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.lut</span><span class="w"> </span><span class="kn">import</span> <span class="n">chopper_distance_along_beam</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorLtotal</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DHKLList</span><span class="p">,</span>
-    <span class="n">GeometryCoordTransformGraph</span><span class="p">,</span>
-    <span class="n">ModulationPeriod</span><span class="p">,</span>
     <span class="n">PulseLength</span><span class="p">,</span>
     <span class="n">RawDetector</span><span class="p">,</span>
     <span class="n">StreakClusteredData</span><span class="p">,</span>
-    <span class="n">WavelengthDefinitionChopperDelay</span><span class="p">,</span>
     <span class="n">WavelengthDetector</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -541,8 +544,7 @@
 <a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.compute_wavelength_in_each_cluster.html#ess.beer.conversions.compute_wavelength_in_each_cluster">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_wavelength_in_each_cluster</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">StreakClusteredData</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">chopper_delay</span><span class="p">:</span> <span class="n">WavelengthDefinitionChopperDelay</span><span class="p">,</span>
-    <span class="n">mod_period</span><span class="p">:</span> <span class="n">ModulationPeriod</span><span class="p">,</span>
+    <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fits a line through each cluster, the intercept of the line is t0.</span>
 <span class="sd">    The line is fitted using linear regression with an outlier removal procedure.</span>
@@ -556,58 +558,83 @@
 <span class="sd">       of the points in the cluster, and probably should belong to another cluster or</span>
 <span class="sd">       are part of the background.</span>
 <span class="sd">    3. Go back to 1) and iterate until convergence. A few iterations should be enough.</span>
-<span class="sd">    4. Finally, round the estimated t0 to the closest known chopper opening time.</span>
+<span class="sd">    4. Finally, round the estimated dt to the closest known chopper opening time.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="n">k</span><span class="p">:</span> <span class="n">compute_wavelength_in_each_cluster</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">chopper_delay</span><span class="p">,</span> <span class="n">mod_period</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">da</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-
+    <span class="n">mod_period</span> <span class="o">=</span> <span class="n">_modulation_period</span><span class="p">(</span><span class="n">choppers</span><span class="p">)</span>
     <span class="n">max_distance_from_streak_line</span> <span class="o">=</span> <span class="n">mod_period</span> <span class="o">/</span> <span class="mi">3</span>
     <span class="n">sin_theta_L</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;two_theta&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Ltotal&#39;</span><span class="p">]</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">time_of_arrival</span><span class="p">(</span>
-        <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_offset&#39;</span><span class="p">],</span>
-        <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;frame_cutoff_time&#39;</span><span class="p">],</span>
-    <span class="p">)</span>
+    <span class="c1"># Time from center of chopper opening &quot;window&quot;.</span>
+    <span class="c1"># The window contains all modulation sub pulses.</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;tof&#39;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">15</span><span class="p">):</span>
-        <span class="n">s</span><span class="p">,</span> <span class="n">t0</span> <span class="o">=</span> <span class="n">_linear_regression_by_bin</span><span class="p">(</span><span class="n">sin_theta_L</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># dt is the difference between the the modulation chopper opening time</span>
+        <span class="c1"># and the time center of the chopper opening window.</span>
+        <span class="n">s</span><span class="p">,</span> <span class="n">dt</span> <span class="o">=</span> <span class="n">_linear_regression_by_bin</span><span class="p">(</span><span class="n">sin_theta_L</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
         <span class="c1"># Distance from point to line through cluster</span>
-        <span class="n">distance_to_self</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">t0</span><span class="p">)</span> <span class="o">+</span> <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin_theta_L</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">distance_to_self</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="o">+</span> <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin_theta_L</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span>
 
         <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span>
             <span class="n">too_far_from_center</span><span class="o">=</span><span class="p">(</span><span class="n">distance_to_self</span> <span class="o">&gt;</span> <span class="n">max_distance_from_streak_line</span><span class="p">),</span>
         <span class="p">)</span>
 
-    <span class="c1"># The t0 estimate from fitting is influenced by peak overlap, background,</span>
-    <span class="c1"># and other factors that can make the estimate offset from the true</span>
-    <span class="c1"># chopper opening time that it should match.</span>
-    <span class="c1"># We know the true chopper opening times, so instead of using the t0 estimte</span>
-    <span class="c1"># directly we can round the estimate to the closest chopper opening time.</span>
-    <span class="c1"># That way the t0 estimate becomes more robust and is guaranteed to correspond to</span>
-    <span class="c1"># a true chopper opening time.</span>
-    <span class="n">t0</span> <span class="o">=</span> <span class="n">_round_t0_to_nearest_chopper_opening</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">t0</span><span class="p">),</span> <span class="n">mod_period</span><span class="p">,</span> <span class="n">chopper_delay</span><span class="p">)</span>
-    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">)</span>
-    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">tof</span><span class="o">=</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+    <span class="c1"># The dt estimate from fitting is influenced by peak overlap, background,</span>
+    <span class="c1"># and other factors that can make the estimate worse.</span>
+    <span class="c1"># We know the true chopper opening times,</span>
+    <span class="c1"># so we can round the estimate to the closest known time.</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">/=</span> <span class="n">mod_period</span>
+    <span class="n">dt</span> <span class="o">+=</span> <span class="mf">0.5</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">*=</span> <span class="n">mod_period</span>
+    <span class="c1"># Remove the offset</span>
+    <span class="n">t</span> <span class="o">-=</span> <span class="n">dt</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavelength_from_tof</span><span class="p">(</span>
+        <span class="n">tof</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">Ltotal</span><span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;Ltotal&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">del</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;tof&#39;</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">da</span></div>
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_round_t0_to_nearest_chopper_opening</span><span class="p">(</span>
-    <span class="n">t0</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">mod_period</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">chopper_delay</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_modulation_period</span><span class="p">(</span><span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="n">periods</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">chopper</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span> <span class="o">*</span> <span class="n">chopper</span><span class="o">.</span><span class="n">slit_begin</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s1">&#39;cutout&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">chopper</span> <span class="ow">in</span> <span class="n">choppers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;FC&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_modulation_chopper_position</span><span class="p">(</span>
+    <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">-</span> <span class="n">chopper_delay</span>
-    <span class="n">out</span> <span class="o">/=</span> <span class="n">mod_period</span>
-    <span class="n">out</span> <span class="o">+=</span> <span class="mf">0.5</span>
-    <span class="n">sc</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
-    <span class="n">out</span> <span class="o">*=</span> <span class="n">mod_period</span>
-    <span class="n">out</span> <span class="o">+=</span> <span class="n">chopper_delay</span>
-    <span class="k">return</span> <span class="n">out</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">chopper</span><span class="o">.</span><span class="n">axle_position</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">chopper</span> <span class="ow">in</span> <span class="n">choppers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;FC&#39;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;chopper&#39;</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_modulation_coordinate_transformation_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">detector_ltotal</span><span class="p">:</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use chopper-to-detector distance as ``Ltotal`` in modulation workflows.&quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">powder_coordinate_transformation_graph</span><span class="p">(</span>
+        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">gravity</span>
+    <span class="p">)</span>
+    <span class="n">ltotal</span> <span class="o">=</span> <span class="n">detector_ltotal</span> <span class="o">-</span> <span class="n">chopper_distance_along_beam</span><span class="p">(</span>
+        <span class="n">_modulation_chopper_position</span><span class="p">(</span><span class="n">choppers</span><span class="p">),</span> <span class="n">source_position</span>
+    <span class="p">)</span>
+    <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;Ltotal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">ltotal</span>
+    <span class="k">return</span> <span class="n">graph</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_linear_regression_by_bin</span><span class="p">(</span>
@@ -637,27 +664,23 @@
     <span class="n">theta</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">dhkl_list</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">pulse_length</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">moderator_to_detector_distance</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">detector_ltotal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines the ``d_hkl`` peak each event belongs to,</span>
 <span class="sd">    given a list of known peaks.&quot;&quot;&quot;</span>
     <span class="c1"># Source: https://www.mcstas.org/download/components/current/contrib/NPI_tof_dhkl_detector.comp</span>
     <span class="n">sinth</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">time_of_arrival</span>
 
     <span class="n">d</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span>
-        <span class="n">time_of_arrival</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">dhkl_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span>
+        <span class="n">time_of_arrival</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">dhkl_list</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span>
     <span class="p">)</span>
     <span class="n">dtfound</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">time_of_arrival</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
 
     <span class="n">const</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="mi">2</span>
-        <span class="o">*</span> <span class="n">sinth</span>
-        <span class="o">*</span> <span class="n">moderator_to_detector_distance</span>
-        <span class="o">/</span> <span class="p">(</span><span class="n">scipp</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">h</span> <span class="o">/</span> <span class="n">scipp</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_n</span><span class="p">)</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">sinth</span> <span class="o">*</span> <span class="n">detector_ltotal</span> <span class="o">/</span> <span class="p">(</span><span class="n">scipp</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">h</span> <span class="o">/</span> <span class="n">scipp</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_n</span><span class="p">)</span>
     <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">time_of_arrival</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">/angstrom&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">dhkl</span> <span class="ow">in</span> <span class="n">dhkl_list</span><span class="p">:</span>
-        <span class="n">dt</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">dhkl</span> <span class="o">*</span> <span class="n">const</span> <span class="o">-</span> <span class="n">pulse_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">time_of_arrival</span> <span class="o">-</span> <span class="n">dhkl</span> <span class="o">*</span> <span class="n">const</span> <span class="o">-</span> <span class="n">pulse_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">dt_in_range</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">&lt;</span> <span class="n">pulse_length</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">no_dt_found</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dtfound</span><span class="p">)</span>
         <span class="n">dtfound</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_in_range</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">no_dt_found</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dtfound</span><span class="p">),</span> <span class="n">dtfound</span><span class="p">)</span>
@@ -670,124 +693,159 @@
     <span class="k">return</span> <span class="n">d</span>
 
 
-<div class="viewcode-block" id="time_of_arrival">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.time_of_arrival.html#ess.beer.conversions.time_of_arrival">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">time_of_arrival</span><span class="p">(</span>
+<div class="viewcode-block" id="modulation_time_of_arrival">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.modulation_time_of_arrival.html#ess.beer.conversions.modulation_time_of_arrival">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">modulation_time_of_arrival</span><span class="p">(</span>
     <span class="n">event_time_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">frame_cutoff_time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Does frame unwrapping for pulse shaping chopper modes.</span>
+    <span class="n">Ltotal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unwrap detector event times for a BEER modulation mode.</span>
 
-<span class="sd">    Events before the &quot;cutoff time&quot; are assumed to come from the previous pulse.&quot;&quot;&quot;</span>
-    <span class="n">_eto</span> <span class="o">=</span> <span class="n">event_time_offset</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">_eto</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-    <span class="n">tc</span> <span class="o">=</span> <span class="n">frame_cutoff_time</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">_eto</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">_eto</span> <span class="o">&gt;=</span> <span class="n">tc</span><span class="p">,</span> <span class="n">_eto</span><span class="p">,</span> <span class="n">_eto</span> <span class="o">+</span> <span class="n">T</span><span class="p">)</span></div>
+<span class="sd">    ``event_time_offset`` contains detector arrival times folded into one source</span>
+<span class="sd">    period. The opening times of the modulation choppers and ``FC2A`` define the</span>
+<span class="sd">    cutoff for shifting an event by one ``FC2A`` period so its time refers to the</span>
+<span class="sd">    source pulse that produced it. Here, ``Ltotal`` is the distance from the</span>
+<span class="sd">    modulation chopper to the detector.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    time_of_arrival : sc.Variable</span>
+<span class="sd">        Detector arrival time relative to the start of the source pulse that</span>
+<span class="sd">        produced the event.</span>
+<span class="sd">    tof_from_chopper : sc.Variable</span>
+<span class="sd">        Approximate time of flight from the modulation chopper to the detector,</span>
+<span class="sd">        obtained by subtracting the center time of the modulation-chopper opening.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">center_time</span><span class="p">(</span><span class="n">chopper</span><span class="p">):</span>
+        <span class="n">slit_center</span> <span class="o">=</span> <span class="p">(</span><span class="n">chopper</span><span class="o">.</span><span class="n">slit_begin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">chopper</span><span class="o">.</span><span class="n">slit_end</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">chopper</span><span class="o">.</span><span class="n">time_offset_angle_at_beam</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="n">slit_center</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="n">definition_choppers</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">chopper</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">chopper</span> <span class="ow">in</span> <span class="n">choppers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;FC&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">nominal_time_at_chopper</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">center_time</span><span class="p">(</span><span class="n">chopper</span><span class="p">)</span> <span class="k">for</span> <span class="n">chopper</span> <span class="ow">in</span> <span class="n">definition_choppers</span><span class="p">],</span>
+        <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;chopper&#39;</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">modulation_position</span> <span class="o">=</span> <span class="n">_modulation_chopper_position</span><span class="p">(</span><span class="n">choppers</span><span class="p">)</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span>
+
+    <span class="n">frame_chopper</span> <span class="o">=</span> <span class="n">choppers</span><span class="p">[</span><span class="s1">&#39;FC2A&#39;</span><span class="p">]</span>
+    <span class="n">inverse_velocity</span> <span class="o">=</span> <span class="p">(</span><span class="n">center_time</span><span class="p">(</span><span class="n">frame_chopper</span><span class="p">)</span> <span class="o">-</span> <span class="n">nominal_time_at_chopper</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">frame_chopper</span><span class="o">.</span><span class="n">axle_position</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="n">modulation_position</span>
+    <span class="p">)</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">frame_chopper</span><span class="o">.</span><span class="n">frequency</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">event_time_offset</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="n">nominal_time_at_chopper</span> <span class="o">=</span> <span class="n">nominal_time_at_chopper</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">event_time_offset</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="n">cutoff</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">nominal_time_at_chopper</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">inverse_velocity</span> <span class="o">*</span> <span class="n">Ltotal</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">event_time_offset</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">period</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">tof_from_source</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="n">event_time_offset</span> <span class="o">&gt;=</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">event_time_offset</span><span class="p">,</span> <span class="n">event_time_offset</span> <span class="o">+</span> <span class="n">period</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">tof_from_source</span><span class="p">,</span> <span class="n">tof_from_source</span> <span class="o">-</span> <span class="n">nominal_time_at_chopper</span></div>
+
+
+
+<div class="viewcode-block" id="automatic_coordinate_transformation_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.automatic_coordinate_transformation_graph.html#ess.beer.conversions.automatic_coordinate_transformation_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">automatic_coordinate_transformation_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">detector_ltotal</span><span class="p">:</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coordinate transformations for automatic modulation reduction.&quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">_modulation_coordinate_transformation_graph</span><span class="p">(</span>
+        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">detector_ltotal</span><span class="p">,</span> <span class="n">choppers</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">tof</span><span class="p">(</span><span class="n">event_time_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">Ltotal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">modulation_time_of_arrival</span><span class="p">(</span><span class="n">event_time_offset</span><span class="p">,</span> <span class="n">Ltotal</span><span class="p">,</span> <span class="n">choppers</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">graph</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;tof&#39;</span><span class="p">:</span> <span class="n">tof</span><span class="p">,</span>
+            <span class="s1">&#39;wavelength&#39;</span><span class="p">:</span> <span class="n">wavelength_from_tof</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">graph</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_tof_from_dhkl</span><span class="p">(</span>
-    <span class="n">time_of_arrival</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">tof_from_chopper</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">theta</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">coarse_dhkl</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">Ltotal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">mod_period</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">chopper_delay</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes tof for BEER given the dhkl peak that the event belongs to&quot;&quot;&quot;</span>
     <span class="c1"># Source: https://www.mcstas.org/download/components/current/contrib/NPI_tof_dhkl_detector.comp</span>
     <span class="c1"># tref = 2 * d_hkl * sin(theta) / hm * Ltotal</span>
-    <span class="c1"># tc = time_of_arrival - chopper_delay - tref</span>
-    <span class="c1"># dt = floor(tc / mod_period + 0.5) * mod_period + chopper_delay</span>
-    <span class="c1"># tof = time_of_arrival - dt</span>
+    <span class="c1"># tc = tof_from_chopper - tref</span>
+    <span class="c1"># dt = floor(tc / mod_period + 0.5) * mod_period</span>
+    <span class="c1"># tof = tof_from_chopper - dt</span>
     <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">scipp</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">h</span> <span class="o">/</span> <span class="n">scipp</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_n</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-        <span class="n">unit</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">time_of_arrival</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">/m/angstrom&#39;</span>
+        <span class="n">unit</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tof_from_chopper</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s1">/m/angstrom&#39;</span>
     <span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">coarse_dhkl</span>
     <span class="n">out</span> <span class="o">*=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">*=</span> <span class="n">Ltotal</span>
-    <span class="n">out</span> <span class="o">+=</span> <span class="n">time_of_arrival</span>
-    <span class="n">out</span> <span class="o">-=</span> <span class="n">chopper_delay</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">tof_from_chopper</span>
     <span class="n">out</span> <span class="o">/=</span> <span class="n">mod_period</span>
     <span class="n">out</span> <span class="o">+=</span> <span class="mf">0.5</span>
     <span class="n">sc</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">*=</span> <span class="n">mod_period</span>
-    <span class="n">out</span> <span class="o">+=</span> <span class="n">chopper_delay</span>
     <span class="n">out</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">out</span> <span class="o">+=</span> <span class="n">time_of_arrival</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">tof_from_chopper</span>
     <span class="k">return</span> <span class="n">out</span>
 
 
-<div class="viewcode-block" id="tof_from_nominal_time_at_chopper_graph">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.tof_from_nominal_time_at_chopper_graph.html#ess.beer.conversions.tof_from_nominal_time_at_chopper_graph">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tof_from_nominal_time_at_chopper_graph</span><span class="p">(</span>
-    <span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">gg</span><span class="p">:</span> <span class="n">GeometryCoordTransformGraph</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Graph for computing ``wavelength`` in pulse shaping chopper modes.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="o">**</span><span class="n">gg</span><span class="p">,</span>
-        <span class="s1">&#39;tof&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">time_of_arrival</span><span class="p">,</span> <span class="n">nominal_time_at_chopper</span><span class="p">:</span> <span class="p">(</span>
-            <span class="n">time_of_arrival</span> <span class="o">-</span> <span class="n">nominal_time_at_chopper</span>
-        <span class="p">),</span>
-        <span class="s1">&#39;time_of_arrival&#39;</span><span class="p">:</span> <span class="n">time_of_arrival</span><span class="p">,</span>
-    <span class="p">}</span></div>
-
-
-
-<div class="viewcode-block" id="geometry_graph">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.geometry_graph.html#ess.beer.conversions.geometry_graph">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">geometry_graph</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">GeometryCoordTransformGraph</span><span class="p">:</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="o">**</span><span class="n">graph</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">beamline</span><span class="p">(</span><span class="n">scatter</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-        <span class="o">**</span><span class="n">graph</span><span class="o">.</span><span class="n">tof</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span><span class="s2">&quot;tof&quot;</span><span class="p">),</span>
-    <span class="p">}</span></div>
-
-
-
-<div class="viewcode-block" id="tof_from_known_dhkl_graph">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.tof_from_known_dhkl_graph.html#ess.beer.conversions.tof_from_known_dhkl_graph">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tof_from_known_dhkl_graph</span><span class="p">(</span>
-    <span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">mod_period</span><span class="p">:</span> <span class="n">ModulationPeriod</span><span class="p">,</span>
+<div class="viewcode-block" id="known_peaks_coordinate_transformation_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.known_peaks_coordinate_transformation_graph.html#ess.beer.conversions.known_peaks_coordinate_transformation_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">known_peaks_coordinate_transformation_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">detector_ltotal</span><span class="p">:</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">pulse_length</span><span class="p">:</span> <span class="n">PulseLength</span><span class="p">,</span>
-    <span class="n">chopper_delay</span><span class="p">:</span> <span class="n">WavelengthDefinitionChopperDelay</span><span class="p">,</span>
     <span class="n">dhkl_list</span><span class="p">:</span> <span class="n">DHKLList</span><span class="p">,</span>
-    <span class="n">gg</span><span class="p">:</span> <span class="n">GeometryCoordTransformGraph</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Graph computing ``tof`` in modulation chopper modes using</span>
-<span class="sd">    list of peak positions.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coordinate transformations for modulation with known peak positions.&quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">_modulation_coordinate_transformation_graph</span><span class="p">(</span>
+        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">detector_ltotal</span><span class="p">,</span> <span class="n">choppers</span>
+    <span class="p">)</span>
+    <span class="n">mod_period</span> <span class="o">=</span> <span class="n">_modulation_period</span><span class="p">(</span><span class="n">choppers</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_coarse_dspacing</span><span class="p">(</span>
-        <span class="n">time_of_arrival</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-        <span class="n">theta</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-        <span class="n">pulse_length</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-        <span class="n">moderator_to_detector_distance</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;To capture dhkl_list, otherwise it causes an error when</span>
-<span class="sd">        ``.transform_coords`` is called unless it is called with</span>
-<span class="sd">        ``keep_indermediates=False``.</span>
-<span class="sd">        The error happens because data arrays do not allow coordinates</span>
-<span class="sd">        with dimensions not present on the data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">_compute_d_given_list_of_peaks</span><span class="p">(</span>
-            <span class="n">time_of_arrival</span><span class="o">=</span><span class="n">time_of_arrival</span><span class="p">,</span>
-            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
-            <span class="n">pulse_length</span><span class="o">=</span><span class="n">pulse_length</span><span class="p">,</span>
-            <span class="n">moderator_to_detector_distance</span><span class="o">=</span><span class="n">moderator_to_detector_distance</span><span class="p">,</span>
-            <span class="n">dhkl_list</span><span class="o">=</span><span class="n">dhkl_list</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modulation_times</span><span class="p">(</span><span class="n">event_time_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">Ltotal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+        <span class="n">time_of_arrival</span><span class="p">,</span> <span class="n">tof_from_chopper</span> <span class="o">=</span> <span class="n">modulation_time_of_arrival</span><span class="p">(</span>
+            <span class="n">event_time_offset</span><span class="p">,</span> <span class="n">Ltotal</span><span class="p">,</span> <span class="n">choppers</span>
         <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;time_of_arrival&#39;</span><span class="p">:</span> <span class="n">time_of_arrival</span><span class="p">,</span>
+            <span class="s1">&#39;tof_from_chopper&#39;</span><span class="p">:</span> <span class="n">tof_from_chopper</span><span class="p">,</span>
+        <span class="p">}</span>
 
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="o">**</span><span class="n">gg</span><span class="p">,</span>
-        <span class="s1">&#39;pulse_length&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">pulse_length</span><span class="p">,</span>
-        <span class="s1">&#39;mod_period&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">mod_period</span><span class="p">,</span>
-        <span class="s1">&#39;chopper_delay&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">chopper_delay</span><span class="p">,</span>
-        <span class="s1">&#39;tof&#39;</span><span class="p">:</span> <span class="n">_tof_from_dhkl</span><span class="p">,</span>
-        <span class="s1">&#39;time_of_arrival&#39;</span><span class="p">:</span> <span class="n">time_of_arrival</span><span class="p">,</span>
-        <span class="s1">&#39;coarse_dhkl&#39;</span><span class="p">:</span> <span class="n">_compute_coarse_dspacing</span><span class="p">,</span>
-        <span class="s1">&#39;theta&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">two_theta</span><span class="p">:</span> <span class="n">two_theta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="p">}</span></div>
+    <span class="n">graph</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;detector_ltotal&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">detector_ltotal</span><span class="p">,</span>
+            <span class="s1">&#39;pulse_length&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">pulse_length</span><span class="p">,</span>
+            <span class="s1">&#39;mod_period&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">mod_period</span><span class="p">,</span>
+            <span class="s1">&#39;dhkl_list&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dhkl_list</span><span class="p">,</span>
+            <span class="s1">&#39;tof&#39;</span><span class="p">:</span> <span class="n">_tof_from_dhkl</span><span class="p">,</span>
+            <span class="s1">&#39;wavelength&#39;</span><span class="p">:</span> <span class="n">wavelength_from_tof</span><span class="p">,</span>
+            <span class="p">(</span><span class="s1">&#39;time_of_arrival&#39;</span><span class="p">,</span> <span class="s1">&#39;tof_from_chopper&#39;</span><span class="p">):</span> <span class="n">modulation_times</span><span class="p">,</span>
+            <span class="s1">&#39;coarse_dhkl&#39;</span><span class="p">:</span> <span class="n">_compute_d_given_list_of_peaks</span><span class="p">,</span>
+            <span class="s1">&#39;theta&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">two_theta</span><span class="p">:</span> <span class="n">two_theta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">graph</span></div>
 
 
 
@@ -796,22 +854,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">wavelength_detector</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span> <span class="n">graph</span><span class="p">:</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Applies the transformation graph to compute ``wavelength``.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">((</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,),</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute wavelength using the workflow&#39;s coordinate transformations.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">keep_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-
-
-<span class="n">convert_from_known_peaks_providers</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">geometry_graph</span><span class="p">,</span>
-    <span class="n">tof_from_known_dhkl_graph</span><span class="p">,</span>
-    <span class="n">wavelength_detector</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">convert_pulse_shaping</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">geometry_graph</span><span class="p">,</span>
-    <span class="n">tof_from_nominal_time_at_chopper_graph</span><span class="p">,</span>
-    <span class="n">wavelength_detector</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span><span class="n">compute_wavelength_in_each_cluster</span><span class="p">,</span> <span class="n">geometry_graph</span><span class="p">)</span>
 </pre></div>
 
                 </article>
@@ -875,7 +920,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

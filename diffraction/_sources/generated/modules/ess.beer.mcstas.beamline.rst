@@ -5,13 +5,6 @@ ess.beer.mcstas.beamline
 
    
    
-   .. rubric:: Module Attributes
-
-   .. autosummary::
-      :toctree:
-   
-      MCSTAS_T_OFFSET
-   
    
 
    
@@ -33,6 +26,7 @@ ess.beer.mcstas.beamline
       :toctree:
       :template: class-template.rst
    
+      ModulationMode
       PulseShapingMode
    
    
