@@ -42,7 +42,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pooch>=1.5",
-    "pytest>=7.0",
+    "pytest>=9.0",
 ]
 docs = [
     "autodoc-pydantic>=2.0.0",
