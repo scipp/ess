@@ -11,7 +11,6 @@ import scippnexus as snx
 from ess.spectroscopy.indirect.conversion import add_spectrometer_coords
 from ess.spectroscopy.types import (
     Analyzer,
-    DetectorPositionOffset,
     EmptyDetector,
     NeXusComponent,
     NeXusTransformation,
@@ -86,7 +85,6 @@ def get_calibrated_detector_bifrost(
     analyzer: Analyzer[RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
-    offset: DetectorPositionOffset[RunType],
     primary_graph: PrimarySpecCoordTransformGraph[RunType],
     secondary_graph: SecondarySpecCoordTransformGraph[RunType],
 ) -> EmptyDetector[RunType]:
@@ -107,8 +105,6 @@ def get_calibrated_detector_bifrost(
         Loaded analyzer parameters.
     transform:
         Transformation that determines the detector position.
-    offset:
-        Offset to add to the detector position.
     primary_graph:
         Coordinate transformation graph for the primary spectrometer.
     secondary_graph:
@@ -122,9 +118,7 @@ def get_calibrated_detector_bifrost(
         Detector geometry and spectrometer coordinates.
     """
 
-    da = get_base_calibrated_detector_bifrost(
-        detector, analyzer, transform=transform, offset=offset
-    )
+    da = get_base_calibrated_detector_bifrost(detector, analyzer, transform=transform)
     da = da.rename(dim_0='tube', dim_1='length')
 
     arc, channel = arc_and_channel_from_detector_number(da.coords['detector_number'])
@@ -147,7 +141,6 @@ def get_base_calibrated_detector_bifrost(
     analyzer: Analyzer[RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
-    offset: DetectorPositionOffset[RunType],
 ) -> sc.DataArray:
     """Extract the data array corresponding to a detector's signal field.
 
@@ -163,8 +156,6 @@ def get_base_calibrated_detector_bifrost(
         Loaded analyzer parameters.
     transform:
         Transformation that determines the detector position.
-    offset:
-        Offset to add to the detector position.
 
     Returns
     -------
@@ -173,9 +164,14 @@ def get_base_calibrated_detector_bifrost(
     """
 
     from ess.reduce.nexus import compute_detector_position, extract_signal_data_array
+    from ess.reduce.nexus.workflow import no_offset
 
     da = extract_signal_data_array(detector)
-    position = compute_detector_position(da, transform=transform, offset=offset)
+    # BIFROST's detectors ride the rotating tank, so a lab-frame offset added after
+    # the transform cannot express any correction one would actually want; the
+    # transformation chain is the handle. compute_detector_position requires the
+    # argument, so pin it to zero here.
+    position = compute_detector_position(da, transform=transform, offset=no_offset)
     return _assign_detector_position(da, position)
 
 
