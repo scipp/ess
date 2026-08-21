@@ -4,72 +4,84 @@ import sys
 import numpy as np
 import pytest
 import scipp as sc
-import scippneutron as scn
 from ess.beer import (
     BeerMcStasWorkflowPulseShaping,
     BeerModMcStasWorkflow,
     BeerModMcStasWorkflowKnownPeaks,
-    BeerPowderMcStasWorkflowAnalytical,
+    BeerPowderMcStasWorkflow,
 )
 from ess.beer.data import (
-    duplex_peaks_array,
     mcstas_duplex,
     mcstas_few_neutrons_3d_detector_example,
     mcstas_more_neutrons_3d_detector_example,
+    mcstas_powder_silicon_in_vanadium_can,
     mcstas_silicon_new_model,
+    silicon_peaks_array,
 )
 from ess.beer.mcstas import (
     load_beer_mcstas,
     load_beer_mcstas_monitor,
-    mcstas_chopper_delay_from_mode_new_simulations,
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import (
     DspacingDetector,
     ElasticCoordTransformGraph,
-    RawDetector,
     SampleRun,
 )
 from scipp.testing import assert_allclose
 
-from ess.reduce.nexus.types import DetectorBankSizes, Filename
+from ess.reduce.nexus.types import Filename
+
+_DSPACE_BINS = sc.linspace('dspacing', 0.8, 2.2, 4001, unit='angstrom')
 
 
 def test_can_reduce_using_known_peaks_workflow():
     wf = BeerModMcStasWorkflowKnownPeaks()
-    wf[DHKLList] = duplex_peaks_array()
+    wf[DHKLList] = silicon_peaks_array()
     wf[DetectorBank] = DetectorBank.north
-    wf[Filename[SampleRun]] = mcstas_duplex(7)
-    da = wf.compute(WavelengthDetector[SampleRun])
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(7)
+    result = wf.compute(
+        (WavelengthDetector[SampleRun], ElasticCoordTransformGraph[SampleRun])
+    )
+    da = result[WavelengthDetector[SampleRun]]
     assert 'wavelength' in da.bins.coords
     # assert dataarray has all coords required to compute dspacing
     da = da.transform_coords(
         ('dspacing',),
-        graph=scn.conversion.graph.tof.elastic('tof'),
+        graph=result[ElasticCoordTransformGraph[SampleRun]],
     )
-    h = da.hist(dspacing=2000, dim=da.dims)
+    h = da.hist(dspacing=_DSPACE_BINS, dim=da.dims)
     max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
     assert_allclose(
         max_peak_d,
-        sc.scalar(2.0407, unit='angstrom'),
-        atol=sc.scalar(2e-3, unit='angstrom'),
+        sc.scalar(1.6374, unit='angstrom'),
+        atol=sc.scalar(5e-4, unit='angstrom'),
     )
 
 
 @pytest.mark.parametrize(
-    'fname', [mcstas_silicon_new_model(7), mcstas_more_neutrons_3d_detector_example()]
+    'fname',
+    [
+        mcstas_silicon_new_model(7),
+        mcstas_silicon_new_model(10),
+        mcstas_silicon_new_model(16),
+        mcstas_more_neutrons_3d_detector_example(),
+    ],
 )
 def test_can_reduce_using_unknown_peaks_workflow(fname):
     wf = BeerModMcStasWorkflow()
     wf[Filename[SampleRun]] = fname
     wf[DetectorBank] = DetectorBank.north
-    wf.insert(mcstas_chopper_delay_from_mode_new_simulations)
-    da = wf.compute(WavelengthDetector[SampleRun])
+    result = wf.compute(
+        (WavelengthDetector[SampleRun], ElasticCoordTransformGraph[SampleRun])
+    )
+    da = result[WavelengthDetector[SampleRun]]
+    assert 'wavelength' in da.bins.coords
     da = da.transform_coords(
         ('dspacing',),
-        graph=scn.conversion.graph.tof.elastic('tof'),
+        graph=result[ElasticCoordTransformGraph[SampleRun]],
     )
-    h = da.hist(dspacing=2000, dim=da.dims)
+    h = da.hist(dspacing=_DSPACE_BINS, dim=da.dims)
     max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
     assert_allclose(
         max_peak_d,
@@ -78,7 +90,7 @@ def test_can_reduce_using_unknown_peaks_workflow(fname):
         sc.scalar(1.5677, unit='angstrom')
         if max_peak_d < sc.scalar(1.6, unit='angstrom')
         else sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(2e-3, unit='angstrom'),
+        atol=sc.scalar(5e-4, unit='angstrom'),
     )
 
 
@@ -96,17 +108,17 @@ def test_pulse_shaping_workflow():
         ('dspacing',),
         graph=res[ElasticCoordTransformGraph[SampleRun]],
     )
-    h = da.hist(dspacing=2000, dim=da.dims)
+    h = da.hist(dspacing=_DSPACE_BINS, dim=da.dims)
     max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
     assert_allclose(
         max_peak_d,
         sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(2e-3, unit='angstrom'),
+        atol=sc.scalar(5e-4, unit='angstrom'),
     )
 
 
 def test_powder_mcstas_analytical_workflow_computes_dspacing():
-    wf = BeerPowderMcStasWorkflowAnalytical()
+    wf = BeerPowderMcStasWorkflow()
     wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
     wf[DetectorBank] = DetectorBank.north
 
@@ -114,46 +126,40 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
 
     assert 'wavelength' in da.bins.coords
     assert 'dspacing' in da.bins.coords
-    h = da.hist(dspacing=2000, dim=da.dims)
+    h = da.hist(dspacing=_DSPACE_BINS, dim=da.dims)
     max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
     assert_allclose(
         max_peak_d,
         sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(2e-3, unit='angstrom'),
+        atol=sc.scalar(5e-4, unit='angstrom'),
     )
 
 
-def test_can_load_3d_detector():
-    sizes = {
-        'north_detector': {'x': 500, 'y': 200},
-        'south_detector': {'x': 500, 'y': 200},
-    }
-    load_beer_mcstas(
-        mcstas_few_neutrons_3d_detector_example(), DetectorBank.north, sizes
-    )
-    da = load_beer_mcstas(
-        mcstas_few_neutrons_3d_detector_example(), DetectorBank.south, sizes
-    )
-    assert 'panel' in da.dims
-    # Detector position.x is monotone in panel dimension.
-    panel_x_diff = np.diff(da.coords['detector_position'].fields.x.values)
-    assert (panel_x_diff > 0).all() or (panel_x_diff < 0).all()
+@pytest.mark.parametrize(
+    'fname',
+    [
+        pytest.param(mcstas_duplex(7), id='legacy-2d'),
+        pytest.param(mcstas_silicon_new_model(7), id='new-2d'),
+        pytest.param(mcstas_few_neutrons_3d_detector_example(), id='panelized-3d'),
+        pytest.param(mcstas_powder_silicon_in_vanadium_can(), id='powder-2d'),
+    ],
+)
+@pytest.mark.parametrize('bank', DetectorBank)
+def test_can_load_all_detector_generations(fname, bank):
+    da = load_beer_mcstas(fname, bank)
+
+    assert da.coords['pixel_id'].dtype == sc.DType.int32
+    assert 'position' in da.coords
+    assert 'event_time_offset' in da.bins.coords
+    assert da.bins.size().sum().value > 0
 
 
-def test_load_pulse_shaping_detector_adds_nominal_time_at_chopper():
-    sizes = {
-        'north_detector': {'x': 500, 'y': 200},
-        'south_detector': {'x': 500, 'y': 200},
-    }
+def test_loaded_mcstas_event_variances_are_squared_weights():
+    da = load_beer_mcstas(mcstas_few_neutrons_3d_detector_example(), DetectorBank.north)
+    weights = da.bins.constituents['data']
 
-    da = load_beer_mcstas(mcstas_silicon_new_model(6), DetectorBank.north, sizes)
-
-    assert 'wavelength_estimate' not in da.coords
-    assert_allclose(
-        da.coords['nominal_time_at_chopper'].to(unit='ms'),
-        sc.scalar(5.07692, unit='ms'),
-        atol=sc.scalar(1e-5, unit='ms'),
-    )
+    assert weights.variances is not None
+    assert_allclose(sc.variances(weights), sc.values(weights) ** 2)
 
 
 def test_can_load_monitor():
@@ -171,27 +177,3 @@ def test_io_module_reexports_mcstas_loaders():
         io = importlib.import_module('ess.beer.io')
 
     assert io.load_beer_mcstas is load_beer_mcstas
-
-
-@pytest.mark.parametrize(
-    ('bank_in_sizes', 'bank'),
-    [
-        ('south_detector', DetectorBank.south),
-        ('north_detector', DetectorBank.north),
-        (DetectorBank.south, DetectorBank.south),
-        (DetectorBank.north, DetectorBank.north),
-    ],
-)
-@pytest.mark.parametrize(
-    'fname', [mcstas_silicon_new_model(7), mcstas_more_neutrons_3d_detector_example()]
-)
-def test_detector_bank_size_parameter_determines_loaded_detector_size(
-    bank_in_sizes, bank, fname
-):
-    wf = BeerMcStasWorkflowPulseShaping()
-    wf[Filename[SampleRun]] = fname
-    wf[DetectorBank] = bank
-    wf[DetectorBankSizes] = {bank_in_sizes: {'x': 10, 'y': 20}}
-    res = wf.compute(RawDetector[SampleRun])
-    assert res.sizes['x'] == 10
-    assert res.sizes['y'] == 20

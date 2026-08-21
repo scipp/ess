@@ -1,26 +1,24 @@
 import scipp as sc
-from ess.powder.types import RunType
+from ess.powder.types import ElasticCoordTransformGraph, RunType
 from scipy.signal import find_peaks, medfilt
 
-from .conversions import tof_from_nominal_time_at_chopper_graph
-from .types import (
-    GeometryCoordTransformGraph,
-    RawDetector,
-    StreakClusteredData,
-)
+from .types import RawDetector, StreakClusteredData
 
 
 def cluster_events_by_streak(
-    da: RawDetector[RunType], gg: GeometryCoordTransformGraph
+    da: RawDetector[RunType],
+    graph: ElasticCoordTransformGraph[RunType],
 ) -> StreakClusteredData[RunType]:
-    graph = tof_from_nominal_time_at_chopper_graph(da, gg)
-
-    da = da.transform_coords(['dspacing'], graph=graph)
+    da = da.transform_coords(
+        ['dspacing', 'tof', 'Ltotal', 'two_theta'],
+        graph=graph,
+        keep_intermediate=False,
+    )
     da.bins.coords['coarse_d'] = da.bins.coords.pop('dspacing').to(unit='angstrom')
 
     # We need to keep these coordinates after binning,
     # adding them to the binned data coords achieves this.
-    for coord in ('two_theta', 'Ltotal', 'frame_cutoff_time'):
+    for coord in ('two_theta', 'Ltotal'):
         da.bins.coords[coord] = sc.bins_like(da, da.coords[coord])
 
     h = da.bins.concat().hist(coarse_d=1000)
@@ -32,11 +30,7 @@ def cluster_events_by_streak(
     )
 
     valleys = h.coords['coarse_d'][i_valleys]
-    peaks = sc.array(
-        dims=['coarse_d'],
-        values=h.coords['coarse_d'].values[i_peaks],
-        unit=h.coords['coarse_d'].unit,
-    )
+    peaks = h.coords['coarse_d'][i_peaks]
 
     has_peak = peaks.bin(coarse_d=valleys).bins.size().data.to(dtype='bool')
     filtered_valleys = valleys[
@@ -59,6 +53,3 @@ def cluster_events_by_streak(
     b = b.bins.drop_coords(('coarse_d',))
     b = b.rename_dims(coarse_d='streak')
     return b
-
-
-providers = (cluster_events_by_streak,)
