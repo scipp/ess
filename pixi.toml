@@ -28,6 +28,9 @@ args = ["package"]
 # ==================== Package features ====================
 
 # essreduce (core package, no workspace deps)
+[feature.essreduce.dependencies]
+numba = ">=0.63"  # Prefer conda-forge Numba as it installs thread safe backends for all platforms
+
 [feature.essreduce.pypi-dependencies]
 essreduce = { path = "packages/essreduce", editable = true, extras = ["test"] }
 
