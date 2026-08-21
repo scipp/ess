@@ -36,9 +36,6 @@ _registry = make_registry(
         "dhkl_quartz_nc.tab": "md5:40887d736e3acf859e44488bfd9a9213",
         # Simulations from new model with corrected(?) moderator to detector
         # distance.
-        # For correct reduction you need to use
-        # beer.mcstas.mcstas_chopper_delay_from_mode_new_simulations
-        # to obtain the correct WavelengthDefinitionChopperDelay for these files.
         "silicon-mode10-new-model.h5": "md5:98500830f27700fc719634e1acd49944",
         "silicon-mode16-new-model.h5": "md5:393f9287e7d3f97ceedbe64343918413",
         "silicon-mode3-new-model.h5": "md5:260fc811352b96c1dcdf431d91c11787",

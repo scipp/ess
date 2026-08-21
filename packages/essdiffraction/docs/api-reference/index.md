@@ -124,13 +124,11 @@
    :toctree: ../generated/functions
 
    BeerMcStasWorkflowPulseShaping
-   BeerMcStasWorkflowPulseShapingAnalytical
    BeerModMcStasWorkflowKnownPeaks
    BeerModMcStasWorkflow
    BeerPowderWorkflow
    BeerPowderWorkflowAnalytical
    BeerPowderMcStasWorkflow
-   BeerPowderMcStasWorkflowAnalytical
 ```
 
 ### Top-level functions
