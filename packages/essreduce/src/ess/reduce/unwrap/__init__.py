@@ -28,6 +28,7 @@ from .to_wavelength import providers
 from .types import (
     DetectorLtotal,
     ErrorLimitedLookupTable,
+    FrameUnwrapBackend,
     LookupTable,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
@@ -48,6 +49,7 @@ __all__ = [
     "DiskChoppers",
     "DistanceResolution",
     "ErrorLimitedLookupTable",
+    "FrameUnwrapBackend",
     "GenericUnwrapWorkflow",
     "LookupTable",
     "LookupTableFilename",
