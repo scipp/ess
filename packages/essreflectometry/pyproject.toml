@@ -43,7 +43,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
-    "pytest>=7.0",
+    "pytest>=9.0",
     "pooch>=1.5",
 ]
 gui = [
