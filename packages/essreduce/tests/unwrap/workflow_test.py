@@ -22,6 +22,7 @@ from ess.reduce.nexus.types import (
     SampleRun,
 )
 from ess.reduce.unwrap import (
+    FrameUnwrapBackend,
     GenericUnwrapWorkflow,
     fakes,
     simulate_chopper_cascade_using_tof,
@@ -33,8 +34,17 @@ sl = pytest.importorskip("sciline")
 Monitor0 = NewType("Monitor0", int)
 
 
+def test_GenericUnwrapWorkflow_defaults_to_numba_backend():
+    wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
+
+    assert wf.compute(FrameUnwrapBackend) == FrameUnwrapBackend.numba
+
+
 def _make_workflow(
-    wavelength_from, *, keep_event_time_offset=False
+    wavelength_from,
+    *,
+    backend: FrameUnwrapBackend = FrameUnwrapBackend.numba,
+    keep_event_time_offset=False,
 ) -> sciline.Pipeline:
     sizes = {'detector_number': 10}
     detector_geometry = sc.DataArray(
@@ -88,6 +98,7 @@ def _make_workflow(
         monitor_types=[Monitor0],
         wavelength_from=wavelength_from,
     )
+    wf[FrameUnwrapBackend] = backend
     wf[NeXusDetectorName] = "detector"
     wf[NeXusName[Monitor0]] = "monitor"
     wf[unwrap.LookupTableRelativeErrorThreshold] = {
@@ -122,10 +133,11 @@ def simulation_results_psc_choppers():
 
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 @pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize("backend", ["numba", "scipy"])
 def test_GenericUnwrapWorkflow_computes_wavelength(
-    wavelength_from, detector_or_monitor, simulation_results_psc_choppers
+    wavelength_from, detector_or_monitor, backend, simulation_results_psc_choppers
 ):
-    wf = _make_workflow(wavelength_from=wavelength_from)
+    wf = _make_workflow(wavelength_from=wavelength_from, backend=backend)
 
     if wavelength_from == "simulation":
         wf[unwrap.SimulationResults[SampleRun]] = simulation_results_psc_choppers
