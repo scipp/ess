@@ -1,8 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
-import numpy as np
+from unittest.mock import patch
 
+import numba
+import numpy as np
+import pytest
+
+from ess.reduce.unwrap import FrameUnwrapBackend, to_wavelength
 from ess.reduce.unwrap.interpolator_numba import (
     Interpolator as InterpolatorNumba,
 )
@@ -100,3 +105,55 @@ def test_numba_and_scipy_interpolators_yield_same_results_with_values_on_edges()
     numba_result = numba_interp(times, distances)
     scipy_result = scipy_interp(times, distances)
     assert np.allclose(numba_result, scipy_result, equal_nan=True)
+
+
+def test_scipy_backend_selects_scipy(monkeypatch):
+    def fail_if_called():
+        raise AssertionError('Numba should not be checked for the SciPy backend.')
+
+    monkeypatch.setattr(numba, 'get_num_threads', fail_if_called)
+
+    impl = to_wavelength._get_interpolator_class(FrameUnwrapBackend.scipy)
+
+    assert impl is InterpolatorScipy
+
+
+def test_numba_backend_selects_numba():
+    impl = to_wavelength._get_interpolator_class(FrameUnwrapBackend.numba)
+
+    assert impl is InterpolatorNumba
+
+
+def test_numba_backend_falls_back_to_scipy_without_threadsafe_backend(monkeypatch):
+    def unavailable_backend():
+        raise ValueError('No threading layer could be loaded.')
+
+    monkeypatch.setattr(numba, 'get_num_threads', unavailable_backend)
+
+    with pytest.warns(
+        FutureWarning,
+        match="fallback is deprecated and will be an error in a future release",
+    ):
+        impl = to_wavelength._get_interpolator_class(FrameUnwrapBackend.numba)
+
+    assert impl is InterpolatorScipy
+
+
+def test_numba_backend_falls_back_to_scipy_without_numba():
+    with (
+        patch.dict('sys.modules', {'numba': None}),
+        pytest.warns(FutureWarning, match="Numba is unavailable"),
+    ):
+        impl = to_wavelength._get_interpolator_class(FrameUnwrapBackend.numba)
+
+    assert impl is InterpolatorScipy
+
+
+def test_numba_backend_falls_back_to_scipy_for_workqueue(monkeypatch):
+    monkeypatch.setattr(numba, 'get_num_threads', lambda: 1)
+    monkeypatch.setattr(numba, 'threading_layer', lambda: 'workqueue')
+
+    with pytest.warns(FutureWarning, match="thread-safe threading layer"):
+        impl = to_wavelength._get_interpolator_class(FrameUnwrapBackend.numba)
+
+    assert impl is InterpolatorScipy
