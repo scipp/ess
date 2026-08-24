@@ -33,7 +33,7 @@ dependencies = [
   "dask>=2022.1.0",
   "graphviz>=0.20",
   "plopp[all]>=23.10.0",
-  "tifffile>=2024.7.2",
+  "tifffile>=2026.5.2",
   "essreduce>=26.6.2",
   "scitiff>=26.6",
 ]
