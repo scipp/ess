@@ -29,10 +29,24 @@ def _reconstruct_wavelength(
 _BASE_TWO_THETA_RESOLUTION = 1024
 """Number of bins used to cover the full two-theta range of a detector.
 
-The two-theta binning used for focussing must be fine enough that the wavelength
-reconstructed from bin centers (see :func:`_reconstruct_wavelength`) is accurate
-enough for a monitor normalization. This is independent of the two-theta binning
+This sets the resolution of the wavelength reconstructed from bin centers, see
+:func:`_reconstruct_wavelength`. It is independent of the two-theta binning
 requested for the final result, see :func:`_focussing_two_theta_bins`.
+
+It only matters when focussing produces a histogram *and* the run is normalized
+by a monitor histogram. The monitor is then looked up once per (d-spacing,
+two-theta) bin and the lookup is piecewise constant on the bins of the monitor,
+so the wavelength spread within a bin should stay below the width of a monitor
+bin. Since
+
+.. math::
+
+    \\frac{\\Delta\\lambda}{\\lambda}
+    = \\frac{\\Delta 2\\theta}{2} \\cot\\theta
+
+this is most demanding at small scattering angles. If the focussed data keeps
+its events, they carry their own wavelength and this number has no influence on
+the result.
 """
 
 
