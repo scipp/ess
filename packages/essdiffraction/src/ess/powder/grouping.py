@@ -86,18 +86,19 @@ def _focussing_two_theta_bins(
             unit=two_theta.unit,
         )
     edges = requested.to(unit=two_theta.unit, dtype='float64').values
-    n_sub = np.ceil(np.diff(edges) / base_width).astype(int)
-    # Each piece starts at an exact requested edge, so those edges are preserved.
-    refined = [
-        np.linspace(low, high, num=n + 1)[:-1]
-        for low, high, n in zip(edges[:-1], edges[1:], n_sub, strict=True)
-    ]
+    widths = np.diff(edges)
+    n_sub = np.ceil(widths / base_width).astype(int)
+    # Index of the requested bin each sub-bin belongs to, and its position within it.
+    # The first sub-bin of a requested bin reproduces its lower edge exactly.
+    offset = np.concatenate([[0], np.cumsum(n_sub)])
+    index = np.repeat(np.arange(len(n_sub)), n_sub)
+    position = (np.arange(offset[-1]) - offset[index]) / n_sub[index]
     return sc.array(
         dims=['two_theta'],
         values=np.concatenate(
             [
                 _extend_edges(edges[0], -base_width, lo.value),
-                *refined,
+                edges[index] + position * widths[index],
                 edges[-1:],
                 _extend_edges(edges[-1], base_width, hi.value),
             ]
