@@ -62,6 +62,7 @@ def _focus_and_group(
         sc.linspace('two_theta', 0.8, 2.4, num=17, unit='rad'),
         sc.array(dims=['two_theta'], values=[0.5, 0.6, 1.5, 1.55, 2.9], unit='rad'),
         sc.linspace('two_theta', 0.0, 180.0, num=19, unit='deg'),
+        sc.array(dims=['two_theta'], values=[0.5, 1.5, 1.5, 2.9], unit='rad'),
         sc.array(dims=['two_theta'], values=[0.5, 0.5, 1.5, 2.9, 2.9], unit='rad'),
     ],
     ids=[
@@ -69,7 +70,8 @@ def _focus_and_group(
         'few-wide-rad',
         'non-uniform-rad',
         'beyond-detector-deg',
-        'zero-width-rad',
+        'zero-width-interior-rad',
+        'zero-width-outermost-rad',
     ],
 )
 def test_group_two_theta_matches_direct_histogram(

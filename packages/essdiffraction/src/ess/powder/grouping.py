@@ -99,8 +99,8 @@ def _focussing_two_theta_bins(
         )
     edges = requested.to(unit=two_theta.unit, dtype='float64').values
     widths = np.diff(edges)
-    # Zero-width bins are kept as zero-width sub-bins; like scipp's own binning,
-    # they end up empty.
+    # A zero-width bin gets a single zero-width sub-bin instead of none, which keeps
+    # the sub-bin width well-defined. It comes out empty, as it would from scipp.
     n_sub = np.maximum(np.ceil(widths / base_width), 1).astype(int)
     # Index of the requested bin each sub-bin belongs to, and its position within it.
     # The first sub-bin of a requested bin reproduces its lower edge exactly.
