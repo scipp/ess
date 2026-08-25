@@ -71,6 +71,12 @@ def _focussing_two_theta_bins(
     this alignment, each focussing bin is assigned as a whole to the requested
     bin containing its center, so the number of bins per group varies
     periodically and produces large spikes in the result.
+
+    Beyond the requested range the grid continues at the width of the outermost
+    sub-bins rather than the base width. This keeps the edges linearly spaced
+    when ``requested`` is, which :func:`scipp.bin` and :func:`scipp.hist` can
+    exploit. Since a sub-bin is never narrower than half the base width, it at
+    most doubles the number of bins needed to reach the ends of the range.
     """
     lo = two_theta.nanmin()
     hi = two_theta.nanmax()
@@ -93,14 +99,15 @@ def _focussing_two_theta_bins(
     offset = np.concatenate([[0], np.cumsum(n_sub)])
     index = np.repeat(np.arange(len(n_sub)), n_sub)
     position = (np.arange(offset[-1]) - offset[index]) / n_sub[index]
+    sub_widths = widths / n_sub
     return sc.array(
         dims=['two_theta'],
         values=np.concatenate(
             [
-                _extend_edges(edges[0], -base_width, lo.value),
+                _extend_edges(edges[0], -sub_widths[0], lo.value),
                 edges[index] + position * widths[index],
                 edges[-1:],
-                _extend_edges(edges[-1], base_width, hi.value),
+                _extend_edges(edges[-1], sub_widths[-1], hi.value),
             ]
         ),
         unit=two_theta.unit,
