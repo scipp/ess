@@ -74,9 +74,11 @@ def _focussing_two_theta_bins(
 
     Beyond the requested range the grid continues at the width of the outermost
     sub-bins rather than the base width. This keeps the edges linearly spaced
-    when ``requested`` is, which :func:`scipp.bin` and :func:`scipp.hist` can
-    exploit. Since a sub-bin is never narrower than half the base width, it at
-    most doubles the number of bins needed to reach the ends of the range.
+    when ``requested`` is, which is faster to bin into: :func:`scipp.bin` and
+    :func:`scipp.hist` can then compute bin indices directly instead of
+    searching for them. Since a sub-bin is never narrower than half the base
+    width, it at most doubles the number of bins needed to reach the ends of
+    the range.
     """
     lo = two_theta.nanmin()
     hi = two_theta.nanmax()
