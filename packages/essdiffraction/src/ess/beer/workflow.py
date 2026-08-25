@@ -12,6 +12,7 @@ from ess.powder.types import (
     CaveMonitor,
     EmptyCanRun,
     SampleRun,
+    TwoThetaBins,
     VanadiumRun,
 )
 
@@ -32,6 +33,7 @@ from .types import DetectorBank, PulseLength
 
 default_parameters = {
     CalibrationData: None,
+    TwoThetaBins: None,
     PulseLength: sc.scalar(0.003, unit='s'),
     DetectorBankSizes: {
         'south_detector': {'y': 200, 'x': 500},
