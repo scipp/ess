@@ -73,7 +73,8 @@ pixels by scattering angle into bins given by these edges.
 
 The focussing step aligns its internal, finer 2theta binning with these edges,
 so setting them also affects results that are integrated over 2theta.
-``None`` means that the data will not be grouped by 2theta.
+``None`` means that no 2theta grouping is available: the workflow can then only
+produce results integrated over 2theta and raises if grouped data is requested.
 """
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode

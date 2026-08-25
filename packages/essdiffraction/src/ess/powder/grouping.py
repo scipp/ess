@@ -50,9 +50,13 @@ the result.
 """
 
 
-def _extend_edges(start: float, step: float, limit: float) -> np.ndarray:
-    """Ascending edges reaching from ``start`` (exclusive) past ``limit``."""
-    n = max(int(np.ceil((limit - start) / step)), 0)
+def _extend_edges(start: float, limit: float, step: float) -> np.ndarray:
+    """Ascending edges reaching from ``start`` (exclusive) past ``limit``.
+
+    Empty if ``limit`` has already been passed, which happens when the requested
+    bins extend beyond the range of the detector.
+    """
+    n = int(np.ceil((limit - start) / step))
     edges = start + step * np.arange(1, n + 1)
     return edges if step > 0 else edges[::-1]
 
@@ -95,21 +99,27 @@ def _focussing_two_theta_bins(
         )
     edges = requested.to(unit=two_theta.unit, dtype='float64').values
     widths = np.diff(edges)
-    n_sub = np.ceil(widths / base_width).astype(int)
+    # Zero-width bins are kept as zero-width sub-bins; like scipp's own binning,
+    # they end up empty.
+    n_sub = np.maximum(np.ceil(widths / base_width), 1).astype(int)
     # Index of the requested bin each sub-bin belongs to, and its position within it.
     # The first sub-bin of a requested bin reproduces its lower edge exactly.
     offset = np.concatenate([[0], np.cumsum(n_sub)])
     index = np.repeat(np.arange(len(n_sub)), n_sub)
     position = (np.arange(offset[-1]) - offset[index]) / n_sub[index]
     sub_widths = widths / n_sub
+    # A zero-width outermost bin provides no step to continue the grid with. The
+    # grid is not linearly spaced in that case anyway, so fall back to the base width.
+    low_step = sub_widths[0] if sub_widths[0] > 0 else base_width
+    high_step = sub_widths[-1] if sub_widths[-1] > 0 else base_width
     return sc.array(
         dims=['two_theta'],
         values=np.concatenate(
             [
-                _extend_edges(edges[0], -sub_widths[0], lo.value),
+                _extend_edges(edges[0], lo.value, -low_step),
                 edges[index] + position * widths[index],
                 edges[-1:],
-                _extend_edges(edges[-1], sub_widths[-1], hi.value),
+                _extend_edges(edges[-1], hi.value, high_step),
             ]
         ),
         unit=two_theta.unit,
@@ -182,6 +192,18 @@ def integrate_two_theta(
     )
 
 
+def _check_aligned(edges: sc.Variable, requested: sc.Variable) -> None:
+    """Raise unless every requested edge occurs in ``edges``."""
+    grid = edges.values
+    found = np.clip(np.searchsorted(grid, requested.values), 0, len(grid) - 1)
+    if not np.array_equal(grid[found], requested.values):
+        raise ValueError(
+            'The two-theta binning of the data is not aligned with the requested '
+            'bins. The data must be focussed with the same TwoThetaBins, see '
+            'focus_data_dspacing_and_two_theta.'
+        )
+
+
 def group_two_theta(
     data: NormalizedDspacing[RunType],
     two_theta_bins: TwoThetaBins,
@@ -190,19 +212,26 @@ def group_two_theta(
 
     ``data`` was focussed onto a finer two-theta grid that is aligned with
     ``two_theta_bins``, see :func:`focus_data_dspacing_and_two_theta`. Grouping is
-    therefore an exact sum over whole sub-bins.
+    therefore an exact sum over whole sub-bins. This requires that both steps were
+    given the same bins; otherwise, an exception is raised.
     """
     if two_theta_bins is None:
         raise ValueError("Cannot group by two-theta, no 'TwoThetaBins' were set.")
     if 'two_theta' not in data.dims:
         raise ValueError("Data does not have a 'two_theta' dimension.")
-    data = data.assign_coords(
-        two_theta=sc.midpoints(data.coords['two_theta']).to(unit=two_theta_bins.unit)
+    edges = data.coords['two_theta']
+    # Grouping in the unit of the data keeps the requested edges bit-identical to the
+    # grid built by focussing, so that the alignment can be checked exactly.
+    bins = two_theta_bins.to(unit=edges.unit, dtype='float64')
+    _check_aligned(edges, bins)
+    data = data.assign_coords(two_theta=sc.midpoints(edges))
+    grouped = (
+        data.groupby('two_theta', bins=bins).nansum('two_theta')
+        if data.bins is None
+        else data.bin(two_theta=bins)
     )
     return FocussedDataDspacingTwoTheta[RunType](
-        data.groupby('two_theta', bins=two_theta_bins).nansum('two_theta')
-        if data.bins is None
-        else data.bin(two_theta=two_theta_bins)
+        grouped.assign_coords(two_theta=two_theta_bins)
     )
 
 

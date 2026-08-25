@@ -51,7 +51,7 @@ def _focus_and_group(
         KeepEvents[SampleRun](keep_events),
     )
     grouped = group_two_theta(focussed, two_theta_bins)
-    return grouped if grouped.bins is None else grouped.hist()
+    return grouped.hist() if grouped.is_binned else grouped
 
 
 @pytest.mark.parametrize('keep_events', [True, False])
@@ -61,8 +61,16 @@ def _focus_and_group(
         sc.linspace('two_theta', 75.0, 105.0, num=180, unit='deg'),
         sc.linspace('two_theta', 0.8, 2.4, num=17, unit='rad'),
         sc.array(dims=['two_theta'], values=[0.5, 0.6, 1.5, 1.55, 2.9], unit='rad'),
+        sc.linspace('two_theta', 0.0, 180.0, num=19, unit='deg'),
+        sc.array(dims=['two_theta'], values=[0.5, 0.5, 1.5, 2.9, 2.9], unit='rad'),
     ],
-    ids=['many-narrow-deg', 'few-wide-rad', 'non-uniform-rad'],
+    ids=[
+        'many-narrow-deg',
+        'few-wide-rad',
+        'non-uniform-rad',
+        'beyond-detector-deg',
+        'zero-width-rad',
+    ],
 )
 def test_group_two_theta_matches_direct_histogram(
     detector, two_theta_bins, keep_events
@@ -108,6 +116,28 @@ def test_focussing_without_requested_bins_keeps_all_counts(detector):
     assert sc.allclose(
         focussed.sum().data, detector.hist(dspacing=DSPACING_BINS).sum().data
     )
+
+
+@pytest.mark.parametrize('keep_events', [True, False])
+def test_focussing_with_descending_bins_raises(detector, keep_events):
+    two_theta_bins = sc.array(dims=['two_theta'], values=[0.5, 1.5, 1.0], unit='rad')
+    with pytest.raises(sc.BinEdgeError):
+        focus_data_dspacing_and_two_theta(
+            detector, DSPACING_BINS, two_theta_bins, KeepEvents[SampleRun](keep_events)
+        )
+
+
+@pytest.mark.parametrize('keep_events', [True, False])
+def test_group_two_theta_with_misaligned_bins_raises(detector, keep_events):
+    focussed = focus_data_dspacing_and_two_theta(
+        detector,
+        DSPACING_BINS,
+        sc.linspace('two_theta', 0.8, 2.4, num=17, unit='rad'),
+        KeepEvents[SampleRun](keep_events),
+    )
+    other_bins = sc.linspace('two_theta', 0.8, 2.4, num=23, unit='rad')
+    with pytest.raises(ValueError, match='aligned'):
+        group_two_theta(focussed, other_bins)
 
 
 def test_group_two_theta_without_requested_bins_raises(detector):
