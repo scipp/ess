@@ -188,5 +188,9 @@ def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
         data.loki_tutorial_run_60392()
     )
     workflow[Filename[EmptyBeamRun]] = str(data.loki_tutorial_run_60392())
-    workflow[BeamCenter] = sc.vector(value=[-0.02914868, -0.01816138, 0.0], unit='m')
+    # Beam center determined with `beam_center_from_center_of_mass`, the Z component
+    # being the distance from the sample at which it was determined.
+    workflow[BeamCenter] = sc.vector(
+        value=[-0.02914868, -0.01816138, 4.11610], unit='m'
+    )
     return workflow

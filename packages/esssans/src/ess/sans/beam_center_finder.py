@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import uuid
+from dataclasses import dataclass
 
 import numpy as np
 import sciline
@@ -120,7 +121,6 @@ def _find_beam_center(
                 > slope * distance_to_center.fields.x - beam_stop_arm_width
             )
 
-    center.data.fields.z = sc.scalar(0.0, unit=center.data.unit)
     return center.data
 
 
@@ -180,7 +180,16 @@ def beam_center_from_center_of_mass_alternative(
 
     workflow = _with_default_beam_center(workflow)
     data = workflow.compute(CorrectedDetector[SampleRun, Numerator])
-    return _find_beam_center(data, beam_stop_radius, beam_stop_arm_width)
+    graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
+    com = _find_beam_center(data, beam_stop_radius, beam_stop_arm_width)
+    return BeamCenter(com - _sample_position(data, graph))
+
+
+def _sample_position(data: sc.DataArray, graph: dict) -> sc.Variable:
+    """Sample position as defined by the coordinate transformation graph."""
+    return data.transform_coords('sample_position', graph=graph).coords[
+        'sample_position'
+    ]
 
 
 def _with_default_beam_center(workflow: sciline.Pipeline) -> sciline.Pipeline:
@@ -206,9 +215,37 @@ def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     The center-of-mass is simply the weighted mean of the positions.
     Areas with low counts are excluded from the center of mass calculation, as they
     typically fall into asymmetric regions of the detector panel and would thus lead
-    to a biased result. The beam is assumed to be roughly aligned with the Z axis.
-    The returned beam center is the component normal to the beam direction, projected
-    onto the X-Y plane.
+    to a biased result.
+
+    The result is the center-of-mass relative to the sample, i.e., the transverse offset
+    of the beam together with the distance from the sample at which that offset was
+    determined. See :py:class:`ess.sans.types.BeamCenter`.
+
+    On a bank with depth, the reported distance is the intensity-weighted mean depth,
+    not the geometric center of the bank: layers closer to the sample see more counts
+    and pull it forward. That is consistent rather than wrong. The transverse position
+    of the beam is linear in the distance from the sample, so any intensity-weighted
+    average of points on the beam is again a point on the beam. The weighting moves the
+    result along the beam, not away from it, and the reported distance says where it
+    ended up.
+
+    This holds as long as the intensity is symmetric around the beam at every depth. It
+    is not exactly true: masking, the shadow of the beam stop and, with gravity, the
+    wavelength-dependent drop all bias the center-of-mass, and they do so differently at
+    different depths. The resulting uncertainty on the distance is a few centimetres for
+    a Loki bank, which is of the order of the depth of the bank itself. The distance is
+    used to extrapolate the transverse offset to other banks, where an error of a few
+    centimetres out of several metres is negligible, but it means the variation of the
+    correction *within* one bank is not resolved any better than the noise on it.
+
+    The result is anchored at the sample position, so an error in the sample position at
+    the time of determination tilts the inferred beam direction by that error divided by
+    the distance. One millimetre of transverse error at five metres is 0.2 mrad, which
+    is 0.24 mm of transverse error on a bank one metre from the sample. Errors along the
+    beam are second order and negligible. Note that this is an error on the beam
+    direction and does not require the sample to be in the same place for the run the
+    beam center is applied to: the direction is re-anchored at that run's own sample
+    position.
 
     Parameters
     ----------
@@ -253,53 +290,50 @@ def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     pos = pos[select]
     com = sc.sum(pos * v) / v.sum()
 
-    # We compute the shift between the incident beam direction and the center-of-mass.
-    # Both are anchored at the sample, so the center-of-mass must be taken relative to
-    # the sample position.
-    coords = summed.transform_coords(
-        ['incident_beam', 'sample_position'], graph=graph
-    ).coords
-    incident_beam = coords['incident_beam']
-    n_beam = incident_beam / sc.norm(incident_beam)
-    com = com - coords['sample_position']
-    com_shift = com - sc.dot(com, n_beam) * n_beam
-    xy = [com_shift.fields.x.value, com_shift.fields.y.value]
-    return BeamCenter(
-        _offsets_to_vector(
-            xy=xy,
-            unit_vectors=_beam_plane_unit_vectors(data=summed, graph=graph),
-            unit=summed.coords['position'].unit,
+    # The center-of-mass is a point on the beam, so relative to the sample it is the
+    # beam center, including the distance at which it was determined.
+    return BeamCenter(com - _sample_position(summed, graph))
+
+
+@dataclass(frozen=True)
+class _BeamPlane:
+    """
+    Plane normal to the incident beam in which beam-center offsets are expressed.
+
+    ``axis`` points from the sample to the plane, i.e., it carries the distance at which
+    the beam center is determined. Offsets alone do not define a beam direction, so
+    searching for a beam center means searching within such a plane.
+    """
+
+    unit_x: sc.Variable
+    unit_y: sc.Variable
+    axis: sc.Variable
+
+    @staticmethod
+    def from_beam_center(
+        data: sc.DataArray, graph: dict, beam_center: sc.Variable
+    ) -> '_BeamPlane':
+        """Plane containing ``beam_center``, normal to the incident beam."""
+        coords = data.transform_coords(
+            ['cyl_x_unit_vector', 'cyl_y_unit_vector', 'incident_beam'], graph=graph
+        ).coords
+        incident_beam = coords['incident_beam']
+        direction = incident_beam / sc.norm(incident_beam)
+        return _BeamPlane(
+            unit_x=coords['cyl_x_unit_vector'],
+            unit_y=coords['cyl_y_unit_vector'],
+            axis=sc.dot(beam_center, direction) * direction,
         )
-    )
 
+    def offsets(self, beam_center: sc.Variable) -> list[float]:
+        """Components of ``beam_center`` within the plane."""
+        return [sc.dot(beam_center, e).value for e in (self.unit_x, self.unit_y)]
 
-def _beam_plane_unit_vectors(
-    data: sc.DataArray, graph: dict
-) -> tuple[sc.Variable, sc.Variable]:
-    """
-    Return two unit vectors spanning the plane normal to the incident beam.
-
-    These do not depend on the beam center, which is applied to the scattered beam and
-    leaves the incident beam unchanged.
-    """
-    coords = data.transform_coords(
-        ['cyl_x_unit_vector', 'cyl_y_unit_vector'], graph=graph
-    ).coords
-    return coords['cyl_x_unit_vector'], coords['cyl_y_unit_vector']
-
-
-def _offsets_to_vector(
-    xy: list[float],
-    unit_vectors: tuple[sc.Variable, sc.Variable],
-    unit: str,
-) -> sc.Variable:
-    """
-    Convert x,y offsets inside the plane normal to the beam to a vector in absolute
-    coordinates.
-    """
-    center = xy[0] * unit_vectors[0] + xy[1] * unit_vectors[1]
-    center.unit = unit
-    return center
+    def beam_center(self, xy: list[float]) -> sc.Variable:
+        """Beam center given by offsets within the plane."""
+        center = xy[0] * self.unit_x + xy[1] * self.unit_y
+        center.unit = self.axis.unit
+        return center + self.axis
 
 
 def _iofq_in_quadrants(
@@ -307,7 +341,7 @@ def _iofq_in_quadrants(
     workflow: sciline.Pipeline,
     detector: sc.DataArray,
     norm: sc.DataArray,
-    unit_vectors: tuple[sc.Variable, sc.Variable],
+    plane: _BeamPlane,
 ) -> dict[str, sc.DataArray]:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
@@ -320,8 +354,8 @@ def _iofq_in_quadrants(
         The raw detector.
     norm:
         The denominator data for normalization.
-    unit_vectors:
-        Unit vectors spanning the plane normal to the beam, defining ``xy``.
+    plane:
+        The plane normal to the beam in which ``xy`` are given.
 
     Returns
     -------
@@ -335,9 +369,7 @@ def _iofq_in_quadrants(
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
     workflow = workflow.copy()
-    workflow[BeamCenter] = _offsets_to_vector(
-        xy=xy, unit_vectors=unit_vectors, unit=detector.coords['position'].unit
-    )
+    workflow[BeamCenter] = plane.beam_center(xy)
     graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
     calibrated = workflow.compute(CorrectedDetector[SampleRun, Numerator])
     with_phi = calibrated.transform_coords(
@@ -573,10 +605,13 @@ def beam_center_from_iofq(
     workflow[QBins] = q_bins
 
     # Use center of mass to get initial guess for beam center
-    com_shift = beam_center_from_center_of_mass(workflow)
-    logger.info('Initial guess for beam center: %s', com_shift)
+    com = beam_center_from_center_of_mass(workflow)
+    logger.info('Initial guess for beam center: %s', com)
 
-    unit_vectors = _beam_plane_unit_vectors(data=data, graph=graph)
+    # The refinement below only varies the offsets within the plane normal to the beam.
+    # The distance at which the beam center is determined is taken from the initial
+    # guess and kept fixed.
+    plane = _BeamPlane.from_beam_center(data=data, graph=graph, beam_center=com)
 
     coords = data.transform_coords(
         ['cylindrical_x', 'cylindrical_y'], graph=graph
@@ -589,16 +624,14 @@ def beam_center_from_iofq(
     # Refine using Scipy optimize
     res = minimize(
         _cost,
-        x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-        args=(workflow, detector, norm, unit_vectors),
+        x0=plane.offsets(com),
+        args=(workflow, detector, norm, plane),
         bounds=bounds,
         method=minimizer,
         tol=tolerance,
     )
 
-    center = _offsets_to_vector(
-        xy=res.x, unit_vectors=unit_vectors, unit=data.coords['position'].unit
-    )
+    center = plane.beam_center(res.x)
     logger.info('Final beam center value: %s', center)
     logger.info('Beam center finder minimizer info: %s', res)
     return center
