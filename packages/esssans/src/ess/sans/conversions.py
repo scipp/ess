@@ -13,6 +13,7 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
+    BeamCenter,
     BinnedQ,
     BinnedQxQy,
     CorrectForGravity,
@@ -31,6 +32,24 @@ from .types import (
     UncertaintyBroadcastMode,
     WavelengthMask,
 )
+
+
+def _scattered_beam_with_beam_center(beam_center: sc.Variable):
+    """
+    Return a provider for ``scattered_beam`` that accounts for the beam center.
+
+    Scattering angles must be measured relative to the actual beam, which in general
+    does not coincide with the nominal beam axis defined by source and sample. Shifting
+    the pixel positions by the beam center maps the actual beam onto the nominal axis,
+    so that all angles derived from the scattered beam are relative to the actual beam.
+    """
+
+    def scattered_beam(
+        position: sc.Variable, sample_position: sc.Variable
+    ) -> sc.Variable:
+        return position - sample_position - beam_center
+
+    return scattered_beam
 
 
 def cyl_unit_vectors(incident_beam: sc.Variable, gravity: sc.Variable):
@@ -102,6 +121,7 @@ def sans_elastic(
     *,
     sample_position: Position[snx.NXsample, RunType],
     source_position: Position[snx.NXsource, RunType],
+    beam_center: BeamCenter,
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:
     """
@@ -142,12 +162,16 @@ def sans_elastic(
         Position of the sample as a vector.
     source_position:
         Position of the source as a vector.
+    beam_center:
+        Offset of the beam from the nominal beam axis defined by source and sample,
+        in the plane normal to the beam.
     """  # noqa: E501
     graph = {
         **beamline.beamline(scatter=True),
         **tof.elastic_Q('wavelength'),
         'sample_position': lambda: sample_position,
         'source_position': lambda: source_position,
+        'scattered_beam': _scattered_beam_with_beam_center(beam_center),
         'gravity': lambda: gravity,
     }
     if correct_for_gravity:

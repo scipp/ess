@@ -178,13 +178,25 @@ def beam_center_from_center_of_mass_alternative(
     if beam_stop_arm_width is None:
         beam_stop_arm_width = sc.scalar(0.02, unit='m')
 
-    try:
-        beam_center = workflow.compute(BeamCenter)
-    except sciline.UnsatisfiedRequirement:
-        beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
-        workflow[BeamCenter] = beam_center
+    workflow = _with_default_beam_center(workflow)
     data = workflow.compute(CorrectedDetector[SampleRun, Numerator])
-    return _find_beam_center(data, beam_stop_radius, beam_stop_arm_width) + beam_center
+    return _find_beam_center(data, beam_stop_radius, beam_stop_arm_width)
+
+
+def _with_default_beam_center(workflow: sciline.Pipeline) -> sciline.Pipeline:
+    """
+    Return a workflow that can compute detector data even without a beam center set.
+
+    Computing the detector data may require a beam center, but the beam center found by
+    the functions below does not depend on it: it is derived from the pixel positions,
+    which the beam center does not modify.
+    """
+    try:
+        workflow.compute(BeamCenter)
+    except sciline.UnsatisfiedRequirement:
+        workflow = workflow.copy()
+        workflow[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    return workflow
 
 
 def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
@@ -208,12 +220,7 @@ def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     :
         The beam center position as a vector.
     """
-    try:
-        beam_center = workflow.compute(BeamCenter)
-    except sciline.UnsatisfiedRequirement:
-        beam_center = sc.vector([0.0, 0.0, 0.0], unit='m')
-        workflow = workflow.copy()
-        workflow[BeamCenter] = beam_center
+    workflow = _with_default_beam_center(workflow)
     data = workflow.compute(CorrectedDetector[SampleRun, Numerator])
     graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
 
@@ -257,21 +264,41 @@ def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     com = com - coords['sample_position']
     com_shift = com - sc.dot(com, n_beam) * n_beam
     xy = [com_shift.fields.x.value, com_shift.fields.y.value]
-    return beam_center + _offsets_to_vector(data=summed, xy=xy, graph=graph)
+    return BeamCenter(
+        _offsets_to_vector(
+            xy=xy,
+            unit_vectors=_beam_plane_unit_vectors(data=summed, graph=graph),
+            unit=summed.coords['position'].unit,
+        )
+    )
 
 
-def _offsets_to_vector(data: sc.DataArray, xy: list[float], graph: dict) -> sc.Variable:
+def _beam_plane_unit_vectors(
+    data: sc.DataArray, graph: dict
+) -> tuple[sc.Variable, sc.Variable]:
+    """
+    Return two unit vectors spanning the plane normal to the incident beam.
+
+    These do not depend on the beam center, which is applied to the scattered beam and
+    leaves the incident beam unchanged.
+    """
+    coords = data.transform_coords(
+        ['cyl_x_unit_vector', 'cyl_y_unit_vector'], graph=graph
+    ).coords
+    return coords['cyl_x_unit_vector'], coords['cyl_y_unit_vector']
+
+
+def _offsets_to_vector(
+    xy: list[float],
+    unit_vectors: tuple[sc.Variable, sc.Variable],
+    unit: str,
+) -> sc.Variable:
     """
     Convert x,y offsets inside the plane normal to the beam to a vector in absolute
     coordinates.
     """
-    u = data.coords['position'].unit
-    # Get two vectors that define the plane normal to the beam
-    coords = data.transform_coords(
-        ['cyl_x_unit_vector', 'cyl_y_unit_vector'], graph=graph
-    ).coords
-    center = xy[0] * coords['cyl_x_unit_vector'] + xy[1] * coords['cyl_y_unit_vector']
-    center.unit = u
+    center = xy[0] * unit_vectors[0] + xy[1] * unit_vectors[1]
+    center.unit = unit
     return center
 
 
@@ -280,6 +307,7 @@ def _iofq_in_quadrants(
     workflow: sciline.Pipeline,
     detector: sc.DataArray,
     norm: sc.DataArray,
+    unit_vectors: tuple[sc.Variable, sc.Variable],
 ) -> dict[str, sc.DataArray]:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
@@ -292,6 +320,8 @@ def _iofq_in_quadrants(
         The raw detector.
     norm:
         The denominator data for normalization.
+    unit_vectors:
+        Unit vectors spanning the plane normal to the beam, defining ``xy``.
 
     Returns
     -------
@@ -304,9 +334,11 @@ def _iofq_in_quadrants(
     phi_bins = sc.linspace('phi', -pi, pi, 5, unit='rad')
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
-    graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
     workflow = workflow.copy()
-    workflow[BeamCenter] = _offsets_to_vector(data=detector, xy=xy, graph=graph)
+    workflow[BeamCenter] = _offsets_to_vector(
+        xy=xy, unit_vectors=unit_vectors, unit=detector.coords['position'].unit
+    )
+    graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
     calibrated = workflow.compute(CorrectedDetector[SampleRun, Numerator])
     with_phi = calibrated.transform_coords(
         'phi', graph=graph, keep_intermediate=False, keep_inputs=False
@@ -325,8 +357,8 @@ def _iofq_in_quadrants(
     for i, quad in enumerate(quadrants):
         # Select pixels based on phi
         sel = (phi >= phi_bins[i]) & (phi < phi_bins[i + 1])
-        # The beam center is applied when computing EmptyDetector, set quadrant
-        # *before* that step.
+        # Restrict the raw detector to the quadrant, so the denominator (solid angle)
+        # covers the same pixels as the numerator.
         workflow[NeXusComponent[snx.NXdetector, SampleRun]] = sc.DataGroup(
             data=detector[sel]
         )
@@ -544,6 +576,8 @@ def beam_center_from_iofq(
     com_shift = beam_center_from_center_of_mass(workflow)
     logger.info('Initial guess for beam center: %s', com_shift)
 
+    unit_vectors = _beam_plane_unit_vectors(data=data, graph=graph)
+
     coords = data.transform_coords(
         ['cylindrical_x', 'cylindrical_y'], graph=graph
     ).coords
@@ -556,13 +590,15 @@ def beam_center_from_iofq(
     res = minimize(
         _cost,
         x0=[com_shift.fields.x.value, com_shift.fields.y.value],
-        args=(workflow, detector, norm),
+        args=(workflow, detector, norm, unit_vectors),
         bounds=bounds,
         method=minimizer,
         tol=tolerance,
     )
 
-    center = _offsets_to_vector(data=data, xy=res.x, graph=graph)
+    center = _offsets_to_vector(
+        xy=res.x, unit_vectors=unit_vectors, unit=data.coords['position'].unit
+    )
     logger.info('Final beam center value: %s', center)
     logger.info('Beam center finder minimizer info: %s', res)
     return center
