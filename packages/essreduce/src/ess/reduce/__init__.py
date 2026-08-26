@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from . import nexus, normalization, polarization, uncertainty, unwrap
+import lazy_loader as lazy
 
 try:
     __version__ = importlib.metadata.version("essreduce")
@@ -12,4 +12,14 @@ except importlib.metadata.PackageNotFoundError:
 
 del importlib
 
-__all__ = ["nexus", "normalization", "polarization", "uncertainty", "unwrap"]
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submodules=[
+        "nexus",
+        "normalization",
+        "polarization",
+        "streaming",
+        "uncertainty",
+        "unwrap",
+    ],
+)
