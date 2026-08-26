@@ -75,10 +75,30 @@ def test_beam_center_shifts_two_theta() -> None:
     assert with_center.value < without.value
 
 
-def test_phi_is_measured_around_the_beam_center() -> None:
-    # Directly to the right of the beam center, i.e., phi == 0.
-    position = SAMPLE_POSITION + BEAM_CENTER + sc.vector([0.2, 0, 0], unit='m')
+def _transverse_offset(direction: sc.Variable) -> sc.Variable:
+    """Offset of 20 cm along ``direction``."""
+    return sc.scalar(0.2, unit='m') * direction / sc.norm(direction)
+
+
+def test_phi_is_zero_horizontally_beside_the_beam_center() -> None:
+    # Perpendicular to the beam and to gravity, i.e., phi == 0.
+    right = sc.cross(-gravity_vector(), BEAM_CENTER)
+    position = SAMPLE_POSITION + BEAM_CENTER + _transverse_offset(right)
     assert_zero_angle(angle(position, make_graph(beam_center=BEAM_CENTER), name='phi'))
+
+
+def test_phi_is_ninety_degrees_above_the_beam_center() -> None:
+    # Perpendicular to the beam, in the plane spanned by the beam and gravity.
+    right = sc.cross(-gravity_vector(), BEAM_CENTER)
+    position = (
+        SAMPLE_POSITION + BEAM_CENTER + _transverse_offset(sc.cross(BEAM_CENTER, right))
+    )
+    phi = angle(position, make_graph(beam_center=BEAM_CENTER), name='phi')
+    assert sc.isclose(
+        phi,
+        0.5 * sc.constants.pi.value * sc.Unit('rad'),
+        atol=sc.scalar(1e-9, unit='rad'),
+    )
 
 
 @pytest.mark.parametrize('correct_for_gravity', [False, True])
