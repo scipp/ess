@@ -108,12 +108,14 @@ def larmor_detector_coord_transform_graph(
     *,
     sample_position: Position[snx.NXsample, RunType],
     source_position: Position[snx.NXsource, RunType],
+    beam_center: BeamCenter,
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:
     graph = sans_elastic(
         correct_for_gravity=correct_for_gravity,
         sample_position=sample_position,
         source_position=source_position,
+        beam_center=beam_center,
         gravity=gravity,
     )
     return ElasticCoordTransformGraph[RunType]({**graph, **tof.elastic_Q('tof')})
