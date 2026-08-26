@@ -111,9 +111,11 @@ def test_pipeline_can_compute_IofQ_in_event_mode(
         sc.values(reference.data),
         sc.values(result.hist().data),
         # Could be 1e-11, but currently the workflow defaults to float32 data, as
-        # returned by ScippNexus.
+        # returned by ScippNexus. The background subtraction cancels most of the
+        # signal, so a single ulp of the unsubtracted intensity shows up here as a
+        # much larger deviation.
         rtol=sc.scalar(1e-7),
-        atol=sc.scalar(1e-7),
+        atol=sc.scalar(1e-6),
     )
     if uncertainties == UncertaintyBroadcastMode.drop:
         # Could both be 1e-14 if using float64
