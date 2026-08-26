@@ -246,11 +246,15 @@ def beam_center_from_center_of_mass(workflow: sciline.Pipeline) -> BeamCenter:
     pos = pos[select]
     com = sc.sum(pos * v) / v.sum()
 
-    # We compute the shift between the incident beam direction and the center-of-mass
-    incident_beam = summed.transform_coords('incident_beam', graph=graph).coords[
-        'incident_beam'
-    ]
+    # We compute the shift between the incident beam direction and the center-of-mass.
+    # Both are anchored at the sample, so the center-of-mass must be taken relative to
+    # the sample position.
+    coords = summed.transform_coords(
+        ['incident_beam', 'sample_position'], graph=graph
+    ).coords
+    incident_beam = coords['incident_beam']
     n_beam = incident_beam / sc.norm(incident_beam)
+    com = com - coords['sample_position']
     com_shift = com - sc.dot(com, n_beam) * n_beam
     xy = [com_shift.fields.x.value, com_shift.fields.y.value]
     return beam_center + _offsets_to_vector(data=summed, xy=xy, graph=graph)
