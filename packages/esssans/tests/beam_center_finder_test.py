@@ -3,18 +3,18 @@
 
 import sciline
 import scipp as sc
+import scippnexus as snx
 from ess.sans.beam_center_finder import beam_center_from_center_of_mass
 from ess.sans.common import gravity_vector
 from ess.sans.conversions import ElasticCoordTransformGraph, sans_elastic
 from ess.sans.types import (
-    CorrectForGravity,
+    BeamCenter,
     CorrectedDetector,
+    CorrectForGravity,
     Numerator,
     Position,
     SampleRun,
 )
-
-import scippnexus as snx
 
 
 def make_detector(
@@ -67,6 +67,7 @@ def make_workflow(
         CorrectForGravity(False),
         sample_position=Position[snx.NXsample, SampleRun](sample_position),
         source_position=Position[snx.NXsource, SampleRun](source_position),
+        beam_center=BeamCenter(sc.vector([0, 0, 0], unit='m')),
         gravity=gravity_vector(),
     )
     return workflow
