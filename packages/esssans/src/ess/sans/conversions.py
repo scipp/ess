@@ -36,30 +36,23 @@ from .types import (
 )
 
 
-def _scattered_beam_with_beam_center(
-    beam_center: sc.Variable, incident_beam: sc.Variable
-) -> Callable[[sc.Variable, sc.Variable], sc.Variable]:
+def _incident_beam_from_beam_center(
+    beam_center: sc.Variable, nominal_incident_beam: sc.Variable
+) -> Callable[[], sc.Variable]:
     """
-    Return a provider for ``scattered_beam`` that accounts for the beam center.
+    Return a provider for ``incident_beam`` that points along the actual beam.
 
     Scattering angles must be measured relative to the actual beam. The beam passes
     through the sample, but its direction, set by the collimation, in general deviates
     from the nominal beam axis defined by source and sample. The beam center is a point
-    on the actual beam, so together with the sample position it defines that direction.
+    on the actual beam, measured from the sample, so it defines that direction.
 
-    Every pixel is shifted transversely in proportion to its distance from the sample,
-    which maps the actual beam onto the nominal axis: by the full transverse offset at
-    the distance where the beam center was determined, by half of it at half that
-    distance. Only the ratio of the offset to that distance is used, so scaling
-    ``beam_center`` leaves the result unchanged.
-
-    The shift is a shear rather than a rotation, hence exact along the beam and
-    approximate elsewhere, with a relative error in ``two_theta`` of the order of the
-    squared beam tilt, i.e., below 1e-5 for a beam center of 20 mm at 5 m.
+    Only the direction is taken from the beam center. The length is that of the nominal
+    incident beam, since ``L1`` is a property of the beamline and not of the beam
+    center. Scaling ``beam_center`` therefore leaves the result unchanged.
     """
-    axis = incident_beam / sc.norm(incident_beam)
-    distance = sc.dot(beam_center, axis)
-    if distance.value <= 0.0:
+    axis = nominal_incident_beam / sc.norm(nominal_incident_beam)
+    if sc.dot(beam_center, axis).value <= 0.0:
         raise ValueError(
             f'Invalid beam center {beam_center}. The beam center is the position of '
             'the beam relative to the sample, so its component along the beam must be '
@@ -67,15 +60,8 @@ def _scattered_beam_with_beam_center(
             'center was determined. A beam center given as a transverse offset alone, '
             'without that distance, cannot define a beam direction.'
         )
-    offset = beam_center - distance * axis
-
-    def scattered_beam(
-        position: sc.Variable, sample_position: sc.Variable
-    ) -> sc.Variable:
-        beam = position - sample_position
-        return beam - offset * (sc.dot(beam, axis) / distance)
-
-    return scattered_beam
+    incident_beam = sc.norm(nominal_incident_beam) * beam_center / sc.norm(beam_center)
+    return lambda: incident_beam
 
 
 def cyl_unit_vectors(incident_beam: sc.Variable, gravity: sc.Variable):
@@ -202,8 +188,8 @@ def sans_elastic(
     }
     # A zero beam center means no correction, leaving the plain beamline graph.
     if sc.norm(beam_center).value != 0.0:
-        graph['scattered_beam'] = _scattered_beam_with_beam_center(
-            beam_center, incident_beam=sample_position - source_position
+        graph['incident_beam'] = _incident_beam_from_beam_center(
+            beam_center, nominal_incident_beam=sample_position - source_position
         )
     if correct_for_gravity:
         del graph['two_theta']
