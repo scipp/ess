@@ -280,7 +280,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result(larmor_work
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
     center = sans.beam_center_from_center_of_mass(pipeline)
-    reference = sc.vector([-0.0291487, -0.0181614, 0], unit='m')
+    reference = sc.vector([-0.0291487, -0.0181614, 4.1161], unit='m')
     assert sc.allclose(center, reference)
 
 
@@ -294,7 +294,7 @@ def test_beam_center_from_center_of_mass_alternative_is_close_to_verified_result
     center = sans.beam_center_finder.beam_center_from_center_of_mass_alternative(
         pipeline
     )
-    reference = sc.vector([-0.0248743, -0.0166965, 0], unit='m')
+    reference = sc.vector([-0.0248743, -0.0166965, 4.12268], unit='m')
     assert sc.allclose(center, reference)
 
 

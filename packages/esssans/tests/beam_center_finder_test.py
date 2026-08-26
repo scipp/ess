@@ -73,27 +73,82 @@ def make_workflow(
     return workflow
 
 
+DISTANCE = sc.scalar(5.0, unit='m')
+
+
 def test_center_of_mass_finds_center_of_symmetric_pattern() -> None:
     center = sc.vector([0.1, -0.07, 0.0], unit='m')
     workflow = make_workflow(
-        detector=make_detector(center=center, distance=sc.scalar(5.0, unit='m')),
+        detector=make_detector(center=center, distance=DISTANCE),
         sample_position=sc.vector([0, 0, 0], unit='m'),
     )
     result = beam_center_from_center_of_mass(workflow)
-    assert sc.allclose(result, center, atol=sc.scalar(1e-3, unit='m'))
+    assert sc.allclose(
+        result, center + DISTANCE * sc.vector([0, 0, 1]), atol=sc.scalar(1e-3, unit='m')
+    )
+
+
+def test_center_of_mass_records_the_distance_at_which_it_was_determined() -> None:
+    # The beam center only defines a beam direction together with the distance from the
+    # sample at which it was determined, so the finder must report that distance.
+    center = sc.vector([0.1, -0.07, 0.0], unit='m')
+    near = beam_center_from_center_of_mass(
+        make_workflow(
+            detector=make_detector(center=center, distance=sc.scalar(2.0, unit='m')),
+            sample_position=sc.vector([0, 0, 0], unit='m'),
+        )
+    )
+    far = beam_center_from_center_of_mass(
+        make_workflow(
+            detector=make_detector(center=center, distance=sc.scalar(8.0, unit='m')),
+            sample_position=sc.vector([0, 0, 0], unit='m'),
+        )
+    )
+    tol = sc.scalar(1e-3, unit='m')
+    assert sc.isclose(near.fields.z, sc.scalar(2.0, unit='m'), atol=tol)
+    assert sc.isclose(far.fields.z, sc.scalar(8.0, unit='m'), atol=tol)
 
 
 def test_center_of_mass_is_measured_relative_to_the_sample_position() -> None:
-    # Pattern is centered on the beam axis through the sample, so there is no offset
-    # of the beam center, despite the sample being off-axis.
+    # Pattern is centered on the beam axis through the sample, so there is no transverse
+    # offset of the beam center, despite the sample being off-axis.
     sample_position = sc.vector([0.1, -0.07, 0.0], unit='m')
     workflow = make_workflow(
-        detector=make_detector(
-            center=sample_position, distance=sc.scalar(5.0, unit='m')
-        ),
+        detector=make_detector(center=sample_position, distance=DISTANCE),
         sample_position=sample_position,
     )
     result = beam_center_from_center_of_mass(workflow)
     assert sc.allclose(
-        result, sc.vector([0, 0, 0], unit='m'), atol=sc.scalar(1e-3, unit='m')
+        result,
+        DISTANCE * sc.vector([0, 0, 1]),
+        atol=sc.scalar(1e-3, unit='m'),
+    )
+
+
+def test_center_of_mass_result_yields_zero_scattering_angle_at_the_pattern_center() -> (
+    None
+):
+    center = sc.vector([0.1, -0.07, 0.0], unit='m')
+    sample_position = sc.vector([0, 0, 0], unit='m')
+    workflow = make_workflow(
+        detector=make_detector(center=center, distance=DISTANCE),
+        sample_position=sample_position,
+    )
+    beam_center = beam_center_from_center_of_mass(workflow)
+    graph = sans_elastic(
+        CorrectForGravity(False),
+        sample_position=Position[snx.NXsample, SampleRun](sample_position),
+        source_position=Position[snx.NXsource, SampleRun](
+            sample_position - sc.vector([0, 0, 20.0], unit='m')
+        ),
+        beam_center=BeamCenter(beam_center),
+        gravity=gravity_vector(),
+    )
+    da = sc.DataArray(
+        data=sc.scalar(1.0),
+        coords={'position': center + DISTANCE * sc.vector([0, 0, 1])},
+    )
+    two_theta = da.transform_coords('two_theta', graph=graph).coords['two_theta']
+    assert sc.isclose(
+        two_theta, sc.scalar(0.0, unit='rad'), atol=sc.scalar(1e-4, unit='rad')
     )

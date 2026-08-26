@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from collections.abc import Callable
+
 import sciline
 import scipp as sc
 import scippnexus as snx
@@ -34,20 +36,44 @@ from .types import (
 )
 
 
-def _scattered_beam_with_beam_center(beam_center: sc.Variable):
+def _scattered_beam_with_beam_center(
+    beam_center: sc.Variable, incident_beam: sc.Variable
+) -> Callable[[sc.Variable, sc.Variable], sc.Variable]:
     """
     Return a provider for ``scattered_beam`` that accounts for the beam center.
 
-    Scattering angles must be measured relative to the actual beam, which in general
-    does not coincide with the nominal beam axis defined by source and sample. Shifting
-    the pixel positions by the beam center maps the actual beam onto the nominal axis,
-    so that all angles derived from the scattered beam are relative to the actual beam.
+    Scattering angles must be measured relative to the actual beam. The beam passes
+    through the sample, but its direction, set by the collimation, in general deviates
+    from the nominal beam axis defined by source and sample. The beam center is a point
+    on the actual beam, so together with the sample position it defines that direction.
+
+    Every pixel is shifted transversely in proportion to its distance from the sample,
+    which maps the actual beam onto the nominal axis: by the full transverse offset at
+    the distance where the beam center was determined, by half of it at half that
+    distance. Only the ratio of the offset to that distance is used, so scaling
+    ``beam_center`` leaves the result unchanged.
+
+    The shift is a shear rather than a rotation, hence exact along the beam and
+    approximate elsewhere, with a relative error in ``two_theta`` of the order of the
+    squared beam tilt, i.e., below 1e-5 for a beam center of 20 mm at 5 m.
     """
+    axis = incident_beam / sc.norm(incident_beam)
+    distance = sc.dot(beam_center, axis)
+    if distance.value <= 0.0:
+        raise ValueError(
+            f'Invalid beam center {beam_center}. The beam center is the position of '
+            'the beam relative to the sample, so its component along the beam must be '
+            'the (positive) distance from the sample to the plane in which the beam '
+            'center was determined. A beam center given as a transverse offset alone, '
+            'without that distance, cannot define a beam direction.'
+        )
+    offset = beam_center - distance * axis
 
     def scattered_beam(
         position: sc.Variable, sample_position: sc.Variable
     ) -> sc.Variable:
-        return position - sample_position - beam_center
+        beam = position - sample_position
+        return beam - offset * (sc.dot(beam, axis) / distance)
 
     return scattered_beam
 
@@ -163,17 +189,22 @@ def sans_elastic(
     source_position:
         Position of the source as a vector.
     beam_center:
-        Offset of the beam from the nominal beam axis defined by source and sample,
-        in the plane normal to the beam.
+        Position of the beam center relative to the sample, i.e., the transverse offset
+        of the beam together with the distance from the sample at which that offset was
+        determined. Set to a zero vector to apply no correction.
     """  # noqa: E501
     graph = {
         **beamline.beamline(scatter=True),
         **tof.elastic_Q('wavelength'),
         'sample_position': lambda: sample_position,
         'source_position': lambda: source_position,
-        'scattered_beam': _scattered_beam_with_beam_center(beam_center),
         'gravity': lambda: gravity,
     }
+    # A zero beam center means no correction, leaving the plain beamline graph.
+    if sc.norm(beam_center).value != 0.0:
+        graph['scattered_beam'] = _scattered_beam_with_beam_center(
+            beam_center, incident_beam=sample_position - source_position
+        )
     if correct_for_gravity:
         del graph['two_theta']
         graph[('two_theta', 'phi')] = scattering_angles_with_gravity

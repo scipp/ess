@@ -13,6 +13,8 @@ SAMPLE_POSITION = sc.vector([0.0, 0.0, 0.0], unit='m')
 # Offset of the source from the sample, i.e., the nominal beam is along Z.
 SOURCE_OFFSET = sc.vector([0.0, 0.0, -20.0], unit='m')
 NO_BEAM_CENTER = sc.vector([0.0, 0.0, 0.0], unit='m')
+# Beam center determined on a detector 5 m downstream of the sample.
+BEAM_CENTER = sc.vector([0.05, -0.03, 5.0], unit='m')
 
 
 def make_graph(
@@ -53,26 +55,30 @@ def test_two_theta_is_zero_on_beam_axis_without_beam_center() -> None:
 
 
 def test_two_theta_is_zero_at_beam_center() -> None:
-    beam_center = sc.vector([0.05, -0.03, 0.0], unit='m')
-    position = sc.vector([0.05, -0.03, 5.0], unit='m')
-    assert_zero_angle(angle(position, make_graph(beam_center=beam_center)))
+    position = SAMPLE_POSITION + BEAM_CENTER
+    assert_zero_angle(angle(position, make_graph(beam_center=BEAM_CENTER)))
+
+
+@pytest.mark.parametrize('fraction', [0.2, 0.5, 0.9, 2.0])
+def test_two_theta_is_zero_along_the_beam_at_any_distance(fraction: float) -> None:
+    # The beam center measured at one distance defines the beam direction, so pixels
+    # on the same ray but at a different distance also see zero scattering angle.
+    position = SAMPLE_POSITION + fraction * BEAM_CENTER
+    assert_zero_angle(angle(position, make_graph(beam_center=BEAM_CENTER)))
 
 
 def test_beam_center_shifts_two_theta() -> None:
-    position = sc.vector([0.05, -0.03, 5.0], unit='m')
+    position = SAMPLE_POSITION + BEAM_CENTER
     without = angle(position, make_graph(beam_center=NO_BEAM_CENTER))
-    with_center = angle(
-        position, make_graph(beam_center=sc.vector([0.05, -0.03, 0.0], unit='m'))
-    )
+    with_center = angle(position, make_graph(beam_center=BEAM_CENTER))
     assert without.value > 0.0
     assert with_center.value < without.value
 
 
 def test_phi_is_measured_around_the_beam_center() -> None:
-    beam_center = sc.vector([0.05, -0.03, 0.0], unit='m')
     # Directly to the right of the beam center, i.e., phi == 0.
-    position = sc.vector([0.25, -0.03, 5.0], unit='m')
-    assert_zero_angle(angle(position, make_graph(beam_center=beam_center), name='phi'))
+    position = SAMPLE_POSITION + BEAM_CENTER + sc.vector([0.2, 0, 0], unit='m')
+    assert_zero_angle(angle(position, make_graph(beam_center=BEAM_CENTER), name='phi'))
 
 
 @pytest.mark.parametrize('correct_for_gravity', [False, True])
@@ -80,11 +86,26 @@ def test_beam_center_is_applied_relative_to_sample_position(
     correct_for_gravity: bool,
 ) -> None:
     sample_position = sc.vector([0.1, -0.07, 0.0], unit='m')
-    beam_center = sc.vector([0.05, -0.03, 0.0], unit='m')
-    position = sample_position + beam_center + sc.vector([0, 0, 5.0], unit='m')
+    position = sample_position + BEAM_CENTER
     graph = make_graph(
-        beam_center=beam_center,
+        beam_center=BEAM_CENTER,
         correct_for_gravity=correct_for_gravity,
         sample_position=sample_position,
     )
     assert_zero_angle(angle(position, graph))
+
+
+@pytest.mark.parametrize(
+    'beam_center',
+    [
+        # Offset without a distance, i.e., the pre-existing 2-D convention.
+        sc.vector([0.05, -0.03, 0.0], unit='m'),
+        # Upstream of the sample.
+        sc.vector([0.05, -0.03, -5.0], unit='m'),
+    ],
+)
+def test_beam_center_without_a_positive_distance_raises(
+    beam_center: sc.Variable,
+) -> None:
+    with pytest.raises(ValueError, match='distance'):
+        make_graph(beam_center=beam_center)

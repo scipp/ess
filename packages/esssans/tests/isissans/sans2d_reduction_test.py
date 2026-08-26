@@ -197,7 +197,9 @@ def test_pixel_dependent_direct_beam_is_supported(pipeline, uncertainties):
     assert result.dims == ('Q',)
 
 
-MANTID_BEAM_CENTER = sc.vector([0.09288, -0.08195, 0], unit='m')
+# Transverse offset obtained from Mantid, at the distance of the SANS2D detector, which
+# is where it was determined.
+MANTID_BEAM_CENTER = sc.vector([0.09288, -0.08195, 4.0], unit='m')
 
 
 def test_beam_center_from_center_of_mass_is_close_to_verified_result(pipeline):
@@ -209,7 +211,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result(pipeline):
 
 
 def test_beam_center_from_center_of_mass_independent_of_set_beam_center(pipeline):
-    pipeline[BeamCenter] = sc.vector([0.1, -0.1, 0], unit='m')
+    pipeline[BeamCenter] = sc.vector([0.1, -0.1, 3.0], unit='m')
     center = sans.beam_center_from_center_of_mass(pipeline)
     assert sc.allclose(center, MANTID_BEAM_CENTER, atol=sc.scalar(3e-3, unit='m'))
 
@@ -262,7 +264,7 @@ def test_beam_center_finder_works_with_direct_beam(pipeline):
     reason="Beam center finder tests are slow and we are revisiting the approach."
 )
 def test_beam_center_finder_independent_of_set_beam_center(pipeline):
-    pipeline[BeamCenter] = sc.vector([0.1, -0.1, 0], unit='m')
+    pipeline[BeamCenter] = sc.vector([0.1, -0.1, 3.0], unit='m')
     q_bins = sc.linspace('Q', 0.02, 0.3, 71, unit='1/angstrom')
     center_with_direct_beam = sans.beam_center_finder.beam_center_from_iofq(
         workflow=pipeline, q_bins=q_bins
