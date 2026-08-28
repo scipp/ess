@@ -68,12 +68,12 @@ def theta(
     .. math::
 
         \\sin(\\gamma^*) =
-        \\sin(\\gamma) + \\frac{g}{2} \\frac{L_2 \\lambda^2 h^2}{m_n^2}.
+        \\sin(\\gamma) + \\frac{g}{2} \\frac{L_2 \\lambda^2 m_n^2}{h^2}.
 
     Finally, the scattering angle is obtained by subtracting the sample rotation
     relative to the horizontal plane.
     '''
-    c = sc.constants.g * sc.constants.m_n**2 / sc.constants.h**2
+    c = sc.constants.g * sc.constants.m_n**2 / sc.constants.h**2 / 2
     out = (c * L2 * wavelength**2).to(unit='dimensionless') + sc.sin(
         pixel_divergence_angle.to(unit='rad', copy=False)
         + detector_rotation.to(unit='rad')
