@@ -7,6 +7,7 @@ This workflow is used to convert raw detector data with event_time_zero and
 event_time_offset coordinates to data with a time-of-flight coordinate.
 """
 
+import warnings
 from collections.abc import Callable
 from dataclasses import asdict
 
@@ -15,11 +16,6 @@ import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 from scippneutron._utils import elem_unit
-
-try:
-    from .interpolator_numba import Interpolator as InterpolatorImpl
-except ImportError:
-    from .interpolator_scipy import Interpolator as InterpolatorImpl
 
 from ..nexus.types import (
     Component,
@@ -37,6 +33,7 @@ from .resample import rebin_strictly_increasing
 from .types import (
     DetectorLtotal,
     ErrorLimitedLookupTable,
+    FrameUnwrapBackend,
     KeepEventTimeOffset,
     LookupTable,
     LookupTableRelativeErrorThreshold,
@@ -47,6 +44,39 @@ from .types import (
 )
 
 
+def _get_interpolator_class(backend: FrameUnwrapBackend) -> type:
+    if backend == FrameUnwrapBackend.scipy:
+        from .interpolator_scipy import Interpolator
+
+        return Interpolator
+
+    try:
+        from numba import get_num_threads, threading_layer
+
+        # Initialize the threading layer now so we can inspect the selected backend
+        # and fall back before interpolation.
+        get_num_threads()
+        if threading_layer() in {'omp', 'tbb'}:
+            from .interpolator_numba import Interpolator
+
+            return Interpolator
+    except (ImportError, ValueError):
+        pass
+
+    warnings.warn(
+        "The 'numba' frame-unwrapping backend was requested, but Numba is "
+        "unavailable or did not select a thread-safe threading layer. Falling "
+        "back to the 'scipy' backend. This fallback is deprecated and will be "
+        "an error in a future release. Select the SciPy backend explicitly with "
+        "backend='scipy'.",
+        FutureWarning,
+        stacklevel=3,
+    )
+    from .interpolator_scipy import Interpolator
+
+    return Interpolator
+
+
 class WavelengthInterpolator:
     def __init__(
         self,
@@ -54,6 +84,7 @@ class WavelengthInterpolator:
         distance_unit: str,
         time_unit: str,
         wavelength_unit: str = 'angstrom',
+        backend: FrameUnwrapBackend = FrameUnwrapBackend.numba,
     ):
         """
         Interpolator object that converts event_time_offset and distances to
@@ -96,7 +127,7 @@ class WavelengthInterpolator:
 
         distances = lookup.coords["distance"].to(unit=distance_unit, copy=False)
 
-        self._interpolator = InterpolatorImpl(
+        self._interpolator = _get_interpolator_class(backend)(
             time_edges=time_coord,
             distance_edges=distances.values,
             values=(
@@ -137,7 +168,10 @@ class WavelengthInterpolator:
 
 
 def _compute_wavelength_histogram(
-    da: sc.DataArray, lookup: LookupTable, ltotal: sc.Variable
+    da: sc.DataArray,
+    lookup: LookupTable,
+    ltotal: sc.Variable,
+    backend: FrameUnwrapBackend,
 ) -> sc.DataArray:
     # In NeXus, 'time_of_flight' is the canonical name in NXmonitor, but in some files,
     # it may be called 'tof' or 'frame_time'.
@@ -164,7 +198,10 @@ def _compute_wavelength_histogram(
 
     # Create linear interpolator
     interp = WavelengthInterpolator(
-        lookup.array, distance_unit=ltotal.unit, time_unit=eto_unit
+        lookup.array,
+        distance_unit=ltotal.unit,
+        time_unit=eto_unit,
+        backend=backend,
     )
 
     # Compute wavelengths of the bin edges using the interpolator
@@ -250,6 +287,7 @@ def _prepare_wavelength_interpolation_inputs(
     lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
+    backend: FrameUnwrapBackend,
 ) -> dict:
     """
     Prepare the inputs required for the wavelength interpolation.
@@ -269,13 +307,18 @@ def _prepare_wavelength_interpolation_inputs(
         When pulse-skipping, the offset of the first pulse in the stride. This is
         typically zero but can be a small integer < pulse_stride.
         If None, a guess is made.
+    backend:
+        Backend used to interpolate the wavelength lookup table.
     """
     etos = da.bins.coords["event_time_offset"].to(dtype=float, copy=False)
     eto_unit = elem_unit(etos)
 
     # Create linear interpolator
     interp = WavelengthInterpolator(
-        lookup.array, distance_unit=ltotal.unit, time_unit=eto_unit
+        lookup.array,
+        distance_unit=ltotal.unit,
+        time_unit=eto_unit,
+        backend=backend,
     )
 
     # Operate on events (broadcast distances to all events)
@@ -343,6 +386,7 @@ def _compute_wavelength_events(
     lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
+    backend: FrameUnwrapBackend,
     keep_event_time_offset: bool,
 ) -> sc.DataArray:
     inputs = _prepare_wavelength_interpolation_inputs(
@@ -350,6 +394,7 @@ def _compute_wavelength_events(
         lookup=lookup,
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
+        backend=backend,
     )
 
     # Compute wavelength for all neutrons using the interpolator
@@ -476,10 +521,13 @@ def _compute_wavelength_data(
     lookup: ErrorLimitedLookupTable[RunType, Component],
     ltotal: sc.Variable,
     pulse_stride_offset: int,
+    backend: FrameUnwrapBackend,
     keep_event_time_offset: bool,
 ) -> sc.DataArray:
     if da.bins is None:
-        data = _compute_wavelength_histogram(da=da, lookup=lookup, ltotal=ltotal)
+        data = _compute_wavelength_histogram(
+            da=da, lookup=lookup, ltotal=ltotal, backend=backend
+        )
         out = rebin_strictly_increasing(data, dim='wavelength')
     else:
         out = _compute_wavelength_events(
@@ -487,6 +535,7 @@ def _compute_wavelength_data(
             lookup=lookup,
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
+            backend=backend,
             keep_event_time_offset=keep_event_time_offset,
         )
     return out.assign_coords(Ltotal=ltotal)
@@ -498,6 +547,7 @@ def detector_wavelength_data(
     ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
     keep_event_time_offset: KeepEventTimeOffset,
+    backend: FrameUnwrapBackend = FrameUnwrapBackend.numba,
 ) -> WavelengthDetector[RunType]:
     """
     Convert the time-of-arrival (event_time_offset) data to wavelength data using a
@@ -520,6 +570,8 @@ def detector_wavelength_data(
     keep_event_time_offset:
         Whether to keep the event_time_offset coordinate after converting to
         wavelength.
+    backend:
+        Backend used to interpolate the wavelength lookup table.
     """
     return WavelengthDetector[RunType](
         _compute_wavelength_data(
@@ -527,6 +579,7 @@ def detector_wavelength_data(
             lookup=lookup,
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
+            backend=backend,
             keep_event_time_offset=keep_event_time_offset,
         )
     )
@@ -538,6 +591,7 @@ def monitor_wavelength_data(
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
     keep_event_time_offset: KeepEventTimeOffset,
+    backend: FrameUnwrapBackend = FrameUnwrapBackend.numba,
 ) -> WavelengthMonitor[RunType, MonitorType]:
     """
     Convert the time-of-arrival (event_time_offset) data to wavelength data using a
@@ -560,6 +614,8 @@ def monitor_wavelength_data(
     keep_event_time_offset:
         Whether to keep the event_time_offset coordinate after converting to
         wavelength.
+    backend:
+        Backend used to interpolate the wavelength lookup table.
     """
     return WavelengthMonitor[RunType, MonitorType](
         _compute_wavelength_data(
@@ -567,6 +623,7 @@ def monitor_wavelength_data(
             lookup=lookup,
             ltotal=ltotal,
             pulse_stride_offset=pulse_stride_offset,
+            backend=backend,
             keep_event_time_offset=keep_event_time_offset,
         )
     )

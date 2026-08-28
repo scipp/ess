@@ -6,7 +6,7 @@ import sciline
 
 from ..nexus import GenericNeXusWorkflow
 from ..nexus.types import AnyRun
-from . import WavelengthLutMode, lut, to_wavelength
+from . import FrameUnwrapBackend, WavelengthLutMode, lut, to_wavelength
 
 
 def GenericUnwrapWorkflow(
@@ -47,7 +47,6 @@ def GenericUnwrapWorkflow(
         Mode for creating the wavelength lookup table. Possible values are
         'analytical', 'simulation', and 'file'. See
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
-
     Returns
     -------
     :
@@ -62,6 +61,7 @@ def GenericUnwrapWorkflow(
         wf.insert(provider)
     for key, value in lut.default_parameters(wavelength_from=wavelength_from).items():
         wf[key] = value
+    wf[FrameUnwrapBackend] = FrameUnwrapBackend.numba
 
     return wf
 

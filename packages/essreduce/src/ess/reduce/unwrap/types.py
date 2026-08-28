@@ -18,6 +18,13 @@ class WavelengthLutMode(StrEnum):
     file = 'file'
 
 
+class FrameUnwrapBackend(StrEnum):
+    """Backend used to interpolate the frame-unwrapping lookup table."""
+
+    numba = 'numba'
+    scipy = 'scipy'
+
+
 class LookupTableFilename(sl.Scope[RunType, Component, str], str):
     """Filename of the wavelength lookup table."""
 
