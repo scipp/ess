@@ -4,6 +4,21 @@ import numpy as np
 from numba import njit, prange
 
 
+@njit(boundscheck=False, cache=True)
+def _locate(grid: np.ndarray, value: float, one_over_step: float, uniform: bool) -> int:
+    """Index of the cell of ``grid`` containing ``value``.
+
+    ``value`` is assumed to lie within the grid. A value on the upper edge is
+    assigned to the last cell, so that the caller can index ``grid[i + 1]``.
+    """
+    n = len(grid)
+    if value == grid[n - 1]:
+        return n - 2
+    if uniform:
+        return int((value - grid[0]) * one_over_step)
+    return np.searchsorted(grid, value, side='right') - 1
+
+
 @njit(boundscheck=False, cache=True, fastmath=False, parallel=True)
 def interpolate(
     x: np.ndarray,
@@ -14,17 +29,19 @@ def interpolate(
     xoffset: np.ndarray | None,
     deltax: float,
     fill_value: float,
+    x_uniform: bool,
+    y_uniform: bool,
     out: np.ndarray,
 ):
     """
-    Linear interpolation of data on a 2D regular grid.
+    Linear interpolation of data on a 2D rectilinear grid.
 
     Parameters
     ----------
     x:
-        1D array of grid edges along the x-axis (size nx). They must be linspaced.
+        1D array of grid points along the x-axis (size nx), strictly increasing.
     y:
-        1D array of grid edges along the y-axis (size ny). They must be linspaced.
+        1D array of grid points along the y-axis (size ny), strictly increasing.
     values:
         2D array of values on the grid. The shape must be (ny, nx).
     xp:
@@ -37,6 +54,11 @@ def interpolate(
         Multiplier to apply to the integer offsets (i.e. the step size).
     fill_value:
         Value to use for points outside of the grid.
+    x_uniform:
+        Whether ``x`` is equally spaced, which allows the containing cell to be
+        computed by division instead of searched for. See :class:`Interpolator`.
+    y_uniform:
+        Whether ``y`` is equally spaced.
     out:
         1D array where the interpolated values will be stored (size N).
     """
@@ -50,11 +72,10 @@ def interpolate(
     xmax = x[nx - 1]
     ymin = y[0]
     ymax = y[ny - 1]
-    dx = x[1] - xmin
-    dy = y[1] - ymin
 
-    one_over_dx = 1.0 / dx
-    one_over_dy = 1.0 / dy
+    one_over_dx = 1.0 / (x[1] - xmin)
+    one_over_dy = 1.0 / (y[1] - ymin)
+    both_uniform = x_uniform and y_uniform
     norm = one_over_dx * one_over_dy
 
     for i in prange(npoints):
@@ -65,8 +86,8 @@ def interpolate(
             out[i] = fill_value
 
         else:
-            ix = nx - 2 if xx == xmax else int((xx - xmin) * one_over_dx)
-            iy = ny - 2 if yy == ymax else int((yy - ymin) * one_over_dy)
+            ix = _locate(x, xx, one_over_dx, x_uniform)
+            iy = _locate(y, yy, one_over_dy, y_uniform)
 
             x1 = x[ix]
             x2 = x[ix + 1]
@@ -81,10 +102,22 @@ def interpolate(
             x2mxx = x2 - xx
             xxmx1 = xx - x1
 
+            # A uniform grid normalizes by the same cell area everywhere, which
+            # is worth hoisting out of the loop; a rectilinear one does not.
+            cell = norm if both_uniform else 1.0 / ((x2 - x1) * (y2 - y1))
+
             out[i] = (
                 (y2 - yy) * (x2mxx * a11 + xxmx1 * a21)
                 + (yy - y1) * (x2mxx * a12 + xxmx1 * a22)
-            ) * norm
+            ) * cell
+
+
+def _is_uniform(grid: np.ndarray) -> bool:
+    """Whether ``grid`` is equally spaced, to within floating-point noise."""
+    if len(grid) < 3:
+        return True
+    steps = np.diff(grid)
+    return bool(np.allclose(steps, steps[0], rtol=1.0e-9, atol=0.0))
 
 
 class Interpolator:
@@ -96,23 +129,40 @@ class Interpolator:
         fill_value: float = np.nan,
     ):
         """
-        Interpolator for 2D regular grid data (Numba implementation).
+        Interpolator for 2D rectilinear grid data (Numba implementation).
+
+        The axes need not be equally spaced: a lookup table may sample distance
+        densely where components sit and not at all in between. Uniformity is
+        detected here, once, because it decides how the containing cell is
+        found — by division for a uniform axis, by binary search otherwise —
+        and that is a per-point cost in the interpolation loop.
 
         Parameters
         ----------
         time_edges:
-            1D array of time edges.
+            1D array of time grid points, strictly increasing.
         distance_edges:
-            1D array of distance edges.
+            1D array of distance grid points, strictly increasing.
         values:
             2D array of values on the grid. The shape must be (ny, nx).
         fill_value:
             Value to use for points outside of the grid.
         """
+        for name, grid in (
+            ('time_edges', time_edges),
+            ('distance_edges', distance_edges),
+        ):
+            if len(grid) < 2:
+                raise ValueError(
+                    f"Interpolator: {name} has {len(grid)} point(s); at least two "
+                    "are needed to bracket a value."
+                )
         self.time_edges = time_edges
         self.distance_edges = distance_edges
         self.values = values
         self.fill_value = fill_value
+        self.time_uniform = _is_uniform(time_edges)
+        self.distance_uniform = _is_uniform(distance_edges)
 
     def __call__(
         self,
@@ -131,6 +181,8 @@ class Interpolator:
             xoffset=pulse_index,
             deltax=pulse_period,
             fill_value=self.fill_value,
+            x_uniform=self.time_uniform,
+            y_uniform=self.distance_uniform,
             out=out,
         )
         return out
