@@ -65,11 +65,16 @@ DspacingBins = NewType("DspacingBins", sc.Variable)
 OutFilename = NewType("OutFilename", str)
 """Filename of the output."""
 
-TwoThetaBins = NewType("TwoThetaBins", sc.Variable)
+TwoThetaBins = NewType("TwoThetaBins", sc.Variable | None)
 """Bin edges for grouping in 2theta.
 
 This is used by an alternative focussing step that groups detector
 pixels by scattering angle into bins given by these edges.
+
+The focussing step aligns its internal, finer 2theta binning with these edges,
+so setting them also affects results that are integrated over 2theta.
+``None`` means that no 2theta grouping is available: the workflow can then only
+produce results integrated over 2theta and raises if grouped data is requested.
 """
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode

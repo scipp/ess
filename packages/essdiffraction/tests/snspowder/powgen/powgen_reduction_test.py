@@ -51,6 +51,7 @@ def params():
             (x < sc.scalar(0.0, unit="us").to(unit=elem_unit(x)))
             | (x > sc.scalar(16666.67, unit="us").to(unit=elem_unit(x)))
         ),
+        TwoThetaBins: None,
         TwoThetaMask: None,
         WavelengthMask: None,
         GravityVector: sc.vector(value=[0, -1, 0]) * sc.constants.g,

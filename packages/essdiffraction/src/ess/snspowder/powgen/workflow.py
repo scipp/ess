@@ -8,6 +8,7 @@ from ess.powder.types import (
     KeepEvents,
     NeXusDetectorName,
     SampleRun,
+    TwoThetaBins,
     VanadiumRun,
 )
 
@@ -23,6 +24,7 @@ def default_parameters() -> dict:
         KeepEvents[VanadiumRun]: KeepEvents[VanadiumRun](False),
         KeepEvents[EmptyCanRun]: KeepEvents[EmptyCanRun](True),
         NeXusDetectorName: "powgen_detector",
+        TwoThetaBins: None,
     }
 
 

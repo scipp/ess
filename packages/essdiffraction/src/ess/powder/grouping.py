@@ -19,27 +19,128 @@ from .types import (
 
 
 def _reconstruct_wavelength(
-    dspacing_bins: DspacingBins, two_theta_bins: TwoThetaBins
+    dspacing_bins: sc.Variable, two_theta_bins: sc.Variable
 ) -> sc.Variable:
     dspacing = dspacing_bins
     two_theta = sc.midpoints(two_theta_bins)
     return (2 * dspacing * sc.sin(two_theta / 2)).to(unit='angstrom')
 
 
+_BASE_TWO_THETA_RESOLUTION = 1024
+"""Number of bins used to cover the full two-theta range of a detector.
+
+This sets the resolution of the wavelength reconstructed from bin centers, see
+:func:`_reconstruct_wavelength`. It is independent of the two-theta binning
+requested for the final result, see :func:`_focussing_two_theta_bins`.
+
+It only matters when focussing produces a histogram *and* the run is normalized
+by a monitor histogram. The monitor is then looked up once per (d-spacing,
+two-theta) bin and the lookup is piecewise constant on the bins of the monitor,
+so the wavelength spread within a bin should stay below the width of a monitor
+bin. Since
+
+.. math::
+
+    \\frac{\\Delta\\lambda}{\\lambda}
+    = \\frac{\\Delta 2\\theta}{2} \\cot\\theta
+
+this is most demanding at small scattering angles. If the focussed data keeps
+its events, they carry their own wavelength and this number has no influence on
+the result.
+"""
+
+
+def _extend_edges(start: float, limit: float, step: float) -> np.ndarray:
+    """Ascending edges reaching from ``start`` (exclusive) past ``limit``.
+
+    Empty if ``limit`` has already been passed, which happens when the requested
+    bins extend beyond the range of the detector.
+    """
+    n = int(np.ceil((limit - start) / step))
+    edges = start + step * np.arange(1, n + 1)
+    return edges if step > 0 else edges[::-1]
+
+
+def _focussing_two_theta_bins(
+    two_theta: sc.Variable, requested: sc.Variable | None
+) -> sc.Variable:
+    """Return the two-theta bin edges to use for focussing.
+
+    The edges cover the full range of ``two_theta`` with bins no wider than that
+    range divided by :py:data:`_BASE_TWO_THETA_RESOLUTION`.
+
+    If ``requested`` is given, its edges are a subset of the returned edges: each
+    requested bin is subdivided into equally wide sub-bins. Grouping the focussed
+    data into ``requested`` is then an exact sum over whole sub-bins. Without
+    this alignment, each focussing bin is assigned as a whole to the requested
+    bin containing its center, so the number of bins per group varies
+    periodically and produces large spikes in the result.
+
+    Beyond the requested range the grid continues at the width of the outermost
+    sub-bins rather than the base width. This keeps the edges linearly spaced
+    when ``requested`` is, which is faster to bin into: :func:`scipp.bin` and
+    :func:`scipp.hist` can then compute bin indices directly instead of
+    searching for them. Since a sub-bin is never narrower than half the base
+    width, it at most doubles the number of bins needed to reach the ends of
+    the range.
+    """
+    lo = two_theta.nanmin()
+    hi = two_theta.nanmax()
+    # Make the upper edge inclusive of the largest two-theta value.
+    hi.value = np.nextafter(hi.value, np.inf)
+    base_width = ((hi - lo) / _BASE_TWO_THETA_RESOLUTION).value
+    if requested is None:
+        return sc.linspace(
+            'two_theta',
+            start=lo,
+            stop=hi,
+            num=_BASE_TWO_THETA_RESOLUTION + 1,
+            unit=two_theta.unit,
+        )
+    edges = requested.to(unit=two_theta.unit, dtype='float64').values
+    widths = np.diff(edges)
+    # A zero-width bin gets a single zero-width sub-bin instead of none, which keeps
+    # the sub-bin width well-defined. It comes out empty, as it would from scipp.
+    n_sub = np.maximum(np.ceil(widths / base_width), 1).astype(int)
+    # Index of the requested bin each sub-bin belongs to, and its position within it.
+    # The first sub-bin of a requested bin reproduces its lower edge exactly.
+    offset = np.concatenate([[0], np.cumsum(n_sub)])
+    index = np.repeat(np.arange(len(n_sub)), n_sub)
+    position = (np.arange(offset[-1]) - offset[index]) / n_sub[index]
+    sub_widths = widths / n_sub
+    # A zero-width outermost bin provides no step to continue the grid with. The
+    # grid is not linearly spaced in that case anyway, so fall back to the base width.
+    low_step = sub_widths[0] if sub_widths[0] > 0 else base_width
+    high_step = sub_widths[-1] if sub_widths[-1] > 0 else base_width
+    return sc.array(
+        dims=['two_theta'],
+        values=np.concatenate(
+            [
+                _extend_edges(edges[0], lo.value, -low_step),
+                edges[index] + position * widths[index],
+                edges[-1:],
+                _extend_edges(edges[-1], hi.value, high_step),
+            ]
+        ),
+        unit=two_theta.unit,
+    )
+
+
 def focus_data_dspacing_and_two_theta(
     data: CorrectedDetector[RunType],
     dspacing_bins: DspacingBins,
+    two_theta_bins: TwoThetaBins,
     keep_events: KeepEvents[RunType],
 ) -> CorrectedDspacing[RunType]:
     """
     Reduce the pixel-based data to d-spacing and two-theta dimensions.
 
-    The two-theta binning does not use :py:class:`TwoThetaBins` but instead
-    computes the two-theta bins from the 'two_theta' coordinate of the input data. This
-    is necessary to ensure that we have sufficiently high wavelength resolution when
-    performing a monitor normalization in a follow-up workflow step. If we were to use
-    :py:class:`TwoThetaBins` we would be influenced by and limited to the two-theta
-    binning the user requests for the end result, which may not be sufficient.
+    The two-theta binning is finer than :py:class:`TwoThetaBins` and covers the full
+    two-theta range of the detector, not only the requested range. Both are necessary
+    to have sufficient wavelength resolution when performing a monitor normalization
+    in a follow-up workflow step. The bins are nevertheless aligned with
+    :py:class:`TwoThetaBins` such that :func:`group_two_theta` can produce the
+    requested binning exactly, see :func:`_focussing_two_theta_bins`.
 
     Parameters
     ----------
@@ -48,6 +149,9 @@ def focus_data_dspacing_and_two_theta(
         'two_theta' coordinates.
     dspacing_bins:
         The bins to use for the d-spacing dimension.
+    two_theta_bins:
+        The two-theta bins requested for the final result, or ``None`` if the data
+        will not be grouped by two-theta.
     keep_events:
         Whether to keep the events in the output. If `False`, the output will be
         histogrammed instead of binned.
@@ -57,17 +161,7 @@ def focus_data_dspacing_and_two_theta(
     :
         The reduced data with 'dspacing' and 'two_theta' dimensions.
     """
-    ttheta = data.coords['two_theta']
-    ttheta_min = ttheta.nanmin()
-    ttheta_max = ttheta.nanmax()
-    ttheta_max.value = np.nextafter(ttheta_max.value, np.inf)
-    twotheta_bins = sc.linspace(
-        'two_theta',
-        start=ttheta_min,
-        stop=ttheta_max,
-        num=1024,
-        unit=ttheta.unit,
-    )
+    twotheta_bins = _focussing_two_theta_bins(data.coords['two_theta'], two_theta_bins)
     args = {twotheta_bins.dim: twotheta_bins, dspacing_bins.dim: dspacing_bins}
     if keep_events.value:
         result = data.bin(args)
@@ -98,18 +192,46 @@ def integrate_two_theta(
     )
 
 
+def _check_aligned(edges: sc.Variable, requested: sc.Variable) -> None:
+    """Raise unless every requested edge occurs in ``edges``."""
+    grid = edges.values
+    found = np.clip(np.searchsorted(grid, requested.values), 0, len(grid) - 1)
+    if not np.array_equal(grid[found], requested.values):
+        raise ValueError(
+            'The two-theta binning of the data is not aligned with the requested '
+            'bins. The data must be focussed with the same TwoThetaBins, see '
+            'focus_data_dspacing_and_two_theta.'
+        )
+
+
 def group_two_theta(
     data: NormalizedDspacing[RunType],
     two_theta_bins: TwoThetaBins,
 ) -> FocussedDataDspacingTwoTheta[RunType]:
-    """Group the data by two-theta bins."""
+    """Group the data by two-theta bins.
+
+    ``data`` was focussed onto a finer two-theta grid that is aligned with
+    ``two_theta_bins``, see :func:`focus_data_dspacing_and_two_theta`. Grouping is
+    therefore an exact sum over whole sub-bins. This requires that both steps were
+    given the same bins; otherwise, an exception is raised.
+    """
+    if two_theta_bins is None:
+        raise ValueError("Cannot group by two-theta, no 'TwoThetaBins' were set.")
     if 'two_theta' not in data.dims:
         raise ValueError("Data does not have a 'two_theta' dimension.")
-    data = data.assign_coords(two_theta=sc.midpoints(data.coords['two_theta']))
-    return FocussedDataDspacingTwoTheta[RunType](
-        data.groupby('two_theta', bins=two_theta_bins).nansum('two_theta')
+    edges = data.coords['two_theta']
+    # Grouping in the unit of the data keeps the requested edges bit-identical to the
+    # grid built by focussing, so that the alignment can be checked exactly.
+    bins = two_theta_bins.to(unit=edges.unit, dtype='float64')
+    _check_aligned(edges, bins)
+    data = data.assign_coords(two_theta=sc.midpoints(edges))
+    grouped = (
+        data.groupby('two_theta', bins=bins).nansum('two_theta')
         if data.bins is None
-        else data.bin(two_theta=two_theta_bins)
+        else data.bin(two_theta=bins)
+    )
+    return FocussedDataDspacingTwoTheta[RunType](
+        grouped.assign_coords(two_theta=two_theta_bins)
     )
 
 
