@@ -10,6 +10,7 @@ from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    EmptyDetector,
     Filename,
     IntensityQ,
     LookupTableFilename,
@@ -18,6 +19,7 @@ from ess.sans.types import (
     QBins,
     ReturnEvents,
     SampleRun,
+    SolidAngle,
     UncertaintyBroadcastMode,
     WavelengthDetector,
 )
@@ -55,6 +57,23 @@ def test_loki_larmor_workflow_parameters_with_param_returns_param():
     wf = LokiAtLarmorWorkflow()
     parameters = workflow.get_parameters(wf, (ReturnEvents,))
     assert parameters.keys() == {ReturnEvents}
+
+
+def test_beam_center_does_not_move_detector_positions(larmor_workflow):
+    wf = larmor_workflow()
+    wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    reference = wf.compute(EmptyDetector[SampleRun]).coords['position']
+    wf[BeamCenter] = sc.vector([0.03, -0.02, 0.0], unit='m')
+    position = wf.compute(EmptyDetector[SampleRun]).coords['position']
+    assert sc.identical(position, reference)
+
+
+def test_solid_angle_is_independent_of_beam_center(larmor_workflow):
+    wf = larmor_workflow()
+    wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    reference = wf.compute(SolidAngle[SampleRun])
+    wf[BeamCenter] = sc.vector([0.03, -0.02, 0.0], unit='m')
+    assert sc.identical(wf.compute(SolidAngle[SampleRun]), reference)
 
 
 def test_loki_larmor_workflow_compute_with_single_pixel_mask(larmor_workflow):

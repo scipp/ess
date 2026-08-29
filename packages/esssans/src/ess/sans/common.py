@@ -6,8 +6,6 @@ import numpy as np
 import scipp as sc
 from scipp.constants import g
 
-from .types import BeamCenter, DetectorPositionOffset, RunType
-
 
 def gravity_vector() -> sc.Variable:
     """
@@ -91,10 +89,3 @@ def mask_range(
         else:
             out.masks[name] = mask_values
     return out
-
-
-def beam_center_to_detector_position_offset(
-    beam_center: BeamCenter,
-) -> DetectorPositionOffset[RunType]:
-    """Convert beam center to detector position offset for all runs."""
-    return DetectorPositionOffset[RunType](-beam_center)

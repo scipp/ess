@@ -108,12 +108,14 @@ def larmor_detector_coord_transform_graph(
     *,
     sample_position: Position[snx.NXsample, RunType],
     source_position: Position[snx.NXsource, RunType],
+    beam_center: BeamCenter,
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:
     graph = sans_elastic(
         correct_for_gravity=correct_for_gravity,
         sample_position=sample_position,
         source_position=source_position,
+        beam_center=beam_center,
         gravity=gravity,
     )
     return ElasticCoordTransformGraph[RunType]({**graph, **tof.elastic_Q('tof')})
@@ -186,5 +188,9 @@ def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
         data.loki_tutorial_run_60392()
     )
     workflow[Filename[EmptyBeamRun]] = str(data.loki_tutorial_run_60392())
-    workflow[BeamCenter] = sc.vector(value=[-0.02914868, -0.01816138, 0.0], unit='m')
+    # Beam center determined with `beam_center_from_center_of_mass`, the Z component
+    # being the distance from the sample at which it was determined.
+    workflow[BeamCenter] = sc.vector(
+        value=[-0.02914868, -0.01816138, 4.11610], unit='m'
+    )
     return workflow

@@ -111,9 +111,11 @@ def test_pipeline_can_compute_IofQ_in_event_mode(
         sc.values(reference.data),
         sc.values(result.hist().data),
         # Could be 1e-11, but currently the workflow defaults to float32 data, as
-        # returned by ScippNexus.
+        # returned by ScippNexus. The background subtraction cancels most of the
+        # signal, so a single ulp of the unsubtracted intensity shows up here as a
+        # much larger deviation.
         rtol=sc.scalar(1e-7),
-        atol=sc.scalar(1e-7),
+        atol=sc.scalar(1e-6),
     )
     if uncertainties == UncertaintyBroadcastMode.drop:
         # Could both be 1e-14 if using float64
@@ -280,7 +282,7 @@ def test_beam_center_from_center_of_mass_is_close_to_verified_result(larmor_work
         pipeline, loki.data.loki_tutorial_mask_filenames()
     )
     center = sans.beam_center_from_center_of_mass(pipeline)
-    reference = sc.vector([-0.0291487, -0.0181614, 0], unit='m')
+    reference = sc.vector([-0.0291487, -0.0181614, 4.1161], unit='m')
     assert sc.allclose(center, reference)
 
 
@@ -294,7 +296,7 @@ def test_beam_center_from_center_of_mass_alternative_is_close_to_verified_result
     center = sans.beam_center_finder.beam_center_from_center_of_mass_alternative(
         pipeline
     )
-    reference = sc.vector([-0.0248743, -0.0166965, 0], unit='m')
+    reference = sc.vector([-0.0248743, -0.0166965, 4.12268], unit='m')
     assert sc.allclose(center, reference)
 
 
