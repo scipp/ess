@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import scipp as sc
 import scippnexus as snx
 from scipp.core import concepts
@@ -281,6 +282,20 @@ def process_wavelength_bands(
 
     The final bands must have a size of 2 in the wavelength dimension, defining a start
     and an end wavelength.
+
+    The band edges are snapped onto ``wavelength_bins``, moving each edge by at most
+    half a bin width. :func:`_reduce` selects a band from event data by re-binning onto
+    the band edges but from dense data by slicing whole bins, and only bands aligned
+    with the bins make the two select the same wavelength range. Unaligned bands leave
+    the I(Q) numerator and denominator covering different ranges, biasing each band by
+    several percent when bands are only a few bins wide. See
+    :py:class:`ess.sans.types.ProcessedWavelengthBands`.
+
+    Raises
+    ------
+    ValueError
+        If the bands are not two wavelength values per band, fall outside
+        ``wavelength_bins``, are not ordered, or are narrower than a wavelength bin.
     """
     if wavelength_bands is None:
         wavelength_bands = sc.concat(
@@ -301,7 +316,49 @@ def process_wavelength_bands(
             'defining a start and an end wavelength, '
             f'got {wavelength_bands.sizes["wavelength"]}.'
         )
-    return wavelength_bands
+    wavelength_bands = wavelength_bands.to(
+        unit=wavelength_bins.unit, dtype='float64', copy=False
+    )
+    lo = wavelength_bins.min()
+    hi = wavelength_bins.max()
+    # A NaN edge compares False against both bounds, so it is rejected here rather
+    # than snapping to an arbitrary bin.
+    if not sc.all((wavelength_bands >= lo) & (wavelength_bands <= hi)).value:
+        raise ValueError(
+            f'Wavelength bands must lie within the wavelength bins [{lo:c}, {hi:c}], '
+            f'got {wavelength_bands}'
+        )
+    if not sc.all(_widths(wavelength_bands) > sc.scalar(0.0, unit=lo.unit)).value:
+        raise ValueError(
+            f'Wavelength bands must start before they end, got {wavelength_bands}'
+        )
+    bands = _snap_to_bins(wavelength_bands, wavelength_bins)
+    widths = _widths(bands)
+    collapsed = int((widths <= sc.scalar(0.0, unit=lo.unit)).sum().value)
+    if collapsed:
+        raise ValueError(
+            f'{collapsed} of {widths.size} wavelength bands are narrower than a '
+            'wavelength bin and collapse to zero width when snapped onto it. Widen the '
+            'bands or refine WavelengthBins.'
+        )
+    return bands
+
+
+def _widths(bands: sc.Variable) -> sc.Variable:
+    return bands['wavelength', 1] - bands['wavelength', 0]
+
+
+def _snap_to_bins(bands: sc.Variable, bins: sc.Variable) -> sc.Variable:
+    """Move every band edge to the nearest wavelength-bin edge."""
+    edges = bins.values
+    upper = np.clip(np.searchsorted(edges, bands.values), 1, len(edges) - 1)
+    lower = upper - 1
+    nearest = np.where(
+        bands.values - edges[lower] <= edges[upper] - bands.values, lower, upper
+    )
+    # Values are taken from ``bins`` rather than rounded, so they are bit-identical to
+    # the bin edges. Slicing rules that differ in how they treat a boundary then agree.
+    return sc.array(dims=bands.dims, values=edges[nearest], unit=bins.unit)
 
 
 def _normalize(
@@ -413,6 +470,11 @@ def _reduce(part: sc.DataArray, /, *, bands: ProcessedWavelengthBands) -> sc.Dat
         # If in event mode the desired wavelength binning has not been applied, we need
         # it for splitting by bands, or restricting the range in case of a single band.
         part = part.bin(wavelength=sc.sort(bands.flatten(to=wav), wav))
+    # Selection by label slicing means different things depending on the wavelength
+    # coord: bin edges select every overlapping bin, midpoints (as carried by the
+    # denominator, see `norm_detector_term_denominator`) select by nearest bin. The
+    # three cases coincide only because `process_wavelength_bands` aligned the bands
+    # with the bins.
     parts = [
         _do_reduce(part[wav, wav_range[0] : wav_range[1]])
         for wav_range in sc.collapse(bands, keep=wav).values()
