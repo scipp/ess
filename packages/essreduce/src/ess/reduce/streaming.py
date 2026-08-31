@@ -267,6 +267,61 @@ class MaxAccumulator(Accumulator):
         self._cur_max = None
 
 
+class _Inputs:
+    """
+    Values fed into a workflow, without rebuilding its graph.
+
+    Assigning a value to a :class:`sciline.Pipeline` rebuilds its graph and keeps the
+    value reachable from the pipeline until it is overwritten. Streaming feeds values
+    for every chunk, every finalize, and every context update, so both costs are paid
+    repeatedly, for the largest objects in the process. Here the workflow instead
+    obtains each key from a provider reading this mapping, so feeding a value is a
+    plain dict write and the graph structure, which does not depend on the values,
+    stays as it was built.
+
+    The first value for a key is still assigned, once. Assignment prunes the branch
+    the value replaces, and the pruned graph is what every later cycle computes on, so
+    skipping it would leave a dead branch behind for the task graph to walk on every
+    call. Deferring that first assignment until a key is actually fed also means a key
+    that is never fed keeps whatever the workflow was built with, which matters for
+    context: a workflow whose context never arrived must fail the way it did before,
+    rather than silently compute from a stand-in value.
+
+    A value stays readable until it is overwritten or explicitly released. Callers
+    release what is dead after computing, and keep what the workflow is meant to reuse
+    across cycles, such as context.
+    """
+
+    def __init__(self, workflow: sciline.Pipeline) -> None:
+        self._workflow = workflow
+        self._values: dict[sciline.typing.Key, Any] = {}
+
+    def __setitem__(self, key: sciline.typing.Key, value: Any) -> None:
+        if key not in self._values:
+            self._workflow[key] = value  # prunes the branch this value replaces
+            self._insert_provider(key)
+        self._values[key] = value
+
+    def release(self, key: sciline.typing.Key) -> None:
+        """Drop the reference to the value fed for ``key``, which must have been fed."""
+        if key not in self._values:
+            # Seeding the mapping here would make the next feed skip the assignment
+            # that wires the key up, so the value would never reach the workflow.
+            raise KeyError(f"Cannot release '{key}': no value was fed for it")
+        self._values[key] = None
+
+    def _insert_provider(self, key: sciline.typing.Key) -> None:
+        values = self._values
+
+        def provide_input_value() -> Any:
+            return values[key]
+
+        # Sciline deduces the provided key from the return annotation. The key is known
+        # only at runtime, so it has to be patched in.
+        provide_input_value.__annotations__ = {'return': key}
+        self._workflow.insert(provide_input_value)
+
+
 class StreamProcessor:
     """
     Wrap a base workflow for streaming processing of chunks.
@@ -421,6 +476,30 @@ class StreamProcessor:
         self._target_keys = target_keys
         self._allow_bypass = allow_bypass
 
+        # Chunks, accumulator values, and context are fed to the workflows rather than
+        # assigned to them, see :class:`_Inputs`.
+        self._context_inputs = _Inputs(self._context_workflow)
+        self._chunk_inputs = _Inputs(self._process_chunk_workflow)
+        self._finalize_inputs = _Inputs(self._finalize_workflow)
+
+        # Dynamic keys that finalize() reads directly, i.e., that reach a target
+        # without passing through an accumulator. Only these are fed to the finalize
+        # workflow, and only they must outlive the chunk they arrived in. Computed on
+        # the graph with the accumulator inputs cut, which is what finalize computes
+        # on. Feeding context cuts further edges, so this may name a key that finalize
+        # turns out not to need, never miss one that it does.
+        self._keys_read_at_finalize: set[sciline.typing.Key] = set()
+        if allow_bypass:
+            finalize_graph = graph.copy()
+            finalize_graph.remove_edges_from(
+                [edge for key in self._accumulators for edge in graph.in_edges(key)]
+            )
+            reachable = set()
+            for key in target_keys:
+                if key in finalize_graph:
+                    reachable |= nx.ancestors(finalize_graph, key)
+            self._keys_read_at_finalize = self._dynamic_keys & reachable
+
     def set_context(self, context: dict[sciline.typing.Key, Any]) -> None:
         """
         Set the context for processing chunks.
@@ -436,17 +515,19 @@ class StreamProcessor:
                 raise ValueError(f"Key '{key}' is not a context key")
             needs_recompute |= self._context_key_to_cached_context_nodes_map[key]
         for key, value in context.items():
-            self._context_workflow[key] = value
+            self._context_inputs[key] = value
             # Propagate context values to finalize workflow so providers that depend
             # on context keys receive the updated values during finalize().
-            self._finalize_workflow[key] = value
+            self._finalize_inputs[key] = value
         results = self._context_workflow.compute(needs_recompute)
+        # Context values and the nodes derived from them are caches, to be reused until
+        # the context changes again, so nothing is released here.
         for key, value in results.items():
             if key in self._target_keys:
                 # Context-dependent key is direct target, independent of dynamic nodes.
-                self._finalize_workflow[key] = value
+                self._finalize_inputs[key] = value
             else:
-                self._process_chunk_workflow[key] = value
+                self._chunk_inputs[key] = value
 
     def add_chunk(
         self, chunks: dict[sciline.typing.Key, Any]
@@ -502,15 +583,18 @@ class StreamProcessor:
             accumulators_to_update.append(acc_key)
 
         for key, value in chunks.items():
-            self._process_chunk_workflow[key] = value
+            self._chunk_inputs[key] = value
             # There can be dynamic keys that do not "terminate" in any accumulator. In
             # that case, we need to make sure they can be and are used when computing
             # the target keys.
-            if self._allow_bypass:
-                self._finalize_workflow[key] = value
+            if key in self._keys_read_at_finalize:
+                self._finalize_inputs[key] = value
         to_accumulate = self._process_chunk_workflow.compute(accumulators_to_update)
         for key, processed in to_accumulate.items():
             self._accumulators[key].push(processed)
+        # Release the chunk. What finalize() reads is held by its own inputs.
+        for key in chunks:
+            self._chunk_inputs.release(key)
 
     def finalize(self) -> dict[sciline.typing.Key, Any]:
         """
@@ -521,11 +605,14 @@ class StreamProcessor:
         :
             Finalized result.
         """
-        for key in self._accumulators:
-            self._finalize_workflow[key] = self._accumulators[key].value
+        for key, accumulator in self._accumulators.items():
+            self._finalize_inputs[key] = accumulator.value
         result = self._finalize_workflow.compute(self._target_keys)
-        for acc in self._accumulators.values():
-            acc.on_finalize()
+        for key, accumulator in self._accumulators.items():
+            # Release the value, which an accumulator such as a sliding window may drop
+            # in on_finalize() and would otherwise stay alive until the next cycle.
+            self._finalize_inputs.release(key)
+            accumulator.on_finalize()
         return result
 
     def clear(self) -> None:
