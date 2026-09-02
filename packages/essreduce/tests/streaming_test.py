@@ -1075,17 +1075,13 @@ def test_StreamProcessor_finalize_does_not_retain_accumulated_value() -> None:
         target_keys=(Target,),
         accumulators={AccumA: accumulator, AccumB: WindowAccumulator()},
     )
-    # The first value fed for a key is assigned, which wires the key up and prunes the
-    # branch it replaces. Retention is a property of the cycles after that.
     streaming_wf.accumulate({DynamicA: sc.scalar(1.0), DynamicB: sc.scalar(4.0)})
-    streaming_wf.finalize()
-
-    streaming_wf.accumulate({DynamicA: sc.scalar(2.0), DynamicB: sc.scalar(5.0)})
     ref = weakref.ref(accumulator.value)
     streaming_wf.finalize()
 
     # The accumulator dropped the value in on_finalize, so nothing should keep it
-    # alive. Note that this must hold without running the cyclic garbage collector.
+    # alive. This must hold without running the cyclic garbage collector, i.e., the
+    # assertion relies on CPython's reference counting.
     assert ref() is None
 
 
@@ -1099,15 +1095,12 @@ def test_StreamProcessor_accumulate_does_not_retain_chunk() -> None:
         target_keys=(Target,),
         accumulators=(AccumA, AccumB),
     )
-    # The first value fed for a key is assigned, which wires the key up and prunes the
-    # branch it replaces. Retention is a property of the cycles after that.
-    streaming_wf.accumulate({DynamicA: sc.scalar(1.0), DynamicB: sc.scalar(4.0)})
-
-    chunk = sc.scalar(2.0)
+    chunk = sc.scalar(1.0)
     ref = weakref.ref(chunk)
-    streaming_wf.accumulate({DynamicA: chunk, DynamicB: sc.scalar(5.0)})
+    streaming_wf.accumulate({DynamicA: chunk, DynamicB: sc.scalar(4.0)})
     del chunk
 
+    # Relies on CPython's reference counting, see the test above.
     assert ref() is None
 
 
@@ -1149,9 +1142,9 @@ def test_StreamProcessor_raises_if_context_was_never_set() -> None:
     )
     streaming_wf.accumulate({Streamed: sc.scalar(1)})
 
-    # A context that never arrived must fail rather than compute from a stand-in
-    # value, which is why inputs are only wired up once they are first fed.
-    with pytest.raises(TypeError):
+    # A context that never arrived must fail, naming the key, rather than compute
+    # from a stand-in value.
+    with pytest.raises(ValueError, match='No value was fed'):
         streaming_wf.finalize()
 
 
@@ -1166,12 +1159,8 @@ def test_StreamProcessor_with_bypass_releases_chunks_not_read_at_finalize() -> N
         accumulators=(AccumA,),  # DynamicA terminates here, only DynamicB is bypassed
         allow_bypass=True,
     )
-    # The first value fed for a key is assigned, which wires the key up.
-    streaming_wf.accumulate({DynamicA: sc.scalar(1.0), DynamicB: sc.scalar(4.0)})
-    streaming_wf.finalize()
-
-    terminated = sc.scalar(2.0)
-    bypassed = sc.scalar(5.0)
+    terminated = sc.scalar(1.0)
+    bypassed = sc.scalar(4.0)
     ref_terminated = weakref.ref(terminated)
     ref_bypassed = weakref.ref(bypassed)
     streaming_wf.accumulate({DynamicA: terminated, DynamicB: bypassed})
@@ -1181,4 +1170,4 @@ def test_StreamProcessor_with_bypass_releases_chunks_not_read_at_finalize() -> N
     assert ref_terminated() is None
     assert ref_bypassed() is not None
     result = streaming_wf.finalize()
-    assert sc.identical(result[Target], sc.scalar(2 * 3.0 / 5.0))
+    assert sc.identical(result[Target], sc.scalar(2 * 1.0 / 4.0))
