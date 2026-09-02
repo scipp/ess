@@ -3,7 +3,7 @@
 """This module provides tools for running workflows in a streaming fashion."""
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
 
@@ -267,6 +267,72 @@ class MaxAccumulator(Accumulator):
         self._cur_max = None
 
 
+class _FedWorkflow:
+    """
+    A workflow whose inputs are fed as values, without rebuilding its graph.
+
+    Assigning a value to a :class:`sciline.Pipeline` rebuilds its graph and keeps the
+    value reachable from the pipeline until it is overwritten. Streaming feeds values
+    for every chunk, every finalize, and every context update, so both costs are paid
+    repeatedly, for the largest objects in the process. Here each input is instead
+    provided by a provider reading a mapping owned by this class, so feeding a value
+    is a plain dict write and the graph structure, which does not depend on the
+    values, stays as it was built.
+
+    Inputs are wired up once, at construction. Wiring assigns to the pipeline before
+    inserting the provider because only assignment prunes the branch the input
+    replaces: ``Pipeline.__setitem__`` removes the ancestors of the key, whereas
+    ``Pipeline.insert`` only cuts the key's incoming edges and leaves the orphaned
+    branch in the graph, for every later ``Pipeline.get`` to walk again.
+
+    A value stays readable until it is released. Reading a key that holds no value
+    raises, so a workflow computed before its inputs arrived fails, naming the key,
+    rather than silently computing from a stand-in value. Callers release what is dead
+    once it has been consumed, and keep what the workflow is meant to reuse across
+    cycles, such as context.
+    """
+
+    def __init__(
+        self, workflow: sciline.Pipeline, inputs: Iterable[sciline.typing.Key]
+    ) -> None:
+        self._workflow = workflow
+        self._values: dict[sciline.typing.Key, Any] = {}
+        for key in inputs:
+            self._workflow[key] = None  # prunes the branch this input replaces
+            self._insert_provider(key)
+
+    def __setitem__(self, key: sciline.typing.Key, value: Any) -> None:
+        self._values[key] = value
+
+    def release(self, key: sciline.typing.Key) -> None:
+        """Drop the reference to the value fed for ``key``, which must have been fed."""
+        del self._values[key]
+
+    def compute(
+        self, keys: Iterable[sciline.typing.Key]
+    ) -> dict[sciline.typing.Key, Any]:
+        """Compute ``keys`` from the values fed so far."""
+        return self._workflow.compute(keys)
+
+    def _insert_provider(self, key: sciline.typing.Key) -> None:
+        # Binding the mapping to a local keeps the closure, and thus the pipeline
+        # holding it, from referencing this instance: capturing ``self`` would close
+        # the cycle pipeline -> provider -> closure -> self -> pipeline, which only
+        # the cyclic garbage collector can break.
+        values = self._values
+
+        def provide_input_value() -> Any:
+            try:
+                return values[key]
+            except KeyError:
+                raise ValueError(f"No value was fed for '{key}'") from None
+
+        # Sciline deduces the provided key from the return annotation. The key is known
+        # only at runtime, so it has to be patched in.
+        provide_input_value.__annotations__ = {'return': key}
+        self._workflow.insert(provide_input_value)
+
+
 class StreamProcessor:
     """
     Wrap a base workflow for streaming processing of chunks.
@@ -334,92 +400,61 @@ class StreamProcessor:
         """
         self._dynamic_keys = set(dynamic_keys)
         self._context_keys = set(context_keys)
-
-        # Validate that dynamic and context keys do not overlap
-        overlap = self._dynamic_keys & self._context_keys
-        if overlap:
-            raise ValueError(f"Keys cannot be both dynamic and context: {overlap}")
-
-        # Check dynamic/context keys don't depend on other dynamic/context keys
-        graph = base_workflow.underlying_graph
-        special_keys = self._dynamic_keys | self._context_keys
-        for key in special_keys:
-            if key not in graph:
-                continue
-            ancestors = nx.ancestors(graph, key)
-            special_ancestors = ancestors & special_keys
-            downstream = 'Dynamic' if key in self._dynamic_keys else 'Context'
-            if special_ancestors:
-                raise ValueError(
-                    f"{downstream} key '{key}' depends on other dynamic/context keys: "
-                    f"{special_ancestors}. This is not supported."
-                )
-
-        workflow = sciline.Pipeline()
-        for key in target_keys:
-            workflow[key] = base_workflow[key]
-        for key in dynamic_keys:
-            workflow[key] = None  # hack to prune branches
-        for key in context_keys:
-            workflow[key] = None
+        self._target_keys = target_keys
+        _validate_streaming_keys(base_workflow, self._dynamic_keys, self._context_keys)
 
         # Store for visualization (copy in case caller modifies base_workflow later)
         self._base_workflow_for_viz = base_workflow.copy()
-
-        # Find and pre-compute static nodes as far down the graph as possible
-        nodes = _find_descendants(workflow, dynamic_keys + context_keys)
-        last_static = _find_parents(workflow, nodes) - nodes
-        for key, value in base_workflow.compute(last_static).items():
-            workflow[key] = value
-        self._cached_keys = last_static  # Store for visualization
-
-        # Nodes that may need updating on context change but should be cached otherwise.
-        dynamic_nodes = _find_descendants(workflow, dynamic_keys)
-        # Nodes as far "down" in the graph as possible, right before the dynamic nodes.
-        # This also includes target keys that are not dynamic but context-dependent.
-        context_to_cache = (
-            (_find_parents(workflow, dynamic_nodes) | set(target_keys)) - dynamic_nodes
-        ) & _find_descendants(workflow, context_keys)
-        graph = workflow.underlying_graph
-        self._context_key_to_cached_context_nodes_map = {
-            context_key: ({context_key} | nx.descendants(graph, context_key))
-            & context_to_cache
-            for context_key in self._context_keys
-            if context_key in graph
-        }
-
-        self._context_workflow = workflow.copy()
-        self._process_chunk_workflow = workflow.copy()
-        self._finalize_workflow = workflow.copy()
-        self._accumulators = (
-            accumulators
-            if isinstance(accumulators, dict)
-            else {key: EternalAccumulator() for key in accumulators}
+        workflow, self._cached_keys = _build_streaming_workflow(
+            base_workflow,
+            target_keys=target_keys,
+            dynamic_keys=dynamic_keys,
+            context_keys=context_keys,
         )
-
+        graph = workflow.underlying_graph
+        self._context_key_to_cached_context_nodes_map = _map_context_to_cached_nodes(
+            workflow,
+            dynamic_keys=dynamic_keys,
+            context_keys=self._context_keys,
+            target_keys=target_keys,
+        )
+        self._accumulators = _make_accumulators(base_workflow, accumulators, graph)
         # Map each accumulator to its dependent dynamic keys
         self._accumulator_dependencies = {
             acc_key: nx.ancestors(graph, acc_key) & self._dynamic_keys
             for acc_key in self._accumulators
-            if acc_key in graph
         }
+        self._keys_read_at_finalize = (
+            _find_keys_read_at_finalize(
+                graph,
+                target_keys=target_keys,
+                accumulator_keys=set(self._accumulators),
+                dynamic_keys=self._dynamic_keys,
+            )
+            if allow_bypass
+            else set()
+        )
 
-        # Depending on the target_keys, some accumulators can be unused and should not
-        # be computed when adding a chunk.
-        self._accumulators = {
-            key: value for key, value in self._accumulators.items() if key in graph
+        # Chunks, accumulator values, and context are fed to the workflows rather than
+        # assigned to them, see :class:`_FedWorkflow`. Each workflow is wired up for
+        # exactly the keys the methods below feed it.
+        cached_context_nodes = {
+            node
+            for nodes in self._context_key_to_cached_context_nodes_map.values()
+            for node in nodes
         }
-        # Create accumulators unless instances were passed. This allows for initializing
-        # accumulators with arguments that depend on the workflow such as bin edges,
-        # which would otherwise be hard to obtain.
-        self._accumulators = {
-            key: value
-            if isinstance(value, Accumulator)
-            else base_workflow.bind_and_call(value)
-            for key, value in self._accumulators.items()
-        }
-        self._target_keys = target_keys
-        self._allow_bypass = allow_bypass
+        targets = set(target_keys)
+        self._context_workflow = _FedWorkflow(workflow.copy(), self._context_keys)
+        self._chunk_workflow = _FedWorkflow(
+            workflow.copy(), self._dynamic_keys | (cached_context_nodes - targets)
+        )
+        self._finalize_workflow = _FedWorkflow(
+            workflow.copy(),
+            set(self._accumulators)
+            | self._context_keys
+            | (cached_context_nodes & targets)
+            | self._keys_read_at_finalize,
+        )
 
     def set_context(self, context: dict[sciline.typing.Key, Any]) -> None:
         """
@@ -441,12 +476,14 @@ class StreamProcessor:
             # on context keys receive the updated values during finalize().
             self._finalize_workflow[key] = value
         results = self._context_workflow.compute(needs_recompute)
+        # Context values and the nodes derived from them are caches, to be reused until
+        # the context changes again, so nothing is released here.
         for key, value in results.items():
             if key in self._target_keys:
                 # Context-dependent key is direct target, independent of dynamic nodes.
                 self._finalize_workflow[key] = value
             else:
-                self._process_chunk_workflow[key] = value
+                self._chunk_workflow[key] = value
 
     def add_chunk(
         self, chunks: dict[sciline.typing.Key, Any]
@@ -502,15 +539,18 @@ class StreamProcessor:
             accumulators_to_update.append(acc_key)
 
         for key, value in chunks.items():
-            self._process_chunk_workflow[key] = value
+            self._chunk_workflow[key] = value
             # There can be dynamic keys that do not "terminate" in any accumulator. In
             # that case, we need to make sure they can be and are used when computing
             # the target keys.
-            if self._allow_bypass:
+            if key in self._keys_read_at_finalize:
                 self._finalize_workflow[key] = value
-        to_accumulate = self._process_chunk_workflow.compute(accumulators_to_update)
+        to_accumulate = self._chunk_workflow.compute(accumulators_to_update)
         for key, processed in to_accumulate.items():
             self._accumulators[key].push(processed)
+        # Release the chunk. What finalize() reads is held by its own inputs.
+        for key in chunks:
+            self._chunk_workflow.release(key)
 
     def finalize(self) -> dict[sciline.typing.Key, Any]:
         """
@@ -521,11 +561,14 @@ class StreamProcessor:
         :
             Finalized result.
         """
-        for key in self._accumulators:
-            self._finalize_workflow[key] = self._accumulators[key].value
+        for key, accumulator in self._accumulators.items():
+            self._finalize_workflow[key] = accumulator.value
         result = self._finalize_workflow.compute(self._target_keys)
-        for acc in self._accumulators.values():
-            acc.on_finalize()
+        for key, accumulator in self._accumulators.items():
+            # Release the value, which an accumulator such as a sliding window may drop
+            # in on_finalize() and would otherwise stay alive until the next cycle.
+            self._finalize_workflow.release(key)
+            accumulator.on_finalize()
         return result
 
     def clear(self) -> None:
@@ -691,6 +734,134 @@ class StreamProcessor:
             _add_legend(dot, show_static_dependencies=show_static_dependencies)
 
         return dot
+
+
+def _validate_streaming_keys(
+    base_workflow: sciline.Pipeline,
+    dynamic_keys: set[sciline.typing.Key],
+    context_keys: set[sciline.typing.Key],
+) -> None:
+    """Raise unless dynamic and context keys are disjoint and mutually independent."""
+    if overlap := dynamic_keys & context_keys:
+        raise ValueError(f"Keys cannot be both dynamic and context: {overlap}")
+    graph = base_workflow.underlying_graph
+    special_keys = dynamic_keys | context_keys
+    for key in special_keys:
+        if key not in graph:
+            continue
+        if special_ancestors := nx.ancestors(graph, key) & special_keys:
+            downstream = 'Dynamic' if key in dynamic_keys else 'Context'
+            raise ValueError(
+                f"{downstream} key '{key}' depends on other dynamic/context keys: "
+                f"{special_ancestors}. This is not supported."
+            )
+
+
+def _build_streaming_workflow(
+    base_workflow: sciline.Pipeline,
+    *,
+    target_keys: tuple[sciline.typing.Key, ...],
+    dynamic_keys: tuple[sciline.typing.Key, ...],
+    context_keys: tuple[sciline.typing.Key, ...],
+) -> tuple[sciline.Pipeline, set[sciline.typing.Key]]:
+    """
+    Build the workflow the stream processor computes on, and its cached keys.
+
+    Everything that does not depend on dynamic or context keys is computed once and
+    assigned, as far down the graph as possible. The cached keys are returned since
+    the visualization distinguishes them from their static ancestors.
+    """
+    workflow = sciline.Pipeline()
+    for key in target_keys:
+        workflow[key] = base_workflow[key]
+    for key in dynamic_keys:
+        workflow[key] = None  # hack to prune branches
+    for key in context_keys:
+        workflow[key] = None
+
+    nodes = _find_descendants(workflow, dynamic_keys + context_keys)
+    last_static = _find_parents(workflow, nodes) - nodes
+    for key, value in base_workflow.compute(last_static).items():
+        workflow[key] = value
+    return workflow, last_static
+
+
+def _map_context_to_cached_nodes(
+    workflow: sciline.Pipeline,
+    *,
+    dynamic_keys: tuple[sciline.typing.Key, ...],
+    context_keys: set[sciline.typing.Key],
+    target_keys: tuple[sciline.typing.Key, ...],
+) -> dict[sciline.typing.Key, set[sciline.typing.Key]]:
+    """
+    Map each context key to the nodes to recompute when that context key changes.
+
+    The nodes are those that depend on context but not on the chunks: as far "down"
+    the graph as possible, right before the dynamic nodes, plus target keys that are
+    context-dependent but not dynamic. They are cached until the context changes.
+    """
+    dynamic_nodes = _find_descendants(workflow, dynamic_keys)
+    context_to_cache = (
+        (_find_parents(workflow, dynamic_nodes) | set(target_keys)) - dynamic_nodes
+    ) & _find_descendants(workflow, context_keys)
+    graph = workflow.underlying_graph
+    return {
+        context_key: ({context_key} | nx.descendants(graph, context_key))
+        & context_to_cache
+        for context_key in context_keys
+        if context_key in graph
+    }
+
+
+def _make_accumulators(
+    base_workflow: sciline.Pipeline,
+    accumulators: dict[sciline.typing.Key, Accumulator | Callable[..., Accumulator]]
+    | tuple[sciline.typing.Key, ...],
+    graph: nx.DiGraph,
+) -> dict[sciline.typing.Key, Accumulator]:
+    """
+    Instantiate the accumulators that the target keys actually depend on.
+
+    Accumulators that are not in the graph are unused given the target keys and are
+    dropped. Callables are bound and called on the workflow, which allows for
+    initializing an accumulator with arguments that depend on the workflow, such as
+    bin edges, which would otherwise be hard to obtain.
+    """
+    if not isinstance(accumulators, dict):
+        accumulators = {key: EternalAccumulator() for key in accumulators}
+    return {
+        key: value
+        if isinstance(value, Accumulator)
+        else base_workflow.bind_and_call(value)
+        for key, value in accumulators.items()
+        if key in graph
+    }
+
+
+def _find_keys_read_at_finalize(
+    graph: nx.DiGraph,
+    *,
+    target_keys: tuple[sciline.typing.Key, ...],
+    accumulator_keys: set[sciline.typing.Key],
+    dynamic_keys: set[sciline.typing.Key],
+) -> set[sciline.typing.Key]:
+    """
+    Find dynamic keys that reach a target without passing through an accumulator.
+
+    Only these are fed to the finalize workflow, and only they must outlive the chunk
+    they arrived in. Computed on the graph with the accumulator inputs cut, which is
+    what finalize computes on. Feeding context cuts further edges, so this may name a
+    key that finalize turns out not to need, never miss one that it does.
+    """
+    finalize_graph = graph.copy()
+    finalize_graph.remove_edges_from(
+        [edge for key in accumulator_keys for edge in graph.in_edges(key)]
+    )
+    reachable = set()
+    for key in target_keys:
+        if key in finalize_graph:
+            reachable |= nx.ancestors(finalize_graph, key)
+    return dynamic_keys & reachable
 
 
 def _find_descendants(
