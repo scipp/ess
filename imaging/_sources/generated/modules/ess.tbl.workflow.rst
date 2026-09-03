@@ -14,6 +14,7 @@
    .. autosummary::
       :toctree:
    
+      OrcaNormalizedImagesWorkflow
       TblWorkflow
       default_parameters
    

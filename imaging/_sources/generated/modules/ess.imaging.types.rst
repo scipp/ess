@@ -13,12 +13,15 @@
       SampleRun
       DarkBackgroundRun
       OpenBeamRun
+      AllRuns
       BeamMonitor1
       BeamMonitor2
       BeamMonitor3
       BeamMonitor4
       MaskingRules
+      MeanDarkFrame
       NormalizedImage
+      ImageKey
    
    
 
@@ -37,7 +40,6 @@
       BackgroundSubtractedDetector
       CoordTransformGraph
       CorrectedDetector
-      ExposureTime
       FluxNormalizedDetector
    
    

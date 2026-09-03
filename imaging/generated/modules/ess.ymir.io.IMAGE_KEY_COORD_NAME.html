@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -36,12 +36,12 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../_static/documentation_options.js?v=271db7d1"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.ymir.io.DarkCurrentImageStacks" href="ess.ymir.io.DarkCurrentImageStacks.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.9.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -280,11 +280,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -297,8 +304,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -309,8 +315,7 @@
           
           
           
-          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -321,8 +326,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
         <li class="nav-item">
           
@@ -493,11 +497,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -510,8 +521,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essimaging" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -522,8 +532,7 @@
           
           
           
-          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essimaging/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -534,8 +543,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essimaging" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
         <li class="nav-item">
           
@@ -594,16 +602,18 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.SampleRun.html">ess.imaging.types.SampleRun</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.DarkBackgroundRun.html">ess.imaging.types.DarkBackgroundRun</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.OpenBeamRun.html">ess.imaging.types.OpenBeamRun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.AllRuns.html">ess.imaging.types.AllRuns</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BeamMonitor1.html">ess.imaging.types.BeamMonitor1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BeamMonitor2.html">ess.imaging.types.BeamMonitor2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BeamMonitor3.html">ess.imaging.types.BeamMonitor3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BeamMonitor4.html">ess.imaging.types.BeamMonitor4</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.MaskingRules.html">ess.imaging.types.MaskingRules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.MeanDarkFrame.html">ess.imaging.types.MeanDarkFrame</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.NormalizedImage.html">ess.imaging.types.NormalizedImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.ImageKey.html">ess.imaging.types.ImageKey</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.BackgroundSubtractedDetector.html">ess.imaging.types.BackgroundSubtractedDetector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.CoordTransformGraph.html">ess.imaging.types.CoordTransformGraph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.CorrectedDetector.html">ess.imaging.types.CorrectedDetector</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.ExposureTime.html">ess.imaging.types.ExposureTime</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.imaging.types.FluxNormalizedDetector.html">ess.imaging.types.FluxNormalizedDetector</a></li>
 </ul>
 </details></li>
@@ -618,6 +628,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_ob_small.html">ess.odin.data.iron_simulation_ob_small</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_sample_large.html">ess.odin.data.iron_simulation_sample_large</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.data.iron_simulation_sample_small.html">ess.odin.data.iron_simulation_sample_small</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.data.odin_lego_images.html">ess.odin.data.odin_lego_images</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.data.odin_wavelength_lookup_table.html">ess.odin.data.odin_wavelength_lookup_table</a></li>
 </ul>
 </details></li>
@@ -627,8 +638,15 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.workflows.html">ess.odin.workflows</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.OdinBraggEdgeWorkflow.html">ess.odin.workflows.OdinBraggEdgeWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.OdinOrcaWorkflow.html">ess.odin.workflows.OdinOrcaWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.OdinWorkflow.html">ess.odin.workflows.OdinWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.compute_detector_tof.html">ess.odin.workflows.compute_detector_tof</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.default_parameters.html">ess.odin.workflows.default_parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.extract_dark_run.html">ess.odin.workflows.extract_dark_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.extract_openbeam_run.html">ess.odin.workflows.extract_openbeam_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.extract_sample_run.html">ess.odin.workflows.extract_sample_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.load_image_key.html">ess.odin.workflows.load_image_key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.workflows.normalize_by_proton_charge_orca_all_runs.html">ess.odin.workflows.normalize_by_proton_charge_orca_all_runs</a></li>
 </ul>
 </details></li>
 </ul>
@@ -643,6 +661,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.tbl.workflow.html">ess.tbl.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.tbl.workflow.OrcaNormalizedImagesWorkflow.html">ess.tbl.workflow.OrcaNormalizedImagesWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.tbl.workflow.TblWorkflow.html">ess.tbl.workflow.TblWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.tbl.workflow.default_parameters.html">ess.tbl.workflow.default_parameters</a></li>
 </ul>
@@ -858,8 +877,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -891,12 +910,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
+Current ESSimaging version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>
