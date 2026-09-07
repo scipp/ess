@@ -4,9 +4,14 @@
 from pathlib import Path
 
 import ess.odin.data
+import scipp as sc
+from scipp.testing import assert_identical
 from scitiff.io import load_scitiff
 
-from ess.imaging.io import tiff_from_event_data
+from ess.imaging.io import (
+    _add_to_event_time_offset_in_case_of_pulse_skipping,
+    tiff_from_event_data,
+)
 
 
 def test_tiff_dumping_helper(tmp_path: Path):
@@ -24,3 +29,30 @@ def test_tiff_dumping_helper(tmp_path: Path):
     assert loaded.sizes['t'] == 20
     assert 'x_pixel_offset' in loaded.coords
     assert 'y_pixel_offset' in loaded.coords
+
+
+def test_correct_event_time_offset() -> None:
+    assert_identical(
+        _add_to_event_time_offset_in_case_of_pulse_skipping(
+            sc.datetimes(dims='t', values=[0, 1, 2], unit='s'),
+            pulse_stride=2,
+            pulse_period=sc.scalar(1, unit='s'),
+        ),
+        sc.array(dims='t', values=[0, 1.0, 0], unit='s'),
+    )
+    assert_identical(
+        _add_to_event_time_offset_in_case_of_pulse_skipping(
+            sc.datetimes(dims='t', values=[10, 999, 2100], unit='ms'),
+            pulse_stride=2,
+            pulse_period=sc.scalar(1, unit='s'),
+        ),
+        sc.array(dims='t', values=[0, 1.0, 0], unit='s'),
+    )
+    assert_identical(
+        _add_to_event_time_offset_in_case_of_pulse_skipping(
+            sc.datetimes(dims='t', values=[-100, 999, 2100], unit='ms'),
+            pulse_stride=3,
+            pulse_period=sc.scalar(1, unit='s'),
+        ),
+        sc.array(dims='t', values=[2, 0.0, 1], unit='s'),
+    )
