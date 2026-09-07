@@ -10,10 +10,9 @@ from typing import NewType
 
 import scipp as sc
 import scippnexus as snx
-import scitiff
 from tifffile import imwrite
 
-from ess.imaging.io import _add_to_event_time_offset_in_case_of_pulse_skipping
+from ess.imaging.io import tiff_from_event_data
 from ess.reduce.nexus.types import FilePath
 
 from .types import (
@@ -373,6 +372,8 @@ def tiff_from_nexus(
     '''
     Write a tiff image file representing the data from the nexus file.
 
+    **Use ess.imaging.io.tiff_from_event_data instead.**
+
     Parameters
     ------------
     nexus_file_name:
@@ -393,23 +394,6 @@ def tiff_from_nexus(
         stacklevel=2,
     )
 
-    with snx.File(nexus_file_name) as f:
-        data = f['/entry/instrument/event_mode_detectors/timepix3'][()][
-            'timepix3_events'
-        ]
-    data.bins.coords['event_time_offset'] += (
-        _add_to_event_time_offset_in_case_of_pulse_skipping(
-            data.bins.coords['event_time_zero'],
-            pulse_stride=pulse_stride,
-            pulse_period=sc.scalar(1 / 14, unit="s").to(
-                unit=data.bins.coords['event_time_offset'].unit
-            ),
-        )
+    tiff_from_event_data(
+        nexus_file_name, output_path, time_bins=time_bins, pulse_stride=pulse_stride
     )
-    image = (
-        sc.concat([data], dim='c')
-        .hist(event_time_offset=time_bins)
-        .rename_dims(event_time_offset='t', dim_0='y', dim_1='x')
-    )
-    image = image.drop_coords([c for c in image.coords if image.coords[c].ndim > 1])
-    scitiff.save_scitiff(image, output_path)
