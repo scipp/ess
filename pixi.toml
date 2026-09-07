@@ -1,16 +1,19 @@
 [workspace]
 name = "ess"
 channels = ["conda-forge"]
-platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+# Scipp requires macOS 14 or newer.
+platforms = [
+    "linux-64",
+    { platform = "osx-64", macos = "14.0" },
+    { platform = "osx-arm64", macos = "14.0" },
+    "win-64",
+]
 version = "2026.2.0"
+requires-pixi = ">=0.71.3"
 exclude-newer = "14d"
 
 [dependencies]
 python = "3.12.*"
-
-[system-requirements]
-# Scipp does not support older OSX versions.
-macos = "14.0"
 
 [pypi-exclude-newer]
 scipp = "0m"
