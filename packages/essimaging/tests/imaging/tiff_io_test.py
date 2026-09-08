@@ -42,6 +42,15 @@ def test_correct_event_time_offset() -> None:
     )
     assert_identical(
         _add_to_event_time_offset_in_case_of_pulse_skipping(
+            sc.datetimes(dims='t', values=[0, 1, 2], unit='s'),
+            pulse_stride=2,
+            pulse_period=sc.scalar(1, unit='s'),
+            pulse_stride_offset=1,
+        ),
+        sc.array(dims='t', values=[1.0, 0, 1.0], unit='s'),
+    )
+    assert_identical(
+        _add_to_event_time_offset_in_case_of_pulse_skipping(
             sc.datetimes(dims='t', values=[10, 999, 2100], unit='ms'),
             pulse_stride=2,
             pulse_period=sc.scalar(1, unit='s'),
@@ -55,4 +64,13 @@ def test_correct_event_time_offset() -> None:
             pulse_period=sc.scalar(1, unit='s'),
         ),
         sc.array(dims='t', values=[2, 0.0, 1], unit='s'),
+    )
+    assert_identical(
+        _add_to_event_time_offset_in_case_of_pulse_skipping(
+            sc.datetimes(dims='t', values=[-100, 999, 2100], unit='ms'),
+            pulse_stride=3,
+            pulse_stride_offset=2,
+            pulse_period=sc.scalar(1, unit='s'),
+        ),
+        sc.array(dims='t', values=[1, 2.0, 0], unit='s'),
     )

@@ -12,6 +12,7 @@ def _add_to_event_time_offset_in_case_of_pulse_skipping(
     event_time_zero: sc.Variable,
     pulse_stride: int,
     pulse_period: sc.Variable,
+    pulse_stride_offset: int = 0,
 ) -> sc.Variable:
     _pulse_period = pulse_period.to(unit=event_time_zero.unit)
     etz = event_time_zero - sc.datetime(0, unit=event_time_zero.unit)
@@ -20,7 +21,7 @@ def _add_to_event_time_offset_in_case_of_pulse_skipping(
     # That way small deviations in etz will not move the etz to the next
     # or previous bin and each subsequent pulse will have a different index.
     offset = _pulse_period / 2 - etz.nanmin() % _pulse_period
-    index = ((etz + offset) // _pulse_period) % pulse_stride
+    index = (((etz + offset) // _pulse_period) + pulse_stride_offset) % pulse_stride
     return index * pulse_period
 
 
@@ -30,6 +31,7 @@ def tiff_from_event_data(
     *,
     time_bins: int | sc.Variable,
     pulse_stride: int,
+    pulse_stride_offset: int = 0,
     detector_group_path: str = "/entry/instrument/event_mode_detectors/timepix3",
     event_data_field_path: str = "timepix3_events",
 ) -> None:
@@ -46,6 +48,11 @@ def tiff_from_event_data(
         The number of time slices the image should have.
     pulse_stride:
         The pulse stride that was used when doing the measurement.
+    pulse_stride_offset:
+        The offset to the pulse stride.
+        For example, if pulse_stride is 2, offset should be
+        0 if the first event_time_zero set is the beginning of the pulse,
+        1 if the first event_time_zero set is the second half of the pulse.
     detector_group_path:
         Path to the event data group in the nexus file.
     event_data_field_path:
@@ -58,6 +65,7 @@ def tiff_from_event_data(
         _add_to_event_time_offset_in_case_of_pulse_skipping(
             data.bins.coords['event_time_zero'],
             pulse_stride=pulse_stride,
+            pulse_stride_offset=pulse_stride_offset,
             pulse_period=sc.scalar(1 / 14, unit="s").to(
                 unit=data.bins.coords['event_time_offset'].unit
             ),
