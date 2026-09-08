@@ -37,6 +37,8 @@ dependencies = [
     "essreduce>=26.6.0",
     "esspolarization>=25.7.0",
     "pandas>=2.1.2",
+    "scippneutron>=26.9.0",
+    "refl1d",
 ]
 
 dynamic = ["version"]
@@ -71,6 +73,7 @@ docs = [
     "ipytree>=0.2.2",
     "ipydatagrid>=1.3.0",
     "tof>=25.08.0",
+    "refl1d>=1.0.1",
 ]
 all = [
     "essreflectometry[gui]",
