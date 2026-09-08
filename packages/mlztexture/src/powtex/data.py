@@ -31,7 +31,7 @@ def load_powtex_csv(
     data_xyz = data[["voxel_x [mm]", "voxel_y [mm]", "voxel_z [mm]"]].to_numpy()
 
     event_coords = sc.vectors(dims=["event"], values=data_xyz, unit="mm")
-    event_data = sc.array(dims=["event"], values=np.ones(event_coords.shape[0]), unit="counts")
+    event_data = sc.ones(dims=["event"], shape=[len(data)], unit="counts")
     event_tof = sc.array(dims=["event"], values=data_tof, unit="ns")
 
     # ToDo: these should be read from the file, hardcoded for now

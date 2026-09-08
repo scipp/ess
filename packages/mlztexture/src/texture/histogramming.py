@@ -13,10 +13,10 @@ from ess.packages.mlztexture.src.texture.types import (
     TwoThetaBinningData,
     DspacingBinningData,
     Texture3D,
-    DetectorView,
-    FlatDetectorView,
-    TwoThetaRings,
-    GammaSlices,
+    DetectorViewRaw,
+    FlatDetectorViewRaw,
+    TwoThetaRingsRaw,
+    GammaSlicesRaw,
 )
 
 from ess.packages.essdiffraction.src.ess.powder.types import (
@@ -103,6 +103,7 @@ def generate_gamma_binning_data(
     #     )
     out = sc.DataGroup({"region_1": region_1_edges, "region_2": region_2_edges})
     return GammaBinningData(out)
+
 
 def generate_two_theta_binning_data(
     bin_width: TwoThetaBinWidth,
@@ -220,7 +221,7 @@ def hist_3d(
     data: DspacingCylSurfaceDetector[RunType],
     gamma_binning: GammaBinningData,
     two_theta_binning: TwoThetaBinningData,
-    dspacing_bin_width: DspacingBinWidth
+    dspacing_bin_width: DspacingBinWidth,
 ) -> Texture3D[RunType]:
 
     # Prepare conventional dspacing binning
@@ -237,9 +238,9 @@ def hist_3d(
     return Texture3D(out)
 
 
-def view_3d(
+def view_3d_raw(
     data: Texture3D[SampleRun],
-) -> DetectorView[SampleRun]:
+) -> DetectorViewRaw:
     """
     ToDo
     """
@@ -247,14 +248,14 @@ def view_3d(
     histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
 
     out = sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
-    return DetectorView[SampleRun](out)
+    return DetectorViewRaw(out)
 
 
-def view_2d_flat(
+def view_2d_flat_raw(
     data: Texture3D[SampleRun],
     # gamma_binning: GammaBinningData,
     # two_theta_binning: TwoThetaBinningData,
-) -> FlatDetectorView[SampleRun]:
+) -> FlatDetectorViewRaw:
     """
     This will be very similar to view_3d, just the detector gap needs to be properly handles.
     """
@@ -263,14 +264,14 @@ def view_2d_flat(
     histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
 
     out = sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
-    return FlatDetectorView[SampleRun](out)
+    return FlatDetectorViewRaw(out)
 
 
-def view_2d_rings(
+def view_2d_rings_raw(
     data: Texture3D[SampleRun],
     #gamma_binning: GammaBinningData,
     # two_theta_binning: TwoThetaBinningData,
-) -> TwoThetaRings[SampleRun]:
+) -> TwoThetaRingsRaw:
     """
     ToDo
     """
@@ -278,14 +279,14 @@ def view_2d_rings(
     histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
 
     out = sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
-    return FlatDetectorView[SampleRun](out)
+    return TwoThetaRingsRaw(out)
 
 
-def view_1d_gamma_slices(
+def view_1d_gamma_slices_raw(
     data: Texture3D[SampleRun],
     # gamma_binning: GammaBinningData,
     # two_theta_binning: TwoThetaBinningData,
-) -> GammaSlices[SampleRun]:
+) -> GammaSlicesRaw:
     """
     ToDo
     """
@@ -295,4 +296,4 @@ def view_1d_gamma_slices(
     # histogrammed_data_2 = data.hist(gamma=gamma_binning["region_2"], two_theta=two_theta_binning)
 
     # out = sc.DataGroup({"region_1": histogrammed_data_1, "region_2": histogrammed_data_2})
-    return GammaSlices[SampleRun](out)
+    return GammaSlicesRaw(out)

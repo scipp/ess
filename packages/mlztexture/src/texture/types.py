@@ -9,7 +9,6 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
 )
 
 
-
 class DspacingCylSurfaceDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with time-of-flight coordinate."""
 
@@ -22,21 +21,15 @@ class Texture3D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """ToDo."""
 
 
-class GammaSlices(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """ToDo."""
+DetectorViewRaw = NewType("DetectorViewRaw", sc.DataArray)
+FlatDetectorViewRaw = NewType("FlatDetectorViewRaw", sc.DataArray)
+TwoThetaRingsRaw = NewType("TwoThetaRingsRaw", sc.DataArray)
+GammaSlicesRaw = NewType("GammaSlicesRaw", sc.DataArray)
 
-
-class FlatDetectorView(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """ToDo."""
-
-
-class TwoThetaRings(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """ToDo."""
-
-
-class DetectorView(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
-    """ToDo."""
-
+DetectorView = NewType("DetectorView", sc.DataArray)
+FlatDetectorView = NewType("FlatDetectorView", sc.DataArray)
+TwoThetaRings = NewType("TwoThetaRings", sc.DataArray)
+GammaSlices = NewType("GammaSlices", sc.DataArray)
 
 # binning settings types
 GammaCutStart = NewType("GammaCutStart", sc.Variable)
@@ -69,3 +62,13 @@ class EmptyCanSubtracted3D(sl.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataAr
 
 NormalisedTexture3D = NewType("NormalisedTexture3D", sc.DataArray)
 """3D Intensity of normalized sample data."""
+
+Texture2D = NewType("Texture2D", sc.DataArray)
+
+GammaSliceWidth = NewType("GammaSliceWidth", sc.DataArray)
+
+DspacingHist = NewType("DspacingHist", sc.DataArray)
+TwoThetaHist = NewType("TwoThetaHist", sc.DataArray)
+IntegratedTwoThetaHist = NewType("IntegratedTwoThetaHist", sc.DataArray)
+
+ProcessedData = NewType("ProcessedData", sc.DataArray)

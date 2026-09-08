@@ -32,16 +32,25 @@ from ess.packages.mlztexture.src.texture.histogramming import (
     generate_gamma_binning_data,
     generate_two_theta_binning_data,
     hist_3d,
-    view_3d,
-    view_2d_flat,
-    view_2d_rings,
-    view_1d_gamma_slices
+    view_3d_raw,
+    view_2d_flat_raw,
+    view_2d_rings_raw,
+    view_1d_gamma_slices_raw
 )
 
 from ess.packages.mlztexture.src.texture.correction import (
     subtract_empty_can_from_sample,
     subtract_empty_can_from_vanadium,
     normalize_by_vanadium
+)
+
+from ess.packages.mlztexture.src.texture.grouping import (
+    view_2d_rings,
+    view_1d_gamma_slices,
+    generate_dspacing_hist,
+    generate_two_theta_hist,
+    generate_integrated_two_theta_hist,
+    export_data
 )
 
 def default_parameters() -> dict:
@@ -77,13 +86,19 @@ def TextureReduce() -> sciline.Pipeline:
                 generate_gamma_binning_data,
                 generate_two_theta_binning_data,
                 hist_3d,
-                view_3d,
-                view_2d_flat,
-                view_2d_rings,
-                view_1d_gamma_slices,
+                view_3d_raw,
+                view_2d_flat_raw,
+                view_2d_rings_raw,
+                view_1d_gamma_slices_raw,
                 subtract_empty_can_from_sample,
                 subtract_empty_can_from_vanadium,
                 normalize_by_vanadium,
+                view_2d_rings,
+                view_1d_gamma_slices,
+                generate_dspacing_hist,
+                generate_two_theta_hist,
+                generate_integrated_two_theta_hist,
+                export_data
                 # # coordinate_transformation_graph_mlz,
                 # p2d_coordinate_transformation_graph_mlz,
                 # #gravity_vector_neg_y,

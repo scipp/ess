@@ -77,11 +77,11 @@ def get_cylindrical_from_cartesian(position, projection_radius):
     # the implementation of gamma below is performed to be consistent with user expectations,
     # i.e. gamma = 0 corresponds to y = 0 and negative x and then increases with increasting y
     angle = sc.atan2(y=y, x=-x)
-    gamma = sc.mod(angle, sc.scalar(2 * np.pi, unit=angle.unit)).to(unit="deg")
+    gamma = sc.mod(angle, sc.scalar(2.0 * np.pi, unit=angle.unit)).to(unit="deg")
     two_theta = sc.atan2(y=xy_radius, x=z).to(unit="deg")
 
     # determine the projection of the position onto the cylindrical surface with the given radius
-    proj_x = projection_radius / xy_radius  * x
+    proj_x = projection_radius / xy_radius * x
     proj_y = projection_radius / xy_radius * y
     proj_z = projection_radius / xy_radius * z
 
