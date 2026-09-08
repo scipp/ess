@@ -38,7 +38,6 @@ dependencies = [
     "esspolarization>=25.7.0",
     "pandas>=2.1.2",
     "scippneutron>=26.9.0",
-    "refl1d",
 ]
 
 dynamic = ["version"]
