@@ -1,4 +1,4 @@
-Results of doctest builder run on 2026-09-03 09:22:37
+Results of doctest builder run on 2026-09-09 14:20:24
 =====================================================
 
 Document: generated/modules/ess.imaging.types.BackgroundSubtractedDetector

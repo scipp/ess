@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=271db7d1"></script>
+    <script src="../../../_static/documentation_options.js?v=9ce135cc"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.0" />
+  <meta name="docsearch:version" content="26.9.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -624,9 +624,9 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scitiff</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tifffile</span><span class="w"> </span><span class="kn">import</span> <span class="n">imwrite</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.imaging.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">tiff_from_event_data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FilePath</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -1015,22 +1015,6 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_add_to_event_time_offset_in_case_of_pulse_skipping</span><span class="p">(</span>
-    <span class="n">event_time_zero</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">pulse_stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">pulse_period</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-    <span class="n">_pulse_period</span> <span class="o">=</span> <span class="n">pulse_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">event_time_zero</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-    <span class="n">etz</span> <span class="o">=</span> <span class="n">event_time_zero</span> <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">event_time_zero</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-    <span class="c1"># The offset is used to place some etz value in the center of a binning</span>
-    <span class="c1"># where the bins have constant width pulse_period.</span>
-    <span class="c1"># That way small deviations in etz will not move the etz to the next</span>
-    <span class="c1"># or previous bin and each subsequent pulse will have a different index.</span>
-    <span class="n">offset</span> <span class="o">=</span> <span class="n">_pulse_period</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">etz</span><span class="o">.</span><span class="n">nanmin</span><span class="p">()</span> <span class="o">%</span> <span class="n">_pulse_period</span>
-    <span class="n">index</span> <span class="o">=</span> <span class="p">((</span><span class="n">etz</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span> <span class="o">//</span> <span class="n">_pulse_period</span><span class="p">)</span> <span class="o">%</span> <span class="n">pulse_stride</span>
-    <span class="k">return</span> <span class="n">index</span> <span class="o">*</span> <span class="n">pulse_period</span>
-
-
 <div class="viewcode-block" id="tiff_from_nexus">
 <a class="viewcode-back" href="../../../generated/modules/ess.ymir.io.tiff_from_nexus.html#ess.ymir.io.tiff_from_nexus">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tiff_from_nexus</span><span class="p">(</span>
@@ -1043,6 +1027,8 @@
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Write a tiff image file representing the data from the nexus file.</span>
 
+<span class="sd">    **Use ess.imaging.io.tiff_from_event_data instead.**</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ------------</span>
 <span class="sd">    nexus_file_name:</span>
@@ -1054,26 +1040,18 @@
 <span class="sd">    pulse_stride:</span>
 <span class="sd">        The pulse stride that was used when doing the measurement.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">with</span> <span class="n">snx</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">nexus_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;/entry/instrument/event_mode_detectors/timepix3&#39;</span><span class="p">][()][</span>
-            <span class="s1">&#39;timepix3_events&#39;</span>
-        <span class="p">]</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_offset&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span>
-        <span class="n">_add_to_event_time_offset_in_case_of_pulse_skipping</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_zero&#39;</span><span class="p">],</span>
-            <span class="n">pulse_stride</span><span class="o">=</span><span class="n">pulse_stride</span><span class="p">,</span>
-            <span class="n">pulse_period</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-                <span class="n">unit</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span>
-            <span class="p">),</span>
-        <span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Tiff file IO helper moved to ess.imaging.io. &quot;</span>
+        <span class="s2">&quot;Use ess.imaging.io.tiff_from_event_data instead.&quot;</span><span class="p">,</span>
+        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">image</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">data</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">event_time_offset</span><span class="o">=</span><span class="n">time_bins</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">rename_dims</span><span class="p">(</span><span class="n">event_time_offset</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">dim_0</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">dim_1</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">drop_coords</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">coords</span> <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">])</span>
-    <span class="n">scitiff</span><span class="o">.</span><span class="n">save_scitiff</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span></div>
+
+    <span class="n">tiff_from_event_data</span><span class="p">(</span>
+        <span class="n">nexus_file_name</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">time_bins</span><span class="o">=</span><span class="n">time_bins</span><span class="p">,</span> <span class="n">pulse_stride</span><span class="o">=</span><span class="n">pulse_stride</span>
+    <span class="p">)</span></div>
 
 </pre></div>
 
@@ -1138,7 +1116,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
+Current ESSimaging version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
