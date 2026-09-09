@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
-from typing import NewType
+import weakref
+from typing import Any, NewType
 
 import pytest
 import sciline
@@ -1037,3 +1038,136 @@ def test_StreamProcessor_finalize_provider_uses_context_directly() -> None:
 
     # Accumulated = 3 + 4 = 7, Context = 200, Output = 7 + 200 = 207
     assert sc.identical(result[Output], sc.scalar(207))
+
+
+class WindowAccumulator(streaming.Accumulator[Any]):
+    """Accumulator that drops its value on finalize, like a sliding window."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self._value: Any = None
+
+    @property
+    def is_empty(self) -> bool:
+        return self._value is None
+
+    def _do_push(self, value: Any) -> None:
+        self._value = value if self._value is None else self._value + value
+
+    def _get_value(self) -> Any:
+        return self._value
+
+    def clear(self) -> None:
+        self._value = None
+
+    def on_finalize(self) -> None:
+        self._value = None
+
+
+def test_StreamProcessor_finalize_does_not_retain_accumulated_value() -> None:
+    accumulator = WindowAccumulator()
+    base_workflow = sciline.Pipeline(
+        (make_static_a, make_accum_a, make_accum_b, make_target)
+    )
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=base_workflow,
+        dynamic_keys=(DynamicA, DynamicB),
+        target_keys=(Target,),
+        accumulators={AccumA: accumulator, AccumB: WindowAccumulator()},
+    )
+    streaming_wf.accumulate({DynamicA: sc.scalar(1.0), DynamicB: sc.scalar(4.0)})
+    ref = weakref.ref(accumulator.value)
+    streaming_wf.finalize()
+
+    # The accumulator dropped the value in on_finalize, so nothing should keep it
+    # alive. This must hold without running the cyclic garbage collector, i.e., the
+    # assertion relies on CPython's reference counting.
+    assert ref() is None
+
+
+def test_StreamProcessor_accumulate_does_not_retain_chunk() -> None:
+    base_workflow = sciline.Pipeline(
+        (make_static_a, make_accum_a, make_accum_b, make_target)
+    )
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=base_workflow,
+        dynamic_keys=(DynamicA, DynamicB),
+        target_keys=(Target,),
+        accumulators=(AccumA, AccumB),
+    )
+    chunk = sc.scalar(1.0)
+    ref = weakref.ref(chunk)
+    streaming_wf.accumulate({DynamicA: chunk, DynamicB: sc.scalar(4.0)})
+    del chunk
+
+    # Relies on CPython's reference counting, see the test above.
+    assert ref() is None
+
+
+def test_StreamProcessor_with_bypass_retains_chunk_until_finalize() -> None:
+    base_workflow = sciline.Pipeline(
+        (make_static_a, make_accum_a, make_accum_b, make_target)
+    )
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=base_workflow,
+        dynamic_keys=(DynamicA, DynamicB),
+        target_keys=(Target,),
+        accumulators=(AccumA,),  # Note: No AccumB, DynamicB bypasses accumulation
+        allow_bypass=True,
+    )
+    streaming_wf.accumulate({DynamicA: sc.scalar(1.0), DynamicB: sc.scalar(4.0)})
+    result = streaming_wf.finalize()
+    assert sc.identical(result[Target], sc.scalar(2 * 1.0 / 4.0))
+
+
+def test_StreamProcessor_raises_if_context_was_never_set() -> None:
+    Streamed = NewType('Streamed', int)
+    Context = NewType('Context', int)
+    Accumulated = NewType('Accumulated', int)
+    Output = NewType('Output', int)
+
+    def accumulate(streamed: Streamed) -> Accumulated:
+        return Accumulated(streamed)
+
+    def make_output(accumulated: Accumulated, context: Context) -> Output:
+        return Output(accumulated + context)
+
+    wf = sciline.Pipeline((accumulate, make_output))
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=wf,
+        dynamic_keys=(Streamed,),
+        context_keys=(Context,),
+        target_keys=(Output,),
+        accumulators=(Accumulated,),
+    )
+    streaming_wf.accumulate({Streamed: sc.scalar(1)})
+
+    # A context that never arrived must fail, naming the key, rather than compute
+    # from a stand-in value.
+    with pytest.raises(ValueError, match='No value was fed'):
+        streaming_wf.finalize()
+
+
+def test_StreamProcessor_with_bypass_releases_chunks_not_read_at_finalize() -> None:
+    base_workflow = sciline.Pipeline(
+        (make_static_a, make_accum_a, make_accum_b, make_target)
+    )
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=base_workflow,
+        dynamic_keys=(DynamicA, DynamicB),
+        target_keys=(Target,),
+        accumulators=(AccumA,),  # DynamicA terminates here, only DynamicB is bypassed
+        allow_bypass=True,
+    )
+    terminated = sc.scalar(1.0)
+    bypassed = sc.scalar(4.0)
+    ref_terminated = weakref.ref(terminated)
+    ref_bypassed = weakref.ref(bypassed)
+    streaming_wf.accumulate({DynamicA: terminated, DynamicB: bypassed})
+    del terminated, bypassed
+
+    # allow_bypass is not all-or-nothing: only what finalize reads directly is kept.
+    assert ref_terminated() is None
+    assert ref_bypassed() is not None
+    result = streaming_wf.finalize()
+    assert sc.identical(result[Target], sc.scalar(2 * 1.0 / 4.0))
