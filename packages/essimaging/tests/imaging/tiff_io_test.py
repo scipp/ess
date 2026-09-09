@@ -31,7 +31,7 @@ def test_tiff_dumping_helper(tmp_path: Path):
     assert 'y_pixel_offset' in loaded.coords
 
 
-def test_correct_event_time_offset() -> None:
+def test_correct_event_time_offset_pulse_stride_2_no_offset() -> None:
     assert_identical(
         _add_to_event_time_offset_in_case_of_pulse_skipping(
             sc.datetimes(dims='t', values=[0, 1, 2], unit='s'),
@@ -40,6 +40,9 @@ def test_correct_event_time_offset() -> None:
         ),
         sc.array(dims='t', values=[0, 1.0, 0], unit='s'),
     )
+
+
+def test_correct_event_time_offset_pulse_stride_2_positive_offset() -> None:
     assert_identical(
         _add_to_event_time_offset_in_case_of_pulse_skipping(
             sc.datetimes(dims='t', values=[0, 1, 2], unit='s'),
@@ -49,6 +52,9 @@ def test_correct_event_time_offset() -> None:
         ),
         sc.array(dims='t', values=[1.0, 0, 1.0], unit='s'),
     )
+
+
+def test_correct_event_time_offset_different_units() -> None:
     assert_identical(
         _add_to_event_time_offset_in_case_of_pulse_skipping(
             sc.datetimes(dims='t', values=[10, 999, 2100], unit='ms'),
@@ -57,6 +63,9 @@ def test_correct_event_time_offset() -> None:
         ),
         sc.array(dims='t', values=[0, 1.0, 0], unit='s'),
     )
+
+
+def test_correct_event_time_offset_slight_drift() -> None:
     assert_identical(
         _add_to_event_time_offset_in_case_of_pulse_skipping(
             sc.datetimes(dims='t', values=[-100, 999, 2100], unit='ms'),
@@ -65,6 +74,9 @@ def test_correct_event_time_offset() -> None:
         ),
         sc.array(dims='t', values=[2, 0.0, 1], unit='s'),
     )
+
+
+def test_correct_event_time_offset_pulse_stride_3() -> None:
     assert_identical(
         _add_to_event_time_offset_in_case_of_pulse_skipping(
             sc.datetimes(dims='t', values=[-100, 999, 2100], unit='ms'),
