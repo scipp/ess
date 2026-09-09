@@ -295,7 +295,8 @@ class _FedWorkflow:
     def __init__(
         self, workflow: sciline.Pipeline, inputs: Iterable[sciline.typing.Key]
     ) -> None:
-        self._workflow = workflow
+        # Wiring mutates the pipeline, so we take a copy and own it from here on.
+        self._workflow = workflow.copy()
         self._values: dict[sciline.typing.Key, Any] = {}
         for key in inputs:
             self._workflow[key] = None  # prunes the branch this input replaces
@@ -444,12 +445,12 @@ class StreamProcessor:
             for node in nodes
         }
         targets = set(target_keys)
-        self._context_workflow = _FedWorkflow(workflow.copy(), self._context_keys)
+        self._context_workflow = _FedWorkflow(workflow, self._context_keys)
         self._chunk_workflow = _FedWorkflow(
-            workflow.copy(), self._dynamic_keys | (cached_context_nodes - targets)
+            workflow, self._dynamic_keys | (cached_context_nodes - targets)
         )
         self._finalize_workflow = _FedWorkflow(
-            workflow.copy(),
+            workflow,
             set(self._accumulators)
             | self._context_keys
             | (cached_context_nodes & targets)
