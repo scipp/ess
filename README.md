@@ -45,9 +45,14 @@ cd ess
 # Install all packages (editable, with test deps):
 pixi install
 
+# Or install all packages with every extra, dev tools, and documentation tools:
+pixi install -e full
+
 # Or just one package:
 pixi install -e essreduce
 ```
+
+Use `pixi run -e full python your_script.py` to run with all extras enabled.
 
 The `pixi.lock` file pins all dependencies reproducibly. No tox, no pip-compile, no manual virtualenv.
 
