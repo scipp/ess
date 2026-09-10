@@ -33,6 +33,7 @@ ess.reduce.nexus.types.Filename
       ~Filename.is_dir
       ~Filename.is_fifo
       ~Filename.is_file
+      ~Filename.is_junction
       ~Filename.is_mount
       ~Filename.is_relative_to
       ~Filename.is_reserved
@@ -41,7 +42,6 @@ ess.reduce.nexus.types.Filename
       ~Filename.iterdir
       ~Filename.joinpath
       ~Filename.lchmod
-      ~Filename.link_to
       ~Filename.lstat
       ~Filename.match
       ~Filename.mkdir
@@ -61,7 +61,9 @@ ess.reduce.nexus.types.Filename
       ~Filename.symlink_to
       ~Filename.touch
       ~Filename.unlink
+      ~Filename.walk
       ~Filename.with_name
+      ~Filename.with_segments
       ~Filename.with_stem
       ~Filename.with_suffix
       ~Filename.write_bytes

@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=dbc7823d"></script>
+    <script src="../../_static/documentation_options.js?v=271db7d1"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.reduce.nexus.types.EmptyMonitor" href="ess.reduce.nexus.types.EmptyMonitor.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.0" />
+  <meta name="docsearch:version" content="26.9.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -876,13 +876,13 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ess.reduce.nexus.types.</span></span><span class="sig-name descname"><span class="pre">Filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SUPER</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/reduce/nexus/types.html#Filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.reduce.nexus.types.Filename" title="Link to this definition">#</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="ess.reduce.nexus.types.Filename.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ess.reduce.nexus.types.Filename.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ess.reduce.nexus.types.Filename.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ess.reduce.nexus.types.Filename.__init__" title="ess.reduce.nexus.types.Filename.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ess.reduce.nexus.types.Filename.__init__" title="ess.reduce.nexus.types.Filename.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">absolute</span></code>()</p></td>
@@ -898,15 +898,15 @@
 <td><p>Change the permissions of the path, like os.chmod().</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cwd</span></code>()</p></td>
-<td><p>Return a new path pointing to the current working directory (as returned by os.getcwd()).</p></td>
+<td><p>Return a new path pointing to the current working directory.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">exists</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">exists</span></code>(*[, follow_symlinks])</p></td>
 <td><p>Whether this path exists.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">expanduser</span></code>()</p></td>
 <td><p>Return a new path with expanded ~ and ~user constructs (as returned by os.path.expanduser)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">glob</span></code>(pattern)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">glob</span></code>(pattern, *[, case_sensitive])</p></td>
 <td><p>Iterate over this subtree and yield all existing files (of any kind, including directories) matching the given relative pattern.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group</span></code>()</p></td>
@@ -936,44 +936,44 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_file</span></code>()</p></td>
 <td><p>Whether this path is a regular file (also True for symlinks pointing to regular files).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_mount</span></code>()</p></td>
-<td><p>Check if this path is a POSIX mount point</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_junction</span></code>()</p></td>
+<td><p>Whether this path is a junction.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_relative_to</span></code>(*other)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_mount</span></code>()</p></td>
+<td><p>Check if this path is a mount point</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_relative_to</span></code>(other, /, *_deprecated)</p></td>
 <td><p>Return True if the path is relative to another path or False.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_reserved</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_reserved</span></code>()</p></td>
 <td><p>Return True if the path contains one of the special names reserved by the system, if any.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_socket</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_socket</span></code>()</p></td>
 <td><p>Whether this path is a socket.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_symlink</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_symlink</span></code>()</p></td>
 <td><p>Whether this path is a symbolic link.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterdir</span></code>()</p></td>
-<td><p>Iterate over the files in this directory.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterdir</span></code>()</p></td>
+<td><p>Yield path objects of the directory contents.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">joinpath</span></code>(*args)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">joinpath</span></code>(*pathsegments)</p></td>
 <td><p>Combine this path with one or several arguments, and return a new path representing either a subpath (if all arguments are relative paths) or a totally different path (if one of the arguments is anchored).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lchmod</span></code>(mode)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lchmod</span></code>(mode)</p></td>
 <td><p>Like chmod(), except if the path points to a symlink, the symlink's permissions are changed, rather than its target's.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">link_to</span></code>(target)</p></td>
-<td><p>Make the target path a hard link pointing to this path.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lstat</span></code>()</p></td>
 <td><p>Like stat(), except if the path points to a symlink, the symlink's status information is returned, rather than its target's.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">match</span></code>(path_pattern)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">match</span></code>(path_pattern, *[, case_sensitive])</p></td>
 <td><p>Return True if this path matches the given pattern.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mkdir</span></code>([mode, parents, exist_ok])</p></td>
 <td><p>Create a new directory at this given path.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">open</span></code>([mode, buffering, encoding, errors, ...])</p></td>
-<td><p>Open the file pointed by this path and return a file object, as the built-in open() function does.</p></td>
+<td><p>Open the file pointed to by this path and return a file object, as the built-in open() function does.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">owner</span></code>()</p></td>
 <td><p>Return the login name of the file owner.</p></td>
@@ -987,7 +987,7 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">readlink</span></code>()</p></td>
 <td><p>Return the path to which the symbolic link points.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">relative_to</span></code>(*other)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">relative_to</span></code>(other, /, *_deprecated[, walk_up])</p></td>
 <td><p>Return the relative path to another path identified by the passed arguments.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename</span></code>(target)</p></td>
@@ -999,7 +999,7 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve</span></code>([strict])</p></td>
 <td><p>Make the path absolute, resolving all symlinks on the way and also normalizing it.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rglob</span></code>(pattern)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rglob</span></code>(pattern, *[, case_sensitive])</p></td>
 <td><p>Recursively yield all existing files (of any kind, including directories) matching the given relative pattern, anywhere in this subtree.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rmdir</span></code>()</p></td>
@@ -1020,8 +1020,14 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unlink</span></code>([missing_ok])</p></td>
 <td><p>Remove this file or link.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_name</span></code>(name)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">walk</span></code>([top_down, on_error, follow_symlinks])</p></td>
+<td><p>Walk the directory tree from this directory, similar to os.walk().</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_name</span></code>(name)</p></td>
 <td><p>Return a new path with the file name changed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_segments</span></code>(*pathsegments)</p></td>
+<td><p>Construct a new path object from any number of path-like objects.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_stem</span></code>(stem)</p></td>
 <td><p>Return a new path with the stem changed.</p></td>
@@ -1158,7 +1164,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.8.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

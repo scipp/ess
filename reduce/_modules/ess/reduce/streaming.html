@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=dbc7823d"></script>
+    <script src="../../../_static/documentation_options.js?v=271db7d1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -492,7 +492,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.0" />
+  <meta name="docsearch:version" content="26.9.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -975,7 +975,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">&quot;&quot;&quot;This module provides tools for running workflows in a streaming fashion.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypeVar</span>
 
@@ -1302,6 +1302,73 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="k">class</span><span class="w"> </span><span class="nc">_FedWorkflow</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A workflow whose inputs are fed as values, without rebuilding its graph.</span>
+
+<span class="sd">    Assigning a value to a :class:`sciline.Pipeline` rebuilds its graph and keeps the</span>
+<span class="sd">    value reachable from the pipeline until it is overwritten. Streaming feeds values</span>
+<span class="sd">    for every chunk, every finalize, and every context update, so both costs are paid</span>
+<span class="sd">    repeatedly, for the largest objects in the process. Here each input is instead</span>
+<span class="sd">    provided by a provider reading a mapping owned by this class, so feeding a value</span>
+<span class="sd">    is a plain dict write and the graph structure, which does not depend on the</span>
+<span class="sd">    values, stays as it was built.</span>
+
+<span class="sd">    Inputs are wired up once, at construction. Wiring assigns to the pipeline before</span>
+<span class="sd">    inserting the provider because only assignment prunes the branch the input</span>
+<span class="sd">    replaces: ``Pipeline.__setitem__`` removes the ancestors of the key, whereas</span>
+<span class="sd">    ``Pipeline.insert`` only cuts the key&#39;s incoming edges and leaves the orphaned</span>
+<span class="sd">    branch in the graph, for every later ``Pipeline.get`` to walk again.</span>
+
+<span class="sd">    A value stays readable until it is released. Reading a key that holds no value</span>
+<span class="sd">    raises, so a workflow computed before its inputs arrived fails, naming the key,</span>
+<span class="sd">    rather than silently computing from a stand-in value. Callers release what is dead</span>
+<span class="sd">    once it has been consumed, and keep what the workflow is meant to reuse across</span>
+<span class="sd">    cycles, such as context.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Wiring mutates the pipeline, so we take a copy and own it from here on.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># prunes the branch this input replaces</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_insert_provider</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop the reference to the value fed for ``key``, which must have been fed.&quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute ``keys`` from the values fed so far.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_insert_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Binding the mapping to a local keeps the closure, and thus the pipeline</span>
+        <span class="c1"># holding it, from referencing this instance: capturing ``self`` would close</span>
+        <span class="c1"># the cycle pipeline -&gt; provider -&gt; closure -&gt; self -&gt; pipeline, which only</span>
+        <span class="c1"># the cyclic garbage collector can break.</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">provide_input_value</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No value was fed for &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+        <span class="c1"># Sciline deduces the provided key from the return annotation. The key is known</span>
+        <span class="c1"># only at runtime, so it has to be patched in.</span>
+        <span class="n">provide_input_value</span><span class="o">.</span><span class="vm">__annotations__</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;return&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provide_input_value</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="StreamProcessor">
 <a class="viewcode-back" href="../../../generated/modules/ess.reduce.streaming.StreamProcessor.html#ess.reduce.streaming.StreamProcessor">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StreamProcessor</span><span class="p">:</span>
@@ -1373,92 +1440,61 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dynamic_keys</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_context_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">context_keys</span><span class="p">)</span>
-
-        <span class="c1"># Validate that dynamic and context keys do not overlap</span>
-        <span class="n">overlap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_keys</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_keys</span>
-        <span class="k">if</span> <span class="n">overlap</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Keys cannot be both dynamic and context: </span><span class="si">{</span><span class="n">overlap</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Check dynamic/context keys don&#39;t depend on other dynamic/context keys</span>
-        <span class="n">graph</span> <span class="o">=</span> <span class="n">base_workflow</span><span class="o">.</span><span class="n">underlying_graph</span>
-        <span class="n">special_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_keys</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_keys</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">special_keys</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="n">ancestors</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">ancestors</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-            <span class="n">special_ancestors</span> <span class="o">=</span> <span class="n">ancestors</span> <span class="o">&amp;</span> <span class="n">special_keys</span>
-            <span class="n">downstream</span> <span class="o">=</span> <span class="s1">&#39;Dynamic&#39;</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_keys</span> <span class="k">else</span> <span class="s1">&#39;Context&#39;</span>
-            <span class="k">if</span> <span class="n">special_ancestors</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">downstream</span><span class="si">}</span><span class="s2"> key &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; depends on other dynamic/context keys: &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">special_ancestors</span><span class="si">}</span><span class="s2">. This is not supported.&quot;</span>
-                <span class="p">)</span>
-
-        <span class="n">workflow</span> <span class="o">=</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">target_keys</span><span class="p">:</span>
-            <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dynamic_keys</span><span class="p">:</span>
-            <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># hack to prune branches</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">context_keys</span><span class="p">:</span>
-            <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target_keys</span> <span class="o">=</span> <span class="n">target_keys</span>
+        <span class="n">_validate_streaming_keys</span><span class="p">(</span><span class="n">base_workflow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_keys</span><span class="p">)</span>
 
         <span class="c1"># Store for visualization (copy in case caller modifies base_workflow later)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_base_workflow_for_viz</span> <span class="o">=</span> <span class="n">base_workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-        <span class="c1"># Find and pre-compute static nodes as far down the graph as possible</span>
-        <span class="n">nodes</span> <span class="o">=</span> <span class="n">_find_descendants</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">dynamic_keys</span> <span class="o">+</span> <span class="n">context_keys</span><span class="p">)</span>
-        <span class="n">last_static</span> <span class="o">=</span> <span class="n">_find_parents</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">nodes</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">base_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">last_static</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cached_keys</span> <span class="o">=</span> <span class="n">last_static</span>  <span class="c1"># Store for visualization</span>
-
-        <span class="c1"># Nodes that may need updating on context change but should be cached otherwise.</span>
-        <span class="n">dynamic_nodes</span> <span class="o">=</span> <span class="n">_find_descendants</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">dynamic_keys</span><span class="p">)</span>
-        <span class="c1"># Nodes as far &quot;down&quot; in the graph as possible, right before the dynamic nodes.</span>
-        <span class="c1"># This also includes target keys that are not dynamic but context-dependent.</span>
-        <span class="n">context_to_cache</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">_find_parents</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">dynamic_nodes</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_keys</span><span class="p">))</span> <span class="o">-</span> <span class="n">dynamic_nodes</span>
-        <span class="p">)</span> <span class="o">&amp;</span> <span class="n">_find_descendants</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">context_keys</span><span class="p">)</span>
-        <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">underlying_graph</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_context_key_to_cached_context_nodes_map</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">context_key</span><span class="p">:</span> <span class="p">({</span><span class="n">context_key</span><span class="p">}</span> <span class="o">|</span> <span class="n">nx</span><span class="o">.</span><span class="n">descendants</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">context_key</span><span class="p">))</span>
-            <span class="o">&amp;</span> <span class="n">context_to_cache</span>
-            <span class="k">for</span> <span class="n">context_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_keys</span>
-            <span class="k">if</span> <span class="n">context_key</span> <span class="ow">in</span> <span class="n">graph</span>
-        <span class="p">}</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_context_workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_process_chunk_workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">accumulators</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">accumulators</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-            <span class="k">else</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">EternalAccumulator</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">accumulators</span><span class="p">}</span>
+        <span class="n">workflow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_keys</span> <span class="o">=</span> <span class="n">_build_streaming_workflow</span><span class="p">(</span>
+            <span class="n">base_workflow</span><span class="p">,</span>
+            <span class="n">target_keys</span><span class="o">=</span><span class="n">target_keys</span><span class="p">,</span>
+            <span class="n">dynamic_keys</span><span class="o">=</span><span class="n">dynamic_keys</span><span class="p">,</span>
+            <span class="n">context_keys</span><span class="o">=</span><span class="n">context_keys</span><span class="p">,</span>
         <span class="p">)</span>
-
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">underlying_graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_context_key_to_cached_context_nodes_map</span> <span class="o">=</span> <span class="n">_map_context_to_cached_nodes</span><span class="p">(</span>
+            <span class="n">workflow</span><span class="p">,</span>
+            <span class="n">dynamic_keys</span><span class="o">=</span><span class="n">dynamic_keys</span><span class="p">,</span>
+            <span class="n">context_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_context_keys</span><span class="p">,</span>
+            <span class="n">target_keys</span><span class="o">=</span><span class="n">target_keys</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span> <span class="o">=</span> <span class="n">_make_accumulators</span><span class="p">(</span><span class="n">base_workflow</span><span class="p">,</span> <span class="n">accumulators</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
         <span class="c1"># Map each accumulator to its dependent dynamic keys</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accumulator_dependencies</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">acc_key</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">ancestors</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">acc_key</span><span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_keys</span>
             <span class="k">for</span> <span class="n">acc_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span>
-            <span class="k">if</span> <span class="n">acc_key</span> <span class="ow">in</span> <span class="n">graph</span>
         <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keys_read_at_finalize</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">_find_keys_read_at_finalize</span><span class="p">(</span>
+                <span class="n">graph</span><span class="p">,</span>
+                <span class="n">target_keys</span><span class="o">=</span><span class="n">target_keys</span><span class="p">,</span>
+                <span class="n">accumulator_keys</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="p">),</span>
+                <span class="n">dynamic_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_keys</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">allow_bypass</span>
+            <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="p">)</span>
 
-        <span class="c1"># Depending on the target_keys, some accumulators can be unused and should not</span>
-        <span class="c1"># be computed when adding a chunk.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">graph</span>
+        <span class="c1"># Chunks, accumulator values, and context are fed to the workflows rather than</span>
+        <span class="c1"># assigned to them, see :class:`_FedWorkflow`. Each workflow is wired up for</span>
+        <span class="c1"># exactly the keys the methods below feed it.</span>
+        <span class="n">cached_context_nodes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">node</span>
+            <span class="k">for</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_key_to_cached_context_nodes_map</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span>
         <span class="p">}</span>
-        <span class="c1"># Create accumulators unless instances were passed. This allows for initializing</span>
-        <span class="c1"># accumulators with arguments that depend on the workflow such as bin edges,</span>
-        <span class="c1"># which would otherwise be hard to obtain.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Accumulator</span><span class="p">)</span>
-            <span class="k">else</span> <span class="n">base_workflow</span><span class="o">.</span><span class="n">bind_and_call</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_target_keys</span> <span class="o">=</span> <span class="n">target_keys</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_allow_bypass</span> <span class="o">=</span> <span class="n">allow_bypass</span></div>
+        <span class="n">targets</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_keys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_context_workflow</span> <span class="o">=</span> <span class="n">_FedWorkflow</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_keys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_workflow</span> <span class="o">=</span> <span class="n">_FedWorkflow</span><span class="p">(</span>
+            <span class="n">workflow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_keys</span> <span class="o">|</span> <span class="p">(</span><span class="n">cached_context_nodes</span> <span class="o">-</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span> <span class="o">=</span> <span class="n">_FedWorkflow</span><span class="p">(</span>
+            <span class="n">workflow</span><span class="p">,</span>
+            <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="p">)</span>
+            <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_keys</span>
+            <span class="o">|</span> <span class="p">(</span><span class="n">cached_context_nodes</span> <span class="o">&amp;</span> <span class="n">targets</span><span class="p">)</span>
+            <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_read_at_finalize</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StreamProcessor.set_context">
@@ -1483,12 +1519,14 @@ window.runMermaid = runMermaid;</script>
             <span class="c1"># on context keys receive the updated values during finalize().</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">needs_recompute</span><span class="p">)</span>
+        <span class="c1"># Context values and the nodes derived from them are caches, to be reused until</span>
+        <span class="c1"># the context changes again, so nothing is released here.</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_keys</span><span class="p">:</span>
                 <span class="c1"># Context-dependent key is direct target, independent of dynamic nodes.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_process_chunk_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="StreamProcessor.add_chunk">
@@ -1550,15 +1588,18 @@ window.runMermaid = runMermaid;</script>
             <span class="n">accumulators_to_update</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">acc_key</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">chunks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_process_chunk_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="c1"># There can be dynamic keys that do not &quot;terminate&quot; in any accumulator. In</span>
             <span class="c1"># that case, we need to make sure they can be and are used when computing</span>
             <span class="c1"># the target keys.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_bypass</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_read_at_finalize</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="n">to_accumulate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_chunk_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">accumulators_to_update</span><span class="p">)</span>
+        <span class="n">to_accumulate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">accumulators_to_update</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">processed</span> <span class="ow">in</span> <span class="n">to_accumulate</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">processed</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">processed</span><span class="p">)</span>
+        <span class="c1"># Release the chunk. What finalize() reads is held by its own inputs.</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_workflow</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StreamProcessor.finalize">
@@ -1572,11 +1613,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        :</span>
 <span class="sd">            Finalized result.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">accumulator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">accumulator</span><span class="o">.</span><span class="n">value</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">acc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">acc</span><span class="o">.</span><span class="n">on_finalize</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">accumulator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accumulators</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Release the value, which an accumulator such as a sliding window may drop</span>
+            <span class="c1"># in on_finalize() and would otherwise stay alive until the next cycle.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_workflow</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">accumulator</span><span class="o">.</span><span class="n">on_finalize</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
 
@@ -1750,6 +1794,134 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="n">dot</span></div>
 </div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_streaming_keys</span><span class="p">(</span>
+    <span class="n">base_workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
+    <span class="n">dynamic_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">],</span>
+    <span class="n">context_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raise unless dynamic and context keys are disjoint and mutually independent.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">overlap</span> <span class="o">:=</span> <span class="n">dynamic_keys</span> <span class="o">&amp;</span> <span class="n">context_keys</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Keys cannot be both dynamic and context: </span><span class="si">{</span><span class="n">overlap</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">base_workflow</span><span class="o">.</span><span class="n">underlying_graph</span>
+    <span class="n">special_keys</span> <span class="o">=</span> <span class="n">dynamic_keys</span> <span class="o">|</span> <span class="n">context_keys</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">special_keys</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">special_ancestors</span> <span class="o">:=</span> <span class="n">nx</span><span class="o">.</span><span class="n">ancestors</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">special_keys</span><span class="p">:</span>
+            <span class="n">downstream</span> <span class="o">=</span> <span class="s1">&#39;Dynamic&#39;</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dynamic_keys</span> <span class="k">else</span> <span class="s1">&#39;Context&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">downstream</span><span class="si">}</span><span class="s2"> key &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; depends on other dynamic/context keys: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">special_ancestors</span><span class="si">}</span><span class="s2">. This is not supported.&quot;</span>
+            <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_streaming_workflow</span><span class="p">(</span>
+    <span class="n">base_workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">target_keys</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">dynamic_keys</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">context_keys</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build the workflow the stream processor computes on, and its cached keys.</span>
+
+<span class="sd">    Everything that does not depend on dynamic or context keys is computed once and</span>
+<span class="sd">    assigned, as far down the graph as possible. The cached keys are returned since</span>
+<span class="sd">    the visualization distinguishes them from their static ancestors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">target_keys</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dynamic_keys</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># hack to prune branches</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">context_keys</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">_find_descendants</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">dynamic_keys</span> <span class="o">+</span> <span class="n">context_keys</span><span class="p">)</span>
+    <span class="n">last_static</span> <span class="o">=</span> <span class="n">_find_parents</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">nodes</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">base_workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">last_static</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">last_static</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_map_context_to_cached_nodes</span><span class="p">(</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">dynamic_keys</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">context_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">],</span>
+    <span class="n">target_keys</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Map each context key to the nodes to recompute when that context key changes.</span>
+
+<span class="sd">    The nodes are those that depend on context but not on the chunks: as far &quot;down&quot;</span>
+<span class="sd">    the graph as possible, right before the dynamic nodes, plus target keys that are</span>
+<span class="sd">    context-dependent but not dynamic. They are cached until the context changes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dynamic_nodes</span> <span class="o">=</span> <span class="n">_find_descendants</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">dynamic_keys</span><span class="p">)</span>
+    <span class="n">context_to_cache</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">_find_parents</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">dynamic_nodes</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_keys</span><span class="p">))</span> <span class="o">-</span> <span class="n">dynamic_nodes</span>
+    <span class="p">)</span> <span class="o">&amp;</span> <span class="n">_find_descendants</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">context_keys</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">underlying_graph</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">context_key</span><span class="p">:</span> <span class="p">({</span><span class="n">context_key</span><span class="p">}</span> <span class="o">|</span> <span class="n">nx</span><span class="o">.</span><span class="n">descendants</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">context_key</span><span class="p">))</span>
+        <span class="o">&amp;</span> <span class="n">context_to_cache</span>
+        <span class="k">for</span> <span class="n">context_key</span> <span class="ow">in</span> <span class="n">context_keys</span>
+        <span class="k">if</span> <span class="n">context_key</span> <span class="ow">in</span> <span class="n">graph</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_accumulators</span><span class="p">(</span>
+    <span class="n">base_workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
+    <span class="n">accumulators</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="n">Accumulator</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Accumulator</span><span class="p">]]</span>
+    <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="n">Accumulator</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Instantiate the accumulators that the target keys actually depend on.</span>
+
+<span class="sd">    Accumulators that are not in the graph are unused given the target keys and are</span>
+<span class="sd">    dropped. Callables are bound and called on the workflow, which allows for</span>
+<span class="sd">    initializing an accumulator with arguments that depend on the workflow, such as</span>
+<span class="sd">    bin edges, which would otherwise be hard to obtain.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">accumulators</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">accumulators</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">EternalAccumulator</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">accumulators</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Accumulator</span><span class="p">)</span>
+        <span class="k">else</span> <span class="n">base_workflow</span><span class="o">.</span><span class="n">bind_and_call</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">accumulators</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">graph</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_keys_read_at_finalize</span><span class="p">(</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">target_keys</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">accumulator_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">],</span>
+    <span class="n">dynamic_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">sciline</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">Key</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find dynamic keys that reach a target without passing through an accumulator.</span>
+
+<span class="sd">    Only these are fed to the finalize workflow, and only they must outlive the chunk</span>
+<span class="sd">    they arrived in. Computed on the graph with the accumulator inputs cut, which is</span>
+<span class="sd">    what finalize computes on. Feeding context cuts further edges, so this may name a</span>
+<span class="sd">    key that finalize turns out not to need, never miss one that it does.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">finalize_graph</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">finalize_graph</span><span class="o">.</span><span class="n">remove_edges_from</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">edge</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">accumulator_keys</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">in_edges</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="n">reachable</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">target_keys</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">finalize_graph</span><span class="p">:</span>
+            <span class="n">reachable</span> <span class="o">|=</span> <span class="n">nx</span><span class="o">.</span><span class="n">ancestors</span><span class="p">(</span><span class="n">finalize_graph</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dynamic_keys</span> <span class="o">&amp;</span> <span class="n">reachable</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_find_descendants</span><span class="p">(</span>
@@ -2028,7 +2200,7 @@ window.runMermaid = runMermaid;</script>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.8.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
