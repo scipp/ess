@@ -44,6 +44,90 @@ def fwhm_to_std(fwhm: sc.Variable) -> sc.Variable:
     return fwhm / _STD_TO_FWHM
 
 
+def smooth_with_resolution(
+    ideal: sc.DataArray,
+    measured: sc.DataArray,
+    *,
+    plateau_fraction: float = 0.6,
+) -> sc.DataArray:
+    """Smooth an ideal reflectivity curve using the measured Q resolution.
+
+    Uses a symmetric trapezoid with a Q-dependent width, scaled so that its
+    standard deviation matches ``Q_resolution``. The kernel shape is a modelling
+    assumption: the standard deviation alone does not determine the response.
+    Requires the optional Refl1D package (``pip install refl1d``).
+
+    Parameters
+    ----------
+    ideal:
+        One-dimensional reflectivity with point coordinates ``Q``. Refl1D
+        linearly interpolates between these samples; the grid should be fine
+        compared with the resolution width.
+    measured:
+        One-dimensional reduced reflectivity with ``Q`` and ``Q_resolution``
+        coordinates. ``Q`` may contain points or bin edges; ``Q_resolution``
+        contains the standard deviation at each point or bin.
+    plateau_fraction:
+        Fraction of the kernel's full support occupied by the plateau, in
+        the interval [0, 1). Zero gives a triangular kernel.
+
+    Returns
+    -------
+    :
+        Smoothed reflectivity at the measured Q points or bin centres, with the
+        unit of ``ideal``. Invalid resolutions and points whose kernel extends
+        beyond the ideal curve are NaN. Zero resolution gives linear
+        interpolation without smoothing. The final bin width is not included
+        in the resolution; measured bins should be fine compared with it.
+    """
+    from refl1d.sample.reflectivity import convolve_sampled
+
+    if not 0.0 <= plateau_fraction < 1.0:
+        raise ValueError('plateau_fraction must be in the interval [0, 1).')
+    if ideal.dims != ('Q',) or measured.dims != ('Q',):
+        raise ValueError('Expected one-dimensional reflectivity curves along Q.')
+    if ideal.coords.is_edges('Q'):
+        raise ValueError(
+            'The ideal curve must have Q point coordinates, not bin edges.'
+        )
+
+    q = measured.coords['Q']
+    if measured.coords.is_edges('Q'):
+        q = sc.midpoints(q)
+    sigma_q = measured.coords['Q_resolution'].to(unit=q.unit)
+    q_ideal = ideal.coords['Q'].to(unit=q.unit)
+
+    # Refl1D's dx scales the kernel offsets. Convert the standard deviation
+    # of the trapezoid on [-1, 1] to its support half-width.
+    kernel_std = np.sqrt((1.0 + plateau_fraction**2) / 6.0)
+    half_width = sigma_q / kernel_std
+    # Avoid truncation and renormalization of kernels at the table edges.
+    valid = (
+        sc.isfinite(sigma_q)
+        & (sigma_q >= sc.scalar(0.0, unit=q.unit))
+        & (q - half_width >= q_ideal.min())
+        & (q + half_width <= q_ideal.max())
+    )
+    values = np.full(q.shape, np.nan)
+    if sc.any(valid).value:
+        offsets = [-1.0, -plateau_fraction, plateau_fraction, 1.0]
+        weights = [0.0, 1.0, 1.0, 0.0]
+        if plateau_fraction == 0.0:
+            offsets, weights = [-1.0, 0.0, 1.0], [0.0, 1.0, 0.0]
+        values[valid.values] = convolve_sampled(
+            xi=q_ideal.values,
+            yi=ideal.values,
+            xp=offsets,
+            yp=weights,
+            x=q.values[valid.values],
+            dx=half_width.values[valid.values],
+        )
+    return sc.DataArray(
+        sc.array(dims=q.dims, values=values, unit=ideal.unit),
+        coords={'Q': q},
+    )
+
+
 def linlogspace(
     dim: str,
     edges: list | np.ndarray,
