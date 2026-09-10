@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-import pytest
 import scipp as sc
 import scippnexus as snx
 from ess.sans.types import Position, RawDetector, SampleRun, SolidAngle
@@ -9,9 +8,8 @@ from ess.skadi import SkadiWorkflow
 from scipp.testing import assert_allclose, assert_identical
 
 
-@pytest.fixture
-def detector() -> sc.DataArray:
-    return sc.DataArray(
+def test_workflow_computes_solid_angle_preserving_pixel_masks() -> None:
+    detector = sc.DataArray(
         sc.ones(sizes={'detector_number': 2}),
         coords={
             'position': sc.vectors(
@@ -31,31 +29,6 @@ def detector() -> sc.DataArray:
             ),
         },
     )
-
-
-def test_workflow_computes_solid_angle_from_calibrated_detector(
-    detector: sc.DataArray,
-) -> None:
-    workflow = SkadiWorkflow()
-    workflow[RawDetector[SampleRun]] = detector
-    workflow[Position[snx.NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
-
-    solid_angle = workflow.compute(SolidAngle[SampleRun])
-
-    assert solid_angle.sizes == detector.sizes
-    assert_allclose(
-        solid_angle.data,
-        sc.array(
-            dims=['detector_number'],
-            values=[0.00015, 0.0012 / 5**1.5],
-            unit='dimensionless',
-        ),
-    )
-
-
-def test_solid_angle_preserves_pixel_masks_and_drops_wavelength_masks(
-    detector: sc.DataArray,
-) -> None:
     detector = sc.broadcast(
         detector, sizes={'detector_number': 2, 'wavelength': 3}
     ).copy()
@@ -71,7 +44,14 @@ def test_solid_angle_preserves_pixel_masks_and_drops_wavelength_masks(
 
     solid_angle = workflow.compute(SolidAngle[SampleRun])
 
-    assert solid_angle.dims == ('detector_number',)
+    assert_allclose(
+        solid_angle.data,
+        sc.array(
+            dims=['detector_number'],
+            values=[0.00015, 0.0012 / 5**1.5],
+            unit='dimensionless',
+        ),
+    )
     assert_identical(solid_angle.masks['pixel_mask'], pixel_mask)
     assert 'wavelength_mask' not in solid_angle.masks
     assert 'wavelength' not in solid_angle.coords

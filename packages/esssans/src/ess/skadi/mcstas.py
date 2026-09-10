@@ -47,13 +47,16 @@ PIXEL_DEPTH = sc.scalar(0.001, unit='m')
 
 @dataclass(frozen=True)
 class _DetectorSpec:
-    group_name: str
+    group: h5py.Group
     component_name: str
     pixel_min: int
     x_limits: tuple[float, float]
     y_limits: tuple[float, float]
     shape: tuple[int, int]
-    event_count: int
+
+    @property
+    def event_count(self) -> int:
+        return self.group['events'].shape[0]
 
     @property
     def pixel_count(self) -> int:
@@ -78,12 +81,10 @@ def _mcstas_path(filename: str | Path) -> Path:
     path = Path(filename)
     if path.is_dir():
         path = path / 'mccode.h5'
-    if not path.exists():
-        raise FileNotFoundError(f"McStas file does not exist: {path}")
     return path
 
 
-def _parse_detector_spec(name: str, group: h5py.Group) -> _DetectorSpec:
+def _parse_detector_spec(group: h5py.Group) -> _DetectorSpec:
     options = _decode(group.attrs['options'])
     x_match = _X_OPTIONS.search(options)
     y_match = _Y_OPTIONS.search(options)
@@ -91,13 +92,12 @@ def _parse_detector_spec(name: str, group: h5py.Group) -> _DetectorSpec:
     if x_match is None or y_match is None or pixel_match is None:
         raise ValueError(f"Cannot parse detector geometry options for {group.name!r}")
     return _DetectorSpec(
-        group_name=name,
+        group=group,
         component_name=_decode(group.attrs['component']),
         pixel_min=int(pixel_match.group(1)),
         x_limits=(float(x_match.group(1)), float(x_match.group(2))),
         y_limits=(float(y_match.group(1)), float(y_match.group(2))),
         shape=(int(y_match.group(3)), int(x_match.group(3))),
-        event_count=group['events'].shape[0],
     )
 
 
@@ -210,8 +210,8 @@ def load_skadi_mcstas(filename: str | Path) -> sc.DataArray:
         data_groups = file['entry1/data']
         specs = sorted(
             (
-                _parse_detector_spec(name, group)
-                for name, group in data_groups.items()
+                _parse_detector_spec(group)
+                for group in data_groups.values()
                 if isinstance(group, h5py.Group) and 'events' in group
             ),
             key=lambda spec: spec.pixel_min,
@@ -257,13 +257,15 @@ def load_skadi_mcstas(filename: str | Path) -> sc.DataArray:
             pixel_sizes.append(geometry[1])
             detector_normals.append(geometry[2])
 
-            group = data_groups[spec.group_name]
-            columns = _decode(group.attrs.get('variables', 'p x y n id t')).split()
+            group = spec.group
+            columns = _decode(group.attrs['variables']).split()
             column = {name: i for i, name in enumerate(columns)}
             events = group['events'][()]
-            ids = events[:, column['id']].astype(np.int64)
-            if np.any((ids < spec.pixel_min) | (ids >= pixel_stop)):
-                raise ValueError(f"Out-of-range pixel ID in {group.name!r}")
+            ids = events[:, column['id']]
+            if not np.all(
+                (ids >= spec.pixel_min) & (ids < pixel_stop) & (ids == np.floor(ids))
+            ):
+                raise ValueError(f"Invalid pixel ID in {group.name!r}")
 
             event_stop = event_cursor + spec.event_count
             weights[event_cursor:event_stop] = events[:, column['p']]
@@ -368,11 +370,22 @@ def mcstas_data_to_wavelength(
     )
 
 
-def unity_monitor_term(wavelength_bins: WavelengthBins) -> MonitorTerm[RunType]:
-    """Return unity normalization for McStas simulations without monitor data."""
-    wavelength = sc.midpoints(wavelength_bins)
+def flat_monitor_term(wavelength_bins: WavelengthBins) -> MonitorTerm[RunType]:
+    """Assume unit incident intensity per angstrom when no monitor is available.
+
+    The SANS denominator expects intensity integrated over each wavelength bin.
+    Weight by bin width so changing the binning does not rescale the result.
+    This flat spectrum is a placeholder for relative intensities; calibrated
+    reductions require a monitor spectrum and transmission correction.
+    """
+    weights = (wavelength_bins[1:] - wavelength_bins[:-1]) / sc.scalar(
+        1.0, unit='angstrom'
+    )
     return MonitorTerm[RunType](
-        sc.DataArray(sc.ones(sizes=wavelength.sizes), coords={'wavelength': wavelength})
+        sc.DataArray(
+            weights.to(unit='dimensionless'),
+            coords={'wavelength': sc.midpoints(wavelength_bins)},
+        )
     )
 
 
@@ -382,5 +395,5 @@ mcstas_providers = (
     sample_position_from_mcstas,
     mcstas_detector_coord_transform_graph,
     mcstas_data_to_wavelength,
-    unity_monitor_term,
+    flat_monitor_term,
 )

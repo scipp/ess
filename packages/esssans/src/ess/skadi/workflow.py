@@ -28,9 +28,6 @@ def skadi_default_parameters() -> dict:
     }
 
 
-skadi_providers = (rectangular_pixel_solid_angle,)
-
-
 @register_workflow
 def SkadiWorkflow(
     wavelength_from: WavelengthLutMode = "file",
@@ -48,8 +45,7 @@ def SkadiWorkflow(
         The SKADI reduction workflow.
     """
     workflow = sans.SansWorkflow(wavelength_from=wavelength_from)
-    for provider in skadi_providers:
-        workflow.insert(provider)
+    workflow.insert(rectangular_pixel_solid_angle)
     for key, value in skadi_default_parameters().items():
         workflow[key] = value
     workflow.typical_outputs = typical_outputs
@@ -58,7 +54,11 @@ def SkadiWorkflow(
 
 @register_workflow
 def SkadiMcStasWorkflow() -> sciline.Pipeline:
-    """Create the basic SKADI workflow with the McStas input adapter."""
+    """Create the SKADI McStas workflow for relative intensity reductions.
+
+    In the absence of monitor data, assume a flat incident spectrum with unit
+    intensity per angstrom and unit transmission.
+    """
     workflow = SkadiWorkflow()
     for provider in mcstas_providers:
         workflow.insert(provider)

@@ -8,7 +8,7 @@ from .mcstas import load_skadi_mcstas
 from .workflow import SkadiMcStasWorkflow, SkadiWorkflow, skadi_default_parameters
 
 try:
-    __version__ = importlib.metadata.version(__package__ or __name__)
+    __version__ = importlib.metadata.version("esssans")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 

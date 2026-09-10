@@ -13,7 +13,7 @@ def test_has_version():
     assert hasattr(isissans, '__version__')
     assert hasattr(loki, '__version__')
     assert hasattr(sans, '__version__')
-    assert hasattr(skadi, '__version__')
+    assert skadi.__version__ == sans.__version__
 
 
 if __name__ == '__main__':
