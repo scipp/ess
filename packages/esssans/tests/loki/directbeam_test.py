@@ -14,7 +14,7 @@ from scipp.scipy.interpolate import interp1d
 
 
 def _get_I0(qbins: sc.Variable) -> sc.Variable:
-    Iq_theory = sc.io.load_hdf5(loki.data.loki_tutorial_poly_gauss_I0())
+    Iq_theory = loki.data.loki_tutorial_poly_gauss_I0_data()
     f = interp1d(Iq_theory, 'Q')
     return f(sc.midpoints(qbins)).data[0]
 
