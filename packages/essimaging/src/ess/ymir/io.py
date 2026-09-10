@@ -10,9 +10,9 @@ from typing import NewType
 
 import scipp as sc
 import scippnexus as snx
-import scitiff
 from tifffile import imwrite
 
+from ess.imaging.io import tiff_from_event_data
 from ess.reduce.nexus.types import FilePath
 
 from .types import (
@@ -362,22 +362,6 @@ def export_image_stacks_as_tiff(
             )
 
 
-def _add_to_event_time_offset_in_case_of_pulse_skipping(
-    event_time_zero: sc.Variable,
-    pulse_stride: int,
-    pulse_period: sc.Variable,
-) -> sc.Variable:
-    _pulse_period = pulse_period.to(unit=event_time_zero.unit)
-    etz = event_time_zero - sc.datetime(0, unit=event_time_zero.unit)
-    # The offset is used to place some etz value in the center of a binning
-    # where the bins have constant width pulse_period.
-    # That way small deviations in etz will not move the etz to the next
-    # or previous bin and each subsequent pulse will have a different index.
-    offset = _pulse_period / 2 - etz.nanmin() % _pulse_period
-    index = ((etz + offset) // _pulse_period) % pulse_stride
-    return index * pulse_period
-
-
 def tiff_from_nexus(
     nexus_file_name: str | Path | io.BytesIO,
     output_path: str | Path | io.BytesIO,
@@ -387,6 +371,8 @@ def tiff_from_nexus(
 ) -> None:
     '''
     Write a tiff image file representing the data from the nexus file.
+
+    **Use ess.imaging.io.tiff_from_event_data instead.**
 
     Parameters
     ------------
@@ -399,23 +385,15 @@ def tiff_from_nexus(
     pulse_stride:
         The pulse stride that was used when doing the measurement.
     '''
-    with snx.File(nexus_file_name) as f:
-        data = f['/entry/instrument/event_mode_detectors/timepix3'][()][
-            'timepix3_events'
-        ]
-    data.bins.coords['event_time_offset'] += (
-        _add_to_event_time_offset_in_case_of_pulse_skipping(
-            data.bins.coords['event_time_zero'],
-            pulse_stride=pulse_stride,
-            pulse_period=sc.scalar(1 / 14, unit="s").to(
-                unit=data.bins.coords['event_time_offset'].unit
-            ),
-        )
+    import warnings
+
+    warnings.warn(
+        category=DeprecationWarning,
+        message="Tiff file IO helper moved to ess.imaging.io. "
+        "Use ess.imaging.io.tiff_from_event_data instead.",
+        stacklevel=2,
     )
-    image = (
-        sc.concat([data], dim='c')
-        .hist(event_time_offset=time_bins)
-        .rename_dims(event_time_offset='t', dim_0='y', dim_1='x')
+
+    tiff_from_event_data(
+        nexus_file_name, output_path, time_bins=time_bins, pulse_stride=pulse_stride
     )
-    image = image.drop_coords([c for c in image.coords if image.coords[c].ndim > 1])
-    scitiff.save_scitiff(image, output_path)
