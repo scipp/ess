@@ -43,6 +43,8 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
+    "essreflectometry[gui]",
+    "ipympl>=0.9.0",
     "pytest>=9.0",
     "pooch>=1.5",
 ]
@@ -98,6 +100,8 @@ addopts = """
 testpaths = "tests"
 filterwarnings = [
     "error",
+    # bqscales still passes trait metadata through the deprecated constructor API.
+    'ignore:metadata .* was set from the constructor:DeprecationWarning:bqscales.traits',
     'ignore:\n.*Sentinel is not a public part of the traitlets API.*:DeprecationWarning',
     "ignore:.*metadata to be logged in the data array, it is necessary to install the orsopy package.:UserWarning",
     "ignore:.*A transformation needs a vector attribute. Falling back to returning underlying value.:UserWarning",
