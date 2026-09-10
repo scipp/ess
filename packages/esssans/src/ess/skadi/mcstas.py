@@ -19,11 +19,17 @@ from ..sans.types import (
     CorrectForGravity,
     Filename,
     GravityVector,
+    MonitorTerm,
     Position,
     RawDetector,
     RunType,
+    WavelengthBins,
     WavelengthDetector,
 )
+
+# The McStas instrument places sourceMantid this far upstream of sample_position
+# along the final collimation axis. The pruned files omit that virtual component.
+_SOURCE_TO_SAMPLE_DISTANCE = sc.scalar(38.42, unit='m')
 
 # The McStas detector geometry description needs some adjustments.
 # Specifically, the outermost pixels on the banks cover a slightly larger
@@ -182,34 +188,17 @@ def _component_map(components: h5py.Group) -> dict[str, h5py.Group]:
     }
 
 
-def _component_position(
-    components: dict[str, h5py.Group], component_name: str
-) -> sc.Variable:
-    component = components.get(component_name)
-    if component is None or 'Position' not in component:
-        raise ValueError(f"No instrument component found for {component_name!r}")
-    return sc.vector(np.asarray(component['Position'][()], dtype=np.float64), unit='m')
-
-
-def load_skadi_mcstas(
-    filename: str | Path,
-    *,
-    source_name: str = 'sourceESS',
-    sample_name: str = 'sample_position',
-) -> sc.DataArray:
+def load_skadi_mcstas(filename: str | Path) -> sc.DataArray:
     """Load SKADI McStas detector events and apply the geometry correction.
 
     The McStas event probability is retained as the event value, with its square as
-    the variance. Events are grouped by the global McStas pixel ID.
+    the variance. Events are grouped by the global McStas pixel ID. Source and sample
+    positions are supplied separately by the workflow's ``Position`` providers.
 
     Parameters
     ----------
     filename:
         McStas ``mccode.h5`` file or its containing directory.
-    source_name:
-        Component name identifying the source position.
-    sample_name:
-        Component name identifying the sample position.
 
     Returns
     -------
@@ -282,9 +271,6 @@ def load_skadi_mcstas(
             pixel_ids[event_cursor:event_stop] = ids
             event_cursor = event_stop
 
-        source_position = _component_position(component_by_name, source_name)
-        sample_position = _component_position(component_by_name, sample_name)
-
     events = sc.DataArray(
         sc.array(
             dims=['event'],
@@ -304,8 +290,6 @@ def load_skadi_mcstas(
         position=sc.concat(positions, detector_dim),
         pixel_size=sc.concat(pixel_sizes, detector_dim),
         detector_normal=sc.concat(detector_normals, detector_dim),
-        source_position=source_position,
-        sample_position=sample_position,
     )
 
 
@@ -317,17 +301,37 @@ def load_skadi_mcstas_provider(
 
 
 def source_position_from_mcstas(
-    detector: RawDetector[RunType],
+    filename: Filename[RunType],
+    sample_position: Position[snx.NXsample, RunType],
 ) -> Position[snx.NXsource, RunType]:
-    """Extract the source position attached by the McStas loader."""
-    return Position[snx.NXsource, RunType](detector.coords['source_position'])
+    """Construct the effective source using the incident direction at the sample.
+
+    The local +z axis of ``sample_position`` follows the final collimation axis.
+    Using the physical moderator position instead would point across the bends in
+    the guide. Retain the flight-path length while aligning the source-to-sample
+    vector with the incident beam. Only component metadata is read.
+    """
+    with h5py.File(_mcstas_path(filename), 'r') as file:
+        components = _component_map(file['entry1/instrument/components'])
+        rotation = sc.spatial.linear_transform(
+            value=components['sample_position']['Rotation'][()].T
+        )
+    incident_direction = rotation * sc.vector([0.0, 0.0, 1.0])
+    flight_path = _SOURCE_TO_SAMPLE_DISTANCE.to(unit=sample_position.unit)
+    return Position[snx.NXsource, RunType](
+        sample_position - flight_path * incident_direction / sc.norm(incident_direction)
+    )
 
 
 def sample_position_from_mcstas(
-    detector: RawDetector[RunType],
+    filename: Filename[RunType],
 ) -> Position[snx.NXsample, RunType]:
-    """Extract the sample position attached by the McStas loader."""
-    return Position[snx.NXsample, RunType](detector.coords['sample_position'])
+    """Read the sample position without loading detector events."""
+    with h5py.File(_mcstas_path(filename), 'r') as file:
+        components = _component_map(file['entry1/instrument/components'])
+        return Position[snx.NXsample, RunType](
+            sc.vector(components['sample_position']['Position'][()], unit='m')
+        )
 
 
 def mcstas_detector_coord_transform_graph(
@@ -364,10 +368,19 @@ def mcstas_data_to_wavelength(
     )
 
 
+def unity_monitor_term(wavelength_bins: WavelengthBins) -> MonitorTerm[RunType]:
+    """Return unity normalization for McStas simulations without monitor data."""
+    wavelength = sc.midpoints(wavelength_bins)
+    return MonitorTerm[RunType](
+        sc.DataArray(sc.ones(sizes=wavelength.sizes), coords={'wavelength': wavelength})
+    )
+
+
 mcstas_providers = (
     load_skadi_mcstas_provider,
     source_position_from_mcstas,
     sample_position_from_mcstas,
     mcstas_detector_coord_transform_graph,
     mcstas_data_to_wavelength,
+    unity_monitor_term,
 )

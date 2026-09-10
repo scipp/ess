@@ -7,6 +7,7 @@ import scipp as sc
 import scippnexus as snx
 from ess.isissans.data import sans2d_solid_angle_reference
 from ess.sans import normalization
+from scipp.testing import assert_allclose
 
 from ess.reduce.nexus.types import NeXusTransformation, SampleRun
 
@@ -86,6 +87,55 @@ def test_solid_angle_compare_to_reference_file():
     ).data
     assert sc.allclose(
         da.data['tof', 0], solid_angle, atol=0.0 * sc.Unit('dimensionless')
+    )
+
+
+@pytest.mark.parametrize('size_unit', ['m', 'mm'])
+@pytest.mark.parametrize('normal_sign', [-1, 1])
+def test_rectangular_pixel_solid_angle(size_unit, normal_sign):
+    sample_position = sc.vector([1.0, -2.0, 0.5], unit='m')
+    # Normal incidence, double distance, off-axis, tilted, edge-on, double area.
+    detector = sc.DataArray(
+        sc.ones(sizes={'pixel': 6}),
+        coords={
+            'position': sc.vectors(
+                dims=['pixel'],
+                values=[
+                    [0, 0, 2],
+                    [0, 0, 4],
+                    [1, 0, 1],
+                    [0, 0, 2],
+                    [0, 0, 2],
+                    [0, 0, 2],
+                ],
+                unit='m',
+            )
+            + sample_position,
+            'pixel_size': sc.vectors(
+                dims=['pixel'],
+                values=[[0.02, 0.03, 0.001]] * 5 + [[0.02, 0.06, 0.01]],
+                unit='m',
+            ).to(unit=size_unit),
+            'detector_normal': normal_sign
+            * sc.vectors(
+                dims=['pixel'],
+                values=[[0, 0, 1]] * 3
+                + [[np.sqrt(3) / 2, 0, 0.5], [1, 0, 0], [0, 0, 1]],
+            ),
+        },
+    )
+
+    solid_angle = normalization.rectangular_pixel_solid_angle(
+        detector, sample_position=sample_position
+    )
+
+    assert_allclose(
+        solid_angle.data,
+        sc.array(
+            dims=['pixel'],
+            values=[0.00015, 0.0000375, 0.0003 / np.sqrt(2), 0.000075, 0.0, 0.0003],
+            unit='dimensionless',
+        ),
     )
 
 

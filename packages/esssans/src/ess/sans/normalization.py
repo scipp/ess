@@ -27,6 +27,7 @@ from .types import (
     Numerator,
     Position,
     ProcessedWavelengthBands,
+    RawDetector,
     ReducedQ,
     ReducedQxQy,
     ReturnEvents,
@@ -86,6 +87,49 @@ def solid_angle(
     return SolidAngle[RunType](
         concepts.rewrap_reduced_data(
             prototype=data, data=omega, dim=set(data.dims) - set(omega.dims)
+        )
+    )
+
+
+def rectangular_pixel_solid_angle(
+    detector: RawDetector[RunType],
+    sample_position: Position[snx.NXsample, RunType],
+) -> SolidAngle[RunType]:
+    r"""Approximate the solid angle of flat rectangular detector pixels.
+
+    The approximation is :math:`\Delta\Omega = A |\hat{n}\cdot\hat{r}| / r^2`,
+    where :math:`A` is the pixel area, :math:`\hat{n}` is its unit normal, and
+    :math:`r` is the distance from sample to pixel. It is valid when that distance
+    is much larger than the pixel width and height.
+
+    Parameters
+    ----------
+    detector:
+        Detector data with calibrated geometry coordinates: ``position`` contains
+        pixel centers, the x and y components of ``pixel_size`` give the local
+        pixel width and height, and ``detector_normal`` contains dimensionless
+        unit normals. Positions and normals must share a coordinate system with
+        ``sample_position``. Pixel sizes and normals may vary between pixels.
+    sample_position:
+        Position of the sample.
+
+    Returns
+    -------
+    :
+        Solid angles with the detector's pixel coordinates and masks preserved.
+    """
+    scattered_beam = detector.coords['position'] - sample_position
+    pixel_size = detector.coords['pixel_size']
+    area = pixel_size.fields.x * pixel_size.fields.y
+    omega = (
+        area
+        * sc.abs(sc.dot(detector.coords['detector_normal'], scattered_beam))
+        / sc.norm(scattered_beam) ** 3
+    ).to(unit='dimensionless')
+
+    return SolidAngle[RunType](
+        concepts.rewrap_reduced_data(
+            prototype=detector, data=omega, dim=set(detector.dims) - set(omega.dims)
         )
     )
 
