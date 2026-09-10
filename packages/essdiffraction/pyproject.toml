@@ -71,6 +71,7 @@ docs = [
     "pyarrow>=12.0.0",
     "pythreejs>=2.4.1",
 ]
+all = ["essdiffraction[test,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"

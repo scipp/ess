@@ -94,6 +94,9 @@ pixi run docs-essspectroscopy
 
 ### Adding or changing dependencies
 
+When adding an optional-dependency group, include it in the package's `all` extra
+so the `full` environment continues to include every extra.
+
 Edit the package's `pyproject.toml`, then re-lock:
 
 ```bash

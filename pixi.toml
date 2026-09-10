@@ -63,15 +63,15 @@ essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras =
 
 # ==================== Full feature ====================
 
-# Keep these lists in sync with each package's [project.optional-dependencies].
+# Each package's all extra includes every optional-dependency group.
 [feature.full.pypi-dependencies]
-essreduce = { path = "packages/essreduce", editable = true, extras = ["test", "docs"] }
-essimaging = { path = "packages/essimaging", editable = true, extras = ["test", "docs"] }
-essnmx = { path = "packages/essnmx", editable = true, extras = ["test", "docs"] }
-essreflectometry = { path = "packages/essreflectometry", editable = true, extras = ["test", "gui", "docs", "all"] }
-essdiffraction = { path = "packages/essdiffraction", editable = true, extras = ["test", "docs"] }
-esssans = { path = "packages/esssans", editable = true, extras = ["test", "docs"] }
-essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["test", "docs"] }
+essreduce = { path = "packages/essreduce", editable = true, extras = ["all"] }
+essimaging = { path = "packages/essimaging", editable = true, extras = ["all"] }
+essnmx = { path = "packages/essnmx", editable = true, extras = ["all"] }
+essreflectometry = { path = "packages/essreflectometry", editable = true, extras = ["all"] }
+essdiffraction = { path = "packages/essdiffraction", editable = true, extras = ["all"] }
+esssans = { path = "packages/esssans", editable = true, extras = ["all"] }
+essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["all"] }
 
 # ==================== Dev feature ====================
 
