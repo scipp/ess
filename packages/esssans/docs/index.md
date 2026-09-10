@@ -37,6 +37,11 @@
 
 :::
 
+:::{grid-item-card} SKADI
+:link: user-guide/skadi/index.md
+
+:::
+
 :::{grid-item-card} ISIS instruments
 :link: user-guide/isis/index.md
 
