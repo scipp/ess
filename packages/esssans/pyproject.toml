@@ -62,6 +62,7 @@ docs = [
     "tof>=25.08.0",
     "pythreejs>=2.4.1",
 ]
+all = ["esssans[test,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"

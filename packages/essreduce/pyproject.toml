@@ -69,6 +69,7 @@ docs = [
     "sphinxcontrib-mermaid>=0.9.2",
     "sympy>=1.11",
 ]
+all = ["essreduce[test,docs]"]
 
 [project.scripts]
 grow-nexus = "ess.reduce.scripts.grow_nexus:main"
