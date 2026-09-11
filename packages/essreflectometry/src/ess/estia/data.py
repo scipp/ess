@@ -141,9 +141,7 @@ def estia_mcstas_groundtruth(name) -> sc.DataArray:
             Qcol, Rcol = ds.keys()
         return sc.DataArray(
             sc.array(dims='Q', values=ds[Rcol].values),
-            coords={
-                'Q': sc.array(dims='Q', values=[0, *ds[Qcol].values], unit='1/angstrom')
-            },
+            coords={'Q': sc.array(dims='Q', values=ds[Qcol].values, unit='1/angstrom')},
         )
 
     if name == 'Ni/Ti-multilayer':
