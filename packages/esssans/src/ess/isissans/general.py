@@ -12,7 +12,6 @@ import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 from ess.sans.types import (
-    BeamCenter,
     DetectorIDs,
     DetectorPixelShape,
     DetectorPositionOffset,
@@ -81,9 +80,9 @@ def default_parameters() -> dict:
 
 
 def to_detector_position_offset(
-    global_offset: DetectorBankOffset, beam_center: BeamCenter
+    global_offset: DetectorBankOffset,
 ) -> DetectorPositionOffset[RunType]:
-    return DetectorPositionOffset[RunType](global_offset - beam_center)
+    return DetectorPositionOffset[RunType](global_offset)
 
 
 def to_monitor_position_offset(
