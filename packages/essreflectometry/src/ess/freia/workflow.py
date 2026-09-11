@@ -29,7 +29,7 @@ from . import (
 )
 from .corrections import RunNormalization, insert_run_normalization
 
-_general_providers = (
+providers = (
     *reflectometry_providers,
     *conversions.providers,
     *corrections.providers,
@@ -39,37 +39,23 @@ _general_providers = (
     *load.providers,
 )
 
-mcstas_providers = (
-    *_general_providers,
-    *mcstas.providers,
-)
-"""List of providers for setting up a Sciline pipeline for McStas data.
-
-This provides a default Freia workflow including providers for loadings files.
-"""
-
-providers = (*_general_providers,)
 """List of providers for setting up a Sciline pipeline data.
 
-This provides a default Freia workflow including providers for loadings files.
+This provides a default Freia workflow including providers for loading files.
 """
 
 
 def mcstas_default_parameters() -> dict:
     """Return default parameters for the McStas Freia workflow."""
-    return {
-        DetectorSpatialResolution: 0.0025 * sc.units.m,
-        NeXusDetectorName: "detector",
+    return default_parameters() | {
+        NeXusDetectorName: "Multiblade",
         BeamDivergenceLimits: (
             sc.scalar(-0.75, unit='deg'),
             sc.scalar(0.75, unit='deg'),
         ),
-        SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections,
         LookupTableRelativeErrorThreshold: {
-            "detector": 0.06,
+            "Multiblade": 0.06,
         },
-        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
@@ -90,10 +76,17 @@ def default_parameters() -> dict:
 def FreiaMcStasWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.none,
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
     **kwargs,
 ) -> sciline.Pipeline:
-    """Workflow for reduction of McStas data for the Freia instrument.
+    """Workflow for loading and unwrapping FREIA McStas detector events.
+
+    Builds on the generic NeXus/unwrapping workflow, replacing input providers
+    with adapters for the final ``Multiblade`` Mantid banana detector. Detector
+    geometry is read from the simulation file; choppers use the fixed WFM
+    configuration from :func:`ess.freia.mcstas.wfm_choppers`. This initial
+    workflow supports visualization through ``WavelengthDetector``; full
+    reflectivity reduction and normalization require further instrument providers.
 
     Parameters
     ----------
@@ -104,10 +97,11 @@ def FreiaMcStasWorkflow(
         'analytical', 'simulation', and 'file'. See
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     """
-    workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
-    for provider in mcstas_providers:
+    workflow = FreiaWorkflow(
+        run_norm=run_norm, wavelength_from=wavelength_from, **kwargs
+    )
+    for provider in mcstas.providers:
         workflow.insert(provider)
-    insert_run_normalization(workflow, run_norm)
     for name, param in mcstas_default_parameters().items():
         workflow[name] = param
     return workflow
