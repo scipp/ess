@@ -70,6 +70,7 @@ docs = [
   "scippneutron>=26.03.0",
   "anywidget>=0.8.0",
 ]
+all = ["essnmx[test,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"

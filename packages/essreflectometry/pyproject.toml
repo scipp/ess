@@ -74,9 +74,7 @@ docs = [
     "ipydatagrid>=1.3.0",
     "tof>=25.08.0",
 ]
-all = [
-    "essreflectometry[gui]",
-]
+all = ["essreflectometry[test,gui,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"

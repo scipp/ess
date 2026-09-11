@@ -60,6 +60,7 @@ docs = [
     "tof>=25.08.0",
     "tqdm>=4.64.0",
 ]
+all = ["essimaging[test,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"

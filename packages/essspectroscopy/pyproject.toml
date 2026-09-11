@@ -60,6 +60,7 @@ docs = [
     "sphinx-copybutton>=0.5.2",
     "sphinx-design>=0.5.0",
 ]
+all = ["essspectroscopy[test,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"
