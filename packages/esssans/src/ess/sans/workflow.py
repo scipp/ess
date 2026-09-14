@@ -9,7 +9,7 @@ import scipp as sc
 from ess.reduce.parameter import parameter_mappers
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
-from . import common, conversions, i_of_q, masking, normalization
+from . import conversions, i_of_q, masking, normalization
 from .types import (
     BackgroundRun,
     CorrectForGravity,
@@ -155,7 +155,6 @@ providers = (
     *i_of_q.providers,
     *masking.providers,
     *normalization.providers,
-    common.beam_center_to_detector_position_offset,
 )
 """
 List of providers for setting up a Sciline pipeline.

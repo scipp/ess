@@ -6,7 +6,7 @@ import sciline
 import scipp as sc
 from ess.sans import SansWorkflow
 from ess.sans.parameters import typical_outputs
-from ess.sans.types import BeamCenter, DetectorMasks, EmptyDetector, SampleRun
+from ess.sans.types import DetectorMasks, EmptyDetector, SampleRun
 
 from ess.reduce.workflow import register_workflow
 
@@ -25,33 +25,26 @@ SampleHolderMask = NewType('SampleHolderMask', sc.Variable | None)
 """Sample holder mask"""
 
 
-def detector_edge_mask(
-    beam_center: BeamCenter, sample: EmptyDetector[SampleRun]
-) -> DetectorEdgeMask:
-    # These values were determined by hand before the beam center was available.
-    # We therefore undo the shift introduced by the beam center.
-    raw_pos = sample.coords['position'] + beam_center
-    mask_edges = (sc.abs(raw_pos.fields.x) > sc.scalar(0.48, unit='m')) | (
-        sc.abs(raw_pos.fields.y) > sc.scalar(0.45, unit='m')
+def detector_edge_mask(sample: EmptyDetector[SampleRun]) -> DetectorEdgeMask:
+    pos = sample.coords['position']
+    mask_edges = (sc.abs(pos.fields.x) > sc.scalar(0.48, unit='m')) | (
+        sc.abs(pos.fields.y) > sc.scalar(0.45, unit='m')
     )
     return DetectorEdgeMask(mask_edges)
 
 
 def sample_holder_mask(
-    beam_center: BeamCenter,
     sample: EmptyDetector[SampleRun],
     low_counts_threshold: LowCountThreshold,
 ) -> SampleHolderMask:
-    # These values were determined by hand before the beam center was available.
-    # We therefore undo the shift introduced by the beam center.
-    raw_pos = sample.coords['position'] + beam_center
+    pos = sample.coords['position']
     summed = sample.hist()
     holder_mask = (
         (summed.data < low_counts_threshold)
-        & (raw_pos.fields.x > sc.scalar(0, unit='m'))
-        & (raw_pos.fields.x < sc.scalar(0.42, unit='m'))
-        & (raw_pos.fields.y < sc.scalar(0.05, unit='m'))
-        & (raw_pos.fields.y > sc.scalar(-0.15, unit='m'))
+        & (pos.fields.x > sc.scalar(0, unit='m'))
+        & (pos.fields.x < sc.scalar(0.42, unit='m'))
+        & (pos.fields.y < sc.scalar(0.05, unit='m'))
+        & (pos.fields.y > sc.scalar(-0.15, unit='m'))
     )
     return SampleHolderMask(holder_mask)
 

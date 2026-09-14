@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from collections.abc import Callable
+
 import sciline
 import scipp as sc
 import scippnexus as snx
@@ -13,6 +15,7 @@ from ess.reduce.uncertainty import broadcast_uncertainties
 
 from .common import mask_range
 from .types import (
+    BeamCenter,
     BinnedQ,
     BinnedQxQy,
     CorrectForGravity,
@@ -31,6 +34,34 @@ from .types import (
     UncertaintyBroadcastMode,
     WavelengthMask,
 )
+
+
+def _incident_beam_from_beam_center(
+    beam_center: sc.Variable, nominal_incident_beam: sc.Variable
+) -> Callable[[], sc.Variable]:
+    """
+    Return a provider for ``incident_beam`` that points along the actual beam.
+
+    Scattering angles must be measured relative to the actual beam. The beam passes
+    through the sample, but its direction, set by the collimation, in general deviates
+    from the nominal beam axis defined by source and sample. The beam center is a point
+    on the actual beam, measured from the sample, so it defines that direction.
+
+    Only the direction is taken from the beam center. The length is that of the nominal
+    incident beam, since ``L1`` is a property of the beamline and not of the beam
+    center. Scaling ``beam_center`` therefore leaves the result unchanged.
+    """
+    axis = nominal_incident_beam / sc.norm(nominal_incident_beam)
+    if sc.dot(beam_center, axis).value <= 0.0:
+        raise ValueError(
+            f'Invalid beam center {beam_center}. The beam center is the position of '
+            'the beam relative to the sample, so its component along the beam must be '
+            'the (positive) distance from the sample to the plane in which the beam '
+            'center was determined. A beam center given as a transverse offset alone, '
+            'without that distance, cannot define a beam direction.'
+        )
+    incident_beam = sc.norm(nominal_incident_beam) * beam_center / sc.norm(beam_center)
+    return lambda: incident_beam
 
 
 def cyl_unit_vectors(incident_beam: sc.Variable, gravity: sc.Variable):
@@ -102,6 +133,7 @@ def sans_elastic(
     *,
     sample_position: Position[snx.NXsample, RunType],
     source_position: Position[snx.NXsource, RunType],
+    beam_center: BeamCenter,
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:
     """
@@ -142,6 +174,10 @@ def sans_elastic(
         Position of the sample as a vector.
     source_position:
         Position of the source as a vector.
+    beam_center:
+        Position of the beam center relative to the sample, i.e., the transverse offset
+        of the beam together with the distance from the sample at which that offset was
+        determined. Set to a zero vector to apply no correction.
     """  # noqa: E501
     graph = {
         **beamline.beamline(scatter=True),
@@ -150,6 +186,11 @@ def sans_elastic(
         'source_position': lambda: source_position,
         'gravity': lambda: gravity,
     }
+    # A zero beam center means no correction, leaving the plain beamline graph.
+    if sc.norm(beam_center).value != 0.0:
+        graph['incident_beam'] = _incident_beam_from_beam_center(
+            beam_center, nominal_incident_beam=sample_position - source_position
+        )
     if correct_for_gravity:
         del graph['two_theta']
         graph[('two_theta', 'phi')] = scattering_angles_with_gravity

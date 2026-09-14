@@ -137,7 +137,28 @@ DirectBeamFilename = NewType('DirectBeamFilename', str)
 """Filename of direct beam correction"""
 
 BeamCenter = NewType('BeamCenter', sc.Variable)
-"""Beam center, may be set directly or computed using beam-center finder"""
+"""Position of the beam center relative to the sample.
+
+The beam passes through the sample, but its direction, set by the collimation, in
+general deviates from the nominal beam axis defined by source and sample. Together with
+the sample position, the beam center defines that direction: it is a point on the actual
+beam, given as an offset from the sample.
+
+Its component along the nominal beam is therefore the distance from the sample at which
+the transverse offset was determined, typically the distance of the detector bank used
+for the beam-center determination. Recording that distance is essential, since the same
+angular deviation of the beam corresponds to a proportionally smaller transverse offset
+on banks closer to the sample.
+
+Only the direction of this vector enters the correction, its magnitude cancels. A value
+determined on one detector bank therefore applies to all banks, and, as long as the beam
+direction is set by the collimation alone, also to a detector that has been moved to a
+different distance from the sample. The value is tied to the collimation that produced
+it, so re-determine the beam center whenever the slits change.
+
+Set to a zero vector to apply no beam-center correction. May be set directly or computed
+using a beam-center finder, see :py:mod:`ess.sans.beam_center_finder`.
+"""
 
 WavelengthMask = NewType('WavelengthMask', sc.DataArray | None)
 """Optional wavelength mask"""
