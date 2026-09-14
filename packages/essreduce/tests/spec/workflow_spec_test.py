@@ -2,17 +2,21 @@
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 import pydantic
 import pytest
+from pydantic import Field
 
 from ess.reduce.spec import (
+    Array,
     ArraySpec,
+    NexusFile,
     NoParams,
-    OutputSpec,
+    Quantity,
     SerializedWorkflowSpec,
     WorkflowSpec,
 )
 
 
 class Params(pydantic.BaseModel):
+    sample: NexusFile
     lower: float
     upper: float
 
@@ -23,6 +27,19 @@ class Params(pydantic.BaseModel):
         return self
 
 
+IOFQ = ArraySpec(dims=('Q',), unit='counts', coords={'Q': '1/Å'})
+
+
+class Outputs(pydantic.BaseModel):
+    iofq: Array(IOFQ) = Field(title='I(Q)', description='Scattering intensity.')
+    beam_centre: Quantity = Field(title='Beam centre')
+    transmission: Array() | None = Field(default=None, title='Transmission')
+
+
+class Result(pydantic.BaseModel):
+    result: Array()
+
+
 @pytest.fixture
 def spec() -> WorkflowSpec:
     return WorkflowSpec(
@@ -31,23 +48,21 @@ def spec() -> WorkflowSpec:
         title='My workflow',
         description='Computes things.',
         params=Params,
-        outputs={
-            'iofq': OutputSpec(
-                title='I(Q)',
-                array=ArraySpec(dims=('Q',), unit='counts', coords={'Q': '1/Å'}),
-            ),
-            'transmission': OutputSpec(title='Transmission'),
-        },
+        outputs=Outputs,
     )
 
 
 class TestWorkflowSpec:
-    def test_minimal_spec_defaults_to_no_params_and_result_output(self) -> None:
+    def test_minimal_spec_defaults_to_no_params(self) -> None:
         spec = WorkflowSpec(
-            name='wf', version=1, title='Workflow', description='Does things.'
+            name='wf', version=1, title='Workflow', description='D', outputs=Result
         )
         assert spec.params is NoParams
-        assert list(spec.outputs) == ['result']
+        assert spec.code_revision is None
+
+    def test_outputs_are_required(self) -> None:
+        with pytest.raises(pydantic.ValidationError):
+            WorkflowSpec(name='wf', version=1, title='Workflow', description='D')
 
     @pytest.mark.parametrize('field', ['name', 'title', 'description'])
     def test_empty_metadata_field_rejected(self, field: str) -> None:
@@ -56,13 +71,16 @@ class TestWorkflowSpec:
             'version': 1,
             'title': 'Workflow',
             'description': 'Does things.',
+            'outputs': Result,
         }
         with pytest.raises(pydantic.ValidationError):
             WorkflowSpec(**{**fields, field: ''})
 
     def test_version_must_be_positive(self) -> None:
         with pytest.raises(pydantic.ValidationError):
-            WorkflowSpec(name='wf', version=0, title='W', description='D')
+            WorkflowSpec(
+                name='wf', version=0, title='W', description='D', outputs=Result
+            )
 
     def test_spec_is_frozen(self, spec: WorkflowSpec) -> None:
         with pytest.raises(pydantic.ValidationError):
@@ -74,25 +92,41 @@ class TestWorkflowSpec:
 
     def test_params_model_validates_in_process(self, spec: WorkflowSpec) -> None:
         with pytest.raises(pydantic.ValidationError):
-            spec.params(lower=2.0, upper=1.0)
+            spec.params(sample={'dataset': 'pid'}, lower=2.0, upper=1.0)
+
+    def test_output_metadata_is_field_metadata(self, spec: WorkflowSpec) -> None:
+        fields = spec.outputs.model_fields
+        assert list(fields) == ['iofq', 'beam_centre', 'transmission']
+        assert fields['iofq'].title == 'I(Q)'
+        assert fields['iofq'].description == 'Scattering intensity.'
+        assert fields['transmission'].is_required() is False
 
 
 class TestSerialization:
-    def test_serialize_projects_params_to_json_schema(self, spec: WorkflowSpec) -> None:
+    def test_serialize_projects_models_to_json_schema(self, spec: WorkflowSpec) -> None:
         serialized = spec.serialize()
         assert serialized.params_schema == Params.model_json_schema()
-        assert set(serialized.params_schema['properties']) == {'lower', 'upper'}
+        assert serialized.outputs_schema == Outputs.model_json_schema()
 
-    def test_serialize_preserves_metadata_and_outputs(self, spec: WorkflowSpec) -> None:
+    def test_serialize_preserves_metadata(self) -> None:
+        spec = WorkflowSpec(
+            name='wf',
+            version=2,
+            title='W',
+            description='D',
+            code_revision='abc123',
+            outputs=Result,
+        )
         serialized = spec.serialize()
-        assert serialized.name == spec.name
-        assert serialized.version == spec.version
-        assert serialized.title == spec.title
-        assert serialized.description == spec.description
-        assert serialized.outputs == spec.outputs
+        assert (serialized.name, serialized.version) == ('wf', 2)
+        assert (serialized.title, serialized.description) == ('W', 'D')
+        assert serialized.code_revision == 'abc123'
 
-    def test_output_order_preserved(self, spec: WorkflowSpec) -> None:
-        assert list(spec.serialize().outputs) == ['iofq', 'transmission']
+    def test_output_order_and_metadata_preserved(self, spec: WorkflowSpec) -> None:
+        properties = spec.serialize().outputs_schema['properties']
+        assert list(properties) == ['iofq', 'beam_centre', 'transmission']
+        assert properties['iofq']['title'] == 'I(Q)'
+        assert properties['iofq']['description'] == 'Scattering intensity.'
 
     def test_serialized_spec_roundtrips_through_json(self, spec: WorkflowSpec) -> None:
         serialized = spec.serialize()
@@ -101,9 +135,9 @@ class TestSerialization:
         )
         assert restored == serialized
 
-    def test_array_spec_survives_json_roundtrip(self, spec: WorkflowSpec) -> None:
+    def test_array_structure_survives_json_roundtrip(self, spec: WorkflowSpec) -> None:
         restored = SerializedWorkflowSpec.model_validate_json(
             spec.serialize().model_dump_json()
         )
-        array = restored.outputs['iofq'].array
-        assert array == ArraySpec(dims=('Q',), unit='counts', coords={'Q': '1/Å'})
+        iofq = restored.outputs_schema['properties']['iofq']
+        assert ArraySpec.model_validate(iofq['dataField']['array']) == IOFQ

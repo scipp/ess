@@ -1,16 +1,46 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 """
-Conversions from validated parameter models to scipp objects.
+The scipp side of the spec vocabulary.
 
-Consumed by workflow implementations only; kept out of
-:mod:`ess.reduce.spec.parameters` so the parameter vocabulary itself stays
-free of scipp and serializes cleanly to JSON Schema.
+Conversions from validated parameter models to scipp objects, and the
+structural check of a scipp object against an :class:`ArraySpec`. Consumed by
+workflow implementations and runners only; kept out of the rest of
+:mod:`ess.reduce.spec` so the vocabulary itself stays free of scipp and
+serializes cleanly to JSON Schema.
 """
 
 import scipp as sc
 
+from .data import ArraySpec
 from .parameters import EdgesModel, RangeModel, Scale
+
+
+def check_array(value: sc.Variable | sc.DataArray, spec: ArraySpec) -> None:
+    """
+    Raise ``ValueError`` unless ``value`` has the structure ``spec`` declares.
+
+    Pydantic cannot inspect a scipp object, so a runner calls this on array
+    outputs at completion (and may on materialized array inputs).
+    """
+    problems = []
+    if tuple(value.dims) != spec.dims:
+        problems.append(f'dims {value.dims} != {spec.dims}')
+    unit = None if spec.unit is None else sc.Unit(spec.unit)
+    if value.unit != unit:
+        problems.append(f'unit {value.unit} != {unit}')
+    if (value.bins is not None) != spec.binned:
+        problems.append(f'binned={value.bins is not None} != {spec.binned}')
+    coords = value.coords if isinstance(value, sc.DataArray) else {}
+    for name, coord_unit in spec.coords.items():
+        if name not in coords:
+            problems.append(f'missing coord {name!r}')
+            continue
+        expected = None if coord_unit is None else sc.Unit(coord_unit)
+        if coords[name].unit != expected:
+            problems.append(f'coord {name!r} unit {coords[name].unit} != {expected}')
+    if problems:
+        raise ValueError('array does not match its spec: ' + '; '.join(problems))
 
 
 def edges_to_variable(edges: EdgesModel, dim: str) -> sc.Variable:

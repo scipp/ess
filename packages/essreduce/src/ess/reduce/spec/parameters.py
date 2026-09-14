@@ -86,6 +86,19 @@ class EnergyUnit(StrEnum):
     MICRO_EV = 'µeV'
 
 
+class Quantity(BaseModel, frozen=True):
+    """
+    A scalar or short vector with a unit, as plain data.
+
+    The small-value type for parameters and outputs such as a beam centre or a
+    fitted scale factor, which are typed in or chained between workflows
+    without going through the data store.
+    """
+
+    value: float | tuple[float, ...] = Field(description="The value(s).")
+    unit: str | None = Field(default=None, description="Unit, if any.")
+
+
 class RangeModel(BaseModel, ABC):
     """Base model for a value range. Subclasses constrain the unit."""
 

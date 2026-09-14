@@ -3,22 +3,44 @@
 """
 Implementation-independent workflow specifications for UI generation.
 
-See :mod:`ess.reduce.spec._workflow_spec` for the design;
-ADR 0001 (docs/developer/adr) for the rationale.
+See :mod:`ess.reduce.spec._workflow_spec` for the design, :mod:`~.data` for
+data fields, and ADR 0001 (docs/developer/adr) for the rationale.
 """
 
-from ._workflow_spec import (
+from ._workflow_spec import NoParams, SerializedWorkflowSpec, WorkflowSpec
+from .data import (
+    Array,
     ArraySpec,
-    NoParams,
-    OutputSpec,
-    SerializedWorkflowSpec,
-    WorkflowSpec,
+    DataField,
+    DatasetRef,
+    Kind,
+    NexusFile,
+    OpaqueFile,
+    OutputRef,
+    Ref,
+    as_ref,
+    data_fields,
+    ref_fields,
+    walk_refs,
 )
+from .parameters import Quantity
 
 __all__ = [
+    'Array',
     'ArraySpec',
+    'DataField',
+    'DatasetRef',
+    'Kind',
+    'NexusFile',
     'NoParams',
-    'OutputSpec',
+    'OpaqueFile',
+    'OutputRef',
+    'Quantity',
+    'Ref',
     'SerializedWorkflowSpec',
     'WorkflowSpec',
+    'as_ref',
+    'data_fields',
+    'ref_fields',
+    'walk_refs',
 ]

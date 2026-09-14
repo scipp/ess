@@ -4,11 +4,23 @@ import pydantic
 import pytest
 
 from ess.reduce.spec.parameters import (
+    Quantity,
     Scale,
     WavelengthEdges,
     WavelengthRange,
     WavelengthUnit,
 )
+
+
+class TestQuantity:
+    def test_scalar_and_vector(self) -> None:
+        assert Quantity(value=1.0, unit='m').value == 1.0
+        assert Quantity(value=(0.1, 0.2), unit='m').value == (0.1, 0.2)
+        assert Quantity(value=2.0).unit is None
+
+    def test_roundtrips_through_json(self) -> None:
+        q = Quantity(value=(0.1, 0.2), unit='m')
+        assert Quantity.model_validate_json(q.model_dump_json()) == q
 
 
 class TestRangeModel:
