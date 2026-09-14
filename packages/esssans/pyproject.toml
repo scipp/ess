@@ -36,6 +36,7 @@ dependencies = [
   "numpy>=1.26.4",
   "pandas>=2.1.2",
   "plopp>=26.5.0",
+  "scippneutron>=26.9.1",
 ]
 
 [project.optional-dependencies]
