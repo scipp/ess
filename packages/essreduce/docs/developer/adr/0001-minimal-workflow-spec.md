@@ -2,7 +2,7 @@
 
 - Status: proposed
 - Deciders: Simon
-- Date: 2026-08-05, amended 2026-09-14
+- Date: 2026-09-14
 
 ## Context
 
@@ -28,17 +28,11 @@ workflow factories, and widget concerns inside the spec, so the spec could not
 outlive or precede any particular implementation.
 
 The goal is the minimal layer that lets a *generic* user interface — ipywidgets,
-a web dashboard, or a command-line tool — be generated from a workflow
+a web dashboard, a command-line tool, or a GUI application — be generated from a workflow
 description alone. Compute is deliberately abstracted away: the same spec must
 make sense whether the workflow runs as a local sciline pipeline, behind a web
 service, or as a cluster job. Compute is not part of this work, but it shapes
 the design: nothing implementation-bound may appear in the spec.
-
-A fourth consumer shaped the amendment: the architecture sketch for
-data-reduction applications (scipp/essapps, decision D13). There, any output of
-one workflow run can be the input of the next, and a request names data only
-by reference. That requires outputs to be typed in the same vocabulary as
-parameters, and a parameter type that holds data rather than a literal.
 
 ## Decision
 
