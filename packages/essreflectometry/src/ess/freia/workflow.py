@@ -9,8 +9,6 @@ from ess.reduce.workflow import register_workflow
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry.types import (
-    BeamDivergenceLimits,
-    CorrectionsToApply,
     DetectorSpatialResolution,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
@@ -49,10 +47,6 @@ def mcstas_default_parameters() -> dict:
     """Return default parameters for the McStas Freia workflow."""
     return default_parameters() | {
         NeXusDetectorName: "Multiblade",
-        BeamDivergenceLimits: (
-            sc.scalar(-0.75, unit='deg'),
-            sc.scalar(0.75, unit='deg'),
-        ),
         LookupTableRelativeErrorThreshold: {
             "Multiblade": 0.06,
         },
@@ -64,7 +58,6 @@ def default_parameters() -> dict:
     return {
         NeXusDetectorName: "multiblade_detector",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections,
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
@@ -79,14 +72,10 @@ def FreiaMcStasWorkflow(
     wavelength_from: WavelengthLutMode = "analytical",
     **kwargs,
 ) -> sciline.Pipeline:
-    """Workflow for loading and unwrapping FREIA McStas detector events.
+    """Workflow for reducing FREIA McStas events with a no-sample direct beam.
 
-    Builds on the generic NeXus/unwrapping workflow, replacing input providers
-    with adapters for the final ``Multiblade`` Mantid banana detector. Detector
-    geometry is read from the simulation file; choppers use the fixed WFM
-    configuration from :func:`ess.freia.mcstas.wfm_choppers`. This initial
-    workflow supports visualization through ``WavelengthDetector``; full
-    reflectivity reduction and normalization require further instrument providers.
+    Loads geometry and uses the default WFM chopper settings. Reduction inputs
+    and outputs are described in :func:`FreiaWorkflow`.
 
     Parameters
     ----------
@@ -114,6 +103,14 @@ def FreiaWorkflow(
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for reduction of data for the Freia instrument.
+
+    ``QDetector`` provides specular Q with gravity correction. Reflectivity
+    requires separate sample/direct-beam ROIs, wavelength and Q bins, and beam
+    and sample sizes for the footprint correction. The reference run must be a
+    measurement without a sample, taken with matching slit and chopper settings.
+
+    Monitor normalization requires an incident monitor selected through
+    ``NeXusName[IncidentMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.
 
     Parameters
     ----------

@@ -11,6 +11,7 @@ from ess.reduce.nexus.types import (
     DiskChoppers,
     Filename,
     NeXusDetectorName,
+    NeXusName,
     RawDetector,
 )
 from ess.reduce.unwrap import (
@@ -27,6 +28,7 @@ from scippnexus import NXdetector
 
 from ess.freia import FreiaMcStasWorkflow
 from ess.freia.mcstas import load_mcstas
+from ess.freia.types import IncidentMonitor, QDetector, WavelengthMonitor
 from ess.reflectometry.types import ReferenceRun, SampleRun
 
 
@@ -188,10 +190,13 @@ def test_workflow_loads_and_unwraps_detector_with_generic_providers(mcstas_file,
         time=(sc.scalar(0.9, unit='ms'), sc.scalar(1.1, unit='ms')),
         wavelength=(sc.scalar(0.5, unit='angstrom'), sc.scalar(12.0, unit='angstrom')),
     )
-    result = workflow.compute((RawDetector[run], WavelengthDetector[run]))
+    result = workflow.compute(
+        (RawDetector[run], WavelengthDetector[run], QDetector[run])
+    )
     raw = result[RawDetector[run]]
     unwrapped = result[WavelengthDetector[run]]
     assert_allclose(raw.bins.sum().data, unwrapped.bins.sum().data)
+    assert 'Q' in result[QDetector[run]].bins.coords
     wavelength = unwrapped.bins.constituents['data'].coords['wavelength']
     # Arrival time 25 ms minus emission time 1 ms, flight path about 23 m.
     expected = (
@@ -222,5 +227,36 @@ def test_loader_uses_workflow_pulse_period(mcstas_file):
         events.coords['event_time_offset'].to(unit='s'),
         sc.array(
             dims=['event'], values=[0.025, 0.025, 0.025 + 1 / 14 - 0.05], unit='s'
+        ),
+    )
+
+
+def test_load_selected_wavelength_monitor_with_bin_edges_and_variances(mcstas_file):
+    with h5py.File(mcstas_file, 'r+') as f:
+        components = f['entry1/instrument/components']
+        monitor = _component(components, 'IncidentLambda', [0.0, 0.0, 19.0])
+        histogram = monitor.create_group('output/spectrum')
+        histogram.attrs['xvar'] = np.bytes_('L')
+        histogram.attrs['xlimits'] = np.bytes_('1 5')
+        histogram['data'] = [10.0, 20.0]
+        histogram['errors'] = [3.0, 4.0]
+    workflow = FreiaMcStasWorkflow()
+    workflow[Filename[SampleRun]] = str(mcstas_file)
+    workflow[NeXusName[IncidentMonitor]] = 'IncidentLambda'
+    result = workflow.compute(WavelengthMonitor[SampleRun])
+    assert_identical(
+        result,
+        sc.DataArray(
+            sc.array(
+                dims=['wavelength'],
+                values=[10.0, 20.0],
+                variances=[9.0, 16.0],
+                unit='counts',
+            ),
+            coords={
+                'wavelength': sc.array(
+                    dims=['wavelength'], values=[1.0, 3.0, 5.0], unit='angstrom'
+                )
+            },
         ),
     )

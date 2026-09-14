@@ -19,12 +19,15 @@ from ess.reduce.nexus.types import (
     EmptyDetector,
     Filename,
     NeXusDetectorName,
+    NeXusName,
     Position,
     RawDetector,
     RunType,
 )
 from ess.reduce.unwrap import PulsePeriod
 from scippneutron.chopper import DiskChopper
+
+from .types import IncidentMonitor, SampleSurfaceNormal, WavelengthMonitor
 
 
 class _ChopperParameters(TypedDict):
@@ -222,6 +225,7 @@ def load_mcstas(
     Empty detector pixels are retained, and weighted-event variances are ``p**2``.
     Arrival times are split into ``event_time_zero`` and ``event_time_offset``
     using ``pulse_period``, which defaults to the ESS period of 1/14 s.
+    If present, ``L`` is kept as ``wavelength_from_mcstas`` in angstroms.
     """
     if pulse_period is None:
         pulse_period = sc.scalar(1 / 14, unit='s')
@@ -240,8 +244,11 @@ def _load_events(
             f'No Mantid detector events with pixel IDs found for {detector_name!r}. '
             'Enable "mantid banana ... list all neutrons" in the simulation.'
         )
+    variables = ['p', 't', 'id']
+    if 'L' in data.get_component_variables(detector_name):
+        variables.append('L')
     values = data.get_event_data(
-        variables=['p', 't', 'id'], component_name=detector_name, filter_zeros=True
+        variables=variables, component_name=detector_name, filter_zeros=True
     )
     if geometry is None:
         geometry = _detector_geometry(data, detector_name)
@@ -265,8 +272,12 @@ def _load_events(
             'event_time_zero': sc.datetime(0, unit='ns')
             + (time - offset).to(unit='ns', dtype='int64'),
         },
-    ).group(pixel_ids)
-    return events.assign_coords(geometry.coords)
+    )
+    if 'L' in values:
+        events.coords['wavelength_from_mcstas'] = sc.array(
+            dims=['event'], values=values['L'], unit='angstrom'
+        )
+    return events.group(pixel_ids).assign_coords(geometry.coords)
 
 
 def load_mcstas_provider(
@@ -299,6 +310,53 @@ def mcstas_sample_position(
 ) -> Position[snx.NXsample, RunType]:
     """Load the sample position from the simulation geometry."""
     return Position[snx.NXsample, RunType](_component_position(filename, 'Arm_Sample'))
+
+
+def mcstas_sample_surface_normal(
+    filename: Filename[RunType],
+) -> SampleSurfaceNormal[RunType]:
+    """Load the sample surface normal in global coordinates."""
+    with _open_mcstas(filename) as data:
+        _, rotation = data.get_component_placement('Arm_Sample')
+    # mcstastox transforms row vectors from local to global with local @ rotation.
+    return SampleSurfaceNormal[RunType](sc.vector(rotation[1], unit='dimensionless'))
+
+
+def load_mcstas_monitor(filename: str | Path, monitor_name: str) -> sc.DataArray:
+    """Read a selected one-dimensional McStas L_monitor histogram.
+
+    Select an incident monitor upstream of the sample. In particular,
+    SampleLambda in FREIA_surface_test.instr is downstream of the sample.
+    McStas stores bin-integrated intensities and standard errors; xlimits
+    supplies the bounds of the uniformly spaced wavelength bins.
+    """
+    with _open_mcstas(filename) as data:
+        histogram = data.file_object.get_info_entry(monitor_name)
+        if _text(histogram.attrs.get('xvar', '')) != 'L' or histogram['data'].ndim != 1:
+            raise ValueError(f'{monitor_name!r} is not a 1-D wavelength monitor.')
+        low, high = map(float, _text(histogram.attrs['xlimits']).split())
+        intensity = histogram['data'][:]
+        return sc.DataArray(
+            sc.array(
+                dims=['wavelength'],
+                values=intensity,
+                variances=histogram['errors'][:] ** 2,
+                unit='counts',
+            ),
+            coords={
+                'wavelength': sc.linspace(
+                    'wavelength', low, high, len(intensity) + 1, unit='angstrom'
+                ),
+            },
+        )
+
+
+def mcstas_wavelength_monitor(
+    filename: Filename[RunType],
+    monitor_name: NeXusName[IncidentMonitor],
+) -> WavelengthMonitor[RunType]:
+    """Provide the explicitly selected incident wavelength histogram."""
+    return WavelengthMonitor[RunType](load_mcstas_monitor(filename, monitor_name))
 
 
 def _histogram_axis(histogram, axis, unit):
@@ -376,5 +434,7 @@ providers = (
     load_mcstas_provider,
     mcstas_source_position,
     mcstas_sample_position,
+    mcstas_sample_surface_normal,
+    mcstas_wavelength_monitor,
     mcstas_detector_geometry,
 )

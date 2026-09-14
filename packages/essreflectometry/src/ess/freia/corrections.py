@@ -7,20 +7,15 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ..reflectometry import corrections as common_corrections
 from ..reflectometry.corrections import RunNormalization
 from ..reflectometry.types import (
-    BeamDivergenceLimits,
-    CoordTransformationGraph,
-    CorrectionsToApply,
+    BeamSize,
     ReducibleData,
     RunType,
     RunUnnormalizedData,
-    WavelengthBins,
-    WavelengthDetector,
-    YIndexLimits,
-    ZIndexLimits,
+    Sample,
+    SampleRun,
+    SampleSize,
 )
-from .conversions import add_coords
-from .maskings import add_masks
-from .types import WavelengthMonitor
+from .types import SampleIlluminatedFraction, WavelengthMonitor
 
 
 def normalize_by_monitor_histogram(
@@ -89,33 +84,45 @@ def insert_run_normalization(
     )
 
 
-def add_coords_masks_and_apply_corrections(
-    da: WavelengthDetector[RunType],
-    ylim: YIndexLimits,
-    zlims: ZIndexLimits,
-    bdlim: BeamDivergenceLimits,
-    wbins: WavelengthBins,
-    graph: CoordTransformationGraph[RunType],
-    corrections_to_apply: CorrectionsToApply,
-) -> RunUnnormalizedData[RunType]:
+def sample_illuminated_fraction(
+    sample: ReducibleData[SampleRun],
+    beam_size: BeamSize[SampleRun],
+    sample_size: SampleSize[SampleRun],
+) -> SampleIlluminatedFraction:
+    """Use Amor's Gaussian footprint model with the specular incidence angle.
+
+    Beam size is the FWHM at the sample; sample size is its length along the
+    beam. These must be supplied explicitly, since slit openings alone do not
+    determine the profile of the beam reaching the sample.
     """
-    Computes coordinates, masks and corrections that are
-    the same for the sample measurement and the reference measurement.
-    """
-    da = add_coords(da, graph)
-    da = add_masks(da, ylim, zlims, bdlim, wbins)
-
-    for correction in corrections_to_apply:
-        da = correction(da)
-
-    return RunUnnormalizedData[RunType](da)
-
-
-def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
-    """Corrects the data by the size of the footprint on the sample."""
-    return da / sc.sin(da.coords['theta'])
+    for name, size in [('BeamSize', beam_size), ('SampleSize', sample_size)]:
+        if (
+            not sc.isfinite(size).value
+            or not (size > sc.scalar(0.0, unit=size.unit)).value
+        ):
+            raise ValueError(f'{name} must be finite and positive.')
+    return SampleIlluminatedFraction(
+        common_corrections.footprint_on_sample(
+            sample.bins.coords['theta'], beam_size=beam_size, sample_size=sample_size
+        )
+    )
 
 
-default_corrections = {correct_by_footprint}
+def prepare_sample(
+    sample: ReducibleData[SampleRun],
+    illuminated_fraction: SampleIlluminatedFraction,
+) -> Sample:
+    """Correct the reflected beam for footprint; the direct beam has no sample."""
+    if illuminated_fraction.bins is None:
+        illuminated_fraction = sc.bins_like(sample, illuminated_fraction)
+    valid = sc.isfinite(illuminated_fraction) & (illuminated_fraction > sc.scalar(0.0))
+    valid &= illuminated_fraction <= sc.scalar(1.0)
+    sample = sample.bins.assign_masks(
+        footprint=~valid,
+        non_reflected=sample.bins.coords['theta'] <= sc.scalar(0.0, unit='rad'),
+    )
+    fraction = sc.where(valid, illuminated_fraction, sc.scalar(1.0))
+    return Sample(sample / fraction)
 
-providers = (add_coords_masks_and_apply_corrections,)
+
+providers = (sample_illuminated_fraction, prepare_sample)
