@@ -303,6 +303,11 @@ class _BeamPlane:
     ``axis`` points from the sample to the plane, i.e., it carries the distance at which
     the beam center is determined. Offsets alone do not define a beam direction, so
     searching for a beam center means searching within such a plane.
+
+    ``unit_x`` and ``unit_y`` must be the beam-aligned unit vectors belonging to the
+    same ``incident_beam``. The third axis of that frame is the normalized incident
+    beam, so the frame is orthonormal and ``offsets`` and ``beam_center`` are exact
+    inverses of each other.
     """
 
     unit_x: sc.Variable
@@ -311,17 +316,17 @@ class _BeamPlane:
 
     @staticmethod
     def from_beam_center(
-        data: sc.DataArray, graph: dict, beam_center: sc.Variable
+        *,
+        unit_x: sc.Variable,
+        unit_y: sc.Variable,
+        incident_beam: sc.Variable,
+        beam_center: sc.Variable,
     ) -> '_BeamPlane':
-        """Plane containing ``beam_center``, normal to the incident beam."""
-        coords = data.transform_coords(
-            ['cyl_x_unit_vector', 'cyl_y_unit_vector', 'incident_beam'], graph=graph
-        ).coords
-        incident_beam = coords['incident_beam']
+        """Plane containing ``beam_center``, normal to ``incident_beam``."""
         direction = incident_beam / sc.norm(incident_beam)
         return _BeamPlane(
-            unit_x=coords['cyl_x_unit_vector'],
-            unit_y=coords['cyl_y_unit_vector'],
+            unit_x=unit_x,
+            unit_y=unit_y,
             axis=sc.dot(beam_center, direction) * direction,
         )
 
@@ -337,25 +342,22 @@ class _BeamPlane:
 
 
 def _iofq_in_quadrants(
-    xy: list[float],
+    beam_center: sc.Variable,
     workflow: sciline.Pipeline,
     detector: sc.DataArray,
     norm: sc.DataArray,
-    plane: _BeamPlane,
 ) -> dict[str, sc.DataArray]:
     """
     Compute the intensity as a function of Q inside 4 quadrants in Phi.
 
     Parameters
     ----------
-    xy:
-        The x,y offsets in the plane normal to the beam.
+    beam_center:
+        The beam center to use, see :py:class:`ess.sans.types.BeamCenter`.
     detector:
         The raw detector.
     norm:
         The denominator data for normalization.
-    plane:
-        The plane normal to the beam in which ``xy`` are given.
 
     Returns
     -------
@@ -369,7 +371,7 @@ def _iofq_in_quadrants(
     quadrants = ['south-west', 'south-east', 'north-east', 'north-west']
 
     workflow = workflow.copy()
-    workflow[BeamCenter] = plane.beam_center(xy)
+    workflow[BeamCenter] = beam_center
     graph = workflow.compute(ElasticCoordTransformGraph[SampleRun])
     calibrated = workflow.compute(CorrectedDetector[SampleRun, Numerator])
     with_phi = calibrated.transform_coords(
@@ -401,7 +403,12 @@ def _iofq_in_quadrants(
     return out
 
 
-def _cost(xy: list[float], *args) -> float:
+def _cost(
+    beam_center: sc.Variable,
+    workflow: sciline.Pipeline,
+    detector: sc.DataArray,
+    norm: sc.DataArray,
+) -> float:
     """
     Cost function for determining how close the :math:`I(Q)` curves are in all four
     quadrants. The cost is defined as
@@ -421,10 +428,13 @@ def _cost(xy: list[float], *args) -> float:
 
     Parameters
     ----------
-    xy:
-        The x,y offsets in the plane normal to the beam.
-    *args:
-        Arguments passed to :func:`iofq_in_quadrants`.
+    beam_center:
+        The beam center at which to evaluate the cost, see
+        :py:class:`ess.sans.types.BeamCenter`.
+    detector:
+        The raw detector.
+    norm:
+        The denominator data for normalization.
 
     Returns
     -------
@@ -451,7 +461,7 @@ def _cost(xy: list[float], *args) -> float:
     one. The Mantid implementation is available
     `here <https://github.com/mantidproject/mantid/blob/main/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py`_.
     """  # noqa: E501
-    iofq = _iofq_in_quadrants(xy, *args)
+    iofq = _iofq_in_quadrants(beam_center, workflow, detector, norm)
     all_q = sc.concat([sc.values(da) for da in iofq.values()], dim='quadrant')
     ref = all_q.mean('quadrant')
     c = (all_q - ref) ** 2
@@ -465,7 +475,7 @@ def _cost(xy: list[float], *args) -> float:
             'try restricting your Q range, or increasing the size of your Q bins to '
             'improve statistics in the denominator.'
         )
-    logger.info('Beam center finder: x=%s, y=%s, cost=%s', xy[0], xy[1], out)
+    logger.info('Beam center finder: beam_center=%s, cost=%s', beam_center, out)
     return out
 
 
@@ -608,14 +618,25 @@ def beam_center_from_iofq(
     com = beam_center_from_center_of_mass(workflow)
     logger.info('Initial guess for beam center: %s', com)
 
+    coords = data.transform_coords(
+        [
+            'cyl_x_unit_vector',
+            'cyl_y_unit_vector',
+            'incident_beam',
+            'cylindrical_x',
+            'cylindrical_y',
+        ],
+        graph=graph,
+    ).coords
     # The refinement below only varies the offsets within the plane normal to the beam.
     # The distance at which the beam center is determined is taken from the initial
     # guess and kept fixed.
-    plane = _BeamPlane.from_beam_center(data=data, graph=graph, beam_center=com)
-
-    coords = data.transform_coords(
-        ['cylindrical_x', 'cylindrical_y'], graph=graph
-    ).coords
+    plane = _BeamPlane.from_beam_center(
+        unit_x=coords['cyl_x_unit_vector'],
+        unit_y=coords['cyl_y_unit_vector'],
+        incident_beam=coords['incident_beam'],
+        beam_center=com,
+    )
     bounds = [
         (coords['cylindrical_x'].min().value, coords['cylindrical_x'].max().value),
         (coords['cylindrical_y'].min().value, coords['cylindrical_y'].max().value),
@@ -623,9 +644,8 @@ def beam_center_from_iofq(
 
     # Refine using Scipy optimize
     res = minimize(
-        _cost,
+        lambda xy: _cost(plane.beam_center(xy), workflow, detector, norm),
         x0=plane.offsets(com),
-        args=(workflow, detector, norm, plane),
         bounds=bounds,
         method=minimizer,
         tol=tolerance,
