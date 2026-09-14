@@ -597,6 +597,8 @@ def beam_center_from_iofq(
         ElasticCoordTransformGraph[SampleRun],
     )
     workflow = workflow.copy()
+    # This function determines the beam center, so it must run without one being set.
+    workflow = _with_default_beam_center(workflow)
     # Avoid reshape of detector, which would break boolean-indexing by cost function
     workflow[DetectorBankSizes] = {}
     results = workflow.compute(keys)
