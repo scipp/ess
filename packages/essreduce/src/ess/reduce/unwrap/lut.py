@@ -26,6 +26,26 @@ from .types import (
     WavelengthLutMode,
 )
 
+# We define a maximum instrument length which is used to determine how many chopper
+# rotations should be performed when computing the chopper frame sequence.
+# We need to rotate the choppers for long enough to make sure we capture cases where
+# very slow neutrons pass through chopper openings multiple pulse periods later.
+# The most robust way is to define the longest possible distance that could be traveled
+# and compute how long it would take the slowest neutrons to reach it.
+MAXIMUM_INSTRUMENT_LENGTH = sc.scalar(500.0, unit='m')
+
+
+def _wavelength_to_speed(wavelength: sc.Variable) -> sc.Variable:
+    """
+    Convert wavelength to speed.
+
+    Parameters
+    ----------
+    wavelength:
+        Wavelength of the neutrons.
+    """
+    return (sc.constants.h / sc.constants.m_n) / wavelength
+
 
 @dataclass
 class BeamlineComponentReading:
@@ -58,7 +78,7 @@ class BeamlineComponentReading:
     distance: sc.Variable
 
     def __post_init__(self):
-        self.speed = (sc.constants.h / sc.constants.m_n) / self.wavelength
+        self.speed = _wavelength_to_speed(self.wavelength).to(unit='m/s')
 
 
 @dataclass
@@ -623,6 +643,11 @@ def _estimate_wavelength_by_polygon_centers(
     # This is because neutrons that arrive after the frame period will wrap around and
     # appear in the next pulse, which is equivalent to the original pulse but shifted
     # by the frame period.
+    # We determine the number of frame periods to shift by calculating how many periods
+    # are needed to cover the maximum arrival time in the subframes.
+    max_time = sc.reduce([f.time.max() for f in subframes]).max()
+    nperiods = int(max_time.to(unit=time_unit).value / frame_period.value) + 1
+
     polygons = [
         np.stack(
             [
@@ -632,7 +657,7 @@ def _estimate_wavelength_by_polygon_centers(
             axis=1,
         )
         for f in subframes
-        for i in (0, 1)
+        for i in range(nperiods)
     ]
 
     wavs, stddevs = _polygon_intersections(polygons, time_edges.values)
@@ -670,18 +695,14 @@ def compute_frame_sequence(
 
     # The `pulse_frequency` parameter in time_offset_open and time_offset_close below
     # decides how many rotations the chopper will perform when computing the open and
-    # close times. Because we want to cover a number of pulses equal to `pulse_stride`,
-    # we need to set the pulse frequency to be `pulse_stride` times smaller than the
-    # actual pulse frequency.
-    #
-    # In addition, the time_offset_open and time_offset_close below require the
-    # pulse_frequency to be an integer multiple of the pulse frequency or vice versa.
-    # A simple trick is to make sure that the requested pulse frequency is divided by
-    # an even number. We need to rotate the chopper for long enough to cover wrapping
-    # around the frame period, so we cover two pulses strides.
-    frequency_for_chopper_rotation = (1.0 / pulse_period.to(unit='s')) / (
-        pulse_stride * 2
-    )
+    # close times.
+    # We need to cover the entire time range from 0 to the time it takes the slowest
+    # neutron to travel the maximum instrument length.
+    travel_time = source_bounds.time[1].to(unit='s') + (
+        MAXIMUM_INSTRUMENT_LENGTH / _wavelength_to_speed(source_bounds.wavelength[1])
+    ).to(unit='s')
+    nperiods = sc.ceil(travel_time / pulse_period)
+    frequency_for_chopper_rotation = 1.0 / (nperiods * pulse_period)
 
     chops = {
         key: chopper_cascade.Chopper(
@@ -744,8 +765,13 @@ def make_wavelength_lut_from_polygons(
     pulse_period = pulse_period.to(unit=time_unit)
     frame_period = pulse_period * pulse_stride
 
-    min_dist = ltotal_range[0].to(unit=distance_unit)
-    max_dist = ltotal_range[1].to(unit=distance_unit)
+    dist0 = ltotal_range[0].to(unit=distance_unit)
+    dist1 = ltotal_range[1].to(unit=distance_unit)
+    # By default, the minimum and maximum distances should be the first and second
+    # elements of the total range. But if the user set them manually on the workflow
+    # we need to make sure we pick the minimum and maximum distances.
+    min_dist = min(dist0, dist1)
+    max_dist = max(dist0, dist1)
 
     # We want to give the 2d interpolator a table that covers the requested range,
     # hence we need to extend the range by at least half a resolution in each direction.
