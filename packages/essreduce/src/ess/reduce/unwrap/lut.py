@@ -735,7 +735,7 @@ def make_wavelength_lut_from_polygons(
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride[RunType],
-    frames: ChopperFrameSequence,
+    frames: ChopperFrameSequence[RunType],
 ) -> LookupTable[RunType, Component]:
     """
     Compute a lookup table for wavelength as a function of distance and
