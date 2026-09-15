@@ -3,7 +3,16 @@
 import importlib.metadata
 
 from ..reflectometry import supermirror
-from . import conversions, load, maskings, normalization, orso, resolution, workflow
+from . import (
+    conversions,
+    load,
+    maskings,
+    mcstas,
+    normalization,
+    orso,
+    resolution,
+    workflow,
+)
 from .types import (
     AngularResolution,
     SampleSizeResolution,
@@ -44,6 +53,7 @@ __all__ = [
     "conversions",
     "load",
     "maskings",
+    "mcstas",
     "normalization",
     "orso",
     "resolution",

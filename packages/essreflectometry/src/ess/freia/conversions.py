@@ -1,171 +1,83 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ess.reduce.nexus.types import DetectorBankSizes, Position
-from scipp.constants import pi
-from scippneutron._utils import elem_dtype
-from scippneutron.conversion import graph
+from ess.reduce.nexus.types import GravityVector, Position
+from scippneutron.conversion import graph, tof
 from scippnexus import NXsample, NXsource
 
 from ..reflectometry.conversions import reflectometry_q
-from ..reflectometry.types import (
-    CoordTransformationGraph,
-    DetectorRotation,
-    RunType,
-    SampleRotation,
-)
-
-
-def reflectometry_q_x(
-    wavelength: sc.Variable, theta: sc.Variable, sample_rotation: sc.Variable
-) -> sc.Variable:
-    """
-    Compute momentum transfer in off-specular direction.
-
-    .. math::
-        Q_x = \\frac{2 \\pi}{\\lambda} (cos(\\theta_o) - cos(\\theta_i))
-
-    Where :math:`\\theta_o` is the reflection angle (:func:`theta`)
-    and :math:`\\theta_i` is the incident angle on the sample surface.
-
-    Note that here we assume the incident angle is equal to ``sample_rotation``.
-
-    Source:
-    `Frédéric Ott, "Off-specular data representations in neutron reflectivity" <https://doi.org/10.1107/S0021889811002858>`_
-
-    Parameters
-    ----------
-    wavelength:
-        Wavelength values for the events.
-    theta:
-        Angle of reflection for the events.
-    sample_rotation:
-        Angle of incidence.
-
-    Returns
-    -------
-    :
-        Qx-values.
-    """
-    dtype = elem_dtype(wavelength)
-    c = (2 * pi).astype(dtype)
-    return (
-        c
-        * (
-            sc.cos(theta.astype(dtype, copy=False))
-            - sc.cos(sample_rotation.to(unit=theta.unit, dtype=dtype))
-        )
-        / wavelength
-    )
+from ..reflectometry.types import CoordTransformationGraph, RunType, WavelengthDetector
+from .types import QDetector, SampleSurfaceNormal
 
 
 def theta(
-    divergence_angle: sc.Variable,
-    sample_rotation: sc.Variable,
-):
-    '''
-    Angle of reflection.
+    scattered_beam: sc.Variable,
+    wavelength: sc.Variable,
+    gravity: sc.Variable,
+    sample_surface_normal: sc.Variable,
+) -> sc.Variable:
+    """Signed, gravity-corrected angle above the sample plane.
 
-    Computes the angle between the scattering direction of
-    the neutron and the sample surface.
-
-    Parameters
-    ------------
-        divergence_angle:
-            Divergence angle of the scattered beam.
-        sample_rotation:
-            Rotation of the sample from to its zero position.
-
-    Returns
-    -----------
-    The reflection angle of the neutron.
-    '''
-    return divergence_angle + sample_rotation.to(
-        unit=divergence_angle.unit, dtype='float64'
-    )
-
-
-def divergence_angle(
-    position: sc.Variable,
-    sample_position: sc.Variable,
-    detector_rotation: sc.Variable,
-):
+    Approximate the flight time using the straight sample-to-detector distance,
+    as in ScippNeutron's gravity correction. Positive angles point toward the
+    sample surface normal.
     """
-    Angle between the scattering ray and
-    the ray that travels parallel to the sample surface
-    when the sample rotation is zero.
-
-    Parameters
-    ------------
-        position:
-            Detector position where the neutron was detected.
-        sample_position:
-            Position of the sample.
-        detector_rotation:
-            Rotation of the detector from its zero position.
-    Returns
-    ----------
-    The divergence angle of the scattered beam.
-    """
-    p = position - sample_position.to(unit=position.unit)
-    return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(
-        unit='rad', dtype='float64'
+    flight_time = tof.tof_from_wavelength(
+        wavelength=wavelength, Ltotal=sc.norm(scattered_beam)
+    ).to(unit='s')
+    outgoing_beam = scattered_beam - (0.5 * gravity * flight_time**2).to(
+        unit=scattered_beam.unit
     )
+    normal = sample_surface_normal / sc.norm(sample_surface_normal)
+    return sc.asin(sc.dot(outgoing_beam, normal) / sc.norm(outgoing_beam))
 
 
 def coordinate_transformation_graph(
     source_position: Position[NXsource, RunType],
     sample_position: Position[NXsample, RunType],
-    sample_rotation: SampleRotation[RunType],
-    detector_rotation: DetectorRotation[RunType],
-    detector_bank_sizes: DetectorBankSizes,
+    sample_surface_normal: SampleSurfaceNormal[RunType],
+    gravity: GravityVector,
 ) -> CoordTransformationGraph[RunType]:
-    bank = detector_bank_sizes['multiblade_detector']
+    """Build a specular conversion graph."""
+    length = sc.norm(sample_surface_normal)
+    if (
+        not sc.isfinite(length).value
+        or not (length > sc.scalar(0.0, unit=length.unit)).value
+    ):
+        raise ValueError('SampleSurfaceNormal must be a finite, nonzero vector.')
     return {
         **graph.beamline.beamline(scatter=True),
-        "theta": theta,
-        "divergence_angle": divergence_angle,
-        "Q": reflectometry_q,
-        "Qx": reflectometry_q_x,
-        'sample_size': lambda: sc.scalar(20.0, unit='mm'),
-        'blade': lambda: sc.arange('blade', bank['blade'] - 1, -1, -1),
-        'wire': lambda: sc.arange('wire', bank['wire'] - 1, -1, -1),
-        'strip': lambda: sc.arange('strip', bank['strip'] - 1, -1, -1),
-        'z_index': lambda blade, wire: blade * wire,
-        'sample_rotation': lambda: sample_rotation,
-        'detector_rotation': lambda: detector_rotation,
+        'theta': theta,
+        'Q': reflectometry_q,
         'source_position': lambda: source_position,
         'sample_position': lambda: sample_position,
+        'sample_surface_normal': lambda: sample_surface_normal,
+        'gravity': lambda: gravity,
     }
 
 
 def add_coords(
-    da: sc.DataArray,
-    graph: dict,
-) -> sc.DataArray:
-    "Adds scattering coordinates to the raw detector data."
-    return da.transform_coords(
-        (
-            "wavelength",
-            "theta",
-            "divergence_angle",
-            "Q",
-            "Qx",
-            "L1",
-            "L2",
-            "blade",
-            "wire",
-            "strip",
-            "z_index",
-            "sample_rotation",
-            "detector_rotation",
-            "sample_size",
-        ),
-        graph,
-        rename_dims=False,
-        keep_intermediate=False,
-        keep_aliases=False,
+    da: WavelengthDetector[RunType],
+    graph: CoordTransformationGraph[RunType],
+) -> QDetector[RunType]:
+    """Add specular Q and the gravity-corrected angle to detector events."""
+    return QDetector[RunType](
+        da.transform_coords(
+            (
+                'theta',
+                'Q',
+                'L1',
+                'L2',
+                'incident_beam',
+                'sample_position',
+                'sample_surface_normal',
+            ),
+            graph,
+            rename_dims=False,
+            keep_intermediate=False,
+            keep_aliases=False,
+        )
     )
 
 
-providers = (coordinate_transformation_graph,)
+providers = (coordinate_transformation_graph, add_coords)
