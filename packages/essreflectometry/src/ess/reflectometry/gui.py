@@ -207,11 +207,10 @@ class NexusExplorer(widgets.VBox):
                                 layout=widgets.Layout(
                                     width='100%',
                                     height='600px',
-                                    min_height='100px',  # Min resize height
-                                    max_height='1000px',  # Max resize height
-                                    overflow_y='scroll',
+                                    min_height='100px',
+                                    max_height='1000px',
+                                    overflow='auto',
                                     border='1px solid lightgray',
-                                    resize='vertical',  # Add resize handle
                                 ),
                             ),
                         ],
@@ -434,7 +433,7 @@ class ReflectometryBatchReductionGUI:
             value="",
             placeholder="Proposal number or file path",
             description="Proposal no.:",
-            layout=widgets.Layout(description_width="auto"),
+            style={'description_width': 'auto'},
             disabled=False,
         )
 
@@ -595,7 +594,6 @@ class ReflectometryBatchReductionGUI:
             pd.DataFrame([]),
             editable=True,
             auto_fit_columns=True,
-            column_visibility={"key": False},
             selection_mode="cell",
             renderers=self.get_renderers_for_runs_table(),
         )
@@ -603,7 +601,6 @@ class ReflectometryBatchReductionGUI:
             pd.DataFrame([]),
             editable=True,
             auto_fit_columns=True,
-            column_visibility={"key": False},
             selection_mode="cell",
             renderers=self.get_renderers_for_reduction_table(),
         )
@@ -611,7 +608,6 @@ class ReflectometryBatchReductionGUI:
             pd.DataFrame([]),
             editable=True,
             auto_fit_columns=True,
-            column_visibility={"key": False},
             selection_mode="cell",
             renderers=self.get_renderers_for_reference_table(),
         )
@@ -619,7 +615,6 @@ class ReflectometryBatchReductionGUI:
             pd.DataFrame([]),
             editable=True,
             auto_fit_columns=True,
-            column_visibility={"key": False},
             selection_mode="cell",
             renderers=self.get_renderers_for_custom_reduction_table(),
         )
@@ -768,8 +763,8 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
 
     def sync_runs_table(self, db):
         df = self._merge_old_and_new_state(db["meta"], db["user_runs"], on='Run')
-        df = df[db['run_number_min'] <= df['Run'].astype(int)][
-            db['run_number_max'] >= df['Run'].astype(int)
+        df = df[
+            df['Run'].astype(int).between(db['run_number_min'], db['run_number_max'])
         ]
         self._setdefault(df, "Exclude", False)
         self._setdefault(df, "Reference", False)
@@ -782,7 +777,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
     def sync_reduction_table(self, db):
         df = db["user_runs"]
         df = (
-            df[~df["Reference"]][~df["Exclude"]]
+            df[~df["Reference"] & ~df["Exclude"]]
             .groupby(["Sample", "Angle"], as_index=False)
             .agg(Runs=("Run", tuple))
             .sort_values(["Sample", "Angle"])
@@ -810,7 +805,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
     def sync_reference_table(self, db):
         df = db["user_runs"]
         df = (
-            df[df["Reference"]][~df["Exclude"]]
+            df[df["Reference"] & ~df["Exclude"]]
             .groupby(["Sample", "Angle"], as_index=False)
             .agg(Runs=("Run", tuple))
             .sort_values(["Sample", "Angle"])
@@ -1031,13 +1026,20 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
                 sc.scalar(reference_row['Zmax']),
             )
 
+            reference_filenames = list(
+                map(self.get_filepath_from_run, reference_row["Runs"])
+            )
+            # Keep a filename for metadata needed after the reference is cached.
+            # Merged runs already use the first run's metadata.
+            wf[Filename[ReferenceRun]] = reference_filenames[0]
+
             if (key := self.get_row_key(reference_row)) in self.results:
                 reference_result = self.results[key]
             else:
                 reference_result = with_filenames(
                     wf,
                     ReferenceRun,
-                    list(map(self.get_filepath_from_run, reference_row["Runs"])),
+                    reference_filenames,
                 ).compute(ReducedReference)
                 self.set_result(reference_row, reference_result)
 

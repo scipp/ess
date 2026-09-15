@@ -61,6 +61,18 @@ esssans = { path = "packages/esssans", editable = true, extras = ["test"] }
 [feature.essspectroscopy.pypi-dependencies]
 essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["test"] }
 
+# ==================== Full feature ====================
+
+# Each package's all extra includes every optional-dependency group.
+[feature.full.pypi-dependencies]
+essreduce = { path = "packages/essreduce", editable = true, extras = ["all"] }
+essimaging = { path = "packages/essimaging", editable = true, extras = ["all"] }
+essnmx = { path = "packages/essnmx", editable = true, extras = ["all"] }
+essreflectometry = { path = "packages/essreflectometry", editable = true, extras = ["all"] }
+essdiffraction = { path = "packages/essdiffraction", editable = true, extras = ["all"] }
+esssans = { path = "packages/esssans", editable = true, extras = ["all"] }
+essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["all"] }
+
 # ==================== Dev feature ====================
 
 [feature.dev.pypi-dependencies]
@@ -153,8 +165,12 @@ cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'docte
 # ==================== Environments ====================
 
 [environments]
-# Default: all packages (for full dev setup)
+# Default: all packages with test extras and dev tools
 default = { features = ["dev", "essreduce", "essimaging", "essnmx", "essreflectometry", "essdiffraction", "esssans", "essspectroscopy"], solve-group = "default" }
+
+# Full: all packages with every extra, dev tools, and documentation tools
+# Keep essreduce for its conda-forge Numba dependency.
+full = { features = ["full", "dev", "docs", "essreduce"], solve-group = "default" }
 
 # Per-package test environments (include workspace dep features)
 essreduce = { features = ["essreduce"], solve-group = "default" }
