@@ -117,10 +117,7 @@ def prepare_sample(
         illuminated_fraction = sc.bins_like(sample, illuminated_fraction)
     valid = sc.isfinite(illuminated_fraction) & (illuminated_fraction > sc.scalar(0.0))
     valid &= illuminated_fraction <= sc.scalar(1.0)
-    sample = sample.bins.assign_masks(
-        footprint=~valid,
-        non_reflected=sample.bins.coords['theta'] <= sc.scalar(0.0, unit='rad'),
-    )
+    sample = sample.bins.assign_masks(footprint=~valid)
     fraction = sc.where(valid, illuminated_fraction, sc.scalar(1.0))
     return Sample(sample / fraction)
 

@@ -6,12 +6,12 @@ from ..reflectometry.types import RunType, RunUnnormalizedData, WavelengthBins
 from .types import DetectorRegionOfInterest, QDetector
 
 
-def select_events(
+def add_masks(
     da: QDetector[RunType],
     roi: DetectorRegionOfInterest[RunType],
     wavelength_bins: WavelengthBins,
 ) -> RunUnnormalizedData[RunType]:
-    """Select a peak using pixel or event coordinates and wavelength."""
+    """Mask events outside the ROI and wavelength range."""
     masks = {}
     event_masks = {}
     for name, (low, high) in roi.items():
@@ -36,4 +36,4 @@ def select_events(
     )
 
 
-providers = (select_events,)
+providers = (add_masks,)

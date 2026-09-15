@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from ess.reduce.nexus.types import GravityVector, Position
-from scippneutron.conversion import beamline, graph
+from scippneutron.conversion import graph, tof
 from scippnexus import NXsample, NXsource
 
 from ..reflectometry.conversions import reflectometry_q
@@ -11,40 +11,25 @@ from .types import QDetector, SampleSurfaceNormal
 
 
 def theta(
-    incident_beam: sc.Variable,
     scattered_beam: sc.Variable,
     wavelength: sc.Variable,
     gravity: sc.Variable,
     sample_surface_normal: sc.Variable,
 ) -> sc.Variable:
-    """Signed, gravity-corrected exit angle above the sample plane.
+    """Signed, gravity-corrected angle above the sample plane.
 
-    ScippNeutron reconstructs the outgoing direction at the sample. Project
-    that direction onto the sample normal to retain the sign and support a
-    tilted sample. Its reflectometry-specific scattering_angle_in_yz_plane
-    returns an unsigned angle, which cannot distinguish the direct beam.
-
-    The horizontal beam direction only defines a coordinate basis here; it
-    does not specify an incident angle. For Q and footprint we still assume
-    specular reflection, so the incidence angle equals this exit angle.
+    Approximate the flight time using the straight sample-to-detector distance,
+    as in ScippNeutron's gravity correction. Positive angles point toward the
+    sample surface normal.
     """
-    basis = beamline.beam_aligned_unit_vectors(incident_beam, gravity)
-    x, y, z = (basis[f'beam_aligned_unit_{axis}'] for axis in 'xyz')
-    # Use the horizontal reference axis: the source-to-sample line in FREIA
-    # is tilted and does not describe the incident direction at the sample.
-    angles = beamline.scattering_angles_with_gravity(
-        incident_beam=z * sc.scalar(1.0, unit='m'),
-        scattered_beam=scattered_beam,
-        wavelength=wavelength,
-        gravity=gravity,
+    flight_time = tof.tof_from_wavelength(
+        wavelength=wavelength, Ltotal=sc.norm(scattered_beam)
+    ).to(unit='s')
+    outgoing_beam = scattered_beam - (0.5 * gravity * flight_time**2).to(
+        unit=scattered_beam.unit
     )
-    polar, azimuth = angles['two_theta'], angles['phi']
     normal = sample_surface_normal / sc.norm(sample_surface_normal)
-    return sc.asin(
-        sc.sin(polar)
-        * (sc.dot(normal, x) * sc.cos(azimuth) + sc.dot(normal, y) * sc.sin(azimuth))
-        + sc.dot(normal, z) * sc.cos(polar)
-    )
+    return sc.asin(sc.dot(outgoing_beam, normal) / sc.norm(outgoing_beam))
 
 
 def coordinate_transformation_graph(
@@ -53,7 +38,7 @@ def coordinate_transformation_graph(
     sample_surface_normal: SampleSurfaceNormal[RunType],
     gravity: GravityVector,
 ) -> CoordTransformationGraph[RunType]:
-    """Build a specular conversion graph independent of detector pixel layout."""
+    """Build a specular conversion graph."""
     length = sc.norm(sample_surface_normal)
     if (
         not sc.isfinite(length).value
@@ -75,7 +60,7 @@ def add_coords(
     da: WavelengthDetector[RunType],
     graph: CoordTransformationGraph[RunType],
 ) -> QDetector[RunType]:
-    """Add Q without requiring an ROI, monitor, reference, or footprint inputs."""
+    """Add specular Q and the gravity-corrected angle to detector events."""
     return QDetector[RunType](
         da.transform_coords(
             (

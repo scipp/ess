@@ -1,10 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
-"""Adapters for FREIA McStas files.
-
-McStas conventions and the fixed WFM simulation configuration belong here.
-The rest of the workflow uses the standard ESSreduce domain types.
-"""
+"""Adapters for FREIA McStas files."""
 
 import re
 from pathlib import Path
@@ -171,6 +167,10 @@ _WFM_PARAMETERS: dict[str, _ChopperParameters] = {
     },
 }
 
+# Non-WFM settings in run 265080: stopWBC=0, stopWFM=1. The bandwidth
+# choppers use the same settings as in WFM mode; the PSC disks are stopped.
+_NON_WFM_PARAMETERS = {name: _WFM_PARAMETERS[name] for name in ('WBC1', 'WBC2', 'WBC3')}
+
 
 def wfm_choppers() -> DiskChoppers[RunType]:
     """Construct the fixed WFM cascade used by the initial FREIA simulations.
@@ -183,6 +183,18 @@ def wfm_choppers() -> DiskChoppers[RunType]:
     The analytical cascade projects them onto the z axis, approximating the
     curved guide and finite beam width by a central ray.
     """
+    return _make_choppers(_WFM_PARAMETERS)
+
+
+def non_wfm_choppers() -> DiskChoppers[RunType]:
+    """Construct the non-WFM cascade with only the three bandwidth choppers.
+
+    Insert this provider into the workflow to replace the default WFM cascade.
+    """
+    return _make_choppers(_NON_WFM_PARAMETERS)
+
+
+def _make_choppers(settings: dict[str, _ChopperParameters]) -> DiskChoppers[RunType]:
     return DiskChoppers[RunType](
         {
             name: DiskChopper(
@@ -197,7 +209,7 @@ def wfm_choppers() -> DiskChoppers[RunType]:
                     dims=['cutout'], values=parameters['close'], unit='deg'
                 ),
             )
-            for name, parameters in _WFM_PARAMETERS.items()
+            for name, parameters in settings.items()
         }
     )
 
@@ -217,11 +229,11 @@ def load_mcstas(
     *,
     pulse_period: sc.Variable | None = None,
 ) -> sc.DataArray:
-    """Load weighted events and pixel geometry from the final FREIA detector.
+    """Load weighted detector events and pixel geometry.
 
     Only the selected component is read. The expected output is the
     ``mantid banana`` event list, including ``p``, ``t``, ``id`` and pixel
-    geometry. Histogram-only and upstream debug monitors are not substitutes.
+    geometry.
     Empty detector pixels are retained, and weighted-event variances are ``p**2``.
     Arrival times are split into ``event_time_zero`` and ``event_time_offset``
     using ``pulse_period``, which defaults to the ESS period of 1/14 s.
@@ -286,7 +298,7 @@ def load_mcstas_provider(
     geometry: EmptyDetector[RunType],
     pulse_period: PulsePeriod,
 ) -> RawDetector[RunType]:
-    """Provide final-detector events, reusing the workflow's pixel geometry."""
+    """Load detector events using the workflow's pixel geometry."""
     with _open_mcstas(filename) as data:
         return RawDetector[RunType](
             _load_events(data, detector_name, pulse_period, geometry)
@@ -325,8 +337,6 @@ def mcstas_sample_surface_normal(
 def load_mcstas_monitor(filename: str | Path, monitor_name: str) -> sc.DataArray:
     """Read a selected one-dimensional McStas L_monitor histogram.
 
-    Select an incident monitor upstream of the sample. In particular,
-    SampleLambda in FREIA_surface_test.instr is downstream of the sample.
     McStas stores bin-integrated intensities and standard errors; xlimits
     supplies the bounds of the uniformly spaced wavelength bins.
     """
@@ -383,7 +393,8 @@ def _detector_geometry(data, detector_name) -> sc.DataArray:
             data.file_object.get_pixels_entry(detector_name), dtype='int64'
         ).ravel()
     else:
-        # Histogram axes also describe geometry; no intensities are read.
+        # McStasToX's pixel reader requires BINS. Older histogram-only files
+        # need their axes read separately.
         geometry = data.file_object.get_geometry_dict(detector_name)
         if geometry['shape'] != 'banana':
             raise ValueError(f'Expected banana geometry for {detector_name!r}.')

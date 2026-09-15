@@ -108,6 +108,7 @@ def FreiaWorkflow(
     requires separate sample/direct-beam ROIs, wavelength and Q bins, and beam
     and sample sizes for the footprint correction. The reference run must be a
     measurement without a sample, taken with matching slit and chopper settings.
+    Set its ``SampleSurfaceNormal`` to the sample run's orientation.
 
     Monitor normalization requires an incident monitor selected through
     ``NeXusName[IncidentMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.
