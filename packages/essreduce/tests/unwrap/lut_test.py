@@ -395,10 +395,11 @@ def test_lut_workflow_guesses_pulse_stride():
 def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
     wf = _make_workflow(wavelength_from)
     # Add a very slowly rotating chopper that will block all neutrons.
+    freq = sc.scalar(0.1, unit='Hz')
     wf[unwrap.DiskChoppers[AnyRun]] = {
         'chopper1': DiskChopper(
             axle_position=sc.vector([0, 0, -15.0], unit='m'),
-            frequency=sc.scalar(0.1, unit='Hz'),
+            frequency=freq,
             beam_position=sc.scalar(0.0, unit='deg'),
             phase=sc.scalar(0.0, unit='rad'),
             slit_begin=sc.array(dims=['cutout'], values=[0.0], unit='deg'),
@@ -407,6 +408,8 @@ def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
             radius=sc.scalar(0.35, unit='m'),
         )
     }
+    # Need to synchronize the source period with the chopper frequency.
+    wf[unwrap.PulsePeriod] = 1.0 / freq
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
     # Need to force the pulse stride so that it doesn't get set to a large value due to
     # the slow chopper.
