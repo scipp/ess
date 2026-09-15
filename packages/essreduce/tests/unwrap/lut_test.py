@@ -395,10 +395,11 @@ def test_lut_workflow_guesses_pulse_stride():
 def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
     wf = _make_workflow(wavelength_from)
     # Add a very slowly rotating chopper that will block all neutrons.
+    freq = sc.scalar(0.1, unit='Hz')
     wf[unwrap.DiskChoppers[AnyRun]] = {
         'chopper1': DiskChopper(
             axle_position=sc.vector([0, 0, -15.0], unit='m'),
-            frequency=sc.scalar(0.1, unit='Hz'),
+            frequency=freq,
             beam_position=sc.scalar(0.0, unit='deg'),
             phase=sc.scalar(0.0, unit='rad'),
             slit_begin=sc.array(dims=['cutout'], values=[0.0], unit='deg'),
@@ -407,6 +408,8 @@ def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
             radius=sc.scalar(0.35, unit='m'),
         )
     }
+    # Need to synchronize the source period with the chopper frequency.
+    wf[unwrap.PulsePeriod] = 1.0 / freq
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
     # Need to force the pulse stride so that it doesn't get set to a large value due to
     # the slow chopper.
@@ -487,3 +490,58 @@ def test_polygon_intersections_handles_uncovered_columns_without_warning():
     # Columns 0 and 2 miss the polygon (all-NaN); column 1 is covered.
     np.testing.assert_array_equal(np.isnan(center), [True, False, True])
     np.testing.assert_array_equal(np.isnan(spread), [True, False, True])
+
+
+def test_choppers_rotate_enough_times_to_catch_slow_neutrons():
+    choppers = {
+        "chopper1": DiskChopper(
+            axle_position=sc.vector([0, 0, 28.4], unit='m'),
+            frequency=sc.scalar(-14, unit='Hz'),
+            beam_position=sc.scalar(0, unit='deg'),
+            phase=sc.scalar(-112.3, unit='deg'),
+            slit_begin=sc.array(dims=["cutout"], values=[-38.5], unit='deg'),
+            slit_end=sc.array(dims=["cutout"], values=[38.5], unit='deg'),
+            slit_height=None,
+            radius=None,
+        ),
+        "chopper2a": DiskChopper(
+            axle_position=sc.vector([0, 0, 50.9774], unit='m'),
+            frequency=sc.scalar(-14, unit='Hz'),
+            beam_position=sc.scalar(0, unit='deg'),
+            phase=sc.scalar(194.1, unit='deg'),
+            slit_begin=sc.array(dims=["cutout"], values=[-70.0], unit='deg'),
+            slit_end=sc.array(dims=["cutout"], values=[70.0], unit='deg'),
+            slit_height=None,
+            radius=None,
+        ),
+        "chopper2b": DiskChopper(
+            axle_position=sc.vector([0, 0, 51.0024], unit='m'),
+            frequency=sc.scalar(-14, unit='Hz'),
+            beam_position=sc.scalar(0, unit='deg'),
+            phase=sc.scalar(168.0, unit='deg'),
+            slit_begin=sc.array(dims=["cutout"], values=[-70.0], unit='deg'),
+            slit_end=sc.array(dims=["cutout"], values=[70.0], unit='deg'),
+            slit_height=None,
+            radius=None,
+        ),
+    }
+    wf = _make_workflow("analytical")
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+
+    frames = wf.compute(unwrap.ChopperFrameSequence[AnyRun])
+
+    # In this configuration (based on the NMX instrument), the last frame should have
+    # two subframes: a main subframe containing short wavelengths 1-5 Å and a secondary
+    # subframe containing longer wavelengths 12-15 Å.
+    last_frame = frames[-1]
+    assert len(last_frame.subframes) == 2
+    main_subframe = last_frame.subframes[0]
+    secondary_subframe = last_frame.subframes[1]
+
+    # Check the wavelength ranges for the subframes
+    assert main_subframe.wavelength.min() > sc.scalar(1, unit='angstrom')
+    assert main_subframe.wavelength.max() < sc.scalar(5, unit='angstrom')
+
+    assert secondary_subframe.wavelength.min() > sc.scalar(12, unit='angstrom')
+    assert secondary_subframe.wavelength.max() < sc.scalar(15, unit='angstrom')
