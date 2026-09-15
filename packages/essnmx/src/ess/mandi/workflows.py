@@ -1,13 +1,25 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
+import argparse
+import logging
+import warnings
+from collections.abc import Callable
 
 import scipp as sc
 import scippnexus as snx
 
+from ess.nmx._executable_helper import (
+    add_args_from_pydantic_model,
+    build_logger,
+    from_args,
+)
+from ess.nmx.nexus import _check_file
 from ess.nmx.types import (
     NMXDetectorMetadata,
-    # NMXInstrument,
-    # NMXLauetof,
+    NMXInstrument,
+    NMXLauetof,
+    NMXMonitorMetadata,
+    NMXReducedDetector,
     NMXSampleMetadata,
     NMXSourceMetadata,
 )
@@ -23,12 +35,35 @@ from ess.reduce.nexus.types import (
 
 from ._idf_helper import read_mandi_geometry_xml
 from .configurations import (
-    # AuxiliaryOutputConfig,
-    # InputConfig,
-    # OutputConfig,
+    AuxiliaryOutputConfig,
+    InputConfig,
+    OutputConfig,
     ReductionConfig,
     WorkflowConfig,
 )
+
+
+def build_reduction_argument_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Command line arguments for the Mandi reduction. "
+        "It assumes 60 Hz pulse speed."
+    )
+    parser = add_args_from_pydantic_model(model_cls=InputConfig, parser=parser)
+    parser = add_args_from_pydantic_model(model_cls=WorkflowConfig, parser=parser)
+    parser = add_args_from_pydantic_model(model_cls=OutputConfig, parser=parser)
+    parser = add_args_from_pydantic_model(
+        model_cls=AuxiliaryOutputConfig, parser=parser
+    )
+    return parser
+
+
+def reduction_config_from_args(args: argparse.Namespace) -> ReductionConfig:
+    return ReductionConfig(
+        inputs=from_args(InputConfig, args),
+        workflow=from_args(WorkflowConfig, args),
+        output=from_args(OutputConfig, args),
+        aux=from_args(AuxiliaryOutputConfig, args),
+    )
 
 
 def assemble_sample_metadata(
@@ -148,7 +183,7 @@ def _build_mandi_time_bin_edges(
 
     from ess.nmx.executables import _warn_bin_edge_out_of_range
 
-    t_coord_name = "time_of_flight"
+    t_coord_name = "tof"
     da_min_t = min(da.coords[t_coord_name].nanmin() for da in das.values())
     da_max_t = max(da.coords[t_coord_name].nanmax() for da in das.values())
 
@@ -228,26 +263,30 @@ def _build_mandi_time_bin_edges(
         )
 
 
-def reduce_mandi(*, config: ReductionConfig, logger, display) -> sc.DataGroup:
-    import warnings
-
-    try:
-        import tqdm
-    except ImportError:
-
-        def tqdm(generator):
-            if hasattr(generator, "__len__"):
-                total_count = len(generator)
-            for i_item, next_item in enumerate(generator):
-                display(f"{i_item + 1}/{total_count}", next_item)
-                yield next_item
-
-    if config.output.verbose:
-        progress = tqdm
+def _retrieve_display(
+    logger: logging.Logger | None, display: Callable | None
+) -> Callable:
+    if display is not None:
+        return display
+    elif logger is not None:
+        return logger.info
     else:
+        return logging.getLogger(__name__).info
 
-        def progress(generator):
-            yield from generator
+
+def reduction(
+    *,
+    config: ReductionConfig,
+    logger: logging.Logger | None = None,
+    display: Callable | None = None,
+) -> NMXLauetof:
+    from ess.nmx.executables import save_results
+
+    if not config.output.skip_file_output:
+        _check_file(config.output.output_file, config.output.overwrite)
+        config.aux.check_output_dir()
+
+    display = _retrieve_display(logger, display)
 
     warnings.filterwarnings("ignore", category=UserWarning)
     # Loading
@@ -258,30 +297,98 @@ def reduce_mandi(*, config: ReductionConfig, logger, display) -> sc.DataGroup:
                 file['entry/instrument'][snx.NXdetector].items(),
             )
         )
-        banks = {
-            name: det[()]['events'].bins.concat().value.copy()
-            for name, det in progress(detectors.items())
-        }
-        # Mandi files' event_time_offset is time-of-flight
-        for bank in banks.values():
-            bank.coords['time_of_flight'] = bank.coords.pop('event_time_offset')
+        total_detectors = len(detectors)
+        banks = {}
+        for idet, (name, det) in enumerate(detectors.items()):
+            da = det[()]['events'].bins.concat().value.copy()
+            # Mandi files' event_time_offset is time-of-flight
+            da.coords['tof'] = da.coords.pop('event_time_offset')
+            banks[name] = da
+            display(f"{idet + 1}/{total_detectors} detector bank {name=} loaded.")
 
     mandi_geo = read_mandi_geometry_xml(config.inputs.input_file)
     detector_dict = {det.name: det for det in mandi_geo.detectors}
     tof_bin_edges = _build_mandi_time_bin_edges(wf_config=config.workflow, das=banks)
-    results = {}
-    for name, bank in progress(banks.items()):
+    det_hists = {}
+    source_position = mandi_geo.source.position
+    sample_position = mandi_geo.sample.position
+    monitor_metadata = NMXMonitorMetadata(
+        tof_bin_coord='tof',
+        # TODO: Use real monitor data
+        data=sc.DataArray(
+            coords={'tof': tof_bin_edges},
+            data=sc.ones_like(tof_bin_edges),
+        ),
+    )
+
+    sample_meta = NMXSampleMetadata(
+        # TODO: retrieve crystal rotation from the file correctly.
+        crystal_rotation=sc.vector([0.0, 0.0, 0.0], unit='deg'),
+        name=mandi_geo.sample.name,
+        position=sample_position,
+    )
+
+    for ibank, (name, bank) in enumerate(banks.items()):
         if name not in detector_dict:
             warnings.warn(f"Detector {name=} not found in the IDF.", stacklevel=2)
             continue
 
         det_geo = detector_dict[name]
         binned = bank.group(det_geo.pixel_ids)
-        hist = binned.hist(
-            time_of_flight=tof_bin_edges.to(unit=bank.coords['time_of_flight'].unit)
+        hist = binned.hist(tof=tof_bin_edges.to(unit=bank.coords['tof'].unit))
+        hist.coords['tof'] = hist.coords['tof'].to(
+            unit=config.workflow.result_time_bin_unit
         )
-        hist.coords['positions'] = det_geo.pixel_positions
-        hist = det_geo.fold(hist)
-        results[name] = hist
+        pixel_positions = det_geo.pixel_positions
+        origin = pixel_positions.mean()
+        distance = sc.norm(origin - source_position.to(unit=origin.unit))
+        hist.coords['position'] = pixel_positions
+        # We save the first pixel position so that DIALS can read use it.
+        # first_pixel_position should be retrieved before folding.
+        first_pixel_number = hist.coords['event_id'].min()
+        first_pixel_position = hist['event_id', first_pixel_number].coords['position']
+        first_pixel_position_from_sample = first_pixel_position - sample_position
 
+        hist = det_geo.fold(hist)
+        detector_meta = NMXDetectorMetadata(
+            detector_name=name,
+            x_pixel_size=det_geo.step_x,
+            y_pixel_size=det_geo.step_y,
+            origin=origin,
+            fast_axis=det_geo.fast_axis,
+            fast_axis_dim=det_geo.fast_axis_name,
+            slow_axis=det_geo.slow_axis,
+            slow_axis_dim=det_geo.slow_axis_name,
+            distance=distance,
+            first_pixel_position=first_pixel_position_from_sample,
+        )
+        det_hists[name] = NMXReducedDetector(data=hist, metadata=detector_meta)
+        display(f"{ibank + 1}/{total_detectors} reduced")
+        display(hist)
+
+    instrument = NMXInstrument(
+        detectors=sc.DataGroup(det_hists),
+        name="MANDI",
+        source=NMXSourceMetadata(position=source_position),
+    )
+    results = NMXLauetof(
+        control=monitor_metadata,
+        instrument=instrument,
+        sample=sample_meta,
+    )
+    if not config.output.skip_file_output:
+        save_results(
+            results=results,
+            output_config=config.output,
+            aux_config=config.aux,
+            display=display,
+        )
     return results
+
+
+def main() -> None:
+    parser = build_reduction_argument_parser()
+    config = reduction_config_from_args(parser.parse_args())
+    logger = build_logger(config.output)
+
+    reduction(config=config, logger=logger)

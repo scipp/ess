@@ -1,13 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import enum
-import pathlib
 
 from pydantic import BaseModel, Field, model_validator
 
-from ess.nmx.types import Compression
-
-# from ess.nmx.configurations import to_command_arguments
+from ess.nmx.configurations import (
+    AuxiliaryOutputConfig as NMXAuxiliaryOutputConfig,
+)
+from ess.nmx.configurations import (
+    OutputConfig as NMXOutputConfig,
+)
 
 
 class InputConfig(BaseModel):
@@ -104,83 +106,15 @@ class WorkflowConfig(BaseModel):
     )
 
 
-class AuxiliaryOutputConfig(BaseModel):
-    # Add title of the basemodel
-    model_config = {"title": "Auxiliary Output Configuration"}
-    output_dir: str = Field(
-        title="Path to the Auxiliary Files Directory",
-        description="Directory to save auxiliary files into. "
-        "If not given, stem of the output file name will be used.",
-        default="",
-    )
-
-    @property
-    def tof_1d_png_filename(self) -> str:
-        """Hard-coded png file name for tof 1D histgoram plot."""
-        return "essnmx-reduce-tof-1d.png"
-
-    def build_target_dir(self, output_file: str = "") -> pathlib.Path:
-        if self.output_dir:
-            return pathlib.Path(self.output_dir)
-        elif output_file:
-            output_file_path = pathlib.Path(output_file)
-            return output_file_path.parent / output_file_path.stem
-        else:
-            return pathlib.Path("essnmx-reduce-aux")
-
-    def check_output_dir(self, output_file: str = "") -> None:
-        """Raises if the expected auxiliary output directory path is invalid.
-
-        Raises
-        ------
-            - If the parent directory does not exist.
-            - If the path already exists but is not a directory.
-
-        """
-        target_dir = self.build_target_dir(output_file)
-        if not target_dir.parent.is_dir():
-            raise NotADirectoryError(
-                "Parent directory doesn't exist "
-                f"for the output files: {target_dir.parent}. "
-                "Please make sure the parent directory exists first."
-            )
-        if target_dir.exists() and not target_dir.is_dir():
-            raise NotADirectoryError(
-                f"Target Directory path exists but it is not a directory: {target_dir} "
-                "Please choose another directory path."
-            )
+class AuxiliaryOutputConfig(NMXAuxiliaryOutputConfig, BaseModel): ...
 
 
-class OutputConfig(BaseModel):
-    # Add title of the basemodel
-    model_config = {"title": "Output Configuration"}
-    # Log verbosity
-    verbose: bool = Field(
-        title="Verbose Logging",
-        description="Increase output verbosity.",
-        default=False,
-    )
-    # File output
-    skip_file_output: bool = Field(
-        title="Skip File Output",
-        description="If True, the output file will not be written.",
-        default=False,
-    )
+class OutputConfig(NMXOutputConfig, BaseModel):
     output_file: str = Field(
         title="Output File",
         description="Path to the output file. "
         "It will be overwritten if ``overwrite`` is True.",
         default="scipp_mandi_output.h5",
-    )
-    overwrite: bool = Field(
-        title="Overwrite Output File",
-        description="If True, overwrite the output file if ``output_file`` exists.",
-        default=False,
-    )
-    compression: Compression = Field(
-        title="Compression",
-        description="Compress option of reduced output file.",
-        default=Compression.BITSHUFFLE_LZ4,
     )
 
 
