@@ -36,33 +36,35 @@ from .filtering import flatten_to_spectra
 from .grouping import focus_to_dspacing_dperp
 from .masking import apply_masks_mlz, apply_masks_p2d
 from .types import (
-    CalibrationRun,
-    CorrectedDetector,
     DSpacingMask,
     DperpBins,
     DperpMask,
     DspacingBins,
-    EmptyCanRun,
-    EmptyVanadiumCanRun,
     ExtendedIntensity2D,
-    FilenameMLZ,
-    FilepathMLZ,
-    KeepEventsMLZ,
     MaskedExtendedIntensity2D,
     MaskedIntensity2D,
     MaskingData,
-    NegativeIntensityResetValue,
     NormalizedIntensity2D,
     P2DOutputFilename,
     RunType,
-    SampleRun,
-    ShiftNegativeIntensity,
     TofMask,
     TwoThetaMask,
+    WavelengthMask,
+)
+from ..powtex.types import (
+    CalibrationRun,
+    CorrectedDetector,
+    EmptyCanRun,
+    EmptyVanadiumCanRun,
+    FilenameMLZ,
+    FilepathMLZ,
+    KeepEventsMLZ,
+    NegativeIntensityResetValue,
+    SampleRun,
+    ShiftNegativeIntensity,
     UncertaintyBroadcastMode,
     VanadiumRun,
     WavelengthDetector,
-    WavelengthMask,
 )
 
 

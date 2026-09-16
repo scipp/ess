@@ -5,7 +5,8 @@
 
 from typing import cast
 
-from .types import RunType, SpectralDetector, WavelengthDetector
+from ..powtex.types import RunType, WavelengthDetector
+from .types import SpectralDetector
 
 
 def flatten_to_spectra(data: WavelengthDetector[RunType]) -> SpectralDetector[RunType]:

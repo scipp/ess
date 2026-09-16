@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import scipp as sc
 
-from ..powder.types import (
+from ..powtex.types import (
     CalibrationData,
     CalibrationRun,
     FilenameMLZ,
@@ -66,3 +66,9 @@ def load_powtex_calibration(
     _ = filename
     _ = datapath
     return CalibrationData(None)
+
+
+providers = (
+    load_powtex_csv,
+    load_powtex_calibration,
+)

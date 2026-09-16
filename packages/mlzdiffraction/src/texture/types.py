@@ -1,24 +1,26 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+
+"""Domain types for POWTEX texture workflows."""
+
+from dataclasses import dataclass
+from typing import NewType
+
 import sciline as sl
 import scipp as sc
-from typing import TypeVar, NewType
-from dataclasses import dataclass
 
-from ess.packages.essdiffraction.src.ess.powder.types import (
-    RunType,
-    NonEmptyCanRunType
-)
-
+from ..powtex.types import NonEmptyCanRunType, RunType
 
 class DspacingCylSurfaceDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data with time-of-flight coordinate."""
+    """Detector data projected to the POWTEX cylindrical surface."""
 
 
 class CylindricalSurfaceTransformGraph(sl.Scope[dict], dict):
-    """Graph for transforming projecting 3D POWTEX data onto a cylindrical surface."""
+    """Graph for projecting 3-D POWTEX data onto a cylindrical surface."""
 
 
 class Texture3D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """ToDo."""
+    """Texture data binned in gamma, two-theta, and d-spacing."""
 
 
 DetectorViewRaw = NewType("DetectorViewRaw", sc.DataArray)
@@ -31,7 +33,6 @@ FlatDetectorView = NewType("FlatDetectorView", sc.DataArray)
 TwoThetaRings = NewType("TwoThetaRings", sc.DataArray)
 GammaSlices = NewType("GammaSlices", sc.DataArray)
 
-# binning settings types
 GammaCutStart = NewType("GammaCutStart", sc.Variable)
 GammaCutEnd = NewType("GammaCutEnd", sc.Variable)
 DropPartialBins = NewType("DropPartialBins", bool)
@@ -47,7 +48,10 @@ DspacingBinningData = NewType("DspacingBinningData", sc.Variable)
 
 
 @dataclass #(frozen=True) <-- frozen makes it impossible to change the values of the fields after initialization
+@dataclass
 class BinningSettings:
+    """Texture workflow binning settings."""
+
     gamma_cut_start: sc.Variable
     gamma_cut_end: sc.Variable
     drop_partial_bins: bool
@@ -57,12 +61,10 @@ class BinningSettings:
 
 
 class EmptyCanSubtracted3D(sl.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataArray):
-    """..."""
+    """Texture data after empty-can subtraction."""
 
 
 NormalisedTexture3D = NewType("NormalisedTexture3D", sc.DataArray)
-"""3D Intensity of normalized sample data."""
-
 Texture2D = NewType("Texture2D", sc.DataArray)
 
 GammaSliceWidth = NewType("GammaSliceWidth", sc.DataArray)

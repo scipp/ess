@@ -1,35 +1,36 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+
+"""Histogramming helpers for POWTEX texture reduction."""
+
 import math
 
-import scipp as sc
 import numpy as np
+import scipp as sc
 
-from ess.packages.mlztexture.src.texture.types import (
-    GammaBinWidth,
-    TwoThetaBinWidth,
-    DspacingBinWidth,
+from ..powtex.types import RunType, SampleRun
+
+from .types import (
     BinningSettings,
-    DspacingCylSurfaceDetector,
-    GammaBinningData,
-    TwoThetaBinningData,
-    DspacingBinningData,
-    Texture3D,
     DetectorViewRaw,
+    DspacingBinWidth,
+    DspacingCylSurfaceDetector,
     FlatDetectorViewRaw,
-    TwoThetaRingsRaw,
+    GammaBinWidth,
+    GammaBinningData,
     GammaSlicesRaw,
-)
-
-from ess.packages.essdiffraction.src.ess.powder.types import (
-    RunType,
-    SampleRun
+    Texture3D,
+    TwoThetaBinWidth,
+    TwoThetaBinningData,
+    TwoThetaRingsRaw,
 )
 
 
 def generate_gamma_binning_data(
     bin_width: GammaBinWidth,
-    binning_settings: BinningSettings
+    binning_settings: BinningSettings,
 ) -> GammaBinningData:
-    "ToDo"
+    """Generate gamma binning data with the POWTEX detector gap removed."""
     excluded_start = binning_settings.gamma_cut_start
     excluded_end = binning_settings.gamma_cut_end
     drop_partial_bins = binning_settings.drop_partial_bins
@@ -59,19 +60,25 @@ def generate_gamma_binning_data(
     region_1_end = num_bins_region_1 * width
     region_2_start = 360.0 - num_bins_region_2 * width
 
-    # The two principal linspace calls.
     dim = "gamma"
-    region_1_edges = sc.linspace(dim, 0.0, region_1_end, num=num_bins_region_1 + 1, unit="deg")
-    region_2_edges = sc.linspace(dim, region_2_start, 360.0, num=num_bins_region_2 + 1, unit="deg")
+    region_1_edges = sc.linspace(
+        dim, 0.0, region_1_end, num=num_bins_region_1 + 1, unit="deg"
+    )
+    region_2_edges = sc.linspace(
+        dim, region_2_start, 360.0, num=num_bins_region_2 + 1, unit="deg"
+    )
 
     if not drop_partial_bins:
-        if not math.isclose(region_1_end, gap_start, rel_tol=1.0e-12, abs_tol=1.0e-12):
+        if not math.isclose(
+            region_1_end, gap_start, rel_tol=1.0e-12, abs_tol=1.0e-12
+        ):
             region_1_edges = sc.concat(
                 [region_1_edges, sc.array(dims=[dim], values=[gap_start], unit="deg")],
                 dim=dim,
             )
-
-        if not math.isclose(region_2_start, gap_end, rel_tol=1.0e-12, abs_tol=1.0e-12):
+        if not math.isclose(
+            region_2_start, gap_end, rel_tol=1.0e-12, abs_tol=1.0e-12
+        ):
             region_2_edges = sc.concat(
                 [sc.array(dims=[dim], values=[gap_end], unit="deg"), region_2_edges],
                 dim=dim,
@@ -101,15 +108,18 @@ def generate_gamma_binning_data(
     #         [region_2_centers, region_1_centers],
     #         dim=dim,
     #     )
-    out = sc.DataGroup({"region_1": region_1_edges, "region_2": region_2_edges})
-    return GammaBinningData(out)
+
+
+    return GammaBinningData(
+        sc.DataGroup({"region_1": region_1_edges, "region_2": region_2_edges})
+    )
 
 
 def generate_two_theta_binning_data(
     bin_width: TwoThetaBinWidth,
-    binning_settings: BinningSettings
+    binning_settings: BinningSettings,
 ) -> TwoThetaBinningData:
-    """ToDo"""
+    """Generate two-theta bin edges."""
     angle_unit = bin_width.unit
     drop_partial_bins = binning_settings.drop_partial_bins
     min_angle = binning_settings.two_theta_min.to(unit=angle_unit)
@@ -120,17 +130,23 @@ def generate_two_theta_binning_data(
         raise ValueError("Expected min_angle < mid_angle < max_angle.")
 
     dim = "two_theta"
-    lower_edges = generate_bin_edges_reverse(max_value=mid_angle, min_value=min_angle, bin_width=bin_width, drop_partial_bins=drop_partial_bins)
-
-    upper_edges = generate_bin_edges(min_value=mid_angle, max_value=max_angle, bin_width=bin_width, drop_partial_bins=drop_partial_bins)
-
-    bin_edges = sc.concat([lower_edges, upper_edges], dim=dim)
-
+    lower_edges = generate_bin_edges_reverse(
+        max_value=mid_angle,
+        min_value=min_angle,
+        bin_width=bin_width,
+        drop_partial_bins=drop_partial_bins,
+    )
+    upper_edges = generate_bin_edges(
+        min_value=mid_angle,
+        max_value=max_angle,
+        bin_width=bin_width,
+        drop_partial_bins=drop_partial_bins,
+    )
     # bin_centers = (
     #     bin_edges[dim, :-1] + bin_edges[dim, 1:]
     # ) / 2.0
 
-    return TwoThetaBinningData(bin_edges)
+    return TwoThetaBinningData(sc.concat([lower_edges, upper_edges], dim=dim))
 
 
 def generate_bin_edges(
@@ -139,15 +155,8 @@ def generate_bin_edges(
     bin_width: sc.Variable,
     drop_partial_bins: bool = True,
 ) -> sc.Variable:
-    """
-    Generate ascending bin edges starting at ``min_value``.
-
-    Complete bins are anchored at ``min_value``. If the interval does not
-    contain an integer number of bins, the final partial bin is either
-    dropped or retained depending on ``drop_partial_bins``.
-    """
+    """Generate ascending bin edges starting at ``min_value``."""
     angle_unit = bin_width.unit
-
     min_value = min_value.to(unit=angle_unit)
     max_value = max_value.to(unit=angle_unit)
 
@@ -157,7 +166,6 @@ def generate_bin_edges(
 
     if width <= 0.0:
         raise ValueError("bin_width must be positive.")
-
     if lower >= upper:
         raise ValueError("min_value must be smaller than max_value.")
 
@@ -166,10 +174,10 @@ def generate_bin_edges(
 
     dim = "two_theta"
     edges = sc.linspace(dim, lower, complete_end, num=n_complete + 1, unit=angle_unit)
-
-    if (not drop_partial_bins and not math.isclose(complete_end, upper)):
-        edges = sc.concat([edges, sc.array(dims=[dim], values=[upper], unit=angle_unit)], dim=dim)
-
+    if not drop_partial_bins and not math.isclose(complete_end, upper):
+        edges = sc.concat(
+            [edges, sc.array(dims=[dim], values=[upper], unit=angle_unit)], dim=dim
+        )
     return edges
 
 
@@ -177,13 +185,10 @@ def generate_bin_edges_reverse(
     max_value: sc.Variable,
     min_value: sc.Variable,
     bin_width: sc.Variable,
-    drop_partial_bins: bool = True
+    drop_partial_bins: bool = True,
 ) -> sc.Variable:
-    """
-    ToDo
-    """
+    """Generate ascending bin edges anchored at ``max_value``."""
     unit = bin_width.unit
-
     min_value = min_value.to(unit=unit)
     max_value = max_value.to(unit=unit)
 
@@ -193,27 +198,24 @@ def generate_bin_edges_reverse(
 
     if width <= 0.0:
         raise ValueError("bin_width must be positive.")
-
     if lower >= upper:
         raise ValueError("min_value must be smaller than max_value.")
 
     n_complete = math.floor((upper - lower) / width)
-
     dim = "two_theta"
     if n_complete == 0:
         if drop_partial_bins:
             return sc.array(dims=[dim], values=[], unit=unit)
-
         return sc.array(dims=[dim], values=[lower], unit=unit)
 
     complete_start = upper - n_complete * width
 
     # Generate directly in ascending order.
     edges = sc.linspace(dim, complete_start, upper - width, num=n_complete, unit=unit)
-
-    if (not drop_partial_bins and not math.isclose(complete_start, lower)):
-        edges = sc.concat([sc.array(dims=[dim], values=[lower], unit=unit), edges], dim=dim)
-
+    if not drop_partial_bins and not math.isclose(complete_start, lower):
+        edges = sc.concat(
+            [sc.array(dims=[dim], values=[lower], unit=unit), edges], dim=dim
+        )
     return edges
 
 
@@ -223,77 +225,69 @@ def hist_3d(
     two_theta_binning: TwoThetaBinningData,
     dspacing_bin_width: DspacingBinWidth,
 ) -> Texture3D[RunType]:
-
-    # Prepare conventional dspacing binning
+    """Histogram projected detector data to texture coordinates."""
     dmin = sc.min(data.coords["dspacing"])
     dmax = sc.max(data.coords["dspacing"])
-    dspacing_binning = sc.arange("dspacing", dmin, dmax + dspacing_bin_width, dspacing_bin_width, unit="angstrom")
+    dspacing_binning = sc.arange(
+        "dspacing",
+        dmin,
+        dmax + dspacing_bin_width,
+        dspacing_bin_width,
+        unit="angstrom",
+    )
+    histogrammed_data_1 = data.hist(
+        gamma=gamma_binning["region_1"],
+        two_theta=two_theta_binning,
+        dspacing=dspacing_binning,
+    )
+    histogrammed_data_2 = data.hist(
+        gamma=gamma_binning["region_2"],
+        two_theta=two_theta_binning,
+        dspacing=dspacing_binning,
+    )
+    return Texture3D(
+        sc.DataGroup({"region_1": histogrammed_data_1, "region_2": histogrammed_data_2})
+    )
 
-    # Perform the histogramming
-    histogrammed_data_1 = data.hist(gamma=gamma_binning["region_1"], two_theta=two_theta_binning, dspacing=dspacing_binning)
-    histogrammed_data_2 = data.hist(gamma=gamma_binning["region_2"], two_theta=two_theta_binning, dspacing=dspacing_binning)
 
-    out = sc.DataGroup({"region_1": histogrammed_data_1, "region_2": histogrammed_data_2})
-
-    return Texture3D(out)
-
-
-def view_3d_raw(
-    data: Texture3D[SampleRun],
-) -> DetectorViewRaw:
-    """
-    ToDo
-    """
+def view_3d_raw(data: Texture3D[SampleRun]) -> DetectorViewRaw:
+    """Return a raw detector view."""
     histogrammed_2d_1 = data["region_1"].sum(dim="dspacing")
     histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
+    return DetectorViewRaw(
+        sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
+    )
 
-    out = sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
-    return DetectorViewRaw(out)
 
-
-def view_2d_flat_raw(
-    data: Texture3D[SampleRun],
-    # gamma_binning: GammaBinningData,
-    # two_theta_binning: TwoThetaBinningData,
-) -> FlatDetectorViewRaw:
-    """
-    This will be very similar to view_3d, just the detector gap needs to be properly handles.
-    """
-    # ToDo proper implementation
+def view_2d_flat_raw(data: Texture3D[SampleRun]) -> FlatDetectorViewRaw:
+    """Return a raw flattened detector view. This will be very similar to view_3d, just the detector gap needs to be properly handles."""
     histogrammed_2d_1 = data["region_1"].sum(dim="dspacing")
     histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
+    return FlatDetectorViewRaw(
+        sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
+    )
 
-    out = sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
-    return FlatDetectorViewRaw(out)
 
-
-def view_2d_rings_raw(
-    data: Texture3D[SampleRun],
-    #gamma_binning: GammaBinningData,
-    # two_theta_binning: TwoThetaBinningData,
-) -> TwoThetaRingsRaw:
-    """
-    ToDo
-    """
+def view_2d_rings_raw(data: Texture3D[SampleRun]) -> TwoThetaRingsRaw:
+    """Return a raw two-theta rings view."""
     histogrammed_2d_1 = data["region_1"].sum(dim="dspacing")
     histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
+    return TwoThetaRingsRaw(
+        sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
+    )
 
-    out = sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
-    return TwoThetaRingsRaw(out)
+
+def view_1d_gamma_slices_raw(data: Texture3D[SampleRun]) -> GammaSlicesRaw:
+    """Return a raw gamma-slices view."""
+    return GammaSlicesRaw(data)
 
 
-def view_1d_gamma_slices_raw(
-    data: Texture3D[SampleRun],
-    # gamma_binning: GammaBinningData,
-    # two_theta_binning: TwoThetaBinningData,
-) -> GammaSlicesRaw:
-    """
-    ToDo
-    """
-    # Perform the histogramming operation.
-    out = data
-    # histogrammed_data_1 = data.hist(gamma=gamma_binning["region_1"], two_theta=two_theta_binning)
-    # histogrammed_data_2 = data.hist(gamma=gamma_binning["region_2"], two_theta=two_theta_binning)
-
-    # out = sc.DataGroup({"region_1": histogrammed_data_1, "region_2": histogrammed_data_2})
-    return GammaSlicesRaw(out)
+providers = (
+    generate_gamma_binning_data,
+    generate_two_theta_binning_data,
+    hist_3d,
+    view_3d_raw,
+    view_2d_flat_raw,
+    view_2d_rings_raw,
+    view_1d_gamma_slices_raw,
+)

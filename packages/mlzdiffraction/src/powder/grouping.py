@@ -8,12 +8,11 @@ from typing import cast
 import numpy as np
 import scipp as sc
 
+from ..powtex.types import DspacingDetector, KeepEventsMLZ
 from .types import (
     DperpBins,
     Dspacing2D,
     DspacingBins,
-    DspacingDetector,
-    KeepEventsMLZ,
     RunType,
     SpectralDetector,
 )

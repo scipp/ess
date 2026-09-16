@@ -9,16 +9,12 @@ import scipp as sc
 
 from ess.reduce.uncertainty import broadcast_uncertainties
 
-from .types import (
+from ..powtex.types import (
     AccumulatedProtonCharge,
-    Dspacing2D,
     EmptyCanRun,
     EmptyVanadiumCanRun,
-    EmptyCanSubtracted2D,
-    EmptyCanSubtractedNoNegative2D,
     NegativeIntensityResetValue,
     NormalizedDspacing,
-    NormalizedIntensity2D,
     RunType,
     SampleRun,
     ShiftNegativeIntensity,
@@ -26,6 +22,12 @@ from .types import (
     VanadiumRun,
 )
 
+from .types import (
+    Dspacing2D,
+    EmptyCanSubtracted2D,
+    EmptyCanSubtractedNoNegative2D,
+    NormalizedIntensity2D,
+)
 
 def normalize_by_vanadium_mlz(
     data: EmptyCanSubtractedNoNegative2D[SampleRun],

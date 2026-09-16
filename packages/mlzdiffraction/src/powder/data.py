@@ -10,25 +10,28 @@ import pandas as pd
 import scipp as sc
 import scippnexus as snx
 
-from .types import (
+from ..powtex.types import (
     AccumulatedProtonCharge,
     CalibrationData,
     CalibrationRun,
     CorrectedDspacing,
+    FilenameMLZ,
+    FilepathMLZ,
+    Position,
+    RawDataAndMetadata,
+    RunType,
+    TofDetector,
+)
+
+from .types import (
     DSpacingMask,
     DataFrameP2D,
     DperpMask,
-    FilenameMLZ,
-    FilepathMLZ,
     IntensityP2D,
     MaskedExtendedIntensity2D,
     MaskedIntensity2D,
     MaskingData,
-    Position,
     P2DOutputFilename,
-    RawDataAndMetadata,
-    RunType,
-    TofDetector,
     TofMask,
     TwoThetaMask,
     WavelengthMask,

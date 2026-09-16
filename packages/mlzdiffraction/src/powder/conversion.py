@@ -11,13 +11,15 @@ import scippneutron as scn
 
 from ess.powder.correction import merge_calibration
 
-from .types import (
+from ..powtex.types import (
     CalibrationData,
-    ElasticCoordTransformGraphMLZ,
     RunType,
     TofDetector,
     WavelengthDetector,
 )
+
+from .types import ElasticCoordTransformGraphMLZ
+
 
 # Copied from ess.powder.conversion, which might be modified
 # in future, so we keep a copy here for now to avoid breaking

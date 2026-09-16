@@ -3,6 +3,6 @@
 
 """Components for POWTEX texture reduction."""
 
-from .workflow import TextureReduce
+# from ..texture.workflow import TextureReduce
 
-__all__ = ["TextureReduce"]
+# __all__ = ["TextureReduce"]

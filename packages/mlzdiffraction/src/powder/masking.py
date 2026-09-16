@@ -5,6 +5,7 @@
 
 import scipp as sc
 
+from ..powtex.types import WavelengthDetector
 from .types import (
     DSpacingMask,
     DperpMask,
@@ -12,7 +13,6 @@ from .types import (
     RunType,
     TofMask,
     TwoThetaMask,
-    WavelengthDetector,
     WavelengthMask,
 )
 
