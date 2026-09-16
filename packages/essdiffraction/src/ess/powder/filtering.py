@@ -5,15 +5,9 @@
 
 from contextlib import contextmanager
 from numbers import Real
-from typing import cast
 
 import scipp as sc
-from .types import (
-    CorrectedDetector,
-    SpectralDetector,
-    WavelengthDetector,
-    RunType
-)
+
 
 def _equivalent_bin_indices(a, b) -> bool:
     a_begin = a.bins.constituents["begin"].flatten(to="")
@@ -70,16 +64,6 @@ def remove_bad_pulses(
     filtered = filtered.squeeze("good_pulse").copy(deep=False)
     del filtered.coords["good_pulse"]
     return filtered
-
-
-#def flatten_to_spectra(data: CorrectedDetector[RunType]) -> SpectralDetector[RunType]:
-def flatten_to_spectra(data: WavelengthDetector[RunType]) -> SpectralDetector[RunType]:
-    """"""
-    if data is None:
-        return cast(SpectralDetector[RunType], None)
-    out = data.flatten(dims=["wire", "strip", "segment"], to="spectrum")
-    del data
-    return SpectralDetector[RunType](out)
 
 
 providers = ()

@@ -4,14 +4,9 @@
 Coordinate transformations for powder diffraction.
 """
 
-from typing import cast
-
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
-from scipy.special import lambertw
-import numpy as np
-
 
 from .calibration import OutputCalibrationData
 from .correction import merge_calibration
@@ -20,7 +15,6 @@ from .types import (
     CorrectedDetector,
     DspacingDetector,
     ElasticCoordTransformGraph,
-    ElasticCoordTransformGraphMLZ,
     EmptyCanSubtractedIntensityTof,
     EmptyCanSubtractedIofDspacing,
     GravityVector,
@@ -32,10 +26,7 @@ from .types import (
     RunType,
     SampleRun,
     WavelengthDetector,
-    TofDetector
 )
-
-#from ess.packages.essdiffraction.src.ess.snspowder.powgen.data import TofDetector
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
@@ -55,26 +46,6 @@ def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
     sc.sqrt(out, out=out)
     out -= 1
     out *= c / (2 * a)
-    return out
-
-
-def _dspacing_from_diff_calibration_generic_impl_mlz(tof, tzero, difa, difc):
-    """
-    This function implements the solution to
-      t = a * d^2 + c * d + t0
-    for a != 0.
-    It uses the following way of expressing the solution with an order of operations
-    that is optimized for low memory usage.
-      d = (sqrt([x-t0+t] / x) - 1) * c / (2a)
-      x = c^2 / (4a)
-    """
-    x = difc**2 / (4.0 * difa)
-    out = (x - tzero) + tof
-    out /= x
-    del x
-    sc.sqrt(out, out=out)
-    out -= 1.0
-    out *= difc / (2.0 * difa)
     return out
 
 
@@ -123,21 +94,6 @@ def _consume_positions(position, sample_position, source_position):
     return sc.scalar(0)
 
 
-def d_perp_from_lambda_and_theta(*, wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
-    """Compute the coordinate d_perp, which is suggested to be used instead of two_theta in http://dx.doi.org/10.1107/S1600576715016520"""
-    lambda_K = sc.scalar(1.0, unit="angstrom")
-    return sc.sqrt(wavelength**2 - 2.0 * (lambda_K)**2 * sc.log(sc.cos(0.5 * two_theta)))
-
-
-def d_dperp_from_tof_and_calibration_coeffs() -> dict:
-    """Get a modified version of the standard tof to elastic scattering graph that includes the additional coordinate d_perp"""
-    modified_graph = {}
-    modified_graph["wavelength"] = scn.conversion.tof.wavelength_from_tof
-    modified_graph["dspacing"] = _dspacing_from_diff_calibration_generic_impl_mlz
-    modified_graph["dperp"] = d_perp_from_lambda_and_theta
-    return modified_graph
-
-
 def to_dspacing_with_calibration(
     data: sc.DataArray, calibration: sc.Dataset
 ) -> sc.DataArray:
@@ -163,8 +119,6 @@ def to_dspacing_with_calibration(
     ess.powder.conversions.dspacing_from_diff_calibration
     """
     out = merge_calibration(into=data, calibration=calibration)
-    del data
-    del calibration
 
     # TODO: we should not be restoring tof here, as the calibration should be converting
     # a time of arrival to d-spacing, and not a tof.
@@ -187,8 +141,6 @@ def to_dspacing_with_calibration(
         pos_graph["_tag_positions_consumed"] = lambda: sc.scalar(0)
     out = out.transform_coords("dspacing", graph=pos_graph, keep_intermediate=False)
     out.coords.pop("_tag_positions_consumed", None)
-    for key in ["difa", "difc", "tzero", "position", "sample_position", "source_position", "Ltotal"]:
-        out.coords.pop(key, None)
     return CorrectedDetector[RunType](out)
 
 
@@ -225,58 +177,6 @@ def powder_coordinate_transformation_graph(
     )
 
 
-def powder_coordinate_transformation_graph_mlz(
-    source_position: Position[snx.NXsource, RunType],
-    sample_position: Position[snx.NXsample, RunType],
-    gravity: GravityVector,
-) -> ElasticCoordTransformGraph[RunType]:
-    """
-    Generate a coordinate transformation graph for powder diffraction.
-    The graph includes the additional coordinate dperp, which is needed in MLZ workflows.
-
-    Parameters
-    ----------
-    source_position:
-        Position of the neutron source.
-    sample_position:
-        Position of the sample.
-    gravity:
-        Gravity vector.
-
-    Returns
-    -------
-    :
-        A dictionary with the graph for the transformation.
-    """
-    return ElasticCoordTransformGraph(
-        {
-            **scn.conversion.graph.beamline.beamline(scatter=True),
-            **get_modified_tof_graph(),
-            'source_position': lambda: source_position,
-            'sample_position': lambda: sample_position,
-            'gravity': lambda: gravity,
-        }
-    )
-
-
-def p2d_coordinate_transformation_graph_mlz() -> ElasticCoordTransformGraphMLZ:
-    """
-    Generate a coordinate transformation graph for powder diffraction.
-    The graph includes the additional coordinate dperp, which is needed in MLZ workflows.
-
-    Returns
-    -------
-    :
-        A dictionary with the graph for the transformation.
-    """
-    return ElasticCoordTransformGraphMLZ(
-        {
-           **scn.conversion.graph.beamline.beamline(scatter=True),
-           **d_dperp_from_tof_and_calibration_coeffs(), # minimal additional nodes to the beamline graph
-        }
-    )
-
-
 def add_scattering_coordinates_from_positions(
     data: WavelengthDetector[RunType],
     graph: ElasticCoordTransformGraph[RunType],
@@ -301,37 +201,6 @@ def add_scattering_coordinates_from_positions(
     )
     out = convert_to_dspacing(out, graph, calibration)
     return DspacingDetector[RunType](out)
-
-
-def add_scattering_coordinates_from_positions_mlz(
-    data: TofDetector[RunType],
-    graph: ElasticCoordTransformGraphMLZ, #ElasticCoordTransformGraph[RunType],
-    calibration: CalibrationData,
-) -> WavelengthDetector[RunType]:
-    """
-    Add ``wavelength``, ``two_theta``, ``dspacing`` and ``dperp`` coordinates to the data.
-    The input ``data`` must have a ``tof`` coordinate, as well as the necessary
-    positions of the beamline components (source, sample, detectors) to compute
-    the scattering coordinates.
-
-    Parameters
-    ----------
-    data:
-        Input data with a ``tof`` coordinate.
-    graph:
-        Coordinate transformation graph.
-    """
-    if data is None:
-        return cast(WavelengthDetector[RunType], None)
-    data = data.transform_coords(
-        ["two_theta", "wavelength", "Ltotal", "dperp"],
-        graph=graph,
-        keep_intermediate=False,
-    )
-    out = convert_to_dspacing_mlz(data, graph, calibration)
-    del data
-    del calibration
-    return WavelengthDetector[RunType](out)
 
 
 def convert_to_dspacing(
@@ -418,34 +287,11 @@ def powder_monitor_coordinate_transformation_graph(
     )
 
 
-def sc_wright_omega_real(d: sc.Variable, dp: sc.Variable, lam_K: sc.Variable) -> sc.DataArray:
-    argument = (4.0 * d**2 - lam_K**2 * sc.log(0.25 * lam_K**2 / d**2) - dp**2) / lam_K**2
-    x = argument.values
-    wright_omega_values = np.real(lambertw(np.exp(x), 0))
-
-    wright_omega_var = sc.array(dims=argument.dims, values=wright_omega_values, unit=argument.unit)
-
-    wright_omega = sc.DataArray(
-        data=wright_omega_var,
-        coords={
-            d.dim: d,
-            dp.dim: dp,
-        },
-    )
-    return wright_omega
-
-
-def lambda_from_d_dperp(d: sc.Variable, dp: sc.Variable, lam_K: sc.Variable) -> sc.DataArray:
-    lam = sc.sqrt(4.0 * d**2 - lam_K**2 * sc_wright_omega_real(d, dp, lam_K))
-    return lam
-
-
 providers = (
     add_scattering_coordinates_from_positions,
     add_q_coordinate,
     convert_reduced_to_tof,
     convert_reduced_to_empty_can_subtracted_tof,
-    # powder_coordinate_transformation_graph,
-    powder_coordinate_transformation_graph_mlz,
+    powder_coordinate_transformation_graph,
     powder_monitor_coordinate_transformation_graph,
 )

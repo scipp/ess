@@ -4,7 +4,7 @@
 
 import enum
 from collections.abc import Mapping, Sequence
-from typing import TypeVar, cast
+from typing import TypeVar
 
 import sciline
 import scipp as sc
@@ -20,7 +20,6 @@ from .types import (
     EmptyCanRun,
     EmptyCanSubtractedIofDspacing,
     EmptyCanSubtractedIofDspacingTwoTheta,
-    Dspacing2D,
     FocussedDataDspacing,
     FocussedDataDspacingTwoTheta,
     IntensityDspacing,
@@ -30,14 +29,7 @@ from .types import (
     SampleRun,
     UncertaintyBroadcastMode,
     VanadiumRun,
-    EmptyVanadiumCanRun,
-    NonEmptyCanRunType,
     WavelengthMonitor,
-    EmptyCanSubtracted2D,
-    ShiftNegativeIntensity,
-    NegativeIntensityResetValue,
-    EmptyCanSubtractedNoNegative2D,
-    NormalizedIntensity2D,
 )
 
 _T = TypeVar("_T")
@@ -246,29 +238,6 @@ def normalize_by_vanadium_dspacing(
     )
 
 
-def normalize_by_vanadium_mlz(
-    data: EmptyCanSubtractedNoNegative2D[SampleRun],
-    vanadium: EmptyCanSubtractedNoNegative2D[VanadiumRun],
-    uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> NormalizedIntensity2D:
-    if data is None:
-        return cast(NormalizedIntensity2D, None)
-    if vanadium is None:
-        return NormalizedIntensity2D(data)
-    norm = broadcast_uncertainties(
-        vanadium, prototype=data, mode=uncertainty_broadcast_mode
-    )
-    # Convert the unit such that the end-result has unit 'one' because the division
-    # might otherwise produce a unit with a large scale if the proton charges in data
-    # and vanadium were measured with different units.
-    # norm = norm.to(unit=data.unit, copy=False) <- Seems not needed in our worlflow
-    normalized = data / norm
-    mask = norm.data == sc.scalar(0.0, unit=norm.unit)
-    if mask.any():
-        normalized.masks['zero_vanadium'] = mask
-    return NormalizedIntensity2D(normalized)
-
-
 def normalize_by_vanadium_dspacing_and_two_theta(
     data: FocussedDataDspacingTwoTheta[_RunTypeNoVanadium],
     vanadium: FocussedDataDspacingTwoTheta[VanadiumRun],
@@ -335,29 +304,6 @@ def normalize_by_proton_charge(
     return NormalizedDspacing[RunType](data / proton_charge)
 
 
-def normalize_by_proton_charge_mlz(
-    data: Dspacing2D[RunType],
-    proton_charge: AccumulatedProtonCharge[RunType],
-) -> NormalizedDspacing[RunType]:
-    """Normalize data by an accumulated proton charge.
-
-    Parameters
-    ----------
-    data:
-        Un-normalized data array as events or a histogram.
-    proton_charge:
-        Accumulated proton charge over the entire run.
-
-    Returns
-    -------
-    :
-        ``data / proton_charge``
-    """
-    if data is None:
-        return cast(NormalizedDspacing[RunType], None)
-    return NormalizedDspacing[RunType](data / proton_charge)
-
-
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
     """
     Return a scipp.DataArray containing calibration metadata as coordinates.
@@ -385,7 +331,6 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
                 f"Coordinate {name} of calibration and target dataset do not agree."
             )
     out = into.copy(deep=False)
-    del into
     for name in ("difa", "difc", "tzero"):
         if name in out.coords:
             raise ValueError(
@@ -400,7 +345,6 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
         )
     if (mask := calibration.get("mask")) is not None:
         out.masks["calibration"] = mask.data
-    del calibration
     return out
 
 
@@ -439,7 +383,6 @@ def apply_lorentz_correction(da: sc.DataArray) -> sc.DataArray:
     d4 = dspacing**4
     out = da * sin_theta.to(dtype=da.bins.dtype if da.bins else da.dtype, copy=False)
     out *= d4.to(dtype=da.bins.dtype if da.bins else da.dtype, copy=False)
-    del da
     return out
 
 
@@ -448,76 +391,6 @@ def subtract_empty_can(
     background: IntensityDspacing[EmptyCanRun],
 ) -> EmptyCanSubtractedIofDspacing:
     return EmptyCanSubtractedIofDspacing(data.bins.concatenate(-background))
-
-
-def subtract_sample_empty_can_mlz(
-    data: Dspacing2D[SampleRun],
-    background: Dspacing2D[EmptyCanRun],
-) -> EmptyCanSubtracted2D[SampleRun]:
-    if data is None:
-        return cast(EmptyCanSubtracted2D[SampleRun], None)
-    if background is None:
-        return EmptyCanSubtracted2D[SampleRun](data)
-    if data.bins is None:
-        return EmptyCanSubtracted2D[SampleRun](data - background)
-    return EmptyCanSubtracted2D[SampleRun](data.bins.concatenate(-background))
-
-
-def subtract_vanadium_empty_can_mlz(
-    data: Dspacing2D[VanadiumRun],
-    background: Dspacing2D[EmptyVanadiumCanRun],
-) -> EmptyCanSubtracted2D[VanadiumRun]:
-    if data is None:
-        return cast(EmptyCanSubtracted2D[VanadiumRun], None)
-    if background is None:
-        return EmptyCanSubtracted2D[VanadiumRun](data)
-    if data.bins is None:
-        return EmptyCanSubtracted2D[VanadiumRun](data - background)
-    return EmptyCanSubtracted2D[VanadiumRun](data.bins.concatenate(-background))
-
-
-def handle_negative_intensity_sample(
-    data: EmptyCanSubtracted2D[SampleRun],
-    shift_flag: ShiftNegativeIntensity[SampleRun],
-    reset_value: NegativeIntensityResetValue[SampleRun],
-) -> EmptyCanSubtractedNoNegative2D[SampleRun]:
-    if data is None:
-        return cast(EmptyCanSubtractedNoNegative2D[SampleRun], None)
-    if shift_flag:
-        min_intensity = sc.min(data)
-        min_value = min_intensity.value
-        if min_value < 0.0:
-            offset = sc.scalar(-min_value, unit=min_intensity.unit)
-            print(f"Sample: negative intensity values are SHIFTED by {min_value}.")
-            return EmptyCanSubtractedNoNegative2D[SampleRun](data + offset)
-    else:
-        if reset_value is not None:
-            print(f"Sample: negative intensity values are REPLACED by {reset_value}.")
-            data.values[data.values < 0.0] = reset_value
-            # Q: What to do with uncertainties? For now, we just keep them as they are.
-    return EmptyCanSubtractedNoNegative2D[SampleRun](data)
-
-
-def handle_negative_intensity_vanadium(
-    data: EmptyCanSubtracted2D[VanadiumRun],
-    shift_flag: ShiftNegativeIntensity[VanadiumRun],
-    reset_value: NegativeIntensityResetValue[VanadiumRun],
-) -> EmptyCanSubtractedNoNegative2D[VanadiumRun]:
-    if data is None:
-        return cast(EmptyCanSubtractedNoNegative2D[VanadiumRun], None)
-    if shift_flag:
-        min_intensity = sc.min(data)
-        min_value = min_intensity.value
-        if min_value < 0.0:
-            offset = sc.scalar(-min_value, unit=min_intensity.unit)
-            print(f"Vanadium: negative intensity values are SHIFTED by {min_value}.")
-            return EmptyCanSubtractedNoNegative2D[VanadiumRun](data + offset)
-    else:
-        if reset_value is not None:
-            print(f"Vanadium: negative intensity values are REPLACED by {reset_value}.")
-            data.values[data.values < 0.0] = reset_value
-            # Q: What to do with uncertainties? For now, we just keep them as they are.
-    return EmptyCanSubtractedNoNegative2D[VanadiumRun](data)
 
 
 def subtract_empty_can_two_theta(

@@ -4,18 +4,12 @@
 """Utilities for loading example data for POWGEN."""
 
 from pathlib import Path
-from typing import cast
 
 import sciline as sl
 import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
-import os
-import numpy as np
-import pandas as pd
-from pathlib import Path
-
-from ess.packages.essdiffraction.src.ess.powder.types import (
+from ess.powder.types import (
     AccumulatedProtonCharge,
     CalibrationData,
     CalibrationFilename,
@@ -29,41 +23,21 @@ from ess.packages.essdiffraction.src.ess.powder.types import (
     ProtonCharge,
     RawDataAndMetadata,
     RunType,
-    GeneralRunType,
-    TofDetector,
-    TofMonitor,
     WavelengthDetector,
     WavelengthMonitor,
-    FilenameMLZ,
-    FilepathMLZ,
-    CalibrationRun,
-    MaskingData,
-    TofMask,
-    TwoThetaMask,
-    WavelengthMask,
-    DSpacingMask,
-    DperpMask,
-    MaskedDetectorIDs,
-    CorrectedDspacing,
-    MaskedExtendedIntensity2D,
-    MaskedIntensity2D,
-    IntensityP2D,
-    DataFrameP2D,
-    P2DOutputFilename
 )
 
-from ess.packages.essdiffraction.src.ess.powder.masking import with_pixel_mask_filenames
-from ess.packages.essreduce.src.ess.reduce.data import Entry, make_registry
+from ess.reduce.data import Entry, make_registry
 
 
-# class TofDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-#     """
-#     Detector with a time-of-flight coordinate
-#     """
+class TofDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
+    """
+    Detector with a time-of-flight coordinate
+    """
 
 
-# class TofMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
-#     """Monitor data with time-of-flight coordinate."""
+class TofMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArray):
+    """Monitor data with time-of-flight coordinate."""
 
 
 _registry = make_registry(
@@ -227,35 +201,6 @@ def pooch_load(filename: Filename[RunType]) -> RawDataAndMetadata[RunType]:
     return RawDataAndMetadata[RunType](sc.io.load_hdf5(filename))
 
 
-def load_powgen_mlz(
-    filename: FilenameMLZ[RunType],
-    datapath: FilepathMLZ[RunType]
-) -> TofDetector[RunType]: #RawDataAndMetadata[RunType]:
-    """Load a file.
-
-    The loaded data holds both the events and useful metadata from the file.
-    This loader can be applied to already preprocessed POWGEN event files,
-    not the raw files from the instrument. To generate an appropriate file,
-    the following steps should be taken:
-    - use convert_to_scipp_nxs() defined in utils.py to extract appropriate
-    fields from the original NeXus files.
-    - the appropriate fields (including 'positions') are oextracted from
-    the outcome of scn.load_with_mantid().
-    """
-    if filename is None:
-        return cast(TofDetector[RunType], None)
-    filepath = Path(os.path.join(datapath, filename))
-    dg = sc.io.load_hdf5(filepath)
-    out = dg["data"].squeeze()
-    del dg
-    out.coords.pop("tof", None)
-    det_size = {"wire": 40, "strip": 154, "segment": 7}
-    out = out.fold(dim="spectrum", sizes=det_size)
-    if "pulse_time" in out.data.bins.coords:
-        out.data = out.data.bins.drop_coords("pulse_time")
-    return TofDetector[RunType](out) #RawDataAndMetadata[RunType](sc.io.load_hdf5(filepath))
-
-
 def pooch_load_calibration(
     filename: CalibrationFilename,
     detector_dimensions: DetectorBankSizes,
@@ -273,107 +218,6 @@ def pooch_load_calibration(
     return CalibrationData(ds)
 
 
-def load_powgen_calibration_mlz(
-    filename: FilenameMLZ[CalibrationRun],
-    datapath: FilepathMLZ[CalibrationRun]
-) -> CalibrationData:
-    """Load a diamond calibration file.
-
-    The loaded data holds ...
-    """
-    if filename is None:
-        return CalibrationData(None)
-    filepath = Path(os.path.join(datapath, filename))
-    ds = sc.io.load_hdf5(filepath)
-    # print(f"Loading calibration data from {filepath}")
-    det_size = {"wire": 40, "strip": 154, "segment": 7}
-    out = sc.Dataset(
-        {
-            key: da.fold(dim='spectrum', sizes=det_size)
-            for key, da in ds.items()
-        }
-    )
-    del ds
-    return CalibrationData(out)
-
-
-def load_powgen_tof_mask_mlz() -> MaskingData[TofMask]:
-    """Load the TOF mask for POWGEN."""
-    mask_function = None
-    #mask_function = lambda x: (x < sc.scalar(0.0, unit="us")) | (x > sc.scalar(16666.67, unit="us"))
-    return MaskingData[TofMask](mask_function)
-
-
-def load_powgen_wavelength_mask_mlz() -> MaskingData[WavelengthMask]:
-    """Load the wavelength mask for POWGEN."""
-    # mask_function = None
-    mask_function = lambda x: (
-        x <= sc.scalar(0.3, unit="angstrom") # extra cut as in powtex
-    ) | (
-        x >= sc.scalar(1.25, unit="angstrom") # extra cut as in powtex
-    ) | (
-        (x >= sc.scalar(1.03, unit="angstrom")) & (x <= sc.scalar(1.07, unit="angstrom"))
-    )
-    return MaskingData[WavelengthMask](mask_function)
-
-
-def load_powgen_two_theta_mask_mlz() -> MaskingData[TwoThetaMask]:
-    """Load the two-theta mask for POWGEN."""
-    # mask_function = None
-    # deg = lambda value: sc.scalar(value, unit="degree").to(unit="rad")
-
-    deg = lambda value: sc.scalar(value, unit="degree")
-    mask_function = lambda x: (
-        x < deg(10.0) # extra cut as in powtex
-    ) | (
-        x > deg(150.0) ) | (
-        (x > deg(13.6)) & (x < deg(16.6))
-    ) | (
-        (x > deg(23.6)) & (x < deg(26.6))
-    ) | (
-        (x > deg(34.3)) & (x < deg(37.3))
-    ) | (
-        (x > deg(45.2)) & (x < deg(48.2))
-    ) | (
-        (x > deg(56.0)) & (x < deg(61.0))
-    ) | (
-        (x > deg(69.8)) & (x < deg(72.8))
-    ) | (
-        (x > deg(83.5)) & (x < deg(86.5))
-    ) | (
-        (x > deg(97.1)) & (x < deg(101.1))
-    ) | (
-        (x > deg(113.0)) & (x < deg(116.0))
-    ) | (
-        (x > deg(131.0)) & (x < deg(134.0))
-    ) | (
-        (x > deg(146.0)) & (x < deg(150.0))
-    )
-    return MaskingData[TwoThetaMask](mask_function)
-
-
-def load_powgen_dspacing_mask_mlz() -> MaskingData[DSpacingMask]:
-    """Load the d-spacing mask for POWGEN."""
-    # mask_function = None
-    mask_function = lambda x: (
-        x <= sc.scalar(0.4, unit="angstrom")
-    ) | (
-        x >= sc.scalar(2.0, unit="angstrom")
-    )
-    return MaskingData[DSpacingMask](mask_function)
-
-
-def load_powgen_dperp_mask_mlz() -> MaskingData[DperpMask]:
-    """Load the dperp mask for POWGEN."""
-    # mask_function = None
-    mask_function = lambda x: (
-        x <= sc.scalar(0.2, unit="angstrom")
-    ) | (
-        x >= sc.scalar(4.0, unit="angstrom")
-    )
-    return MaskingData[DperpMask](mask_function)
-
-
 def extract_raw_data(
     dg: RawDataAndMetadata[RunType], sizes: DetectorBankSizes
 ) -> TofDetector[RunType]:
@@ -386,28 +230,13 @@ def extract_raw_data(
     return TofDetector[RunType](out)
 
 
-def extract_raw_data_mlz(
-    dg: RawDataAndMetadata[RunType] #, sizes: DetectorBankSizes
-) -> TofDetector[RunType]:
-    """Return the events from a loaded data group."""
-    # Remove the tof binning and dimension, as it is not needed and it gets in the way
-    # of masking.
-    if dg is None:
-        return cast(TofDetector[RunType], None)
-    out = dg["data"].squeeze()
-    out.coords.pop("tof", None)
-    det_size = {"bank": 40, "column": 154, "row": 7}
-    out = out.fold(dim="spectrum", sizes=det_size)
-    return TofDetector[RunType](out)
-
-
 def extract_proton_charge(dg: RawDataAndMetadata[RunType]) -> ProtonCharge[RunType]:
     """Return the proton charge from a loaded data group."""
     return ProtonCharge[RunType](dg["proton_charge"])
 
 
 def extract_accumulated_proton_charge(
-    data: CorrectedDspacing[RunType],
+    data: TofDetector[RunType],
 ) -> AccumulatedProtonCharge[RunType]:
     """Return the stored accumulated proton charge from a loaded data group."""
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])
@@ -420,20 +249,6 @@ def source_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsource, R
 
 def sample_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsample, RunType]:
     """Return the sample position from a loaded data group."""
-    return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
-
-
-def source_position_mlz(dg: TofDetector[RunType]) -> Position[snx.NXsource, RunType]:
-    """Return the source position from a loaded data group."""
-    if dg is None:
-        return cast(Position[snx.NXsource, RunType], None)
-    return Position[snx.NXsource, RunType](dg["data"].coords["source_position"])
-
-
-def sample_position_mlz(dg: TofDetector[RunType]) -> Position[snx.NXsample, RunType]:
-    """Return the sample position from a loaded data group."""
-    if dg is None:
-        return cast(Position[snx.NXsample, RunType], None)
     return Position[snx.NXsample, RunType](dg["data"].coords["sample_position"])
 
 
@@ -524,90 +339,6 @@ def convert_monitor_to_wavelength(
     return WavelengthMonitor[RunType, MonitorType](
         monitor.transform_coords("wavelength", graph=graph, keep_intermediate=False)
     )
-
-
-def extract_masked_intensity(
-    data: MaskedExtendedIntensity2D,
-) -> MaskedIntensity2D:
-    out = data["intensity"].copy()
-    combined_mask = _calculate_combined_mask(data, out.dims)
-    del data
-    out.masks["combined_mask"] = combined_mask
-    return MaskedExtendedIntensity2D(out)
-
-
-def _calculate_combined_mask(ds, target_dims):
-    combined = None
-    for var_name, da in ds.items():
-        for mask_name, mask in da.masks.items():
-
-            if set(mask.dims) != set(target_dims):
-                raise ValueError(
-                    f"Mask {mask_name!r} from {var_name!r} has dims {mask.dims}, "
-                    f"but target has dims {target_dims}."
-                )
-
-            if mask.dims != target_dims:
-                mask = mask.transpose(target_dims)
-
-            combined = mask.copy() if combined is None else combined | mask
-    del ds
-    return combined
-
-
-def prepare_for_p2d_export(
-    data2d: MaskedExtendedIntensity2D,
-) -> IntensityP2D:
-    combined_mask = _calculate_combined_mask(data2d, data2d.dims)
-    out = sc.DataArray(
-        data=data2d["intensity"].data,
-        coords={
-            "dperp": data2d["dperp_2d"].data,
-            "dspacing": data2d["dspacing_2d"].data,
-            "lambda": data2d["lambda"].data,
-            "two_theta": data2d["two_theta"].data,
-        },
-        masks={
-            "combined_mask": combined_mask,
-        }
-    )
-    del data2d
-    out = out.flatten(dims=out.dims, to="d_pixel")
-    valid = ~out.masks["combined_mask"]
-    out_valid = out[valid]
-    del out
-    return IntensityP2D(out_valid)
-
-
-def export_to_p2d(
-    data: IntensityP2D,
-    filename: P2DOutputFilename,
-) -> DataFrameP2D:
-    df = pd.DataFrame({
-        "#2theta": data.coords["two_theta"].values,
-        "lambda": data.coords["lambda"].values,
-        "d-value": data.coords["dspacing"].values,
-        "dp-value": data.coords["dperp"].values,
-        "counts": data.values,
-    })
-
-    filepath = Path(filename)
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-
-
-    header = (
-        "#Title: \n"
-        "#Inst: POWGEN.prm\n"
-        "#Binning: ddperp \n"
-        "#Bank: 1\n"
-    )
-
-    formatter = "{:12.7f}".format
-
-    with open(filepath, "w") as f:
-        f.write(header + df.to_string(index=False, justify="left", formatters={column: formatter for column in df.columns}).lstrip())
-    print(f"The output file has been saved to {filepath}.")
-    return DataFrameP2D(df)
 
 
 providers = (

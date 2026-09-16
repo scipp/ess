@@ -17,9 +17,9 @@ import scipp as sc
 from scippneutron.io import cif
 from scippneutron.metadata import Person, Software
 
-from ess.packages.essreduce.src.ess.reduce.nexus import types as reduce_t
+from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
-from ess.packages.essreduce.src.ess.reduce.unwrap import types as unwrap_t
+from ess.reduce.unwrap import types as unwrap_t
 
 EmptyDetector = reduce_t.EmptyDetector
 EmptyMonitor = reduce_t.EmptyMonitor
@@ -40,8 +40,6 @@ DetectorBankSizes = reduce_t.DetectorBankSizes
 DetectorLtotal = unwrap_t.DetectorLtotal
 WavelengthDetector = unwrap_t.WavelengthDetector
 WavelengthMonitor = unwrap_t.WavelengthMonitor
-TofDetector = unwrap_t.TofDetector
-TofMonitor = unwrap_t.TofMonitor
 PulseStrideOffset = unwrap_t.PulseStrideOffset
 LookupTable = unwrap_t.LookupTable
 LookupTableFilename = unwrap_t.LookupTableFilename
@@ -50,44 +48,16 @@ LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 SampleRun = reduce_t.SampleRun
 VanadiumRun = NewType("VanadiumRun", int)
 EmptyCanRun = NewType("EmptyCanRun", int)
-VanadiumRun = reduce_t.VanadiumRun
-EmptyVanadiumCanRun = NewType("EmptyVanadiumCanRun", int)
-CalibrationRun = NewType("CalibrationRun", int)
 
 CaveMonitor = NewType("CaveMonitor", int)
 BunkerMonitor = NewType("BunkerMonitor", int)
 
-RunType = TypeVar("RunType", SampleRun, EmptyCanRun, VanadiumRun, EmptyVanadiumCanRun)
-NonEmptyCanRunType = TypeVar("NonEmptyCanRunType", SampleRun, VanadiumRun)
-EmptyCanRunType = TypeVar("EmptyCanRunType", EmptyCanRun, EmptyVanadiumCanRun)
-GeneralRunType = TypeVar("GeneralRunType", SampleRun, EmptyCanRun, VanadiumRun, EmptyVanadiumCanRun, CalibrationRun)
+RunType = TypeVar("RunType", SampleRun, VanadiumRun, EmptyCanRun)
 MonitorType = TypeVar("MonitorType", CaveMonitor, BunkerMonitor)
 
-TofMask = NewType("TofMask", Callable | None)
-"""TofMask is a callable that returns a mask for masking time-of-flight regions."""
-
-TwoThetaMask = NewType("TwoThetaMask", Callable | None)
-"""TwoThetaMask is a callable that returns a mask for a given TwoThetaData."""
-
-WavelengthMask = NewType("WavelengthMask", Callable | None)
-"""WavelengthMask is a callable that returns a mask for a given WavelengthData."""
-
-DSpacingMask = NewType("DSpacingMask", Callable | None)
-"""DSpacingMask is a callable that returns a mask for a given DSpacingData."""
-
-DperpMask = NewType("DperpMask", Callable | None)
-"""DperpMask is a callable that returns a mask for a given DperpData."""
-
-MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
-"""1-D variable listing all masked detector IDs."""
-
-MaskType = TypeVar("MaskType", TwoThetaMask, TofMask, WavelengthMask, DSpacingMask, DperpMask)
 
 CalibrationFilename = NewType("CalibrationFilename", str | None)
 """Filename of the instrument calibration file."""
-
-P2DOutputFilename = NewType("P2DOutputFilename", str)
-"""Filename of the P2D output file."""
 
 DspacingBins = NewType("DspacingBins", sc.Variable)
 """Bin edges for d-spacing."""
@@ -160,10 +130,6 @@ class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """Graph for transforming coordinates in elastic scattering."""
 
 
-class ElasticCoordTransformGraphMLZ(sciline.Scope[dict], dict):
-    """Graph for transforming coordinates in elastic scattering."""
-
-
 class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict):
     """Graph for transforming coordinates of a monitor."""
 
@@ -197,31 +163,8 @@ EmptyCanSubtractedIofDspacingTwoTheta = NewType(
 IntensityTof = NewType("IntensityTof", sc.DataArray)
 """Normalized data that has been converted to ToF."""
 
-NormalizedIntensity2D = NewType("NormalizedIntensity2D", sc.DataArray)
-"""2D Intensity of normalized sample data."""
-
-ExtendedIntensity2D = NewType("ExtendedIntensity2D", sc.Dataset)
-"""2D Intensity with additional info, including two_theta and lambda."""
-
-MaskedExtendedIntensity2D = NewType("MaskedExtendedIntensity2D", sc.Dataset)
-"""2D ExtendedIntensity with masks."""
-
-MaskedIntensity2D = NewType("MaskedIntensity2D", sc.DataArray)
-"""2D Intensity with combined masks applied."""
-
-IntensityP2D = NewType("IntensityP2D", sc.DataArray)
-"""Intensity data ready for export into a .p2d file."""
-
-DataFrameP2D = NewType("DataFrameP2D", sc.DataArray)
-"""Panda dataframe with .p2d info."""
-
 EmptyCanSubtractedIntensityTof = NewType("EmptyCanSubtractedIntensityTof", sc.DataArray)
 """Normalized and empty-can-subtracted data that has been converted to ToF."""
-
-
-class SpectralDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """ToDo
-    """
 
 
 class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
@@ -233,6 +176,9 @@ class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     - Absorption correction
     """
 
+
+MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
+"""1-D variable listing all masked detector IDs."""
 
 CaveMonitorPosition = NewType("CaveMonitorPosition", sc.Variable)
 """Position of DREAM's cave monitor."""
@@ -254,29 +200,6 @@ class CorrectedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data in d-spacing - 2theta space including corrections."""
 
 
-class Dspacing2D(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data in with d-spacing and dperp dimensions."""
-
-
-class EmptyCanSubtracted2D(sciline.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataArray):
-    """..."""
-
-
-class EmptyCanSubtractedNoNegative2D(sciline.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataArray):
-    """..."""
-
-
-class ShiftNegativeIntensity(sciline.Scope[NonEmptyCanRunType, int], int):
-    """Whether negative intensities should be shifted to positive values by adding the most negative value to all intensities.
-
-    Use 0 for False and 1 for True.
-    """
-
-
-class NegativeIntensityResetValue(sciline.Scope[NonEmptyCanRunType, float], float):
-    """The value to which negative intensities should be reset (mapped)."""
-
-
 class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data in d-spacing - 2theta space normalized by monitor/proton charge."""
 
@@ -289,15 +212,16 @@ class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Raw data and associated metadata."""
 
 
-class FilenameMLZ(sciline.Scope[GeneralRunType, Path], Path):
-    """Filename for MLZ data. Set to 'None' to omit this run type."""
+TofMask = NewType("TofMask", Callable | None)
+"""TofMask is a callable that returns a mask for masking time-of-flight regions."""
 
 
-class FilepathMLZ(sciline.Scope[GeneralRunType, Path], Path): ...
+TwoThetaMask = NewType("TwoThetaMask", Callable | None)
+"""TwoThetaMask is a callable that returns a mask for a given TwoThetaData."""
 
 
-class MaskingData(sciline.Scope[MaskType, type], type): ...
-
+WavelengthMask = NewType("WavelengthMask", Callable | None)
+"""WavelengthMask is a callable that returns a mask for a given WavelengthData."""
 
 Beamline = reduce_t.Beamline
 """Beamline metadata."""
@@ -330,10 +254,6 @@ class KeepEvents(Generic[RunType]):
     """
 
     value: bool
-
-KeepEventsMLZ = NewType("KeepEventsMLZ", bool)
-"""Flag indicating whether the workflow should keep all events when focussing data. If False, data will be histogrammed when focussing."""
-
 
 
 del sc, sciline, NewType, TypeVar
