@@ -10,7 +10,6 @@ from ess.freia import FreiaWorkflow
 from ess.freia.corrections import RunNormalization
 from ess.freia.types import (
     DetectorRegionOfInterest,
-    SampleIlluminatedFraction,
     SampleSurfaceNormal,
     WavelengthMonitor,
 )
@@ -21,6 +20,7 @@ from ess.reflectometry.types import (
     ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
+    Sample,
     SampleRun,
     SampleSize,
     WavelengthBins,
@@ -105,7 +105,7 @@ def test_reduce_reflectivity_with_monitor_and_footprint():
 
 def test_rebinning_integrates_before_dividing():
     wf = _make_workflow(RunNormalization.none)
-    wf[SampleIlluminatedFraction] = sc.scalar(1.0)
+    wf[Sample] = wf[ReducibleData[SampleRun]]
     wf[QBins] = sc.array(dims=['Q'], values=[1.0, 4.0], unit='1/angstrom')
 
     result = wf.compute(ReflectivityOverQ)

@@ -30,7 +30,3 @@ class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
     ReferenceRun, for example using ``scattering_angle`` and ``height``.
     An empty dictionary explicitly selects the entire detector.
     """
-
-
-SampleIlluminatedFraction = NewType('SampleIlluminatedFraction', sc.Variable)
-"""Fraction of the incoming beam hitting the sample; set to 1 to skip footprint."""

@@ -5,7 +5,6 @@ import importlib.metadata
 from ..reflectometry import supermirror
 from . import (
     conversions,
-    load,
     maskings,
     mcstas,
     normalization,
@@ -51,7 +50,6 @@ __all__ = [
     "SampleSizeResolution",
     "WavelengthResolution",
     "conversions",
-    "load",
     "maskings",
     "mcstas",
     "normalization",

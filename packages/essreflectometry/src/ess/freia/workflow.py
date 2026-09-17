@@ -3,8 +3,10 @@
 
 import sciline
 import scipp as sc
+from ess.reduce.nexus.types import DetectorBankSizes
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ess.reduce.unwrap import WavelengthLutMode
+from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 from ess.reduce.workflow import register_workflow
 
 from ..reflectometry import providers as reflectometry_providers
@@ -12,19 +14,12 @@ from ..reflectometry.types import (
     DetectorSpatialResolution,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
-    RunType,
-    SampleRotationOffset,
+    ReferenceRun,
+    SampleRun,
 )
-from . import (
-    beamline,
-    conversions,
-    corrections,
-    load,
-    mcstas,
-    normalization,
-    orso,
-)
+from . import conversions, corrections, mcstas, normalization, orso
 from .corrections import RunNormalization, insert_run_normalization
+from .types import IncidentMonitor
 
 providers = (
     *reflectometry_providers,
@@ -32,7 +27,6 @@ providers = (
     *corrections.providers,
     *normalization.providers,
     *orso.providers,
-    *load.providers,
 )
 
 """List of providers for setting up a Sciline pipeline data.
@@ -55,7 +49,9 @@ def default_parameters() -> dict:
     """Return default parameters for the NeXus Freia workflow."""
     return {
         NeXusDetectorName: "multiblade_detector",
-        SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
+        DetectorBankSizes: {
+            "multiblade_detector": {"strip": 64, "blade": 32, "wire": 32},
+        },
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
@@ -111,6 +107,9 @@ def FreiaWorkflow(
     measurement without a sample, taken with matching slit and chopper settings.
     Set its ``SampleSurfaceNormal`` to the sample run's orientation.
 
+    To skip footprint correction, set
+    ``workflow[Sample] = workflow[ReducibleData[SampleRun]]``.
+
     Monitor normalization requires an incident monitor selected through
     ``NeXusName[IncidentMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.
 
@@ -123,7 +122,12 @@ def FreiaWorkflow(
         'analytical', 'simulation', and 'file'. See
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     """
-    workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
+    workflow = GenericUnwrapWorkflow(
+        run_types=[SampleRun, ReferenceRun],
+        monitor_types=[IncidentMonitor],
+        wavelength_from=wavelength_from,
+        **kwargs,
+    )
     for provider in providers:
         workflow.insert(provider)
     insert_run_normalization(workflow, run_norm)
