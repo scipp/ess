@@ -107,7 +107,7 @@ class DetectorDesc:
         fast_axis_steps = self.fast_axis * self.fast_step
         slow_axis_steps = self.slow_axis * self.slow_step
 
-        return (
+        return self.position + (
             (pixel_n_slow * slow_axis_steps)
             + (pixel_n_fast * fast_axis_steps)
             + self.rotation_matrix

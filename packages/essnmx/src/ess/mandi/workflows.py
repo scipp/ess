@@ -23,15 +23,6 @@ from ess.nmx.types import (
     NMXSampleMetadata,
     NMXSourceMetadata,
 )
-from ess.reduce.nexus.types import (
-    EmptyDetector,
-    # Filename,
-    NeXusComponent,
-    NeXusTransformation,
-    Position,
-    # RunType,
-    SampleRun,
-)
 
 from ._idf_helper import read_mandi_geometry_xml
 from .configurations import (
@@ -66,107 +57,8 @@ def reduction_config_from_args(args: argparse.Namespace) -> ReductionConfig:
     )
 
 
-def assemble_sample_metadata(
-    crystal_rotation: Position[snx.NXcrystal, SampleRun],
-    sample_position: Position[snx.NXsample, SampleRun],
-    sample_component: NeXusComponent[snx.NXsample, SampleRun],
-) -> NMXSampleMetadata:
-    """Assemble sample metadata for NMX reduction workflow."""
-    name = sample_component['name']
-    if isinstance(name, sc.Variable) and name.dtype == str:
-        sample_name = name.value
-    elif isinstance(name, str):
-        sample_name = name
-    else:
-        raise TypeError(f'Sample name {name}is in a wrong type: ', type(name))
-
-    return NMXSampleMetadata(
-        name=sample_name,
-        crystal_rotation=crystal_rotation,
-        position=sample_position,
-    )
-
-
-def assemble_source_metadata(
-    source_position: Position[snx.NXsource, SampleRun],
-) -> NMXSourceMetadata:
-    """Assemble source metadata for NMX reduction workflow."""
-    return NMXSourceMetadata(position=source_position)
-
-
-def _decide_fast_axis(da: sc.DataArray) -> str:
-    x_slice = da['x_pixel_offset', 0].coords['detector_number']
-    y_slice = da['y_pixel_offset', 0].coords['detector_number']
-
-    if (x_slice.max() < y_slice.max()).value:
-        return 'y'
-    elif (x_slice.max() > y_slice.max()).value:
-        return 'x'
-    else:
-        raise ValueError(
-            "Cannot decide fast axis based on pixel offsets. "
-            "Please specify the fast axis explicitly."
-        )
-
-
-def _decide_step(offsets: sc.Variable) -> sc.Variable:
-    """Decide the step size based on the offsets assuming at least 2 values."""
-    sorted_offsets = sc.sort(offsets, key=offsets.dim, order='ascending')
-    return sorted_offsets[1] - sorted_offsets[0]
-
-
 def _normalize_vector(vec: sc.Variable) -> sc.Variable:
     return vec / sc.norm(vec)
-
-
-def assemble_detector_metadata(
-    detector_component: NeXusComponent[snx.NXdetector, SampleRun],
-    transformation: NeXusTransformation[snx.NXdetector, SampleRun],
-    sample_position: Position[snx.NXsample, SampleRun],
-    source_position: Position[snx.NXsource, SampleRun],
-    empty_detector: EmptyDetector[SampleRun],
-) -> NMXDetectorMetadata:
-    """Assemble detector metadata for NMX reduction workflow."""
-    positions = empty_detector.coords['position']
-    # Origin should be the center of the detector.
-    origin = positions.mean()
-    _fast_axis = _decide_fast_axis(empty_detector)
-    _slow_axis = 'y' if _fast_axis == 'x' else 'x'
-    t_unit = transformation.value.unit
-
-    axis_vectors = {
-        'x': positions['x_pixel_offset', 1]['y_pixel_offset', 0]
-        - positions['x_pixel_offset', 0]['y_pixel_offset', 0],
-        'y': positions['y_pixel_offset', 1]['x_pixel_offset', 0]
-        - positions['y_pixel_offset', 0]['x_pixel_offset', 0],
-    }
-
-    fast_axis_vector = axis_vectors[_fast_axis].to(unit=t_unit)
-    slow_axis_vector = axis_vectors[_slow_axis].to(unit=t_unit)
-    x_pixel_size = _decide_step(empty_detector.coords['x_pixel_offset'])
-    y_pixel_size = _decide_step(empty_detector.coords['y_pixel_offset'])
-    distance = sc.norm(origin - source_position.to(unit=origin.unit))
-
-    # We save the first pixel position so that DIALS can read use it.
-    flattened = empty_detector.flatten(to='detector_number')
-    first_pixel_number = flattened.coords['detector_number'].min()
-    first_pixel_position = flattened['detector_number', first_pixel_number].coords[
-        'position'
-    ]
-    first_pixel_position_from_sample = first_pixel_position - sample_position
-
-    return NMXDetectorMetadata(
-        detector_name=detector_component['nexus_component_name'],
-        x_pixel_size=x_pixel_size,
-        y_pixel_size=y_pixel_size,
-        origin=origin,
-        fast_axis=_normalize_vector(fast_axis_vector),
-        fast_axis_dim=_fast_axis + '_pixel_offset',
-        slow_axis=_normalize_vector(slow_axis_vector),
-        slow_axis_dim=_slow_axis + '_pixel_offset',
-        distance=distance,
-        first_pixel_position=first_pixel_position_from_sample,
-    )
 
 
 def _build_mandi_time_bin_edges(
@@ -355,10 +247,10 @@ def reduction(
             x_pixel_size=det_geo.step_x,
             y_pixel_size=det_geo.step_y,
             origin=origin,
-            fast_axis=det_geo.fast_axis,
-            fast_axis_dim=det_geo.fast_axis_name,
-            slow_axis=det_geo.slow_axis,
-            slow_axis_dim=det_geo.slow_axis_name,
+            fast_axis=_normalize_vector(det_geo.fast_axis),
+            fast_axis_dim=det_geo.fast_axis_name + '_pixel_offset',
+            slow_axis=_normalize_vector(det_geo.slow_axis),
+            slow_axis_dim=det_geo.slow_axis_name + '_pixel_offset',
             distance=distance,
             first_pixel_position=first_pixel_position_from_sample,
         )
