@@ -194,6 +194,12 @@ def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
         _handle_sample(dg['entry']['sample'], entry['sample'])
         _handle_monitor(dg['entry']['control'], entry['control'])
         _handle_source(dg['entry']['instrument'], entry['instrument'])
+        # handle instrument definition - only needed for MANDI
+        if (
+            'instrument_definition' in dg['entry']['instrument']
+            and dg['entry']['instrument']['instrument_definition'] is None
+        ):
+            dg['entry']['instrument'].pop('instrument_definition')
         _handle_detector_data(dg['entry']['instrument'], entry['instrument'])
 
     return dg['entry']

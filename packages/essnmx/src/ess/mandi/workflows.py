@@ -3,7 +3,7 @@
 import argparse
 import logging
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 
 import scipp as sc
 import scippnexus as snx
@@ -166,6 +166,17 @@ def _retrieve_display(
         return logging.getLogger(__name__).info
 
 
+def _sort_mandi_detbank_names(bank_names: Iterable[str]) -> list[str]:
+    """Sort the bank names.
+
+    Bank names are sorted as bank1, bank2, bank22, bank5, bank51,
+    when they are loaded,
+    so this function helps to sort them by the number prefix instead.
+    """
+    char_sorted = sorted(bank_names)
+    return sorted(char_sorted, key=lambda x: len(x))
+
+
 def reduction(
     *,
     config: ReductionConfig,
@@ -191,6 +202,11 @@ def reduction(
         )
         total_detectors = len(detectors)
         banks = {}
+        # Sort the bank names
+        detectors = {
+            name: detectors[name]
+            for name in _sort_mandi_detbank_names(detectors.keys())
+        }
         for idet, (name, det) in enumerate(detectors.items()):
             da = det[()]['events'].bins.concat().value.copy()
             # Mandi files' event_time_offset is time-of-flight
@@ -255,7 +271,7 @@ def reduction(
             first_pixel_position=first_pixel_position_from_sample,
         )
         det_hists[name] = NMXReducedDetector(data=hist, metadata=detector_meta)
-        display(f"{ibank + 1}/{total_detectors} reduced")
+        display(f"{ibank + 1}/{total_detectors} bank {name=} reduced")
         display(hist)
 
     instrument = NMXInstrument(
