@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=cb47b71e"></script>
+    <script src="../../_static/documentation_options.js?v=271db7d1"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@
     <link rel="prev" title="ess.bifrost.live.arc_energy" href="ess.bifrost.live.arc_energy.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.7.0" />
+  <meta name="docsearch:version" content="26.9.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -185,7 +185,7 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -366,7 +366,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -574,6 +574,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.mcstas.html">ess.bifrost.io.mcstas</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.assemble_detector_data.html">ess.bifrost.io.mcstas.assemble_detector_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset.html">ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.load_sample_angle.html">ess.bifrost.io.mcstas.load_sample_angle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.nexus.html">ess.bifrost.io.nexus</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -706,15 +707,15 @@ if present. Then, the projected data is histogrammed according to the axis bins.
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.spectroscopy.types.EnergyQDetector.html#ess.spectroscopy.types.EnergyQDetector" title="ess.spectroscopy.types.EnergyQDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyQDetector</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Input data with coordinates “sample_table_momentum_transfer” and
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.spectroscopy.types.EnergyQDetector.html#ess.spectroscopy.types.EnergyQDetector" title="ess.spectroscopy.types.EnergyQDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyQDetector</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Input data with coordinates “sample_table_momentum_transfer” and
 “energy_transfer”.</p></li>
 <li><p><strong>axis_1</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.bifrost.live.CutAxis1.html#ess.bifrost.live.CutAxis1" title="ess.bifrost.live.CutAxis1"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.bifrost.live.CutAxis1</span></code></a> (<a class="reference internal" href="ess.bifrost.live.CutAxis.html#ess.bifrost.live.CutAxis" title="ess.bifrost.live.CutAxis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.bifrost.live.CutAxis</span></code></a>)</span>) – Defines the projection onto and binning in the first axis.</p></li>
 <li><p><strong>axis_2</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.bifrost.live.CutAxis2.html#ess.bifrost.live.CutAxis2" title="ess.bifrost.live.CutAxis2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.bifrost.live.CutAxis2</span></code></a> (<a class="reference internal" href="ess.bifrost.live.CutAxis.html#ess.bifrost.live.CutAxis" title="ess.bifrost.live.CutAxis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.bifrost.live.CutAxis</span></code></a>)</span>) – Defines the projection onto and binning in the second axis.</p></li>
-<li><p><strong>arc_energy</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.bifrost.types.ArcEnergy</span></code> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – The final energies for each analyzer arc.</p></li>
+<li><p><strong>arc_energy</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.bifrost.types.ArcEnergy</span></code> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – The final energies for each analyzer arc.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.bifrost.live.CutData.html#ess.bifrost.live.CutData" title="ess.bifrost.live.CutData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CutData</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span> – <code class="docutils literal notranslate"><span class="pre">data</span></code> projected and histogrammed along the cut axes. If the input has
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.bifrost.live.CutData.html#ess.bifrost.live.CutData" title="ess.bifrost.live.CutData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CutData</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span> – <code class="docutils literal notranslate"><span class="pre">data</span></code> projected and histogrammed along the cut axes. If the input has
 an arc dimension, it is preserved in the output. Otherwise, all dimensions
 are integrated.</p>
 </dd>
@@ -802,7 +803,7 @@ are integrated.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.7.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

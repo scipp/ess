@@ -16,6 +16,7 @@ ess.bifrost.io.mcstas
    
       assemble_detector_data
       convert_simulated_time_to_event_time_offset
+      load_sample_angle
    
    
 

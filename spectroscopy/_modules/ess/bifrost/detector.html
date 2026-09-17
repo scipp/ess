@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=cb47b71e"></script>
+    <script src="../../../_static/documentation_options.js?v=271db7d1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.7.0" />
+  <meta name="docsearch:version" content="26.9.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -180,7 +180,7 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -363,7 +363,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -531,7 +531,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.spectroscopy.indirect.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_spectrometer_coords</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.spectroscopy.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Analyzer</span><span class="p">,</span>
-    <span class="n">DetectorPositionOffset</span><span class="p">,</span>
     <span class="n">EmptyDetector</span><span class="p">,</span>
     <span class="n">NeXusComponent</span><span class="p">,</span>
     <span class="n">NeXusTransformation</span><span class="p">,</span>
@@ -614,7 +613,6 @@
     <span class="n">analyzer</span><span class="p">:</span> <span class="n">Analyzer</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">transform</span><span class="p">:</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
-    <span class="n">offset</span><span class="p">:</span> <span class="n">DetectorPositionOffset</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">primary_graph</span><span class="p">:</span> <span class="n">PrimarySpecCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">secondary_graph</span><span class="p">:</span> <span class="n">SecondarySpecCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
@@ -635,8 +633,6 @@
 <span class="sd">        Loaded analyzer parameters.</span>
 <span class="sd">    transform:</span>
 <span class="sd">        Transformation that determines the detector position.</span>
-<span class="sd">    offset:</span>
-<span class="sd">        Offset to add to the detector position.</span>
 <span class="sd">    primary_graph:</span>
 <span class="sd">        Coordinate transformation graph for the primary spectrometer.</span>
 <span class="sd">    secondary_graph:</span>
@@ -650,9 +646,7 @@
 <span class="sd">        Detector geometry and spectrometer coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">da</span> <span class="o">=</span> <span class="n">get_base_calibrated_detector_bifrost</span><span class="p">(</span>
-        <span class="n">detector</span><span class="p">,</span> <span class="n">analyzer</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
-    <span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">get_base_calibrated_detector_bifrost</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">analyzer</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span>
     <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">dim_0</span><span class="o">=</span><span class="s1">&#39;tube&#39;</span><span class="p">,</span> <span class="n">dim_1</span><span class="o">=</span><span class="s1">&#39;length&#39;</span><span class="p">)</span>
 
     <span class="n">arc</span><span class="p">,</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">arc_and_channel_from_detector_number</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;detector_number&#39;</span><span class="p">])</span>
@@ -678,7 +672,6 @@
     <span class="n">analyzer</span><span class="p">:</span> <span class="n">Analyzer</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">transform</span><span class="p">:</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
-    <span class="n">offset</span><span class="p">:</span> <span class="n">DetectorPositionOffset</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the data array corresponding to a detector&#39;s signal field.</span>
 
@@ -694,8 +687,6 @@
 <span class="sd">        Loaded analyzer parameters.</span>
 <span class="sd">    transform:</span>
 <span class="sd">        Transformation that determines the detector position.</span>
-<span class="sd">    offset:</span>
-<span class="sd">        Offset to add to the detector position.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -704,9 +695,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_detector_position</span><span class="p">,</span> <span class="n">extract_signal_data_array</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">no_offset</span>
 
     <span class="n">da</span> <span class="o">=</span> <span class="n">extract_signal_data_array</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
-    <span class="n">position</span> <span class="o">=</span> <span class="n">compute_detector_position</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
+    <span class="c1"># BIFROST&#39;s detectors ride the rotating tank, so a lab-frame offset added after</span>
+    <span class="c1"># the transform cannot express any correction one would actually want; the</span>
+    <span class="c1"># transformation chain is the handle. compute_detector_position requires the</span>
+    <span class="c1"># argument, so pin it to zero here.</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">compute_detector_position</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">no_offset</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_assign_detector_position</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span></div>
 
 
@@ -896,7 +892,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.7.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

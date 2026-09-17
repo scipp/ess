@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=cb47b71e"></script>
+    <script src="../../_static/documentation_options.js?v=271db7d1"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.bifrost.io.sqw" href="ess.bifrost.io.sqw.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.7.0" />
+  <meta name="docsearch:version" content="26.9.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -183,7 +183,7 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -364,7 +364,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -572,6 +572,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.mcstas.html">ess.bifrost.io.mcstas</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.assemble_detector_data.html">ess.bifrost.io.mcstas.assemble_detector_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset.html">ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.load_sample_angle.html">ess.bifrost.io.mcstas.load_sample_angle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.nexus.html">ess.bifrost.io.nexus</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -725,36 +726,36 @@ arrays and fill those with null observations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.OutFilename</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>)</span>) – Path of the file to write.</p></li>
-<li><p><strong>events</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.spectroscopy.types.NormalizedIncidentEnergyDetector.html#ess.spectroscopy.types.NormalizedIncidentEnergyDetector" title="ess.spectroscopy.types.NormalizedIncidentEnergyDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">NormalizedIncidentEnergyDetector</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>)]</span>) – Binned data array with shape <code class="docutils literal notranslate"><span class="pre">(*logical,</span> <span class="pre">&quot;a3&quot;,</span> <span class="pre">&quot;a4&quot;)</span></code> where <code class="docutils literal notranslate"><span class="pre">logical</span></code>
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.OutFilename</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>)</span>) – Path of the file to write.</p></li>
+<li><p><strong>events</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.spectroscopy.types.NormalizedIncidentEnergyDetector.html#ess.spectroscopy.types.NormalizedIncidentEnergyDetector" title="ess.spectroscopy.types.NormalizedIncidentEnergyDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">NormalizedIncidentEnergyDetector</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>)]</span>) – Binned data array with shape <code class="docutils literal notranslate"><span class="pre">(*logical,</span> <span class="pre">&quot;a3&quot;,</span> <span class="pre">&quot;a4&quot;)</span></code> where <code class="docutils literal notranslate"><span class="pre">logical</span></code>
 is any number of logical detector dimensions (e.g., arc, tube).
 Must have an <code class="docutils literal notranslate"><span class="pre">&quot;incident_energy&quot;</span></code> event coordinate.</p></li>
-<li><p><strong>bin_sizes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.SQWBinSizes</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</span>) – Sizes of the output ‘image’ bins.
+<li><p><strong>bin_sizes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.SQWBinSizes</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</span>) – Sizes of the output ‘image’ bins.
 The data will be ordered based on these bins, but it is possible
 to change the binning later in Horace.
 E.g., <code class="docutils literal notranslate"><span class="pre">{'u1':</span> <span class="pre">50,</span> <span class="pre">'u2':</span> <span class="pre">50,</span> <span class="pre">'u3':</span> <span class="pre">50,</span> <span class="pre">'u4':</span> <span class="pre">50}</span></code>.</p></li>
-<li><p><strong>energy_bins</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.EnergyBins</span></code> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – Bin edges or number of bins for (incident) energy.
+<li><p><strong>energy_bins</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.EnergyBins</span></code> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – Bin edges or number of bins for (incident) energy.
 The events are histogrammed according to these bins, so this determines the
 final energy resolution that is available in Horace.
 Should typically be larger than <code class="docutils literal notranslate"><span class="pre">bin_sizes['energy_transfer']</span></code>.</p></li>
 <li><p><strong>beamline</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Beamline[NewType]</span></code></span>) – Beamline metadata.</p></li>
 <li><p><strong>measurement</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Measurement[NewType]</span></code></span>) – Measurement metadata.</p></li>
-<li><p><strong>sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/scippneutron/generated/classes/scippneutron.io.sqw.SqwIXSample.html#scippneutron.io.sqw.SqwIXSample" title="(in ScippNeutron v26.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SqwIXSample</span></code></a></span>) – Sample metadata in SQW format.</p></li>
-<li><p><strong>pulse_period</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.unwrap.lut.PulsePeriod</span></code> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – Pulse period of the neutron source.</p></li>
-<li><p><strong>gravity</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.GravityVector</span></code> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – Vector indicating the direction of gravity.
+<li><p><strong>sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/scippneutron/generated/classes/scippneutron.io.sqw.SqwIXSample.html#scippneutron.io.sqw.SqwIXSample" title="(in ScippNeutron v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SqwIXSample</span></code></a></span>) – Sample metadata in SQW format.</p></li>
+<li><p><strong>pulse_period</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.unwrap.lut.PulsePeriod</span></code> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – Pulse period of the neutron source.</p></li>
+<li><p><strong>gravity</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.GravityVector</span></code> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – Vector indicating the direction of gravity.
 Used to define the lab coordinate system.
 See also
 <a class="reference internal" href="ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer.html#ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer" title="ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer"><code class="xref py py-func docutils literal notranslate"><span class="pre">ess.spectroscopy.indirect.conversion.rotate_to_sample_table_momentum_transfer()</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference external" href="https://scipp.github.io/scippneutron/generated/modules/scippneutron.io.sqw.html#module-scippneutron.io.sqw" title="(in ScippNeutron v26.7.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scippneutron.io.sqw</span></code></a></dt><dd><p>For low-level SQW I/O and the underlying implementation of <code class="docutils literal notranslate"><span class="pre">save_sqw</span></code>.</p>
+<dt><a class="reference external" href="https://scipp.github.io/scippneutron/generated/modules/scippneutron.io.sqw.html#module-scippneutron.io.sqw" title="(in ScippNeutron v26.9.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scippneutron.io.sqw</span></code></a></dt><dd><p>For low-level SQW I/O and the underlying implementation of <code class="docutils literal notranslate"><span class="pre">save_sqw</span></code>.</p>
 </dd>
 </dl>
 </div>
@@ -841,7 +842,7 @@ See also
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.7.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

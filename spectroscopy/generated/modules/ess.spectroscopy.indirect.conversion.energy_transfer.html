@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=cb47b71e"></script>
+    <script src="../../_static/documentation_options.js?v=271db7d1"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@
     <link rel="prev" title="ess.spectroscopy.indirect.conversion.add_spectrometer_coords" href="ess.spectroscopy.indirect.conversion.add_spectrometer_coords.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.7.0" />
+  <meta name="docsearch:version" content="26.9.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -185,7 +185,7 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -366,7 +366,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -574,6 +574,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.mcstas.html">ess.bifrost.io.mcstas</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.assemble_detector_data.html">ess.bifrost.io.mcstas.assemble_detector_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset.html">ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.load_sample_angle.html">ess.bifrost.io.mcstas.load_sample_angle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.nexus.html">ess.bifrost.io.nexus</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -710,12 +711,12 @@ to be</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>incident_energy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – The neutron energy <span class="math notranslate nohighlight">\(E_i\)</span> before scattering.</p></li>
-<li><p><strong>final_energy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – The neutron energy <span class="math notranslate nohighlight">\(E_f\)</span> after scattering.</p></li>
+<li><p><strong>incident_energy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – The neutron energy <span class="math notranslate nohighlight">\(E_i\)</span> before scattering.</p></li>
+<li><p><strong>final_energy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – The neutron energy <span class="math notranslate nohighlight">\(E_f\)</span> after scattering.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span> – The energy transfer <span class="math notranslate nohighlight">\(\Delta E\)</span>.</p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span> – The energy transfer <span class="math notranslate nohighlight">\(\Delta E\)</span>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -801,7 +802,7 @@ to be</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.7.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
