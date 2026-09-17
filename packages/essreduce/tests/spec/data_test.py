@@ -10,7 +10,7 @@ from ess.reduce.spec import (
     Array,
     ArraySpec,
     DatasetRef,
-    Kind,
+    Format,
     NexusFile,
     OpaqueFile,
     OutputRef,
@@ -39,36 +39,37 @@ class TestFieldIntrospection:
     def test_data_fields_include_optionals_and_collections(self) -> None:
         fields = data_fields(Params)
         assert set(fields) == {'data', 'background', 'runs', 'banks'}
-        assert fields['data'].kind is Kind.ARRAY
+        assert fields['data'].format is Format.SCIPP
         assert fields['data'].array is None
         assert fields['background'].array == ArraySpec(dims=('x',))
         assert fields['banks'].array == ArraySpec(dims=('tof',))
-        assert fields['runs'].kind is Kind.NEXUS
+        assert fields['runs'].format is Format.NEXUS
 
     def test_ref_fields_include_literal_or_reference_unions(self) -> None:
         assert ref_fields(Params) == {'data', 'background', 'runs', 'banks', 'centre'}
 
 
 class TestValidation:
-    def test_array_field_accepts_either_reference_form(self) -> None:
+    def test_data_field_accepts_either_reference_form(self) -> None:
         assert Params(data=OUTPUT_REF).data == OutputRef(record='r1', output='data')
         assert Params(data=DATASET_REF).data == DatasetRef(dataset='pid-1')
 
-    def test_array_field_accepts_a_scipp_object(self) -> None:
-        assert Params(data=sc.scalar(1.0)).data.value == 1.0
-
-    @pytest.mark.parametrize('bad', ['a path', 3, [1, 2], {'x': 1}, None])
-    def test_array_field_rejects_plain_data(self, bad: object) -> None:
+    @pytest.mark.parametrize(
+        'bad',
+        ['a path', Path('/data/run.nxs'), 3, [1, 2], {'x': 1}, None, sc.scalar(1.0)],
+    )
+    def test_data_field_rejects_anything_but_a_reference(self, bad: object) -> None:
         with pytest.raises(ValidationError):
             Params(data=bad)
 
-    def test_file_field_accepts_a_reference_or_a_path(self) -> None:
-        assert Params(data=OUTPUT_REF, runs=[DATASET_REF]).runs == [
-            DatasetRef(dataset='pid-1')
+    def test_file_field_holds_references_like_any_data_field(self) -> None:
+        params = Params(data=OUTPUT_REF, runs=[DATASET_REF, OUTPUT_REF])
+        assert params.runs == [
+            DatasetRef(dataset='pid-1'),
+            OutputRef(record='r1', output='data'),
         ]
-        assert Params(data=OUTPUT_REF, runs=['/data/run.nxs']).runs == [
-            Path('/data/run.nxs')
-        ]
+        with pytest.raises(ValidationError):
+            Params(data=OUTPUT_REF, runs=['/data/run.nxs'])
 
     def test_literal_or_reference_union_accepts_both(self) -> None:
         params = Params(data=OUTPUT_REF, centre={'value': (0.1, 0.2), 'unit': 'm'})
@@ -78,10 +79,10 @@ class TestValidation:
 
 
 class TestJsonSchema:
-    def test_marks_data_fields_with_kind_and_structure(self) -> None:
+    def test_marks_data_fields_with_format_and_structure(self) -> None:
         schema = Params.model_json_schema()['properties']
-        assert schema['data']['dataField'] == {'kind': 'array'}
-        assert schema['runs']['items']['dataField'] == {'kind': 'nexus'}
+        assert schema['data']['dataField'] == {'format': 'scipp'}
+        assert schema['runs']['items']['dataField'] == {'format': 'nexus'}
         assert schema['background']['anyOf'][0]['dataField']['array'] == {
             'dims': ['x'],
             'unit': None,
@@ -90,17 +91,17 @@ class TestJsonSchema:
         }
         assert 'dataField' not in schema['label']
 
-    def test_array_field_schema_shows_reference_forms_only(self) -> None:
-        schema = Params.model_json_schema()
-        forms = {c['$ref'] for c in schema['properties']['data']['anyOf']}
-        assert forms == {'#/$defs/OutputRef', '#/$defs/DatasetRef'}
-
-    def test_file_field_schema_shows_path_form_too(self) -> None:
+    @pytest.mark.parametrize('annotation', [Array(), NexusFile, OpaqueFile])
+    def test_data_field_schema_is_the_two_reference_forms(
+        self, annotation: object
+    ) -> None:
         class P(BaseModel):
-            run: OpaqueFile
+            field: annotation
 
-        forms = P.model_json_schema()['properties']['run']['anyOf']
-        assert {'type': 'string', 'format': 'path'} in forms
+        forms = {
+            c['$ref'] for c in P.model_json_schema()['properties']['field']['anyOf']
+        }
+        assert forms == {'#/$defs/OutputRef', '#/$defs/DatasetRef'}
 
 
 class TestReferences:

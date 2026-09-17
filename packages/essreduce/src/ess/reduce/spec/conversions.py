@@ -21,7 +21,7 @@ def check_array(value: sc.Variable | sc.DataArray, spec: ArraySpec) -> None:
     Raise ``ValueError`` unless ``value`` has the structure ``spec`` declares.
 
     Pydantic cannot inspect a scipp object, so a runner calls this on array
-    outputs at completion (and may on materialized array inputs).
+    outputs at completion, and may on the arrays it resolves for a workflow.
     """
     problems = []
     if tuple(value.dims) != spec.dims:

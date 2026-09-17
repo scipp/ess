@@ -107,39 +107,47 @@ machinery (`OutputView`, `Temporality`, windowing) stays in esslivedata.
 ### Data fields: inputs are parameters
 
 There is no separate input section. A parameter or output that holds data
-rather than a literal is a **data field**: a field annotated with a `Kind`
-(raw NeXus file, opaque file, scipp array) and, for arrays, an `ArraySpec`
-describing dims, unit, coordinate units, and whether the data is binned. The
-`binned` flag tells consumers which outputs are event data that must not be
-plotted directly. A scalar with a unit is the 0-d case.
+rather than a literal is a **data field**: a field of type `Ref`, annotated
+with the `Format` of the bytes (raw NeXus file, scipp object, opaque file) and,
+for scipp data, an `ArraySpec` describing dims, unit, coordinate units, and
+whether the data is binned. The `binned` flag tells consumers which outputs are
+event data that must not be plotted directly. A scalar with a unit is the 0-d
+case.
 
-The field's type is a union of two forms, and the annotation says which one a
-framework must produce for the workflow:
+A reference is plain data naming data that exists elsewhere: an output of an
+earlier run (`OutputRef`: record, output name, optionally one element of a
+collection by key), or a dataset the framework did not compute (`DatasetRef`:
+an identity string whose meaning, a catalogue PID or a local file's identity,
+belongs to the framework). A field may be a union of a literal and a reference,
+for values a user may type in or take from a previous run. Collections,
+`list[...]` and `dict[str, ...]` of one declared type, are allowed on both
+sides, and a reference may name one element of a collection output.
 
-- At submission the field holds a **reference**, plain data naming data that
-  exists elsewhere: an output of an earlier run (`OutputRef`: record, output
-  name, optionally one element of a collection by key), or a dataset the
-  framework did not compute (`DatasetRef`: an identity string whose meaning,
-  a catalogue PID or a local file's identity, belongs to the framework). A
-  dataset satisfies a data field of any kind.
-- Inside the workflow the field holds the materialized value: a local path for
-  files, a scipp object for arrays. The spec layer admits a scipp object
-  without importing scipp by accepting anything that is not plain data; the
-  structural check of a scipp object against its `ArraySpec` needs scipp and
-  lives in `ess.reduce.spec.conversions`, called by whoever runs the workflow.
+The spec says nothing about how a workflow gets at the bytes. Whether a
+reference becomes a local path or an in-memory object is decided where the
+workflow is called, by the executor binding that the ADR leaves out of scope,
+and the workflow asks there for the form it wants: a path for a NeXus file it
+loads by component, an object for a curve it fits. A framework that adds an
+in-memory fast path for chained runs therefore changes no spec and no workflow
+interface. An earlier form of this decision typed a data field as a union of the
+reference and the materialized value, a path or a scipp object, so that one
+model served both the request and the call. That made the model wrong in both
+phases, needed a validator that accepted anything not plain data, hid that
+member from the JSON Schema, and put a materialization instruction into what
+was meant to be pure interface.
 
-A field may be a union of a literal and a reference, for values a user may
-type in or take from a previous run. Collections, `list[...]` and
-`dict[str, ...]` of one declared type, are allowed on both sides, and a
-reference may name one element of a collection output. Every difference
-between an input and a parameter — resolution, materialization, provenance,
-which widget a UI shows — is behaviour a framework selects by the field's
-type; the spec only declares the type. Helpers find the data fields of a model
-and the references in a plain request value, so a framework never re-derives
-the annotation's meaning.
-
-A generic UI without a framework, an ipywidgets form on a local pipeline, uses
-the materialized form directly: a path for a file, a scipp object for an array.
+The format serves the consumers of the spec: a framework compares the
+producer's output annotation with the consumer's parameter annotation before
+chaining, a picker lists candidates of matching format, a UI selects a plotter
+from the `ArraySpec`. A dataset's format is not checked at submission; a dataset
+that is not what the field declares fails when the workflow reads it. Every
+difference between an input and a parameter — resolution, provenance, which
+widget a UI shows — is behaviour a framework selects by the field's type; the
+spec only declares the type. Helpers find the data fields of a model and the
+references in a plain request value, so a framework never re-derives the
+annotation's meaning. The structural check of a scipp object against its
+`ArraySpec` needs scipp and lives in `ess.reduce.spec.conversions`, called by
+whoever runs the workflow on the outputs it returns.
 
 ### Two forms, one-way projection
 
@@ -149,8 +157,8 @@ custom validators. `spec.serialize()` projects onto `SerializedWorkflowSpec`,
 a plain-data pydantic model with both models as JSON Schema
 (`model_json_schema()`), which round-trips through JSON and is what a service
 announces to remote consumers. Data fields appear in the schema under a
-`dataField` key with their kind and array structure, and only in their
-reference form; the schema is the entire cross-process surface, sufficient to
+`dataField` key with their format and array structure; the schema is the
+entire cross-process surface, sufficient to
 render a form, offer a picker for data fields, and select a plotter for an
 output.
 
@@ -218,11 +226,11 @@ not via imports.
   boundaries, with no knowledge of the workflow implementation.
 - A framework that chains workflows validates a reference by looking up the
   producer's output field and comparing its data-field annotation with the
-  consumer's; how strict that comparison is (kind only, or full `ArraySpec`
+  consumer's; how strict that comparison is (format only, or full `ArraySpec`
   compatibility) is the framework's rule.
-- In-process validation of an array field is weak by design: anything that is
-  not plain data passes, and the structural check needs scipp. A runner calls
-  `check_array` on outputs at completion.
+- A workflow receives references and resolves them through whatever runs it;
+  the contract for that resolution belongs to the executor binding, not to the
+  spec. A runner calls `check_array` on array outputs at completion.
 - essreduce gains a pydantic dependency.
 - `ess.reduce.parameter`, `ess.reduce.workflow`, and the widgets built on them
   are superseded and will be removed in a later hard break; they are untouched

@@ -4,22 +4,22 @@
 Data fields: parameters and outputs that hold data rather than literals.
 
 A data field is a parameter or output field whose value is a file or an array.
-Its type is a union of two forms, and a :class:`DataField` annotation says
-which kind of data the field holds:
+Its type is a :data:`Ref`, a reference to data that exists elsewhere: an output
+of an earlier run, or a dataset the framework did not compute. A
+:class:`DataField` annotation on the field says what the bytes are, its
+:class:`Format`, and for scipp data its :class:`ArraySpec`, so that an output
+field of one spec can feed a parameter field of another when the two agree, and
+so that a consumer can offer candidates for a field or select a plotter for an
+output.
 
-* At submission the field holds a :data:`Ref`, a reference to data that exists
-  elsewhere: an output of an earlier run, or a dataset the framework did not
-  compute. A remote consumer sees only this form in the JSON Schema.
-* Inside the workflow the field holds the materialized value: a local path for
-  files, a scipp object for arrays. Which form a framework produces for each
-  :class:`Kind` is its business; the spec only declares the kind.
-
-Arrays are constrained by :class:`ArraySpec`, on both sides, so an output field
-of one spec can feed a parameter field of another when their structure matches.
-Collections of data fields, ``list[...]`` and ``dict[str, ...]`` of one declared
-type, are allowed and a reference may name one element of a collection output.
-This module imports no scipp; the structural check of a scipp object against its
-:class:`ArraySpec` lives in :mod:`ess.reduce.spec.conversions`.
+The spec says nothing about how a workflow gets at the bytes. A reference is
+what a request names and what a record keeps; turning it into a local path or an
+in-memory object is the business of whatever runs the workflow, and the workflow
+asks for the form it wants. Collections of data fields, ``list[...]`` and
+``dict[str, ...]`` of one declared type, are allowed and a reference may name one
+element of a collection output. This module imports no scipp; the structural
+check of a scipp object against its :class:`ArraySpec` lives in
+:mod:`ess.reduce.spec.conversions`.
 """
 
 from __future__ import annotations
@@ -27,23 +27,21 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import StrEnum
-from pathlib import Path
 from types import UnionType
 from typing import Annotated, Any, Union, get_args, get_origin
 
 from pydantic import BaseModel, Field
-from pydantic_core import PydanticOmit, core_schema
 
 
-class Kind(StrEnum):
-    """What a data field holds, and thus how a framework materializes it."""
+class Format(StrEnum):
+    """What the bytes of a data field are."""
 
     NEXUS = 'nexus'
-    """A raw NeXus file, materialized as a local path."""
+    """A raw NeXus file."""
+    SCIPP = 'scipp'
+    """A scipp object, held in memory or as scipp HDF5; structure by ArraySpec."""
     OPAQUE = 'opaque'
-    """A file of a format the framework does not read, materialized as a path."""
-    ARRAY = 'array'
-    """A scipp object."""
+    """A file of a format the framework does not read, such as CIF or ORSO."""
 
 
 class ArraySpec(BaseModel, frozen=True):
@@ -90,7 +88,8 @@ class DatasetRef(BaseModel, frozen=True):
     Data the framework did not compute, named by an identity the framework owns.
 
     What the identity means, a catalogue PID or a local file's identity, is not
-    the spec's concern; a dataset satisfies a data field of any kind.
+    the spec's concern, and neither is the dataset's format: a dataset that is
+    not what the field declares fails when the workflow reads it.
     """
 
     dataset: str = Field(min_length=1)
@@ -100,62 +99,38 @@ class DatasetRef(BaseModel, frozen=True):
 
 
 Ref = OutputRef | DatasetRef
-"""A reference: the value a data field holds at submission."""
+"""A reference: the value of a data field."""
 
 
 @dataclass(frozen=True)
 class DataField:
     """
-    Field annotation marking a data field, with its kind and array structure.
+    Field annotation marking a data field, with its format and array structure.
 
-    The union type on the field admits both the reference and the materialized
-    form; this annotation says what the materialized form must be. Serialized
-    into JSON Schema under the ``dataField`` key so that remote consumers can
-    tell data fields from literals and know their structure.
+    Serialized into JSON Schema under the ``dataField`` key so that remote
+    consumers can tell data fields from literals and know their structure.
     """
 
-    kind: Kind
+    format: Format
     array: ArraySpec | None = None
 
     def __get_pydantic_json_schema__(self, core_schema: Any, handler: Any) -> Any:
         schema = handler(core_schema)
-        schema['dataField'] = {'kind': self.kind.value}
+        schema['dataField'] = {'format': self.format.value}
         if self.array is not None:
             schema['dataField']['array'] = self.array.model_dump(mode='json')
         return schema
 
 
-class Materialized:
-    """
-    The in-process form of an array field: anything that is not plain data.
-
-    Admits a scipp object without naming scipp, which the spec layer must not
-    import. Omitted from JSON Schema, where only the reference form exists.
-    """
-
-    @classmethod
-    def __get_pydantic_core_schema__(cls, source: Any, handler: Any) -> Any:
-        def check(value: Any) -> Any:
-            if isinstance(value, dict | list | str | int | float | bool | type(None)):
-                raise ValueError('expected a reference or an in-process data object')
-            return value
-
-        return core_schema.no_info_plain_validator_function(check)
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, core_schema: Any, handler: Any) -> Any:
-        raise PydanticOmit
-
-
-NexusFile = Annotated[Ref | Path, DataField(kind=Kind.NEXUS)]
-"""A raw NeXus file; the workflow receives a local path."""
-OpaqueFile = Annotated[Ref | Path | bytes, DataField(kind=Kind.OPAQUE)]
-"""A file the framework does not read; a workflow returns one as bytes."""
+NexusFile = Annotated[Ref, DataField(format=Format.NEXUS)]
+"""A raw NeXus file."""
+OpaqueFile = Annotated[Ref, DataField(format=Format.OPAQUE)]
+"""A file the framework does not read."""
 
 
 def Array(spec: ArraySpec | None = None) -> Any:
     """Type of a field holding a scipp object, constrained by ``spec`` if given."""
-    return Annotated[Ref | Materialized, DataField(kind=Kind.ARRAY, array=spec)]
+    return Annotated[Ref, DataField(format=Format.SCIPP, array=spec)]
 
 
 def _members(annotation: Any) -> Iterator[Any]:

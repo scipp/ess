@@ -137,7 +137,7 @@ class SerializedWorkflowSpec(_SpecFields, frozen=True):
     and outputs are represented as JSON Schema, sufficient for form generation
     and optimistic validation but not for authoritative validation — that
     remains with the process owning the model classes. Data fields carry a
-    ``dataField`` key with their kind and array structure.
+    ``dataField`` key with their format and array structure.
     """
 
     params_schema: dict[str, Any] = Field(
