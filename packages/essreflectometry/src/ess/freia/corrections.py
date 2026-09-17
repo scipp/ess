@@ -8,18 +8,38 @@ from ..reflectometry import corrections as common_corrections
 from ..reflectometry.corrections import RunNormalization
 from ..reflectometry.types import (
     BeamSize,
+    CoordTransformationGraph,
+    CorrectedDetector,
     ReducibleData,
     RunType,
-    RunUnnormalizedData,
     Sample,
     SampleRun,
     SampleSize,
+    WavelengthBins,
+    WavelengthDetector,
 )
-from .types import SampleIlluminatedFraction, WavelengthMonitor
+from .conversions import add_coords
+from .maskings import add_masks
+from .types import (
+    DetectorRegionOfInterest,
+    SampleIlluminatedFraction,
+    WavelengthMonitor,
+)
+
+
+def add_coords_and_masks(
+    da: WavelengthDetector[RunType],
+    graph: CoordTransformationGraph[RunType],
+    roi: DetectorRegionOfInterest[RunType],
+    wavelength_bins: WavelengthBins,
+) -> CorrectedDetector[RunType]:
+    """Transform coordinates and mask events before run normalization."""
+    da = add_coords(da, graph)
+    return CorrectedDetector[RunType](add_masks(da, roi, wavelength_bins))
 
 
 def normalize_by_monitor_histogram(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     *,
     monitor: WavelengthMonitor[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -59,7 +79,7 @@ def normalize_by_monitor_histogram(
 
 
 def normalize_by_monitor_integrated(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     *,
     monitor: WavelengthMonitor[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -122,4 +142,4 @@ def prepare_sample(
     return Sample(sample / fraction)
 
 
-providers = (sample_illuminated_fraction, prepare_sample)
+providers = (add_coords_and_masks, sample_illuminated_fraction, prepare_sample)

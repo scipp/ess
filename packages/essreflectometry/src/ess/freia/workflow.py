@@ -20,7 +20,6 @@ from . import (
     conversions,
     corrections,
     load,
-    maskings,
     mcstas,
     normalization,
     orso,
@@ -31,7 +30,6 @@ providers = (
     *reflectometry_providers,
     *conversions.providers,
     *corrections.providers,
-    *maskings.providers,
     *normalization.providers,
     *orso.providers,
     *load.providers,
@@ -104,7 +102,10 @@ def FreiaWorkflow(
 ) -> sciline.Pipeline:
     """Workflow for reduction of data for the Freia instrument.
 
-    ``QDetector`` provides specular Q with gravity correction. Reflectivity
+    The coordinate transformation graph computes the signed, gravity-corrected
+    scattering angle above the laboratory x-z plane for both runs, with reflection
+    angle and Q for the sample. The direct beam is mapped to Q when building
+    ``Reference``. Reflectivity
     requires separate sample/direct-beam ROIs, wavelength and Q bins, and beam
     and sample sizes for the footprint correction. The reference run must be a
     measurement without a sample, taken with matching slit and chopper settings.

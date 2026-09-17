@@ -23,15 +23,11 @@ class SampleSurfaceNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Normal pointing out of the reflecting surface, in global coordinates."""
 
 
-class QDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector events with specular Q and signed angle to the sample surface."""
-
-
 class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
     """Pixel or event coordinates mapped to inclusive (lower, upper) bounds.
 
     Select corresponding reflected and direct peaks separately for SampleRun and
-    ReferenceRun, for example using signed ``theta`` and ``height``.
+    ReferenceRun, for example using ``scattering_angle`` and ``height``.
     An empty dictionary explicitly selects the entire detector.
     """
 

@@ -11,16 +11,24 @@ from ..reflectometry.types import (
     ReflectivityOverQ,
     Sample,
 )
+from .conversions import theta
 
 
 def evaluate_direct_beam(
     direct_beam: ReducibleData[ReferenceRun],
 ) -> Reference:
-    """Compute reference Q using the direct beam's incidence angle."""
-    theta = -direct_beam.bins.coords['theta']
+    """Compute reference Q for the direct beam reflected in the sample plane."""
+    normal = direct_beam.coords['sample_surface_normal']
+    normal = normal / sc.norm(normal)
+    outgoing = direct_beam.bins.coords['outgoing_direction']
+    reflected = outgoing - 2 * sc.dot(outgoing, normal) * normal
+    reflection_angle = theta(
+        outgoing_direction=reflected,
+        sample_surface_normal=normal,
+    )
     wavelength = direct_beam.bins.coords['wavelength']
     return Reference(
-        direct_beam.bins.assign_coords(Q=reflectometry_q(wavelength, theta))
+        direct_beam.bins.assign_coords(Q=reflectometry_q(wavelength, reflection_angle))
     )
 
 

@@ -11,8 +11,8 @@ from scipp.testing import assert_allclose, assert_identical
 
 from ess.freia import FreiaMcStasWorkflow
 from ess.freia.mcstas import mcstas_detector_geometry
-from ess.freia.types import IncidentMonitor, QDetector, WavelengthMonitor
-from ess.reflectometry.types import SampleRun
+from ess.freia.types import DetectorRegionOfInterest, IncidentMonitor, WavelengthMonitor
+from ess.reflectometry.types import CorrectedDetector, SampleRun, WavelengthBins
 
 
 def _component(components, name, position):
@@ -65,8 +65,12 @@ def mcstas_file(tmp_path: Path) -> Path:
 def test_load_detector_and_compute_q(mcstas_file):
     workflow = FreiaMcStasWorkflow()
     workflow[Filename[SampleRun]] = mcstas_file
+    workflow[DetectorRegionOfInterest[SampleRun]] = {}
+    workflow[WavelengthBins] = sc.array(
+        dims=['wavelength'], values=[1.0, 12.0], unit='angstrom'
+    )
 
-    result = workflow.compute((RawDetector[SampleRun], QDetector[SampleRun]))
+    result = workflow.compute((RawDetector[SampleRun], CorrectedDetector[SampleRun]))
 
     raw = result[RawDetector[SampleRun]]
     image = sc.sort(raw.bins.sum(), 'pixel_id')
@@ -88,7 +92,7 @@ def test_load_detector_and_compute_q(mcstas_file):
         events.coords['event_time_offset'],
         sc.full(sizes=events.sizes, value=0.025, unit='s'),
     )
-    q = result[QDetector[SampleRun]].bins.constituents['data'].coords['Q']
+    q = result[CorrectedDetector[SampleRun]].bins.constituents['data'].coords['Q']
     assert sc.isfinite(q).all().value
 
 

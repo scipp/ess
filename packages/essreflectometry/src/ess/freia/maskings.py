@@ -2,15 +2,12 @@
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 
-from ..reflectometry.types import RunType, RunUnnormalizedData, WavelengthBins
-from .types import DetectorRegionOfInterest, QDetector
-
 
 def add_masks(
-    da: QDetector[RunType],
-    roi: DetectorRegionOfInterest[RunType],
-    wavelength_bins: WavelengthBins,
-) -> RunUnnormalizedData[RunType]:
+    da: sc.DataArray,
+    roi: dict,
+    wavelength_bins: sc.Variable,
+) -> sc.DataArray:
     """Mask events outside the ROI and wavelength range."""
     masks = {}
     event_masks = {}
@@ -24,16 +21,11 @@ def add_masks(
             (coord >= low) & (coord <= high)
         )
     wavelength = da.bins.coords['wavelength']
-    return RunUnnormalizedData[RunType](
-        da.assign_masks(masks).bins.assign_masks(
-            event_masks,
-            wavelength=~(
-                sc.isfinite(wavelength)
-                & (wavelength >= wavelength_bins[0].to(unit=wavelength.unit))
-                & (wavelength < wavelength_bins[-1].to(unit=wavelength.unit))
-            ),
-        )
+    return da.assign_masks(masks).bins.assign_masks(
+        event_masks,
+        wavelength=~(
+            sc.isfinite(wavelength)
+            & (wavelength >= wavelength_bins[0].to(unit=wavelength.unit))
+            & (wavelength < wavelength_bins[-1].to(unit=wavelength.unit))
+        ),
     )
-
-
-providers = (add_masks,)

@@ -18,6 +18,7 @@ from ess.reflectometry.corrections import footprint_on_sample
 from ess.reflectometry.types import (
     BeamSize,
     QBins,
+    ReducibleData,
     ReferenceRun,
     ReflectivityOverQ,
     SampleRun,
@@ -43,19 +44,27 @@ def _make_workflow(run_norm):
                 'pixel_id': sc.array(dims=['event'], values=[0, 0, 1], unit=None),
             },
         ).group('pixel_id')
-        # The first pixel is at 30 degrees; the second is outside the ROI.
+        # Sample rotation is 10 degrees. The matching beams make angles of
+        # 30 degrees with the surface; the second pixel is outside the ROI.
+        angles = np.deg2rad([10.0 + sign * 30.0, 10.0 + sign * 60.0])
         events.coords['position'] = sc.vectors(
             dims=['pixel_id'],
-            values=[[0, sign * 0.5, np.sqrt(3) / 2], [0, sign * np.sqrt(3) / 2, 0.5]],
+            values=[[0, np.sin(angle), np.cos(angle)] for angle in angles],
             unit='m',
         )
         wf[WavelengthDetector[run]] = events
         wf[Position[NXsample, run]] = sc.vector([0.0, 0.0, 0.0], unit='m')
-        wf[Position[NXsource, run]] = sc.vector([0.0, 0.0, -20.0], unit='m')
-        wf[SampleSurfaceNormal[run]] = sc.vector([0.0, 1.0, 0.0])
-        low, high = sorted([sign * 20.0, sign * 40.0])
+        # Source position must not set the angular reference frame.
+        wf[Position[NXsource, run]] = sc.vector([3.0, 2.0, -20.0], unit='m')
+        wf[SampleSurfaceNormal[run]] = sc.vector(
+            [0.0, np.cos(np.deg2rad(10.0)), -np.sin(np.deg2rad(10.0))]
+        )
+        low, high = sorted([10.0 + sign * 20.0, 10.0 + sign * 40.0])
         wf[DetectorRegionOfInterest[run]] = {
-            'theta': (sc.scalar(low, unit='deg'), sc.scalar(high, unit='deg'))
+            'scattering_angle': (
+                sc.scalar(low, unit='deg'),
+                sc.scalar(high, unit='deg'),
+            )
         }
     wf[WavelengthBins] = sc.array(
         dims=['wavelength'], values=[1.0, 3.0, 5.0], unit='angstrom'
@@ -76,7 +85,11 @@ def test_reduce_reflectivity_with_monitor_and_footprint():
             coords={'wavelength': wf.compute(WavelengthBins)},
         )
 
-    result = wf.compute(ReflectivityOverQ)
+    results = wf.compute((ReflectivityOverQ, ReducibleData[ReferenceRun]))
+    result = results[ReflectivityOverQ]
+    direct_beam = results[ReducibleData[ReferenceRun]]
+    assert 'theta' not in direct_beam.bins.coords
+    assert 'Q' not in direct_beam.bins.coords
 
     fraction = footprint_on_sample(sc.scalar(30.0, unit='deg'), beam_size, sample_size)
     # Q bins contain wavelengths 4 and 2 angstrom, respectively.
