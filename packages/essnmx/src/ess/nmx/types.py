@@ -249,6 +249,8 @@ class NMXReducedDetector:
 class NMXInstrument:
     nx_class = snx.NXinstrument
 
+    instrument_definition: str | None = None
+    """Instrument definition xml string."""
     detectors: sc.DataGroup[NMXReducedDetector]
     name: str = "NMX"
     source: NMXSourceMetadata

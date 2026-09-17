@@ -355,7 +355,7 @@ def save_results(
     # Validate if results have expected fields
     export_static_metadata_as_nxlauetof(
         sample_metadata=results.sample,
-        source_metadata=results.instrument.source,
+        instrument_metadata=results.instrument,
         program=results.reducer,
         output_file=output_config.output_file,
         overwrite=output_config.overwrite,

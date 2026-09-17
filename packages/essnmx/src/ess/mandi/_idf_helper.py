@@ -164,6 +164,7 @@ class MonitorDesc:
 
 @dataclass
 class MandiInstrument:
+    instrument_definition: str
     detectors: tuple[DetectorDesc, ...]
     monitors: tuple[MonitorDesc, ...]
     source: SourceDesc
@@ -381,7 +382,8 @@ def read_mandi_geometry_xml(file_path: FilePath) -> MandiInstrument:
     """Retrieve geometry parameters from Mandi file."""
     instrument_xml_path = 'entry/instrument/instrument_xml/data'
     with h5py.File(file_path) as file:
-        tree = fromstring(file[instrument_xml_path][...][0])
+        idf_str: str = file[instrument_xml_path][...][0].decode()
+        tree = fromstring(idf_str)
 
     # Probably better way to retrieve the namespace...
     namespace = tree.tag.removesuffix("instrument")
@@ -427,6 +429,7 @@ def read_mandi_geometry_xml(file_path: FilePath) -> MandiInstrument:
     )
 
     return MandiInstrument(
+        instrument_definition=idf_str,
         detectors=tuple(detectors),
         monitors=tuple(monitors),
         sample=sample,

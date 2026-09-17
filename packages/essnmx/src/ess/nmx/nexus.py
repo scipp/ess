@@ -13,10 +13,10 @@ import scippnexus as snx
 from .configurations import Compression
 from .types import (
     NMXDetectorMetadata,
+    NMXInstrument,
     NMXMonitorMetadata,
     NMXProgram,
     NMXSampleMetadata,
-    NMXSourceMetadata,
 )
 
 
@@ -146,7 +146,7 @@ def _set_default_instrument(nx_entry: snx.Group) -> snx.Group:
 def export_static_metadata_as_nxlauetof(
     *,
     sample_metadata: NMXSampleMetadata,
-    source_metadata: NMXSourceMetadata,
+    instrument_metadata: NMXInstrument,
     program: NMXProgram,
     output_file: str | pathlib.Path | io.BytesIO,
     overwrite: bool = False,
@@ -166,6 +166,8 @@ def export_static_metadata_as_nxlauetof(
         Sample metadata object.
     source_metadata:
         Source metadata object.
+    instrument_metadata:
+        Instrument metadata object.
     monitor_metadata:
         Monitor metadata object.
     output_file:
@@ -183,7 +185,12 @@ def export_static_metadata_as_nxlauetof(
         nx_entry['reducer'] = program
 
         nx_instrument = _set_default_instrument(nx_entry)
-        nx_instrument['source'] = source_metadata
+        nx_instrument['source'] = instrument_metadata.source
+        if instrument_metadata.instrument_definition is not None:
+            idf = nx_instrument.create_field(
+                'IDF', value=instrument_metadata.instrument_definition
+            )
+            idf.attrs['long_name'] = 'instrument definition xml'
         _add_arbitrary_metadata(nx_entry._group, **arbitrary_metadata)
 
 

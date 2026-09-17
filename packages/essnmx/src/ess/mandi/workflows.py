@@ -89,7 +89,7 @@ def _build_mandi_time_bin_edges(
         # is bigger than all time-bin-coordinate values.
         if min_t > da_max_t:
             _warn_bin_edge_out_of_range(
-                edge=min_t, coord_name=wf_config.time_bin_coordinate, desc='bigger'
+                edge=min_t, coord_name=t_coord_name, desc='bigger'
             )
     else:
         min_t = da_min_t
@@ -102,7 +102,7 @@ def _build_mandi_time_bin_edges(
         # is smaller than all time-bin-coordinate values.
         if max_t <= da_min_t:
             _warn_bin_edge_out_of_range(
-                edge=max_t, coord_name=wf_config.time_bin_coordinate, desc='smaller'
+                edge=max_t, coord_name=t_coord_name, desc='smaller'
             )
     else:
         max_t = da_max_t
@@ -259,6 +259,7 @@ def reduction(
         display(hist)
 
     instrument = NMXInstrument(
+        instrument_definition=mandi_geo.instrument_definition,
         detectors=sc.DataGroup(det_hists),
         name="MANDI",
         source=NMXSourceMetadata(position=source_position),
