@@ -247,6 +247,5 @@ not via imports.
 Foreseen extensions, each one optional spec field or one field-level
 annotation, deliberately not added until a consumer exists: the parameters a
 warm workflow can change cheaply (what lets a UI offer a slider), declared
-failure reasons, a contribution output with the parameters its finalize stage
-reads (the additive combine of the essapps sketch, D15), an intermediate flag
-for retention, and declared keys of a collection output.
+failure reasons, an intermediate flag for retention, and declared keys of a
+collection output.
