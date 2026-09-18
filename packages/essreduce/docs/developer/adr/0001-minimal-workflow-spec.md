@@ -245,7 +245,6 @@ not via imports.
   workflow code.
 
 Foreseen extensions, each one optional spec field or one field-level
-annotation, deliberately not added until a consumer exists: the parameters a
-warm workflow can change cheaply (what lets a UI offer a slider), declared
-failure reasons, an intermediate flag for retention, and declared keys of a
-collection output.
+annotation, deliberately not added until a consumer exists: declared failure
+reasons, an intermediate flag for retention, and declared keys of a collection
+output.
