@@ -33,12 +33,14 @@ from .grouping import (
 from .histogramming import (
     generate_gamma_binning_data,
     generate_two_theta_binning_data,
+    hist_2d,
     hist_3d,
-    view_1d_gamma_slices_raw,
-    view_2d_flat_raw,
-    view_2d_rings_raw,
-    view_3d_raw,
+    extract_gamma_slices_view_data,
+    extract_flat_view_data,
+    extract_two_theta_rings_view_data,
+    extract_detector_view_data,
 )
+from .plotting import detector_plot
 from .types import BinningSettings
 from ..powtex.data import load_powtex_calibration, load_powtex_csv
 
@@ -70,13 +72,15 @@ def TextureReduce() -> sciline.Pipeline:
             load_powtex_csv,
             load_powtex_calibration,
             project_onto_cylindrical_surface,
+            detector_plot,
             generate_gamma_binning_data,
             generate_two_theta_binning_data,
             hist_3d,
-            view_3d_raw,
-            view_2d_flat_raw,
-            view_2d_rings_raw,
-            view_1d_gamma_slices_raw,
+            hist_2d,
+            extract_detector_view_data,
+            extract_flat_view_data,
+            extract_two_theta_rings_view_data,
+            extract_gamma_slices_view_data,
             subtract_empty_can_from_sample,
             subtract_empty_can_from_vanadium,
             normalize_by_vanadium,

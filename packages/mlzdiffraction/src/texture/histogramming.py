@@ -12,18 +12,21 @@ from ..powtex.types import RunType, SampleRun
 
 from .types import (
     BinningSettings,
-    DetectorViewRaw,
+    DetectorViewData,
     DspacingBinWidth,
     DspacingCylSurfaceDetector,
-    FlatDetectorViewRaw,
+    FlatViewData,
     GammaBinWidth,
     GammaBinningData,
-    GammaSlicesRaw,
+    GammaSlicesViewData,
+    RawData2D,
     Texture3D,
     TwoThetaBinWidth,
     TwoThetaBinningData,
-    TwoThetaRingsRaw,
+    TwoThetaRingsViewData,
 )
+
+from .conversion import get_cartesian_from_cylindrical
 
 
 def generate_gamma_binning_data(
@@ -250,44 +253,80 @@ def hist_3d(
     )
 
 
-def view_3d_raw(data: Texture3D[SampleRun]) -> DetectorViewRaw:
+def hist_2d(
+    data: Texture3D[RunType]
+) -> RawData2D[RunType]:
+    """Histogram projected detector data to texture coordinates."""
+    # histogrammed_data_1 = data["region_1"].sum(dim="dspacing")
+    # histogrammed_data_2 = data["region_2"].sum(dim="dspacing")
+    return RawData2D(
+        sc.DataGroup({"region_1": data["region_1"].sum(dim="dspacing"), "region_2": data["region_2"].sum(dim="dspacing")})
+    )
+
+
+def extract_detector_view_data(data: RawData2D[SampleRun]) -> DetectorViewData:
     """Return a raw detector view."""
-    histogrammed_2d_1 = data["region_1"].sum(dim="dspacing")
-    histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
-    return DetectorViewRaw(
-        sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
+    histogrammed_2d_1 = data["region_1"]
+    histogrammed_2d_2 = data["region_2"]
+
+    gamma_bin_centers_1 = sc.midpoints(histogrammed_2d_1.coords["gamma"])
+    gamma_bin_centers_2 = sc.midpoints(histogrammed_2d_2.coords["gamma"])
+
+    # TODO: check that dims match
+    gamma_bin_centers = sc.concat([gamma_bin_centers_2, gamma_bin_centers_1], dim="gamma")
+
+    # TODO: check that reg1 and reg2 have the same two_theta coords
+    two_theta_bin_centers = sc.midpoints(histogrammed_2d_1.coords["two_theta"])
+
+    counts_1 = histogrammed_2d_1.data
+    counts_2 = histogrammed_2d_2.data
+
+    counts = sc.concat([counts_2, counts_1], dim="gamma")
+
+    projection_radius = histogrammed_2d_1.coords["projection_radius"]
+
+    x_bin_centers, y_bin_centers, z_bin_centers = get_cartesian_from_cylindrical(
+        projection_radius, gamma_bin_centers, two_theta_bin_centers
+    )
+
+    return DetectorViewData(
+        sc.DataArray(counts, coords={
+            "gamma": gamma_bin_centers,
+            "two_theta": two_theta_bin_centers,
+            "x": x_bin_centers,
+            "y": y_bin_centers,
+            "z": z_bin_centers,
+            "projection_radius": projection_radius
+        })
     )
 
 
-def view_2d_flat_raw(data: Texture3D[SampleRun]) -> FlatDetectorViewRaw:
+def extract_flat_view_data(data: RawData2D[SampleRun]) -> FlatViewData:
     """Return a raw flattened detector view. This will be very similar to view_3d, just the detector gap needs to be properly handles."""
-    histogrammed_2d_1 = data["region_1"].sum(dim="dspacing")
-    histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
-    return FlatDetectorViewRaw(
+    return FlatViewData(
         sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
     )
 
 
-def view_2d_rings_raw(data: Texture3D[SampleRun]) -> TwoThetaRingsRaw:
+def extract_two_theta_rings_view_data(data: RawData2D[SampleRun]) -> TwoThetaRingsViewData:
     """Return a raw two-theta rings view."""
-    histogrammed_2d_1 = data["region_1"].sum(dim="dspacing")
-    histogrammed_2d_2 = data["region_2"].sum(dim="dspacing")
-    return TwoThetaRingsRaw(
+    return TwoThetaRingsViewData(
         sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
     )
 
 
-def view_1d_gamma_slices_raw(data: Texture3D[SampleRun]) -> GammaSlicesRaw:
+def extract_gamma_slices_view_data(data: RawData2D[SampleRun]) -> GammaSlicesViewData:
     """Return a raw gamma-slices view."""
-    return GammaSlicesRaw(data)
+    return GammaSlicesViewData(data)
 
 
 providers = (
     generate_gamma_binning_data,
     generate_two_theta_binning_data,
     hist_3d,
-    view_3d_raw,
-    view_2d_flat_raw,
-    view_2d_rings_raw,
-    view_1d_gamma_slices_raw,
+    hist_2d,
+    extract_detector_view_data,
+    extract_flat_view_data,
+    extract_two_theta_rings_view_data,
+    extract_gamma_slices_view_data,
 )

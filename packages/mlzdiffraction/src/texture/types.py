@@ -23,10 +23,14 @@ class Texture3D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """Texture data binned in gamma, two-theta, and d-spacing."""
 
 
-DetectorViewRaw = NewType("DetectorViewRaw", sc.DataArray)
-FlatDetectorViewRaw = NewType("FlatDetectorViewRaw", sc.DataArray)
-TwoThetaRingsRaw = NewType("TwoThetaRingsRaw", sc.DataArray)
-GammaSlicesRaw = NewType("GammaSlicesRaw", sc.DataArray)
+class RawData2D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
+    """2D Texture binned in gamma and two-theta."""
+
+
+DetectorViewData = NewType("DetectorViewData", sc.DataArray)
+FlatViewData = NewType("FlatViewData", sc.DataArray)
+TwoThetaRingsViewData = NewType("TwoThetaRingsViewData", sc.DataArray)
+GammaSlicesViewData = NewType("GammaSlicesViewData", sc.DataArray)
 
 DetectorView = NewType("DetectorView", sc.DataArray)
 FlatDetectorView = NewType("FlatDetectorView", sc.DataArray)
@@ -65,7 +69,6 @@ class EmptyCanSubtracted3D(sl.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataAr
 
 
 NormalisedTexture3D = NewType("NormalisedTexture3D", sc.DataArray)
-Texture2D = NewType("Texture2D", sc.DataArray)
 
 GammaSliceWidth = NewType("GammaSliceWidth", sc.DataArray)
 

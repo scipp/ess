@@ -79,10 +79,19 @@ def get_cylindrical_from_cartesian(position, projection_radius):
         #"proj_x": proj_x,
         #"proj_y": proj_y,
         #"proj_z": proj_z,
-        "proj_position": proj_position,
         "gamma": gamma,
         "two_theta": two_theta,
+        "proj_position": proj_position,
     }
+
+
+def get_cartesian_from_cylindrical(cylinder_radius, gamma, two_theta):
+    """Convert cylindrical coordinates positions to Cartesian."""
+    x = - cylinder_radius * sc.cos(gamma)
+    y = cylinder_radius * sc.sin(gamma)
+    z = cylinder_radius / sc.tan(two_theta)
+
+    return (x, y, z)
 
 
 providers = (
