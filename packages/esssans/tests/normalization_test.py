@@ -188,3 +188,143 @@ def test_transmission_fraction():
             direct_transmission_monitor=direct_transmission_monitor,
         ).data,
     )
+
+
+@pytest.fixture
+def wavelength_bins() -> sc.Variable:
+    return sc.linspace('wavelength', 1.0, 13.0, num=51, unit='angstrom')
+
+
+@pytest.fixture
+def q_bins() -> sc.Variable:
+    return sc.linspace('Q', 0.0, 1.0, num=2, unit='1/angstrom')
+
+
+def _flat_density(bins: sc.Variable, q_bins: sc.Variable) -> sc.DataArray:
+    """Events with a uniform density of one count per angstrom.
+
+    Reducing this over a band yields the width of the band in angstrom, so any
+    discrepancy between two representations is the discrepancy in the wavelength range
+    they select. The event count must stay large compared to the number of bands, else
+    the discretization of the uniform placement dominates the comparison tolerance.
+    """
+    n = 120_000
+    lo, hi = bins.min().value, bins.max().value
+    return sc.DataArray(
+        sc.full(dims=['event'], shape=[n], value=(hi - lo) / n, unit='counts'),
+        coords={
+            'wavelength': sc.array(
+                dims=['event'],
+                values=np.linspace(lo, hi, n, endpoint=False),
+                unit='angstrom',
+            ),
+            'Q': sc.full(dims=['event'], shape=[n], value=0.5, unit='1/angstrom'),
+        },
+    ).bin(Q=q_bins, wavelength=bins)
+
+
+def _as_midpoints(histogram: sc.DataArray) -> sc.DataArray:
+    """Replace the wavelength bin edges by midpoints.
+
+    The I(Q) denominator is dense in this form, because computing Q requires one
+    wavelength value per bin. See :func:`normalization.norm_detector_term_denominator`.
+    """
+    return histogram.assign_coords(
+        wavelength=sc.midpoints(histogram.coords['wavelength'])
+    )
+
+
+@pytest.mark.parametrize('nbands', [7, 10, 13])
+def test_reduce_q_selects_same_wavelength_range_for_all_representations(
+    wavelength_bins, q_bins, nbands
+):
+    bands = normalization.process_wavelength_bands(
+        sc.linspace(
+            'wavelength',
+            wavelength_bins.min().value,
+            wavelength_bins.max().value,
+            num=nbands + 1,
+            unit='angstrom',
+        ),
+        wavelength_bins,
+    )
+    events = _flat_density(wavelength_bins, q_bins)
+    representations = {
+        'events': events,
+        'bin_edges': events.hist(),
+        'midpoints': _as_midpoints(events.hist()),
+    }
+    reduced = {
+        name: normalization.reduce_q(data, bands=bands)
+        for name, data in representations.items()
+    }
+    reduced['events'] = reduced['events'].hist()
+    for name, result in reduced.items():
+        assert sc.allclose(result.data, reduced['events'].data, rtol=sc.scalar(1e-4)), (
+            name
+        )
+
+
+def test_process_wavelength_bands_returns_exact_bin_edges(wavelength_bins):
+    bands = sc.linspace('wavelength', 1.0, 13.0, num=11, unit='angstrom')
+    processed = normalization.process_wavelength_bands(bands, wavelength_bins)
+    assert sc.identical(
+        processed,
+        sc.concat([bands[:-1], bands[1:]], dim='x').rename(
+            x='wavelength', wavelength='band'
+        ),
+    )
+
+
+def test_process_wavelength_bands_snaps_unaligned_bands_onto_bins(wavelength_bins):
+    bands = sc.linspace('wavelength', 1.0, 13.0, num=8, unit='angstrom')
+    processed = normalization.process_wavelength_bands(bands, wavelength_bins)
+    assert set(np.unique(processed.values)) <= set(wavelength_bins.values)
+    half_width = 0.5 * (wavelength_bins[1] - wavelength_bins[0]).value
+    assert np.all(np.abs(np.unique(processed.values) - bands.values) <= half_width)
+
+
+def test_process_wavelength_bands_is_idempotent(wavelength_bins):
+    """`direct_beam` feeds already-processed bands back in as `WavelengthBands`."""
+    bands = sc.linspace('wavelength', 1.0, 13.0, num=8, unit='angstrom')
+    once = normalization.process_wavelength_bands(bands, wavelength_bins)
+    assert sc.identical(
+        normalization.process_wavelength_bands(once, wavelength_bins), once
+    )
+
+
+def test_process_wavelength_bands_snaps_overlapping_bands(wavelength_bins):
+    edges = sc.linspace('band', 1.0, 13.0, num=12, unit='angstrom')
+    bands = sc.concat([edges[:-2], edges[2:]], dim='wavelength').transpose()
+    processed = normalization.process_wavelength_bands(bands, wavelength_bins)
+    assert processed.dims == bands.dims
+    assert set(np.unique(processed.values)) <= set(wavelength_bins.values)
+    bin_width = (wavelength_bins[1] - wavelength_bins[0]).value
+    processed_hi = processed['wavelength', 1]['band', :-1]
+    processed_lo = processed['wavelength', 0]['band', 1:]
+    overlap = (processed_hi - processed_lo).values
+    bands_hi = bands['wavelength', 1]['band', :-1]
+    bands_lo = bands['wavelength', 0]['band', 1:]
+    expected = (bands_hi - bands_lo).values
+    assert np.all(np.abs(overlap - expected) <= bin_width)
+
+
+def test_process_wavelength_bands_raises_if_bands_narrower_than_bins(wavelength_bins):
+    bands = sc.linspace('wavelength', 1.0, 13.0, num=201, unit='angstrom')
+    with pytest.raises(ValueError, match='collapse to zero width'):
+        normalization.process_wavelength_bands(bands, wavelength_bins)
+
+
+@pytest.mark.parametrize(
+    'values', [[0.5, 5.0], [5.0, 20.0], [-3.0, -1.0], [2.0, float('nan')]]
+)
+def test_process_wavelength_bands_raises_if_bands_outside_bins(wavelength_bins, values):
+    bands = sc.array(dims=['wavelength'], values=values, unit='angstrom')
+    with pytest.raises(ValueError, match='must lie within'):
+        normalization.process_wavelength_bands(bands, wavelength_bins)
+
+
+def test_process_wavelength_bands_raises_if_band_is_reversed(wavelength_bins):
+    bands = sc.array(dims=['band', 'wavelength'], values=[[6.0, 3.0]], unit='angstrom')
+    with pytest.raises(ValueError, match='start before they end'):
+        normalization.process_wavelength_bands(bands, wavelength_bins)
