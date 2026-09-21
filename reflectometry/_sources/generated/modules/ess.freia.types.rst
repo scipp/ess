@@ -13,6 +13,15 @@
 
    
    
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class-template.rst
+   
+      DetectorRegionOfInterest
+      SampleSurfaceNormal
+   
    
 
    

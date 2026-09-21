@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -35,12 +35,12 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../../_static/documentation_options.js?v=9ce135cc"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.9.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -235,11 +235,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -252,8 +259,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -264,8 +270,7 @@
           
           
           
-          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -276,8 +281,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
       
@@ -397,11 +401,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -414,8 +425,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -426,8 +436,7 @@
           
           
           
-          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -438,8 +447,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
         
@@ -503,55 +511,35 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorBankSizes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">UncertaintyBroadcastMode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">WavelengthLutMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericUnwrapWorkflow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_workflow</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">providers</span> <span class="k">as</span> <span class="n">reflectometry_providers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">BeamDivergenceLimits</span><span class="p">,</span>
-    <span class="n">CorrectionsToApply</span><span class="p">,</span>
     <span class="n">DetectorSpatialResolution</span><span class="p">,</span>
     <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">,</span>
     <span class="n">NeXusDetectorName</span><span class="p">,</span>
-    <span class="n">RunType</span><span class="p">,</span>
-    <span class="n">SampleRotationOffset</span><span class="p">,</span>
+    <span class="n">ReferenceRun</span><span class="p">,</span>
+    <span class="n">SampleRun</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">beamline</span><span class="p">,</span>
-    <span class="n">conversions</span><span class="p">,</span>
-    <span class="n">corrections</span><span class="p">,</span>
-    <span class="n">load</span><span class="p">,</span>
-    <span class="n">maskings</span><span class="p">,</span>
-    <span class="n">mcstas</span><span class="p">,</span>
-    <span class="n">normalization</span><span class="p">,</span>
-    <span class="n">orso</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">conversions</span><span class="p">,</span> <span class="n">corrections</span><span class="p">,</span> <span class="n">mcstas</span><span class="p">,</span> <span class="n">normalization</span><span class="p">,</span> <span class="n">orso</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.corrections</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunNormalization</span><span class="p">,</span> <span class="n">insert_run_normalization</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">IncidentMonitor</span>
 
-<span class="n">_general_providers</span> <span class="o">=</span> <span class="p">(</span>
+<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span>
     <span class="o">*</span><span class="n">reflectometry_providers</span><span class="p">,</span>
     <span class="o">*</span><span class="n">conversions</span><span class="o">.</span><span class="n">providers</span><span class="p">,</span>
     <span class="o">*</span><span class="n">corrections</span><span class="o">.</span><span class="n">providers</span><span class="p">,</span>
-    <span class="o">*</span><span class="n">maskings</span><span class="o">.</span><span class="n">providers</span><span class="p">,</span>
     <span class="o">*</span><span class="n">normalization</span><span class="o">.</span><span class="n">providers</span><span class="p">,</span>
     <span class="o">*</span><span class="n">orso</span><span class="o">.</span><span class="n">providers</span><span class="p">,</span>
-    <span class="o">*</span><span class="n">load</span><span class="o">.</span><span class="n">providers</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">mcstas_providers</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="o">*</span><span class="n">_general_providers</span><span class="p">,</span>
-    <span class="o">*</span><span class="n">mcstas</span><span class="o">.</span><span class="n">providers</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;List of providers for setting up a Sciline pipeline for McStas data.</span>
-
-<span class="sd">This provides a default Freia workflow including providers for loadings files.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">_general_providers</span><span class="p">,)</span>
 <span class="sd">&quot;&quot;&quot;List of providers for setting up a Sciline pipeline data.</span>
 
-<span class="sd">This provides a default Freia workflow including providers for loadings files.</span>
+<span class="sd">This provides a default Freia workflow including providers for loading files.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 
@@ -559,19 +547,11 @@
 <a class="viewcode-back" href="../../../generated/modules/ess.freia.workflow.mcstas_default_parameters.html#ess.freia.workflow.mcstas_default_parameters">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mcstas_default_parameters</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return default parameters for the McStas Freia workflow.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="n">DetectorSpatialResolution</span><span class="p">:</span> <span class="mf">0.0025</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
-        <span class="n">NeXusDetectorName</span><span class="p">:</span> <span class="s2">&quot;detector&quot;</span><span class="p">,</span>
-        <span class="n">BeamDivergenceLimits</span><span class="p">:</span> <span class="p">(</span>
-            <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
-            <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
-        <span class="p">),</span>
-        <span class="n">SampleRotationOffset</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
-        <span class="n">CorrectionsToApply</span><span class="p">:</span> <span class="n">corrections</span><span class="o">.</span><span class="n">default_corrections</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">default_parameters</span><span class="p">()</span> <span class="o">|</span> <span class="p">{</span>
+        <span class="n">NeXusDetectorName</span><span class="p">:</span> <span class="s2">&quot;Multiblade&quot;</span><span class="p">,</span>
         <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;detector&quot;</span><span class="p">:</span> <span class="mf">0.06</span><span class="p">,</span>
+            <span class="s2">&quot;Multiblade&quot;</span><span class="p">:</span> <span class="mf">0.06</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="n">UncertaintyBroadcastMode</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="o">.</span><span class="n">drop</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 
@@ -582,8 +562,9 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return default parameters for the NeXus Freia workflow.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="n">NeXusDetectorName</span><span class="p">:</span> <span class="s2">&quot;multiblade_detector&quot;</span><span class="p">,</span>
-        <span class="n">SampleRotationOffset</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
-        <span class="n">CorrectionsToApply</span><span class="p">:</span> <span class="n">corrections</span><span class="o">.</span><span class="n">default_corrections</span><span class="p">,</span>
+        <span class="n">DetectorBankSizes</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;multiblade_detector&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;strip&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;blade&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;wire&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">},</span>
+        <span class="p">},</span>
         <span class="n">DetectorSpatialResolution</span><span class="p">:</span> <span class="mf">0.0025</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
         <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;multiblade_detector&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
@@ -598,10 +579,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">FreiaMcStasWorkflow</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">none</span><span class="p">,</span>
-    <span class="n">wavelength_from</span><span class="p">:</span> <span class="n">WavelengthLutMode</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+    <span class="n">wavelength_from</span><span class="p">:</span> <span class="n">WavelengthLutMode</span> <span class="o">=</span> <span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for reduction of McStas data for the Freia instrument.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for reducing FREIA McStas events with a no-sample direct beam.</span>
+
+<span class="sd">    Loads geometry and uses the default WFM chopper settings. Reduction inputs</span>
+<span class="sd">    and outputs are described in :func:`FreiaWorkflow`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -612,10 +596,11 @@
 <span class="sd">        &#39;analytical&#39;, &#39;simulation&#39;, and &#39;file&#39;. See</span>
 <span class="sd">        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">beamline</span><span class="o">.</span><span class="n">LoadNeXusWorkflow</span><span class="p">(</span><span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">mcstas_providers</span><span class="p">:</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">FreiaWorkflow</span><span class="p">(</span>
+        <span class="n">run_norm</span><span class="o">=</span><span class="n">run_norm</span><span class="p">,</span> <span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">mcstas</span><span class="o">.</span><span class="n">providers</span><span class="p">:</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
-    <span class="n">insert_run_normalization</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">mcstas_default_parameters</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">workflow</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span>
     <span class="k">return</span> <span class="n">workflow</span></div>
@@ -632,6 +617,21 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for reduction of data for the Freia instrument.</span>
 
+<span class="sd">    The coordinate transformation graph computes the signed, gravity-corrected</span>
+<span class="sd">    scattering angle above the laboratory x-z plane for both runs, with reflection</span>
+<span class="sd">    angle and Q for the sample. The direct beam is mapped to Q when building</span>
+<span class="sd">    ``Reference``. Reflectivity</span>
+<span class="sd">    requires separate sample/direct-beam ROIs, wavelength and Q bins, and beam</span>
+<span class="sd">    and sample sizes for the footprint correction. The reference run must be a</span>
+<span class="sd">    measurement without a sample, taken with matching slit and chopper settings.</span>
+<span class="sd">    Set its ``SampleSurfaceNormal`` to the sample run&#39;s orientation.</span>
+
+<span class="sd">    To skip footprint correction, set</span>
+<span class="sd">    ``workflow[Sample] = workflow[ReducibleData[SampleRun]]``.</span>
+
+<span class="sd">    Monitor normalization requires an incident monitor selected through</span>
+<span class="sd">    ``NeXusName[IncidentMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    run_norm:</span>
@@ -641,7 +641,12 @@
 <span class="sd">        &#39;analytical&#39;, &#39;simulation&#39;, and &#39;file&#39;. See</span>
 <span class="sd">        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">beamline</span><span class="o">.</span><span class="n">LoadNeXusWorkflow</span><span class="p">(</span><span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">GenericUnwrapWorkflow</span><span class="p">(</span>
+        <span class="n">run_types</span><span class="o">=</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">ReferenceRun</span><span class="p">],</span>
+        <span class="n">monitor_types</span><span class="o">=</span><span class="p">[</span><span class="n">IncidentMonitor</span><span class="p">],</span>
+        <span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">providers</span><span class="p">:</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
     <span class="n">insert_run_normalization</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">)</span>
@@ -767,8 +772,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -800,12 +805,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

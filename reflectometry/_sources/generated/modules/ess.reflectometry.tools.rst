@@ -20,6 +20,7 @@
       fwhm_to_std
       linlogspace
       scale_for_reflectivity_overlap
+      smooth_with_resolution
    
    
 

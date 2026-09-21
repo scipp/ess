@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -35,12 +35,12 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../../_static/documentation_options.js?v=9ce135cc"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.9.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -235,11 +235,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -252,8 +259,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -264,8 +270,7 @@
           
           
           
-          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -276,8 +281,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
       
@@ -397,11 +401,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -414,8 +425,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -426,8 +436,7 @@
           
           
           
-          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -438,8 +447,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
         
@@ -499,126 +507,64 @@
                   
   <h1>Source code for ess.freia.conversions</h1><div class="highlight"><pre>
 <span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
-<span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
+<span class="c1"># Copyright (c) 2026 Scipp contributors (https://github.com/scipp)</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorBankSizes</span><span class="p">,</span> <span class="n">Position</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipp.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">pi</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">elem_dtype</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GravityVector</span><span class="p">,</span> <span class="n">Position</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">graph</span><span class="p">,</span> <span class="n">tof</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXsample</span><span class="p">,</span> <span class="n">NXsource</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">reflectometry_q</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CoordTransformationGraph</span><span class="p">,</span>
-    <span class="n">DetectorRotation</span><span class="p">,</span>
     <span class="n">RunType</span><span class="p">,</span>
-    <span class="n">SampleRotation</span><span class="p">,</span>
+    <span class="n">SampleRun</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleSurfaceNormal</span>
 
 
-<div class="viewcode-block" id="reflectometry_q_x">
-<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.reflectometry_q_x.html#ess.freia.conversions.reflectometry_q_x">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">reflectometry_q_x</span><span class="p">(</span>
-    <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">sample_rotation</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+<div class="viewcode-block" id="outgoing_direction">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.outgoing_direction.html#ess.freia.conversions.outgoing_direction">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">outgoing_direction</span><span class="p">(</span>
+    <span class="n">scattered_beam</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute momentum transfer in off-specular direction.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unit direction of the outgoing ray at the sample, corrected for gravity.</span>
 
-<span class="sd">    .. math::</span>
-<span class="sd">        Q_x = \\frac{2 \\pi}{\\lambda} (cos(\\theta_o) - cos(\\theta_i))</span>
-
-<span class="sd">    Where :math:`\\theta_o` is the reflection angle (:func:`theta`)</span>
-<span class="sd">    and :math:`\\theta_i` is the incident angle on the sample surface.</span>
-
-<span class="sd">    Note that here we assume the incident angle is equal to ``sample_rotation``.</span>
-
-<span class="sd">    Source:</span>
-<span class="sd">    `Frédéric Ott, &quot;Off-specular data representations in neutron reflectivity&quot; &lt;https://doi.org/10.1107/S0021889811002858&gt;`_</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    wavelength:</span>
-<span class="sd">        Wavelength values for the events.</span>
-<span class="sd">    theta:</span>
-<span class="sd">        Angle of reflection for the events.</span>
-<span class="sd">    sample_rotation:</span>
-<span class="sd">        Angle of incidence.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    :</span>
-<span class="sd">        Qx-values.</span>
+<span class="sd">    Approximate the flight time using the straight sample-to-detector distance,</span>
+<span class="sd">    as in ScippNeutron&#39;s gravity correction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">dtype</span> <span class="o">=</span> <span class="n">elem_dtype</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="n">c</span>
-        <span class="o">*</span> <span class="p">(</span>
-            <span class="n">sc</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-            <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">sample_rotation</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">theta</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">))</span>
-        <span class="p">)</span>
-        <span class="o">/</span> <span class="n">wavelength</span>
-    <span class="p">)</span></div>
+    <span class="n">flight_time</span> <span class="o">=</span> <span class="n">tof</span><span class="o">.</span><span class="n">tof_from_wavelength</span><span class="p">(</span>
+        <span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">Ltotal</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">scattered_beam</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="n">outgoing_beam</span> <span class="o">=</span> <span class="n">scattered_beam</span> <span class="o">-</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">gravity</span> <span class="o">*</span> <span class="n">flight_time</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">scattered_beam</span><span class="o">.</span><span class="n">unit</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">outgoing_beam</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">outgoing_beam</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="scattering_angle">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.scattering_angle.html#ess.freia.conversions.scattering_angle">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scattering_angle</span><span class="p">(</span><span class="n">outgoing_direction</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Signed elevation of the outgoing ray above the laboratory x-z plane.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">outgoing_direction</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="theta">
 <a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.theta.html#ess.freia.conversions.theta">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">theta</span><span class="p">(</span>
-    <span class="n">divergence_angle</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">sample_rotation</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Angle of reflection.</span>
+    <span class="n">outgoing_direction</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specular reflection angle between the outgoing ray and the sample surface.</span>
 
-<span class="sd">    Computes the angle between the scattering direction of</span>
-<span class="sd">    the neutron and the sample surface.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ------------</span>
-<span class="sd">        divergence_angle:</span>
-<span class="sd">            Divergence angle of the scattered beam.</span>
-<span class="sd">        sample_rotation:</span>
-<span class="sd">            Rotation of the sample from to its zero position.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -----------</span>
-<span class="sd">    The reflection angle of the neutron.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">return</span> <span class="n">divergence_angle</span> <span class="o">+</span> <span class="n">sample_rotation</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-        <span class="n">unit</span><span class="o">=</span><span class="n">divergence_angle</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="divergence_angle">
-<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.divergence_angle.html#ess.freia.conversions.divergence_angle">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">divergence_angle</span><span class="p">(</span>
-    <span class="n">position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">sample_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-    <span class="n">detector_rotation</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Angle between the scattering ray and</span>
-<span class="sd">    the ray that travels parallel to the sample surface</span>
-<span class="sd">    when the sample rotation is zero.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ------------</span>
-<span class="sd">        position:</span>
-<span class="sd">            Detector position where the neutron was detected.</span>
-<span class="sd">        sample_position:</span>
-<span class="sd">            Position of the sample.</span>
-<span class="sd">        detector_rotation:</span>
-<span class="sd">            Rotation of the detector from its zero position.</span>
-<span class="sd">    Returns</span>
-<span class="sd">    ----------</span>
-<span class="sd">    The divergence angle of the scattered beam.</span>
+<span class="sd">    Use the full three-dimensional direction. Under specular reflection this</span>
+<span class="sd">    also determines the incidence angle, without requiring the incoming ray.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">position</span> <span class="o">-</span> <span class="n">sample_position</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">position</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">detector_rotation</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-        <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span>
-    <span class="p">)</span></div>
+    <span class="n">normal</span> <span class="o">=</span> <span class="n">sample_surface_normal</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sample_surface_normal</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">outgoing_direction</span><span class="p">,</span> <span class="n">normal</span><span class="p">))</span></div>
 
 
 
@@ -627,27 +573,41 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">coordinate_transformation_graph</span><span class="p">(</span>
     <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
-    <span class="n">sample_rotation</span><span class="p">:</span> <span class="n">SampleRotation</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">detector_rotation</span><span class="p">:</span> <span class="n">DetectorRotation</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">detector_bank_sizes</span><span class="p">:</span> <span class="n">DetectorBankSizes</span><span class="p">,</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">SampleSurfaceNormal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordTransformationGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
-    <span class="n">bank</span> <span class="o">=</span> <span class="n">detector_bank_sizes</span><span class="p">[</span><span class="s1">&#39;multiblade_detector&#39;</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the scattering coordinates shared by sample and direct-beam runs.&quot;&quot;&quot;</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sample_surface_normal</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="ow">not</span> <span class="n">sc</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">length</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span><span class="o">.</span><span class="n">value</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;SampleSurfaceNormal must be a finite, nonzero vector.&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="o">**</span><span class="n">graph</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">beamline</span><span class="p">(</span><span class="n">scatter</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-        <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span>
-        <span class="s2">&quot;divergence_angle&quot;</span><span class="p">:</span> <span class="n">divergence_angle</span><span class="p">,</span>
-        <span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">reflectometry_q</span><span class="p">,</span>
-        <span class="s2">&quot;Qx&quot;</span><span class="p">:</span> <span class="n">reflectometry_q_x</span><span class="p">,</span>
-        <span class="s1">&#39;sample_size&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;mm&#39;</span><span class="p">),</span>
-        <span class="s1">&#39;blade&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="s1">&#39;blade&#39;</span><span class="p">,</span> <span class="n">bank</span><span class="p">[</span><span class="s1">&#39;blade&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;wire&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="s1">&#39;wire&#39;</span><span class="p">,</span> <span class="n">bank</span><span class="p">[</span><span class="s1">&#39;wire&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;strip&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="s1">&#39;strip&#39;</span><span class="p">,</span> <span class="n">bank</span><span class="p">[</span><span class="s1">&#39;strip&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;z_index&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">blade</span><span class="p">,</span> <span class="n">wire</span><span class="p">:</span> <span class="n">blade</span> <span class="o">*</span> <span class="n">wire</span><span class="p">,</span>
-        <span class="s1">&#39;sample_rotation&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sample_rotation</span><span class="p">,</span>
-        <span class="s1">&#39;detector_rotation&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">detector_rotation</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">graph</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">L1</span><span class="p">(),</span>
+        <span class="o">**</span><span class="n">graph</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">L2</span><span class="p">(),</span>
+        <span class="s1">&#39;outgoing_direction&#39;</span><span class="p">:</span> <span class="n">outgoing_direction</span><span class="p">,</span>
+        <span class="s1">&#39;scattering_angle&#39;</span><span class="p">:</span> <span class="n">scattering_angle</span><span class="p">,</span>
         <span class="s1">&#39;source_position&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">source_position</span><span class="p">,</span>
         <span class="s1">&#39;sample_position&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sample_position</span><span class="p">,</span>
+        <span class="s1">&#39;sample_surface_normal&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sample_surface_normal</span><span class="p">,</span>
+        <span class="s1">&#39;gravity&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">gravity</span><span class="p">,</span>
     <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="sample_coordinate_transformation_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.sample_coordinate_transformation_graph.html#ess.freia.conversions.sample_coordinate_transformation_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_coordinate_transformation_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">SampleSurfaceNormal</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordTransformationGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extend the scattering graph with the sample&#39;s reflection angle and Q.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">coordinate_transformation_graph</span><span class="p">(</span>
+        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">sample_surface_normal</span><span class="p">,</span> <span class="n">gravity</span>
+    <span class="p">)</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;theta&#39;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">reflectometry_q</span><span class="p">}</span></div>
 
 
 
@@ -657,33 +617,15 @@
     <span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-    <span class="s2">&quot;Adds scattering coordinates to the raw detector data.&quot;</span>
-    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
-        <span class="p">(</span>
-            <span class="s2">&quot;wavelength&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;theta&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;divergence_angle&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Q&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Qx&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;L1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;L2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;blade&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;wire&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;strip&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;z_index&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;sample_rotation&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;detector_rotation&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;sample_size&quot;</span><span class="p">,</span>
-        <span class="p">),</span>
-        <span class="n">graph</span><span class="p">,</span>
-        <span class="n">rename_dims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">keep_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">keep_aliases</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the scattering coordinates provided by the run&#39;s transformation graph.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span><span class="n">rename_dims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">graph</span><span class="p">)</span></div>
 
 
 
-<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span><span class="n">coordinate_transformation_graph</span><span class="p">,)</span>
+<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">coordinate_transformation_graph</span><span class="p">,</span>
+    <span class="n">sample_coordinate_transformation_graph</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 
                 </article>
@@ -714,8 +656,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -747,12 +689,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

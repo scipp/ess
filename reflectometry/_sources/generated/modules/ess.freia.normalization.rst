@@ -9,6 +9,14 @@
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      evaluate_direct_beam
+      reduce_sample_over_q
+   
    
 
    

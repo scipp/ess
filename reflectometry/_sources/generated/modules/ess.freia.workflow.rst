@@ -10,7 +10,6 @@
    .. autosummary::
       :toctree:
    
-      mcstas_providers
       providers
    
    

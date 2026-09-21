@@ -16,8 +16,9 @@
    
       add_coords
       coordinate_transformation_graph
-      divergence_angle
-      reflectometry_q_x
+      outgoing_direction
+      sample_coordinate_transformation_graph
+      scattering_angle
       theta
    
    

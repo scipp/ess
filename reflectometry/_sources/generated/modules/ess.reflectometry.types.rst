@@ -40,11 +40,11 @@
    
       BeamSize
       CoordTransformationGraph
+      CorrectedDetector
       DetectorRotation
       RawChopper
       RawSampleRotation
       ReducibleData
-      RunUnnormalizedData
       SampleRotation
       SampleRotationOffset
       SampleSize

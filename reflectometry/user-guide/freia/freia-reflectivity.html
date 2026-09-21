@@ -1,0 +1,941 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FREIA reflectivity reduction &#8212; ESSreflectometry</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+
+    <script src="../../_static/documentation_options.js?v=9ce135cc"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/freia/freia-reflectivity';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Offspec" href="../offspec/index.html" />
+    <link rel="prev" title="FREIA analytical wavelength lookup table" href="freia-wavelength-lookup-table.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.9.1" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ESSreflectometry - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ESSreflectometry - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/plopp">
+    Plopp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/sciline">
+    Sciline
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippnexus">
+    ScippNexus
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../amor/index.html">Amor</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../amor/amor-reduction.html">Divergent data reduction for Amor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amor/amor-reduction-advanced.html">Divergent data reduction for Amor - advanced</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amor/compare-to-eos.html">Comparison with PSI reduction software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amor/workflow-widget.html">Workflow widget</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../estia/index.html">ESTIA</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../estia/estia-mcstas-reduction.html">Reduction of ESTIA McStas data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../estia/estia-advanced-mcstas-reduction.html">ESTIA advanced data reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../estia/simulated-spin-flip-sample.html">Reduction of spin flip data from McStas simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../estia/create-estia-wavelength-lookup-table.html">Create a wavelength lookup table for ESTIA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">FREIA</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="freia-mcstas-visualization.html">FREIA detector data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="freia-wavelength-lookup-table.html">FREIA analytical wavelength lookup table</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">FREIA reflectivity reduction</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../offspec/index.html">Offspec</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../offspec/offspec_reduction.html">Collimated data reduction for OFFSPEC</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../focused-reflectometry-data-reduction.html">Focused reflectometry data reduction</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Select-the-runs">Select the runs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Inspect-the-reflected-and-direct-peaks">Inspect the reflected and direct peaks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Inspect-the-wavelength-normalization">Inspect the wavelength normalization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Select-the-beams-and-configure-footprint-correction">Select the beams and configure footprint correction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Compute-one-reflectivity-curve-per-beam">Compute one reflectivity curve per beam</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Compare-with-the-silicon-reference">Compare with the silicon reference</a></li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/user-guide/freia/freia-reflectivity.ipynb">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">FREIA</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">FREIA reflectivity reduction</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+<span data-pagefind-meta="image[data-url]" data-url="../../_static/essreflectometry-search-logo.png" hidden></span>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="FREIA-reflectivity-reduction">
+<h1>FREIA reflectivity reduction<a class="headerlink" href="#FREIA-reflectivity-reduction" title="Link to this heading">#</a></h1>
+<p>Compute one reflectivity curve for each incident beam using a sample measurement and a direct-beam measurement taken without a sample. Normalize by an incident wavelength monitor, select matching peaks, and compare the three curves with the silicon reflectivity reference.</p>
+<p>The sample and direct-beam runs must have matching slit and chopper settings. This example downloads and caches sample and direct-beam runs using <code class="docutils literal notranslate"><span class="pre">pooch</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pooch</span></code>).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plopp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.freia</span><span class="w"> </span><span class="kn">import</span> <span class="n">FreiaMcStasWorkflow</span><span class="p">,</span> <span class="n">data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.freia.corrections</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunNormalization</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.freia.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DetectorRegionOfInterest</span><span class="p">,</span>
+    <span class="n">IncidentMonitor</span><span class="p">,</span>
+    <span class="n">WavelengthMonitor</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">NeXusName</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reflectometry.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BeamSize</span><span class="p">,</span>
+    <span class="n">CorrectedDetector</span><span class="p">,</span>
+    <span class="n">Filename</span><span class="p">,</span>
+    <span class="n">QBins</span><span class="p">,</span>
+    <span class="n">ReducibleData</span><span class="p">,</span>
+    <span class="n">ReferenceRun</span><span class="p">,</span>
+    <span class="n">ReflectivityOverQ</span><span class="p">,</span>
+    <span class="n">Sample</span><span class="p">,</span>
+    <span class="n">SampleRun</span><span class="p">,</span>
+    <span class="n">SampleSize</span><span class="p">,</span>
+    <span class="n">WavelengthBins</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Select-the-runs">
+<h2>Select the runs<a class="headerlink" href="#Select-the-runs" title="Link to this heading">#</a></h2>
+<p>The workflow normalizes by the direct beam measurement and by a beam monitor. <code class="docutils literal notranslate"><span class="pre">SampleLambda</span></code> is a monitor in the McStas model that measures the wavelength spectrum before the sample. If no incident monitor is available, the monitor normalization can be skipped by using <code class="docutils literal notranslate"><span class="pre">RunNormalization.none</span></code>; the two runs must then already share an exposure and flux scale.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span> <span class="o">=</span> <span class="n">FreiaMcStasWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_histogram</span><span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">freia_mcstas_sample_run</span><span class="p">()</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">freia_mcstas_reference_run</span><span class="p">()</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">NeXusName</span><span class="p">[</span><span class="n">IncidentMonitor</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;SampleLambda&#39;</span>
+
+<span class="n">workflow</span><span class="p">[</span><span class="n">WavelengthBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">QBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">151</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;mcstas-wfm-silicon.h5&#39; from &#39;https://public.esss.dk/groups/scipp/ess/freia/1/mcstas-wfm-silicon.h5&#39; to &#39;/home/runner/.cache/ess/freia&#39;.
+</pre></div></div>
+</div>
+</section>
+<section id="Inspect-the-reflected-and-direct-peaks">
+<h2>Inspect the reflected and direct peaks<a class="headerlink" href="#Inspect-the-reflected-and-direct-peaks" title="Link to this heading">#</a></h2>
+<p>The signed scattering angle γ is the elevation of the outgoing ray above the laboratory x–z plane, corrected for gravity. It is available for both runs.</p>
+<p>For the sample, θ is the angle between the outgoing ray and the sample surface. Assuming specular reflection, this also gives the incidence angle and hence <span class="math notranslate nohighlight">\(Q = 4\pi\sin(\theta)/\lambda\)</span>. The conversion uses the full three-dimensional direction; θ = γ − μ, with sample tilt μ, applies when the ray and sample tilt lie in the vertical scattering plane.</p>
+<p>Inspect both distributions before selecting corresponding peaks. These runs have reflected beams near +0.3°, +1°, and +3.5°, with direct beams at the corresponding negative angles.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span><span class="p">[</span><span class="n">DetectorRegionOfInterest</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">DetectorRegionOfInterest</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">detectors</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">])</span>
+<span class="p">)</span>
+<span class="n">angle_bins</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;scattering_angle&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.2</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mi">421</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
+<span class="n">profiles</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">run</span> <span class="ow">in</span> <span class="p">[(</span><span class="s1">&#39;Sample&#39;</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Direct beam&#39;</span><span class="p">,</span> <span class="n">ReferenceRun</span><span class="p">)]:</span>
+    <span class="n">detector</span> <span class="o">=</span> <span class="n">detectors</span><span class="p">[</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">run</span><span class="p">]]</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">scattering_angle</span><span class="o">=</span><span class="n">angle_bins</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+    <span class="n">profile</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;scattering_angle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;scattering_angle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span>
+    <span class="p">)</span>
+    <span class="n">profiles</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">profile</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">profiles</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Reflected and direct beams&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user-guide_freia_freia-reflectivity_5_0.svg" src="../../_images/user-guide_freia_freia-reflectivity_5_0.svg" />
+</div>
+</div>
+</section>
+<section id="Inspect-the-wavelength-normalization">
+<h2>Inspect the wavelength normalization<a class="headerlink" href="#Inspect-the-wavelength-normalization" title="Link to this heading">#</a></h2>
+<p>The incident monitor corrects wavelength-dependent flux differences between runs. Its wavelength range must cover the selected detector data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;Sample monitor&#39;</span><span class="p">:</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]),</span>
+        <span class="s1">&#39;Direct-beam monitor&#39;</span><span class="p">:</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]),</span>
+    <span class="p">},</span>
+    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Incident wavelength spectra&#39;</span><span class="p">,</span>
+    <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mf">1e0</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user-guide_freia_freia-reflectivity_7_0.svg" src="../../_images/user-guide_freia_freia-reflectivity_7_0.svg" />
+</div>
+</div>
+</section>
+<section id="Select-the-beams-and-configure-footprint-correction">
+<h2>Select the beams and configure footprint correction<a class="headerlink" href="#Select-the-beams-and-configure-footprint-correction" title="Link to this heading">#</a></h2>
+<p>Each entry below gives separate scattering-angle bounds for the reflected and direct peaks, in degrees. Adjust them after inspecting the profiles when using other runs.</p>
+<p>The Gaussian footprint correction uses the sample length along the beam and each beam’s FWHM at the sample. It applies only to the reflected run. Beam widths have not yet been established for these data, so the example leaves this correction off. To enable it for a beam, replace its <code class="docutils literal notranslate"><span class="pre">None</span></code> width with a measured value, for example <code class="docutils literal notranslate"><span class="pre">sc.scalar(width_in_mm,</span> <span class="pre">unit='mm')</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Beam label: (sample ROI, direct-beam ROI), in degrees.</span>
+<span class="n">beam_rois</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;0.3° beam&#39;</span><span class="p">:</span> <span class="p">((</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">)),</span>
+    <span class="s1">&#39;1° beam&#39;</span><span class="p">:</span> <span class="p">((</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">)),</span>
+    <span class="s1">&#39;3.5° beam&#39;</span><span class="p">:</span> <span class="p">((</span><span class="mf">3.1</span><span class="p">,</span> <span class="mf">3.9</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">3.9</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.1</span><span class="p">)),</span>
+<span class="p">}</span>
+<span class="n">sample_size</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">80.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+<span class="n">beam_sizes</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">beam_rois</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Compute-one-reflectivity-curve-per-beam">
+<h2>Compute one reflectivity curve per beam<a class="headerlink" href="#Compute-one-reflectivity-curve-per-beam" title="Link to this heading">#</a></h2>
+<p>For each beam, apply the matching sample and direct-beam ROIs to a copy of the workflow. When building the reference, the workflow reflects the direct-beam direction in the sample plane and uses the resulting reflection angle to compute Q. It integrates both selected peaks into matching Q bins and divides their intensities, propagating counting uncertainties.</p>
+<p>The curves retain their direct-beam normalization; no scale is fitted to the silicon reference or to another beam.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reflectivities</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_roi</span><span class="p">,</span> <span class="n">direct_roi</span><span class="p">)</span> <span class="ow">in</span> <span class="n">beam_rois</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">reduction</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">run</span><span class="p">,</span> <span class="n">bounds</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">sample_roi</span><span class="p">),</span> <span class="p">(</span><span class="n">ReferenceRun</span><span class="p">,</span> <span class="n">direct_roi</span><span class="p">)]:</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="n">DetectorRegionOfInterest</span><span class="p">[</span><span class="n">run</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;scattering_angle&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="n">beam_size</span> <span class="o">=</span> <span class="n">beam_sizes</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">beam_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="n">Sample</span><span class="p">]</span> <span class="o">=</span> <span class="n">reduction</span><span class="p">[</span><span class="n">ReducibleData</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="n">SampleSize</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sample_size</span>
+        <span class="n">reduction</span><span class="p">[</span><span class="n">BeamSize</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">beam_size</span>
+    <span class="n">reflectivity</span> <span class="o">=</span> <span class="n">reduction</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ReflectivityOverQ</span><span class="p">)</span>
+    <span class="n">reflectivities</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">reflectivity</span>
+    <span class="n">covered</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">reflectivity</span><span class="o">.</span><span class="n">masks</span><span class="p">[</span><span class="s1">&#39;direct_beam&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">value</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">covered</span><span class="si">}</span><span class="s1"> Q bins have direct-beam coverage.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.3° beam: 52 Q bins have direct-beam coverage.
+1° beam: 52 Q bins have direct-beam coverage.
+3.5° beam: 52 Q bins have direct-beam coverage.
+</pre></div></div>
+</div>
+</section>
+<section id="Compare-with-the-silicon-reference">
+<h2>Compare with the silicon reference<a class="headerlink" href="#Compare-with-the-silicon-reference" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Si-15SiO2-air.txt</span></code> is the exact reflectivity table used for the silicon sample in these runs. Its columns are Q in Å⁻¹ and dimensionless reflectivity. Plot it together with all three reduced curves on the same axes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reference_file</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">freia_mcstas_silicon_reflectivity</span><span class="p">()</span>
+<span class="n">q</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">reference_file</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">si_reference</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;dimensionless&#39;</span><span class="p">),</span>
+    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)},</span>
+<span class="p">)</span>
+<span class="n">plot_curves</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">reflectivities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">curve</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">sc</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">variances</span><span class="p">(</span><span class="n">curve</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">valid</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">curve</span><span class="o">.</span><span class="n">masks</span><span class="p">[</span><span class="s1">&#39;direct_beam&#39;</span><span class="p">]</span>
+    <span class="n">plot_curves</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">valid</span><span class="p">,</span> <span class="n">curve</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">curve</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="n">q_range</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">QBins</span><span class="p">)</span>
+<span class="n">comparison</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="p">{</span><span class="o">**</span><span class="n">plot_curves</span><span class="p">,</span> <span class="s1">&#39;Si reference&#39;</span><span class="p">:</span> <span class="n">si_reference</span><span class="p">},</span>
+    <span class="n">logy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">ymin</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">ymax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=</span><span class="n">q_range</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="n">q_range</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+    <span class="n">ls</span><span class="o">=</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">plot_curves</span><span class="p">,</span> <span class="s1">&#39;solid&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;Si reference&#39;</span><span class="p">:</span> <span class="s1">&#39;dashed&#39;</span><span class="p">},</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Si reference&#39;</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">},</span>
+    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;FREIA reflectivity by beam&#39;</span><span class="p">,</span>
+    <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Reflectivity&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">comparison</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;Si-15SiO2-air.txt&#39; from &#39;https://public.esss.dk/groups/scipp/ess/freia/1/Si-15SiO2-air.txt&#39; to &#39;/home/runner/.cache/ess/freia&#39;.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user-guide_freia_freia-reflectivity_13_1.png" src="../../_images/user-guide_freia_freia-reflectivity_13_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">critical_edge</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="p">{</span><span class="s1">&#39;0.3° beam&#39;</span><span class="p">:</span> <span class="n">plot_curves</span><span class="p">[</span><span class="s1">&#39;0.3° beam&#39;</span><span class="p">],</span> <span class="s1">&#39;Si reference&#39;</span><span class="p">:</span> <span class="n">si_reference</span><span class="p">},</span>
+    <span class="n">xmin</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.006</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">),</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.016</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">),</span>
+    <span class="n">ymin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">ymax</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span>
+    <span class="n">ls</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Si reference&#39;</span><span class="p">:</span> <span class="s1">&#39;dashed&#39;</span><span class="p">},</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Si reference&#39;</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">},</span>
+    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;FREIA critical edge&#39;</span><span class="p">,</span>
+    <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Reflectivity&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">critical_edge</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/user-guide_freia_freia-reflectivity_14_0.png" src="../../_images/user-guide_freia_freia-reflectivity_14_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="freia-wavelength-lookup-table.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">FREIA analytical wavelength lookup table</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../offspec/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Offspec</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ESSreflectometry version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

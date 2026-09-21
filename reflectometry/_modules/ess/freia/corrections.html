@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -35,12 +35,12 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../../_static/documentation_options.js?v=9ce135cc"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.9.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -235,11 +235,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -252,8 +259,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -264,8 +270,7 @@
           
           
           
-          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -276,8 +281,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
       
@@ -397,11 +401,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -414,8 +425,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -426,8 +436,7 @@
           
           
           
-          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -438,8 +447,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
         
@@ -507,56 +515,48 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">corrections</span> <span class="k">as</span> <span class="n">common_corrections</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.corrections</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunNormalization</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">BeamDivergenceLimits</span><span class="p">,</span>
+    <span class="n">BeamSize</span><span class="p">,</span>
     <span class="n">CoordTransformationGraph</span><span class="p">,</span>
-    <span class="n">CorrectionsToApply</span><span class="p">,</span>
+    <span class="n">CorrectedDetector</span><span class="p">,</span>
     <span class="n">ReducibleData</span><span class="p">,</span>
     <span class="n">RunType</span><span class="p">,</span>
-    <span class="n">RunUnnormalizedData</span><span class="p">,</span>
+    <span class="n">Sample</span><span class="p">,</span>
+    <span class="n">SampleRun</span><span class="p">,</span>
+    <span class="n">SampleSize</span><span class="p">,</span>
     <span class="n">WavelengthBins</span><span class="p">,</span>
     <span class="n">WavelengthDetector</span><span class="p">,</span>
-    <span class="n">YIndexLimits</span><span class="p">,</span>
-    <span class="n">ZIndexLimits</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_coords</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.maskings</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_masks</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">WavelengthMonitor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorRegionOfInterest</span><span class="p">,</span> <span class="n">WavelengthMonitor</span>
+
+
+<div class="viewcode-block" id="add_coords_and_masks">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.corrections.add_coords_and_masks.html#ess.freia.corrections.add_coords_and_masks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_coords_and_masks</span><span class="p">(</span>
+    <span class="n">da</span><span class="p">:</span> <span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">CoordTransformationGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">roi</span><span class="p">:</span> <span class="n">DetectorRegionOfInterest</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">wavelength_bins</span><span class="p">:</span> <span class="n">WavelengthBins</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform coordinates and mask events before run normalization.&quot;&quot;&quot;</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">add_coords</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">add_masks</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">roi</span><span class="p">,</span> <span class="n">wavelength_bins</span><span class="p">))</span></div>
+
 
 
 <div class="viewcode-block" id="normalize_by_monitor_histogram">
 <a class="viewcode-back" href="../../../generated/modules/ess.freia.corrections.normalize_by_monitor_histogram.html#ess.freia.corrections.normalize_by_monitor_histogram">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">normalize_by_monitor_histogram</span><span class="p">(</span>
-    <span class="n">detector</span><span class="p">:</span> <span class="n">RunUnnormalizedData</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">monitor</span><span class="p">:</span> <span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">uncertainty_broadcast_mode</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReducibleData</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize detector data by a histogrammed monitor.</span>
 
-<span class="sd">    The detector is normalized according to</span>
-
-<span class="sd">    .. math::</span>
-
-<span class="sd">        d_i^\\text{Norm} = \\frac{d_i}{m_i} \\Delta \\lambda_i</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    detector:</span>
-<span class="sd">        Input event data in wavelength.</span>
-<span class="sd">    monitor:</span>
-<span class="sd">        A histogrammed monitor in wavelength.</span>
-<span class="sd">    uncertainty_broadcast_mode:</span>
-<span class="sd">        Choose how uncertainties of the monitor are broadcast to the sample data.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    :</span>
-<span class="sd">        `detector` normalized by a monitor.</span>
-
-<span class="sd">    See also</span>
-<span class="sd">    --------</span>
-<span class="sd">    ess.reduce.normalization.normalize_by_monitor_histogram:</span>
-<span class="sd">        For details and the actual implementation.</span>
+<span class="sd">    See :func:`ess.reduce.normalization.normalize_by_monitor_histogram` for the</span>
+<span class="sd">    normalization and uncertainty treatment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">common_corrections</span><span class="o">.</span><span class="n">normalize_by_monitor_histogram</span><span class="p">(</span>
         <span class="n">detector</span><span class="o">=</span><span class="n">detector</span><span class="p">,</span>
@@ -569,7 +569,7 @@
 <div class="viewcode-block" id="normalize_by_monitor_integrated">
 <a class="viewcode-back" href="../../../generated/modules/ess.freia.corrections.normalize_by_monitor_integrated.html#ess.freia.corrections.normalize_by_monitor_integrated">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">normalize_by_monitor_integrated</span><span class="p">(</span>
-    <span class="n">detector</span><span class="p">:</span> <span class="n">RunUnnormalizedData</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">monitor</span><span class="p">:</span> <span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">uncertainty_broadcast_mode</span><span class="p">:</span> <span class="n">UncertaintyBroadcastMode</span><span class="p">,</span>
@@ -598,42 +598,34 @@
 
 
 
-<div class="viewcode-block" id="add_coords_masks_and_apply_corrections">
-<a class="viewcode-back" href="../../../generated/modules/ess.freia.corrections.add_coords_masks_and_apply_corrections.html#ess.freia.corrections.add_coords_masks_and_apply_corrections">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_coords_masks_and_apply_corrections</span><span class="p">(</span>
-    <span class="n">da</span><span class="p">:</span> <span class="n">WavelengthDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">ylim</span><span class="p">:</span> <span class="n">YIndexLimits</span><span class="p">,</span>
-    <span class="n">zlims</span><span class="p">:</span> <span class="n">ZIndexLimits</span><span class="p">,</span>
-    <span class="n">bdlim</span><span class="p">:</span> <span class="n">BeamDivergenceLimits</span><span class="p">,</span>
-    <span class="n">wbins</span><span class="p">:</span> <span class="n">WavelengthBins</span><span class="p">,</span>
-    <span class="n">graph</span><span class="p">:</span> <span class="n">CoordTransformationGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">corrections_to_apply</span><span class="p">:</span> <span class="n">CorrectionsToApply</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunUnnormalizedData</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Computes coordinates, masks and corrections that are</span>
-<span class="sd">    the same for the sample measurement and the reference measurement.</span>
+<div class="viewcode-block" id="prepare_sample">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.corrections.prepare_sample.html#ess.freia.corrections.prepare_sample">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_sample</span><span class="p">(</span>
+    <span class="n">sample</span><span class="p">:</span> <span class="n">ReducibleData</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">beam_size</span><span class="p">:</span> <span class="n">BeamSize</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">sample_size</span><span class="p">:</span> <span class="n">SampleSize</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sample</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply the Gaussian footprint correction using the specular incidence angle.</span>
+
+<span class="sd">    Beam size is the FWHM at the sample; sample size is its length along the beam.</span>
+<span class="sd">    The correction applies only to the reflected run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">da</span> <span class="o">=</span> <span class="n">add_coords</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
-    <span class="n">da</span> <span class="o">=</span> <span class="n">add_masks</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlims</span><span class="p">,</span> <span class="n">bdlim</span><span class="p">,</span> <span class="n">wbins</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">correction</span> <span class="ow">in</span> <span class="n">corrections_to_apply</span><span class="p">:</span>
-        <span class="n">da</span> <span class="o">=</span> <span class="n">correction</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">RunUnnormalizedData</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">da</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="correct_by_footprint">
-<a class="viewcode-back" href="../../../generated/modules/ess.freia.corrections.correct_by_footprint.html#ess.freia.corrections.correct_by_footprint">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">correct_by_footprint</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Corrects the data by the size of the footprint on the sample.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">da</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">])</span></div>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">size</span> <span class="ow">in</span> <span class="p">[(</span><span class="s1">&#39;BeamSize&#39;</span><span class="p">,</span> <span class="n">beam_size</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;SampleSize&#39;</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">)]:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">sc</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">size</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> must be finite and positive.&#39;</span><span class="p">)</span>
+    <span class="n">fraction</span> <span class="o">=</span> <span class="n">common_corrections</span><span class="o">.</span><span class="n">footprint_on_sample</span><span class="p">(</span>
+        <span class="n">sample</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">],</span> <span class="n">beam_size</span><span class="o">=</span><span class="n">beam_size</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="n">sample_size</span>
+    <span class="p">)</span>
+    <span class="n">corrected</span> <span class="o">=</span> <span class="n">sample</span> <span class="o">/</span> <span class="n">fraction</span>
+    <span class="n">invalid</span> <span class="o">=</span> <span class="o">~</span><span class="n">sc</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">fraction</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">fraction</span> <span class="o">&lt;=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Sample</span><span class="p">(</span><span class="n">corrected</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span><span class="n">footprint</span><span class="o">=</span><span class="n">invalid</span><span class="p">))</span></div>
 
 
 
-<span class="n">default_corrections</span> <span class="o">=</span> <span class="p">{</span><span class="n">correct_by_footprint</span><span class="p">}</span>
-
-<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span><span class="n">add_coords_masks_and_apply_corrections</span><span class="p">,)</span>
+<span class="n">providers</span> <span class="o">=</span> <span class="p">(</span><span class="n">add_coords_and_masks</span><span class="p">,</span> <span class="n">prepare_sample</span><span class="p">)</span>
 </pre></div>
 
                 </article>
@@ -664,8 +656,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -697,12 +689,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

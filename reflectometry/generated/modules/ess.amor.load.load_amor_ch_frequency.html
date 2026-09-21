@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -36,12 +36,12 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../_static/documentation_options.js?v=9ce135cc"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.amor.load.amor_chopper" href="ess.amor.load.amor_chopper.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.9.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -238,11 +238,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -255,8 +262,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -267,8 +273,7 @@
           
           
           
-          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -279,8 +284,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
       
@@ -398,11 +402,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -415,8 +426,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/essreflectometry" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -427,8 +437,7 @@
           
           
           
-          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/essreflectometry/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -439,8 +448,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/essreflectometry" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
         
@@ -509,11 +517,11 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.ReferenceFilePath.html">ess.reflectometry.types.ReferenceFilePath</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.BeamSize.html">ess.reflectometry.types.BeamSize</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.CoordTransformationGraph.html">ess.reflectometry.types.CoordTransformationGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.CorrectedDetector.html">ess.reflectometry.types.CorrectedDetector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.DetectorRotation.html">ess.reflectometry.types.DetectorRotation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.RawChopper.html">ess.reflectometry.types.RawChopper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.RawSampleRotation.html">ess.reflectometry.types.RawSampleRotation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.ReducibleData.html">ess.reflectometry.types.ReducibleData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.RunUnnormalizedData.html">ess.reflectometry.types.RunUnnormalizedData</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.SampleRotation.html">ess.reflectometry.types.SampleRotation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.SampleRotationOffset.html">ess.reflectometry.types.SampleRotationOffset</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.types.SampleSize.html">ess.reflectometry.types.SampleSize</a></li>
@@ -527,6 +535,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.tools.fwhm_to_std.html">ess.reflectometry.tools.fwhm_to_std</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.tools.linlogspace.html">ess.reflectometry.tools.linlogspace</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.tools.scale_for_reflectivity_overlap.html">ess.reflectometry.tools.scale_for_reflectivity_overlap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.tools.smooth_with_resolution.html">ess.reflectometry.tools.smooth_with_resolution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.tools.BatchProcessor.html">ess.reflectometry.tools.BatchProcessor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reflectometry.tools.MultiGraphViz.html">ess.reflectometry.tools.MultiGraphViz</a></li>
 </ul>
@@ -702,8 +711,9 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.conversions.html">ess.freia.conversions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.add_coords.html">ess.freia.conversions.add_coords</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.coordinate_transformation_graph.html">ess.freia.conversions.coordinate_transformation_graph</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.divergence_angle.html">ess.freia.conversions.divergence_angle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.reflectometry_q_x.html">ess.freia.conversions.reflectometry_q_x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.outgoing_direction.html">ess.freia.conversions.outgoing_direction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.sample_coordinate_transformation_graph.html">ess.freia.conversions.sample_coordinate_transformation_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.scattering_angle.html">ess.freia.conversions.scattering_angle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.theta.html">ess.freia.conversions.theta</a></li>
 </ul>
 </details></li>
@@ -712,18 +722,30 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.corrections.html">ess.freia.corrections</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.add_coords_masks_and_apply_corrections.html">ess.freia.corrections.add_coords_masks_and_apply_corrections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.correct_by_footprint.html">ess.freia.corrections.correct_by_footprint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.add_coords_and_masks.html">ess.freia.corrections.add_coords_and_masks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.insert_run_normalization.html">ess.freia.corrections.insert_run_normalization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.normalize_by_monitor_histogram.html">ess.freia.corrections.normalize_by_monitor_histogram</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.normalize_by_monitor_integrated.html">ess.freia.corrections.normalize_by_monitor_integrated</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.prepare_sample.html">ess.freia.corrections.prepare_sample</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="ess.freia.data.html">ess.freia.data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ess.freia.mcstas.html">ess.freia.mcstas</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.load.html">ess.freia.load</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.load.load_detector_rotation.html">ess.freia.load.load_detector_rotation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.load.load_sample_rotation.html">ess.freia.load.load_sample_rotation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.data.html">ess.freia.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.data.freia_mcstas_reference_run.html">ess.freia.data.freia_mcstas_reference_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.data.freia_mcstas_sample_run.html">ess.freia.data.freia_mcstas_sample_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.data.freia_mcstas_silicon_reflectivity.html">ess.freia.data.freia_mcstas_silicon_reflectivity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.mcstas.html">ess.freia.mcstas</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.load_mcstas.html">ess.freia.mcstas.load_mcstas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.load_mcstas_monitor.html">ess.freia.mcstas.load_mcstas_monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.load_mcstas_provider.html">ess.freia.mcstas.load_mcstas_provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.mcstas_detector_geometry.html">ess.freia.mcstas.mcstas_detector_geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.mcstas_sample_position.html">ess.freia.mcstas.mcstas_sample_position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.mcstas_sample_surface_normal.html">ess.freia.mcstas.mcstas_sample_surface_normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.mcstas_source_position.html">ess.freia.mcstas.mcstas_source_position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.mcstas_wavelength_monitor.html">ess.freia.mcstas.mcstas_wavelength_monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.non_wfm_choppers.html">ess.freia.mcstas.non_wfm_choppers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.mcstas.wfm_choppers.html">ess.freia.mcstas.wfm_choppers</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.resolution.html">ess.freia.resolution</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -733,10 +755,17 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.resolution.wavelength_resolution.html">ess.freia.resolution.wavelength_resolution</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="ess.freia.types.html">ess.freia.types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ess.freia.normalization.html">ess.freia.normalization</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.types.html">ess.freia.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.DetectorRegionOfInterest.html">ess.freia.types.DetectorRegionOfInterest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.SampleSurfaceNormal.html">ess.freia.types.SampleSurfaceNormal</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.normalization.html">ess.freia.normalization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.normalization.evaluate_direct_beam.html">ess.freia.normalization.evaluate_direct_beam</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.normalization.reduce_sample_over_q.html">ess.freia.normalization.reduce_sample_over_q</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.workflow.html">ess.freia.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.mcstas_providers.html">ess.freia.workflow.mcstas_providers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.providers.html">ess.freia.workflow.providers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaMcStasMonitorHistogramWorkflow.html">ess.freia.workflow.FreiaMcStasMonitorHistogramWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaMcStasMonitorIntegratedWorkflow.html">ess.freia.workflow.FreiaMcStasMonitorIntegratedWorkflow</a></li>
@@ -922,8 +951,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -955,12 +984,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>
