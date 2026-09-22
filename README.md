@@ -20,7 +20,7 @@ essreduce
 ├── essimaging
 ├── essnmx
 ├── essreflectometry
-└── esssans
+├── esssans
 └── essspectroscopy
 ```
 
@@ -107,14 +107,19 @@ Commit the updated `pixi.lock`.
 
 ### Releasing a package
 
-Push a tag with the package prefix:
+The `.github/workflows/release.yml` workflow builds, publishes to PyPI, and deploys docs. It also automatically generates release notes based on merged pull requests.
+
+#### Using the Github web UI
+
+* Navigate to the [Releases](https://github.com/scipp/ess/releases) and click "Draft a new release".
+* Create a tag which contains the name of the package and the version, separated by a `/`: e.g. `essreduce/26.3.0`.
+* Copy the tag name in the release title, and leave the release notes empty unless you have a specific note that needs to be there.
+
+#### Using the command line
 
 ```bash
-git tag essreduce/26.3.0
-git push origin main --tags
+gh release create essreduce/26.3.0 --title essreduce/26.3.0 --notes "" -R scipp/ess
 ```
-
-The `release.yml` workflow builds, publishes to PyPI, and deploys docs.
 
 ### How CI works
 
