@@ -123,12 +123,27 @@
 .. autosummary::
    :toctree: ../generated/functions
 
-   BeerMcStasWorkflowPulseShaping
-   BeerModMcStasWorkflowKnownPeaks
-   BeerModMcStasWorkflow
+   BeerModulationAutoMcStasWorkflow
+   BeerModulationKnownPeaksMcStasWorkflow
    BeerPowderWorkflow
-   BeerPowderWorkflowAnalytical
    BeerPowderMcStasWorkflow
+```
+
+### Deprecated workflows
+
+These names remain available for existing code. Use the replacement named in each
+function's documentation and deprecation warning.
+
+```{eval-rst}
+.. currentmodule:: ess.beer
+
+.. autosummary::
+   :toctree: ../generated/functions
+
+   BeerMcStasWorkflowPulseShaping
+   BeerModMcStasWorkflow
+   BeerModMcStasWorkflowKnownPeaks
+   BeerPowderWorkflowAnalytical
 ```
 
 ### Top-level functions

@@ -1,14 +1,19 @@
 import importlib
+import re
 import sys
 
 import numpy as np
 import pytest
+import sciline as sl
 import scipp as sc
 from ess.beer import (
     BeerMcStasWorkflowPulseShaping,
     BeerModMcStasWorkflow,
     BeerModMcStasWorkflowKnownPeaks,
+    BeerModulationAutoMcStasWorkflow,
+    BeerModulationKnownPeaksMcStasWorkflow,
     BeerPowderMcStasWorkflow,
+    BeerPowderWorkflowAnalytical,
 )
 from ess.beer.data import (
     mcstas_duplex,
@@ -24,9 +29,17 @@ from ess.beer.mcstas import (
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import (
+    DspacingBins,
     DspacingDetector,
     ElasticCoordTransformGraph,
+    KeepEvents,
+    MaskedDetectorIDs,
+    NormalizedDspacing,
     SampleRun,
+    TofMask,
+    TwoThetaMask,
+    UncertaintyBroadcastMode,
+    WavelengthMask,
 )
 from scipp.testing import assert_allclose
 
@@ -35,8 +48,27 @@ from ess.reduce.nexus.types import Filename
 _DSPACE_BINS = sc.linspace('dspacing', 0.8, 2.2, 4001, unit='angstrom')
 
 
+@pytest.mark.parametrize(
+    ('factory', 'replacement'),
+    [
+        (BeerModMcStasWorkflow, 'BeerModulationAutoMcStasWorkflow'),
+        (BeerModMcStasWorkflowKnownPeaks, 'BeerModulationKnownPeaksMcStasWorkflow'),
+        (BeerMcStasWorkflowPulseShaping, 'BeerPowderMcStasWorkflow'),
+        (
+            BeerPowderWorkflowAnalytical,
+            "BeerPowderWorkflow(wavelength_from='analytical')",
+        ),
+    ],
+)
+def test_deprecated_workflow_names_warn_with_replacement(factory, replacement):
+    with pytest.warns(DeprecationWarning, match=re.escape(replacement)):
+        workflow = factory()
+
+    assert isinstance(workflow, sl.Pipeline)
+
+
 def test_can_reduce_using_known_peaks_workflow():
-    wf = BeerModMcStasWorkflowKnownPeaks()
+    wf = BeerModulationKnownPeaksMcStasWorkflow()
     wf[DHKLList] = silicon_peaks_array()
     wf[DetectorBank] = DetectorBank.north
     wf[Filename[SampleRun]] = mcstas_silicon_new_model(7)
@@ -69,7 +101,7 @@ def test_can_reduce_using_known_peaks_workflow():
     ],
 )
 def test_can_reduce_using_unknown_peaks_workflow(fname):
-    wf = BeerModMcStasWorkflow()
+    wf = BeerModulationAutoMcStasWorkflow()
     wf[Filename[SampleRun]] = fname
     wf[DetectorBank] = DetectorBank.north
     result = wf.compute(
@@ -94,27 +126,26 @@ def test_can_reduce_using_unknown_peaks_workflow(fname):
     )
 
 
-def test_pulse_shaping_workflow():
-    wf = BeerMcStasWorkflowPulseShaping()
-    wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
+@pytest.mark.parametrize(
+    'factory',
+    [BeerModulationAutoMcStasWorkflow, BeerModulationKnownPeaksMcStasWorkflow],
+)
+def test_modulation_workflows_can_normalize(factory):
+    wf = factory()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(7)
     wf[DetectorBank] = DetectorBank.north
-    res = wf.compute(
-        (WavelengthDetector[SampleRun], ElasticCoordTransformGraph[SampleRun])
-    )
-    da = res[WavelengthDetector[SampleRun]]
-    assert 'wavelength' in da.bins.coords
-    # assert dataarray has all coords required to compute dspacing
-    da = da.transform_coords(
-        ('dspacing',),
-        graph=res[ElasticCoordTransformGraph[SampleRun]],
-    )
-    h = da.hist(dspacing=_DSPACE_BINS, dim=da.dims)
-    max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
-    assert_allclose(
-        max_peak_d,
-        sc.scalar(1.6374, unit='angstrom'),
-        atol=sc.scalar(5e-4, unit='angstrom'),
-    )
+    wf[DHKLList] = silicon_peaks_array()
+    wf[DspacingBins] = sc.linspace('dspacing', 0.8, 2.2, 31, unit='angstrom')
+    wf[MaskedDetectorIDs] = MaskedDetectorIDs({})
+    wf[KeepEvents[SampleRun]] = KeepEvents[SampleRun](True)
+    wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    wf[TofMask] = None
+    wf[WavelengthMask] = None
+    wf[TwoThetaMask] = None
+
+    result = wf.compute(NormalizedDspacing[SampleRun])
+
+    assert result.bins.size().sum().value > 0
 
 
 def test_powder_mcstas_analytical_workflow_computes_dspacing():
