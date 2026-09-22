@@ -107,16 +107,20 @@ Commit the updated `pixi.lock`.
 
 ### Releasing a package
 
-Currently, releases **must** be done via the Github web UI:
+The `.github/workflows/release.yml` workflow builds, publishes to PyPI, and deploys docs. It also automatically generates release notes based on merged pull requests.
+
+#### Using the Github web UI
 
 * Navigate to the [Releases](https://github.com/scipp/ess/releases) and click "Draft a new release".
 * Create a tag which contains the name of the package and the version, separated by a `/`: e.g. `essreduce/26.3.0`.
 * Copy the tag name in the release title, and leave the release notes empty unless you have a specific note that needs to be there.
 * The release notes will be populated during the release build, as it figures out which PRs are relevant to the given release.
 
-The `release.yml` workflow builds, publishes to PyPI, and deploys docs.
+#### Using the command line
 
-*Creating a release via pushing a tag from the command line is currently broken (because of the release notes bot).*
+```bash
+gh release create essreduce/26.3.0 --title essreduce/26.3.0 --notes "" -R scipp/ess
+```
 
 ### How CI works
 
