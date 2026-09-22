@@ -631,3 +631,25 @@ def test_choppers_rotate_enough_times_with_slow_neutrons_to_pollute_lut():
         ).max()
         < sc.scalar(0.1, unit='angstrom^2')
     ).value
+
+
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_drops_choppers_with_zero_frequency(wavelength_from):
+    wf = _make_workflow(wavelength_from)
+    wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    if wavelength_from == "simulation":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 77
+
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
+        sc.scalar(35.0, unit='m'),
+        sc.scalar(65.0, unit='m'),
+    )
+    wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
+    wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
+
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+    at_detector = table.array['distance', -1]
+
+    assert not np.isnan(at_detector.values).all()

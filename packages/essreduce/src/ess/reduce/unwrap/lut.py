@@ -523,6 +523,11 @@ def simulate_chopper_cascade_using_tof(
     tof_choppers = []
     for name, ch in choppers.items():
         chop = tof.Chopper.from_diskchopper(ch, name=name)
+        # `tof` currently treats choppers with zero frequency as always open, which is
+        # what we want. However, to guard agains possible future changes in `tof`'s
+        # behavior, we explicitly omit choppers with zero frequency.
+        if ch.frequency.value == 0:
+            continue
         chop.distance = chopper_distance_along_beam(ch.axle_position, source_position)
         tof_choppers.append(chop)
 
@@ -704,6 +709,10 @@ def compute_frame_sequence(
 
     chops = {}
     for key, ch in disk_choppers.items():
+        # Skip choppers with zero frequency as they are treated as parked (not in use).
+        if ch.frequency.value == 0:
+            continue
+
         chopper_distance = chopper_distance_along_beam(
             ch.axle_position, source_position
         )
