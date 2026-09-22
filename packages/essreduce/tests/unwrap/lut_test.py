@@ -10,7 +10,12 @@ from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import AnyRun, Position
-from ess.reduce.unwrap import GenericUnwrapWorkflow, LookupTableWorkflow, SourceBounds
+from ess.reduce.unwrap import (
+    GenericUnwrapWorkflow,
+    LookupTableWorkflow,
+    LtotalRange,
+    SourceBounds,
+)
 from ess.reduce.unwrap.lut import _polygon_intersections, chopper_distance_along_beam
 
 sl = pytest.importorskip("sciline")
@@ -395,11 +400,10 @@ def test_lut_workflow_guesses_pulse_stride():
 def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
     wf = _make_workflow(wavelength_from)
     # Add a very slowly rotating chopper that will block all neutrons.
-    freq = sc.scalar(0.1, unit='Hz')
     wf[unwrap.DiskChoppers[AnyRun]] = {
         'chopper1': DiskChopper(
             axle_position=sc.vector([0, 0, -15.0], unit='m'),
-            frequency=freq,
+            frequency=sc.scalar(0.1, unit='Hz'),
             beam_position=sc.scalar(0.0, unit='deg'),
             phase=sc.scalar(0.0, unit='rad'),
             slit_begin=sc.array(dims=['cutout'], values=[0.0], unit='deg'),
@@ -408,8 +412,6 @@ def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
             radius=sc.scalar(0.35, unit='m'),
         )
     }
-    # Need to synchronize the source period with the chopper frequency.
-    wf[unwrap.PulsePeriod] = 1.0 / freq
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
     # Need to force the pulse stride so that it doesn't get set to a large value due to
     # the slow chopper.
@@ -545,3 +547,87 @@ def test_choppers_rotate_enough_times_to_catch_slow_neutrons():
 
     assert secondary_subframe.wavelength.min() > sc.scalar(12, unit='angstrom')
     assert secondary_subframe.wavelength.max() < sc.scalar(15, unit='angstrom')
+
+
+def test_choppers_rotate_enough_times_with_slow_neutrons_to_pollute_lut():
+    choppers = {
+        "chopper1": DiskChopper(
+            axle_position=sc.vector([0, 0, 28.4], unit='m'),
+            frequency=sc.scalar(-14, unit='Hz'),
+            beam_position=sc.scalar(0, unit='deg'),
+            phase=sc.scalar(-112.3, unit='deg'),
+            slit_begin=sc.array(dims=["cutout"], values=[-38.5], unit='deg'),
+            slit_end=sc.array(dims=["cutout"], values=[38.5], unit='deg'),
+            slit_height=None,
+            radius=None,
+        ),
+        "chopper2a": DiskChopper(
+            axle_position=sc.vector([0, 0, 50.9774], unit='m'),
+            frequency=sc.scalar(-14, unit='Hz'),
+            beam_position=sc.scalar(0, unit='deg'),
+            phase=sc.scalar(194.1, unit='deg'),
+            slit_begin=sc.array(dims=["cutout"], values=[-70.0], unit='deg'),
+            slit_end=sc.array(dims=["cutout"], values=[70.0], unit='deg'),
+            slit_height=None,
+            radius=None,
+        ),
+        "chopper2b": DiskChopper(
+            axle_position=sc.vector([0, 0, 51.0024], unit='m'),
+            frequency=sc.scalar(-14, unit='Hz'),
+            beam_position=sc.scalar(0, unit='deg'),
+            phase=sc.scalar(168.0, unit='deg'),
+            slit_begin=sc.array(dims=["cutout"], values=[-70.0], unit='deg'),
+            slit_end=sc.array(dims=["cutout"], values=[70.0], unit='deg'),
+            slit_height=None,
+            radius=None,
+        ),
+    }
+    wf = _make_workflow("analytical")
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    dist = sc.scalar(157.5, unit='m')
+    wf[LtotalRange[AnyRun, snx.NXdetector]] = dist, dist
+
+    # In the center of the event time offset range, the table should be smooth, free
+    # from overlap artifacts.
+    eto_range = sc.scalar(10000, unit='us'), sc.scalar(60000, unit='us')
+
+    # Using a normal wavelength range for the source pulse, we expect the choppers to
+    # rotate enough times to create the main and secondary subframes in the last frame.
+    # The secondary frame should travel all the way to the detector and pollute the
+    # lookup table results, meaning it should have large variances.
+    wf[SourceBounds] = SourceBounds(
+        time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+        wavelength=(
+            sc.scalar(0.001, unit='angstrom'),
+            sc.scalar(15.0, unit='angstrom'),
+        ),
+    )
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+    at_detector = table.array['distance', -1]
+
+    assert (
+        sc.variances(
+            at_detector['event_time_offset', slice(eto_range[0], eto_range[1])]
+        ).max()
+        > sc.scalar(10.0, unit='angstrom^2')
+    ).value
+
+    # Using a narrower wavelength range for the source pulse, the secondary frame
+    # should be suppressed, and the variances at the detector should be lower.
+    wf[SourceBounds] = SourceBounds(
+        time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+        wavelength=(
+            sc.scalar(0.001, unit='angstrom'),
+            sc.scalar(10.0, unit='angstrom'),
+        ),
+    )
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+    at_detector = table.array['distance', -1]
+
+    assert (
+        sc.variances(
+            at_detector['event_time_offset', slice(eto_range[0], eto_range[1])]
+        ).max()
+        < sc.scalar(0.1, unit='angstrom^2')
+    ).value

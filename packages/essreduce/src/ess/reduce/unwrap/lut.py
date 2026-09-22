@@ -26,14 +26,6 @@ from .types import (
     WavelengthLutMode,
 )
 
-# We define a maximum instrument length which is used to determine how many chopper
-# rotations should be performed when computing the chopper frame sequence.
-# We need to rotate the choppers for long enough to make sure we capture cases where
-# very slow neutrons pass through chopper openings multiple pulse periods later.
-# The most robust way is to define the longest possible distance that could be traveled
-# and compute how long it would take the slowest neutrons to reach it.
-MAXIMUM_INSTRUMENT_LENGTH = sc.scalar(500.0, unit='m')
-
 
 def _wavelength_to_speed(wavelength: sc.Variable) -> sc.Variable:
     """
@@ -646,7 +638,12 @@ def _estimate_wavelength_by_polygon_centers(
     # We determine the number of frame periods to shift by calculating how many periods
     # are needed to cover the maximum arrival time in the subframes.
     max_time = sc.reduce([f.time.max() for f in subframes]).max()
-    nperiods = int(max_time.to(unit=time_unit).value / frame_period.value) + 1
+    # Why `- noffset` below:
+    # nperiods is computed from the absolute max_time, but the copies are shifted by
+    # noffset + i. So the first noffset extra copies end up at negative times and only
+    # contribute NaNs. This is correct, but for long flight paths it adds work in the
+    # per-distance loop, so int(max_time / frame_period) - noffset + 1 is sufficient.
+    nperiods = int(max_time.to(unit=time_unit).value / frame_period.value) - noffset + 1
 
     polygons = [
         np.stack(
@@ -693,29 +690,34 @@ def compute_frame_sequence(
         pulse-skipping.
     """
 
-    # The `pulse_frequency` parameter in time_offset_open and time_offset_close below
-    # decides how many rotations the chopper will perform when computing the open and
-    # close times.
-    # We need to cover the entire time range from 0 to the time it takes the slowest
-    # neutron to travel the maximum instrument length.
-    travel_time = source_bounds.time[1].to(unit='s') + (
-        MAXIMUM_INSTRUMENT_LENGTH / _wavelength_to_speed(source_bounds.wavelength[1])
-    ).to(unit='s')
-    nperiods = sc.ceil(travel_time / pulse_period)
-    frequency_for_chopper_rotation = 1.0 / (nperiods * pulse_period)
-
-    chops = {
-        key: chopper_cascade.Chopper(
-            distance=chopper_distance_along_beam(ch.axle_position, source_position),
-            time_open=ch.time_offset_open(
-                pulse_frequency=frequency_for_chopper_rotation
-            ),
-            time_close=ch.time_offset_close(
-                pulse_frequency=frequency_for_chopper_rotation
-            ),
+    chops = {}
+    for key, ch in disk_choppers.items():
+        chopper_distance = chopper_distance_along_beam(
+            ch.axle_position, source_position
         )
-        for key, ch in disk_choppers.items()
-    }
+        # The `pulse_frequency` parameter in time_offset_open and time_offset_close
+        # below decides how many rotations the chopper will perform when computing the
+        # open and close times.
+        # We need to cover the entire time range from 0 to the time it takes the
+        # slowest neutron to travel the distance to the chopper.
+        slowest_to_chopper = chopper_distance / _wavelength_to_speed(
+            source_bounds.wavelength[1]
+        )
+        travel_time = (
+            source_bounds.time[1].to(unit='s')
+            + (pulse_stride - 1) * pulse_period.to(unit='s')
+            + slowest_to_chopper.to(unit='s')
+        )
+
+        freq = abs(ch.frequency).to(unit='Hz')
+        nrot = int(np.ceil((travel_time * freq).value)) + 1
+        pulse_frequency = freq / nrot
+
+        chops[key] = chopper_cascade.Chopper(
+            distance=chopper_distance,
+            time_open=ch.time_offset_open(pulse_frequency=pulse_frequency),
+            time_close=ch.time_offset_close(pulse_frequency=pulse_frequency),
+        )
 
     frames = chopper_cascade.FrameSequence.from_source_pulse(
         time_min=source_bounds.time[0],
