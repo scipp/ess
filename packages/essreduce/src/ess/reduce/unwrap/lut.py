@@ -5,7 +5,7 @@ Utilities for computing wavelength lookup tables.
 """
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Generic, NewType
 
 import numpy as np
@@ -165,6 +165,16 @@ SimulationMinWavelength = NewType("SimulationMinWavelength", sc.Variable | None)
 SimulationMaxWavelength = NewType("SimulationMaxWavelength", sc.Variable | None)
 """Maximum wavelength of the neutrons in the simulation used to create the lookup table.
 """
+
+
+class ProcessedDiskChoppers(
+    sl.Scope[RunType, dict[str, DiskChopper]], dict[str, DiskChopper]
+):
+    """Processed disk choppers:
+    If a chopper has 0 frequency, it is treated as parked/inactive, and is dropped.
+    If a chopper's frequency is not in sync with the source frequency, it is replaced
+    with a chopper which is always closed.
+    """
 
 
 @dataclass
@@ -481,8 +491,38 @@ def chopper_distance_along_beam(
     return (axle_position - source_position).fields.z
 
 
+def _is_int_or_inverse_int(x: sc.Variable, *, rtol: sc.Variable) -> bool:
+    a = sc.all(abs(sc.round(x) - x) < rtol)
+    y = sc.reciprocal(x)
+    b = sc.all(abs(sc.round(y) - y) < rtol)
+    return bool(a | b)
+
+
+def process_disk_choppers(
+    choppers: DiskChoppers[RunType], pulse_period: PulsePeriod
+) -> ProcessedDiskChoppers[RunType]:
+    out = {}
+    for key, ch in choppers.items():
+        if ch.frequency.value == 0:
+            continue
+
+        # If the frequency is not synced to the source pulse frequency, we transform
+        # this chopper to always be closed.
+        freq = abs(ch.frequency).to(unit='Hz')
+        pulse_frequency = sc.reciprocal(pulse_period).to(unit=freq.unit)
+        quot = freq / pulse_frequency
+        if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
+            empty = sc.array(dims=['cutout'], values=[], unit='deg')
+            out[key] = replace(
+                ch, frequency=pulse_frequency, slit_begin=empty, slit_end=empty
+            )
+        else:
+            out[key] = ch
+    return ProcessedDiskChoppers[RunType](out)
+
+
 def simulate_chopper_cascade_using_tof(
-    choppers: DiskChoppers[RunType],
+    choppers: ProcessedDiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
     neutrons: NumberOfSimulatedNeutrons,
     pulse_stride: PulseStride[RunType],
@@ -523,11 +563,6 @@ def simulate_chopper_cascade_using_tof(
     tof_choppers = []
     for name, ch in choppers.items():
         chop = tof.Chopper.from_diskchopper(ch, name=name)
-        # `tof` currently treats choppers with zero frequency as always open, which is
-        # what we want. However, to guard against possible future changes in `tof`'s
-        # behavior, we explicitly omit choppers with zero frequency.
-        if ch.frequency.value == 0:
-            continue
         chop.distance = chopper_distance_along_beam(ch.axle_position, source_position)
         tof_choppers.append(chop)
 
@@ -681,16 +716,9 @@ def _estimate_wavelength_by_polygon_centers(
     )
 
 
-def _is_int_or_inverse_int(x: sc.Variable, *, rtol: sc.Variable) -> bool:
-    a = sc.all(abs(sc.round(x) - x) < rtol)
-    y = sc.reciprocal(x)
-    b = sc.all(abs(sc.round(y) - y) < rtol)
-    return bool(a | b)
-
-
 def compute_frame_sequence(
     pulse_period: PulsePeriod,
-    disk_choppers: DiskChoppers[RunType],
+    disk_choppers: ProcessedDiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
     source_bounds: SourceBounds,
     pulse_stride: PulseStride[RunType],
@@ -908,19 +936,16 @@ def ltotal_range_from_ltotal_monitor(
 
 
 def guess_pulse_stride_from_choppers(
-    choppers: DiskChoppers[RunType], pulse_period: PulsePeriod
+    choppers: ProcessedDiskChoppers[RunType], pulse_period: PulsePeriod
 ) -> PulseStride[RunType]:
     """
     If the pulse stride is not provided, we try to guess it from the chopper parameters.
     If there is a chopper rotating slower than the pulse_period, we use its rotation
     frequency to estimate the pulse stride.
-    We omit choppers with a zero rotation frequency, as they are considered inactive.
     """
     stride = 1
     for chopper in choppers.values():
         f = sc.abs(chopper.frequency)
-        if f.value == 0:
-            continue
         stride = max(stride, round((1 / pulse_period / f).to(unit="").value))
     return PulseStride[RunType](stride)
 
@@ -965,6 +990,7 @@ def providers(
         return (load_lookup_table_from_file,)
 
     common = (
+        process_disk_choppers,
         ltotal_range_from_ltotal_detector,
         ltotal_range_from_ltotal_monitor,
         guess_pulse_stride_from_choppers,
