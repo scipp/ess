@@ -114,7 +114,6 @@ The `.github/workflows/release.yml` workflow builds, publishes to PyPI, and depl
 * Navigate to the [Releases](https://github.com/scipp/ess/releases) and click "Draft a new release".
 * Create a tag which contains the name of the package and the version, separated by a `/`: e.g. `essreduce/26.3.0`.
 * Copy the tag name in the release title, and leave the release notes empty unless you have a specific note that needs to be there.
-* The release notes will be populated during the release build, as it figures out which PRs are relevant to the given release.
 
 #### Using the command line
 
