@@ -10,11 +10,13 @@ concern (see :mod:`ess.reduce.spec.conversions`).
 
 Value defaults (start, stop, number of bins) are deliberately not provided
 here: sensible values depend on the workflow and instrument, so workflow
-authors set them at the use site, e.g.::
+authors set them at the use site, next to the field's title and description::
 
     class MyParams(pydantic.BaseModel):
-        wavelength: WavelengthEdges = WavelengthEdges(
-            start=1.0, stop=10.0, num_bins=200
+        wavelength: WavelengthEdges = pydantic.Field(
+            title='Wavelength bins',
+            description='Bin edges for binning in wavelength.',
+            default=WavelengthEdges(start=1.0, stop=10.0, num_bins=200),
         )
 """
 

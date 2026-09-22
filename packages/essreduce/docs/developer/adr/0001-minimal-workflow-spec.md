@@ -83,6 +83,13 @@ The field defaults to `NoParams` (a closed model with no fields), so consumers
 never branch on params being absent, and sending parameters to a workflow that
 takes none is a validation error rather than silently ignored.
 
+Value defaults belong to the workflow's params model, set by the workflow
+author next to the field's title and description, never to the shared
+vocabulary in `ess.reduce.spec.parameters`, whose sensible values depend on the
+workflow and instrument. A default makes the field optional in a request, so a
+framework that records provenance persists the validated model, in which every
+default has been filled in, rather than the request as submitted.
+
 ### Outputs are a typed model in the same vocabulary
 
 Outputs are likewise a pydantic model class (`outputs: type[BaseModel]`,
