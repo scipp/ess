@@ -253,6 +253,19 @@ def _compute_mean_wavelength(
     return mean_wavelength
 
 
+def _unpack_ltotal_range(
+    ltotal_range: tuple[sc.Variable, sc.Variable], distance_unit: str
+) -> tuple[sc.Variable, sc.Variable]:
+    min_dist = ltotal_range[0].to(unit=distance_unit)
+    max_dist = ltotal_range[1].to(unit=distance_unit)
+    if (min_dist > max_dist).value:
+        raise ValueError(
+            "Building the lookup table failed: the minimum distance in the total range "
+            f"({min_dist:c}) is greater than the maximum distance ({max_dist:c})."
+        )
+    return min_dist, max_dist
+
+
 def make_wavelength_lut_from_simulation(
     simulation: SimulationResults[RunType],
     ltotal_range: LtotalRange[RunType, Component],
@@ -326,8 +339,7 @@ def make_wavelength_lut_from_simulation(
     pulse_period = pulse_period.to(unit=time_unit)
     frame_period = pulse_period * pulse_stride
 
-    min_dist = ltotal_range[0].to(unit=distance_unit)
-    max_dist = ltotal_range[1].to(unit=distance_unit)
+    min_dist, max_dist = _unpack_ltotal_range(ltotal_range, distance_unit)
 
     # We need to bin the data below, to compute the weighted mean of the wavelength.
     # This results in data with bin edges.
@@ -767,13 +779,7 @@ def make_wavelength_lut_from_polygons(
     pulse_period = pulse_period.to(unit=time_unit)
     frame_period = pulse_period * pulse_stride
 
-    dist0 = ltotal_range[0].to(unit=distance_unit)
-    dist1 = ltotal_range[1].to(unit=distance_unit)
-    # By default, the minimum and maximum distances should be the first and second
-    # elements of the total range. But if the user set them manually on the workflow
-    # we need to make sure we pick the minimum and maximum distances.
-    min_dist = min(dist0, dist1)
-    max_dist = max(dist0, dist1)
+    min_dist, max_dist = _unpack_ltotal_range(ltotal_range, distance_unit)
 
     # We want to give the 2d interpolator a table that covers the requested range,
     # hence we need to extend the range by at least half a resolution in each direction.
