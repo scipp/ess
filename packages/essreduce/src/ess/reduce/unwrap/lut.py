@@ -524,7 +524,7 @@ def simulate_chopper_cascade_using_tof(
     for name, ch in choppers.items():
         chop = tof.Chopper.from_diskchopper(ch, name=name)
         # `tof` currently treats choppers with zero frequency as always open, which is
-        # what we want. However, to guard agains possible future changes in `tof`'s
+        # what we want. However, to guard against possible future changes in `tof`'s
         # behavior, we explicitly omit choppers with zero frequency.
         if ch.frequency.value == 0:
             continue
@@ -681,6 +681,13 @@ def _estimate_wavelength_by_polygon_centers(
     )
 
 
+def _is_int_or_inverse_int(x: sc.Variable, *, rtol: sc.Variable) -> bool:
+    a = sc.all(abs(sc.round(x) - x) < rtol)
+    y = sc.reciprocal(x)
+    b = sc.all(abs(sc.round(y) - y) < rtol)
+    return bool(a | b)
+
+
 def compute_frame_sequence(
     pulse_period: PulsePeriod,
     disk_choppers: DiskChoppers[RunType],
@@ -716,29 +723,48 @@ def compute_frame_sequence(
         chopper_distance = chopper_distance_along_beam(
             ch.axle_position, source_position
         )
-        # The `pulse_frequency` parameter in time_offset_open and time_offset_close
-        # below decides how many rotations the chopper will perform when computing the
-        # open and close times.
-        # We need to cover the entire time range from 0 to the time it takes the
-        # slowest neutron to travel the distance to the chopper.
-        slowest_to_chopper = chopper_distance / _wavelength_to_speed(
-            source_bounds.wavelength[1]
-        )
-        travel_time = (
-            source_bounds.time[1].to(unit='s')
-            + (pulse_stride - 1) * pulse_period.to(unit='s')
-            + slowest_to_chopper.to(unit='s')
-        )
 
+        # If the frequency is not synced to the source pulse frequency, we transform
+        # this chopper to always be closed.
         freq = abs(ch.frequency).to(unit='Hz')
-        nrot = int(np.ceil((travel_time * freq).value)) + 1
-        pulse_frequency = freq / nrot
+        pulse_frequency = sc.reciprocal(pulse_period).to(unit=freq.unit)
+        quot = freq / pulse_frequency
+        if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
+            chops[key] = chopper_cascade.Chopper(
+                distance=chopper_distance,
+                time_open=sc.array(dims=["cutout"], values=[], unit='s'),
+                time_close=sc.array(dims=["cutout"], values=[], unit='s'),
+            )
+        else:
+            # The `pulse_frequency` parameter in time_offset_open and time_offset_close
+            # below decides how many rotations the chopper will perform when computing
+            # the open and close times.
+            # We need to cover the entire time range from 0 to the time it takes the
+            # slowest neutron to travel the distance to the chopper.
+            slowest_to_chopper = chopper_distance / _wavelength_to_speed(
+                source_bounds.wavelength[1]
+            )
+            travel_time = (
+                source_bounds.time[1].to(unit='s')
+                + (pulse_stride - 1) * pulse_period.to(unit='s')
+                + slowest_to_chopper.to(unit='s')
+            )
 
-        chops[key] = chopper_cascade.Chopper(
-            distance=chopper_distance,
-            time_open=ch.time_offset_open(pulse_frequency=pulse_frequency),
-            time_close=ch.time_offset_close(pulse_frequency=pulse_frequency),
-        )
+            # In addition, the time_offset_open and time_offset_close below require the
+            # pulse_frequency to be an integer multiple of the pulse frequency or vice
+            # versa.
+            nrot = int(np.ceil((travel_time * freq).value)) + 1
+            pulse_frequency_for_diskchopper = freq / nrot
+
+            chops[key] = chopper_cascade.Chopper(
+                distance=chopper_distance,
+                time_open=ch.time_offset_open(
+                    pulse_frequency=pulse_frequency_for_diskchopper
+                ),
+                time_close=ch.time_offset_close(
+                    pulse_frequency=pulse_frequency_for_diskchopper
+                ),
+            )
 
     frames = chopper_cascade.FrameSequence.from_source_pulse(
         time_min=source_bounds.time[0],
