@@ -87,9 +87,13 @@ class DatasetRef(BaseModel, frozen=True):
     """
     Data the framework did not compute, named by an identity the framework owns.
 
-    What the identity means, a catalogue PID or a local file's identity, is not
-    the spec's concern, and neither is the dataset's format: a dataset that is
-    not what the field declares fails when the workflow reads it.
+    The identity string is opaque to the spec and interpreted only by the
+    framework that minted it. A framework with several kinds of identity, a
+    catalogue PID, an instrument and run number, a path, makes the string
+    self-describing, ``pid:...`` or ``run:...``, and normalizes it before it
+    enters a record, because two references are equal only when their strings
+    are. The dataset's format is not the spec's concern either: a dataset that
+    is not what the field declares fails when the workflow reads it.
     """
 
     dataset: str = Field(min_length=1)

@@ -71,6 +71,17 @@ class TestValidation:
         with pytest.raises(ValidationError):
             Params(data=OUTPUT_REF, runs=['/data/run.nxs'])
 
+    def test_dataset_identity_is_an_opaque_string(self) -> None:
+        # The spec does not normalize: the framework that minted the identity is
+        # the one that knows a run number and the PID minted from it are one
+        # dataset.
+        assert DatasetRef(dataset='pid:20.500.12269/abc') == DatasetRef(
+            dataset='pid:20.500.12269/abc'
+        )
+        assert DatasetRef(dataset='run:dream/1') != DatasetRef(
+            dataset='pid:20.500.12269/abc'
+        )
+
     def test_literal_or_reference_union_accepts_both(self) -> None:
         params = Params(data=OUTPUT_REF, centre={'value': (0.1, 0.2), 'unit': 'm'})
         assert params.centre == Quantity(value=(0.1, 0.2), unit='m')

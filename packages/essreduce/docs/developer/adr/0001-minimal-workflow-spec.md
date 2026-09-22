@@ -117,11 +117,23 @@ case.
 A reference is plain data naming data that exists elsewhere: an output of an
 earlier run (`OutputRef`: record, output name, optionally one element of a
 collection by key), or a dataset the framework did not compute (`DatasetRef`:
-an identity string whose meaning, a catalogue PID or a local file's identity,
-belongs to the framework). A field may be a union of a literal and a reference,
+one identity string). A field may be a union of a literal and a reference,
 for values a user may type in or take from a previous run. Collections,
 `list[...]` and `dict[str, ...]` of one declared type, are allowed on both
 sides, and a reference may name one element of a collection output.
+
+The identity string is opaque to the spec and interpreted only by the framework
+that minted it. The spec has no use for the kind of identity, a catalogue PID,
+an instrument and run number, or a path. A structured form, `provider` plus
+`id`, would put one framework's list of identity kinds into a layer every
+framework shares, and JSON Schema could not validate the list anyway. A
+framework with several kinds makes the string self-describing instead, as a URI
+does with its scheme: `pid:20.500.12269/abc`, `run:dream/1`. The string is also
+the framework's canonical identity. `DatasetRef` compares as a string, so a run
+number and the PID minted from it are two references unless the framework
+normalizes before a reference enters a record. Records therefore hold
+references that only their own framework can resolve; sharing records between
+frameworks needs an agreed encoding, which this ADR does not fix.
 
 The spec says nothing about how a workflow gets at the bytes. Whether a
 reference becomes a local path or an in-memory object is decided where the
