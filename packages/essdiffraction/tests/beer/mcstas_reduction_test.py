@@ -1,6 +1,7 @@
 import importlib
 import re
 import sys
+from math import tau
 
 import numpy as np
 import pytest
@@ -146,6 +147,7 @@ def test_modulation_workflows_can_normalize(factory):
     result = wf.compute(NormalizedDspacing[SampleRun])
 
     assert result.bins.size().sum().value > 0
+    assert 'Q' in result.bins.coords
 
 
 def test_powder_mcstas_analytical_workflow_computes_dspacing():
@@ -157,6 +159,7 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
 
     assert 'wavelength' in da.bins.coords
     assert 'dspacing' in da.bins.coords
+    assert_allclose(da.bins.coords['Q'], tau / da.bins.coords['dspacing'])
     h = da.hist(dspacing=_DSPACE_BINS, dim=da.dims)
     max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
     assert_allclose(

@@ -104,7 +104,7 @@ CalibrationData = NewType("CalibrationData", sc.Dataset | None)
 
 class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Data with scattering coordinates computed for all events: wavelength, 2theta,
-    d-spacing."""
+    d-spacing, and Q."""
 
 
 DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)

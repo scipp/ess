@@ -4,7 +4,11 @@ import numpy as np
 import pytest
 import scipp as sc
 import scipp.testing
-from ess.powder.conversion import to_dspacing_with_calibration
+import scippneutron as scn
+from ess.powder.conversion import (
+    add_scattering_coordinates_from_positions,
+    to_dspacing_with_calibration,
+)
 
 
 @pytest.fixture(params=['random', 'zero'])
@@ -85,6 +89,28 @@ def test_dspacing_with_calibration_roundtrip_with_wavelength(calibration):
     # automatically broadcast to the shape of recomputed_tof, so the check is
     # effectively comparing each spectrum's recomputed_tof to the same initial_tof.
     assert sc.allclose(recomputed_tof, initial_wavelength.coords['tof'])
+
+
+def test_q_is_preserved_when_dspacing_is_calibrated(calibration):
+    data = sc.DataArray(
+        sc.ones(sizes={'spectrum': calibration.sizes['spectrum'], 'wavelength': 3}),
+        coords={
+            'spectrum': calibration.coords['spectrum'],
+            'wavelength': sc.linspace('wavelength', 10.0, 100.0, 3, unit='angstrom'),
+            'two_theta': sc.scalar(1.0, unit='rad'),
+            'Ltotal': sc.scalar(1.0, unit='m'),
+        },
+    )
+
+    graph = scn.conversion.graph.tof.elastic('wavelength')
+    out = add_scattering_coordinates_from_positions(
+        data, graph=graph, calibration=calibration
+    )
+
+    expected = (
+        4 * np.pi * sc.sin(data.coords['two_theta'] / 2) / data.coords['wavelength']
+    ).rename_dims({'wavelength': 'Q'})
+    scipp.testing.assert_allclose(out.coords['Q'], expected)
 
 
 def test_dspacing_with_calibration_consumes_positions(calibration):
