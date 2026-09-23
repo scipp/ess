@@ -511,6 +511,13 @@ def process_disk_choppers(
         freq = abs(ch.frequency).to(unit='Hz')
         pulse_frequency = sc.reciprocal(pulse_period).to(unit=freq.unit)
         quot = freq / pulse_frequency
+        # Note on possible edge-cases:
+        # If we have two choppers, one at 14/3 Hz and another at 14/4 Hz, both pass
+        # the check here, and the table is built without error, even though the
+        # 14/3 Hz chopper turns 4/3 times per frame. This would most probably be the
+        # result of an error in the chopper settings. We delay implementing a proper
+        # handling of this for now, as the solution is not obvious, and it is
+        # unlikely to happen in practice.
         if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
             empty = sc.array(dims=['cutout'], values=[], unit='deg')
             out[key] = replace(
