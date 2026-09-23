@@ -377,7 +377,6 @@ class RawChoppers(
 
 
 class DiskChoppers(
-    sciline.Scope[RunType, sc.DataGroup[DiskChopper]],
-    sc.DataGroup[DiskChopper],
+    sciline.Scope[RunType, dict[str, DiskChopper]], dict[str, DiskChopper]
 ):
     """All disk choppers parsed from a NeXus file."""

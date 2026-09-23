@@ -5,7 +5,7 @@ Utilities for computing wavelength lookup tables.
 """
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Generic, NewType
 
 import numpy as np
@@ -25,6 +25,18 @@ from .types import (
     PulseStrideOffset,
     WavelengthLutMode,
 )
+
+
+def _wavelength_to_speed(wavelength: sc.Variable) -> sc.Variable:
+    """
+    Convert wavelength to speed.
+
+    Parameters
+    ----------
+    wavelength:
+        Wavelength of the neutrons.
+    """
+    return (sc.constants.h / sc.constants.m_n) / wavelength
 
 
 @dataclass
@@ -58,7 +70,7 @@ class BeamlineComponentReading:
     distance: sc.Variable
 
     def __post_init__(self):
-        self.speed = (sc.constants.h / sc.constants.m_n) / self.wavelength
+        self.speed = _wavelength_to_speed(self.wavelength).to(unit='m/s')
 
 
 @dataclass
@@ -155,6 +167,16 @@ SimulationMaxWavelength = NewType("SimulationMaxWavelength", sc.Variable | None)
 """
 
 
+class ProcessedDiskChoppers(
+    sl.Scope[RunType, dict[str, DiskChopper]], dict[str, DiskChopper]
+):
+    """Processed disk choppers:
+    If a chopper has 0 frequency, it is treated as parked/inactive, and is dropped.
+    If a chopper's frequency is not in sync with the source frequency, it is replaced
+    with a chopper which is always closed.
+    """
+
+
 @dataclass
 class SourceBounds:
     """Time and wavelength bounds of the neutrons in the source pulse that encompass
@@ -241,6 +263,19 @@ def _compute_mean_wavelength(
     return mean_wavelength
 
 
+def _unpack_ltotal_range(
+    ltotal_range: tuple[sc.Variable, sc.Variable], distance_unit: str
+) -> tuple[sc.Variable, sc.Variable]:
+    min_dist = ltotal_range[0].to(unit=distance_unit)
+    max_dist = ltotal_range[1].to(unit=distance_unit)
+    if (min_dist > max_dist).value:
+        raise ValueError(
+            "Building the lookup table failed: the minimum distance in the total range "
+            f"({min_dist:c}) is greater than the maximum distance ({max_dist:c})."
+        )
+    return min_dist, max_dist
+
+
 def make_wavelength_lut_from_simulation(
     simulation: SimulationResults[RunType],
     ltotal_range: LtotalRange[RunType, Component],
@@ -314,8 +349,7 @@ def make_wavelength_lut_from_simulation(
     pulse_period = pulse_period.to(unit=time_unit)
     frame_period = pulse_period * pulse_stride
 
-    min_dist = ltotal_range[0].to(unit=distance_unit)
-    max_dist = ltotal_range[1].to(unit=distance_unit)
+    min_dist, max_dist = _unpack_ltotal_range(ltotal_range, distance_unit)
 
     # We need to bin the data below, to compute the weighted mean of the wavelength.
     # This results in data with bin edges.
@@ -457,8 +491,74 @@ def chopper_distance_along_beam(
     return (axle_position - source_position).fields.z
 
 
+def _is_int_or_inverse_int(x: sc.Variable, *, rtol: sc.Variable) -> bool:
+    a = sc.all(abs(sc.round(x) - x) < rtol)
+    y = sc.reciprocal(x)
+    b = sc.all(abs(sc.round(y) - y) < rtol)
+    return bool(a | b)
+
+
+def process_disk_choppers(
+    choppers: DiskChoppers[RunType], pulse_period: PulsePeriod
+) -> ProcessedDiskChoppers[RunType]:
+    """
+    Iterate through the choppers and drop any choppers that have a frequency of 0 Hz.
+    They are considered to be parked/inactive.
+    In addition, if a chopper's frequency is not in sync with the source frequency
+    (neither a multiple of the source frequency, nor an integer fraction of it), it
+    is replaced with a chopper that is always closed.
+    This is because we cannot always find a frame_period over which we can find
+    periodicity for all choppers without making it arbitrary long.
+    Such chopper frequencies are most probably a result of an error in chopper settings,
+    and the simplest course of action is to treat them as always closed, which ensures
+    we do not compute an invalid wavelength lookup table from them.
+
+    Parameters
+    ----------
+    choppers:
+        A dict of DiskChopper objects representing the choppers in the beamline.
+    pulse_period:
+        Period of the source pulses, i.e., time between consecutive pulse starts.
+    """
+    out = {}
+    for key, ch in choppers.items():
+        if ch.frequency.value == 0:
+            continue
+
+        # If the frequency is not synced to the source pulse frequency, we transform
+        # this chopper to always be closed.
+        freq = abs(ch.frequency).to(unit='Hz')
+        pulse_frequency = sc.reciprocal(pulse_period).to(unit=freq.unit)
+        quot = freq / pulse_frequency
+        # Note on possible edge-cases:
+        # If we have two choppers, one at 14/3 Hz and another at 14/4 Hz, both pass
+        # the check here, and the table is built without error, even though the
+        # 14/3 Hz chopper turns 4/3 times per frame. This would most probably be the
+        # result of an error in the chopper settings. We delay implementing a proper
+        # handling of this for now, as the solution is not obvious (e.g. is it ok to
+        # have both 14/2 Hz and 14/4 Hz?), and it is unlikely to happen in practice.
+        if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
+            dim = ch.slit_begin.dim
+            empty = sc.array(dims=[dim], values=[], unit='deg')
+            height = (
+                None
+                if ch.slit_height is None
+                else sc.array(dims=[dim], values=[], unit=ch.slit_height.unit)
+            )
+            out[key] = replace(
+                ch,
+                frequency=pulse_frequency,
+                slit_begin=empty,
+                slit_end=empty,
+                slit_height=height,
+            )
+        else:
+            out[key] = ch
+    return ProcessedDiskChoppers[RunType](out)
+
+
 def simulate_chopper_cascade_using_tof(
-    choppers: DiskChoppers[RunType],
+    choppers: ProcessedDiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
     neutrons: NumberOfSimulatedNeutrons,
     pulse_stride: PulseStride[RunType],
@@ -623,6 +723,16 @@ def _estimate_wavelength_by_polygon_centers(
     # This is because neutrons that arrive after the frame period will wrap around and
     # appear in the next pulse, which is equivalent to the original pulse but shifted
     # by the frame period.
+    # We determine the number of frame periods to shift by calculating how many periods
+    # are needed to cover the maximum arrival time in the subframes.
+    max_time = sc.reduce([f.time.max() for f in subframes]).max()
+    # Why `- noffset` below:
+    # nperiods is computed from the absolute max_time, but the copies are shifted by
+    # noffset + i. So the first noffset extra copies end up at negative times and only
+    # contribute NaNs. This is correct, but for long flight paths it adds work in the
+    # per-distance loop, so int(max_time / frame_period) - noffset + 1 is sufficient.
+    nperiods = int(max_time.to(unit=time_unit).value / frame_period.value) - noffset + 1
+
     polygons = [
         np.stack(
             [
@@ -632,7 +742,7 @@ def _estimate_wavelength_by_polygon_centers(
             axis=1,
         )
         for f in subframes
-        for i in (0, 1)
+        for i in range(nperiods)
     ]
 
     wavs, stddevs = _polygon_intersections(polygons, time_edges.values)
@@ -644,7 +754,7 @@ def _estimate_wavelength_by_polygon_centers(
 
 def compute_frame_sequence(
     pulse_period: PulsePeriod,
-    disk_choppers: DiskChoppers[RunType],
+    disk_choppers: ProcessedDiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
     source_bounds: SourceBounds,
     pulse_stride: PulseStride[RunType],
@@ -668,33 +778,42 @@ def compute_frame_sequence(
         pulse-skipping.
     """
 
-    # The `pulse_frequency` parameter in time_offset_open and time_offset_close below
-    # decides how many rotations the chopper will perform when computing the open and
-    # close times. Because we want to cover a number of pulses equal to `pulse_stride`,
-    # we need to set the pulse frequency to be `pulse_stride` times smaller than the
-    # actual pulse frequency.
-    #
-    # In addition, the time_offset_open and time_offset_close below require the
-    # pulse_frequency to be an integer multiple of the pulse frequency or vice versa.
-    # A simple trick is to make sure that the requested pulse frequency is divided by
-    # an even number. We need to rotate the chopper for long enough to cover wrapping
-    # around the frame period, so we cover two pulses strides.
-    frequency_for_chopper_rotation = (1.0 / pulse_period.to(unit='s')) / (
-        pulse_stride * 2
-    )
+    chops = {}
+    for key, ch in disk_choppers.items():
+        chopper_distance = chopper_distance_along_beam(
+            ch.axle_position, source_position
+        )
 
-    chops = {
-        key: chopper_cascade.Chopper(
-            distance=chopper_distance_along_beam(ch.axle_position, source_position),
+        # The `pulse_frequency` parameter in time_offset_open and time_offset_close
+        # below decides how many rotations the chopper will perform when computing
+        # the open and close times.
+        # We need to cover the entire time range from 0 to the time it takes the
+        # slowest neutron to travel the distance to the chopper.
+        slowest_to_chopper = chopper_distance / _wavelength_to_speed(
+            source_bounds.wavelength[1]
+        )
+        travel_time = (
+            source_bounds.time[1].to(unit='s')
+            + (pulse_stride - 1) * pulse_period.to(unit='s')
+            + slowest_to_chopper.to(unit='s')
+        )
+
+        # In addition, the time_offset_open and time_offset_close below require the
+        # pulse_frequency to be an integer multiple of the pulse frequency or vice
+        # versa.
+        freq = abs(ch.frequency).to(unit='Hz')
+        nrot = int(np.ceil((travel_time * freq).value)) + 1
+        pulse_frequency_for_diskchopper = freq / nrot
+
+        chops[key] = chopper_cascade.Chopper(
+            distance=chopper_distance,
             time_open=ch.time_offset_open(
-                pulse_frequency=frequency_for_chopper_rotation
+                pulse_frequency=pulse_frequency_for_diskchopper
             ),
             time_close=ch.time_offset_close(
-                pulse_frequency=frequency_for_chopper_rotation
+                pulse_frequency=pulse_frequency_for_diskchopper
             ),
         )
-        for key, ch in disk_choppers.items()
-    }
 
     frames = chopper_cascade.FrameSequence.from_source_pulse(
         time_min=source_bounds.time[0],
@@ -714,7 +833,7 @@ def make_wavelength_lut_from_polygons(
     time_resolution: TimeResolution,
     pulse_period: PulsePeriod,
     pulse_stride: PulseStride[RunType],
-    frames: ChopperFrameSequence,
+    frames: ChopperFrameSequence[RunType],
 ) -> LookupTable[RunType, Component]:
     """
     Compute a lookup table for wavelength as a function of distance and
@@ -744,8 +863,7 @@ def make_wavelength_lut_from_polygons(
     pulse_period = pulse_period.to(unit=time_unit)
     frame_period = pulse_period * pulse_stride
 
-    min_dist = ltotal_range[0].to(unit=distance_unit)
-    max_dist = ltotal_range[1].to(unit=distance_unit)
+    min_dist, max_dist = _unpack_ltotal_range(ltotal_range, distance_unit)
 
     # We want to give the 2d interpolator a table that covers the requested range,
     # hence we need to extend the range by at least half a resolution in each direction.
@@ -839,19 +957,16 @@ def ltotal_range_from_ltotal_monitor(
 
 
 def guess_pulse_stride_from_choppers(
-    choppers: DiskChoppers[RunType], pulse_period: PulsePeriod
+    choppers: ProcessedDiskChoppers[RunType], pulse_period: PulsePeriod
 ) -> PulseStride[RunType]:
     """
     If the pulse stride is not provided, we try to guess it from the chopper parameters.
     If there is a chopper rotating slower than the pulse_period, we use its rotation
     frequency to estimate the pulse stride.
-    We omit choppers with a zero rotation frequency, as they are considered inactive.
     """
     stride = 1
     for chopper in choppers.values():
         f = sc.abs(chopper.frequency)
-        if f.value == 0:
-            continue
         stride = max(stride, round((1 / pulse_period / f).to(unit="").value))
     return PulseStride[RunType](stride)
 
@@ -896,6 +1011,7 @@ def providers(
         return (load_lookup_table_from_file,)
 
     common = (
+        process_disk_choppers,
         ltotal_range_from_ltotal_detector,
         ltotal_range_from_ltotal_monitor,
         guess_pulse_stride_from_choppers,
