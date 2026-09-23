@@ -501,6 +501,25 @@ def _is_int_or_inverse_int(x: sc.Variable, *, rtol: sc.Variable) -> bool:
 def process_disk_choppers(
     choppers: DiskChoppers[RunType], pulse_period: PulsePeriod
 ) -> ProcessedDiskChoppers[RunType]:
+    """
+    Iterate through the choppers and drop any choppers that have a frequency of 0 Hz.
+    They are considered to be parked/inactive.
+    In addition, if a chopper's frequency is not in sync with the source frequency
+    (neither a multiple of the source frequency, nor an integer fraction of it), it
+    is replaced with a chopper that is always closed.
+    This is because we cannot always find a frame_period over which we can find
+    periodicity for all choppers without making it arbitrary long.
+    Such chopper frequencies are most probably a result of an error in chopper settings,
+    and the simplest course of action is to treat them as always closed, which ensures
+    we do not compute an invalid wavelength lookup table from them.
+
+    Parameters
+    ----------
+    choppers:
+        A dict of DiskChopper objects representing the choppers in the beamline.
+    pulse_period:
+        Period of the source pulses, i.e., time between consecutive pulse starts.
+    """
     out = {}
     for key, ch in choppers.items():
         if ch.frequency.value == 0:
@@ -516,8 +535,8 @@ def process_disk_choppers(
         # the check here, and the table is built without error, even though the
         # 14/3 Hz chopper turns 4/3 times per frame. This would most probably be the
         # result of an error in the chopper settings. We delay implementing a proper
-        # handling of this for now, as the solution is not obvious, and it is
-        # unlikely to happen in practice.
+        # handling of this for now, as the solution is not obvious (e.g. is it ok to
+        # have both 14/2 Hz and 14/4 Hz?), and it is unlikely to happen in practice.
         if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
             empty = sc.array(dims=['cutout'], values=[], unit='deg')
             out[key] = replace(
@@ -751,55 +770,40 @@ def compute_frame_sequence(
 
     chops = {}
     for key, ch in disk_choppers.items():
-        # Skip choppers with zero frequency as they are treated as parked (not in use).
-        if ch.frequency.value == 0:
-            continue
-
         chopper_distance = chopper_distance_along_beam(
             ch.axle_position, source_position
         )
 
-        # If the frequency is not synced to the source pulse frequency, we transform
-        # this chopper to always be closed.
+        # The `pulse_frequency` parameter in time_offset_open and time_offset_close
+        # below decides how many rotations the chopper will perform when computing
+        # the open and close times.
+        # We need to cover the entire time range from 0 to the time it takes the
+        # slowest neutron to travel the distance to the chopper.
+        slowest_to_chopper = chopper_distance / _wavelength_to_speed(
+            source_bounds.wavelength[1]
+        )
+        travel_time = (
+            source_bounds.time[1].to(unit='s')
+            + (pulse_stride - 1) * pulse_period.to(unit='s')
+            + slowest_to_chopper.to(unit='s')
+        )
+
+        # In addition, the time_offset_open and time_offset_close below require the
+        # pulse_frequency to be an integer multiple of the pulse frequency or vice
+        # versa.
         freq = abs(ch.frequency).to(unit='Hz')
-        pulse_frequency = sc.reciprocal(pulse_period).to(unit=freq.unit)
-        quot = freq / pulse_frequency
-        if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
-            chops[key] = chopper_cascade.Chopper(
-                distance=chopper_distance,
-                time_open=sc.array(dims=["cutout"], values=[], unit='s'),
-                time_close=sc.array(dims=["cutout"], values=[], unit='s'),
-            )
-        else:
-            # The `pulse_frequency` parameter in time_offset_open and time_offset_close
-            # below decides how many rotations the chopper will perform when computing
-            # the open and close times.
-            # We need to cover the entire time range from 0 to the time it takes the
-            # slowest neutron to travel the distance to the chopper.
-            slowest_to_chopper = chopper_distance / _wavelength_to_speed(
-                source_bounds.wavelength[1]
-            )
-            travel_time = (
-                source_bounds.time[1].to(unit='s')
-                + (pulse_stride - 1) * pulse_period.to(unit='s')
-                + slowest_to_chopper.to(unit='s')
-            )
+        nrot = int(np.ceil((travel_time * freq).value)) + 1
+        pulse_frequency_for_diskchopper = freq / nrot
 
-            # In addition, the time_offset_open and time_offset_close below require the
-            # pulse_frequency to be an integer multiple of the pulse frequency or vice
-            # versa.
-            nrot = int(np.ceil((travel_time * freq).value)) + 1
-            pulse_frequency_for_diskchopper = freq / nrot
-
-            chops[key] = chopper_cascade.Chopper(
-                distance=chopper_distance,
-                time_open=ch.time_offset_open(
-                    pulse_frequency=pulse_frequency_for_diskchopper
-                ),
-                time_close=ch.time_offset_close(
-                    pulse_frequency=pulse_frequency_for_diskchopper
-                ),
-            )
+        chops[key] = chopper_cascade.Chopper(
+            distance=chopper_distance,
+            time_open=ch.time_offset_open(
+                pulse_frequency=pulse_frequency_for_diskchopper
+            ),
+            time_close=ch.time_offset_close(
+                pulse_frequency=pulse_frequency_for_diskchopper
+            ),
+        )
 
     frames = chopper_cascade.FrameSequence.from_source_pulse(
         time_min=source_bounds.time[0],

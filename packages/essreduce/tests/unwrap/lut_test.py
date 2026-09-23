@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import dataclasses
 from typing import NewType
 
 import numpy as np
@@ -653,3 +654,36 @@ def test_lut_workflow_drops_choppers_with_zero_frequency(wavelength_from):
     at_detector = table.array['distance', -1]
 
     assert not np.isnan(at_detector.values).all()
+
+
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_treats_choppers_with_bad_frequency_as_closed(wavelength_from):
+    wf = _make_workflow(wavelength_from)
+    choppers = _make_choppers()
+    # Set one of the choppers to have a frequency out of sync with the source (14 Hz of
+    # the source is not divisible by 5 Hz).
+    choppers['FOC_1'] = dataclasses.replace(
+        choppers['FOC_1'], frequency=sc.scalar(5.0, unit='Hz')
+    )
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    if wavelength_from == "simulation":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 78
+
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
+        choppers['wfm1'].axle_position.fields.z,
+        choppers['FOC_5'].axle_position.fields.z,
+    )
+    wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
+    wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
+
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+
+    # Before the bad chopper, the table should have some non-NaN values.
+    before_bad_chopper = table.array['distance', 1]
+    assert not np.isnan(before_bad_chopper.values).all()
+
+    # After the bad chopper, the table should be all NaNs.
+    after_bad_chopper = table.array['distance', -1]
+    assert np.isnan(after_bad_chopper.values).all()
