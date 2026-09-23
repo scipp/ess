@@ -15,11 +15,10 @@ from ..reflectometry.types import (
     Sample,
     SampleRun,
     SampleSize,
-    WavelengthBins,
     WavelengthDetector,
 )
 from .conversions import add_coords
-from .maskings import add_masks
+from .maskings import add_roi_masks
 from .types import DetectorRegionOfInterest, WavelengthMonitor
 
 
@@ -27,11 +26,10 @@ def add_coords_and_masks(
     da: WavelengthDetector[RunType],
     graph: CoordTransformationGraph[RunType],
     roi: DetectorRegionOfInterest[RunType],
-    wavelength_bins: WavelengthBins,
 ) -> CorrectedDetector[RunType]:
     """Transform coordinates and mask events before run normalization."""
     da = add_coords(da, graph)
-    return CorrectedDetector[RunType](add_masks(da, roi, wavelength_bins))
+    return CorrectedDetector[RunType](add_roi_masks(da, roi))
 
 
 def normalize_by_monitor_histogram(
