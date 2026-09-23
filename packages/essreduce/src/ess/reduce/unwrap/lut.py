@@ -538,9 +538,19 @@ def process_disk_choppers(
         # handling of this for now, as the solution is not obvious (e.g. is it ok to
         # have both 14/2 Hz and 14/4 Hz?), and it is unlikely to happen in practice.
         if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
-            empty = sc.array(dims=['cutout'], values=[], unit='deg')
+            dim = ch.slit_begin.dim
+            empty = sc.array(dims=[dim], values=[], unit='deg')
+            height = (
+                None
+                if ch.slit_height is None
+                else sc.array(dims=[dim], values=[], unit=ch.slit_height.unit)
+            )
             out[key] = replace(
-                ch, frequency=pulse_frequency, slit_begin=empty, slit_end=empty
+                ch,
+                frequency=pulse_frequency,
+                slit_begin=empty,
+                slit_end=empty,
+                slit_height=height,
             )
         else:
             out[key] = ch

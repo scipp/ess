@@ -634,10 +634,60 @@ def test_choppers_rotate_enough_times_with_slow_neutrons_to_pollute_lut():
     ).value
 
 
+def test_chopper_processing_drops_choppers_with_zero_frequency():
+    from ess.reduce.unwrap.lut import process_disk_choppers
+
+    choppers = _make_choppers()
+    n_original = len(choppers)
+    key = next(iter(choppers))
+    period = sc.scalar(1 / 14, unit='s')
+
+    all_processed = process_disk_choppers(choppers, pulse_period=period)
+    assert len(all_processed) == n_original
+    assert key in all_processed
+
+    choppers[key] = dataclasses.replace(
+        choppers[key], frequency=sc.scalar(0.0, unit='Hz')
+    )
+    processed = process_disk_choppers(choppers, pulse_period=period)
+    assert len(processed) == n_original - 1
+    assert key not in processed
+
+
+def test_chopper_processing_treats_choppers_with_bad_frequency_as_closed():
+    from ess.reduce.unwrap.lut import process_disk_choppers
+
+    choppers = _make_choppers()
+    n_original = len(choppers)
+    key = next(iter(choppers))
+    period = sc.scalar(1 / 14, unit='s')
+
+    all_processed = process_disk_choppers(choppers, pulse_period=period)
+    assert len(all_processed) == n_original
+    assert key in all_processed
+
+    # Set one of the choppers to have a frequency out of sync with the source (14 Hz of
+    # the source is not divisible by 5 Hz).
+    choppers[key] = dataclasses.replace(
+        choppers[key], frequency=sc.scalar(5.0, unit='Hz')
+    )
+    processed = process_disk_choppers(choppers, pulse_period=period)
+    # The chopper is still there
+    assert len(processed) == n_original
+    assert key in processed
+    # The chopper should not have any slits
+    assert processed[key].slit_begin.size == 0
+    assert processed[key].slit_end.size == 0
+
+
 @pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
 def test_lut_workflow_drops_choppers_with_zero_frequency(wavelength_from):
     wf = _make_workflow(wavelength_from)
-    wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
+    choppers = _make_choppers()
+    choppers['FOC_1'] = dataclasses.replace(
+        choppers['FOC_1'], frequency=sc.scalar(0.0, unit='Hz')
+    )
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
     wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
