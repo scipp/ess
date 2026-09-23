@@ -78,7 +78,7 @@ def insert_run_normalization(
     )
 
 
-def prepare_sample(
+def correct_sample(
     sample: ReducibleData[SampleRun],
     beam_size: BeamSize[SampleRun],
     sample_size: SampleSize[SampleRun],
@@ -102,4 +102,4 @@ def prepare_sample(
     return Sample(corrected.bins.assign_masks(footprint=invalid))
 
 
-providers = (add_coords_and_masks, prepare_sample)
+providers = (add_coords_and_masks, correct_sample)
