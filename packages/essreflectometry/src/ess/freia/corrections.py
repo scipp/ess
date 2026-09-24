@@ -7,54 +7,43 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ..reflectometry import corrections as common_corrections
 from ..reflectometry.corrections import RunNormalization
 from ..reflectometry.types import (
-    BeamDivergenceLimits,
+    BeamSize,
     CoordTransformationGraph,
-    CorrectionsToApply,
+    CorrectedDetector,
     ReducibleData,
     RunType,
-    RunUnnormalizedData,
+    Sample,
+    SampleRun,
+    SampleSize,
     WavelengthBins,
     WavelengthDetector,
-    YIndexLimits,
-    ZIndexLimits,
 )
 from .conversions import add_coords
 from .maskings import add_masks
-from .types import WavelengthMonitor
+from .types import DetectorRegionOfInterest, WavelengthMonitor
+
+
+def add_coords_and_masks(
+    da: WavelengthDetector[RunType],
+    graph: CoordTransformationGraph[RunType],
+    roi: DetectorRegionOfInterest[RunType],
+    wavelength_bins: WavelengthBins,
+) -> CorrectedDetector[RunType]:
+    """Transform coordinates and mask events before run normalization."""
+    da = add_coords(da, graph)
+    return CorrectedDetector[RunType](add_masks(da, roi, wavelength_bins))
 
 
 def normalize_by_monitor_histogram(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     *,
     monitor: WavelengthMonitor[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
 ) -> ReducibleData[RunType]:
     """Normalize detector data by a histogrammed monitor.
 
-    The detector is normalized according to
-
-    .. math::
-
-        d_i^\\text{Norm} = \\frac{d_i}{m_i} \\Delta \\lambda_i
-
-    Parameters
-    ----------
-    detector:
-        Input event data in wavelength.
-    monitor:
-        A histogrammed monitor in wavelength.
-    uncertainty_broadcast_mode:
-        Choose how uncertainties of the monitor are broadcast to the sample data.
-
-    Returns
-    -------
-    :
-        `detector` normalized by a monitor.
-
-    See also
-    --------
-    ess.reduce.normalization.normalize_by_monitor_histogram:
-        For details and the actual implementation.
+    See :func:`ess.reduce.normalization.normalize_by_monitor_histogram` for the
+    normalization and uncertainty treatment.
     """
     return common_corrections.normalize_by_monitor_histogram(
         detector=detector,
@@ -64,7 +53,7 @@ def normalize_by_monitor_histogram(
 
 
 def normalize_by_monitor_integrated(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     *,
     monitor: WavelengthMonitor[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -89,33 +78,28 @@ def insert_run_normalization(
     )
 
 
-def add_coords_masks_and_apply_corrections(
-    da: WavelengthDetector[RunType],
-    ylim: YIndexLimits,
-    zlims: ZIndexLimits,
-    bdlim: BeamDivergenceLimits,
-    wbins: WavelengthBins,
-    graph: CoordTransformationGraph[RunType],
-    corrections_to_apply: CorrectionsToApply,
-) -> RunUnnormalizedData[RunType]:
+def prepare_sample(
+    sample: ReducibleData[SampleRun],
+    beam_size: BeamSize[SampleRun],
+    sample_size: SampleSize[SampleRun],
+) -> Sample:
+    """Apply the Gaussian footprint correction using the specular incidence angle.
+
+    Beam size is the FWHM at the sample; sample size is its length along the beam.
+    The correction applies only to the reflected run.
     """
-    Computes coordinates, masks and corrections that are
-    the same for the sample measurement and the reference measurement.
-    """
-    da = add_coords(da, graph)
-    da = add_masks(da, ylim, zlims, bdlim, wbins)
-
-    for correction in corrections_to_apply:
-        da = correction(da)
-
-    return RunUnnormalizedData[RunType](da)
-
-
-def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:
-    """Corrects the data by the size of the footprint on the sample."""
-    return da / sc.sin(da.coords['theta'])
+    for name, size in [('BeamSize', beam_size), ('SampleSize', sample_size)]:
+        if (
+            not sc.isfinite(size).value
+            or not (size > sc.scalar(0.0, unit=size.unit)).value
+        ):
+            raise ValueError(f'{name} must be finite and positive.')
+    fraction = common_corrections.footprint_on_sample(
+        sample.bins.coords['theta'], beam_size=beam_size, sample_size=sample_size
+    )
+    corrected = sample / fraction
+    invalid = ~sc.isfinite(fraction) | (fraction <= sc.scalar(0.0))
+    return Sample(corrected.bins.assign_masks(footprint=invalid))
 
 
-default_corrections = {correct_by_footprint}
-
-providers = (add_coords_masks_and_apply_corrections,)
+providers = (add_coords_and_masks, prepare_sample)
