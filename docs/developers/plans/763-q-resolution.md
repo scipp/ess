@@ -17,9 +17,11 @@ Original requirement: scipp/ess#360.
 
 ## Suggested order of work
 
+Bank merging (1) and the resolution work (2, 3) are independent and can be done in either order; see "Independence from bank merging" below.
+
 1. Bank merging (separate PR).
    - `ess/sans/workflow.py`: `with_banks` currently maps over `NeXusDetectorName` without reducing, and the `parameter_mappers[NeXusDetectorName]` line is commented out with a TODO.
-   - Reduce at `NormalizedQ[RunType, IofQPart]` for both parts, using `merge_contributions`, the same pattern `_set_runs` uses for multiple runs.
+   - Reduce at `NormalizedQ[RunType, IofQPart]` for all parts, using `merge_contributions`, the same pattern `_set_runs` uses for multiple runs. Write it as a loop over the parts so a `ResolutionMoments` part (step 3) is included automatically.
    - Check that per-bank `DetectorBankSizes` and `DimsToKeep` still produce identical output dims across banks.
    - Update the `with_banks` docstring (the "different Q-resolution" argument).
    - Existing tests: `tests/loki/iofq_test.py` uses `with_banks`.
@@ -29,10 +31,18 @@ Original requirement: scipp/ess#360.
    - Note `mask_large_uncertainty_in_lut` replaces uncertain entries with NaN; decide how the resolution handles NaN regions (they are masked in the data anyway).
 3. Resolution sums in esssans.
    - Compute σ_i² on `QDetector[RunType, Denominator]` (pixel × λ midpoints, has `Q` and can give `two_theta`, `L2`, `Ltotal` via the graph).
-   - Histogram `N·Q` and `N·(σ² + Q²)` over Q exactly like the denominator (`_bin_in_q`). A `moment` dimension of size 2 may let this reuse `mask_and_scale_wavelength_q`, `_reduce` and the bank/run merge unchanged; check whether a new `IofQPart`-like key or separate domain types is cleaner.
+   - Make the sums a third member of `IofQPart`: `IofQPart = TypeVar('IofQPart', Numerator, Denominator, ResolutionMoments)`, carrying `N·Q` and `N·(σ² + Q²)` along a size-2 `moment` dimension. Generic providers (`compute_Q`, `bin_in_q`, `reduce_q`) then apply unchanged.
+   - New code: the provider creating the sums from the denominator grid, and a variant of `mask_and_scale_wavelength_q` that multiplies by the monitor term.
+   - Add `ResolutionMoments` to the `for part in (Numerator, Denominator)` loop in `_set_runs`.
    - Final provider: σ_bin² from S0, S1, S2, then attach as variances of the `Q` point coordinate on I(Q). `save_background_subtracted_iofq` in `io.py` already writes Q variances as `resolutions`. Background-subtracted I(Q) uses the sample run's resolution.
    - Only QBins (1D) initially; Qx/Qy resolution is out of scope.
-4. Optional: mixture components (classes by fixed σ/Q log bins × Q sub-bins, ~10–20 per bin).
+4. Optional: mixture components, ~10–20 per bin. Class = (Q sub-bin, σ/Q class); σ/Q class k holds elements with `f^k ≤ σ_i/Q_i < f^(k+1)` (f = 1.5 worked in the toy model); Q sub-bins split each Q bin into n equal parts (n = 4). Edges must be fixed in advance so sums merge.
+
+## Independence from bank merging
+
+- Compute `σ² = S2/S0 − (S1/S0)²` only once, after all merging. Never compute σ per bank or run and average.
+- Every merge point must merge the resolution sums too. Today that is only `_set_runs`. The instrument scientists will probably process runs separately and merge the files instead, but the multi-run workflow must stay correct.
+- Test for both: σ from two runs merged by the workflow equals σ computed from the summed S0, S1, S2 of the individual runs.
 
 ## Parameters still open
 
