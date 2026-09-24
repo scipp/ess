@@ -4,7 +4,38 @@ import numpy as np
 import pytest
 import scipp as sc
 import scipp.testing
-from ess.powder.conversion import to_dspacing_with_calibration
+import scippneutron as scn
+from ess.powder.conversion import add_q_coordinate, to_dspacing_with_calibration
+from ess.powder.types import (
+    DspacingDetector,
+    ElasticCoordTransformGraph,
+    SampleRun,
+)
+
+
+def test_q_detector_adds_q_coordinate_to_dspacing_detector():
+    wavelength = sc.array(dims=['event'], values=[1.0, 1.5, 2.0], unit='angstrom')
+    two_theta = sc.array(dims=['event'], values=[0.4, 0.8, 1.2], unit='rad')
+    graph = ElasticCoordTransformGraph[SampleRun](
+        scn.conversion.graph.tof.elastic('wavelength')
+    )
+    detector = DspacingDetector[SampleRun](
+        sc.DataArray(
+            sc.array(dims=['event'], values=[1.0, 2.0, 3.0]),
+            coords={
+                'wavelength': wavelength,
+                'two_theta': two_theta,
+            },
+        ).transform_coords(
+            'dspacing', graph=graph, keep_intermediate=False, rename_dims=False
+        )
+    )
+
+    result = add_q_coordinate(detector, graph)
+
+    expected_q = 2 * np.pi / detector.coords['dspacing']
+    assert sc.allclose(result.coords['Q'], expected_q)
+    assert sc.identical(result.drop_coords('Q'), detector)
 
 
 @pytest.fixture(params=['random', 'zero'])
