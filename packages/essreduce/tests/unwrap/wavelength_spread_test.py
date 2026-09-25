@@ -48,9 +48,7 @@ def _make_table(*, roll: int = 0) -> LookupTable:
 
 @pytest.fixture
 def ltotal() -> sc.Variable:
-    return sc.array(
-        dims=['x', 'y'], values=[[10.0, 11.3], [12.0, 14.0]], unit='m'
-    )
+    return sc.array(dims=['x', 'y'], values=[[10.0, 11.3], [12.0, 14.0]], unit='m')
 
 
 @pytest.fixture

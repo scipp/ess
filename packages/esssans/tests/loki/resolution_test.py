@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
+import itertools
+
 import ess.loki.data  # noqa: F401
 import numpy as np
 import pytest
@@ -73,9 +75,7 @@ def test_q_resolution_equals_n_weighted_second_moment(
     # Brute force over the dense (pixel, wavelength) arrays
     dims = detector_term.dims
     unmasked = ~sc.reduce(list(detector_term.masks.values())).any()
-    n = sc.values(detector_term.data) * sc.values(
-        results[MonitorTerm[SampleRun]].data
-    )
+    n = sc.values(detector_term.data) * sc.values(results[MonitorTerm[SampleRun]].data)
     n = sc.where(unmasked, n, sc.zeros_like(n)).transpose(dims).values.ravel()
     q = detector_term.coords['Q'].transpose(dims)
     second = (variance.transpose(dims) + q**2).values.ravel()
@@ -83,7 +83,7 @@ def test_q_resolution_equals_n_weighted_second_moment(
     edges = resolution.coords['Q'].values
     expected_mean = []
     expected_variance = []
-    for lo, hi in zip(edges[:-1], edges[1:], strict=True):
+    for lo, hi in itertools.pairwise(edges):
         sel = (q >= lo) & (q < hi)
         w = n[sel] / n[sel].sum()
         mean = np.sum(w * q[sel])
@@ -93,9 +93,7 @@ def test_q_resolution_equals_n_weighted_second_moment(
     np.testing.assert_allclose(
         resolution.coords['Q_mean'].values, expected_mean, rtol=1e-12
     )
-    np.testing.assert_allclose(
-        resolution.values**2, expected_variance, rtol=1e-9
-    )
+    np.testing.assert_allclose(resolution.values**2, expected_variance, rtol=1e-9)
 
 
 def test_q_resolution_of_merged_runs_equals_resolution_from_summed_moments(
