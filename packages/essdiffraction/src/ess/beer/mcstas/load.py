@@ -7,7 +7,7 @@ from pathlib import Path
 import mcstastox
 import scipp as sc
 import scippnexus as snx
-from ess.powder.types import CaveMonitor, RunType, WavelengthMonitor
+from ess.powder.types import CaveMonitor, EmptyDetector, RunType, WavelengthMonitor
 
 from ess.reduce.nexus.types import DiskChoppers, Position
 from ess.reduce.unwrap.types import DetectorLtotal
@@ -24,6 +24,8 @@ _MCSTAS_T_OFFSET = sc.scalar(1.6, unit='ms')
 __all__ = [
     'chopper_mode_from_mcstas_mode',
     'load_beer_mcstas',
+    'load_beer_mcstas_geometry',
+    'load_beer_mcstas_geometry_provider',
     'load_beer_mcstas_monitor',
     'load_beer_mcstas_monitor_provider',
     'load_beer_mcstas_provider',
@@ -62,6 +64,25 @@ def _detector_components(data: mcstastox.Read, bank: DetectorBank) -> list[str]:
     )
 
 
+def _load_position_table(data: mcstastox.Read, components: list[str]) -> sc.DataArray:
+    """Load pixel positions for selected detector components."""
+    position_tables = []
+    for component in components:
+        positions = data.get_component_global(component)
+        begin, end = data.pixel_range[component]
+        position_tables.append(
+            sc.DataArray(
+                sc.vectors(dims=['pixel_id'], values=positions, unit='m'),
+                coords={
+                    'pixel_id': sc.arange(
+                        'pixel_id', int(begin), int(end) + 1, dtype='int32'
+                    )
+                },
+            )
+        )
+    return sc.sort(sc.concat(position_tables, dim='pixel_id'), key='pixel_id')
+
+
 def _load_events(data: mcstastox.Read, components: list[str]) -> sc.DataArray:
     """Load weighted events and pixel positions for selected components only.
 
@@ -86,28 +107,20 @@ def _load_events(data: mcstastox.Read, components: list[str]) -> sc.DataArray:
             ),
             't': sc.array(dims=['events'], values=event_data['t'], unit='s'),
         },
-    ).group('pixel_id')
+    )
 
-    position_tables = []
-    for component in components:
-        positions = data.get_component_global(component)
-        begin, end = data.pixel_range[component]
-        position_tables.append(
-            sc.DataArray(
-                sc.vectors(dims=['pixel_id'], values=positions, unit='m'),
-                coords={
-                    'pixel_id': sc.arange(
-                        'pixel_id', int(begin), int(end) + 1, dtype='int32'
-                    )
-                },
-            )
-        )
-
-    position_table = sc.sort(sc.concat(position_tables, dim='pixel_id'), key='pixel_id')
-    events.coords['position'] = sc.lookup(
-        position_table, dim='pixel_id', mode='previous'
-    )[events.coords['pixel_id']]
+    position_table = _load_position_table(data, components)
+    # Group by the complete list of detector pixels, rather than by the IDs that
+    # occur in the event table. This retains pixels with no events as empty bins and
+    # keeps detector geometry independent of the measured event population.
+    events = events.group(position_table.coords['pixel_id'])
+    events.coords['position'] = position_table.data
     return events
+
+
+def _load_mode(data: mcstastox.Read) -> str:
+    mode = data.file['entry1/simulation/Param/mode'][0]
+    return mode.decode() if isinstance(mode, bytes) else str(mode)
 
 
 def load_beer_mcstas(
@@ -132,8 +145,7 @@ def load_beer_mcstas(
 
     filename = Path(filename)
     with mcstastox.Read(filename.parent, filename.name) as data:
-        mode = data.file['entry1/simulation/Param/mode'][0]
-        mode = mode.decode() if isinstance(mode, bytes) else str(mode)
+        mode = _load_mode(data)
         events = _load_events(data, _detector_components(data, bank))
 
     events.coords['mode'] = sc.scalar(mode)
@@ -141,6 +153,40 @@ def load_beer_mcstas(
         events.bins.coords.pop('t') + _MCSTAS_T_OFFSET.to(unit='s')
     ) % sc.scalar(1 / 14, unit='s')
     return events
+
+
+def load_beer_mcstas_geometry(
+    filename: str | Path,
+    bank: DetectorBank,
+) -> sc.DataArray:
+    """Load detector geometry from a BEER McStas file without loading events."""
+    if not isinstance(bank, DetectorBank):
+        raise ValueError(
+            'bank must be ``DetectorBank.north``, '
+            '``DetectorBank.south``, or ``DetectorBank.both``'
+        )
+
+    if bank == DetectorBank.both:
+        return sc.concat(
+            [
+                load_beer_mcstas_geometry(filename, bank)
+                for bank in (DetectorBank.south, DetectorBank.north)
+            ],
+            dim='pixel_id',
+        )
+
+    filename = Path(filename)
+    with mcstastox.Read(filename.parent, filename.name) as data:
+        positions = _load_position_table(data, _detector_components(data, bank))
+
+    pixel_id = positions.coords['pixel_id']
+    return sc.DataArray(
+        pixel_id,
+        coords={
+            'pixel_id': pixel_id,
+            'position': positions.data,
+        },
+    )
 
 
 def _to_edges(centers: sc.Variable) -> sc.Variable:
@@ -199,6 +245,13 @@ def load_beer_mcstas_provider(
 ) -> RawDetector[RunType]:
     """Sciline provider for loading BEER McStas detector data."""
     return load_beer_mcstas(fname, bank)
+
+
+def load_beer_mcstas_geometry_provider(
+    fname: Filename[RunType], bank: DetectorBank
+) -> EmptyDetector[RunType]:
+    """Sciline provider for loading BEER McStas detector geometry."""
+    return EmptyDetector[RunType](load_beer_mcstas_geometry(fname, bank))
 
 
 def load_beer_mcstas_monitor_provider(
@@ -287,22 +340,34 @@ def mcstas_choppers(
     return simulation_choppers(mode, source_position)
 
 
+def _mcstas_choppers_from_file(
+    fname: Filename[RunType],
+    source_position: Position[snx.NXsource, RunType],
+) -> DiskChoppers[RunType]:
+    """Return BEER choppers without loading detector events."""
+    fname = Path(fname)
+    with mcstastox.Read(fname.parent, fname.name) as data:
+        mode = chopper_mode_from_mcstas_mode(_load_mode(data))
+    return simulation_choppers(mode, source_position)
+
+
 def mcstas_detector_ltotal(
-    da: RawDetector[RunType],
+    detector: RawDetector[RunType],
     source_position: Position[snx.NXsource, RunType],
     sample_position: Position[snx.NXsample, RunType],
 ) -> DetectorLtotal[RunType]:
     """Return moderator-to-detector flight path lengths for BEER McStas data."""
     source_to_sample = sc.norm(sample_position - source_position)
-    sample_to_detector = sc.norm(da.coords['position'] - sample_position)
+    sample_to_detector = sc.norm(detector.coords['position'] - sample_position)
     return source_to_sample + sample_to_detector
 
 
 mcstas_providers = (
     load_beer_mcstas_provider,
+    load_beer_mcstas_geometry_provider,
     load_beer_mcstas_monitor_provider,
     mcstas_source_position,
     mcstas_sample_position,
-    mcstas_choppers,
+    _mcstas_choppers_from_file,
     mcstas_detector_ltotal,
 )

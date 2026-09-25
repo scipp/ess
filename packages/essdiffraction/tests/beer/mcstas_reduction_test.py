@@ -1,6 +1,7 @@
 import importlib
 import sys
 
+import mcstastox
 import numpy as np
 import pytest
 import scipp as sc
@@ -20,11 +21,14 @@ from ess.beer.data import (
 )
 from ess.beer.mcstas import (
     load_beer_mcstas,
+    load_beer_mcstas_geometry,
     load_beer_mcstas_monitor,
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import (
+    DspacingBins,
     DspacingDetector,
+    DspacingNBins,
     ElasticCoordTransformGraph,
     SampleRun,
 )
@@ -135,6 +139,24 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
     )
 
 
+def test_powder_workflow_computes_dspacing_bins_without_loading_events(monkeypatch):
+    wf = BeerPowderMcStasWorkflow()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
+    wf[DetectorBank] = DetectorBank.north
+    wf[DspacingNBins] = 123
+
+    def fail_if_events_are_loaded(*args, **kwargs):
+        raise AssertionError('event data must not be used to determine bin edges')
+
+    monkeypatch.setattr(mcstastox.Read, 'get_event_data', fail_if_events_are_loaded)
+
+    bins = wf.compute(DspacingBins)
+
+    assert bins.sizes == {'dspacing': 124}
+    assert sc.all(sc.isfinite(bins)).value
+    assert sc.all(bins[1:] > bins[:-1]).value
+
+
 @pytest.mark.parametrize(
     'fname',
     [
@@ -163,6 +185,16 @@ def test_load_both_detector_banks():
     assert both.bins.size().sum().value == (
         north.bins.size().sum().value + south.bins.size().sum().value
     )
+
+
+def test_loaded_detector_includes_pixels_without_events():
+    filename = mcstas_silicon_new_model(10)
+    detector = load_beer_mcstas(filename, DetectorBank.north)
+    geometry = load_beer_mcstas_geometry(filename, DetectorBank.north)
+
+    assert sc.identical(detector.coords['pixel_id'], geometry.coords['pixel_id'])
+    assert sc.identical(detector.coords['position'], geometry.coords['position'])
+    assert sc.any(detector.bins.size() == sc.index(0)).value
 
 
 def test_loaded_mcstas_event_variances_are_squared_weights():

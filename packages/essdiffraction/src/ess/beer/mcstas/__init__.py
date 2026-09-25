@@ -11,6 +11,8 @@ from .beamline import (
 from .load import (
     chopper_mode_from_mcstas_mode,
     load_beer_mcstas,
+    load_beer_mcstas_geometry,
+    load_beer_mcstas_geometry_provider,
     load_beer_mcstas_monitor,
     load_beer_mcstas_monitor_provider,
     load_beer_mcstas_provider,
@@ -26,6 +28,8 @@ __all__ = [
     'PulseShapingMode',
     'chopper_mode_from_mcstas_mode',
     'load_beer_mcstas',
+    'load_beer_mcstas_geometry',
+    'load_beer_mcstas_geometry_provider',
     'load_beer_mcstas_monitor',
     'load_beer_mcstas_monitor_provider',
     'load_beer_mcstas_provider',
