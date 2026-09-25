@@ -24,6 +24,7 @@ from ess.beer.mcstas import (
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import (
+    DspacingDetector,
     ElasticCoordTransformGraph,
     QDetector,
     SampleRun,
@@ -117,16 +118,15 @@ def test_pulse_shaping_workflow():
     )
 
 
-def test_powder_mcstas_analytical_workflow_computes_scattering_coordinates():
+def test_powder_mcstas_analytical_workflow_computes_dspacing():
     wf = BeerPowderMcStasWorkflow()
     wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
     wf[DetectorBank] = DetectorBank.north
 
-    da = wf.compute(QDetector[SampleRun])
+    da = wf.compute(DspacingDetector[SampleRun])
 
     assert 'wavelength' in da.bins.coords
     assert 'dspacing' in da.bins.coords
-    assert 'Q' in da.bins.coords
     h = da.hist(dspacing=_DSPACE_BINS, dim=da.dims)
     max_peak_d = sc.midpoints(h['dspacing', np.argmax(h.values)].coords['dspacing'])[0]
     assert_allclose(
@@ -134,6 +134,16 @@ def test_powder_mcstas_analytical_workflow_computes_scattering_coordinates():
         sc.scalar(1.6374, unit='angstrom'),
         atol=sc.scalar(5e-4, unit='angstrom'),
     )
+
+
+def test_powder_mcstas_analytical_workflow_computes_q():
+    wf = BeerPowderMcStasWorkflow()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
+    wf[DetectorBank] = DetectorBank.north
+
+    da = wf.compute(QDetector[SampleRun])
+
+    assert 'Q' in da.bins.coords
 
 
 @pytest.mark.parametrize(
