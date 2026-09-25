@@ -24,7 +24,7 @@ from .lut import (
     TimeResolution,
     simulate_chopper_cascade_using_tof,
 )
-from .to_wavelength import providers
+from .to_wavelength import providers, wavelength_spread
 from .types import (
     DetectorLtotal,
     ErrorLimitedLookupTable,
@@ -75,4 +75,5 @@ __all__ = [
     "WavelengthMonitor",
     "providers",
     "simulate_chopper_cascade_using_tof",
+    "wavelength_spread",
 ]

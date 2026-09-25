@@ -1,6 +1,6 @@
 # Handoff: Q resolution for esssans (scipp/ess#763)
 
-Status: design done, no implementation yet.
+Status: steps 2 and 3 implemented (`ess.reduce.unwrap.wavelength_spread`, `ess.sans.resolution`). Deviation from the plan below: the sums are two `IofQPart` members, `ResolutionFirstMoment` and `ResolutionSecondMoment`, not one part with a `moment` dim, because `N·Q` and `N·(σ² + Q²)` have different units. The result is a separate `QResolution[RunType]` output; writing it to NXcanSAS is not done yet. Bank merging (1) and mixture components (4) are postponed.
 Design and derivation: scipp/ess#763 (read it first; this document does not repeat the math).
 Earlier attempt: scipp/esssans#185 (per pixel and wavelength, no combination rule; types are outdated, do not port directly).
 Original requirement: scipp/ess#360.

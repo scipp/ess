@@ -516,6 +516,78 @@ def mask_large_uncertainty_in_lut(
     )
 
 
+def wavelength_spread(
+    table: LookupTable, ltotal: sc.Variable, wavelength: sc.Variable
+) -> sc.Variable:
+    """
+    Standard deviation of the wavelength of neutrons arriving at a given distance
+    with a given (mean) wavelength.
+
+    The lookup table stores the mean wavelength and its variance as a function of
+    ``(distance, event_time_offset)``. At fixed distance, each wavelength corresponds
+    to a single ``event_time_offset``, so the standard deviation can be expressed as a
+    function of ``(distance, wavelength)``: for each distance in the table it is
+    interpolated linearly as a function of the mean wavelength, then linearly in
+    distance.
+
+    Table entries without a finite mean or variance are ignored. For wavelengths
+    outside the range of a table row, the standard deviation at the closest wavelength
+    of that row is used.
+
+    Parameters
+    ----------
+    table:
+        Lookup table with variances on the mean wavelength.
+    ltotal:
+        Total flight path lengths. Must be within the distance range of the table.
+    wavelength:
+        1-D wavelengths at which to evaluate the standard deviation.
+
+    Returns
+    -------
+    :
+        Standard deviation of the wavelength, with dims ``(*ltotal.dims,
+        *wavelength.dims)`` and the unit of ``wavelength``.
+    """
+    da = table.array
+    if da.variances is None:
+        raise ValueError('Lookup table has no variances.')
+    mean = da.data.to(unit=wavelength.unit, dtype='float64').transpose(
+        ['distance', 'event_time_offset']
+    )
+    distance = da.coords['distance'].to(unit=ltotal.unit, dtype='float64').values
+    if ltotal.min().value < distance[0] or ltotal.max().value > distance[-1]:
+        raise ValueError(
+            f'Ltotal range [{ltotal.min().value}, {ltotal.max().value}] '
+            f'{ltotal.unit} is outside the distance range of the lookup table '
+            f'[{distance[0]}, {distance[-1]}] {ltotal.unit}.'
+        )
+
+    stddev = np.full((len(distance), len(wavelength)), np.nan)
+    for i, (values, variances) in enumerate(
+        zip(mean.values, mean.variances, strict=True)
+    ):
+        valid = np.isfinite(values) & np.isfinite(variances)
+        if not valid.any():
+            continue
+        order = np.argsort(values[valid])
+        stddev[i] = np.interp(
+            wavelength.values,
+            values[valid][order],
+            np.sqrt(variances[valid][order]),
+        )
+
+    x = ltotal.values.ravel()
+    j = np.clip(np.searchsorted(distance, x, side='right') - 1, 0, len(distance) - 2)
+    w = ((x - distance[j]) / (distance[j + 1] - distance[j]))[:, np.newaxis]
+    out = (1 - w) * stddev[j] + w * stddev[j + 1]
+    return sc.array(
+        dims=[*ltotal.dims, *wavelength.dims],
+        values=out.reshape(ltotal.shape + wavelength.shape),
+        unit=wavelength.unit,
+    )
+
+
 def _compute_wavelength_data(
     da: sc.DataArray,
     lookup: ErrorLimitedLookupTable[RunType, Component],

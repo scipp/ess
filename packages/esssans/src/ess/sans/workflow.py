@@ -9,7 +9,7 @@ import scipp as sc
 from ess.reduce.parameter import parameter_mappers
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 
-from . import common, conversions, i_of_q, masking, normalization
+from . import common, conversions, i_of_q, masking, normalization, resolution
 from .types import (
     BackgroundRun,
     CorrectForGravity,
@@ -25,6 +25,8 @@ from .types import (
     NormalizedQxQy,
     Numerator,
     PixelMaskFilename,
+    ResolutionFirstMoment,
+    ResolutionSecondMoment,
     SampleRun,
     TransformationPath,
     Transmission,
@@ -99,13 +101,19 @@ def _set_runs(
 ) -> sciline.Pipeline:
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
-    for part in (Numerator, Denominator):
-        for qtype in (NormalizedQ, NormalizedQxQy):
-            pipeline[qtype[key, part]] = (
-                pipeline[qtype[key, part]]
-                .map(runs)
-                .reduce(index=axis_name, func=merge_contributions)
-            )
+    targets = [
+        NormalizedQ[key, ResolutionFirstMoment],
+        NormalizedQ[key, ResolutionSecondMoment],
+        *(
+            qtype[key, part]
+            for part in (Numerator, Denominator)
+            for qtype in (NormalizedQ, NormalizedQxQy)
+        ),
+    ]
+    for target in targets:
+        pipeline[target] = (
+            pipeline[target].map(runs).reduce(index=axis_name, func=merge_contributions)
+        )
     return pipeline
 
 
@@ -155,6 +163,7 @@ providers = (
     *i_of_q.providers,
     *masking.providers,
     *normalization.providers,
+    *resolution.providers,
     common.beam_center_to_detector_position_offset,
 )
 """

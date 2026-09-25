@@ -41,6 +41,7 @@
    i_of_q
    io
    logging
+   resolution
    types
 ```
 
