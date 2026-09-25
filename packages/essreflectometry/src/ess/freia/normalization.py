@@ -21,6 +21,9 @@ def evaluate_direct_beam(
     normal = direct_beam.coords['sample_surface_normal']
     normal = normal / sc.norm(normal)
     outgoing = direct_beam.bins.coords['outgoing_direction']
+    # The reflected direction is the direction the direct beam
+    # would have gone if it had been reflected.
+    # It is the direct beam reflected by the sample surface.
     reflected = outgoing - 2 * sc.dot(outgoing, normal) * normal
     reflection_angle = theta(
         outgoing_direction=reflected,
@@ -37,11 +40,7 @@ def reduce_sample_over_q(
     reference: Reference,
     qbins: QBins,
 ) -> ReflectivityOverQ:
-    """Divide ROI intensities on a common Q grid, propagating both variances.
-
-    Histogram before division so changing Q bin widths does not rescale R.
-    Empty, masked, or nonfinite direct-beam bins provide no normalization.
-    """
+    """Divide ROI intensities on a common Q grid, propagating both variances."""
     numerator = sample.hist(Q=qbins, dim=sample.dims)
     denominator = reference.hist(Q=qbins, dim=reference.dims)
     valid = sc.isfinite(denominator.data) & (

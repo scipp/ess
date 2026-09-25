@@ -3,12 +3,14 @@
 import scipp as sc
 
 
-def add_masks(
+def add_roi_masks(
     da: sc.DataArray,
     roi: dict,
-    wavelength_bins: sc.Variable,
 ) -> sc.DataArray:
-    """Mask events outside the ROI and wavelength range."""
+    """Mask events outside the ROI.
+    When a coordinate with the same name exists both on the bins
+    and on the events the method masks the event coordinate.
+    """
     masks = {}
     event_masks = {}
     for name, (low, high) in roi.items():
@@ -20,12 +22,4 @@ def add_masks(
         (event_masks if is_event_coord else masks)[f'roi_{name}'] = ~(
             (coord >= low) & (coord <= high)
         )
-    wavelength = da.bins.coords['wavelength']
-    return da.assign_masks(masks).bins.assign_masks(
-        event_masks,
-        wavelength=~(
-            sc.isfinite(wavelength)
-            & (wavelength >= wavelength_bins[0].to(unit=wavelength.unit))
-            & (wavelength < wavelength_bins[-1].to(unit=wavelength.unit))
-        ),
-    )
+    return da.assign_masks(masks).bins.assign_masks(event_masks)
