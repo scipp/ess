@@ -272,7 +272,7 @@ class NMXLauetof:
     nx_class = "NXlauetof"
 
     control: NMXMonitorMetadata
-    definitions: Literal['NXlauetof'] = 'NXlauetof'
+    definition: Literal['NXlauetof'] = 'NXlauetof'
     instrument: NMXInstrument
     sample: NMXSampleMetadata
     lookup_table: unwrap_types.LookupTable | None = None
