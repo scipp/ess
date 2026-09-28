@@ -534,6 +534,10 @@ def wavelength_spread(
     outside the range of a table row, the standard deviation at the closest wavelength
     of that row is used.
 
+    The result is a standard deviation only if the table stores the true variance, as
+    tables built from a simulation do. Tables built in ``analytical`` mode store the
+    square of half the range of possible wavelengths instead.
+
     Parameters
     ----------
     table:

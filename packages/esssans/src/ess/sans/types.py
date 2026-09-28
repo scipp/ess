@@ -183,10 +183,6 @@ CollimationLength = NewType('CollimationLength', sc.Variable)
 """Distance L1 between source aperture and sample aperture, used for the Q
 resolution."""
 
-DetectorPixelSize = NewType('DetectorPixelSize', sc.Variable)
-"""Radial size of a detector pixel in the plane perpendicular to the incident beam,
-used for the Q resolution. Scalar, or broadcastable to the detector pixel dims."""
-
 OutFilename = NewType('OutFilename', str)
 """Filename of the output"""
 
@@ -292,9 +288,15 @@ class SourceWavelengthSpread(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Standard deviation of the wavelength of neutrons detected with a given wavelength
     at a given pixel, due to the pulse length of the source and chopper openings.
 
-    This excludes the contribution of the wavelength binning. Scalar, or broadcastable
-    to the detector pixel dims and the ``wavelength`` dim of the midpoints of
-    :py:class:`WavelengthBins`."""
+    Scalar, or broadcastable to the detector pixel dims and the ``wavelength`` dim of
+    the midpoints of :py:class:`WavelengthBins`."""
+
+
+class PixelScatteringAngleVariance(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Variance of the scattering angle ``2 theta`` within each detector pixel, seen
+    from the sample, in rad**2 (dimensionless).
+
+    Used for the Q resolution. Scalar, or broadcastable to the detector pixel dims."""
 
 
 class DetectorQVariance(sciline.Scope[RunType, sc.Variable], sc.Variable):

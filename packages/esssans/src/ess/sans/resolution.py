@@ -4,21 +4,30 @@
 Q resolution of I(Q).
 
 The resolution of a single element (pixel and wavelength bin) ``i`` is approximated as
-a Gaussian with variance (Mildner and Carpenter, keeping ``cos(theta)``)
+a Gaussian with variance (Mildner and Carpenter, keeping ``cos(theta)`` and
+``cos(2 theta)``)
 
 .. code-block:: text
 
     sigma_i**2 = (2 pi cos(theta) / lambda)**2
-                 * [3 (R1/L1)**2 + 3 (R2/L3)**2 + (dR cos(2 theta) / L2)**2] / 12
-               + Q_i**2 * sigma_lambda**2 / lambda**2
+                 * [R1**2 / (4 L1**2) + R2**2 (1/L1 + cos(2 theta)/L2)**2 / 4
+                    + sigma_pixel**2]
+               + Q_i**2 * sigma_source**2 / lambda**2
 
-    1/L3 = 1/L1 + 1/L2
-    sigma_lambda**2 = sigma_source**2 + d_lambda**2 / 12
+with circular source and sample apertures of radius ``R1`` and ``R2``, collimation
+length ``L1``, and ``sigma_pixel`` the standard deviation of the scattering angle
+``2 theta`` within a pixel, see :py:func:`pixel_scattering_angle_variance`.
+``sigma_source`` is the standard deviation of the true wavelength of neutrons detected
+at the given pixel and wavelength.
 
-with ``d_lambda`` the width of the wavelength bin. Since I(Q) in a bin is
-``sum(C_i) / sum(N_i)``, with ``N_i`` the denominator, the resolution function of the
-bin is the mixture of the element Gaussians weighted by ``N_i``. Its variance is
-computed from sums, which can be merged across runs by addition:
+The wavelength binning does not contribute: events are histogrammed in Q using their
+own wavelength, so they do not spread beyond the Q bin they are counted in. The spread
+of Q within a Q bin is accounted for below.
+
+Since I(Q) in a bin is ``sum(C_i) / sum(N_i)``, with ``N_i`` the denominator, the
+resolution function of the bin is the mixture of the element Gaussians weighted by
+``N_i``. Its variance is computed from sums, which can be merged across runs by
+addition:
 
 .. code-block:: text
 
@@ -41,16 +50,20 @@ from ess.reduce.unwrap import wavelength_spread
 
 from .common import mask_range
 from .conversions import ElasticCoordTransformGraph
+from .normalization import pixel_cylinder
 from .types import (
     BinnedQ,
     CollimationLength,
     Denominator,
     DetectorLtotal,
-    DetectorPixelSize,
+    DetectorPixelShape,
     DetectorQVariance,
+    EmptyDetector,
     LookupTable,
     MonitorTerm,
+    NeXusTransformation,
     NormalizedQ,
+    PixelScatteringAngleVariance,
     QDetector,
     QResolution,
     ReducedQ,
@@ -76,6 +89,12 @@ def source_wavelength_spread_from_lookup_table(
 
     Uses the lookup table before masking large uncertainties, since the denominator
     includes all pixels and wavelengths.
+
+    The table must store the true variance of the wavelength, as tables built from a
+    simulation do. Tables built in ``analytical`` mode store half the range of
+    possible wavelengths instead. With the default source time range of 5 ms and
+    without pulse-shaping choppers, this is about 2.8 times the standard deviation for
+    the ESS pulse.
     """
     return SourceWavelengthSpread[RunType](
         wavelength_spread(
@@ -84,19 +103,59 @@ def source_wavelength_spread_from_lookup_table(
     )
 
 
-def _ratio_squared(a: sc.Variable, b: sc.Variable) -> sc.Variable:
-    return (a / b).to(unit='') ** 2
+def pixel_scattering_angle_variance(
+    detector: EmptyDetector[RunType],
+    pixel_shape: DetectorPixelShape[RunType],
+    transform: NeXusTransformation[snx.NXdetector, RunType],
+    graph: ElasticCoordTransformGraph[RunType],
+) -> PixelScatteringAngleVariance[RunType]:
+    """
+    Variance of the scattering angle ``2 theta`` within each cylindrical pixel.
+
+    Neutrons are assumed to be detected uniformly within the pixel volume. A
+    displacement ``d`` from the pixel center changes the scattering angle by
+    ``d . e / L2``, with ``e`` the unit vector perpendicular to the scattered beam, in
+    the direction of increasing ``2 theta``:
+
+    .. code-block:: text
+
+        e = cos(2 theta) rho - sin(2 theta) k
+
+    ``k`` is the incident beam direction and ``rho`` the unit vector from the beam axis
+    towards the pixel, perpendicular to ``k``. For a cylinder of length ``l`` and radius
+    ``r``, with ``c`` the cosine of the angle between its axis and ``e``, the variance
+    of ``d . e`` is ``l**2 c**2 / 12 + r**2 (1 - c**2) / 4``.
+    """
+    coords = detector.transform_coords(
+        ('incident_beam', 'scattered_beam'),
+        graph=graph,
+        keep_intermediate=False,
+        rename_dims=False,
+    ).coords
+    k = coords['incident_beam'] / sc.norm(coords['incident_beam'])
+    scattered = coords['scattered_beam']
+    l2 = sc.norm(scattered)
+    rho = scattered - sc.dot(scattered, k) * k
+    rho_norm = sc.norm(rho)
+    cos_2theta = sc.dot(scattered, k) / l2
+    sin_2theta = rho_norm / l2
+    e = cos_2theta * (rho / rho_norm) - sin_2theta * k
+
+    axis, radius = pixel_cylinder(pixel_shape, transform)
+    length = sc.norm(axis)
+    c2 = sc.dot(axis / length, e) ** 2
+    variance = length**2 * c2 / 12 + radius**2 * (1 - c2) / 4
+    return PixelScatteringAngleVariance[RunType]((variance / l2**2).to(unit=''))
 
 
 def detector_q_variance(
     detector_term: QDetector[RunType, Denominator],
     graph: ElasticCoordTransformGraph[RunType],
     source_spread: SourceWavelengthSpread[RunType],
-    wavelength_bins: WavelengthBins,
+    pixel_variance: PixelScatteringAngleVariance[RunType],
     source_aperture: SourceApertureRadius,
     sample_aperture: SampleApertureRadius,
     collimation_length: CollimationLength,
-    pixel_size: DetectorPixelSize,
 ) -> DetectorQVariance[RunType]:
     """
     Variance ``sigma**2`` of the Q resolution of each pixel and wavelength.
@@ -109,18 +168,17 @@ def detector_q_variance(
     q = coords['Q']
     wavelength = coords['wavelength']
     two_theta = coords['two_theta']
-    l2 = coords['L2']
-    l3_inv = sc.reciprocal(collimation_length) + sc.reciprocal(l2)
-
-    d_wavelength = wavelength_bins[1:] - wavelength_bins[:-1]
-    wavelength_variance = source_spread**2 + d_wavelength**2 / 12
+    # Scattering point within the sample aperture, seen from the source and the pixel
+    sample_term = sample_aperture * (
+        sc.reciprocal(collimation_length) + sc.cos(two_theta) / coords['L2']
+    )
     angular_variance = (
-        3 * _ratio_squared(source_aperture, collimation_length)
-        + 3 * (sample_aperture * l3_inv).to(unit='') ** 2
-        + _ratio_squared(pixel_size * sc.cos(two_theta), l2)
-    ) / 12
+        (source_aperture / collimation_length).to(unit='') ** 2 / 4
+        + sample_term.to(unit='') ** 2 / 4
+        + pixel_variance
+    )
     variance = (2 * np.pi * sc.cos(two_theta / 2) / wavelength) ** 2 * angular_variance
-    variance += q**2 * (wavelength_variance / wavelength**2).to(unit='')
+    variance += q**2 * (source_spread / wavelength).to(unit='') ** 2
     return DetectorQVariance[RunType](
         variance.to(unit=q.unit**2).transpose(detector_term.dims)
     )
@@ -193,6 +251,7 @@ def q_resolution(
 
 providers = (
     source_wavelength_spread_from_lookup_table,
+    pixel_scattering_angle_variance,
     detector_q_variance,
     resolution_first_moment,
     resolution_second_moment,

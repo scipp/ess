@@ -13,7 +13,6 @@ from ess.sans.types import (
     BeamCenter,
     CollimationLength,
     Denominator,
-    DetectorPixelSize,
     DetectorQVariance,
     DimsToKeep,
     Filename,
@@ -40,7 +39,6 @@ def _set_resolution_parameters(wf: sciline.Pipeline) -> None:
     wf[SourceApertureRadius] = sc.scalar(15.0, unit='mm')
     wf[SampleApertureRadius] = sc.scalar(4.0, unit='mm')
     wf[CollimationLength] = sc.scalar(4.8, unit='m')
-    wf[DetectorPixelSize] = sc.scalar(8.0, unit='mm')
 
 
 @pytest.fixture
