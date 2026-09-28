@@ -36,9 +36,12 @@ addition:
     S2 = sum(N_i (sigma_i**2 + Q_i**2))
     sigma_bin**2 = S2/S0 - (S1/S0)**2
 
-``S1`` and ``S2`` are the :py:class:`ResolutionFirstMoment` and
-:py:class:`ResolutionSecondMoment` parts of I(Q), processed by the same generic
-providers as numerator and denominator. The variance must be computed only
+``S0``, ``S1`` and ``S2`` are the :py:class:`ResolutionZerothMoment`,
+:py:class:`ResolutionFirstMoment` and :py:class:`ResolutionSecondMoment` parts of
+I(Q), processed by the same generic providers as numerator and denominator.
+Elements whose events have no wavelength, because the lookup table is masked there,
+contribute to the denominator but not to the counts, so they are excluded from the
+sums. They are marked by a NaN :py:class:`SourceWavelengthSpread`. The variance must be computed only
 after all merging. See https://github.com/scipp/ess/issues/763 for details.
 """
 
@@ -54,15 +57,19 @@ from .normalization import pixel_cylinder
 from .types import (
     BinnedQ,
     CollimationLength,
+    CorrectedDetector,
     Denominator,
     DetectorLtotal,
     DetectorPixelShape,
     DetectorQVariance,
     EmptyDetector,
     LookupTable,
+    LookupTableRelativeErrorThreshold,
     MonitorTerm,
+    NeXusDetectorName,
     NeXusTransformation,
     NormalizedQ,
+    Numerator,
     PixelScatteringAngleVariance,
     QDetector,
     QResolution,
@@ -70,6 +77,7 @@ from .types import (
     ResolutionFirstMoment,
     ResolutionMoment,
     ResolutionSecondMoment,
+    ResolutionZerothMoment,
     RunType,
     SampleApertureRadius,
     SourceApertureRadius,
@@ -83,12 +91,16 @@ def source_wavelength_spread_from_lookup_table(
     table: LookupTable[RunType, snx.NXdetector],
     ltotal: DetectorLtotal[RunType],
     wavelength_bins: WavelengthBins,
+    error_threshold: LookupTableRelativeErrorThreshold,
+    detector_name: NeXusDetectorName,
 ) -> SourceWavelengthSpread[RunType]:
     """
     Wavelength spread from the variance stored in the wavelength lookup table.
 
-    Uses the lookup table before masking large uncertainties, since the denominator
-    includes all pixels and wavelengths.
+    Where the relative spread exceeds the error threshold of the lookup table, events
+    get no wavelength. The spread is NaN there, which excludes these pixels and
+    wavelengths from the resolution. Since events get their wavelength by
+    interpolating the table, this reproduces the masking of the table approximately.
 
     The table must store the true variance of the wavelength, as tables built from a
     simulation do. Tables built in ``analytical`` mode store half the range of
@@ -96,10 +108,11 @@ def source_wavelength_spread_from_lookup_table(
     without pulse-shaping choppers, this is about 2.8 times the standard deviation for
     the ESS pulse.
     """
+    wavelength = sc.midpoints(wavelength_bins)
+    spread = wavelength_spread(table, ltotal=ltotal, wavelength=wavelength)
+    masked = spread / wavelength > sc.scalar(error_threshold[detector_name])
     return SourceWavelengthSpread[RunType](
-        wavelength_spread(
-            table, ltotal=ltotal, wavelength=sc.midpoints(wavelength_bins)
-        )
+        sc.where(masked, sc.scalar(np.nan, unit=spread.unit), spread)
     )
 
 
@@ -156,12 +169,20 @@ def detector_q_variance(
     source_aperture: SourceApertureRadius,
     sample_aperture: SampleApertureRadius,
     collimation_length: CollimationLength,
+    numerator: CorrectedDetector[RunType, Numerator],
 ) -> DetectorQVariance[RunType]:
     """
     Variance ``sigma**2`` of the Q resolution of each pixel and wavelength.
 
-    See the module docstring for the definition.
+    See the module docstring for the definition. Requires event data: if the counts
+    were histogrammed in wavelength before conversion to Q, the width of the
+    wavelength bins would have to be included.
     """
+    if numerator.bins is None:
+        raise ValueError(
+            'The Q resolution requires event data. For data histogrammed in '
+            'wavelength, the width of the wavelength bins would contribute.'
+        )
     coords = detector_term.transform_coords(
         ('two_theta', 'L2'), graph=graph, keep_intermediate=False, rename_dims=False
     ).coords
@@ -184,18 +205,41 @@ def detector_q_variance(
     )
 
 
-def resolution_first_moment(
+def _resolution_weights(
+    detector_term: sc.DataArray, variance: sc.Variable
+) -> sc.Variable:
+    """Values of ``N``, zero where the variance is NaN (see the module docstring)."""
+    n = sc.values(detector_term.data)
+    return sc.where(sc.isnan(variance), sc.zeros_like(n), n)
+
+
+def resolution_zeroth_moment(
     detector_term: QDetector[RunType, Denominator],
-) -> QDetector[RunType, ResolutionFirstMoment]:
+    variance: DetectorQVariance[RunType],
+) -> QDetector[RunType, ResolutionZerothMoment]:
     """
-    Compute ``N*Q`` for each pixel and wavelength.
+    Compute ``N`` for each pixel and wavelength.
 
     ``N`` are the values of the detector-dependent factor of the denominator. The
     monitor-dependent factor is applied after binning in Q, as for the denominator.
     """
+    return QDetector[RunType, ResolutionZerothMoment](
+        detector_term.assign(_resolution_weights(detector_term, variance))
+    )
+
+
+def resolution_first_moment(
+    detector_term: QDetector[RunType, Denominator],
+    variance: DetectorQVariance[RunType],
+) -> QDetector[RunType, ResolutionFirstMoment]:
+    """
+    Compute ``N*Q`` for each pixel and wavelength.
+
+    See :py:func:`resolution_zeroth_moment` for ``N``.
+    """
     q = detector_term.coords['Q']
     return QDetector[RunType, ResolutionFirstMoment](
-        detector_term.assign(sc.values(detector_term.data) * q)
+        detector_term.assign(_resolution_weights(detector_term, variance) * q)
     )
 
 
@@ -206,12 +250,14 @@ def resolution_second_moment(
     """
     Compute ``N*(sigma**2 + Q**2)`` for each pixel and wavelength.
 
-    ``N`` are the values of the detector-dependent factor of the denominator. The
-    monitor-dependent factor is applied after binning in Q, as for the denominator.
+    See :py:func:`resolution_zeroth_moment` for ``N``.
     """
     q = detector_term.coords['Q']
+    weights = _resolution_weights(detector_term, variance)
+    # Avoid 0 * NaN for excluded elements
+    variance = sc.where(sc.isnan(variance), sc.zeros_like(variance), variance)
     return QDetector[RunType, ResolutionSecondMoment](
-        detector_term.assign(sc.values(detector_term.data) * (variance + q**2))
+        detector_term.assign(weights * (variance + q**2))
     )
 
 
@@ -232,7 +278,7 @@ def mask_and_scale_resolution_moment(
 
 
 def q_resolution(
-    denominator: ReducedQ[RunType, Denominator],
+    zeroth_moment: ReducedQ[RunType, ResolutionZerothMoment],
     first_moment: ReducedQ[RunType, ResolutionFirstMoment],
     second_moment: ReducedQ[RunType, ResolutionSecondMoment],
 ) -> QResolution[RunType]:
@@ -241,11 +287,11 @@ def q_resolution(
 
     Must be computed from sums that include all runs, see the module docstring.
     """
-    s0 = sc.values(denominator.data)
+    s0 = zeroth_moment.data
     q_mean = first_moment.data / s0
     variance = second_moment.data / s0 - q_mean**2
     return QResolution[RunType](
-        denominator.assign(sc.sqrt(variance)).assign_coords(Q_mean=q_mean)
+        zeroth_moment.assign(sc.sqrt(variance)).assign_coords(Q_mean=q_mean)
     )
 
 
@@ -253,6 +299,7 @@ providers = (
     source_wavelength_spread_from_lookup_table,
     pixel_scattering_angle_variance,
     detector_q_variance,
+    resolution_zeroth_moment,
     resolution_first_moment,
     resolution_second_moment,
     mask_and_scale_resolution_moment,

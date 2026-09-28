@@ -18,6 +18,7 @@ from ess.sans.types import (
     Filename,
     IntensityQ,
     LookupTableFilename,
+    LookupTableRelativeErrorThreshold,
     MonitorTerm,
     NeXusDetectorName,
     QDetector,
@@ -25,6 +26,7 @@ from ess.sans.types import (
     ReducedQ,
     ResolutionFirstMoment,
     ResolutionSecondMoment,
+    ResolutionZerothMoment,
     SampleApertureRadius,
     SampleRun,
     SourceApertureRadius,
@@ -101,7 +103,7 @@ def test_q_resolution_of_merged_runs_equals_resolution_from_summed_moments(
         loki.data.loki_tutorial_sample_run_60250(),
         loki.data.loki_tutorial_sample_run_60339(),
     ]
-    parts = (Denominator, ResolutionFirstMoment, ResolutionSecondMoment)
+    parts = (ResolutionZerothMoment, ResolutionFirstMoment, ResolutionSecondMoment)
     per_run = []
     for run in runs:
         workflow[Filename[SampleRun]] = run
@@ -148,3 +150,28 @@ def test_loki_q_resolution_uses_wavelength_spread_from_lookup_table(
     assert (spread > sc.scalar(0.0, unit=spread.unit)).all()
     # The test file contains no real data, so we only check that the result exists
     assert wf.compute(QResolution[SampleRun]).dims == ('Q',)
+
+
+def test_loki_wavelength_spread_is_nan_where_lookup_table_is_masked(
+    loki_workflow,
+) -> None:
+    wf = loki_workflow()
+    wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    wf[NeXusDetectorName] = 'loki_detector_0'
+    wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
+    unmasked = wf.compute(SourceWavelengthSpread[SampleRun])
+    wavelength = sc.midpoints(wf.compute(WavelengthBins))
+
+    # The test table has frame overlap almost everywhere, so pick a threshold that
+    # splits the elements
+    threshold = float(np.median((unmasked / wavelength).values))
+    wf[LookupTableRelativeErrorThreshold] = {'loki_detector_0': threshold}
+    spread = wf.compute(SourceWavelengthSpread[SampleRun])
+
+    expected_mask = unmasked / wavelength > sc.scalar(threshold)
+    assert expected_mask.any()
+    assert (~expected_mask).any()
+    assert sc.identical(sc.isnan(spread), expected_mask)
+    assert_allclose(
+        sc.where(expected_mask, unmasked, spread), unmasked, equal_nan=False
+    )

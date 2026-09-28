@@ -10,11 +10,14 @@ from ess.sans.resolution import (
     pixel_scattering_angle_variance,
     resolution_first_moment,
     resolution_second_moment,
+    resolution_zeroth_moment,
 )
 from ess.sans.types import (
     CollimationLength,
+    CorrectedDetector,
     CorrectForGravity,
     DetectorPixelShape,
+    Numerator,
     NeXusTransformation,
     PixelScatteringAngleVariance,
     SampleApertureRadius,
@@ -60,8 +63,13 @@ def detector_term(graph: dict, wavelength_bins: sc.Variable) -> sc.DataArray:
     )
 
 
+@pytest.fixture
+def event_numerator() -> CorrectedDetector[SampleRun, Numerator]:
+    return CorrectedDetector[SampleRun, Numerator](sc.data.table_xyz(10).bin(x=2))
+
+
 def test_detector_q_variance_matches_mildner_carpenter(
-    detector_term: sc.DataArray, graph: dict
+    detector_term: sc.DataArray, graph: dict, event_numerator: sc.DataArray
 ) -> None:
     r1, r2, l1, spread = 0.015, 0.005, 5.0, 0.1
     pixel_variance = np.array([1e-6, 4e-6])
@@ -75,6 +83,7 @@ def test_detector_q_variance_matches_mildner_carpenter(
         source_aperture=SourceApertureRadius(sc.scalar(1000 * r1, unit='mm')),
         sample_aperture=SampleApertureRadius(sc.scalar(1000 * r2, unit='mm')),
         collimation_length=CollimationLength(sc.scalar(l1, unit='m')),
+        numerator=event_numerator,
     )
 
     l2 = np.linalg.norm(POSITIONS, axis=1)[:, np.newaxis]
@@ -165,21 +174,62 @@ def test_pixel_scattering_angle_variance_matches_brute_force(
     np.testing.assert_allclose(variance.values, expected, rtol=1e-3)
 
 
-def test_resolution_moments_are_weighted_by_denominator_values(
-    detector_term: sc.DataArray,
+def test_detector_q_variance_requires_event_data(
+    detector_term: sc.DataArray, graph: dict, event_numerator: sc.DataArray
 ) -> None:
-    variance = sc.array(
+    with pytest.raises(ValueError, match='requires event data'):
+        detector_q_variance(
+            detector_term,
+            graph=graph,
+            source_spread=sc.scalar(0.1, unit='angstrom'),
+            pixel_variance=PixelScatteringAngleVariance[SampleRun](sc.scalar(0.0)),
+            source_aperture=SourceApertureRadius(sc.scalar(15.0, unit='mm')),
+            sample_aperture=SampleApertureRadius(sc.scalar(5.0, unit='mm')),
+            collimation_length=CollimationLength(sc.scalar(5.0, unit='m')),
+            numerator=CorrectedDetector[SampleRun, Numerator](event_numerator.hist()),
+        )
+
+
+@pytest.fixture
+def variance() -> sc.Variable:
+    return sc.array(
         dims=['pixel', 'wavelength'],
         values=[[1e-6, 2e-6], [3e-6, 4e-6]],
         unit='1/angstrom**2',
     )
+
+
+def test_resolution_moments_are_weighted_by_denominator_values(
+    detector_term: sc.DataArray, variance: sc.Variable
+) -> None:
     q = detector_term.coords['Q']
     n = sc.values(detector_term.data)
 
-    first = resolution_first_moment(detector_term)
-    second = resolution_second_moment(detector_term, variance=variance)
+    moments = [
+        f(detector_term, variance=variance)
+        for f in (
+            resolution_zeroth_moment,
+            resolution_first_moment,
+            resolution_second_moment,
+        )
+    ]
 
-    assert_allclose(first.data, n * q)
-    assert_allclose(second.data, n * (variance + q**2))
-    assert sc.identical(first.coords['Q'], q)
-    assert sc.identical(second.coords['Q'], q)
+    assert_allclose(moments[0].data, n)
+    assert_allclose(moments[1].data, n * q)
+    assert_allclose(moments[2].data, n * (variance + q**2))
+    for moment in moments:
+        assert sc.identical(moment.coords['Q'], q)
+
+
+def test_resolution_moments_exclude_elements_with_nan_variance(
+    detector_term: sc.DataArray, variance: sc.Variable
+) -> None:
+    variance['pixel', 1]['wavelength', 0] = sc.scalar(np.nan, unit=variance.unit)
+    for f in (
+        resolution_zeroth_moment,
+        resolution_first_moment,
+        resolution_second_moment,
+    ):
+        moment = f(detector_term, variance=variance).data
+        assert moment['pixel', 1]['wavelength', 0].value == 0.0
+        assert (moment['pixel', 0] > sc.scalar(0.0, unit=moment.unit)).all()

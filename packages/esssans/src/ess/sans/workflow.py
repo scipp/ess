@@ -27,6 +27,7 @@ from .types import (
     PixelMaskFilename,
     ResolutionFirstMoment,
     ResolutionSecondMoment,
+    ResolutionZerothMoment,
     SampleRun,
     TransformationPath,
     Transmission,
@@ -102,6 +103,7 @@ def _set_runs(
     pipeline = pipeline.copy()
     runs = pd.DataFrame({Filename[key]: runs}).rename_axis(axis_name)
     targets = [
+        NormalizedQ[key, ResolutionZerothMoment],
         NormalizedQ[key, ResolutionFirstMoment],
         NormalizedQ[key, ResolutionSecondMoment],
         *(

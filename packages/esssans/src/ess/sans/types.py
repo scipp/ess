@@ -74,6 +74,13 @@ Numerator = NewType('Numerator', sc.DataArray)
 """Numerator of IntensityQ"""
 Denominator = NewType('Denominator', sc.DataArray)
 """Denominator of IntensityQ"""
+ResolutionZerothMoment = NewType('ResolutionZerothMoment', sc.DataArray)
+"""Sum of ``N``, used for the Q resolution of IntensityQ.
+
+``N`` is the denominator of IntensityQ for a single pixel and wavelength, excluding
+pixels and wavelengths that do not contribute to the numerator. Like numerator and
+denominator, the sum can be merged across runs by addition.
+See :py:class:`QResolution`."""
 ResolutionFirstMoment = NewType('ResolutionFirstMoment', sc.DataArray)
 """Sum of ``N*Q``, used for the Q resolution of IntensityQ.
 
@@ -90,13 +97,17 @@ IofQPart = TypeVar(
     'IofQPart',
     Numerator,
     Denominator,
+    ResolutionZerothMoment,
     ResolutionFirstMoment,
     ResolutionSecondMoment,
 )
 """TypeVar used for specifying Numerator, Denominator, or the resolution moments of
 IntensityQ"""
 ResolutionMoment = TypeVar(
-    'ResolutionMoment', ResolutionFirstMoment, ResolutionSecondMoment
+    'ResolutionMoment',
+    ResolutionZerothMoment,
+    ResolutionFirstMoment,
+    ResolutionSecondMoment,
 )
 """TypeVar used for specifying the moments used for the Q resolution of IntensityQ"""
 
@@ -288,7 +299,8 @@ class SourceWavelengthSpread(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Standard deviation of the wavelength of neutrons detected with a given wavelength
     at a given pixel, due to the pulse length of the source and chopper openings.
 
-    Scalar, or broadcastable to the detector pixel dims and the ``wavelength`` dim of
+    NaN where events get no wavelength; these pixels and wavelengths are excluded from
+    the Q resolution. Scalar, or broadcastable to the detector pixel dims and the ``wavelength`` dim of
     the midpoints of :py:class:`WavelengthBins`."""
 
 
