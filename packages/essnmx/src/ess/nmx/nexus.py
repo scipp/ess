@@ -12,11 +12,8 @@ import scippnexus as snx
 
 from .configurations import Compression
 from .types import (
-    NMXDetectorMetadata,
+    NMXLauetof,
     NMXMonitorMetadata,
-    NMXProgram,
-    NMXSampleMetadata,
-    NMXSourceMetadata,
 )
 
 
@@ -127,27 +124,9 @@ def _add_arbitrary_metadata(
             )
 
 
-def _set_default_instrument(nx_entry: snx.Group) -> snx.Group:
-    """Return NXinstrument group.
-
-    If 'instrument' exists in the NXentry group, it returns the existing one.
-    Otherwise, new NXinstrument group is created and returned.
-    The default NXinstrument group has a field 'name' with the instrument name, 'NMX'.
-    """
-    if "instrument" not in nx_entry:
-        nx_instrument = nx_entry.create_class("instrument", 'NXinstrument')
-        nx_instrument.create_field(key='name', value='NMX')
-    else:
-        nx_instrument = nx_entry["instrument"]
-
-    return nx_instrument
-
-
 def export_static_metadata_as_nxlauetof(
     *,
-    sample_metadata: NMXSampleMetadata,
-    source_metadata: NMXSourceMetadata,
-    program: NMXProgram,
+    nxlauetof: NMXLauetof,
     output_file: str | pathlib.Path | io.BytesIO,
     overwrite: bool = False,
     **arbitrary_metadata: sc.Variable,
@@ -176,15 +155,16 @@ def export_static_metadata_as_nxlauetof(
     """
     _check_file(output_file, overwrite=overwrite)
     with snx.File(output_file, "w") as f:
-        f._group.attrs["NX_class"] = "NXlauetof"
-        nx_entry = f.create_class(name='entry', class_name='NXlauetof')
-        nx_entry.create_field('definitions', value='NXlauetof')
-        nx_entry['sample'] = sample_metadata
-        nx_entry['reducer'] = program
+        f['entry'] = nxlauetof
+        f['entry']['reducer'] = nxlauetof.reducer
+        f['entry']['sample'] = nxlauetof.sample
+        f['entry']['instrument'] = nxlauetof.instrument
+        f['entry']['instrument']['source'] = nxlauetof.instrument.source
+        detectors = nxlauetof.instrument.detectors
+        for det in detectors.values():
+            f['entry']['instrument'][det.metadata.detector_name] = det.metadata
 
-        nx_instrument = _set_default_instrument(nx_entry)
-        nx_instrument['source'] = source_metadata
-        _add_arbitrary_metadata(nx_entry._group, **arbitrary_metadata)
+        _add_arbitrary_metadata(f['entry']._group, **arbitrary_metadata)
 
 
 def export_monitor_metadata_as_nxlauetof(
@@ -211,34 +191,6 @@ def export_monitor_metadata_as_nxlauetof(
     with snx.File(output_file, "r+") as f:
         nx_entry = f["entry"]
         nx_entry["control"] = monitor_metadata
-
-
-def export_detector_metadata_as_nxlauetof(
-    detector_metadata: NMXDetectorMetadata,
-    output_file: str | pathlib.Path | io.BytesIO,
-    append_mode: bool = True,
-) -> None:
-    """Export the detector specific metadata to a NeXus file.
-
-    Since NMX can have arbitrary number of detectors,
-    this function can take multiple detector metadata objects.
-
-    Parameters
-    ----------
-    detector_metadatas:
-        Detector metadata objects.
-    output_file:
-        Output file path.
-
-    """
-
-    if not append_mode:
-        raise NotImplementedError("Only append mode is supported for now.")
-
-    with snx.File(output_file, "r+") as f:
-        nx_entry: snx.Group = f["entry"]
-        nx_instrument = _set_default_instrument(nx_entry)
-        nx_instrument[detector_metadata.detector_name] = detector_metadata
 
 
 def export_reduced_data_as_nxlauetof(
