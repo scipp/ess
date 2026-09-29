@@ -3,14 +3,15 @@
 """Automatic bin-edge generation for powder diffraction."""
 
 import scipp as sc
-import scippneutron as scn
 
 from ess.reduce.unwrap import ChopperFrameSequence
+from ess.reduce.unwrap import lut as unwrap_lut
 
 from .types import (
     DetectorTwoTheta,
     DspacingBins,
     DspacingNBins,
+    ElasticCoordTransformGraph,
     RunType,
     SampleRun,
     WavelengthRange,
@@ -27,6 +28,7 @@ def wavelength_range_from_chopper_frames(
 def dspacing_bins_from_wavelength_and_two_theta(
     wavelength_range: WavelengthRange[SampleRun],
     two_theta: DetectorTwoTheta[SampleRun],
+    graph: ElasticCoordTransformGraph[SampleRun],
     nbins: DspacingNBins,
 ) -> DspacingBins:
     """Make d-spacing bin edges from wavelength and detector geometry.
@@ -37,12 +39,20 @@ def dspacing_bins_from_wavelength_and_two_theta(
     """
     if nbins < 1:
         raise ValueError(f'DspacingNBins must be positive, got {nbins}.')
-    dspacing_range = scn.conversion.tof.dspacing_from_wavelength(
-        wavelength=sc.concat(
-            [wavelength_range.nanmin(), wavelength_range.nanmax()], dim='bound'
-        ),
-        two_theta=sc.concat([two_theta.nanmax(), two_theta.nanmin()], dim='bound'),
+    bounds = sc.DataArray(
+        sc.ones(dims=['bound'], shape=[2]),
+        coords={
+            'wavelength': sc.concat(
+                [wavelength_range.nanmin(), wavelength_range.nanmax()], dim='bound'
+            ),
+            'two_theta': sc.concat(
+                [two_theta.nanmax(), two_theta.nanmin()], dim='bound'
+            ),
+        },
     )
+    dspacing_range = bounds.transform_coords(
+        'dspacing', graph=graph, keep_intermediate=False
+    ).coords['dspacing']
     return DspacingBins(
         sc.linspace(
             dim='dspacing',
@@ -55,6 +65,8 @@ def dspacing_bins_from_wavelength_and_two_theta(
 
 
 providers = (
+    unwrap_lut.guess_pulse_stride_from_choppers,
+    unwrap_lut.compute_frame_sequence,
     wavelength_range_from_chopper_frames,
     dspacing_bins_from_wavelength_and_two_theta,
 )

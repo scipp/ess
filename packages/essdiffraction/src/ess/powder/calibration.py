@@ -8,12 +8,15 @@ from collections.abc import Callable, ItemsView, Iterable, Iterator, KeysView, M
 
 import scipp as sc
 import scipp.constants
+import scippneutron as scn
+import scippnexus as snx
 
 from .types import (
     DetectorLtotal,
     DetectorTwoTheta,
-    ElasticCoordTransformGraph,
     EmptyDetector,
+    GravityVector,
+    Position,
     RunType,
     SampleRun,
 )
@@ -102,7 +105,9 @@ class OutputCalibrationData(Mapping[int, sc.Variable]):
 
 def detector_two_theta(
     detector: EmptyDetector[RunType],
-    graph: ElasticCoordTransformGraph[RunType],
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
 ) -> DetectorTwoTheta[RunType]:
     """Compute the scattering angle (two-theta) for each detector pixel.
 
@@ -110,9 +115,19 @@ def detector_two_theta(
     ----------
     detector:
         Data array with detector positions.
-    graph:
-        Coordinate transformation graph for elastic scattering.
+    source_position:
+        Position of the neutron source.
+    sample_position:
+        Position of the sample.
+    gravity:
+        Gravity vector.
     """
+    graph = {
+        **scn.conversion.graph.beamline.beamline(scatter=True),
+        'source_position': lambda: source_position,
+        'sample_position': lambda: sample_position,
+        'gravity': lambda: gravity,
+    }
     return DetectorTwoTheta[RunType](
         detector.transform_coords(
             "two_theta", graph=graph, keep_intermediate=False

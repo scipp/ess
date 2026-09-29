@@ -28,7 +28,6 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 providers = (
-    *binning.providers,
     *calibration.providers,
     *conversion.providers,
     *correction.providers,

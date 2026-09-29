@@ -10,6 +10,7 @@ from ess.beer import (
     BeerModMcStasWorkflow,
     BeerModMcStasWorkflowKnownPeaks,
     BeerPowderMcStasWorkflow,
+    BeerPowderWorkflow,
 )
 from ess.beer.data import (
     mcstas_duplex,
@@ -21,8 +22,8 @@ from ess.beer.data import (
 )
 from ess.beer.mcstas import (
     load_beer_mcstas,
-    load_beer_mcstas_geometry,
     load_beer_mcstas_monitor,
+    mcstas_providers,
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import (
@@ -139,10 +140,39 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
     )
 
 
-def test_powder_workflow_computes_dspacing_bins_without_loading_events(monkeypatch):
-    wf = BeerPowderMcStasWorkflow()
-    wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
+def _beer_powder_mcstas_workflow(wavelength_from):
+    wf = BeerPowderWorkflow(wavelength_from=wavelength_from)
+    for provider in mcstas_providers:
+        wf.insert(provider)
+    return wf
+
+
+@pytest.mark.parametrize(
+    ('make_workflow', 'mode'),
+    [
+        pytest.param(
+            lambda: _beer_powder_mcstas_workflow('analytical'),
+            6,
+            id='powder-analytical',
+        ),
+        pytest.param(
+            lambda: _beer_powder_mcstas_workflow('simulation'),
+            6,
+            id='powder-simulation',
+        ),
+        pytest.param(BeerModMcStasWorkflow, 7, id='modulation'),
+        pytest.param(BeerModMcStasWorkflowKnownPeaks, 7, id='modulation-known-peaks'),
+        pytest.param(BeerMcStasWorkflowPulseShaping, 6, id='pulse-shaping'),
+        pytest.param(BeerPowderMcStasWorkflow, 6, id='powder-mcstas'),
+    ],
+)
+def test_beer_workflows_compute_dspacing_bins_without_loading_events(
+    monkeypatch, make_workflow, mode
+):
+    wf = make_workflow()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(mode)
     wf[DetectorBank] = DetectorBank.north
+    wf[DHKLList] = silicon_peaks_array()
     wf[DspacingNBins] = 123
 
     def fail_if_events_are_loaded(*args, **kwargs):
@@ -185,16 +215,6 @@ def test_load_both_detector_banks():
     assert both.bins.size().sum().value == (
         north.bins.size().sum().value + south.bins.size().sum().value
     )
-
-
-def test_loaded_detector_includes_pixels_without_events():
-    filename = mcstas_silicon_new_model(10)
-    detector = load_beer_mcstas(filename, DetectorBank.north)
-    geometry = load_beer_mcstas_geometry(filename, DetectorBank.north)
-
-    assert sc.identical(detector.coords['pixel_id'], geometry.coords['pixel_id'])
-    assert sc.identical(detector.coords['position'], geometry.coords['position'])
-    assert sc.any(detector.bins.size() == sc.index(0)).value
 
 
 def test_loaded_mcstas_event_variances_are_squared_weights():

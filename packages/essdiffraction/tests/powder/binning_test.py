@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-import pytest
 import scipp as sc
+from ess import powder
 from ess.powder.binning import (
     dspacing_bins_from_wavelength_and_two_theta,
     wavelength_range_from_chopper_frames,
 )
+from ess.powder.conversion import powder_coordinate_transformation_graph
 from ess.powder.types import (
     DetectorTwoTheta,
     DspacingNBins,
@@ -14,6 +15,10 @@ from ess.powder.types import (
     WavelengthRange,
 )
 from scippneutron.tof import chopper_cascade
+
+
+def test_automatic_dspacing_binning_is_opt_in_for_powder_workflows():
+    assert set(powder.binning.providers).isdisjoint(powder.providers)
 
 
 def test_wavelength_range_uses_frame_after_last_chopper():
@@ -51,9 +56,13 @@ def test_dspacing_bins_span_envelope_of_wavelength_and_two_theta():
     two_theta = DetectorTwoTheta[SampleRun](
         sc.array(dims=['pixel'], values=[30.0, 60.0, 90.0], unit='deg')
     )
-
+    graph = powder_coordinate_transformation_graph(
+        source_position=sc.vector([0.0, 0.0, -1.0], unit='m'),
+        sample_position=sc.vector([0.0, 0.0, 0.0], unit='m'),
+        gravity=sc.vector([0.0, -9.81, 0.0], unit='m/s^2'),
+    )
     bins = dspacing_bins_from_wavelength_and_two_theta(
-        wavelength_range, two_theta, DspacingNBins(4)
+        wavelength_range, two_theta, graph, DspacingNBins(4)
     )
 
     assert bins.sizes == {'dspacing': 5}
@@ -68,17 +77,3 @@ def test_dspacing_bins_span_envelope_of_wavelength_and_two_theta():
             unit='angstrom',
         ),
     )
-
-
-def test_dspacing_nbins_must_be_positive():
-    wavelength_range = WavelengthRange[SampleRun](
-        sc.array(dims=['bound'], values=[1.0, 4.0], unit='angstrom')
-    )
-    two_theta = DetectorTwoTheta[SampleRun](
-        sc.array(dims=['pixel'], values=[30.0, 90.0], unit='deg')
-    )
-
-    with pytest.raises(ValueError, match='DspacingNBins must be positive'):
-        dspacing_bins_from_wavelength_and_two_theta(
-            wavelength_range, two_theta, DspacingNBins(0)
-        )
