@@ -35,6 +35,7 @@ from ess.powder.types import (
     KeepEvents,
     MaskedDetectorIDs,
     NormalizedDspacing,
+    QDetector,
     SampleRun,
     TofMask,
     TwoThetaMask,
@@ -164,6 +165,16 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
         sc.scalar(1.6374, unit='angstrom'),
         atol=sc.scalar(5e-4, unit='angstrom'),
     )
+
+
+def test_powder_mcstas_analytical_workflow_computes_q():
+    wf = BeerPowderMcStasWorkflow()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
+    wf[DetectorBank] = DetectorBank.north
+
+    da = wf.compute(QDetector[SampleRun])
+
+    assert 'Q' in da.bins.coords
 
 
 @pytest.mark.parametrize(
