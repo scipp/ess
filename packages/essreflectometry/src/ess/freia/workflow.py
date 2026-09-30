@@ -19,7 +19,7 @@ from ..reflectometry.types import (
 )
 from . import conversions, corrections, mcstas, normalization, orso
 from .corrections import RunNormalization, insert_run_normalization
-from .types import IncidentMonitor
+from .types import DetectorRegionOfInterest, IncidentMonitor
 
 providers = (
     *reflectometry_providers,
@@ -137,6 +137,51 @@ def FreiaWorkflow(
 
 
 @register_workflow
+def FreiaOffspecWorkflow(
+    *,
+    wavelength_from: WavelengthLutMode = "file",
+    **kwargs,
+) -> sciline.Pipeline:
+    """Workflow for unnormalized, coplanar off-specular FREIA data.
+
+    The possible incident beams are computed from corresponding centers in the
+    upstream and downstream slit assemblies. For every neutron, the workflow
+    reflects its outgoing direction about the sample surface and assigns the
+    open incident beam with the closest direction. It then computes ``Qx`` and
+    ``Qz`` from the assigned incidence angle and measured reflection angle.
+
+    Supply :class:`~ess.freia.types.UpstreamSlitCenters` and
+    :class:`~ess.freia.types.DownstreamSlitCenters` for ``SampleRun``. Their
+    common ``incident_beam`` dimension can contain all three simultaneously
+    open FREIA slit channels. The output is ``CorrectedDetector[SampleRun]``;
+    this workflow deliberately has no reference run or normalization step. By
+    default the detector ROI is empty, so the entire detector is retained.
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    """
+    workflow = GenericUnwrapWorkflow(
+        run_types=[SampleRun],
+        monitor_types=[],
+        wavelength_from=wavelength_from,
+        **kwargs,
+    )
+    for provider in (
+        conversions.offspecular_sample_coordinate_transformation_graph,
+        corrections.add_coords_and_masks,
+    ):
+        workflow.insert(provider)
+    for name, param in default_parameters().items():
+        workflow[name] = param
+    workflow[DetectorRegionOfInterest[SampleRun]] = {}
+    return workflow
+
+
+@register_workflow
 def FreiaMcStasUnnormalizedWorkflow() -> sciline.Pipeline:
     """Workflow for Freia McStas data without run normalization."""
     return FreiaMcStasWorkflow(run_norm=RunNormalization.none)
@@ -192,6 +237,7 @@ __all__ = [
     'FreiaMcStasWorkflow',
     'FreiaMonitorHistogramWorkflow',
     'FreiaMonitorIntegratedWorkflow',
+    'FreiaOffspecWorkflow',
     'FreiaProtonChargeWorkflow',
     'FreiaUnnormalizedWorkflow',
     'FreiaWorkflow',
