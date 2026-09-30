@@ -151,11 +151,11 @@ def FreiaOffspecWorkflow(
     ``Qz`` from the assigned incidence angle and measured reflection angle.
 
     Supply :class:`~ess.freia.types.UpstreamSlitCenters` and
-    :class:`~ess.freia.types.DownstreamSlitCenters` for ``SampleRun``. Their
-    common ``incident_beam`` dimension can contain all three simultaneously
-    open FREIA slit channels. The output is ``CorrectedDetector[SampleRun]``;
-    this workflow deliberately has no reference run or normalization step. By
-    default the detector ROI is empty, so the entire detector is retained.
+    :class:`~ess.freia.types.DownstreamSlitCenters` for ``SampleRun`` as
+    dictionaries with matching slit-channel names. Each dictionary must
+    contain the simultaneously open FREIA slit channels. The output is
+    ``CorrectedDetector[SampleRun]``; this workflow has no reference normalization step.
+    By default the detector ROI is empty, so the entire detector is retained.
 
     Parameters
     ----------

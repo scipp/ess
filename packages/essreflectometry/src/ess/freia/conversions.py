@@ -21,8 +21,6 @@ from .types import (
     UpstreamSlitCenters,
 )
 
-_INCIDENT_BEAM_DIM = 'incident_beam'
-
 
 def outgoing_direction(
     scattered_beam: sc.Variable,
@@ -64,15 +62,22 @@ def theta(
 def incident_beam_directions(
     upstream_slit_centers: UpstreamSlitCenters[RunType],
     downstream_slit_centers: DownstreamSlitCenters[RunType],
-) -> sc.Variable:
+) -> dict[str, sc.Variable]:
     """Compute candidate incident directions from corresponding slit openings.
 
-    The two inputs contain the centers of the open channels in the upstream and
-    downstream slit assemblies. Corresponding indices describe one possible
-    incident beam. FREIA has exactly three such channels.
+    The two inputs map the names of open channels to their centers in the
+    upstream and downstream slit assemblies. Matching keys describe one
+    possible incident beam.
     """
-    beams = downstream_slit_centers - upstream_slit_centers
-    return beams / sc.norm(beams)
+    if upstream_slit_centers.keys() != downstream_slit_centers.keys():
+        raise ValueError(
+            'UpstreamSlitCenters and DownstreamSlitCenters must have the same keys.'
+        )
+    directions = {}
+    for key, upstream in upstream_slit_centers.items():
+        beam = downstream_slit_centers[key] - upstream
+        directions[key] = beam / sc.norm(beam)
+    return directions
 
 
 def hypothetical_incident_direction(
@@ -86,20 +91,29 @@ def hypothetical_incident_direction(
 
 def incident_direction(
     hypothetical_incident_direction: sc.Variable,
-    incident_beam_directions: sc.Variable,
+    incident_beam_directions: dict[str, sc.Variable],
 ) -> sc.Variable:
     """Candidate direction closest to the specular hypothesis."""
-    direction0 = incident_beam_directions[_INCIDENT_BEAM_DIM, 0]
-    direction1 = incident_beam_directions[_INCIDENT_BEAM_DIM, 1]
-    direction2 = incident_beam_directions[_INCIDENT_BEAM_DIM, 2]
-    score0 = sc.dot(hypothetical_incident_direction, direction0)
-    score1 = sc.dot(hypothetical_incident_direction, direction1)
-    score2 = sc.dot(hypothetical_incident_direction, direction2)
-    return sc.where(
-        (score0 >= score1) & (score0 >= score2),
-        direction0,
-        sc.where(score1 >= score2, direction1, direction2),
-    )
+    closest = None
+    max_score = None
+    for direction in incident_beam_directions.values():
+        score = sc.dot(hypothetical_incident_direction, direction)
+        if closest is None:
+            closest = direction
+            max_score = score
+        else:
+            direction_is_closer = score > max_score
+            closest = sc.where(
+                direction_is_closer,
+                direction,
+                closest,
+            )
+            max_score = sc.where(
+                direction_is_closer,
+                score,
+                max_score,
+            )
+    return closest
 
 
 def incident_angle(

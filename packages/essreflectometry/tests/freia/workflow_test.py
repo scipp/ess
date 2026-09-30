@@ -127,14 +127,14 @@ def test_offspec_workflow_provides_qx_and_qz():
     workflow[Position[NXsource, SampleRun]] = sc.vector([0.0, 0.0, -10.0], unit='m')
     workflow[SampleSurfaceNormal[SampleRun]] = sc.vector([0.0, 1.0, 0.0])
     workflow[GravityVector] = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
-    workflow[UpstreamSlitCenters[SampleRun]] = sc.vectors(
-        dims=['incident_beam'], values=[[0.0, 0.0, -2.0]] * 3, unit='m'
-    )
-    workflow[DownstreamSlitCenters[SampleRun]] = sc.vectors(
-        dims=['incident_beam'],
-        values=[[0.0, -0.1, -1.0], [0.0, -0.2, -1.0], [0.0, -0.3, -1.0]],
-        unit='m',
-    )
+    workflow[UpstreamSlitCenters[SampleRun]] = {
+        key: sc.vector([0.0, 0.0, -2.0], unit='m')
+        for key in ('top', 'middle', 'bottom')
+    }
+    workflow[DownstreamSlitCenters[SampleRun]] = {
+        key: sc.vector([0.0, y, -1.0], unit='m')
+        for key, y in zip(('top', 'middle', 'bottom'), (-0.1, -0.2, -0.3), strict=True)
+    }
 
     graph = workflow.compute(CoordTransformationGraph[SampleRun])
 
