@@ -40,7 +40,7 @@ def assert_h5_attrs_equal(
     cur_path: pathlib.Path,
 ) -> None:
 
-    assert attrs_left.keys() == attrs_right.keys()
+    assert attrs_left.keys() == attrs_right.keys(), cur_path
     for attr_key, attr in attrs_left.items():
         if not isinstance(attr, str) and hasattr(attr, '__len__'):
             assert all(attr == attrs_right[attr_key]), cur_path
@@ -113,7 +113,7 @@ def test_compare_output_file_with_frozen(tmp_path: pathlib.Path):
     entry_path = pathlib.Path('/entry')
     excluded_paths = (
         entry_path / 'reducer/program',  # version should be different
-        entry_path / 'aux',  # downstream sw must not depend on the auxiliary output
+        entry_path / 'aux',  # downstream sw must not depend on the auxiliary output,
     )
     ref_file_path = get_small_nmx_reduced()
     with h5py.File(output_file) as cur_file:
