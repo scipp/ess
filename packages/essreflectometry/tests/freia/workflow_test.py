@@ -6,16 +6,19 @@ from ess.reduce.nexus.types import GravityVector, Position
 from scipp.testing import assert_allclose, assert_identical
 from scippnexus import NXsample, NXsource
 
-from ess.freia import FreiaWorkflow
+from ess.freia import FreiaOffspecWorkflow, FreiaWorkflow
 from ess.freia.corrections import RunNormalization
 from ess.freia.types import (
     DetectorRegionOfInterest,
+    DownstreamSlitCenters,
     SampleSurfaceNormal,
+    UpstreamSlitCenters,
     WavelengthMonitor,
 )
 from ess.reflectometry.corrections import footprint_on_sample
 from ess.reflectometry.types import (
     BeamSize,
+    CoordTransformationGraph,
     QBins,
     ReducibleData,
     ReferenceRun,
@@ -116,3 +119,23 @@ def test_rebinning_integrates_before_dividing():
             dims=['Q'], values=[60.0 / 200.0], variances=[0.3**2 * (1 / 60 + 1 / 200)]
         ),
     )
+
+
+def test_offspec_workflow_provides_qx_and_qz():
+    workflow = FreiaOffspecWorkflow()
+    workflow[Position[NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    workflow[Position[NXsource, SampleRun]] = sc.vector([0.0, 0.0, -10.0], unit='m')
+    workflow[SampleSurfaceNormal[SampleRun]] = sc.vector([0.0, 1.0, 0.0])
+    workflow[GravityVector] = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
+    workflow[UpstreamSlitCenters[SampleRun]] = {
+        key: sc.vector([0.0, 0.0, -2.0], unit='m')
+        for key in ('top', 'middle', 'bottom')
+    }
+    workflow[DownstreamSlitCenters[SampleRun]] = {
+        key: sc.vector([0.0, y, -1.0], unit='m')
+        for key, y in zip(('top', 'middle', 'bottom'), (-0.1, -0.2, -0.3), strict=True)
+    }
+
+    graph = workflow.compute(CoordTransformationGraph[SampleRun])
+
+    assert {'incident_angle', 'reflection_angle', 'Qx', 'Qz'} <= graph.keys()
