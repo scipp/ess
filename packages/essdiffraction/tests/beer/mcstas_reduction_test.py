@@ -31,6 +31,7 @@ from ess.powder.types import (
     DspacingDetector,
     DspacingNBins,
     ElasticCoordTransformGraph,
+    QDetector,
     SampleRun,
 )
 from scipp.testing import assert_allclose
@@ -185,6 +186,16 @@ def test_beer_workflows_compute_dspacing_bins_without_loading_events(
     assert bins.sizes == {'dspacing': 124}
     assert sc.all(sc.isfinite(bins)).value
     assert sc.all(bins[1:] > bins[:-1]).value
+
+
+def test_powder_mcstas_analytical_workflow_computes_q():
+    wf = BeerPowderMcStasWorkflow()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(6)
+    wf[DetectorBank] = DetectorBank.north
+
+    da = wf.compute(QDetector[SampleRun])
+
+    assert 'Q' in da.bins.coords
 
 
 @pytest.mark.parametrize(
