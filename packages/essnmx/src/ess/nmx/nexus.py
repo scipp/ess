@@ -155,6 +155,7 @@ def export_static_metadata_as_nxlauetof(
     """
     _check_file(output_file, overwrite=overwrite)
     with snx.File(output_file, "w") as f:
+        f._group.attrs['NX_class'] = 'NXlauetof'
         f['entry'] = nxlauetof
         f['entry']['reducer'] = nxlauetof.reducer
         f['entry']['sample'] = nxlauetof.sample

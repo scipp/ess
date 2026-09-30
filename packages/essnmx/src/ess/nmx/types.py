@@ -272,7 +272,7 @@ class NMXProgram:
 
 @dataclass(kw_only=True)
 class NMXLauetof:
-    nx_class = "NXlauetof"
+    nx_class = "NXentry"
 
     control: NMXMonitorMetadata
     definition: Literal['NXlauetof'] = 'NXlauetof'
