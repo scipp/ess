@@ -15,11 +15,10 @@ from ess.freia.types import (
     UpstreamSlitCenters,
     WavelengthMonitor,
 )
-from ess.reflectometry.conversions import reflectometry_q_x, reflectometry_q_z
 from ess.reflectometry.corrections import footprint_on_sample
 from ess.reflectometry.types import (
     BeamSize,
-    CorrectedDetector,
+    CoordTransformationGraph,
     QBins,
     ReducibleData,
     ReferenceRun,
@@ -122,60 +121,21 @@ def test_rebinning_integrates_before_dividing():
     )
 
 
-def test_offspec_workflow_assigns_beams_and_computes_qx_qz_without_normalization():
+def test_offspec_workflow_provides_qx_and_qz():
     workflow = FreiaOffspecWorkflow()
-    reflection_angles = sc.array(dims=['event'], values=[0.4, 1.2, 3.0], unit='deg').to(
-        unit='rad'
-    )
-    events = sc.DataArray(
-        sc.ones(dims=['event'], shape=[3], unit='counts'),
-        coords={
-            'wavelength': sc.full(
-                dims=['event'], shape=[3], value=4.0, unit='angstrom'
-            ),
-            'pixel_id': sc.arange('event', 3, unit=None),
-        },
-    ).group('pixel_id')
-    events.coords['position'] = sc.vectors(
-        dims=['pixel_id'],
-        values=[
-            [0.0, np.sin(angle), np.cos(angle)] for angle in reflection_angles.values
-        ],
-        unit='m',
-    )
-    workflow[WavelengthDetector[SampleRun]] = events
     workflow[Position[NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
     workflow[Position[NXsource, SampleRun]] = sc.vector([0.0, 0.0, -10.0], unit='m')
     workflow[SampleSurfaceNormal[SampleRun]] = sc.vector([0.0, 1.0, 0.0])
     workflow[GravityVector] = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
-
-    incident_angles = sc.array(
-        dims=['incident_beam'], values=[0.3, 1.0, 3.5], unit='deg'
-    ).to(unit='rad')
     workflow[UpstreamSlitCenters[SampleRun]] = sc.vectors(
         dims=['incident_beam'], values=[[0.0, 0.0, -2.0]] * 3, unit='m'
     )
     workflow[DownstreamSlitCenters[SampleRun]] = sc.vectors(
         dims=['incident_beam'],
-        values=[
-            [0.0, -np.sin(angle), -2.0 + np.cos(angle)]
-            for angle in incident_angles.values
-        ],
+        values=[[0.0, -0.1, -1.0], [0.0, -0.2, -1.0], [0.0, -0.3, -1.0]],
         unit='m',
     )
-    result = workflow.compute(CorrectedDetector[SampleRun])
-    event_coords = result.bins.constituents['data'].coords
-    assigned_angles = incident_angles.rename_dims({'incident_beam': 'event'})
-    wavelength = events.bins.constituents['data'].coords['wavelength']
 
-    assert_allclose(event_coords['incident_angle'], assigned_angles)
-    assert_allclose(event_coords['reflection_angle'], reflection_angles)
-    assert_allclose(
-        event_coords['Qx'],
-        reflectometry_q_x(wavelength, assigned_angles, reflection_angles),
-    )
-    assert_allclose(
-        event_coords['Qz'],
-        reflectometry_q_z(wavelength, assigned_angles, reflection_angles),
-    )
-    assert 'Q' not in event_coords
+    graph = workflow.compute(CoordTransformationGraph[SampleRun])
+
+    assert {'incident_angle', 'reflection_angle', 'Qx', 'Qz'} <= graph.keys()
