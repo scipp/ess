@@ -635,34 +635,34 @@ def test_choppers_rotate_enough_times_with_slow_neutrons_to_pollute_lut():
 
 
 def test_chopper_processing_drops_choppers_with_zero_frequency():
-    from ess.reduce.unwrap.lut import process_disk_choppers
-
+    wf = _make_workflow("analytical")
     choppers = _make_choppers()
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers.copy()
     n_original = len(choppers)
     key = next(iter(choppers))
-    period = sc.scalar(1 / 14, unit='s')
 
-    all_processed = process_disk_choppers(choppers, pulse_period=period)
+    all_processed = wf.compute(unwrap.FrameCompatibleDiskChoppers[AnyRun])
     assert len(all_processed) == n_original
     assert key in all_processed
 
     choppers[key] = dataclasses.replace(
         choppers[key], frequency=sc.scalar(0.0, unit='Hz')
     )
-    processed = process_disk_choppers(choppers, pulse_period=period)
+
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    processed = wf.compute(unwrap.FrameCompatibleDiskChoppers[AnyRun])
     assert len(processed) == n_original - 1
     assert key not in processed
 
 
 def test_chopper_processing_treats_choppers_with_bad_frequency_as_closed():
-    from ess.reduce.unwrap.lut import process_disk_choppers
-
+    wf = _make_workflow("analytical")
     choppers = _make_choppers()
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers.copy()
     n_original = len(choppers)
     key = next(iter(choppers))
-    period = sc.scalar(1 / 14, unit='s')
 
-    all_processed = process_disk_choppers(choppers, pulse_period=period)
+    all_processed = wf.compute(unwrap.FrameCompatibleDiskChoppers[AnyRun])
     assert len(all_processed) == n_original
     assert key in all_processed
 
@@ -671,7 +671,8 @@ def test_chopper_processing_treats_choppers_with_bad_frequency_as_closed():
     choppers[key] = dataclasses.replace(
         choppers[key], frequency=sc.scalar(5.0, unit='Hz')
     )
-    processed = process_disk_choppers(choppers, pulse_period=period)
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    processed = wf.compute(unwrap.FrameCompatibleDiskChoppers[AnyRun])
     # The chopper is still there
     assert len(processed) == n_original
     assert key in processed
