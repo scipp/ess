@@ -167,13 +167,23 @@ SimulationMaxWavelength = NewType("SimulationMaxWavelength", sc.Variable | None)
 """
 
 
-class ProcessedDiskChoppers(
+class ActiveDiskChoppers(
     sl.Scope[RunType, dict[str, DiskChopper]], dict[str, DiskChopper]
 ):
-    """Processed disk choppers:
-    If a chopper has 0 frequency, it is treated as parked/inactive, and is dropped.
-    If a chopper's frequency is not in sync with the source frequency, it is replaced
+    """
+    A dict of choppers that are active (i.e., have a non-zero frequency).
+    """
+
+
+class FrameCompatibleDiskChoppers(
+    sl.Scope[RunType, dict[str, DiskChopper]], dict[str, DiskChopper]
+):
+    """Disk choppers compatible with the frame period (which is made
+    from the source period and the pulse stride).
+    If a chopper's frequency is not in sync with the frame frequency, it is replaced
     with a chopper which is always closed.
+    Being in sync means that the chopper period is either a multiple of the frame
+    period, or an integer fraction of it.
     """
 
 
@@ -498,14 +508,28 @@ def _is_int_or_inverse_int(x: sc.Variable, *, rtol: sc.Variable) -> bool:
     return bool(a | b)
 
 
-def process_disk_choppers(
-    choppers: DiskChoppers[RunType], pulse_period: PulsePeriod
-) -> ProcessedDiskChoppers[RunType]:
+def get_active_choppers(choppers: DiskChoppers[RunType]) -> ActiveDiskChoppers[RunType]:
     """
-    Iterate through the choppers and drop any choppers that have a frequency of 0 Hz.
-    They are considered to be parked/inactive.
-    In addition, if a chopper's frequency is not in sync with the source frequency
-    (neither a multiple of the source frequency, nor an integer fraction of it), it
+    Return a dict of choppers that are active (i.e., have a non-zero frequency).
+
+    Parameters
+    ----------
+    choppers:
+        A dict of DiskChopper objects representing the choppers in the beamline.
+    """
+    return ActiveDiskChoppers[RunType](
+        {k: c for k, c in choppers.items() if c.frequency.value != 0.0}
+    )
+
+
+def close_non_synced_disk_choppers(
+    choppers: ActiveDiskChoppers[RunType],
+    pulse_period: PulsePeriod,
+    pulse_stride: PulseStride[RunType],
+) -> FrameCompatibleDiskChoppers[RunType]:
+    """
+    If a chopper's frequency is not in sync with the frame frequency
+    (neither a multiple of the frame frequency, nor an integer fraction of it), it
     is replaced with a chopper that is always closed.
     This is because we cannot always find a frame_period over which we can find
     periodicity for all choppers without making it arbitrary long.
@@ -517,18 +541,17 @@ def process_disk_choppers(
     ----------
     choppers:
         A dict of DiskChopper objects representing the choppers in the beamline.
+        Parked choppers (with 0 frequency) have been dropped.
     pulse_period:
         Period of the source pulses, i.e., time between consecutive pulse starts.
     """
+    frequency_unit = "Hz"
+    pulse_frequency = sc.reciprocal(pulse_period * pulse_stride).to(unit=frequency_unit)
     out = {}
     for key, ch in choppers.items():
-        if ch.frequency.value == 0:
-            continue
-
         # If the frequency is not synced to the source pulse frequency, we transform
         # this chopper to always be closed.
-        freq = abs(ch.frequency).to(unit='Hz')
-        pulse_frequency = sc.reciprocal(pulse_period).to(unit=freq.unit)
+        freq = abs(ch.frequency).to(unit=frequency_unit)
         quot = freq / pulse_frequency
         # Note on possible edge-cases:
         # If we have two choppers, one at 14/3 Hz and another at 14/4 Hz, both pass
@@ -554,11 +577,11 @@ def process_disk_choppers(
             )
         else:
             out[key] = ch
-    return ProcessedDiskChoppers[RunType](out)
+    return FrameCompatibleDiskChoppers[RunType](out)
 
 
 def simulate_chopper_cascade_using_tof(
-    choppers: ProcessedDiskChoppers[RunType],
+    choppers: FrameCompatibleDiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
     neutrons: NumberOfSimulatedNeutrons,
     pulse_stride: PulseStride[RunType],
@@ -754,7 +777,7 @@ def _estimate_wavelength_by_polygon_centers(
 
 def compute_frame_sequence(
     pulse_period: PulsePeriod,
-    disk_choppers: ProcessedDiskChoppers[RunType],
+    disk_choppers: FrameCompatibleDiskChoppers[RunType],
     source_position: Position[snx.NXsource, RunType],
     source_bounds: SourceBounds,
     pulse_stride: PulseStride[RunType],
@@ -957,7 +980,7 @@ def ltotal_range_from_ltotal_monitor(
 
 
 def guess_pulse_stride_from_choppers(
-    choppers: ProcessedDiskChoppers[RunType], pulse_period: PulsePeriod
+    choppers: ActiveDiskChoppers[RunType], pulse_period: PulsePeriod
 ) -> PulseStride[RunType]:
     """
     If the pulse stride is not provided, we try to guess it from the chopper parameters.
@@ -1011,7 +1034,8 @@ def providers(
         return (load_lookup_table_from_file,)
 
     common = (
-        process_disk_choppers,
+        get_active_choppers,
+        close_non_synced_disk_choppers,
         ltotal_range_from_ltotal_detector,
         ltotal_range_from_ltotal_monitor,
         guess_pulse_stride_from_choppers,
