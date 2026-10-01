@@ -511,6 +511,8 @@ def _is_int_or_inverse_int(x: sc.Variable, *, rtol: sc.Variable) -> bool:
 def get_active_choppers(choppers: DiskChoppers[RunType]) -> ActiveDiskChoppers[RunType]:
     """
     Return a dict of choppers that are active (i.e., have a non-zero frequency).
+    We assume that choppers with zero frequency are parked and do not affect the neutron
+    beam.
 
     Parameters
     ----------
@@ -546,20 +548,13 @@ def close_non_synced_disk_choppers(
         Period of the source pulses, i.e., time between consecutive pulse starts.
     """
     frequency_unit = "Hz"
-    pulse_frequency = sc.reciprocal(pulse_period * pulse_stride).to(unit=frequency_unit)
+    frame_frequency = sc.reciprocal(pulse_period * pulse_stride).to(unit=frequency_unit)
     out = {}
     for key, ch in choppers.items():
         # If the frequency is not synced to the source pulse frequency, we transform
         # this chopper to always be closed.
         freq = abs(ch.frequency).to(unit=frequency_unit)
-        quot = freq / pulse_frequency
-        # Note on possible edge-cases:
-        # If we have two choppers, one at 14/3 Hz and another at 14/4 Hz, both pass
-        # the check here, and the table is built without error, even though the
-        # 14/3 Hz chopper turns 4/3 times per frame. This would most probably be the
-        # result of an error in the chopper settings. We delay implementing a proper
-        # handling of this for now, as the solution is not obvious (e.g. is it ok to
-        # have both 14/2 Hz and 14/4 Hz?), and it is unlikely to happen in practice.
+        quot = freq / frame_frequency
         if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
             dim = ch.slit_begin.dim
             empty = sc.array(dims=[dim], values=[], unit='deg')
@@ -570,7 +565,7 @@ def close_non_synced_disk_choppers(
             )
             out[key] = replace(
                 ch,
-                frequency=pulse_frequency,
+                frequency=frame_frequency,
                 slit_begin=empty,
                 slit_end=empty,
                 slit_height=height,
@@ -749,11 +744,8 @@ def _estimate_wavelength_by_polygon_centers(
     # We determine the number of frame periods to shift by calculating how many periods
     # are needed to cover the maximum arrival time in the subframes.
     max_time = sc.reduce([f.time.max() for f in subframes]).max()
-    # Why `- noffset` below:
-    # nperiods is computed from the absolute max_time, but the copies are shifted by
-    # noffset + i. So the first noffset extra copies end up at negative times and only
-    # contribute NaNs. This is correct, but for long flight paths it adds work in the
-    # per-distance loop, so int(max_time / frame_period) - noffset + 1 is sufficient.
+    # Copy i is shifted by (noffset + i) frame periods, so copies up to
+    # i = int(max_time / frame_period) - noffset are needed to cover max_time.
     nperiods = int(max_time.to(unit=time_unit).value / frame_period.value) - noffset + 1
 
     polygons = [
@@ -825,6 +817,9 @@ def compute_frame_sequence(
         # pulse_frequency to be an integer multiple of the pulse frequency or vice
         # versa.
         freq = abs(ch.frequency).to(unit='Hz')
+        # time_offset_open/close require freq / pulse_frequency to be an integer,
+        # which holds here by construction. DiskChopper starts its repetitions at
+        # rotation -1, so nrot repetitions only reach rotation nrot - 1, hence +1.
         nrot = int(np.ceil((travel_time * freq).value)) + 1
         pulse_frequency_for_diskchopper = freq / nrot
 

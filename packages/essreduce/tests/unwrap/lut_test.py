@@ -741,7 +741,7 @@ def test_lut_workflow_treats_choppers_with_bad_frequency_as_closed(wavelength_fr
 
 
 @pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
-def test_lut_workflow_chopper_frquency_multiple_of_frame_period(wavelength_from):
+def test_lut_workflow_chopper_frequency_multiple_of_frame_period(wavelength_from):
     # Chopper settings copied from the BEER instrument at ESS. The FC1B chopper has
     # a frequency of 63 Hz which is 4.5 times the source frequency of 14 Hz, but this
     # is ok because FC2B rotates at 7 Hz, yielding a pulse stride of 2.
