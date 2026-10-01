@@ -40,6 +40,37 @@ class Result(pydantic.BaseModel):
     result: Array()
 
 
+class Parts(pydantic.BaseModel):
+    numerator: Array(IOFQ)
+    denominator: NexusFile
+
+
+class PartsTable(pydantic.BaseModel):
+    parts: list[Parts]
+
+
+class NestedRow(pydantic.BaseModel):
+    parts: list[Parts]
+    sample: NexusFile
+
+
+class TableInRow(pydantic.BaseModel):
+    rows: list[NestedRow]
+
+
+class ModelRow(pydantic.BaseModel):
+    sample: NexusFile
+    centre: Quantity
+
+
+class ModelInRow(pydantic.BaseModel):
+    rows: list[ModelRow]
+
+
+class Grouped(pydantic.BaseModel):
+    limits: Params
+
+
 @pytest.fixture
 def spec() -> WorkflowSpec:
     return WorkflowSpec(
@@ -94,6 +125,37 @@ class TestWorkflowSpec:
         with pytest.raises(pydantic.ValidationError):
             spec.params(sample={'dataset': 'pid'}, lower=2.0, upper=1.0)
 
+    @pytest.mark.parametrize('side', ['params', 'outputs'])
+    def test_tables_allowed_on_both_sides(self, side: str) -> None:
+        fields = {'params': Params, 'outputs': Result, side: PartsTable}
+        spec = WorkflowSpec(name='wf', version=1, title='W', description='D', **fields)
+        assert getattr(spec, side) is PartsTable
+
+    @pytest.mark.parametrize('side', ['params', 'outputs'])
+    @pytest.mark.parametrize(
+        ('model', 'cell'),
+        [(TableInRow, 'NestedRow.parts'), (ModelInRow, 'ModelRow.centre')],
+    )
+    def test_table_row_holding_a_model_or_a_table_rejected(
+        self, side: str, model: type[pydantic.BaseModel], cell: str
+    ) -> None:
+        fields = {'params': Params, 'outputs': Result, side: model}
+        with pytest.raises(pydantic.ValidationError, match=f'{cell} holds a model'):
+            WorkflowSpec(name='wf', version=1, title='W', description='D', **fields)
+
+    def test_model_field_outside_a_table_allowed(self) -> None:
+        # The one-level rule is about table rows only; a field holding a model,
+        # shown by a UI as a group of fields, is not constrained by it.
+        spec = WorkflowSpec(
+            name='wf',
+            version=1,
+            title='W',
+            description='D',
+            params=Grouped,
+            outputs=Result,
+        )
+        assert spec.params is Grouped
+
     def test_output_metadata_is_field_metadata(self, spec: WorkflowSpec) -> None:
         fields = spec.outputs.model_fields
         assert list(fields) == ['iofq', 'beam_centre', 'transmission']
@@ -141,3 +203,19 @@ class TestSerialization:
         )
         iofq = restored.outputs_schema['properties']['iofq']
         assert ArraySpec.model_validate(iofq['dataField']['array']) == IOFQ
+
+    def test_table_rows_keep_data_fields_in_schema(self) -> None:
+        spec = WorkflowSpec(
+            name='wf', version=1, title='W', description='D', outputs=PartsTable
+        )
+        schema = SerializedWorkflowSpec.model_validate_json(
+            spec.serialize().model_dump_json()
+        ).outputs_schema
+        parts = schema['properties']['parts']
+        assert parts['type'] == 'array'
+        row = schema['$defs'][parts['items']['$ref'].removeprefix('#/$defs/')]
+        cells = row['properties']
+        assert (
+            ArraySpec.model_validate(cells['numerator']['dataField']['array']) == IOFQ
+        )
+        assert cells['denominator']['dataField'] == {'format': 'nexus'}

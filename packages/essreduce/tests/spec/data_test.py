@@ -18,6 +18,7 @@ from ess.reduce.spec import (
     as_ref,
     data_fields,
     ref_fields,
+    table_fields,
     walk_refs,
 )
 
@@ -29,6 +30,28 @@ class Params(BaseModel):
     banks: dict[str, Array(ArraySpec(dims=('tof',)))] = {}
     centre: Quantity | OutputRef | None = None
     label: str = ''
+
+
+class Parts(BaseModel):
+    numerator: Array(ArraySpec(dims=('Q',), unit='counts'))
+    denominator: Array(ArraySpec(dims=('Q',), unit='counts'))
+    weight: float = 1.0
+
+
+class SampleRun(BaseModel):
+    sample: NexusFile
+    transmission: list[NexusFile] = []
+    label: str = ''
+
+
+class TableParams(BaseModel):
+    parts: list[Parts]
+    runs: list[SampleRun] | None = None
+    labels: list[str] = []
+
+
+class Settings(BaseModel):
+    weight: float = 1.0
 
 
 OUTPUT_REF = {'record': 'r1', 'output': 'data'}
@@ -47,6 +70,54 @@ class TestFieldIntrospection:
 
     def test_ref_fields_include_literal_or_reference_unions(self) -> None:
         assert ref_fields(Params) == {'data', 'background', 'runs', 'banks', 'centre'}
+
+
+class TestTableFields:
+    def test_finds_lists_of_a_model_with_their_row_model(self) -> None:
+        assert table_fields(TableParams) == {'parts': Parts, 'runs': SampleRun}
+
+    def test_lists_of_data_fields_or_literals_are_not_tables(self) -> None:
+        assert table_fields(Params) == {}
+
+    def test_a_table_is_not_a_data_field(self) -> None:
+        assert data_fields(TableParams) == {}
+        cells = data_fields(table_fields(TableParams)['runs'])
+        assert set(cells) == {'sample', 'transmission'}
+        assert cells['sample'].format is Format.NEXUS
+
+    def test_a_table_with_reference_cells_is_a_ref_field(self) -> None:
+        class Weights(BaseModel):
+            rows: list[Settings]
+
+        assert ref_fields(TableParams) == {'parts', 'runs'}
+        assert ref_fields(Weights) == set()
+
+    @pytest.mark.parametrize(
+        'cell', [Settings, Settings | None, list[Settings], dict[str, Settings]]
+    )
+    def test_refuses_a_row_holding_a_model_or_a_table(self, cell: object) -> None:
+        class Row(BaseModel):
+            data: Array()
+            nested: cell
+
+        class Nested(BaseModel):
+            rows: list[Row]
+
+        with pytest.raises(ValueError, match=r'Nested\.rows: .* Row\.nested holds'):
+            table_fields(Nested)
+
+    def test_rows_validate_their_cells(self) -> None:
+        params = TableParams(
+            parts=[{'numerator': OUTPUT_REF, 'denominator': DATASET_REF}]
+        )
+        assert params.parts == [
+            Parts(
+                numerator=OutputRef(record='r1', output='data'),
+                denominator=DatasetRef(dataset='pid-1'),
+            )
+        ]
+        with pytest.raises(ValidationError):
+            TableParams(parts=[{'numerator': OUTPUT_REF, 'denominator': 'a path'}])
 
 
 class TestValidation:
@@ -128,6 +199,23 @@ class TestReferences:
             ('runs[0]', 'pid-1'),
             ('runs[1]', 'f2.file'),
             ('banks.a', 'r2.banks[a]'),
+        ]
+
+    def test_walk_refs_finds_references_in_table_rows(self) -> None:
+        params = {
+            'parts': [
+                {'numerator': OUTPUT_REF, 'denominator': DATASET_REF, 'weight': 2.0},
+                {
+                    'numerator': {'record': 'r2', 'output': 'num'},
+                    'denominator': DATASET_REF,
+                },
+            ]
+        }
+        assert [(p, str(r)) for p, r in walk_refs(params)] == [
+            ('parts[0].numerator', 'r1.data'),
+            ('parts[0].denominator', 'pid-1'),
+            ('parts[1].numerator', 'r2.num'),
+            ('parts[1].denominator', 'pid-1'),
         ]
 
     def test_as_ref_decides_what_a_reference_is(self) -> None:

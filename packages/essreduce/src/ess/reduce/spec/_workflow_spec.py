@@ -12,7 +12,9 @@ executor is a separate, parallel mechanism deliberately not defined here.
 Parameters and outputs are both pydantic model classes over one vocabulary
 (:mod:`ess.reduce.spec.parameters` for literals, :mod:`ess.reduce.spec.data`
 for files and arrays), so an output field of one workflow can feed a parameter
-field of another when their types match.
+field of another when their types match. On either side a field may be a table,
+a list of a flat model (see :func:`~ess.reduce.spec.data.table_fields`); a spec
+whose table rows hold a model or another table is refused at construction.
 
 Two forms exist, related by a one-way projection:
 
@@ -31,7 +33,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from .data import table_fields
 
 
 class NoParams(BaseModel):
@@ -110,6 +114,12 @@ class WorkflowSpec(_SpecFields, frozen=True):
         ),
     )
 
+    @field_validator('params', 'outputs')
+    @classmethod
+    def _table_rows_are_flat(cls, model: type[BaseModel]) -> type[BaseModel]:
+        table_fields(model)  # raises if a row holds a model or a table
+        return model
+
     def serialize(self) -> SerializedWorkflowSpec:
         """
         Project to the plain-data form with params and outputs as JSON Schema.
@@ -137,7 +147,9 @@ class SerializedWorkflowSpec(_SpecFields, frozen=True):
     and outputs are represented as JSON Schema, sufficient for form generation
     and optimistic validation but not for authoritative validation — that
     remains with the process owning the model classes. Data fields carry a
-    ``dataField`` key with their format and array structure.
+    ``dataField`` key with their format and array structure. A table field is an
+    array whose ``items`` refer (``$ref``) to the row model under ``$defs``; the
+    row's properties carry the ``dataField`` key of its data fields.
     """
 
     params_schema: dict[str, Any] = Field(

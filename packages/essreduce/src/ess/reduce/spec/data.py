@@ -17,9 +17,17 @@ what a request names and what a record keeps; turning it into a local path or an
 in-memory object is the business of whatever runs the workflow, and the workflow
 asks for the form it wants. Collections of data fields, ``list[...]`` and
 ``dict[str, ...]`` of one declared type, are allowed and a reference may name one
-element of a collection output. This module imports no scipp; the structural
-check of a scipp object against its :class:`ArraySpec` lives in
-:mod:`ess.reduce.spec.conversions`.
+element of a collection output.
+
+A field may also be a *table*, ``list[Row]`` with ``Row`` a flat pydantic model
+whose fields are literals and data fields (collections included) but never a
+model or another table. A UI shows it as a table, one row per element and one
+column per field, so related inputs such as a sample run and its transmission
+run stay paired. A reference names a whole table field, never a row or a cell.
+See :func:`table_fields`.
+
+This module imports no scipp; the structural check of a scipp object against its
+:class:`ArraySpec` lives in :mod:`ess.reduce.spec.conversions`.
 """
 
 from __future__ import annotations
@@ -166,7 +174,8 @@ def data_fields(model: type[BaseModel]) -> dict[str, DataField]:
     Data fields of a params or outputs model, by name.
 
     Optional fields and collections count; every element of a collection shares
-    the annotation.
+    the annotation. A table field is not a data field: the data fields of its
+    rows are ``data_fields(table_fields(model)[name])``.
     """
     fields = {}
     for name, field in model.model_fields.items():
@@ -179,14 +188,75 @@ def data_fields(model: type[BaseModel]) -> dict[str, DataField]:
 
 
 def ref_fields(model: type[BaseModel]) -> set[str]:
-    """Fields that may hold a reference: data fields and literal-or-reference unions."""
+    """
+    Fields that may hold a reference.
+
+    These are data fields, literal-or-reference unions, and table fields whose
+    rows have such fields.
+    """
     data = data_fields(model)
+    tables = table_fields(model)
     return {
         name
         for name, field in model.model_fields.items()
         if name in data
         or any(m in (OutputRef, DatasetRef) for m in _members(field.annotation))
+        or (name in tables and ref_fields(tables[name]))
     }
+
+
+def _is_model(annotation: Any) -> bool:
+    """Whether ``annotation`` is a pydantic model other than a reference."""
+    return (
+        isinstance(annotation, type)
+        and get_origin(annotation) is None
+        and issubclass(annotation, BaseModel)
+        and not issubclass(annotation, OutputRef | DatasetRef)
+    )
+
+
+def _row_model(annotation: Any) -> type[BaseModel] | None:
+    """``Row`` if ``annotation`` is ``list[Row]``, possibly optional or annotated."""
+    origin = get_origin(annotation)
+    if origin is Annotated:
+        return _row_model(get_args(annotation)[0])
+    if origin in (Union, UnionType):
+        args = [arg for arg in get_args(annotation) if arg is not type(None)]
+        return _row_model(args[0]) if len(args) == 1 else None
+    if origin is list:
+        (item,) = get_args(annotation)
+        return item if _is_model(item) else None
+    return None
+
+
+def table_fields(model: type[BaseModel]) -> dict[str, type[BaseModel]]:
+    """
+    Table fields of a params or outputs model, by name, with their row model.
+
+    A table field is ``list[Row]``, possibly optional, with ``Row`` a pydantic
+    model. Rows must be flat: a field of ``Row`` holds literals or data fields,
+    collections of them included, but no model and no table, so that every
+    table is one a generic UI can show as rows and columns.
+
+    Raises
+    ------
+    ValueError
+        If a row model has a field holding a model or a table.
+    """
+    tables = {}
+    for name, field in model.model_fields.items():
+        row = _row_model(field.annotation)
+        if row is None:
+            continue
+        for cell, cell_field in row.model_fields.items():
+            if any(_is_model(m) for m in _members(cell_field.annotation)):
+                raise ValueError(
+                    f'{model.__name__}.{name}: rows of a table hold only literals '
+                    f'and data fields, but {row.__name__}.{cell} holds a model '
+                    'or a table'
+                )
+        tables[name] = row
+    return tables
 
 
 _OUTPUT_REF_KEYS = frozenset(OutputRef.model_fields)

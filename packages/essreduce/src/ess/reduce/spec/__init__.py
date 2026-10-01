@@ -21,6 +21,7 @@ from .data import (
     as_ref,
     data_fields,
     ref_fields,
+    table_fields,
     walk_refs,
 )
 from .parameters import Quantity
@@ -42,5 +43,6 @@ __all__ = [
     'as_ref',
     'data_fields',
     'ref_fields',
+    'table_fields',
     'walk_refs',
 ]

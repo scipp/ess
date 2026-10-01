@@ -127,7 +127,8 @@ collection by key), or a dataset the framework did not compute (`DatasetRef`:
 one identity string). A field may be a union of a literal and a reference,
 for values a user may type in or take from a previous run. Collections,
 `list[...]` and `dict[str, ...]` of one declared type, are allowed on both
-sides, and a reference may name one element of a collection output.
+sides, and a reference may name one element of a collection output, but not a
+row or cell of a table (next section).
 
 The identity string is opaque to the spec and interpreted only by the framework
 that minted it. The spec has no use for the kind of identity, a catalogue PID,
@@ -167,6 +168,40 @@ references in a plain request value, so a framework never re-derives the
 annotation's meaning. The structural check of a scipp object against its
 `ArraySpec` needs scipp and lives in `ess.reduce.spec.conversions`, called by
 whoever runs the workflow on the outputs it returns.
+
+### Tables: a list of a flat model
+
+A field may be a **table**: `list[Row]`, where `Row` is a pydantic model. A sum
+over runs of numerator and denominator pairs, or SANS sample runs each paired
+with its transmission run, is one table field:
+
+```python
+class SampleRun(BaseModel):
+    sample: NexusFile
+    transmission: NexusFile
+
+
+class Params(BaseModel):
+    runs: list[SampleRun]
+```
+
+The alternative, one list per quantity (`samples: list[NexusFile]`,
+`transmissions: list[NexusFile]`), forces callers to transpose and lets the
+lists misalign by position. A UI shows a table as rows and columns: one row per
+element, one column per field of `Row`, with a picker in each data-field cell.
+A UI can also fill a row from one earlier record by matching output names to
+column names.
+
+Rows are flat: a field of `Row` holds a literal or a data field, collections of
+them included, but never a model and never another table. A table with nested
+rows is one no generic UI can show as rows and columns, so `WorkflowSpec`
+refuses it when it is constructed. The rule constrains rows only; a field
+holding a model elsewhere is not affected by it. Tables are allowed in both
+params and outputs. A table is not a data field: `table_fields` finds the
+table fields of a model with their row model, and `data_fields` of the row
+model gives the data fields of its cells. In JSON Schema a table is an array
+whose items refer to the row model under `$defs`, where the cells carry their
+`dataField` key. A reference names a whole table field, never a row or a cell.
 
 ### Two forms, one-way projection
 
