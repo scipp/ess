@@ -737,3 +737,77 @@ def test_lut_workflow_treats_choppers_with_bad_frequency_as_closed(wavelength_fr
     # After the bad chopper, the table should be all NaNs.
     after_bad_chopper = table.array['distance', -1]
     assert np.isnan(after_bad_chopper.values).all()
+
+
+@pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
+def test_lut_workflow_chopper_frquency_multiple_of_frame_period(wavelength_from):
+    # Chopper settings copied from the BEER instrument at ESS. The FC1B chopper has
+    # a frequency of 63 Hz which is 4.5 times the source frequency of 14 Hz, but this
+    # is ok because FC2B rotates at 7 Hz, yielding a pulse stride of 2.
+    params = {
+        "PSC1": {
+            "frequency": 168.0,
+            "phase": 318.6929881679336,
+            "distance": 6.450,
+            "open": [0.0],
+            "close": [144.0],
+        },
+        "PSC3": {
+            "frequency": -168.0,
+            "phase": -318.6929881679336,
+            "distance": 7.375,
+            "open": [0.0],
+            "close": [144.0],
+        },
+        "FC1A": {
+            "frequency": -14.0,
+            "phase": -3.22439393604574,
+            "distance": 8.283,
+            "open": [0.0],
+            "close": [72.0],
+        },
+        "FC1B": {
+            "frequency": -63.0,
+            "phase": -46.41910994173803,
+            "distance": 8.317,
+            "open": [0.0],
+            "close": [180.0],
+        },
+        "FC2B": {
+            "frequency": -7.0,
+            "phase": -68.58171174285046,
+            "distance": 80.025,
+            "open": [0.0],
+            "close": [85.0],
+        },
+    }
+    choppers = {
+        key: DiskChopper(
+            frequency=ch["frequency"] * sc.Unit("Hz"),
+            beam_position=sc.scalar(0.0, unit="deg"),
+            phase=ch["phase"] * sc.Unit("deg"),
+            axle_position=sc.vector(value=[0, 0, ch["distance"]], unit="m"),
+            slit_begin=sc.array(dims=["cutout"], values=ch["open"], unit="deg"),
+            slit_end=sc.array(dims=["cutout"], values=ch["close"], unit="deg"),
+        )
+        for key, ch in params.items()
+    }
+
+    wf = _make_workflow(wavelength_from)
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    if wavelength_from == "simulation":
+        wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
+        wf[unwrap.SimulationSeed] = 79
+
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
+        sc.scalar(100.0, unit='m'),
+        sc.scalar(157.0, unit='m'),
+    )
+    wf[unwrap.DistanceResolution] = sc.scalar(0.1, unit='m')
+    wf[unwrap.TimeResolution] = sc.scalar(250.0, unit='us')
+
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector])
+
+    at_detector = table.array['distance', -1]
+    assert not np.isnan(at_detector.values).all()
