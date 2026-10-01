@@ -32,7 +32,7 @@ IOFQ = ArraySpec(dims=('Q',), unit='counts', coords={'Q': '1/Å'})
 
 class Outputs(pydantic.BaseModel):
     iofq: Array(IOFQ) = Field(title='I(Q)', description='Scattering intensity.')
-    beam_centre: Quantity = Field(title='Beam centre')
+    scale_factor: Quantity = Field(title='Scale factor')
     transmission: Array() | None = Field(default=None, title='Transmission')
 
 
@@ -158,7 +158,7 @@ class TestWorkflowSpec:
 
     def test_output_metadata_is_field_metadata(self, spec: WorkflowSpec) -> None:
         fields = spec.outputs.model_fields
-        assert list(fields) == ['iofq', 'beam_centre', 'transmission']
+        assert list(fields) == ['iofq', 'scale_factor', 'transmission']
         assert fields['iofq'].title == 'I(Q)'
         assert fields['iofq'].description == 'Scattering intensity.'
         assert fields['transmission'].is_required() is False
@@ -186,7 +186,7 @@ class TestSerialization:
 
     def test_output_order_and_metadata_preserved(self, spec: WorkflowSpec) -> None:
         properties = spec.serialize().outputs_schema['properties']
-        assert list(properties) == ['iofq', 'beam_centre', 'transmission']
+        assert list(properties) == ['iofq', 'scale_factor', 'transmission']
         assert properties['iofq']['title'] == 'I(Q)'
         assert properties['iofq']['description'] == 'Scattering intensity.'
 

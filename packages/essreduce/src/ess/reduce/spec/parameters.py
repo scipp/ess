@@ -92,9 +92,10 @@ class Quantity(BaseModel, frozen=True):
     """
     A scalar or short vector with a unit, as plain data.
 
-    The small-value type for parameters and outputs such as a beam centre or a
-    fitted scale factor, which are typed in or chained between workflows
-    without going through the data store.
+    The small-value type for parameters and outputs that a user reads or types,
+    such as a scale factor, kept in the record rather than in the data store. A
+    value a workflow computes as a scipp object, such as a beam centre, is a 0-d
+    data field instead.
     """
 
     value: float | tuple[float, ...] = Field(description="The value(s).")

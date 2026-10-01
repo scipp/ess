@@ -96,9 +96,11 @@ Outputs are likewise a pydantic model class (`outputs: type[BaseModel]`,
 mandatory). Field title and description are the display metadata; a field may
 be optional when the workflow does not always produce it; declaration order is
 meaningful (consumers show outputs in order, primary output first). Array and
-file outputs are data fields (next section); small values such as a beam
-centre or a fitted scale factor are `Quantity`, a scalar or short vector with a
-unit, as plain data.
+file outputs are data fields (next section). A small value that a workflow
+computes as a scipp object, such as a beam centre, is a 0-d data field: the
+object carries its unit, and the field's `ArraySpec` may constrain it. A value
+meant to be read or typed by a user, such as a scale factor, may instead be a
+`Quantity`, a scalar or short vector with a unit, as plain data in the record.
 
 An earlier form of this decision declared outputs as a dictionary of
 structural descriptions, with arrays typed by `ArraySpec` and everything else
@@ -197,7 +199,14 @@ them included, but never a model and never another table. A table with nested
 rows is one no generic UI can show as rows and columns, so `WorkflowSpec`
 refuses it when it is constructed. The rule constrains rows only; a field
 holding a model elsewhere is not affected by it. Tables are allowed in both
-params and outputs. A table is not a data field: `table_fields` finds the
+params and outputs.
+
+Units belong to the column, not to each row. A data-field column constrains
+the unit through its `ArraySpec`, and each cell's data carries its own unit. A
+`Quantity` holds its unit in its value, so it is a model and cannot be a cell;
+a column of plain numbers states its unit in its declaration. A row that needs
+a computed value with a unit, such as the beam centre of each sample run,
+references a 0-d data field. A table is not a data field: `table_fields` finds the
 table fields of a model with their row model, and `data_fields` of the row
 model gives the data fields of its cells. In JSON Schema a table is an array
 whose items refer to the row model under `$defs`, where the cells carry their
