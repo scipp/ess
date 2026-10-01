@@ -181,9 +181,8 @@ class FrameCompatibleDiskChoppers(
     """Disk choppers compatible with the frame period (which is made
     from the source period and the pulse stride).
     If a chopper's frequency is not in sync with the frame frequency, it is replaced
-    with a chopper which is always closed.
-    Being in sync means that the chopper period is either a multiple of the frame
-    period, or an integer fraction of it.
+    by a chopper which is always closed.
+    Being in sync means that the chopper period is a multiple of the frame period.
     """
 
 
@@ -501,13 +500,6 @@ def chopper_distance_along_beam(
     return (axle_position - source_position).fields.z
 
 
-def _is_int_or_inverse_int(x: sc.Variable, *, rtol: sc.Variable) -> bool:
-    a = sc.all(abs(sc.round(x) - x) < rtol)
-    y = sc.reciprocal(x)
-    b = sc.all(abs(sc.round(y) - y) < rtol)
-    return bool(a | b)
-
-
 def get_active_choppers(choppers: DiskChoppers[RunType]) -> ActiveDiskChoppers[RunType]:
     """
     Return a dict of choppers that are active (i.e., have a non-zero frequency).
@@ -531,8 +523,8 @@ def close_non_synced_disk_choppers(
 ) -> FrameCompatibleDiskChoppers[RunType]:
     """
     If a chopper's frequency is not in sync with the frame frequency
-    (neither a multiple of the frame frequency, nor an integer fraction of it), it
-    is replaced with a chopper that is always closed.
+    (it is not a multiple of the frame frequency), it is replaced with a chopper that is
+    always closed.
     This is because we cannot always find a frame_period over which we can find
     periodicity for all choppers without making it arbitrary long.
     Such chopper frequencies are most probably a result of an error in chopper settings,
@@ -555,7 +547,7 @@ def close_non_synced_disk_choppers(
         # this chopper to always be closed.
         freq = abs(ch.frequency).to(unit=frequency_unit)
         quot = freq / frame_frequency
-        if not _is_int_or_inverse_int(quot, rtol=sc.scalar(1e-8)):
+        if not bool(abs(sc.round(quot) - quot) < sc.scalar(1e-8)):
             dim = ch.slit_begin.dim
             empty = sc.array(dims=[dim], values=[], unit='deg')
             height = (

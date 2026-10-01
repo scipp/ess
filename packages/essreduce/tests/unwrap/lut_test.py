@@ -681,6 +681,28 @@ def test_chopper_processing_treats_choppers_with_bad_frequency_as_closed():
     assert processed[key].slit_end.size == 0
 
 
+def test_chopper_processing_treats_7Hz_choppers_with_pulse_stride_1_as_closed():
+    wf = _make_workflow("analytical")
+    choppers = _make_choppers()
+    n_original = len(choppers)
+    key = list(choppers.keys())[-1]
+
+    # Set one of the choppers to have a frequency of 7 Hz, which is not compatible with
+    # a pulse stride of 1.
+    choppers[key] = dataclasses.replace(
+        choppers[key], frequency=sc.scalar(7.0, unit='Hz')
+    )
+    wf[unwrap.PulseStride[AnyRun]] = 1
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+    processed = wf.compute(unwrap.FrameCompatibleDiskChoppers[AnyRun])
+    # The chopper is still there
+    assert len(processed) == n_original
+    assert key in processed
+    # The chopper should not have any slits
+    assert processed[key].slit_begin.size == 0
+    assert processed[key].slit_end.size == 0
+
+
 @pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
 def test_lut_workflow_drops_choppers_with_zero_frequency(wavelength_from):
     wf = _make_workflow(wavelength_from)
