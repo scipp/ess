@@ -45,8 +45,8 @@ def default_parameters() -> dict:
         NeXusMonitorName[BeamMonitor4]: "beam_monitor_4",
         PulseStrideOffset: None,
         LookupTableRelativeErrorThreshold: {
-            "event_mode_detectors/timepix3": float("inf"),
-            "histogram_mode_detectors/orca": float("inf"),
+            "timepix3_efu": float("inf"),
+            "orca": float("inf"),
             "beam_monitor_1": float("inf"),
             "beam_monitor_2": float("inf"),
             "beam_monitor_3": float("inf"),
