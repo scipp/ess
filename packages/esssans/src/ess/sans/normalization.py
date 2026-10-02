@@ -70,11 +70,7 @@ def solid_angle(
     :
         The solid angle of the detector pixels, as viewed from the sample position.
     """
-    face_1_center, face_1_edge, face_2_center = (
-        pixel_shape['vertices']['vertex', i] for i in range(3)
-    )
-    cylinder_axis = transform.value * face_2_center - transform.value * face_1_center
-    radius = sc.norm(face_1_center - face_1_edge)
+    cylinder_axis, radius = pixel_cylinder(pixel_shape, transform)
     length = sc.norm(cylinder_axis)
 
     omega = _approximate_solid_angle_for_cylinder_shaped_pixel_of_detector(
@@ -88,6 +84,28 @@ def solid_angle(
             prototype=data, data=omega, dim=set(data.dims) - set(omega.dims)
         )
     )
+
+
+def pixel_cylinder(
+    pixel_shape: DetectorPixelShape[RunType],
+    transform: NeXusTransformation[snx.NXdetector, RunType],
+) -> tuple[sc.Variable, sc.Variable]:
+    """
+    Axis and radius of cylindrical pixels.
+
+    Returns
+    -------
+    :
+        The cylinder axis in the coordinate system of the sample, with the length of
+        the cylinder as its norm, and the cylinder radius.
+    """
+    face_1_center, face_1_edge, face_2_center = (
+        pixel_shape['vertices']['vertex', i] for i in range(3)
+    )
+    # The transformation may be affine, so it must be applied to the vertices
+    # before subtracting them, to remove the translation part.
+    cylinder_axis = transform.value * face_2_center - transform.value * face_1_center
+    return cylinder_axis, sc.norm(face_1_center - face_1_edge)
 
 
 def mask_solid_angle(
