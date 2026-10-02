@@ -6,7 +6,7 @@ import matplotlib
 import pytest
 import scipp as sc
 from ess import loki
-from ess.loki.diagnostics import InstrumentView, LokiBankViewer
+from ess.loki.diagnostics import LokiBankViewer
 from ess.sans.types import (
     BeamCenter,
     Filename,
@@ -88,11 +88,3 @@ def test_loki_bank_viewer_change_bank(histogrammed_loki_data):
     viewer.tabs.selected_index = 2
     # Change back to all banks
     viewer.tabs.selected_index = 0
-
-
-def test_creat_loki_instrument_view(histogrammed_loki_data):
-    InstrumentView(histogrammed_loki_data)
-
-
-def test_creat_loki_instrument_view_with_dim_slider(loki_data):
-    InstrumentView(loki_data.hist(event_time_offset=10), dim='event_time_offset')
