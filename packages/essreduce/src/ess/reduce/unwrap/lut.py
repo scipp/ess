@@ -182,7 +182,7 @@ class FrameCompatibleDiskChoppers(
     from the source period and the pulse stride).
     If a chopper's frequency is not in sync with the frame frequency, it is replaced
     by a chopper which is always closed.
-    Being in sync means that the chopper period is a multiple of the frame period.
+    Being in sync means that the frame period is a multiple of the chopper period.
     """
 
 
@@ -538,12 +538,14 @@ def close_non_synced_disk_choppers(
         Parked choppers (with 0 frequency) have been dropped.
     pulse_period:
         Period of the source pulses, i.e., time between consecutive pulse starts.
+    pulse_stride:
+        Stride of used pulses. The frame period is ``pulse_stride * pulse_period``.
     """
     frequency_unit = "Hz"
     frame_frequency = sc.reciprocal(pulse_period * pulse_stride).to(unit=frequency_unit)
     out = {}
     for key, ch in choppers.items():
-        # If the frequency is not synced to the source pulse frequency, we transform
+        # If the frequency is not synced to the frame frequency, we transform
         # this chopper to always be closed.
         freq = abs(ch.frequency).to(unit=frequency_unit)
         quot = freq / frame_frequency
@@ -805,9 +807,6 @@ def compute_frame_sequence(
             + slowest_to_chopper.to(unit='s')
         )
 
-        # In addition, the time_offset_open and time_offset_close below require the
-        # pulse_frequency to be an integer multiple of the pulse frequency or vice
-        # versa.
         freq = abs(ch.frequency).to(unit='Hz')
         # time_offset_open/close require freq / pulse_frequency to be an integer,
         # which holds here by construction. DiskChopper starts its repetitions at
