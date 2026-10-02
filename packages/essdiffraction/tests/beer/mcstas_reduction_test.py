@@ -1,6 +1,7 @@
 import importlib
 import sys
 
+import mcstastox
 import numpy as np
 import pytest
 import scipp as sc
@@ -9,6 +10,7 @@ from ess.beer import (
     BeerModMcStasWorkflow,
     BeerModMcStasWorkflowKnownPeaks,
     BeerPowderMcStasWorkflow,
+    BeerPowderWorkflow,
 )
 from ess.beer.data import (
     mcstas_duplex,
@@ -21,10 +23,13 @@ from ess.beer.data import (
 from ess.beer.mcstas import (
     load_beer_mcstas,
     load_beer_mcstas_monitor,
+    mcstas_providers,
 )
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import (
+    DspacingBins,
     DspacingDetector,
+    DspacingNBins,
     ElasticCoordTransformGraph,
     QDetector,
     SampleRun,
@@ -134,6 +139,53 @@ def test_powder_mcstas_analytical_workflow_computes_dspacing():
         sc.scalar(1.6374, unit='angstrom'),
         atol=sc.scalar(5e-4, unit='angstrom'),
     )
+
+
+def _beer_powder_mcstas_workflow(wavelength_from):
+    wf = BeerPowderWorkflow(wavelength_from=wavelength_from)
+    for provider in mcstas_providers:
+        wf.insert(provider)
+    return wf
+
+
+@pytest.mark.parametrize(
+    ('make_workflow', 'mode'),
+    [
+        pytest.param(
+            lambda: _beer_powder_mcstas_workflow('analytical'),
+            6,
+            id='powder-analytical',
+        ),
+        pytest.param(
+            lambda: _beer_powder_mcstas_workflow('simulation'),
+            6,
+            id='powder-simulation',
+        ),
+        pytest.param(BeerModMcStasWorkflow, 7, id='modulation'),
+        pytest.param(BeerModMcStasWorkflowKnownPeaks, 7, id='modulation-known-peaks'),
+        pytest.param(BeerMcStasWorkflowPulseShaping, 6, id='pulse-shaping'),
+        pytest.param(BeerPowderMcStasWorkflow, 6, id='powder-mcstas'),
+    ],
+)
+def test_beer_workflows_compute_dspacing_bins_without_loading_events(
+    monkeypatch, make_workflow, mode
+):
+    wf = make_workflow()
+    wf[Filename[SampleRun]] = mcstas_silicon_new_model(mode)
+    wf[DetectorBank] = DetectorBank.north
+    wf[DHKLList] = silicon_peaks_array()
+    wf[DspacingNBins] = 123
+
+    def fail_if_events_are_loaded(*args, **kwargs):
+        raise AssertionError('event data must not be used to determine bin edges')
+
+    monkeypatch.setattr(mcstastox.Read, 'get_event_data', fail_if_events_are_loaded)
+
+    bins = wf.compute(DspacingBins)
+
+    assert bins.sizes == {'dspacing': 124}
+    assert sc.all(sc.isfinite(bins)).value
+    assert sc.all(bins[1:] > bins[:-1]).value
 
 
 def test_powder_mcstas_analytical_workflow_computes_q():

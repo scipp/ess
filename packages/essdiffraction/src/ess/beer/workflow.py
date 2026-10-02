@@ -3,7 +3,9 @@
 import sciline as sl
 import scipp as sc
 import scippnexus as snx
+from ess.powder import binning as powder_binning
 from ess.powder import providers as powder_providers
+from ess.powder.calibration import detector_two_theta
 from ess.powder.conversion import powder_coordinate_transformation_graph
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
@@ -18,7 +20,11 @@ from ess.powder.types import (
 
 from ess.reduce.nexus import GenericNeXusWorkflow
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
-from ess.reduce.unwrap import GenericUnwrapWorkflow
+from ess.reduce.unwrap import (
+    GenericUnwrapWorkflow,
+    PulsePeriod,
+    SourceBounds,
+)
 from ess.reduce.unwrap.types import LookupTableRelativeErrorThreshold
 
 from .clustering import cluster_events_by_streak
@@ -35,12 +41,26 @@ default_parameters = {
     CalibrationData: None,
     TwoThetaBins: None,
     PulseLength: sc.scalar(0.003, unit='s'),
+    PulsePeriod: 1.0 / sc.scalar(14.0, unit='Hz'),
+    SourceBounds: SourceBounds(
+        time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+        wavelength=(
+            sc.scalar(0.001, unit='angstrom'),
+            sc.scalar(15.0, unit='angstrom'),
+        ),
+    ),
     DetectorBankSizes: {
         'south_detector': {'y': 200, 'x': 500},
         'north_detector': {'y': 200, 'x': 500},
     },
     DetectorBank: DetectorBank.both,
 }
+
+
+def _insert_dspacing_range_detection(workflow: sl.Pipeline) -> None:
+    """Add automatic d-spacing range detection to a BEER workflow."""
+    for provider in (*powder_binning.providers, detector_two_theta):
+        workflow.insert(provider)
 
 
 def _mcstas_beer_modulation_workflow(graph_provider, *providers) -> sl.Pipeline:
@@ -53,6 +73,7 @@ def _mcstas_beer_modulation_workflow(graph_provider, *providers) -> sl.Pipeline:
         workflow.insert(provider)
     for key, value in default_parameters.items():
         workflow[key] = value
+    _insert_dspacing_range_detection(workflow)
     return workflow
 
 
@@ -82,6 +103,7 @@ def BeerMcStasWorkflowPulseShaping():
         wf.insert(provider)
     for key, value in default_parameters.items():
         wf[key] = value
+    _insert_dspacing_range_detection(wf)
     wf[NeXusName[snx.NXdetector]] = 'detector'
     wf[LookupTableRelativeErrorThreshold] = {'detector': float('inf')}
     return wf
@@ -115,6 +137,7 @@ def BeerPowderWorkflow(
 
     for provider in powder_providers:
         wf.insert(provider)
+    _insert_dspacing_range_detection(wf)
 
     insert_run_normalization(wf, run_norm)
     for key, value in default_parameters.items():
