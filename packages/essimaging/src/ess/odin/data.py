@@ -15,7 +15,7 @@ _registry = make_registry(
         "iron_simulation_sample_large.nxs": "md5:38b6eafef238ebe24d0a0e2b20374ec5",
         "iron_simulation_ob_large.nxs": "md5:b6e660f8b92e327e021c9112270f50cb",
         "ODIN-wavelength-lookup-table-5m-65m.h5": "md5:44eef2a2e826cec688aeb1b985eb9f9e",  # noqa: E501
-        "ymir_lego_odin.hdf": "md5:8e8708891e2574046b6f372e5e3516a5",
+        "ymir_lego_odin.hdf": "md5:59b56b4ca2a264983df2d5590853c9fa",
     },
 )
 
