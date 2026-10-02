@@ -8,12 +8,12 @@ from ess.reduce.data import make_registry
 
 _registry = make_registry(
     'ess/odin',
-    version="2",
+    version="3",
     files={
-        "iron_simulation_sample_small.nxs": "md5:80c761ae23afac36385d96db186714b5",
-        "iron_simulation_ob_small.nxs": "md5:0510ec416526169cea1c1a2d96e32877",
-        "iron_simulation_sample_large.nxs": "md5:df22835fae4d1e4a3707ce2ee52eaf1d",
-        "iron_simulation_ob_large.nxs": "md5:a3b3d9b75dd2edada0be0d17ee29b905",
+        "iron_simulation_sample_small.nxs": "md5:b663c3962e599ecb40be90bd13c1b97e",
+        "iron_simulation_ob_small.nxs": "md5:5bd8b24af03bdb03814848f33e41bd7f",
+        "iron_simulation_sample_large.nxs": "md5:57f23284942c857618c5d2dc84fcccb8",
+        "iron_simulation_ob_large.nxs": "md5:c551c0566587349d37b906a9c354c59c",
         "ODIN-wavelength-lookup-table-5m-65m.h5": "md5:44eef2a2e826cec688aeb1b985eb9f9e",  # noqa: E501
         "ymir_lego_odin.hdf": "md5:8e8708891e2574046b6f372e5e3516a5",
     },
