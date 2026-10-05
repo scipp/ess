@@ -161,7 +161,8 @@ def focus_data_dspacing_and_two_theta(
     :
         The reduced data with 'dspacing' and 'two_theta' dimensions.
     """
-    twotheta_bins = _focussing_two_theta_bins(data.coords['two_theta'], two_theta_bins)
+    coords = data.coords if 'two_theta' in data.coords else data.bins.coords
+    twotheta_bins = _focussing_two_theta_bins(coords['two_theta'], two_theta_bins)
     args = {twotheta_bins.dim: twotheta_bins, dspacing_bins.dim: dspacing_bins}
     if keep_events.value:
         result = data.bin(args)
