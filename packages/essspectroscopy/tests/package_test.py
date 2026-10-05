@@ -7,11 +7,14 @@ Note that additional imports need to be added for repositories that
 contain multiple packages.
 """
 
-from ess import bifrost, spectroscopy
+from ess import bifrost, cspec, miracles, spectroscopy, trex
 
 
 def test_has_version():
     assert hasattr(bifrost, '__version__')
+    assert hasattr(cspec, '__version__')
+    assert hasattr(miracles, '__version__')
+    assert hasattr(trex, '__version__')
     assert hasattr(spectroscopy, '__version__')
 
 

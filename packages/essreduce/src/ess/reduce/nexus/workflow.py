@@ -570,6 +570,8 @@ def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
     """
     Convert the raw choppers (DataGroup with chopper information) to the
     ``scippneutron.DiskChopper`` objects used for wavelength calculation.
+    If a chopper has either empty rotation speed or phase/delay logs, it is dropped
+    from the final chopper list.
 
     Parameters
     ----------
