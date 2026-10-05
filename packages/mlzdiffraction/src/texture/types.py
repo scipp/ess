@@ -32,8 +32,6 @@ FlatViewData = NewType("FlatViewData", sc.DataArray)
 TwoThetaRingsViewData = NewType("TwoThetaRingsViewData", sc.DataArray)
 GammaSlicesViewData = NewType("GammaSlicesViewData", sc.DataArray)
 
-DetectorView = NewType("DetectorView", sc.DataArray)
-FlatDetectorView = NewType("FlatDetectorView", sc.DataArray)
 TwoThetaRings = NewType("TwoThetaRings", sc.DataArray)
 GammaSlices = NewType("GammaSlices", sc.DataArray)
 
