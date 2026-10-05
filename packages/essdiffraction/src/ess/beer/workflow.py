@@ -25,6 +25,7 @@ from ess.reduce.unwrap import (
     PulsePeriod,
     SourceBounds,
 )
+from ess.reduce.unwrap import lut as unwrap_lut
 from ess.reduce.unwrap.types import LookupTableRelativeErrorThreshold
 
 from .clustering import cluster_events_by_streak
@@ -59,7 +60,15 @@ default_parameters = {
 
 def _insert_dspacing_range_detection(workflow: sl.Pipeline) -> None:
     """Add automatic d-spacing range detection to a BEER workflow."""
-    for provider in (*powder_binning.providers, detector_two_theta):
+    # Bin edges need chopper frames regardless of how event wavelengths are computed.
+    for provider in (
+        unwrap_lut.get_active_choppers,
+        unwrap_lut.close_non_synced_disk_choppers,
+        unwrap_lut.guess_pulse_stride_from_choppers,
+        unwrap_lut.compute_frame_sequence,
+        *powder_binning.providers,
+        detector_two_theta,
+    ):
         workflow.insert(provider)
 
 

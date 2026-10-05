@@ -5,7 +5,6 @@
 import scipp as sc
 
 from ess.reduce.unwrap import ChopperFrameSequence
-from ess.reduce.unwrap import lut as unwrap_lut
 
 from .types import (
     DetectorTwoTheta,
@@ -65,8 +64,6 @@ def dspacing_bins_from_wavelength_and_two_theta(
 
 
 providers = (
-    unwrap_lut.guess_pulse_stride_from_choppers,
-    unwrap_lut.compute_frame_sequence,
     wavelength_range_from_chopper_frames,
     dspacing_bins_from_wavelength_and_two_theta,
 )

@@ -5,6 +5,7 @@ import mcstastox
 import numpy as np
 import pytest
 import scipp as sc
+import scippnexus as snx
 from ess.beer import (
     BeerMcStasWorkflowPulseShaping,
     BeerModMcStasWorkflow,
@@ -25,6 +26,11 @@ from ess.beer.mcstas import (
     load_beer_mcstas_monitor,
     mcstas_providers,
 )
+from ess.beer.mcstas.beamline import (
+    ModulationMode,
+    PulseShapingMode,
+    simulation_choppers,
+)
 from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
 from ess.powder.types import (
     DspacingBins,
@@ -36,7 +42,8 @@ from ess.powder.types import (
 )
 from scipp.testing import assert_allclose
 
-from ess.reduce.nexus.types import Filename
+from ess.reduce.nexus.types import DiskChoppers, Filename, Position
+from ess.reduce.unwrap import PulseStride
 
 _DSPACE_BINS = sc.linspace('dspacing', 0.8, 2.2, 4001, unit='angstrom')
 
@@ -149,6 +156,9 @@ def _beer_powder_mcstas_workflow(wavelength_from):
 
 
 @pytest.mark.parametrize(
+    'pulse_skipping', [False, True], ids=['normal', 'pulse-skipping']
+)
+@pytest.mark.parametrize(
     ('make_workflow', 'mode'),
     [
         pytest.param(
@@ -161,6 +171,11 @@ def _beer_powder_mcstas_workflow(wavelength_from):
             6,
             id='powder-simulation',
         ),
+        pytest.param(
+            lambda: _beer_powder_mcstas_workflow('file'),
+            6,
+            id='powder-file',
+        ),
         pytest.param(BeerModMcStasWorkflow, 7, id='modulation'),
         pytest.param(BeerModMcStasWorkflowKnownPeaks, 7, id='modulation-known-peaks'),
         pytest.param(BeerMcStasWorkflowPulseShaping, 6, id='pulse-shaping'),
@@ -168,7 +183,7 @@ def _beer_powder_mcstas_workflow(wavelength_from):
     ],
 )
 def test_beer_workflows_compute_dspacing_bins_without_loading_events(
-    monkeypatch, make_workflow, mode
+    monkeypatch, make_workflow, mode, pulse_skipping
 ):
     wf = make_workflow()
     wf[Filename[SampleRun]] = mcstas_silicon_new_model(mode)
@@ -181,8 +196,15 @@ def test_beer_workflows_compute_dspacing_bins_without_loading_events(
 
     monkeypatch.setattr(mcstastox.Read, 'get_event_data', fail_if_events_are_loaded)
 
+    if pulse_skipping:
+        # Use pulse-skipping choppers with the existing detector geometry.
+        source_position = wf.compute(Position[snx.NXsource, SampleRun])
+        chopper_mode = ModulationMode.ds0 if mode == 7 else PulseShapingMode.ds1
+        wf[DiskChoppers[SampleRun]] = simulation_choppers(chopper_mode, source_position)
+
     bins = wf.compute(DspacingBins)
 
+    assert wf.compute(PulseStride[SampleRun]) == (2 if pulse_skipping else 1)
     assert bins.sizes == {'dspacing': 124}
     assert sc.all(sc.isfinite(bins)).value
     assert sc.all(bins[1:] > bins[:-1]).value
