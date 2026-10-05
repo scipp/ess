@@ -125,8 +125,11 @@ case.
 
 A reference is plain data naming data that exists elsewhere: an output of an
 earlier run (`OutputRef`: record, output name, optionally one element of a
-collection by key), or a dataset the framework did not compute (`DatasetRef`:
-one identity string). A field may be a union of a literal and a reference,
+collection by key), a dataset the framework did not compute (`DatasetRef`:
+one identity string), or an output of an accumulator in the state after its
+first pushes (`AccumulatorRef`: accumulator, output name, and the number of
+pushes, which the framework fills in when it binds the reference). A field may
+be a union of a literal and a reference,
 for values a user may type in or take from a previous run. Collections,
 `list[...]` and `dict[str, ...]` of one declared type, are allowed on both
 sides, and a reference may name one element of a collection output, but not a
