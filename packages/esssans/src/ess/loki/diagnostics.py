@@ -4,10 +4,32 @@
 
 from __future__ import annotations
 
+import warnings
+
 import ipywidgets as ipw
 import matplotlib.pyplot as plt
 import plopp as pp
 import scipp as sc
+from plopp.core.typing import FigureLike
+from scippneutron import instrument_view
+
+
+def InstrumentView(
+    data: sc.DataArray | sc.DataGroup | dict,
+    dim: str | None = None,
+    pixel_size: float | sc.Variable | None = None,
+    **kwargs,
+) -> FigureLike:
+    """Deprecated alias for :func:`ess.loki.instrument_view`.
+
+    Additional arguments are forwarded to :func:`scippneutron.instrument_view`.
+    """
+    warnings.warn(
+        'ess.loki.InstrumentView is deprecated; use ess.loki.instrument_view instead.',
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return instrument_view(data, dim=dim, pixel_size=pixel_size, **kwargs)
 
 
 def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
