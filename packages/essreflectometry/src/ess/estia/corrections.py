@@ -9,10 +9,10 @@ from ..reflectometry.corrections import RunNormalization
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
+    CorrectedDetector,
     CorrectionsToApply,
     ReducibleData,
     RunType,
-    RunUnnormalizedData,
     WavelengthBins,
     WavelengthDetector,
     YIndexLimits,
@@ -24,7 +24,7 @@ from .types import WavelengthMonitor
 
 
 def normalize_by_monitor_histogram(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     *,
     monitor: WavelengthMonitor[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -64,7 +64,7 @@ def normalize_by_monitor_histogram(
 
 
 def normalize_by_monitor_integrated(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     *,
     monitor: WavelengthMonitor[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -97,7 +97,7 @@ def add_coords_masks_and_apply_corrections(
     wbins: WavelengthBins,
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
-) -> RunUnnormalizedData[RunType]:
+) -> CorrectedDetector[RunType]:
     """
     Computes coordinates, masks and corrections that are
     the same for the sample measurement and the reference measurement.
@@ -108,7 +108,7 @@ def add_coords_masks_and_apply_corrections(
     for correction in corrections_to_apply:
         da = correction(da)
 
-    return RunUnnormalizedData[RunType](da)
+    return CorrectedDetector[RunType](da)
 
 
 def correct_by_footprint(da: sc.DataArray) -> sc.DataArray:

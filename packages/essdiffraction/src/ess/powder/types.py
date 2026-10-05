@@ -107,6 +107,10 @@ class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     d-spacing."""
 
 
+class QDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """D-spacing detector data with a momentum-transfer coordinate."""
+
+
 DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)
 """Histogrammed intensity vs d-spacing."""
 

@@ -12,13 +12,13 @@ from ..reflectometry.load import load_h5
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
+    CorrectedDetector,
     CorrectionsToApply,
     DetectorLtotal,
     DetectorRotation,
     Filename,
     RawDetector,
     RunType,
-    RunUnnormalizedData,
     SampleRotation,
     SampleRotationOffset,
     WavelengthBins,
@@ -294,7 +294,7 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
     wbins: WavelengthBins,
     graph: CoordTransformationGraph[RunType],
     corrections_to_apply: CorrectionsToApply,
-) -> RunUnnormalizedData[RunType]:
+) -> CorrectedDetector[RunType]:
     out = add_coords_masks_and_apply_corrections(
         da=da,
         ylim=ylim,
@@ -307,7 +307,7 @@ def use_mcstas_wavelengths_instead_of_estimates_from_time_of_arrival(
         },
         corrections_to_apply=corrections_to_apply,
     )
-    return RunUnnormalizedData[RunType](out)
+    return CorrectedDetector[RunType](out)
 
 
 providers = (

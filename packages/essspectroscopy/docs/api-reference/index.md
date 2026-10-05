@@ -15,6 +15,39 @@
    BifrostSimulationWorkflow
 ```
 
+### CSPEC
+
+```{eval-rst}
+.. currentmodule:: ess.cspec
+
+.. autosummary::
+   :toctree: ../generated/functions
+   :recursive:
+
+```
+
+### MIRACLES
+
+```{eval-rst}
+.. currentmodule:: ess.miracles
+
+.. autosummary::
+   :toctree: ../generated/functions
+   :recursive:
+
+```
+
+### T-REX
+
+```{eval-rst}
+.. currentmodule:: ess.trex
+
+.. autosummary::
+   :toctree: ../generated/functions
+   :recursive:
+
+```
+
 ## Spectroscopy
 
 ```{eval-rst}
@@ -25,6 +58,7 @@
    :template: module-template.rst
    :recursive:
 
+   direct
    indirect
    types
 ```

@@ -20,7 +20,7 @@ essreduce
 ├── essimaging
 ├── essnmx
 ├── essreflectometry
-└── esssans
+├── esssans
 └── essspectroscopy
 ```
 
@@ -45,9 +45,14 @@ cd ess
 # Install all packages (editable, with test deps):
 pixi install
 
+# Or install all packages with every extra, dev tools, and documentation tools:
+pixi install -e full
+
 # Or just one package:
 pixi install -e essreduce
 ```
+
+Use `pixi run -e full python your_script.py` to run with all extras enabled.
 
 The `pixi.lock` file pins all dependencies reproducibly. No tox, no pip-compile, no manual virtualenv.
 
@@ -89,6 +94,9 @@ pixi run docs-essspectroscopy
 
 ### Adding or changing dependencies
 
+When adding an optional-dependency group, include it in the package's `all` extra
+so the `full` environment continues to include every extra.
+
 Edit the package's `pyproject.toml`, then re-lock:
 
 ```bash
@@ -99,14 +107,19 @@ Commit the updated `pixi.lock`.
 
 ### Releasing a package
 
-Push a tag with the package prefix:
+The `.github/workflows/release.yml` workflow builds, publishes to PyPI, and deploys docs. It also automatically generates release notes based on merged pull requests.
+
+#### Using the Github web UI
+
+* Navigate to the [Releases](https://github.com/scipp/ess/releases) and click "Draft a new release".
+* Create a tag which contains the name of the package and the version, separated by a `/`: e.g. `essreduce/26.3.0`.
+* Copy the tag name in the release title, and leave the release notes empty unless you have a specific note that needs to be there.
+
+#### Using the command line
 
 ```bash
-git tag essreduce/26.3.0
-git push origin main --tags
+gh release create essreduce/26.3.0 --title essreduce/26.3.0 --notes "" -R scipp/ess
 ```
-
-The `release.yml` workflow builds, publishes to PyPI, and deploys docs.
 
 ### How CI works
 

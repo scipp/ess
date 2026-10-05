@@ -40,11 +40,11 @@ class RawChopper(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
 
 
 class ReducibleData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Event data with common coordinates added"""
+    """Detector data ready for reduction after the selected run normalization."""
 
 
-class RunUnnormalizedData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data prepared for reduction, before run normalization."""
+class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data with coordinates, masks, and detector corrections applied."""
 
 
 ReducedReference = NewType("ReducedReference", sc.DataArray)
