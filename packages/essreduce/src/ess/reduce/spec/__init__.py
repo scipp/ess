@@ -9,6 +9,7 @@ data fields, and ADR 0001 (docs/developer/adr) for the rationale.
 
 from ._workflow_spec import NoParams, SerializedWorkflowSpec, WorkflowSpec
 from .data import (
+    AccumulatorRef,
     Array,
     ArraySpec,
     DataField,
@@ -27,6 +28,7 @@ from .data import (
 from .parameters import Quantity
 
 __all__ = [
+    'AccumulatorRef',
     'Array',
     'ArraySpec',
     'DataField',

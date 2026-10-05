@@ -5,7 +5,8 @@ Data fields: parameters and outputs that hold data rather than literals.
 
 A data field is a parameter or output field whose value is a file or an array.
 Its type is a :data:`Ref`, a reference to data that exists elsewhere: an output
-of an earlier run, or a dataset the framework did not compute. A
+of an earlier run, a dataset the framework did not compute, or the state of an
+accumulator that the framework holds. A
 :class:`DataField` annotation on the field says what the bytes are, its
 :class:`Format`, and for scipp data its :class:`ArraySpec`, so that an output
 field of one spec can feed a parameter field of another when the two agree, and
@@ -110,7 +111,24 @@ class DatasetRef(BaseModel, frozen=True):
         return self.dataset
 
 
-Ref = OutputRef | DatasetRef
+class AccumulatorRef(BaseModel, frozen=True):
+    """
+    Output ``output`` of accumulator ``accumulator`` after its first ``upto`` pushes.
+
+    ``upto`` is ``None`` until the framework binds the reference, when it accepts
+    the request that holds it, so that a record names the state it read.
+    """
+
+    accumulator: str = Field(min_length=1)
+    output: str = Field(min_length=1)
+    upto: int | None = Field(default=None, ge=0)
+
+    def __str__(self) -> str:
+        upto = f'[:{self.upto}]' if self.upto is not None else ''
+        return f'{self.accumulator}{upto}.{self.output}'
+
+
+Ref = OutputRef | DatasetRef | AccumulatorRef
 """A reference: the value of a data field."""
 
 
@@ -200,7 +218,7 @@ def ref_fields(model: type[BaseModel]) -> set[str]:
         name
         for name, field in model.model_fields.items()
         if name in data
-        or any(m in (OutputRef, DatasetRef) for m in _members(field.annotation))
+        or any(m in get_args(Ref) for m in _members(field.annotation))
         or (name in tables and ref_fields(tables[name]))
     }
 
@@ -211,7 +229,7 @@ def _is_model(annotation: Any) -> bool:
         isinstance(annotation, type)
         and get_origin(annotation) is None
         and issubclass(annotation, BaseModel)
-        and not issubclass(annotation, OutputRef | DatasetRef)
+        and not issubclass(annotation, Ref)
     )
 
 
@@ -260,11 +278,12 @@ def table_fields(model: type[BaseModel]) -> dict[str, type[BaseModel]]:
 
 
 _OUTPUT_REF_KEYS = frozenset(OutputRef.model_fields)
+_ACCUMULATOR_REF_KEYS = frozenset(AccumulatorRef.model_fields)
 
 
 def as_ref(value: Any) -> Ref | None:
     """The reference a plain value denotes, if it is one."""
-    if isinstance(value, OutputRef | DatasetRef):
+    if isinstance(value, Ref):
         return value
     if isinstance(value, dict):
         keys = set(value)
@@ -272,6 +291,8 @@ def as_ref(value: Any) -> Ref | None:
             return OutputRef.model_validate(value)
         if keys == {'dataset'}:
             return DatasetRef.model_validate(value)
+        if {'accumulator', 'output'} <= keys <= _ACCUMULATOR_REF_KEYS:
+            return AccumulatorRef.model_validate(value)
     return None
 
 
