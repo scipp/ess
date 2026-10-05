@@ -62,6 +62,9 @@ CalibrationFilename = NewType("CalibrationFilename", str | None)
 DspacingBins = NewType("DspacingBins", sc.Variable)
 """Bin edges for d-spacing."""
 
+DspacingNBins = NewType("DspacingNBins", int)
+"""Number of d-spacing bins."""
+
 OutFilename = NewType("OutFilename", str)
 """Filename of the output."""
 
@@ -107,12 +110,20 @@ class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     d-spacing."""
 
 
+class QDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """D-spacing detector data with a momentum-transfer coordinate."""
+
+
 DspacingHistogram = NewType("DspacingHistogram", sc.DataArray)
 """Histogrammed intensity vs d-spacing."""
 
 
 class DetectorTwoTheta(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Scattering angle (two-theta) for each detector pixel."""
+
+
+class WavelengthRange(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Minimum and maximum wavelength transmitted by the chopper cascade."""
 
 
 class ElasticCoordTransformGraph(sciline.Scope[RunType, dict], dict):

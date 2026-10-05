@@ -203,17 +203,18 @@ def test_RollingDetectorView_projects_counts() -> None:
         projection=lambda da: da['pixel', 1:].rename(pixel='abc'),
     )
     expected = sc.DataArray(
-        sc.array(dims=['pixel'], values=[0, 0], unit='counts', dtype='int32'),
+        sc.array(dims=['pixel'], values=[0, 0], unit='counts', dtype='int64'),
         coords={'detector_number': detector_number[1:]},
     ).rename(pixel='abc')
 
     det.add_counts([1, 2, 3, 2])
     expected.values = [2, 1]
-    assert sc.identical(det.get(), expected)
+    # Scipp >= 26.9 promotes int32 sums to int64; accept either count dtype.
+    assert_identical(det.get().to(dtype='int64'), expected)
 
     det.add_counts([1, 3, 3, 1])
     expected.values = [2, 3]
-    assert sc.identical(det.get(), expected)
+    assert_identical(det.get().to(dtype='int64'), expected)
 
 
 def test_project_xy_with_given_zplane_scales() -> None:
@@ -523,7 +524,7 @@ def test_RollingDetectorView_normalization() -> None:
     assert_identical(view.get().data / weights, expected)
     assert_identical(view.get().data / weights, expected)
     expected.values = [[0.0, 0.0, 0.0, 0.0]]
-    assert_identical(view.get().data, expected.to(dtype='int32'))
+    assert_identical(view.get().data.to(dtype='int64'), expected.to(dtype='int64'))
 
     # detector_number 1 and 2 are in the same bin, so their counts are summed,
     view.add_counts([1, 2, 3, 4])
@@ -531,14 +532,14 @@ def test_RollingDetectorView_normalization() -> None:
     assert_identical(view.get().data / weights, expected)
     assert_identical(view.get().data / weights, expected)
     expected.values = [[2.0, 1.0, 0.0, 1.0]]
-    assert_identical(view.get().data, expected.to(dtype='int32'))
+    assert_identical(view.get().data.to(dtype='int64'), expected.to(dtype='int64'))
 
     view.add_counts([2, 4])
     expected.values = [[0.5, 0.0, np.nan, 1.0]]
     assert_identical(view.get().data / weights, expected)
     assert_identical(view.get().data / weights, expected)
     expected.values = [[1.0, 0.0, 0.0, 1.0]]
-    assert_identical(view.get().data, expected.to(dtype='int32'))
+    assert_identical(view.get().data.to(dtype='int64'), expected.to(dtype='int64'))
 
 
 def test_transform_weights_raises_given_bad_sizes() -> None:
@@ -925,9 +926,9 @@ class TestRollingDetectorViewWithLogicalView:
         assert result.sizes == {'x': 2, 'y': 2}
         # Each front-layer pixel gets one count
         expected = sc.array(
-            dims=['x', 'y'], values=[[1, 1], [1, 1]], dtype='int32', unit='counts'
+            dims=['x', 'y'], values=[[1, 1], [1, 1]], dtype='int64', unit='counts'
         )
-        assert sc.identical(result.data, expected)
+        assert_identical(result.data.to(dtype='int64'), expected)
 
     def test_make_roi_filter_with_non_reducing_view(self) -> None:
         """Test make_roi_filter with non-reducing LogicalView returns dense indices."""

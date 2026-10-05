@@ -7,6 +7,7 @@ Components for powder diffraction experiments.
 import importlib.metadata
 
 from . import (
+    binning,
     calibration,
     conversion,
     correction,
@@ -41,6 +42,7 @@ providers = (
 __all__ = [
     "RunNormalization",
     "__version__",
+    "binning",
     "calibration",
     "conversion",
     "correction",
