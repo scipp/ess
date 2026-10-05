@@ -22,6 +22,9 @@ def InstrumentView(
 ) -> FigureLike:
     """Deprecated alias for :func:`ess.loki.instrument_view`.
 
+    .. deprecated:: 26.10.0
+        Use :func:`ess.loki.instrument_view` instead.
+
     Additional arguments are forwarded to :func:`scippneutron.instrument_view`.
     """
     warnings.warn(
