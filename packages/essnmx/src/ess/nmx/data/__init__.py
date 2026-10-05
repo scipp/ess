@@ -35,6 +35,9 @@ _registry = make_registry(
         "essnmx-reduced-26.6.1.hdf.zip": Entry(
             alg="md5", chk="481cd3b08cd789178d736f130210fa65", extractor="unzip"
         ),
+        "essnmx-reduced-26.10.0.hdf.zip": Entry(
+            alg="md5", chk="e2126e8f89174fb2391810514b6e0c41", extractor="unzip"
+        ),
     },
 )
 
@@ -92,4 +95,4 @@ def get_small_nmx_reduced() -> pathlib.Path:
     of essnmx-reduce changed.
     """
 
-    return get_path("essnmx-reduced-26.6.1.hdf.zip")
+    return get_path("essnmx-reduced-26.10.0.hdf.zip")
