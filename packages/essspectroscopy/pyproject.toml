@@ -41,6 +41,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
+    "numba>=0.63",
     "pooch>=1.5",
     "pytest>=9.0",
 ]
