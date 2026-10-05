@@ -5,7 +5,9 @@ import warnings
 import sciline as sl
 import scipp as sc
 import scippnexus as snx
+from ess.powder import binning as powder_binning
 from ess.powder import providers as powder_providers
+from ess.powder.calibration import detector_two_theta
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
     BunkerMonitor,
@@ -19,7 +21,13 @@ from ess.powder.types import (
 
 from ess.reduce.nexus import GenericNeXusWorkflow
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
-from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
+from ess.reduce.unwrap import (
+    GenericUnwrapWorkflow,
+    PulsePeriod,
+    SourceBounds,
+    WavelengthLutMode,
+)
+from ess.reduce.unwrap import lut as unwrap_lut
 from ess.reduce.unwrap.types import LookupTableRelativeErrorThreshold
 
 from .clustering import cluster_events_by_streak
@@ -36,12 +44,34 @@ default_parameters = {
     CalibrationData: None,
     TwoThetaBins: None,
     PulseLength: sc.scalar(0.003, unit='s'),
+    PulsePeriod: 1.0 / sc.scalar(14.0, unit='Hz'),
+    SourceBounds: SourceBounds(
+        time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+        wavelength=(
+            sc.scalar(0.001, unit='angstrom'),
+            sc.scalar(15.0, unit='angstrom'),
+        ),
+    ),
     DetectorBankSizes: {
         'south_detector': {'y': 200, 'x': 500},
         'north_detector': {'y': 200, 'x': 500},
     },
     DetectorBank: DetectorBank.both,
 }
+
+
+def _insert_dspacing_range_detection(workflow: sl.Pipeline) -> None:
+    """Add automatic d-spacing range detection to a BEER workflow."""
+    # Bin edges need chopper frames regardless of how event wavelengths are computed.
+    for provider in (
+        unwrap_lut.get_active_choppers,
+        unwrap_lut.close_non_synced_disk_choppers,
+        unwrap_lut.guess_pulse_stride_from_choppers,
+        unwrap_lut.compute_frame_sequence,
+        *powder_binning.providers,
+        detector_two_theta,
+    ):
+        workflow.insert(provider)
 
 
 def _beer_modulation_workflow(
@@ -58,6 +88,7 @@ def _beer_modulation_workflow(
     insert_run_normalization(workflow, run_norm)
     for key, value in default_parameters.items():
         workflow[key] = value
+    _insert_dspacing_range_detection(workflow)
     return workflow
 
 
@@ -125,6 +156,7 @@ def BeerPowderWorkflow(
 
     for provider in powder_providers:
         wf.insert(provider)
+    _insert_dspacing_range_detection(wf)
 
     insert_run_normalization(wf, run_norm)
     for key, value in default_parameters.items():
