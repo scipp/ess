@@ -8,9 +8,11 @@ neutron time-of-arrival at the detectors.
 
 from ..nexus.types import DiskChoppers
 from .lut import (
+    ActiveDiskChoppers,
     BeamlineComponentReading,
     ChopperFrameSequence,
     DistanceResolution,
+    FrameCompatibleDiskChoppers,
     LtotalRange,
     NumberOfSimulatedNeutrons,
     PulsePeriod,
@@ -43,12 +45,14 @@ from .types import (
 from .workflow import GenericUnwrapWorkflow, LookupTableWorkflow
 
 __all__ = [
+    "ActiveDiskChoppers",
     "BeamlineComponentReading",
     "ChopperFrameSequence",
     "DetectorLtotal",
     "DiskChoppers",
     "DistanceResolution",
     "ErrorLimitedLookupTable",
+    "FrameCompatibleDiskChoppers",
     "FrameUnwrapBackend",
     "GenericUnwrapWorkflow",
     "LookupTable",

@@ -32,7 +32,6 @@ from .configurations import (
 )
 from .nexus import (
     _check_file,
-    export_detector_metadata_as_nxlauetof,
     export_monitor_metadata_as_nxlauetof,
     export_reduced_data_as_nxlauetof,
     export_static_metadata_as_nxlauetof,
@@ -354,9 +353,7 @@ def save_results(
 
     # Validate if results have expected fields
     export_static_metadata_as_nxlauetof(
-        sample_metadata=results.sample,
-        source_metadata=results.instrument.source,
-        program=results.reducer,
+        nxlauetof=results,
         output_file=output_config.output_file,
         overwrite=output_config.overwrite,
     )
@@ -365,10 +362,6 @@ def save_results(
         output_file=output_config.output_file,
     )
     for detector_name, detector_result in results.instrument.detectors.items():
-        export_detector_metadata_as_nxlauetof(
-            detector_metadata=detector_result.metadata,
-            output_file=output_config.output_file,
-        )
         if isinstance(detector_result.data, sc.DataArray):
             export_reduced_data_as_nxlauetof(
                 detector_name=detector_name,

@@ -22,6 +22,7 @@ from .types import (
     IntensityTof,
     MonitorCoordTransformGraph,
     Position,
+    QDetector,
     RunType,
     SampleRun,
     WavelengthDetector,
@@ -217,6 +218,18 @@ def convert_to_dspacing(
     return out
 
 
+def add_q_coordinate(
+    data: DspacingDetector[RunType],
+    graph: ElasticCoordTransformGraph[RunType],
+) -> QDetector[RunType]:
+    """Add the elastic momentum-transfer coordinate ``Q`` to detector data."""
+    return QDetector[RunType](
+        data.transform_coords(
+            "Q", graph=graph, keep_intermediate=False, rename_dims=False
+        )
+    )
+
+
 def _convert_reduced_to_tof_impl(
     data: sc.DataArray, calibration: OutputCalibrationData
 ) -> sc.DataArray:
@@ -276,6 +289,7 @@ def powder_monitor_coordinate_transformation_graph(
 
 providers = (
     add_scattering_coordinates_from_positions,
+    add_q_coordinate,
     convert_reduced_to_tof,
     convert_reduced_to_empty_can_subtracted_tof,
     powder_coordinate_transformation_graph,
