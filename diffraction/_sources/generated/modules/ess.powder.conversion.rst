@@ -14,6 +14,7 @@
    .. autosummary::
       :toctree:
    
+      add_q_coordinate
       add_scattering_coordinates_from_positions
       convert_reduced_to_empty_can_subtracted_tof
       convert_reduced_to_tof

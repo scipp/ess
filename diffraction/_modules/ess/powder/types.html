@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=603b0020"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -584,14 +584,22 @@
 <span class="n">DspacingBins</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;DspacingBins&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Bin edges for d-spacing.&quot;&quot;&quot;</span>
 
+<span class="n">DspacingNBins</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;DspacingNBins&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Number of d-spacing bins.&quot;&quot;&quot;</span>
+
 <span class="n">OutFilename</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;OutFilename&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Filename of the output.&quot;&quot;&quot;</span>
 
-<span class="n">TwoThetaBins</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;TwoThetaBins&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+<span class="n">TwoThetaBins</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;TwoThetaBins&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Bin edges for grouping in 2theta.</span>
 
 <span class="sd">This is used by an alternative focussing step that groups detector</span>
 <span class="sd">pixels by scattering angle into bins given by these edges.</span>
+
+<span class="sd">The focussing step aligns its internal, finer 2theta binning with these edges,</span>
+<span class="sd">so setting them also affects results that are integrated over 2theta.</span>
+<span class="sd">``None`` means that no 2theta grouping is available: the workflow can then only</span>
+<span class="sd">produce results integrated over 2theta and raises if grouped data is requested.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">UncertaintyBroadcastMode</span> <span class="o">=</span> <span class="n">_UncertaintyBroadcastMode</span>
@@ -633,6 +641,13 @@
 
 
 
+<div class="viewcode-block" id="QDetector">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.QDetector.html#ess.powder.types.QDetector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QDetector</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;D-spacing detector data with a momentum-transfer coordinate.&quot;&quot;&quot;</span></div>
+
+
+
 <span class="n">DspacingHistogram</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;DspacingHistogram&quot;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Histogrammed intensity vs d-spacing.&quot;&quot;&quot;</span>
 
@@ -641,6 +656,13 @@
 <a class="viewcode-back" href="../../../generated/modules/ess.powder.types.DetectorTwoTheta.html#ess.powder.types.DetectorTwoTheta">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DetectorTwoTheta</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scattering angle (two-theta) for each detector pixel.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="WavelengthRange">
+<a class="viewcode-back" href="../../../generated/modules/ess.powder.types.WavelengthRange.html#ess.powder.types.WavelengthRange">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WavelengthRange</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Minimum and maximum wavelength transmitted by the chopper cascade.&quot;&quot;&quot;</span></div>
 
 
 
@@ -877,7 +899,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

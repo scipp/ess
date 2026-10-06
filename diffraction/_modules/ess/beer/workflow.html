@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=603b0020"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -522,11 +522,14 @@
   <h1>Source code for ess.beer.workflow</h1><div class="highlight"><pre>
 <span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
 <span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sl</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder</span><span class="w"> </span><span class="kn">import</span> <span class="n">binning</span> <span class="k">as</span> <span class="n">powder_binning</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder</span><span class="w"> </span><span class="kn">import</span> <span class="n">providers</span> <span class="k">as</span> <span class="n">powder_providers</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">powder_coordinate_transformation_graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">detector_two_theta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.correction</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunNormalization</span><span class="p">,</span> <span class="n">insert_run_normalization</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BunkerMonitor</span><span class="p">,</span>
@@ -534,12 +537,19 @@
     <span class="n">CaveMonitor</span><span class="p">,</span>
     <span class="n">EmptyCanRun</span><span class="p">,</span>
     <span class="n">SampleRun</span><span class="p">,</span>
+    <span class="n">TwoThetaBins</span><span class="p">,</span>
     <span class="n">VanadiumRun</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericNeXusWorkflow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorBankSizes</span><span class="p">,</span> <span class="n">NeXusName</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericUnwrapWorkflow</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GenericUnwrapWorkflow</span><span class="p">,</span>
+    <span class="n">PulsePeriod</span><span class="p">,</span>
+    <span class="n">SourceBounds</span><span class="p">,</span>
+    <span class="n">WavelengthLutMode</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">lut</span> <span class="k">as</span> <span class="n">unwrap_lut</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">LookupTableRelativeErrorThreshold</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.clustering</span><span class="w"> </span><span class="kn">import</span> <span class="n">cluster_events_by_streak</span>
@@ -554,7 +564,16 @@
 
 <span class="n">default_parameters</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">CalibrationData</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">TwoThetaBins</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">PulseLength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.003</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">),</span>
+    <span class="n">PulsePeriod</span><span class="p">:</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;Hz&#39;</span><span class="p">),</span>
+    <span class="n">SourceBounds</span><span class="p">:</span> <span class="n">SourceBounds</span><span class="p">(</span>
+        <span class="n">time</span><span class="o">=</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ms&#39;</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ms&#39;</span><span class="p">)),</span>
+        <span class="n">wavelength</span><span class="o">=</span><span class="p">(</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">),</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">15.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
     <span class="n">DetectorBankSizes</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;south_detector&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">},</span>
         <span class="s1">&#39;north_detector&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">},</span>
@@ -563,63 +582,79 @@
 <span class="p">}</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_mcstas_beer_modulation_workflow</span><span class="p">(</span><span class="n">graph_provider</span><span class="p">,</span> <span class="o">*</span><span class="n">providers</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">GenericNeXusWorkflow</span><span class="p">(</span><span class="n">run_types</span><span class="o">=</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span> <span class="n">monitor_types</span><span class="o">=</span><span class="p">[])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_insert_dspacing_range_detection</span><span class="p">(</span><span class="n">workflow</span><span class="p">:</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add automatic d-spacing range detection to a BEER workflow.&quot;&quot;&quot;</span>
+    <span class="c1"># Bin edges need chopper frames regardless of how event wavelengths are computed.</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="p">(</span>
-        <span class="o">*</span><span class="n">mcstas_providers</span><span class="p">,</span>
-        <span class="n">graph_provider</span><span class="p">,</span>
-        <span class="o">*</span><span class="n">providers</span><span class="p">,</span>
+        <span class="n">unwrap_lut</span><span class="o">.</span><span class="n">get_active_choppers</span><span class="p">,</span>
+        <span class="n">unwrap_lut</span><span class="o">.</span><span class="n">close_non_synced_disk_choppers</span><span class="p">,</span>
+        <span class="n">unwrap_lut</span><span class="o">.</span><span class="n">guess_pulse_stride_from_choppers</span><span class="p">,</span>
+        <span class="n">unwrap_lut</span><span class="o">.</span><span class="n">compute_frame_sequence</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">powder_binning</span><span class="o">.</span><span class="n">providers</span><span class="p">,</span>
+        <span class="n">detector_two_theta</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_beer_modulation_workflow</span><span class="p">(</span>
+    <span class="n">graph_provider</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">providers</span><span class="p">,</span>
+    <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">GenericNeXusWorkflow</span><span class="p">(</span>
+        <span class="n">run_types</span><span class="o">=</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+        <span class="n">monitor_types</span><span class="o">=</span><span class="p">[</span><span class="n">BunkerMonitor</span><span class="p">,</span> <span class="n">CaveMonitor</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="n">powder_providers</span><span class="p">,</span> <span class="n">graph_provider</span><span class="p">,</span> <span class="o">*</span><span class="n">providers</span><span class="p">):</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+    <span class="n">insert_run_normalization</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">default_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">_insert_dspacing_range_detection</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">workflow</span>
 
 
-<div class="viewcode-block" id="BeerModMcStasWorkflow">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerModMcStasWorkflow.html#ess.beer.BeerModMcStasWorkflow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">BeerModMcStasWorkflow</span><span class="p">():</span>
+<div class="viewcode-block" id="BeerModulationAutoMcStasWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerModulationAutoMcStasWorkflow.html#ess.beer.BeerModulationAutoMcStasWorkflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">BeerModulationAutoMcStasWorkflow</span><span class="p">(</span>
+    <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process modulation-mode McStas data without known peak positions.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_mcstas_beer_modulation_workflow</span><span class="p">(</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">_beer_modulation_workflow</span><span class="p">(</span>
         <span class="n">automatic_coordinate_transformation_graph</span><span class="p">,</span>
         <span class="n">cluster_events_by_streak</span><span class="p">,</span>
         <span class="n">compute_wavelength_in_each_cluster</span><span class="p">,</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="BeerModMcStasWorkflowKnownPeaks">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks.html#ess.beer.BeerModMcStasWorkflowKnownPeaks">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">BeerModMcStasWorkflowKnownPeaks</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process modulation-mode McStas data using known peak positions.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_mcstas_beer_modulation_workflow</span><span class="p">(</span>
-        <span class="n">known_peaks_coordinate_transformation_graph</span><span class="p">,</span> <span class="n">wavelength_detector</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="BeerMcStasWorkflowPulseShaping">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerMcStasWorkflowPulseShaping.html#ess.beer.BeerMcStasWorkflowPulseShaping">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">BeerMcStasWorkflowPulseShaping</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow to process BEER pulse-shaping McStas files using analytical</span>
-<span class="sd">    frame unwrapping.&quot;&quot;&quot;</span>
-    <span class="n">wf</span> <span class="o">=</span> <span class="n">GenericUnwrapWorkflow</span><span class="p">(</span>
-        <span class="n">run_types</span><span class="o">=</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span> <span class="n">monitor_types</span><span class="o">=</span><span class="p">[],</span> <span class="n">wavelength_from</span><span class="o">=</span><span class="s1">&#39;analytical&#39;</span>
+        <span class="n">run_norm</span><span class="o">=</span><span class="n">run_norm</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="n">mcstas_providers</span><span class="p">,</span> <span class="n">powder_coordinate_transformation_graph</span><span class="p">):</span>
-        <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">default_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">wf</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">NeXusName</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;detector&#39;</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">LookupTableRelativeErrorThreshold</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;detector&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)}</span>
-    <span class="k">return</span> <span class="n">wf</span></div>
+    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">mcstas_providers</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">workflow</span></div>
+
+
+
+<div class="viewcode-block" id="BeerModulationKnownPeaksMcStasWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerModulationKnownPeaksMcStasWorkflow.html#ess.beer.BeerModulationKnownPeaksMcStasWorkflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">BeerModulationKnownPeaksMcStasWorkflow</span><span class="p">(</span>
+    <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process modulation-mode McStas data using known peak positions.&quot;&quot;&quot;</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">_beer_modulation_workflow</span><span class="p">(</span>
+        <span class="n">known_peaks_coordinate_transformation_graph</span><span class="p">,</span>
+        <span class="n">wavelength_detector</span><span class="p">,</span>
+        <span class="n">run_norm</span><span class="o">=</span><span class="n">run_norm</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">mcstas_providers</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">workflow</span></div>
 
 
 
 <div class="viewcode-block" id="BeerPowderWorkflow">
 <a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerPowderWorkflow.html#ess.beer.BeerPowderWorkflow">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">BeerPowderWorkflow</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span><span class="p">,</span>
+    <span class="n">wavelength_from</span><span class="p">:</span> <span class="n">WavelengthLutMode</span> <span class="o">=</span> <span class="s1">&#39;analytical&#39;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Beer powder workflow with default parameters.</span>
@@ -628,9 +663,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    run_norm:</span>
 <span class="sd">        Select how to normalize each run (sample, vanadium, etc.).</span>
-<span class="sd">    kwargs:</span>
-<span class="sd">        Additional keyword arguments are forwarded to the base</span>
-<span class="sd">        :func:`GenericUnwrapWorkflow`.</span>
+<span class="sd">    wavelength_from:</span>
+<span class="sd">        Mode for creating the wavelength lookup table. Defaults to analytical.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -640,12 +674,19 @@
     <span class="n">wf</span> <span class="o">=</span> <span class="n">GenericUnwrapWorkflow</span><span class="p">(</span>
         <span class="n">run_types</span><span class="o">=</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">VanadiumRun</span><span class="p">,</span> <span class="n">EmptyCanRun</span><span class="p">],</span>
         <span class="n">monitor_types</span><span class="o">=</span><span class="p">[</span><span class="n">BunkerMonitor</span><span class="p">,</span> <span class="n">CaveMonitor</span><span class="p">],</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">NeXusName</span><span class="p">[</span><span class="n">CaveMonitor</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;monitor_cave&quot;</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">NeXusName</span><span class="p">[</span><span class="n">CaveMonitor</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;monitor_cave&#39;</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">NeXusName</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;detector&#39;</span>
+    <span class="n">wf</span><span class="p">[</span><span class="n">LookupTableRelativeErrorThreshold</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;detector&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;monitor_bunker&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;monitor_cave&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
+    <span class="p">}</span>
 
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">powder_providers</span><span class="p">:</span>
         <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+    <span class="n">_insert_dspacing_range_detection</span><span class="p">(</span><span class="n">wf</span><span class="p">)</span>
 
     <span class="n">insert_run_normalization</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">default_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -654,51 +695,75 @@
 
 
 
+<div class="viewcode-block" id="BeerPowderMcStasWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerPowderMcStasWorkflow.html#ess.beer.BeerPowderMcStasWorkflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">BeerPowderMcStasWorkflow</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the BEER analytical powder workflow with McStas loaders inserted.&quot;&quot;&quot;</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">BeerPowderWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">run_norm</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">mcstas_providers</span><span class="p">:</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wf</span></div>
+
+
+
+<div class="viewcode-block" id="BeerModMcStasWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerModMcStasWorkflow.html#ess.beer.BeerModMcStasWorkflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">BeerModMcStasWorkflow</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated: use :func:`BeerModulationAutoMcStasWorkflow`.&quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s1">&#39;BeerModMcStasWorkflow is deprecated; use &#39;</span>
+        <span class="s1">&#39;BeerModulationAutoMcStasWorkflow instead.&#39;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">BeerModulationAutoMcStasWorkflow</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="BeerModMcStasWorkflowKnownPeaks">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks.html#ess.beer.BeerModMcStasWorkflowKnownPeaks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">BeerModMcStasWorkflowKnownPeaks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated: use :func:`BeerModulationKnownPeaksMcStasWorkflow`.&quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s1">&#39;BeerModMcStasWorkflowKnownPeaks is deprecated; use &#39;</span>
+        <span class="s1">&#39;BeerModulationKnownPeaksMcStasWorkflow instead.&#39;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">BeerModulationKnownPeaksMcStasWorkflow</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="BeerMcStasWorkflowPulseShaping">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerMcStasWorkflowPulseShaping.html#ess.beer.BeerMcStasWorkflowPulseShaping">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">BeerMcStasWorkflowPulseShaping</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated: use :func:`BeerPowderMcStasWorkflow`.&quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s1">&#39;BeerMcStasWorkflowPulseShaping is deprecated; use &#39;</span>
+        <span class="s1">&#39;BeerPowderMcStasWorkflow instead.&#39;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">BeerPowderMcStasWorkflow</span><span class="p">()</span></div>
+
+
+
 <div class="viewcode-block" id="BeerPowderWorkflowAnalytical">
 <a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerPowderWorkflowAnalytical.html#ess.beer.BeerPowderWorkflowAnalytical">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">BeerPowderWorkflowAnalytical</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span> <span class="n">run_norm</span><span class="p">:</span> <span class="n">RunNormalization</span> <span class="o">=</span> <span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_integrated</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Beer powder workflow using analytical lookup-table frame unwrapping.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    run_norm:</span>
-<span class="sd">        Select how to normalize each run (sample, vanadium, etc.).</span>
-<span class="sd">    kwargs:</span>
-<span class="sd">        Additional keyword arguments are forwarded to the base</span>
-<span class="sd">        :func:`GenericUnwrapWorkflow`.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    :</span>
-<span class="sd">        A workflow object for BEER.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">wf</span> <span class="o">=</span> <span class="n">BeerPowderWorkflow</span><span class="p">(</span>
-        <span class="n">run_norm</span><span class="o">=</span><span class="n">run_norm</span><span class="p">,</span>
-        <span class="n">wavelength_from</span><span class="o">=</span><span class="s1">&#39;analytical&#39;</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated: use :func:`BeerPowderWorkflow` with analytical wavelength lookup.&quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s1">&#39;BeerPowderWorkflowAnalytical is deprecated; use &#39;</span>
+        <span class="s2">&quot;BeerPowderWorkflow(wavelength_from=&#39;analytical&#39;) instead.&quot;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">NeXusName</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;detector&#39;</span>
-    <span class="n">wf</span><span class="p">[</span><span class="n">LookupTableRelativeErrorThreshold</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;detector&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
-        <span class="s1">&#39;monitor_bunker&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
-        <span class="s1">&#39;monitor_cave&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="n">wf</span></div>
-
-
-
-<div class="viewcode-block" id="BeerPowderMcStasWorkflow">
-<a class="viewcode-back" href="../../../generated/modules/ess.beer.workflow.BeerPowderMcStasWorkflow.html#ess.beer.BeerPowderMcStasWorkflow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">BeerPowderMcStasWorkflow</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sl</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the BEER analytical powder workflow with McStas loaders inserted.&quot;&quot;&quot;</span>
-    <span class="n">wf</span> <span class="o">=</span> <span class="n">BeerPowderWorkflowAnalytical</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">mcstas_providers</span><span class="p">:</span>
-        <span class="n">wf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">wf</span></div>
+    <span class="k">return</span> <span class="n">BeerPowderWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">run_norm</span><span class="p">,</span> <span class="n">wavelength_from</span><span class="o">=</span><span class="s1">&#39;analytical&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 </pre></div>
 
@@ -763,7 +828,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

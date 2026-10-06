@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=603b0020"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -55,11 +55,11 @@
     <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ess.powder.conversion.add_scattering_coordinates_from_positions" href="ess.powder.conversion.add_scattering_coordinates_from_positions.html" />
+    <link rel="next" title="ess.powder.conversion.add_q_coordinate" href="ess.powder.conversion.add_q_coordinate.html" />
     <link rel="prev" title="ess.powder.calibration.OutputCalibrationData" href="ess.powder.calibration.OutputCalibrationData.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -507,6 +507,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">ess.powder.conversion</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.powder.conversion.add_q_coordinate.html">ess.powder.conversion.add_q_coordinate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.conversion.add_scattering_coordinates_from_positions.html">ess.powder.conversion.add_scattering_coordinates_from_positions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof.html">ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.conversion.convert_reduced_to_tof.html">ess.powder.conversion.convert_reduced_to_tof</a></li>
@@ -561,6 +562,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.powder.types.html">ess.powder.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.CalibrationFilename.html">ess.powder.types.CalibrationFilename</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.DspacingBins.html">ess.powder.types.DspacingBins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.powder.types.DspacingNBins.html">ess.powder.types.DspacingNBins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.OutFilename.html">ess.powder.types.OutFilename</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.TwoThetaBins.html">ess.powder.types.TwoThetaBins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.UncertaintyBroadcastMode.html">ess.powder.types.UncertaintyBroadcastMode</a></li>
@@ -599,7 +601,9 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.MonitorCoordTransformGraph.html">ess.powder.types.MonitorCoordTransformGraph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.MonitorFilename.html">ess.powder.types.MonitorFilename</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.NormalizedDspacing.html">ess.powder.types.NormalizedDspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.powder.types.QDetector.html">ess.powder.types.QDetector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.RawDataAndMetadata.html">ess.powder.types.RawDataAndMetadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.powder.types.WavelengthRange.html">ess.powder.types.WavelengthRange</a></li>
 </ul>
 </details></li>
 </ul>
@@ -671,12 +675,16 @@
 </details></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerMcStasWorkflowPulseShaping.html">ess.beer.BeerMcStasWorkflowPulseShaping</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.BeerModMcStasWorkflowKnownPeaks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflow.html">ess.beer.BeerModMcStasWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModulationAutoMcStasWorkflow.html">ess.beer.BeerModulationAutoMcStasWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModulationKnownPeaksMcStasWorkflow.html">ess.beer.BeerModulationKnownPeaksMcStasWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderWorkflow.html">ess.beer.BeerPowderWorkflow</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderWorkflowAnalytical.html">ess.beer.BeerPowderWorkflowAnalytical</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderMcStasWorkflow.html">ess.beer.BeerPowderMcStasWorkflow</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerMcStasWorkflowPulseShaping.html">ess.beer.BeerMcStasWorkflowPulseShaping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflow.html">ess.beer.BeerModMcStasWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.BeerModMcStasWorkflowKnownPeaks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderWorkflowAnalytical.html">ess.beer.BeerPowderWorkflowAnalytical</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.dhkl_peaks_from_cif.html">ess.beer.dhkl_peaks_from_cif</a></li>
@@ -723,9 +731,8 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.beer.io.load.html">ess.beer.io.load</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.chopper_mode_from_mcstas_mode.html">ess.beer.io.load.chopper_mode_from_mcstas_mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas.html">ess.beer.io.load.load_beer_mcstas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_geometry.html">ess.beer.io.load.load_beer_mcstas_geometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor.html">ess.beer.io.load.load_beer_mcstas_monitor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor_provider.html">ess.beer.io.load.load_beer_mcstas_monitor_provider</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_provider.html">ess.beer.io.load.load_beer_mcstas_provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_choppers.html">ess.beer.io.load.mcstas_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_detector_ltotal.html">ess.beer.io.load.mcstas_detector_ltotal</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_sample_position.html">ess.beer.io.load.mcstas_sample_position</a></li>
@@ -744,9 +751,8 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.beer.mcstas.load.html">ess.beer.mcstas.load</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.chopper_mode_from_mcstas_mode.html">ess.beer.mcstas.load.chopper_mode_from_mcstas_mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas.html">ess.beer.mcstas.load.load_beer_mcstas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_geometry.html">ess.beer.mcstas.load.load_beer_mcstas_geometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_monitor.html">ess.beer.mcstas.load.load_beer_mcstas_monitor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_monitor_provider.html">ess.beer.mcstas.load.load_beer_mcstas_monitor_provider</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_provider.html">ess.beer.mcstas.load.load_beer_mcstas_provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_choppers.html">ess.beer.mcstas.load.mcstas_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_detector_ltotal.html">ess.beer.mcstas.load.mcstas_detector_ltotal</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_sample_position.html">ess.beer.mcstas.load.mcstas_sample_position</a></li>
@@ -759,6 +765,8 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerMcStasWorkflowPulseShaping.html">ess.beer.workflow.BeerMcStasWorkflowPulseShaping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModMcStasWorkflow.html">ess.beer.workflow.BeerModMcStasWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModulationAutoMcStasWorkflow.html">ess.beer.workflow.BeerModulationAutoMcStasWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModulationKnownPeaksMcStasWorkflow.html">ess.beer.workflow.BeerModulationKnownPeaksMcStasWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderMcStasWorkflow.html">ess.beer.workflow.BeerPowderMcStasWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderWorkflow.html">ess.beer.workflow.BeerPowderWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderWorkflowAnalytical.html">ess.beer.workflow.BeerPowderWorkflowAnalytical</a></li>
@@ -905,25 +913,28 @@
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.powder.conversion.add_scattering_coordinates_from_positions.html#ess.powder.conversion.add_scattering_coordinates_from_positions" title="ess.powder.conversion.add_scattering_coordinates_from_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_scattering_coordinates_from_positions</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.powder.conversion.add_q_coordinate.html#ess.powder.conversion.add_q_coordinate" title="ess.powder.conversion.add_q_coordinate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_q_coordinate</span></code></a>(data, graph)</p></td>
+<td><p>Add the elastic momentum-transfer coordinate <code class="docutils literal notranslate"><span class="pre">Q</span></code> to detector data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.powder.conversion.add_scattering_coordinates_from_positions.html#ess.powder.conversion.add_scattering_coordinates_from_positions" title="ess.powder.conversion.add_scattering_coordinates_from_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_scattering_coordinates_from_positions</span></code></a>(...)</p></td>
 <td><p>Add <code class="docutils literal notranslate"><span class="pre">two_theta</span></code> and <code class="docutils literal notranslate"><span class="pre">dspacing</span></code> coordinates to the data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof.html#ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof" title="ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_reduced_to_empty_can_subtracted_tof</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof.html#ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof" title="ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_reduced_to_empty_can_subtracted_tof</span></code></a>(...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.powder.conversion.convert_reduced_to_tof.html#ess.powder.conversion.convert_reduced_to_tof" title="ess.powder.conversion.convert_reduced_to_tof"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_reduced_to_tof</span></code></a>(data, calibration)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.powder.conversion.convert_reduced_to_tof.html#ess.powder.conversion.convert_reduced_to_tof" title="ess.powder.conversion.convert_reduced_to_tof"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_reduced_to_tof</span></code></a>(data, calibration)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.powder.conversion.convert_to_dspacing.html#ess.powder.conversion.convert_to_dspacing" title="ess.powder.conversion.convert_to_dspacing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_to_dspacing</span></code></a>(data, graph, calibration)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.powder.conversion.convert_to_dspacing.html#ess.powder.conversion.convert_to_dspacing" title="ess.powder.conversion.convert_to_dspacing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_to_dspacing</span></code></a>(data, graph, calibration)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.powder.conversion.powder_coordinate_transformation_graph.html#ess.powder.conversion.powder_coordinate_transformation_graph" title="ess.powder.conversion.powder_coordinate_transformation_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">powder_coordinate_transformation_graph</span></code></a>(...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.powder.conversion.powder_coordinate_transformation_graph.html#ess.powder.conversion.powder_coordinate_transformation_graph" title="ess.powder.conversion.powder_coordinate_transformation_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">powder_coordinate_transformation_graph</span></code></a>(...)</p></td>
 <td><p>Generate a coordinate transformation graph for powder diffraction.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ess.powder.conversion.powder_monitor_coordinate_transformation_graph.html#ess.powder.conversion.powder_monitor_coordinate_transformation_graph" title="ess.powder.conversion.powder_monitor_coordinate_transformation_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">powder_monitor_coordinate_transformation_graph</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.powder.conversion.powder_monitor_coordinate_transformation_graph.html#ess.powder.conversion.powder_monitor_coordinate_transformation_graph" title="ess.powder.conversion.powder_monitor_coordinate_transformation_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">powder_monitor_coordinate_transformation_graph</span></code></a>(...)</p></td>
 <td><p>Generate a coordinate transformation graph for monitors,</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="ess.powder.conversion.to_dspacing_with_calibration.html#ess.powder.conversion.to_dspacing_with_calibration" title="ess.powder.conversion.to_dspacing_with_calibration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dspacing_with_calibration</span></code></a>(data, calibration)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.powder.conversion.to_dspacing_with_calibration.html#ess.powder.conversion.to_dspacing_with_calibration" title="ess.powder.conversion.to_dspacing_with_calibration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dspacing_with_calibration</span></code></a>(data, calibration)</p></td>
 <td><p>Transform coordinates from a detector time of arrival offset to d-spacing using calibration parameters.</p></td>
 </tr>
 </tbody>
@@ -952,11 +963,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="ess.powder.conversion.add_scattering_coordinates_from_positions.html"
+       href="ess.powder.conversion.add_q_coordinate.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ess.powder.conversion.add_scattering_coordinates_from_positions</p>
+        <p class="prev-next-title">ess.powder.conversion.add_q_coordinate</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1011,7 +1022,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

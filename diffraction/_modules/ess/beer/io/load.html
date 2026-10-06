@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=603b0020"></script>
+    <script src="../../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -529,7 +529,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">mcstastox</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaveMonitor</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">WavelengthMonitor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaveMonitor</span><span class="p">,</span> <span class="n">EmptyDetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">WavelengthMonitor</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiskChoppers</span><span class="p">,</span> <span class="n">Position</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorLtotal</span>
@@ -546,9 +546,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;chopper_mode_from_mcstas_mode&#39;</span><span class="p">,</span>
     <span class="s1">&#39;load_beer_mcstas&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;load_beer_mcstas_geometry&#39;</span><span class="p">,</span>
     <span class="s1">&#39;load_beer_mcstas_monitor&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;load_beer_mcstas_monitor_provider&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;load_beer_mcstas_provider&#39;</span><span class="p">,</span>
     <span class="s1">&#39;mcstas_choppers&#39;</span><span class="p">,</span>
     <span class="s1">&#39;mcstas_detector_ltotal&#39;</span><span class="p">,</span>
     <span class="s1">&#39;mcstas_providers&#39;</span><span class="p">,</span>
@@ -584,6 +583,25 @@
     <span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_position_table</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">mcstastox</span><span class="o">.</span><span class="n">Read</span><span class="p">,</span> <span class="n">components</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load pixel positions for selected detector components.&quot;&quot;&quot;</span>
+    <span class="n">position_tables</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_component_global</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+        <span class="n">begin</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pixel_range</span><span class="p">[</span><span class="n">component</span><span class="p">]</span>
+        <span class="n">position_tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+                <span class="n">sc</span><span class="o">.</span><span class="n">vectors</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">),</span>
+                <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;pixel_id&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                        <span class="s1">&#39;pixel_id&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">begin</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">end</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span>
+                    <span class="p">)</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">position_tables</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_load_events</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">mcstastox</span><span class="o">.</span><span class="n">Read</span><span class="p">,</span> <span class="n">components</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load weighted events and pixel positions for selected components only.</span>
 
@@ -608,36 +626,25 @@
             <span class="p">),</span>
             <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;events&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">event_data</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">),</span>
         <span class="p">},</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
 
-    <span class="n">position_tables</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
-        <span class="n">positions</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_component_global</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
-        <span class="n">begin</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pixel_range</span><span class="p">[</span><span class="n">component</span><span class="p">]</span>
-        <span class="n">position_tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-                <span class="n">sc</span><span class="o">.</span><span class="n">vectors</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">),</span>
-                <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
-                    <span class="s1">&#39;pixel_id&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
-                        <span class="s1">&#39;pixel_id&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">begin</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">end</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span>
-                    <span class="p">)</span>
-                <span class="p">},</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
-    <span class="n">position_table</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">position_tables</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">)</span>
-    <span class="n">events</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span>
-        <span class="n">position_table</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;previous&#39;</span>
-    <span class="p">)[</span><span class="n">events</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">]]</span>
+    <span class="n">position_table</span> <span class="o">=</span> <span class="n">_load_position_table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">components</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">position_table</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">])</span>
+    <span class="n">events</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">position_table</span><span class="o">.</span><span class="n">data</span>
     <span class="k">return</span> <span class="n">events</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_mode</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">mcstastox</span><span class="o">.</span><span class="n">Read</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;entry1/simulation/Param/mode&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">mode</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="load_beer_mcstas">
 <a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.load_beer_mcstas.html#ess.beer.io.load.load_beer_mcstas">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas</span><span class="p">(</span>
-    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">bank</span><span class="p">:</span> <span class="n">DetectorBank</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a detector bank from a BEER McStas file.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">DetectorBank</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -646,25 +653,67 @@
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">bank</span> <span class="o">==</span> <span class="n">DetectorBank</span><span class="o">.</span><span class="n">both</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">load_beer_mcstas</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">bank</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">bank</span> <span class="ow">in</span> <span class="p">(</span><span class="n">DetectorBank</span><span class="o">.</span><span class="n">south</span><span class="p">,</span> <span class="n">DetectorBank</span><span class="o">.</span><span class="n">north</span><span class="p">)</span>
-            <span class="p">],</span>
-            <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">load_beer_mcstas</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">bank</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">bank</span> <span class="ow">in</span> <span class="p">(</span><span class="n">DetectorBank</span><span class="o">.</span><span class="n">south</span><span class="p">,</span> <span class="n">DetectorBank</span><span class="o">.</span><span class="n">north</span><span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="p">)</span>
 
     <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">mcstastox</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">filename</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
-        <span class="n">mode</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;entry1/simulation/Param/mode&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">_load_mode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">_load_events</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_detector_components</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bank</span><span class="p">))</span>
 
     <span class="n">events</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
     <span class="n">events</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;event_time_offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">events</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">_MCSTAS_T_OFFSET</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">%</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">14</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">events</span></div>
+    <span class="k">return</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">events</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_beer_mcstas_geometry">
+<a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.load_beer_mcstas_geometry.html#ess.beer.io.load.load_beer_mcstas_geometry">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas_geometry</span><span class="p">(</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">bank</span><span class="p">:</span> <span class="n">DetectorBank</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load detector geometry from a BEER McStas file without loading events.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">DetectorBank</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;bank must be ``DetectorBank.north``, &#39;</span>
+            <span class="s1">&#39;``DetectorBank.south``, or ``DetectorBank.both``&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">bank</span> <span class="o">==</span> <span class="n">DetectorBank</span><span class="o">.</span><span class="n">both</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">load_beer_mcstas_geometry</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">bank</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">bank</span> <span class="ow">in</span> <span class="p">(</span><span class="n">DetectorBank</span><span class="o">.</span><span class="n">south</span><span class="p">,</span> <span class="n">DetectorBank</span><span class="o">.</span><span class="n">north</span><span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">mcstastox</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">filename</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">_load_position_table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_detector_components</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bank</span><span class="p">))</span>
+
+    <span class="n">pixel_id</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;pixel_id&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+            <span class="n">pixel_id</span><span class="p">,</span>
+            <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;pixel_id&#39;</span><span class="p">:</span> <span class="n">pixel_id</span><span class="p">,</span>
+                <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="n">positions</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
 
 
 
@@ -682,7 +731,9 @@
 
 <div class="viewcode-block" id="load_beer_mcstas_monitor">
 <a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.load_beer_mcstas_monitor.html#ess.beer.io.load.load_beer_mcstas_monitor">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas_monitor</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas_monitor</span><span class="p">(</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">CaveMonitor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the BEER McStas wavelength monitor.&quot;&quot;&quot;</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">mcstastox</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">filename</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
@@ -718,27 +769,7 @@
                 <span class="p">),</span>
             <span class="p">},</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="n">da</span></div>
-
-
-
-<div class="viewcode-block" id="load_beer_mcstas_provider">
-<a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.load_beer_mcstas_provider.html#ess.beer.io.load.load_beer_mcstas_provider">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas_provider</span><span class="p">(</span>
-    <span class="n">fname</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span> <span class="n">bank</span><span class="p">:</span> <span class="n">DetectorBank</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sciline provider for loading BEER McStas detector data.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">load_beer_mcstas</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">bank</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="load_beer_mcstas_monitor_provider">
-<a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.load_beer_mcstas_monitor_provider.html#ess.beer.io.load.load_beer_mcstas_monitor_provider">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_beer_mcstas_monitor_provider</span><span class="p">(</span>
-    <span class="n">fname</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">CaveMonitor</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sciline provider for loading the BEER McStas wavelength monitor.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">load_beer_mcstas_monitor</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">WavelengthMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">CaveMonitor</span><span class="p">](</span><span class="n">da</span><span class="p">)</span></div>
 
 
 
@@ -833,26 +864,38 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_mcstas_choppers_from_file</span><span class="p">(</span>
+    <span class="n">fname</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return BEER choppers without loading detector events.&quot;&quot;&quot;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">mcstastox</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">fname</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">chopper_mode_from_mcstas_mode</span><span class="p">(</span><span class="n">_load_mode</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">simulation_choppers</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">source_position</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="mcstas_detector_ltotal">
 <a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.mcstas_detector_ltotal.html#ess.beer.io.load.mcstas_detector_ltotal">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mcstas_detector_ltotal</span><span class="p">(</span>
-    <span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return moderator-to-detector flight path lengths for BEER McStas data.&quot;&quot;&quot;</span>
     <span class="n">source_to_sample</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sample_position</span> <span class="o">-</span> <span class="n">source_position</span><span class="p">)</span>
-    <span class="n">sample_to_detector</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">sample_position</span><span class="p">)</span>
+    <span class="n">sample_to_detector</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">sample_position</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">source_to_sample</span> <span class="o">+</span> <span class="n">sample_to_detector</span></div>
 
 
 
 <span class="n">mcstas_providers</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">load_beer_mcstas_provider</span><span class="p">,</span>
-    <span class="n">load_beer_mcstas_monitor_provider</span><span class="p">,</span>
+    <span class="n">load_beer_mcstas</span><span class="p">,</span>
+    <span class="n">load_beer_mcstas_geometry</span><span class="p">,</span>
+    <span class="n">load_beer_mcstas_monitor</span><span class="p">,</span>
     <span class="n">mcstas_source_position</span><span class="p">,</span>
     <span class="n">mcstas_sample_position</span><span class="p">,</span>
-    <span class="n">mcstas_choppers</span><span class="p">,</span>
+    <span class="n">_mcstas_choppers_from_file</span><span class="p">,</span>
     <span class="n">mcstas_detector_ltotal</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -918,7 +961,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

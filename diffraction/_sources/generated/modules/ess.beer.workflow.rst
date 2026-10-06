@@ -17,6 +17,8 @@
       BeerMcStasWorkflowPulseShaping
       BeerModMcStasWorkflow
       BeerModMcStasWorkflowKnownPeaks
+      BeerModulationAutoMcStasWorkflow
+      BeerModulationKnownPeaksMcStasWorkflow
       BeerPowderMcStasWorkflow
       BeerPowderWorkflow
       BeerPowderWorkflowAnalytical

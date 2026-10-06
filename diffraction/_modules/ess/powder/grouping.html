@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=603b0020"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -541,11 +541,111 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_reconstruct_wavelength</span><span class="p">(</span>
-    <span class="n">dspacing_bins</span><span class="p">:</span> <span class="n">DspacingBins</span><span class="p">,</span> <span class="n">two_theta_bins</span><span class="p">:</span> <span class="n">TwoThetaBins</span>
+    <span class="n">dspacing_bins</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">two_theta_bins</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
     <span class="n">dspacing</span> <span class="o">=</span> <span class="n">dspacing_bins</span>
     <span class="n">two_theta</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">two_theta_bins</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dspacing</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">two_theta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+
+
+<span class="n">_BASE_TWO_THETA_RESOLUTION</span> <span class="o">=</span> <span class="mi">1024</span>
+<span class="sd">&quot;&quot;&quot;Number of bins used to cover the full two-theta range of a detector.</span>
+
+<span class="sd">This sets the resolution of the wavelength reconstructed from bin centers, see</span>
+<span class="sd">:func:`_reconstruct_wavelength`. It is independent of the two-theta binning</span>
+<span class="sd">requested for the final result, see :func:`_focussing_two_theta_bins`.</span>
+
+<span class="sd">It only matters when focussing produces a histogram *and* the run is normalized</span>
+<span class="sd">by a monitor histogram. The monitor is then looked up once per (d-spacing,</span>
+<span class="sd">two-theta) bin and the lookup is piecewise constant on the bins of the monitor,</span>
+<span class="sd">so the wavelength spread within a bin should stay below the width of a monitor</span>
+<span class="sd">bin. Since</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    \\frac{\\Delta\\lambda}{\\lambda}</span>
+<span class="sd">    = \\frac{\\Delta 2\\theta}{2} \\cot\\theta</span>
+
+<span class="sd">this is most demanding at small scattering angles. If the focussed data keeps</span>
+<span class="sd">its events, they carry their own wavelength and this number has no influence on</span>
+<span class="sd">the result.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extend_edges</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ascending edges reaching from ``start`` (exclusive) past ``limit``.</span>
+
+<span class="sd">    Empty if ``limit`` has already been passed, which happens when the requested</span>
+<span class="sd">    bins extend beyond the range of the detector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">limit</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">step</span><span class="p">))</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">step</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">edges</span> <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">edges</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_focussing_two_theta_bins</span><span class="p">(</span>
+    <span class="n">two_theta</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">requested</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the two-theta bin edges to use for focussing.</span>
+
+<span class="sd">    The edges cover the full range of ``two_theta`` with bins no wider than that</span>
+<span class="sd">    range divided by :py:data:`_BASE_TWO_THETA_RESOLUTION`.</span>
+
+<span class="sd">    If ``requested`` is given, its edges are a subset of the returned edges: each</span>
+<span class="sd">    requested bin is subdivided into equally wide sub-bins. Grouping the focussed</span>
+<span class="sd">    data into ``requested`` is then an exact sum over whole sub-bins. Without</span>
+<span class="sd">    this alignment, each focussing bin is assigned as a whole to the requested</span>
+<span class="sd">    bin containing its center, so the number of bins per group varies</span>
+<span class="sd">    periodically and produces large spikes in the result.</span>
+
+<span class="sd">    Beyond the requested range the grid continues at the width of the outermost</span>
+<span class="sd">    sub-bins rather than the base width. This keeps the edges linearly spaced</span>
+<span class="sd">    when ``requested`` is, which is faster to bin into: :func:`scipp.bin` and</span>
+<span class="sd">    :func:`scipp.hist` can then compute bin indices directly instead of</span>
+<span class="sd">    searching for them. Since a sub-bin is never narrower than half the base</span>
+<span class="sd">    width, it at most doubles the number of bins needed to reach the ends of</span>
+<span class="sd">    the range.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lo</span> <span class="o">=</span> <span class="n">two_theta</span><span class="o">.</span><span class="n">nanmin</span><span class="p">()</span>
+    <span class="n">hi</span> <span class="o">=</span> <span class="n">two_theta</span><span class="o">.</span><span class="n">nanmax</span><span class="p">()</span>
+    <span class="c1"># Make the upper edge inclusive of the largest two-theta value.</span>
+    <span class="n">hi</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nextafter</span><span class="p">(</span><span class="n">hi</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+    <span class="n">base_width</span> <span class="o">=</span> <span class="p">((</span><span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span><span class="p">)</span> <span class="o">/</span> <span class="n">_BASE_TWO_THETA_RESOLUTION</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">if</span> <span class="n">requested</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+            <span class="s1">&#39;two_theta&#39;</span><span class="p">,</span>
+            <span class="n">start</span><span class="o">=</span><span class="n">lo</span><span class="p">,</span>
+            <span class="n">stop</span><span class="o">=</span><span class="n">hi</span><span class="p">,</span>
+            <span class="n">num</span><span class="o">=</span><span class="n">_BASE_TWO_THETA_RESOLUTION</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">two_theta</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">requested</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">two_theta</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+    <span class="c1"># A zero-width bin gets a single zero-width sub-bin instead of none, which keeps</span>
+    <span class="c1"># the sub-bin width well-defined. It comes out empty, as it would from scipp.</span>
+    <span class="n">n_sub</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">widths</span> <span class="o">/</span> <span class="n">base_width</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="c1"># Index of the requested bin each sub-bin belongs to, and its position within it.</span>
+    <span class="c1"># The first sub-bin of a requested bin reproduces its lower edge exactly.</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">n_sub</span><span class="p">)])</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_sub</span><span class="p">)),</span> <span class="n">n_sub</span><span class="p">)</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">offset</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">offset</span><span class="p">[</span><span class="n">index</span><span class="p">])</span> <span class="o">/</span> <span class="n">n_sub</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">sub_widths</span> <span class="o">=</span> <span class="n">widths</span> <span class="o">/</span> <span class="n">n_sub</span>
+    <span class="c1"># A zero-width outermost bin provides no step to continue the grid with. The</span>
+    <span class="c1"># grid is not linearly spaced in that case anyway, so fall back to the base width.</span>
+    <span class="n">low_step</span> <span class="o">=</span> <span class="n">sub_widths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">sub_widths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">base_width</span>
+    <span class="n">high_step</span> <span class="o">=</span> <span class="n">sub_widths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">sub_widths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">base_width</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;two_theta&#39;</span><span class="p">],</span>
+        <span class="n">values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">_extend_edges</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lo</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="o">-</span><span class="n">low_step</span><span class="p">),</span>
+                <span class="n">edges</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">+</span> <span class="n">position</span> <span class="o">*</span> <span class="n">widths</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                <span class="n">edges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:],</span>
+                <span class="n">_extend_edges</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">hi</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">high_step</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">unit</span><span class="o">=</span><span class="n">two_theta</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="focus_data_dspacing_and_two_theta">
@@ -553,17 +653,18 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">focus_data_dspacing_and_two_theta</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">dspacing_bins</span><span class="p">:</span> <span class="n">DspacingBins</span><span class="p">,</span>
+    <span class="n">two_theta_bins</span><span class="p">:</span> <span class="n">TwoThetaBins</span><span class="p">,</span>
     <span class="n">keep_events</span><span class="p">:</span> <span class="n">KeepEvents</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CorrectedDspacing</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reduce the pixel-based data to d-spacing and two-theta dimensions.</span>
 
-<span class="sd">    The two-theta binning does not use :py:class:`TwoThetaBins` but instead</span>
-<span class="sd">    computes the two-theta bins from the &#39;two_theta&#39; coordinate of the input data. This</span>
-<span class="sd">    is necessary to ensure that we have sufficiently high wavelength resolution when</span>
-<span class="sd">    performing a monitor normalization in a follow-up workflow step. If we were to use</span>
-<span class="sd">    :py:class:`TwoThetaBins` we would be influenced by and limited to the two-theta</span>
-<span class="sd">    binning the user requests for the end result, which may not be sufficient.</span>
+<span class="sd">    The two-theta binning is finer than :py:class:`TwoThetaBins` and covers the full</span>
+<span class="sd">    two-theta range of the detector, not only the requested range. Both are necessary</span>
+<span class="sd">    to have sufficient wavelength resolution when performing a monitor normalization</span>
+<span class="sd">    in a follow-up workflow step. The bins are nevertheless aligned with</span>
+<span class="sd">    :py:class:`TwoThetaBins` such that :func:`group_two_theta` can produce the</span>
+<span class="sd">    requested binning exactly, see :func:`_focussing_two_theta_bins`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -572,6 +673,9 @@
 <span class="sd">        &#39;two_theta&#39; coordinates.</span>
 <span class="sd">    dspacing_bins:</span>
 <span class="sd">        The bins to use for the d-spacing dimension.</span>
+<span class="sd">    two_theta_bins:</span>
+<span class="sd">        The two-theta bins requested for the final result, or ``None`` if the data</span>
+<span class="sd">        will not be grouped by two-theta.</span>
 <span class="sd">    keep_events:</span>
 <span class="sd">        Whether to keep the events in the output. If `False`, the output will be</span>
 <span class="sd">        histogrammed instead of binned.</span>
@@ -581,17 +685,8 @@
 <span class="sd">    :</span>
 <span class="sd">        The reduced data with &#39;dspacing&#39; and &#39;two_theta&#39; dimensions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ttheta</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;two_theta&#39;</span><span class="p">]</span>
-    <span class="n">ttheta_min</span> <span class="o">=</span> <span class="n">ttheta</span><span class="o">.</span><span class="n">nanmin</span><span class="p">()</span>
-    <span class="n">ttheta_max</span> <span class="o">=</span> <span class="n">ttheta</span><span class="o">.</span><span class="n">nanmax</span><span class="p">()</span>
-    <span class="n">ttheta_max</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nextafter</span><span class="p">(</span><span class="n">ttheta_max</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
-    <span class="n">twotheta_bins</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
-        <span class="s1">&#39;two_theta&#39;</span><span class="p">,</span>
-        <span class="n">start</span><span class="o">=</span><span class="n">ttheta_min</span><span class="p">,</span>
-        <span class="n">stop</span><span class="o">=</span><span class="n">ttheta_max</span><span class="p">,</span>
-        <span class="n">num</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
-        <span class="n">unit</span><span class="o">=</span><span class="n">ttheta</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span> <span class="k">if</span> <span class="s1">&#39;two_theta&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span>
+    <span class="n">twotheta_bins</span> <span class="o">=</span> <span class="n">_focussing_two_theta_bins</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;two_theta&#39;</span><span class="p">],</span> <span class="n">two_theta_bins</span><span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="n">twotheta_bins</span><span class="o">.</span><span class="n">dim</span><span class="p">:</span> <span class="n">twotheta_bins</span><span class="p">,</span> <span class="n">dspacing_bins</span><span class="o">.</span><span class="n">dim</span><span class="p">:</span> <span class="n">dspacing_bins</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">keep_events</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -626,20 +721,48 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_aligned</span><span class="p">(</span><span class="n">edges</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">requested</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raise unless every requested edge occurs in ``edges``.&quot;&quot;&quot;</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">requested</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="n">found</span><span class="p">],</span> <span class="n">requested</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;The two-theta binning of the data is not aligned with the requested &#39;</span>
+            <span class="s1">&#39;bins. The data must be focussed with the same TwoThetaBins, see &#39;</span>
+            <span class="s1">&#39;focus_data_dspacing_and_two_theta.&#39;</span>
+        <span class="p">)</span>
+
+
 <div class="viewcode-block" id="group_two_theta">
 <a class="viewcode-back" href="../../../generated/modules/ess.powder.grouping.group_two_theta.html#ess.powder.grouping.group_two_theta">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">group_two_theta</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">NormalizedDspacing</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">two_theta_bins</span><span class="p">:</span> <span class="n">TwoThetaBins</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FocussedDataDspacingTwoTheta</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Group the data by two-theta bins.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Group the data by two-theta bins.</span>
+
+<span class="sd">    ``data`` was focussed onto a finer two-theta grid that is aligned with</span>
+<span class="sd">    ``two_theta_bins``, see :func:`focus_data_dspacing_and_two_theta`. Grouping is</span>
+<span class="sd">    therefore an exact sum over whole sub-bins. This requires that both steps were</span>
+<span class="sd">    given the same bins; otherwise, an exception is raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">two_theta_bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot group by two-theta, no &#39;TwoThetaBins&#39; were set.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="s1">&#39;two_theta&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data does not have a &#39;two_theta&#39; dimension.&quot;</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">two_theta</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;two_theta&#39;</span><span class="p">]))</span>
-    <span class="k">return</span> <span class="n">FocussedDataDspacingTwoTheta</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;two_theta&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">two_theta_bins</span><span class="p">)</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="s1">&#39;two_theta&#39;</span><span class="p">)</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;two_theta&#39;</span><span class="p">]</span>
+    <span class="c1"># Grouping in the unit of the data keeps the requested edges bit-identical to the</span>
+    <span class="c1"># grid built by focussing, so that the alignment can be checked exactly.</span>
+    <span class="n">bins</span> <span class="o">=</span> <span class="n">two_theta_bins</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">edges</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+    <span class="n">_check_aligned</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">two_theta</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">midpoints</span><span class="p">(</span><span class="n">edges</span><span class="p">))</span>
+    <span class="n">grouped</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;two_theta&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="s1">&#39;two_theta&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">two_theta</span><span class="o">=</span><span class="n">two_theta_bins</span><span class="p">)</span>
+        <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">two_theta</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">FocussedDataDspacingTwoTheta</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="n">grouped</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">two_theta</span><span class="o">=</span><span class="n">two_theta_bins</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
@@ -736,7 +859,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

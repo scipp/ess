@@ -12,6 +12,7 @@
    
       CalibrationFilename
       DspacingBins
+      DspacingNBins
       OutFilename
       TwoThetaBins
       UncertaintyBroadcastMode
@@ -65,7 +66,9 @@
       MonitorCoordTransformGraph
       MonitorFilename
       NormalizedDspacing
+      QDetector
       RawDataAndMetadata
+      WavelengthRange
    
    
 

@@ -16,9 +16,8 @@ ess.beer.mcstas.load
    
       chopper_mode_from_mcstas_mode
       load_beer_mcstas
+      load_beer_mcstas_geometry
       load_beer_mcstas_monitor
-      load_beer_mcstas_monitor_provider
-      load_beer_mcstas_provider
       mcstas_choppers
       mcstas_detector_ltotal
       mcstas_sample_position

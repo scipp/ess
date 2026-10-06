@@ -1,4 +1,4 @@
-Results of doctest builder run on 2026-08-21 13:54:04
+Results of doctest builder run on 2026-10-06 13:21:34
 =====================================================
 
 Document: generated/modules/ess.diffraction.peaks.dspacing_peaks_from_cif
@@ -97,6 +97,22 @@ Document: generated/modules/ess.powder.types.NormalizedDspacing
 4 passed and 0 failed.
 Test passed.
 
+Document: generated/modules/ess.powder.types.QDetector
+------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.powder.types.WavelengthRange
+------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
 Document: generated/modules/ess.snspowder.powgen.data.TofDetector
 -----------------------------------------------------------------
 1 items passed all tests:
@@ -115,7 +131,7 @@ Test passed.
 
 Doctest summary
 ===============
-   55 tests
+   62 tests
     0 failures in tests
     0 failures in setup code
     0 failures in cleanup code

@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=603b0020"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.powder.types.CorrectedDspacing" href="ess.powder.types.CorrectedDspacing.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -507,6 +507,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.powder.conversion.html">ess.powder.conversion</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.powder.conversion.add_q_coordinate.html">ess.powder.conversion.add_q_coordinate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.conversion.add_scattering_coordinates_from_positions.html">ess.powder.conversion.add_scattering_coordinates_from_positions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof.html">ess.powder.conversion.convert_reduced_to_empty_can_subtracted_tof</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.conversion.convert_reduced_to_tof.html">ess.powder.conversion.convert_reduced_to_tof</a></li>
@@ -561,6 +562,7 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="ess.powder.types.html">ess.powder.types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.CalibrationFilename.html">ess.powder.types.CalibrationFilename</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.DspacingBins.html">ess.powder.types.DspacingBins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.powder.types.DspacingNBins.html">ess.powder.types.DspacingNBins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.OutFilename.html">ess.powder.types.OutFilename</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.TwoThetaBins.html">ess.powder.types.TwoThetaBins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.UncertaintyBroadcastMode.html">ess.powder.types.UncertaintyBroadcastMode</a></li>
@@ -599,7 +601,9 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.MonitorCoordTransformGraph.html">ess.powder.types.MonitorCoordTransformGraph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.MonitorFilename.html">ess.powder.types.MonitorFilename</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.NormalizedDspacing.html">ess.powder.types.NormalizedDspacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.powder.types.QDetector.html">ess.powder.types.QDetector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.powder.types.RawDataAndMetadata.html">ess.powder.types.RawDataAndMetadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.powder.types.WavelengthRange.html">ess.powder.types.WavelengthRange</a></li>
 </ul>
 </details></li>
 </ul>
@@ -671,12 +675,16 @@
 </details></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerMcStasWorkflowPulseShaping.html">ess.beer.BeerMcStasWorkflowPulseShaping</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.BeerModMcStasWorkflowKnownPeaks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflow.html">ess.beer.BeerModMcStasWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModulationAutoMcStasWorkflow.html">ess.beer.BeerModulationAutoMcStasWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModulationKnownPeaksMcStasWorkflow.html">ess.beer.BeerModulationKnownPeaksMcStasWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderWorkflow.html">ess.beer.BeerPowderWorkflow</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderWorkflowAnalytical.html">ess.beer.BeerPowderWorkflowAnalytical</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderMcStasWorkflow.html">ess.beer.BeerPowderMcStasWorkflow</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerMcStasWorkflowPulseShaping.html">ess.beer.BeerMcStasWorkflowPulseShaping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflow.html">ess.beer.BeerModMcStasWorkflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.BeerModMcStasWorkflowKnownPeaks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.BeerPowderWorkflowAnalytical.html">ess.beer.BeerPowderWorkflowAnalytical</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.beer.dhkl_peaks_from_cif.html">ess.beer.dhkl_peaks_from_cif</a></li>
@@ -723,9 +731,8 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.beer.io.load.html">ess.beer.io.load</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.chopper_mode_from_mcstas_mode.html">ess.beer.io.load.chopper_mode_from_mcstas_mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas.html">ess.beer.io.load.load_beer_mcstas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_geometry.html">ess.beer.io.load.load_beer_mcstas_geometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor.html">ess.beer.io.load.load_beer_mcstas_monitor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_monitor_provider.html">ess.beer.io.load.load_beer_mcstas_monitor_provider</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.load_beer_mcstas_provider.html">ess.beer.io.load.load_beer_mcstas_provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_choppers.html">ess.beer.io.load.mcstas_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_detector_ltotal.html">ess.beer.io.load.mcstas_detector_ltotal</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.io.load.mcstas_sample_position.html">ess.beer.io.load.mcstas_sample_position</a></li>
@@ -744,9 +751,8 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.beer.mcstas.load.html">ess.beer.mcstas.load</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.chopper_mode_from_mcstas_mode.html">ess.beer.mcstas.load.chopper_mode_from_mcstas_mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas.html">ess.beer.mcstas.load.load_beer_mcstas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_geometry.html">ess.beer.mcstas.load.load_beer_mcstas_geometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_monitor.html">ess.beer.mcstas.load.load_beer_mcstas_monitor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_monitor_provider.html">ess.beer.mcstas.load.load_beer_mcstas_monitor_provider</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.load_beer_mcstas_provider.html">ess.beer.mcstas.load.load_beer_mcstas_provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_choppers.html">ess.beer.mcstas.load.mcstas_choppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_detector_ltotal.html">ess.beer.mcstas.load.mcstas_detector_ltotal</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.beer.mcstas.load.mcstas_sample_position.html">ess.beer.mcstas.load.mcstas_sample_position</a></li>
@@ -759,6 +765,8 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerMcStasWorkflowPulseShaping.html">ess.beer.workflow.BeerMcStasWorkflowPulseShaping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModMcStasWorkflow.html">ess.beer.workflow.BeerModMcStasWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks.html">ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModulationAutoMcStasWorkflow.html">ess.beer.workflow.BeerModulationAutoMcStasWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerModulationKnownPeaksMcStasWorkflow.html">ess.beer.workflow.BeerModulationKnownPeaksMcStasWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderMcStasWorkflow.html">ess.beer.workflow.BeerPowderMcStasWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderWorkflow.html">ess.beer.workflow.BeerPowderWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.beer.workflow.BeerPowderWorkflowAnalytical.html">ess.beer.workflow.BeerPowderWorkflowAnalytical</a></li>
@@ -924,16 +932,16 @@
 <dd><p>Scattering angle (two-theta) for each detector pixel.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ess.powder.types.DetectorTwoTheta.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self:</span> <span class="pre">scipp._scipp.core.Variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dims:</span> <span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variances:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">scipp._scipp.core.Unit</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">|</span> <span class="pre">scipp._scipp.core.DefaultUnit</span> <span class="pre">=</span> <span class="pre">&lt;automatically</span> <span class="pre">deduced</span> <span class="pre">unit&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aligned:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#ess.powder.types.DetectorTwoTheta.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self:</span> <span class="pre">scipp._scipp.core.Variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dims:</span> <span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variances:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">scipp._scipp.core.Unit</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">|</span> <span class="pre">scipp._scipp.core.DefaultUnit</span> <span class="pre">=</span> <span class="pre">&lt;automatically</span> <span class="pre">deduced</span> <span class="pre">unit&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aligned:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#ess.powder.types.DetectorTwoTheta.__init__" title="Link to this definition">#</a></dt>
 <dd><p>Initialize a variable with values and/or variances.</p>
 <p>At least one argument of <code class="docutils literal notranslate"><span class="pre">values</span></code> and <code class="docutils literal notranslate"><span class="pre">variances</span></code> must be used.
-if you want to preallocate memory to fill later, use <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.empty.html#scipp.empty" title="(in Scipp v26.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.empty()</span></code></a>.</p>
+if you want to preallocate memory to fill later, use <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.empty.html#scipp.empty" title="(in Scipp v26.9.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.empty()</span></code></a>.</p>
 <div class="admonition attention">
 <p class="admonition-title">Attention</p>
 <p>This constructor is meant primarily for internal use.
 Use one of the Specialized
 <a class="reference external" href="https://scipp.github.io/reference/creation-functions.html">creation functions</a> instead.
-See in particular <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.array.html#scipp.array" title="(in Scipp v26.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.array()</span></code></a> and <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.scalar.html#scipp.scalar" title="(in Scipp v26.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.scalar()</span></code></a>.</p>
+See in particular <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.array.html#scipp.array" title="(in Scipp v26.9.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.array()</span></code></a> and <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.scalar.html#scipp.scalar" title="(in Scipp v26.9.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.scalar()</span></code></a>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -950,13 +958,13 @@ possible.</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<p>Use <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.array.html#scipp.array" title="(in Scipp v26.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.array()</span></code></a> for 1-D or higher-dimensional data:</p>
+<p>Use <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.array.html#scipp.array" title="(in Scipp v26.9.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.array()</span></code></a> for 1-D or higher-dimensional data:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
 <span class="go">&lt;scipp.Variable&gt; (x: 3)      int64  [m]  [1, 2, 3]</span>
 </pre></div>
 </div>
-<p>Use <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.scalar.html#scipp.scalar" title="(in Scipp v26.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.scalar()</span></code></a> for 0-D (scalar) data:</p>
+<p>Use <a class="reference external" href="https://scipp.github.io/generated/functions/scipp.scalar.html#scipp.scalar" title="(in Scipp v26.9.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipp.scalar()</span></code></a> for 0-D (scalar) data:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">3.14</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
 <span class="go">&lt;scipp.Variable&gt; ()    float64  [rad]  3.14</span>
 </pre></div>
@@ -1087,7 +1095,7 @@ possible.</p></li>
 <td><p>Alignment flag for coordinates.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bins</span></code></p></td>
-<td><p>Returns helper <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Bins.html#scipp.Bins" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Bins</span></code></a> for bin-wise operations.</p></td>
+<td><p>Returns helper <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Bins.html#scipp.Bins" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Bins</span></code></a> for bin-wise operations.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim</span></code></p></td>
 <td><p>The only dimension label for 1-dimensional data, raising an exception if the data is not 1-dimensional.</p></td>
@@ -1218,7 +1226,7 @@ possible.</p></li>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

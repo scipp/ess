@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="_static/documentation_options.js?v=603b0020"></script>
+    <script src="_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -580,9 +580,13 @@
 </li>
         <li><a href="generated/modules/ess.powder.types.NormalizedDspacing.html#ess.powder.types.NormalizedDspacing.__init__">(ess.powder.types.NormalizedDspacing method)</a>
 </li>
+        <li><a href="generated/modules/ess.powder.types.QDetector.html#ess.powder.types.QDetector.__init__">(ess.powder.types.QDetector method)</a>
+</li>
         <li><a href="generated/modules/ess.powder.types.RawDataAndMetadata.html#ess.powder.types.RawDataAndMetadata.__init__">(ess.powder.types.RawDataAndMetadata method)</a>
 </li>
         <li><a href="generated/modules/ess.powder.types.UncertaintyBroadcastMode.html#ess.powder.types.UncertaintyBroadcastMode.__init__">(ess.powder.types.UncertaintyBroadcastMode method)</a>
+</li>
+        <li><a href="generated/modules/ess.powder.types.WavelengthRange.html#ess.powder.types.WavelengthRange.__init__">(ess.powder.types.WavelengthRange method)</a>
 </li>
         <li><a href="generated/modules/ess.snspowder.powgen.data.TofDetector.html#ess.snspowder.powgen.data.TofDetector.__init__">(ess.snspowder.powgen.data.TofDetector method)</a>
 </li>
@@ -596,6 +600,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.powder.types.AccumulatedProtonCharge.html#ess.powder.types.AccumulatedProtonCharge">AccumulatedProtonCharge (class in ess.powder.types)</a>
+</li>
+      <li><a href="generated/modules/ess.powder.conversion.add_q_coordinate.html#ess.powder.conversion.add_q_coordinate">add_q_coordinate() (in module ess.powder.conversion)</a>
 </li>
       <li><a href="generated/modules/ess.powder.conversion.add_scattering_coordinates_from_positions.html#ess.powder.conversion.add_scattering_coordinates_from_positions">add_scattering_coordinates_from_positions() (in module ess.powder.conversion)</a>
 </li>
@@ -639,8 +645,20 @@
         <li><a href="generated/modules/ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks.html#ess.beer.workflow.BeerModMcStasWorkflowKnownPeaks">(in module ess.beer.workflow)</a>
 </li>
       </ul></li>
+      <li><a href="generated/functions/ess.beer.BeerModulationAutoMcStasWorkflow.html#ess.beer.BeerModulationAutoMcStasWorkflow">BeerModulationAutoMcStasWorkflow() (in module ess.beer)</a>
+
+      <ul>
+        <li><a href="generated/modules/ess.beer.workflow.BeerModulationAutoMcStasWorkflow.html#ess.beer.workflow.BeerModulationAutoMcStasWorkflow">(in module ess.beer.workflow)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/functions/ess.beer.BeerModulationKnownPeaksMcStasWorkflow.html#ess.beer.BeerModulationKnownPeaksMcStasWorkflow">BeerModulationKnownPeaksMcStasWorkflow() (in module ess.beer)</a>
+
+      <ul>
+        <li><a href="generated/modules/ess.beer.workflow.BeerModulationKnownPeaksMcStasWorkflow.html#ess.beer.workflow.BeerModulationKnownPeaksMcStasWorkflow">(in module ess.beer.workflow)</a>
+</li>
+      </ul></li>
       <li><a href="generated/functions/ess.beer.BeerPowderMcStasWorkflow.html#ess.beer.BeerPowderMcStasWorkflow">BeerPowderMcStasWorkflow() (in module ess.beer)</a>
 
       <ul>
@@ -750,6 +768,8 @@
       <li><a href="generated/modules/ess.powder.types.DspacingHistogram.html#ess.powder.types.DspacingHistogram">DspacingHistogram (in module ess.powder.types)</a>
 </li>
       <li><a href="generated/modules/ess.powder.types.DspacingMonitor.html#ess.powder.types.DspacingMonitor">DspacingMonitor (class in ess.powder.types)</a>
+</li>
+      <li><a href="generated/modules/ess.powder.types.DspacingNBins.html#ess.powder.types.DspacingNBins">DspacingNBins (in module ess.powder.types)</a>
 </li>
       <li><a href="generated/modules/ess.dream.io.geant4.dummy_sample_position.html#ess.dream.io.geant4.dummy_sample_position">dummy_sample_position() (in module ess.dream.io.geant4)</a>
 </li>
@@ -1156,26 +1176,20 @@
         <li><a href="generated/modules/ess.beer.mcstas.load.load_beer_mcstas.html#ess.beer.mcstas.load.load_beer_mcstas">(in module ess.beer.mcstas.load)</a>
 </li>
       </ul></li>
+      <li><a href="generated/modules/ess.beer.io.load.load_beer_mcstas_geometry.html#ess.beer.io.load.load_beer_mcstas_geometry">load_beer_mcstas_geometry() (in module ess.beer.io.load)</a>
+
+      <ul>
+        <li><a href="generated/modules/ess.beer.mcstas.load.load_beer_mcstas_geometry.html#ess.beer.mcstas.load.load_beer_mcstas_geometry">(in module ess.beer.mcstas.load)</a>
+</li>
+      </ul></li>
       <li><a href="generated/modules/ess.beer.io.load.load_beer_mcstas_monitor.html#ess.beer.io.load.load_beer_mcstas_monitor">load_beer_mcstas_monitor() (in module ess.beer.io.load)</a>
 
       <ul>
         <li><a href="generated/modules/ess.beer.mcstas.load.load_beer_mcstas_monitor.html#ess.beer.mcstas.load.load_beer_mcstas_monitor">(in module ess.beer.mcstas.load)</a>
 </li>
       </ul></li>
-      <li><a href="generated/modules/ess.beer.io.load.load_beer_mcstas_monitor_provider.html#ess.beer.io.load.load_beer_mcstas_monitor_provider">load_beer_mcstas_monitor_provider() (in module ess.beer.io.load)</a>
-
-      <ul>
-        <li><a href="generated/modules/ess.beer.mcstas.load.load_beer_mcstas_monitor_provider.html#ess.beer.mcstas.load.load_beer_mcstas_monitor_provider">(in module ess.beer.mcstas.load)</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/modules/ess.beer.io.load.load_beer_mcstas_provider.html#ess.beer.io.load.load_beer_mcstas_provider">load_beer_mcstas_provider() (in module ess.beer.io.load)</a>
-
-      <ul>
-        <li><a href="generated/modules/ess.beer.mcstas.load.load_beer_mcstas_provider.html#ess.beer.mcstas.load.load_beer_mcstas_provider">(in module ess.beer.mcstas.load)</a>
-</li>
-      </ul></li>
       <li><a href="generated/modules/ess.snspowder.powgen.calibration.load_calibration.html#ess.snspowder.powgen.calibration.load_calibration">load_calibration() (in module ess.snspowder.powgen.calibration)</a>
 </li>
       <li><a href="generated/functions/ess.dream.load_geant4_csv.html#ess.dream.load_geant4_csv">load_geant4_csv() (in module ess.dream)</a>
@@ -1455,10 +1469,12 @@
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/modules/ess.beer.data.quartz_peaks.html#ess.beer.data.quartz_peaks">quartz_peaks() (in module ess.beer.data)</a>
+      <li><a href="generated/modules/ess.powder.types.QDetector.html#ess.powder.types.QDetector">QDetector (class in ess.powder.types)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.beer.data.quartz_peaks.html#ess.beer.data.quartz_peaks">quartz_peaks() (in module ess.beer.data)</a>
+</li>
       <li><a href="generated/modules/ess.beer.data.quartz_peaks_array.html#ess.beer.data.quartz_peaks_array">quartz_peaks_array() (in module ess.beer.data)</a>
 </li>
   </ul></td>
@@ -1593,6 +1609,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/modules/ess.powder.types.WavelengthRange.html#ess.powder.types.WavelengthRange">WavelengthRange (class in ess.powder.types)</a>
+</li>
       <li><a href="generated/functions/ess.powder.with_pixel_mask_filenames.html#ess.powder.with_pixel_mask_filenames">with_pixel_mask_filenames() (in module ess.powder)</a>
 
       <ul>
@@ -1665,7 +1683,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

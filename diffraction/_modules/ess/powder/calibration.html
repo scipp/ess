@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=603b0020"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.8.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -530,12 +530,15 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp.constants</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippneutron</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DetectorLtotal</span><span class="p">,</span>
     <span class="n">DetectorTwoTheta</span><span class="p">,</span>
-    <span class="n">ElasticCoordTransformGraph</span><span class="p">,</span>
     <span class="n">EmptyDetector</span><span class="p">,</span>
+    <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">Position</span><span class="p">,</span>
     <span class="n">RunType</span><span class="p">,</span>
     <span class="n">SampleRun</span><span class="p">,</span>
 <span class="p">)</span>
@@ -647,7 +650,9 @@
 <a class="viewcode-back" href="../../../generated/modules/ess.powder.calibration.detector_two_theta.html#ess.powder.calibration.detector_two_theta">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">detector_two_theta</span><span class="p">(</span>
     <span class="n">detector</span><span class="p">:</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">graph</span><span class="p">:</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorTwoTheta</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the scattering angle (two-theta) for each detector pixel.</span>
 
@@ -655,9 +660,19 @@
 <span class="sd">    ----------</span>
 <span class="sd">    detector:</span>
 <span class="sd">        Data array with detector positions.</span>
-<span class="sd">    graph:</span>
-<span class="sd">        Coordinate transformation graph for elastic scattering.</span>
+<span class="sd">    source_position:</span>
+<span class="sd">        Position of the neutron source.</span>
+<span class="sd">    sample_position:</span>
+<span class="sd">        Position of the sample.</span>
+<span class="sd">    gravity:</span>
+<span class="sd">        Gravity vector.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="o">**</span><span class="n">scn</span><span class="o">.</span><span class="n">conversion</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">beamline</span><span class="p">(</span><span class="n">scatter</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s1">&#39;source_position&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">source_position</span><span class="p">,</span>
+        <span class="s1">&#39;sample_position&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sample_position</span><span class="p">,</span>
+        <span class="s1">&#39;gravity&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">gravity</span><span class="p">,</span>
+    <span class="p">}</span>
     <span class="k">return</span> <span class="n">DetectorTwoTheta</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
         <span class="n">detector</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
             <span class="s2">&quot;two_theta&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">keep_intermediate</span><span class="o">=</span><span class="kc">False</span>
@@ -752,7 +767,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.8.1 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
