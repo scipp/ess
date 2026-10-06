@@ -14,7 +14,6 @@ def read_goniometer_values(
 ) -> sc.Variable:
     """Read goniometer values from MANDI file.
 
-
     Parameters
     ----------
     file:
@@ -31,7 +30,6 @@ def read_goniometer_values(
     -------
     :
         :math:`\\chi`, :math:`\\phi`, :math:`\\omega` values as a vector.
-
 
     """
     chi_path = input_config.gonio_path_chi
