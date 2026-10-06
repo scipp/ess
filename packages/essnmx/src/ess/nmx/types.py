@@ -84,7 +84,7 @@ class NMXSampleMetadata:
 
     def __write_to_nexus_group__(self, group: h5py.Group):
         cr_field = snx.create_field(group, 'crystal_rotation', self.crystal_rotation)
-        cr_field.attrs['long_name'] = 'crystal rotation in Phi (XYZ)'
+        cr_field.attrs['long_name'] = 'crystal rotation values in Chi, Phi and Omega'
         snx.create_field(group, 'name', self.name)
         snx.create_field(group, 'position', self.position)
         snx.create_field(group, 'orientation_matrix', self.orientation_matrix)
