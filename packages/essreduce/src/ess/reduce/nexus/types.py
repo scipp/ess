@@ -37,16 +37,6 @@ PreopenNeXusFile = NewType('PreopenNeXusFile', bool)
 """Whether to preopen NeXus files before passing them to the rest of the workflow."""
 
 
-class ProductionInfo(snx.NXsource):
-    """A specialized NXsource for neutron production information (accelerator).
-
-    This differs from the regular NXsource in that it
-    encodes information about the accelerator, not the target.
-    So its position is not relevant for data reduction.
-    But it encodes, among others, the proton charge.
-    """
-
-
 # 1  TypeVars used to parametrize the generic parts of the workflow
 
 # 1.1  Run types
@@ -132,7 +122,6 @@ COMPONENT_CONSTRAINTS = (
     snx.NXsource,
     snx.NXdisk_chopper,
     snx.NXcrystal,
-    ProductionInfo,
 )
 """Base constraints for the Component type variable.
 

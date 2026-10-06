@@ -3,7 +3,6 @@
 
 """Workflow and workflow components for interacting with NeXus files."""
 
-import dataclasses
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
@@ -48,7 +47,6 @@ from .types import (
     NeXusTransformationChain,
     Position,
     PreopenNeXusFile,
-    ProductionInfo,
     ProtonCharge,
     RawChoppers,
     RawDetector,
@@ -206,10 +204,6 @@ def nx_class_for_crystal() -> NeXusClass[snx.NXcrystal]:
     return NeXusClass[snx.NXcrystal](snx.NXcrystal)
 
 
-def nx_class_for_production_info() -> NeXusClass[ProductionInfo]:
-    return NeXusClass[ProductionInfo](snx.NXsource)
-
-
 def load_nexus_component(
     location: NeXusComponentLocationSpec[Component, RunType],
     nx_class: NeXusClass[Component],
@@ -310,6 +304,33 @@ def reject_time_dependent_transform(
     )
 
 
+def _extract_interval_from_time_dependent_log(
+    log: sc.DataArray, interval: TimeInterval[RunType]
+):
+    """
+    Extract a time interval from a time-dependent log.
+    """
+    start = interval.value.start
+    stop = interval.value.stop
+    if isinstance(start, sc.Variable) or isinstance(stop, sc.Variable):
+        # NXlog entries are generally interpreted as the previous value being valid
+        # until the next entry. We therefore need to select the previous value, and
+        # any index after the last entry refers to the last entry, i.e., there is no
+        # "end" time in the files. We add a dummy end so we can use Scipp's label-
+        # based indexing for histogram data.
+        time = log.coords['time']
+        # Add 1000 days as a dummy end time. This is hopefully long enough to cover
+        # all reasonable use cases.
+        delta = sc.scalar(24_000, unit='hours', dtype='int64').to(unit=time.unit)
+        time = sc.concat([time, time[-1] + delta], 'time')
+        idx = label_based_index_to_positional_index(
+            sizes=log.sizes, coord=time, index=interval.value
+        )
+        return log[idx]
+    else:
+        return log['time', interval.value]
+
+
 def _apply_time_filter(
     transform: sc.DataArray,
     user_filter: TransformationTimeFilter[Component, RunType],
@@ -354,25 +375,9 @@ def to_transformation(
     for t in chain.transformations.values():
         if t.sizes == {} or not isinstance(t.value, sc.DataArray):
             continue
-        start = interval.value.start
-        stop = interval.value.stop
-        if isinstance(start, sc.Variable) or isinstance(stop, sc.Variable):
-            # NXlog entries are generally interpreted as the previous value being valid
-            # until the next entry. We therefore need to select the previous value, and
-            # any index after the last entry refers to the last entry, i.e., there is no
-            # "end" time in the files. We add a dummy end so we can use Scipp's label-
-            # based indexing for histogram data.
-            time = t.value.coords['time']
-            # Add 1000 days as a dummy end time. This is hopefully long enough to cover
-            # all reasonable use cases.
-            delta = sc.scalar(24_000, unit='hours', dtype='int64').to(unit=time.unit)
-            time = sc.concat([time, time[-1] + delta], 'time')
-            idx = label_based_index_to_positional_index(
-                sizes=t.sizes, coord=time, index=interval.value
-            )
-            t.value = _apply_time_filter(t.value[idx], time_filter)
-        else:
-            t.value = _apply_time_filter(t.value['time', interval.value], time_filter)
+        t.value = _apply_time_filter(
+            _extract_interval_from_time_dependent_log(t.value, interval), time_filter
+        )
 
     return NeXusTransformation[Component, RunType].from_chain(chain)
 
@@ -595,41 +600,27 @@ def to_disk_choppers(choppers: RawChoppers[RunType]) -> DiskChoppers[RunType]:
 
 
 def load_proton_charge(
-    parent_location: NeXusComponentLocationSpec[ProductionInfo, RunType],
+    source_component: NeXusComponent[snx.NXsource, RunType],
     interval: TimeInterval[RunType],
 ) -> ProtonCharge[RunType]:
     """Load the time-dependent proton charge from a NeXus file.
 
     Parameters
     ----------
-    parent_location:
-        Location spec for the ``ProductionInfo`` that holds the proton charge.
+    source_component:
+        The NXsource component from which to load the proton charge.
         The charge is loaded from the "pulse_charge" subgroup.
     interval:
         Time range to load.
-        Overrides ``parent_location.selection``.
 
     Returns
     -------
     :
         The proton charge as a data array.
     """
-    # The ProductionInfo location spec does not encode a time interval, that
-    # would require a NeXusDataLocationSpec. But we don't expose the precise
-    # path of the proton charge in the graph and can't build a data spec.
-    #
-    # The else branch is a workaround for https://github.com/scipp/scippnexus/pull/299
-    selection = interval.value if interval.value != slice(None) else ()
-    charge_location = dataclasses.replace(
-        parent_location,
-        # The pulse charge is a log and not a component, so we build the path
-        # based on the parent ProductionInfo component.
-        component_name=str(parent_location.component_name) + "/pulse_charge",
-        selection=selection,
-    )
-    # This loads all children in the NXlog, extract the value.
-    dg = nexus.load_from_path(charge_location, definitions=definitions)
-    return ProtonCharge[RunType](dg['value'])
+    da = source_component['pulse_charge']['value']
+    out = _extract_interval_from_time_dependent_log(da, interval)
+    return ProtonCharge[RunType](out)
 
 
 def _drop(
@@ -937,7 +928,6 @@ def GenericNeXusWorkflow(
             DetectorBankSizes: DetectorBankSizes({}),
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
-            NeXusName[ProductionInfo]: "/entry/neutron_prod_info",
         },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types
