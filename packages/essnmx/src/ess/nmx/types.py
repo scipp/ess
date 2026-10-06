@@ -257,6 +257,9 @@ class NMXInstrument:
 
     def __write_to_nexus_group__(self, group: h5py.Group):
         snx.create_field(group, 'name', self.name)
+        if self.instrument_definition is not None:
+            idf = snx.create_field(group, 'IDF', self.instrument_definition)
+            idf.attrs['long_name'] = 'instrument definition xml'
 
 
 @dataclass(kw_only=True)
