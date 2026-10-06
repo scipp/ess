@@ -822,7 +822,6 @@ _common_providers = (
     nx_class_for_source,
     nx_class_for_sample,
     nx_class_for_disk_chopper,
-    nx_class_for_production_info,
 )
 
 _monitor_providers = (

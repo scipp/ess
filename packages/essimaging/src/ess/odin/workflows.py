@@ -199,9 +199,7 @@ def OdinOrcaWorkflow(**kwargs) -> sciline.Pipeline:
         normalize_by_proton_charge_orca_all_runs,
     ):
         wf.insert(provider)
-    wf[NeXusName[ImageKey]] = (
-        '/entry/instrument/histogram_mode_detectors/orca/image_key'
-    )
+    wf[NeXusName[ImageKey]] = '/entry/instrument/orca/image_key'
     return wf
 
 
