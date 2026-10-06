@@ -232,7 +232,6 @@ def reduction(
     )
 
     sample_meta = NMXSampleMetadata(
-        # TODO: retrieve crystal rotation from the file correctly.
         crystal_rotation=crystal_rotation,
         name=mandi_geo.sample.name,
         position=sample_position,

@@ -12,6 +12,28 @@ def read_goniometer_values(
     file: snx.Group,
     input_config: InputConfig,
 ) -> sc.Variable:
+    """Read goniometer values from MANDI file.
+
+
+    Parameters
+    ----------
+    file:
+        Mandi file object to read goniometer values from.
+    input_config:
+        Mandi reduction input configuration.
+        Configuration object should contain
+        paths to :math:`\\chi` (chi), :math:`\\phi` (phi),
+        and :math:`\\omega` (omega) values.
+        Each path is expected to have NXlog group.
+        See :obj:`ess.mandi.configurations.InputConfig` for more details.
+
+    Returns
+    -------
+    :
+        :math:`\\chi`, :math:`\\phi`, :math:`\\omega` values as a vector.
+
+
+    """
     chi_path = input_config.gonio_path_chi
     phi_path = input_config.gonio_path_phi
     omega_path = input_config.gonio_path_omega
