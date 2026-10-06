@@ -8,11 +8,11 @@ from ess.reduce.uncertainty import UncertaintyBroadcastMode
 
 from .tools import fwhm_to_std
 from .types import (
+    CorrectedDetector,
     ProtonCharge,
     RawSampleRotation,
     ReducibleData,
     RunType,
-    RunUnnormalizedData,
     SampleRotation,
     SampleRotationOffset,
 )
@@ -85,14 +85,14 @@ def correct_by_proton_charge(
 
 
 def no_run_normalization(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
 ) -> ReducibleData[RunType]:
     """Use prepared detector data without applying a run normalization."""
     return ReducibleData[RunType](detector)
 
 
 def normalize_by_monitor_histogram(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     *,
     monitor: sc.DataArray,
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -109,7 +109,7 @@ def normalize_by_monitor_histogram(
 
 
 def normalize_by_monitor_integrated(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     *,
     monitor: sc.DataArray,
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -126,7 +126,7 @@ def normalize_by_monitor_integrated(
 
 
 def normalize_by_proton_charge(
-    detector: RunUnnormalizedData[RunType],
+    detector: CorrectedDetector[RunType],
     proton_charge: ProtonCharge[RunType],
 ) -> ReducibleData[RunType]:
     """Normalize detector data by time-dependent proton charge."""

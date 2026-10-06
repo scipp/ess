@@ -53,6 +53,7 @@ essmandi-reduce = "ess.mandi.workflows:main"
 
 [project.optional-dependencies]
 test = [
+    "numba>=0.63",
     "pytest>=9.0",
     "bitshuffle>=0.5.2;os_name == 'posix'",
 ]
@@ -71,6 +72,7 @@ docs = [
   "scippneutron>=26.03.0",
   "anywidget>=0.8.0",
 ]
+all = ["essnmx[test,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"

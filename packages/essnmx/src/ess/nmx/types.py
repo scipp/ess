@@ -255,6 +255,9 @@ class NMXInstrument:
     name: str = "NMX"
     source: NMXSourceMetadata
 
+    def __write_to_nexus_group__(self, group: h5py.Group):
+        snx.create_field(group, 'name', self.name)
+
 
 @dataclass(kw_only=True)
 class NMXProgram:
@@ -271,10 +274,10 @@ class NMXProgram:
 
 @dataclass(kw_only=True)
 class NMXLauetof:
-    nx_class = "NXlauetof"
+    nx_class = "NXentry"
 
     control: NMXMonitorMetadata
-    definitions: Literal['NXlauetof'] = 'NXlauetof'
+    definition: Literal['NXlauetof'] = 'NXlauetof'
     instrument: NMXInstrument
     sample: NMXSampleMetadata
     lookup_table: unwrap_types.LookupTable | None = None
@@ -283,3 +286,6 @@ class NMXLauetof:
 
     def to_datagroup(self) -> sc.DataGroup:
         return to_datagroup(self)
+
+    def __write_to_nexus_group__(self, group: h5py.Group):
+        snx.create_field(group, 'definition', self.definition)

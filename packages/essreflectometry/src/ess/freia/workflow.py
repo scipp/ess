@@ -3,73 +3,45 @@
 
 import sciline
 import scipp as sc
+from ess.reduce.nexus.types import DetectorBankSizes
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ess.reduce.unwrap import WavelengthLutMode
+from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 from ess.reduce.workflow import register_workflow
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry.types import (
-    BeamDivergenceLimits,
-    CorrectionsToApply,
     DetectorSpatialResolution,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
-    RunType,
-    SampleRotationOffset,
+    ReferenceRun,
+    SampleRun,
 )
-from . import (
-    beamline,
-    conversions,
-    corrections,
-    load,
-    maskings,
-    mcstas,
-    normalization,
-    orso,
-)
+from . import conversions, corrections, mcstas, normalization, orso
 from .corrections import RunNormalization, insert_run_normalization
+from .types import IncidentMonitor
 
-_general_providers = (
+providers = (
     *reflectometry_providers,
     *conversions.providers,
     *corrections.providers,
-    *maskings.providers,
     *normalization.providers,
     *orso.providers,
-    *load.providers,
 )
 
-mcstas_providers = (
-    *_general_providers,
-    *mcstas.providers,
-)
-"""List of providers for setting up a Sciline pipeline for McStas data.
-
-This provides a default Freia workflow including providers for loadings files.
-"""
-
-providers = (*_general_providers,)
 """List of providers for setting up a Sciline pipeline data.
 
-This provides a default Freia workflow including providers for loadings files.
+This provides a default Freia workflow including providers for loading files.
 """
 
 
 def mcstas_default_parameters() -> dict:
     """Return default parameters for the McStas Freia workflow."""
-    return {
-        DetectorSpatialResolution: 0.0025 * sc.units.m,
-        NeXusDetectorName: "detector",
-        BeamDivergenceLimits: (
-            sc.scalar(-0.75, unit='deg'),
-            sc.scalar(0.75, unit='deg'),
-        ),
-        SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections,
+    return default_parameters() | {
+        NeXusDetectorName: "Multiblade",
         LookupTableRelativeErrorThreshold: {
-            "detector": 0.06,
+            "Multiblade": 0.06,
         },
-        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
@@ -77,8 +49,9 @@ def default_parameters() -> dict:
     """Return default parameters for the NeXus Freia workflow."""
     return {
         NeXusDetectorName: "multiblade_detector",
-        SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
-        CorrectionsToApply: corrections.default_corrections,
+        DetectorBankSizes: {
+            "multiblade_detector": {"strip": 64, "blade": 32, "wire": 32},
+        },
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
@@ -90,10 +63,13 @@ def default_parameters() -> dict:
 def FreiaMcStasWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.none,
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
     **kwargs,
 ) -> sciline.Pipeline:
-    """Workflow for reduction of McStas data for the Freia instrument.
+    """Workflow for reducing FREIA McStas events with a no-sample direct beam.
+
+    Loads geometry and uses the default WFM chopper settings. Reduction inputs
+    and outputs are described in :func:`FreiaWorkflow`.
 
     Parameters
     ----------
@@ -104,10 +80,11 @@ def FreiaMcStasWorkflow(
         'analytical', 'simulation', and 'file'. See
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     """
-    workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
-    for provider in mcstas_providers:
+    workflow = FreiaWorkflow(
+        run_norm=run_norm, wavelength_from=wavelength_from, **kwargs
+    )
+    for provider in mcstas.providers:
         workflow.insert(provider)
-    insert_run_normalization(workflow, run_norm)
     for name, param in mcstas_default_parameters().items():
         workflow[name] = param
     return workflow
@@ -121,6 +98,21 @@ def FreiaWorkflow(
 ) -> sciline.Pipeline:
     """Workflow for reduction of data for the Freia instrument.
 
+    The coordinate transformation graph computes the signed, gravity-corrected
+    scattering angle above the laboratory x-z plane for both runs, with reflection
+    angle and Q for the sample. The direct beam is mapped to Q when building
+    ``Reference``. Reflectivity
+    requires separate sample/direct-beam ROIs, wavelength and Q bins, and beam
+    and sample sizes for the footprint correction. The reference run must be a
+    measurement without a sample, taken with matching slit and chopper settings.
+    Set its ``SampleSurfaceNormal`` to the sample run's orientation.
+
+    To skip footprint correction, set
+    ``workflow[Sample] = workflow[ReducibleData[SampleRun]]``.
+
+    Monitor normalization requires an incident monitor selected through
+    ``NeXusName[IncidentMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.
+
     Parameters
     ----------
     run_norm:
@@ -130,7 +122,12 @@ def FreiaWorkflow(
         'analytical', 'simulation', and 'file'. See
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     """
-    workflow = beamline.LoadNeXusWorkflow(wavelength_from=wavelength_from, **kwargs)
+    workflow = GenericUnwrapWorkflow(
+        run_types=[SampleRun, ReferenceRun],
+        monitor_types=[IncidentMonitor],
+        wavelength_from=wavelength_from,
+        **kwargs,
+    )
     for provider in providers:
         workflow.insert(provider)
     insert_run_normalization(workflow, run_norm)

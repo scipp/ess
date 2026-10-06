@@ -40,6 +40,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
+    "numba>=0.63",
     "ipympl>=0.9.4",
     "pytest>=9.0",
     "pooch>=1.5",
@@ -62,6 +63,7 @@ docs = [
     "tof>=25.08.0",
     "pythreejs>=2.4.1",
 ]
+all = ["esssans[test,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"

@@ -11,9 +11,11 @@ from ess.reduce.nexus.types import FilePath, NeXusFile
 from .types import ControlMode
 
 
-def _validate_entry(entry: snx.Group) -> None:
-    if str(entry.attrs['NX_class']) != 'NXlauetof':
+def _validate_file(file: snx.File) -> None:
+    if str(file.attrs['NX_class']) != 'NXlauetof':
         raise ValueError("File entry is not NXlauetof.")
+
+    entry = file['entry']
     _MANDATORY_FIELDS = ('control', 'instrument', 'sample')
     missing_fields = [field for field in _MANDATORY_FIELDS if field not in entry]
     if any(missing_fields):
@@ -190,7 +192,9 @@ def load_essnmx_nxlauetof(file: str | FilePath | NeXusFile) -> sc.DataGroup:
         # Drop auxiliary output from the loaded result.
         if 'aux' in dg['entry']:
             del dg['entry']['aux']
-        _validate_entry(entry := f['entry'])
+
+        entry = f['entry']
+        _validate_file(f)
         _handle_sample(dg['entry']['sample'], entry['sample'])
         _handle_monitor(dg['entry']['control'], entry['control'])
         _handle_source(dg['entry']['instrument'], entry['instrument'])
