@@ -141,14 +141,8 @@ def export_static_metadata_as_nxlauetof(
 
     Parameters
     ----------
-    sample_metadata:
-        Sample metadata object.
-    source_metadata:
-        Source metadata object.
-    instrument_metadata:
-        Instrument metadata object.
-    monitor_metadata:
-        Monitor metadata object.
+    nxlauetof:
+        NXLauetof with minimum static metadata fields.
     output_file:
         Output file path.
     arbitrary_metadata:
