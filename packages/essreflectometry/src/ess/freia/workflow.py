@@ -19,7 +19,15 @@ from ..reflectometry.types import (
 )
 from . import conversions, corrections, mcstas, normalization, orso
 from .corrections import RunNormalization, insert_run_normalization
-from .types import DetectorRegionOfInterest, IncidentMonitor
+from .types import (
+    DetectorRegionOfInterest,
+    NormalizationMonitor,
+    PSCMonitor,
+    ShutterMonitor,
+    WBC1Monitor,
+    WBC2Monitor,
+    WBC3Monitor,
+)
 
 providers = (
     *reflectometry_providers,
@@ -111,7 +119,7 @@ def FreiaWorkflow(
     ``workflow[Sample] = workflow[ReducibleData[SampleRun]]``.
 
     Monitor normalization requires an incident monitor selected through
-    ``NeXusName[IncidentMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.
+    ``NeXusName[NormalizationMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.
 
     Parameters
     ----------
@@ -124,7 +132,14 @@ def FreiaWorkflow(
     """
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun, ReferenceRun],
-        monitor_types=[IncidentMonitor],
+        monitor_types=[
+            WBC1Monitor,
+            PSCMonitor,
+            WBC2Monitor,
+            WBC3Monitor,
+            ShutterMonitor,
+            NormalizationMonitor,
+        ],
         wavelength_from=wavelength_from,
         **kwargs,
     )
