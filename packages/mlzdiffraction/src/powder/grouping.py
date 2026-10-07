@@ -9,10 +9,13 @@ import numpy as np
 import scipp as sc
 
 from ..powtex.types import DspacingDetector, KeepEventsMLZ
+from .conversion import lambda_from_d_dperp
 from .types import (
     DperpBins,
     Dspacing2D,
     DspacingBins,
+    ExtendedIntensity2D,
+    NormalizedIntensity2D,
     RunType,
     SpectralDetector,
 )
@@ -37,7 +40,7 @@ def bin_dspacing_dperp_mlz(
         # mean wavelength in each bin, but this leads to random wavelength values that
         # break stream processing.
         out = data.hist(args)
-        print("needs to be worked out")
+        # needs to be worked out
         # result = data.hist(args).assign_coords(
         #     wavelength=_reconstruct_wavelength(
         #         dspacing_bins=dspacing_bins, two_theta_bins=twotheta_bins
@@ -68,6 +71,53 @@ def focus_to_dspacing_dperp(
     return Dspacing2D[RunType](out)
 
 
+def append_two_theta_lambda(data: NormalizedIntensity2D) -> ExtendedIntensity2D:
+    """Append wavelength and two-theta grids to normalized P2D intensity."""
+    lambda_k = sc.scalar(1.0, unit="angstrom")
+    d_centers = sc.midpoints(data.coords["dspacing"])
+    dp_centers = sc.midpoints(data.coords["dperp"])
+
+    lam_2d = lambda_from_d_dperp(d_centers, dp_centers, lambda_k).transpose()
+    dspacing_2d = sc.broadcast(
+        d_centers,
+        dims=["dperp", "dspacing"],
+        shape=[dp_centers.size, d_centers.size],
+    )
+    dperp_2d = sc.broadcast(
+        dp_centers,
+        dims=["dperp", "dspacing"],
+        shape=[dp_centers.size, d_centers.size],
+    )
+    two_theta_2d = (2.0 * sc.asin(0.5 * lam_2d / dspacing_2d)).to(unit="deg")
+
+    ds = sc.Dataset(
+        data={
+            "lambda": lam_2d.data if isinstance(lam_2d, sc.DataArray) else lam_2d,
+            "two_theta": (
+                two_theta_2d.data
+                if isinstance(two_theta_2d, sc.DataArray)
+                else two_theta_2d
+            ),
+            "dspacing_2d": (
+                dspacing_2d.data
+                if isinstance(dspacing_2d, sc.DataArray)
+                else dspacing_2d
+            ),
+            "dperp_2d": (
+                dperp_2d.data if isinstance(dperp_2d, sc.DataArray) else dperp_2d
+            ),
+            "intensity": data.data.transpose()
+            if isinstance(data, sc.DataArray)
+            else data,
+        },
+        coords={
+            "dperp": data.coords["dperp"],
+            "dspacing": data.coords["dspacing"],
+        },
+    )
+    return ExtendedIntensity2D(ds)
+
+
 def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None):
     """Geometric range as a Scipp variable using a relative step."""
     ratio = 1.0 + relative_step
@@ -87,12 +137,19 @@ def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None)
     out = sc.array(dims=[dim], values=values, unit=start_var.unit)
 
     if endpoint and not np.isclose(out.values[-1], stop_var.value):
-        out = sc.concat([out, sc.array(dims=[dim], values=[stop_var.value], unit=stop_var.unit)], dim)
+        out = sc.concat(
+            [
+                out,
+                sc.array(dims=[dim], values=[stop_var.value], unit=stop_var.unit),
+            ],
+            dim,
+        )
 
     return out
 
 
 providers = (
+    append_two_theta_lambda,
     bin_dspacing_dperp_mlz,
     focus_to_dspacing_dperp,
 )

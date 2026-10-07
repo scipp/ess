@@ -5,42 +5,15 @@
 
 import scipp as sc
 
-from ..powtex.types import WavelengthDetector
 from .types import (
-    DSpacingMask,
     DperpMask,
+    DSpacingMask,
     ExtendedIntensity2D,
-    RunType,
-    TofMask,
+    MaskedExtendedIntensity2D,
+    MaskingData,
     TwoThetaMask,
     WavelengthMask,
 )
-
-
-def apply_masks_mlz(
-    data: WavelengthDetector[RunType],
-    tof_mask_func: TofMask,
-    wavelength_mask_func: WavelengthMask,
-    two_theta_mask_func: TwoThetaMask,
-) -> sc.DataArray:
-    """Apply event-coordinate masks to detector data."""
-    out = data.copy(deep=False)
-    for dim, mask in {
-        "tof": tof_mask_func,
-        "wavelength": wavelength_mask_func,
-        "two_theta": two_theta_mask_func,
-    }.items():
-        if mask is not None:
-            if (out.bins is not None) and (dim in out.bins.coords):
-                out.bins.masks[dim] = mask(out.bins.coords[dim])
-            else:
-                coord = (
-                    sc.midpoints(out.coords[dim])
-                    if out.coords.is_edges(dim, dim)
-                    else out.coords[dim]
-                )
-                out.masks[dim] = mask(coord)
-    return out
 
 
 def apply_masks_p2d(
@@ -63,4 +36,28 @@ def apply_masks_p2d(
     return out
 
 
-providers = ()
+def add_masks_p2d_data(
+    data: ExtendedIntensity2D,
+    wavelength_mask_func: MaskingData[WavelengthMask],
+    two_theta_mask_func: MaskingData[TwoThetaMask],
+    dspacing_mask_func: MaskingData[DSpacingMask],
+    dperp_mask_func: MaskingData[DperpMask],
+) -> MaskedExtendedIntensity2D:
+    """Apply masks to the extended P2D dataset."""
+    return MaskedExtendedIntensity2D(
+        apply_masks_p2d(
+            data,
+            wavelength_mask_func,
+            two_theta_mask_func,
+            dspacing_mask_func,
+            dperp_mask_func,
+        )
+    )
+
+
+providers = (add_masks_p2d_data,)
+
+__all__ = [
+    "add_masks_p2d_data",
+    "apply_masks_p2d",
+]
