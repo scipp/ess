@@ -144,11 +144,10 @@ def FreiaOffspecWorkflow(
 ) -> sciline.Pipeline:
     """Workflow for unnormalized, coplanar off-specular FREIA data.
 
-    The possible incident beams are computed from corresponding centers in the
-    upstream and downstream slit assemblies. For every neutron, the workflow
-    reflects its outgoing direction about the sample surface and assigns the
-    open incident beam with the closest direction. It then computes ``Qx`` and
-    ``Qz`` from the assigned incidence angle and measured reflection angle.
+    Assign each neutron to the slit beam with the closest expected specular
+    reflection angle. Compute ``Qx`` and ``Qz`` from that beam's incidence angle
+    and the neutron's gravity-corrected reflection angle. With one open beam,
+    the incidence angle is a shared scalar.
 
     Supply :class:`~ess.freia.types.UpstreamSlitCenters` and
     :class:`~ess.freia.types.DownstreamSlitCenters` for ``SampleRun`` as

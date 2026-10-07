@@ -80,39 +80,22 @@ def incident_beam_directions(
     return directions
 
 
-def hypothetical_incident_direction(
-    outgoing_direction: sc.Variable,
-    sample_surface_normal: sc.Variable,
+def assign_incident_angle(
+    reflection_angle: sc.Variable,
+    expected_reflection_angles: dict[str, sc.Variable],
 ) -> sc.Variable:
-    """Incident direction that would specularly produce the outgoing ray."""
-    normal = sample_surface_normal / sc.norm(sample_surface_normal)
-    return outgoing_direction - 2 * sc.dot(outgoing_direction, normal) * normal
+    """Assign incidence using the closest expected specular reflection angle."""
+    angles = iter(expected_reflection_angles.values())
+    closest = next(angles)
+    if len(expected_reflection_angles) == 1:
+        return closest
 
-
-def incident_direction(
-    hypothetical_incident_direction: sc.Variable,
-    incident_beam_directions: dict[str, sc.Variable],
-) -> sc.Variable:
-    """Candidate direction closest to the specular hypothesis."""
-    closest = None
-    max_score = None
-    for direction in incident_beam_directions.values():
-        score = sc.dot(hypothetical_incident_direction, direction)
-        if closest is None:
-            closest = direction
-            max_score = score
-        else:
-            direction_is_closer = score > max_score
-            closest = sc.where(
-                direction_is_closer,
-                direction,
-                closest,
-            )
-            max_score = sc.where(
-                direction_is_closer,
-                score,
-                max_score,
-            )
+    min_distance = sc.abs(reflection_angle - closest)
+    for angle in angles:
+        distance = sc.abs(reflection_angle - angle)
+        is_closer = distance < min_distance
+        closest = sc.where(is_closer, angle, closest)
+        min_distance = sc.where(is_closer, distance, min_distance)
     return closest
 
 
@@ -170,22 +153,25 @@ def offspecular_sample_coordinate_transformation_graph(
     upstream_slit_centers: UpstreamSlitCenters[SampleRun],
     downstream_slit_centers: DownstreamSlitCenters[SampleRun],
 ) -> CoordTransformationGraph[SampleRun]:
-    """Build a graph that determines incidence from the open slit channels."""
+    """Assign incidence by comparing measured and expected reflection angles."""
+    transformation_graph = coordinate_transformation_graph(
+        source_position, sample_position, sample_surface_normal, gravity
+    )
     directions = incident_beam_directions(
         upstream_slit_centers, downstream_slit_centers
     )
+    expected_reflection_angles = {
+        key: incident_angle(direction, sample_surface_normal)
+        for key, direction in directions.items()
+    }
 
-    def select_incident_direction(
-        hypothetical_incident_direction: sc.Variable,
+    def select_incident_angle(
+        reflection_angle: sc.Variable,
     ) -> sc.Variable:
-        return incident_direction(hypothetical_incident_direction, directions)
+        return assign_incident_angle(reflection_angle, expected_reflection_angles)
 
-    return coordinate_transformation_graph(
-        source_position, sample_position, sample_surface_normal, gravity
-    ) | {
-        'hypothetical_incident_direction': hypothetical_incident_direction,
-        'incident_direction': select_incident_direction,
-        'incident_angle': incident_angle,
+    return transformation_graph | {
+        'incident_angle': select_incident_angle,
         'reflection_angle': theta,
         'Qx': reflectometry_q_x,
         'Qz': reflectometry_q_z,

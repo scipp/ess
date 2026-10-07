@@ -3,13 +3,11 @@
 import numpy as np
 import pytest
 import scipp as sc
-from scipp.testing import assert_allclose
+from scipp.testing import assert_allclose, assert_identical
 
 from ess.freia.conversions import (
-    hypothetical_incident_direction,
-    incident_angle,
+    assign_incident_angle,
     incident_beam_directions,
-    incident_direction,
     outgoing_direction,
     scattering_angle,
     theta,
@@ -107,31 +105,28 @@ def test_incident_directions_support_one_or_two_slit_channels(channels):
     assert result.keys() == upstream.keys()
 
 
-def test_assigns_each_neutron_to_closest_specular_incident_direction():
+def test_assigns_each_neutron_to_closest_expected_reflection_angle():
     incident_angles = {
         'top': sc.scalar(0.3, unit='deg').to(unit='rad'),
         'middle': sc.scalar(1.0, unit='deg').to(unit='rad'),
         'bottom': sc.scalar(3.5, unit='deg').to(unit='rad'),
     }
-    directions = {
-        key: sc.vector([0.0, -np.sin(angle.value), np.cos(angle.value)])
-        for key, angle in incident_angles.items()
-    }
     reflection_angles = sc.array(dims=['event'], values=[0.4, 1.2, 3.0], unit='deg').to(
         unit='rad'
     )
-    outgoing = sc.vectors(
-        dims=['event'],
-        values=[
-            [0.0, np.sin(angle), np.cos(angle)] for angle in reflection_angles.values
-        ],
-    )
-    normal = sc.vector([0.0, 1.0, 0.0])
 
-    hypothetical = hypothetical_incident_direction(outgoing, normal)
-    assigned = incident_direction(hypothetical, directions)
+    assigned = assign_incident_angle(reflection_angles, incident_angles)
 
     assert_allclose(
-        incident_angle(assigned, normal),
+        assigned,
         sc.array(dims=['event'], values=[0.3, 1.0, 3.5], unit='deg').to(unit='rad'),
     )
+
+
+def test_single_incident_beam_returns_scalar():
+    angle = sc.scalar(1.0, unit='rad')
+    assigned = assign_incident_angle(
+        sc.array(dims=['event'], values=[0.0, 2.0], unit='rad'), {'middle': angle}
+    )
+
+    assert_identical(assigned, angle)

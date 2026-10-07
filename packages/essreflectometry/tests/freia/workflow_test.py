@@ -139,3 +139,5 @@ def test_offspec_workflow_provides_qx_and_qz():
     graph = workflow.compute(CoordTransformationGraph[SampleRun])
 
     assert {'incident_angle', 'reflection_angle', 'Qx', 'Qz'} <= graph.keys()
+    assert 'hypothetical_incident_direction' not in graph
+    assert 'incident_direction' not in graph
