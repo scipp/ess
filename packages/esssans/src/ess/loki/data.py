@@ -60,7 +60,7 @@ _registry = make_registry(
         'loki-coda-5-pulses.hdf': 'md5:8368779651ccf101612b35ca075d0298',
         # Wavelength lookup table without choppers
         'loki-wavelength-lookup-table-no-choppers.h5': 'md5:34cc975a00383653cce4b3e2356e0dc7',  # noqa: E501
-        'loki-broken-file.hdf': 'md5:3aefc2c2df52439c38904da9ffa82416',
+        'loki_336349_00000342.hdf': 'md5:3aefc2c2df52439c38904da9ffa82416',
     },
     version='3',
 )
@@ -201,4 +201,4 @@ def loki_broken_file() -> Path:
     It has an empty time-dependent transformation for the detector bank 0 and some badly
     formed monitor data.
     """
-    return _registry.get_path("loki-broken-file.hdf")
+    return _registry.get_path("loki_336349_00000342.hdf")
