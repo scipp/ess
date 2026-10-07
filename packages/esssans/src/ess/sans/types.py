@@ -30,6 +30,7 @@ NeXusTransformation = reduce_t.NeXusTransformation
 Position = reduce_t.Position
 SampleRun = reduce_t.SampleRun
 
+DetectorLtotal = unwrap_t.DetectorLtotal
 LookupTableRelativeErrorThreshold = unwrap_t.LookupTableRelativeErrorThreshold
 LookupTableFilename = unwrap_t.LookupTableFilename
 LookupTable = unwrap_t.LookupTable
@@ -73,8 +74,42 @@ Numerator = NewType('Numerator', sc.DataArray)
 """Numerator of IntensityQ"""
 Denominator = NewType('Denominator', sc.DataArray)
 """Denominator of IntensityQ"""
-IofQPart = TypeVar('IofQPart', Numerator, Denominator)
-"""TypeVar used for specifying Numerator or Denominator of IntensityQ"""
+ResolutionZerothMoment = NewType('ResolutionZerothMoment', sc.DataArray)
+"""Sum of ``N``, used for the Q resolution of IntensityQ.
+
+``N`` is the denominator of IntensityQ for a single pixel and wavelength, excluding
+pixels and wavelengths that do not contribute to the numerator. Like numerator and
+denominator, the sum can be merged across runs by addition.
+See :py:class:`QResolution`."""
+ResolutionFirstMoment = NewType('ResolutionFirstMoment', sc.DataArray)
+"""Sum of ``N*Q``, used for the Q resolution of IntensityQ.
+
+``N`` is the denominator of IntensityQ for a single pixel and wavelength. Like numerator
+and denominator, the sum can be merged across runs by addition.
+See :py:class:`QResolution`."""
+ResolutionSecondMoment = NewType('ResolutionSecondMoment', sc.DataArray)
+"""Sum of ``N*(sigma**2 + Q**2)``, used for the Q resolution of IntensityQ.
+
+``N`` is the denominator of IntensityQ and ``sigma`` the Q resolution for a single pixel
+and wavelength. Like numerator and denominator, the sum can be merged across runs by
+addition. See :py:class:`QResolution`."""
+IofQPart = TypeVar(
+    'IofQPart',
+    Numerator,
+    Denominator,
+    ResolutionZerothMoment,
+    ResolutionFirstMoment,
+    ResolutionSecondMoment,
+)
+"""TypeVar used for specifying Numerator, Denominator, or the resolution moments of
+IntensityQ"""
+ResolutionMoment = TypeVar(
+    'ResolutionMoment',
+    ResolutionZerothMoment,
+    ResolutionFirstMoment,
+    ResolutionSecondMoment,
+)
+"""TypeVar used for specifying the moments used for the Q resolution of IntensityQ"""
 
 # 1.4  Entry paths in NeXus files
 PixelShapePath = NewType('PixelShapePath', str)
@@ -154,6 +189,16 @@ CorrectForGravity = NewType('CorrectForGravity', bool)
 DimsToKeep = NewType('DimsToKeep', Sequence[str])
 """Dimensions that should not be reduced and thus still be present in the final
 I(Q) result (this is typically the layer dimension)."""
+
+SourceApertureRadius = NewType('SourceApertureRadius', sc.Variable)
+"""Radius R1 of the source aperture, used for the Q resolution."""
+
+SampleApertureRadius = NewType('SampleApertureRadius', sc.Variable)
+"""Radius R2 of the sample aperture, used for the Q resolution."""
+
+CollimationLength = NewType('CollimationLength', sc.Variable)
+"""Distance L1 between source aperture and sample aperture, used for the Q
+resolution."""
 
 OutFilename = NewType('OutFilename', str)
 """Filename of the output"""
@@ -254,6 +299,36 @@ class ReducedQxQy(sciline.Scope[RunType, IofQPart, sc.DataArray], sc.DataArray):
 
 class IntensityQ(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """I(Q)"""
+
+
+class SourceWavelengthSpread(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Standard deviation of the wavelength of neutrons detected with a given wavelength
+    at a given pixel, due to the pulse length of the source and chopper openings.
+
+    NaN where events get no wavelength; these pixels and wavelengths are excluded from
+    the Q resolution. Scalar, or broadcastable to the detector pixel dims and the ``wavelength`` dim of
+    the midpoints of :py:class:`WavelengthBins`."""
+
+
+class PixelScatteringAngleVariance(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Variance of the scattering angle ``2 theta`` within each detector pixel, seen
+    from the sample, in rad**2 (dimensionless).
+
+    Used for the Q resolution. Scalar, or broadcastable to the detector pixel dims."""
+
+
+class DetectorQVariance(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Variance of the Q resolution of each detector pixel and wavelength."""
+
+
+class QResolution(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Standard deviation of the resolution function of each bin of I(Q).
+
+    The resolution function of a bin is the mixture of the Gaussian resolution
+    functions of all pixels and wavelengths that contribute to the bin, weighted by
+    their contribution to the denominator of I(Q). The standard deviation is computed
+    about the mean Q of this mixture, which is stored as the ``Q_mean`` coordinate.
+    Corresponds to ``Qdev`` in NXcanSAS."""
 
 
 class IntensityQxQy(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
