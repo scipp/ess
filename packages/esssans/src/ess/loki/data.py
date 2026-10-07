@@ -60,7 +60,7 @@ _registry = make_registry(
         'loki-coda-5-pulses.hdf': 'md5:8368779651ccf101612b35ca075d0298',
         # Wavelength lookup table without choppers
         'loki-wavelength-lookup-table-no-choppers.h5': 'md5:34cc975a00383653cce4b3e2356e0dc7',  # noqa: E501
-        'loki-file-with-broken-transformations.hdf': 'md5:3aefc2c2df52439c38904da9ffa82416',  # noqa: E501
+        'loki-broken-file.hdf': 'md5:3aefc2c2df52439c38904da9ffa82416',
     },
     version='3',
 )
@@ -194,9 +194,11 @@ def loki_coda_file() -> Path:
     return _registry.get_path("loki-coda-5-pulses.hdf")
 
 
-def loki_file_with_broken_transformations() -> Path:
+def loki_broken_file() -> Path:
     """
-    Small LoKI CODA file with broken transformations for testing purposes.
-    The file was generated recorded at the Loki instrument and contains no events.
+    Small LoKI file with broken transformations and monitor data for testing purposes.
+    The file was recorded at the Loki instrument and contains no events.
+    It has an empty time-dependent transformation for the detector bank 0 and some badly
+    formed monitor data.
     """
-    return _registry.get_path("loki-file-with-broken-transformations.hdf")
+    return _registry.get_path("loki-broken-file.hdf")
