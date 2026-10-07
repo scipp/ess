@@ -5,7 +5,7 @@ import pytest
 from ess import loki
 from ess.loki import data
 
-FILES = [data.loki_coda_file(), data.loki_file_with_broken_transformations()]
+FILES = [data.loki_coda_file(), data.loki_broken_file()]
 
 
 @pytest.mark.parametrize("file", FILES)
