@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+import datetime
 import doctest
 import os
 import sys
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # General information about the project.
 project = 'ESSsans'
-copyright = '2025 Scipp contributors'
+copyright = f'{datetime.datetime.now(datetime.UTC).year} Scipp contributors'
 author = 'Scipp contributors'
 
 html_show_sourcelink = True
