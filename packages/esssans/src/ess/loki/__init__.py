@@ -10,6 +10,7 @@ from .larmor_workflow import (
     LokiAtLarmorWorkflow,
     larmor_default_parameters,
 )
+from .safe_load import load_detectors, load_monitors
 from .workflow import LokiWorkflow, loki_default_parameters
 
 try:
@@ -27,6 +28,8 @@ __all__ = [
     'LokiWorkflow',
     'instrument_view',
     'larmor_default_parameters',
+    'load_detectors',
+    'load_monitors',
     'loki_default_parameters',
     'workflow',
 ]
