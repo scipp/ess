@@ -10,10 +10,10 @@ _registry = make_registry(
     'ess/odin',
     version="3",
     files={
-        "iron_simulation_sample_small.nxs": "md5:e459ecc67656719731fbca34c5714fbc",
-        "iron_simulation_ob_small.nxs": "md5:27e40621a5c8d8ab6b3ca6783ac3faef",
-        "iron_simulation_sample_large.nxs": "md5:df14b271c27e2b3e1448b9260d1a6b77",
-        "iron_simulation_ob_large.nxs": "md5:bbe5ef111c680de1637228700f9182f0",
+        "iron_simulation_sample_small.nxs": "md5:9c94a683c2042bf2a79b183dbb01066b",
+        "iron_simulation_ob_small.nxs": "md5:123494aa6c43f9a4584ba8454ccd2fd6",
+        "iron_simulation_sample_large.nxs": "md5:4e133486837e3709885207d7cb1bd589",
+        "iron_simulation_ob_large.nxs": "md5:69d5955dd0ca366e304b396523308699",
         "ODIN-wavelength-lookup-table-5m-65m.h5": "md5:44eef2a2e826cec688aeb1b985eb9f9e",  # noqa: E501
         "ymir_lego_odin.hdf": "md5:59b56b4ca2a264983df2d5590853c9fa",
     },
