@@ -14,7 +14,7 @@
    .. autosummary::
       :toctree:
    
-      add_masks
+      add_roi_masks
    
    
 

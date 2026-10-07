@@ -5,6 +5,13 @@
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      BeamMonitor
+   
    
 
    

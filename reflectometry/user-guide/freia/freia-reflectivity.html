@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=9ce135cc"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,7 +62,7 @@
     <link rel="prev" title="FREIA analytical wavelength lookup table" href="freia-wavelength-lookup-table.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -482,7 +482,8 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">FREIA</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="freia-mcstas-visualization.html">FREIA detector data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="freia-visualizations.html">FREIA detector data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="freia-detector-diagnostics.html">FREIA detector diagnostics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="freia-wavelength-lookup-table.html">FREIA analytical wavelength lookup table</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">FREIA reflectivity reduction</a></li>
 </ul>
@@ -590,7 +591,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.freia.corrections</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunNormalization</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.freia.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DetectorRegionOfInterest</span><span class="p">,</span>
-    <span class="n">IncidentMonitor</span><span class="p">,</span>
+    <span class="n">NormalizationMonitor</span><span class="p">,</span>
     <span class="n">WavelengthMonitor</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">NeXusName</span>
@@ -605,7 +606,6 @@
     <span class="n">Sample</span><span class="p">,</span>
     <span class="n">SampleRun</span><span class="p">,</span>
     <span class="n">SampleSize</span><span class="p">,</span>
-    <span class="n">WavelengthBins</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -620,9 +620,8 @@
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span> <span class="o">=</span> <span class="n">FreiaMcStasWorkflow</span><span class="p">(</span><span class="n">run_norm</span><span class="o">=</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_histogram</span><span class="p">)</span>
 <span class="n">workflow</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">freia_mcstas_sample_run</span><span class="p">()</span>
 <span class="n">workflow</span><span class="p">[</span><span class="n">Filename</span><span class="p">[</span><span class="n">ReferenceRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">freia_mcstas_reference_run</span><span class="p">()</span>
-<span class="n">workflow</span><span class="p">[</span><span class="n">NeXusName</span><span class="p">[</span><span class="n">IncidentMonitor</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;SampleLambda&#39;</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">NeXusName</span><span class="p">[</span><span class="n">NormalizationMonitor</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;SampleLambda&#39;</span>
 
-<span class="n">workflow</span><span class="p">[</span><span class="n">WavelengthBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
 <span class="n">workflow</span><span class="p">[</span><span class="n">QBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">151</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1/angstrom&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -632,7 +631,7 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Downloading file &#39;mcstas-wfm-silicon.h5&#39; from &#39;https://public.esss.dk/groups/scipp/ess/freia/1/mcstas-wfm-silicon.h5&#39; to &#39;/home/runner/.cache/ess/freia&#39;.
+Downloading file &#39;mcstas-wfm-direct-beam.h5&#39; from &#39;https://public.esss.dk/groups/scipp/ess/freia/1/mcstas-wfm-direct-beam.h5&#39; to &#39;/home/runner/.cache/ess/freia&#39;.
 </pre></div></div>
 </div>
 </section>
@@ -754,7 +753,7 @@ Downloading file &#39;mcstas-wfm-silicon.h5&#39; from &#39;https://public.esss.d
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 0.3° beam: 52 Q bins have direct-beam coverage.
-1° beam: 52 Q bins have direct-beam coverage.
+1° beam: 53 Q bins have direct-beam coverage.
 3.5° beam: 52 Q bins have direct-beam coverage.
 </pre></div></div>
 </div>
@@ -924,7 +923,7 @@ Downloading file &#39;Si-15SiO2-air.txt&#39; from &#39;https://public.esss.dk/gr
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=9ce135cc"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -511,14 +511,16 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 
 
-<div class="viewcode-block" id="add_masks">
-<a class="viewcode-back" href="../../../generated/modules/ess.freia.maskings.add_masks.html#ess.freia.maskings.add_masks">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_masks</span><span class="p">(</span>
+<div class="viewcode-block" id="add_roi_masks">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.maskings.add_roi_masks.html#ess.freia.maskings.add_roi_masks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_roi_masks</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">roi</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-    <span class="n">wavelength_bins</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mask events outside the ROI and wavelength range.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mask events outside the ROI.</span>
+<span class="sd">    When a coordinate with the same name exists both on the bins</span>
+<span class="sd">    and on the events the method masks the event coordinate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">masks</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">event_masks</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="ow">in</span> <span class="n">roi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -530,15 +532,7 @@
         <span class="p">(</span><span class="n">event_masks</span> <span class="k">if</span> <span class="n">is_event_coord</span> <span class="k">else</span> <span class="n">masks</span><span class="p">)[</span><span class="sa">f</span><span class="s1">&#39;roi_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span>
             <span class="p">(</span><span class="n">coord</span> <span class="o">&gt;=</span> <span class="n">low</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">coord</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">)</span>
         <span class="p">)</span>
-    <span class="n">wavelength</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;wavelength&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">)</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span>
-        <span class="n">event_masks</span><span class="p">,</span>
-        <span class="n">wavelength</span><span class="o">=~</span><span class="p">(</span>
-            <span class="n">sc</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
-            <span class="o">&amp;</span> <span class="p">(</span><span class="n">wavelength</span> <span class="o">&gt;=</span> <span class="n">wavelength_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">wavelength</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
-            <span class="o">&amp;</span> <span class="p">(</span><span class="n">wavelength</span> <span class="o">&lt;</span> <span class="n">wavelength_bins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">wavelength</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
-        <span class="p">),</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">)</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">assign_masks</span><span class="p">(</span><span class="n">event_masks</span><span class="p">)</span></div>
 
 </pre></div>
 
@@ -603,7 +597,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

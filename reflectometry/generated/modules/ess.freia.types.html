@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=9ce135cc"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -55,11 +55,11 @@
     <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ess.freia.types.DetectorRegionOfInterest" href="ess.freia.types.DetectorRegionOfInterest.html" />
+    <link rel="next" title="ess.freia.types.WBC1Monitor" href="ess.freia.types.WBC1Monitor.html" />
     <link rel="prev" title="ess.freia.resolution.wavelength_resolution" href="ess.freia.resolution.wavelength_resolution.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -683,7 +683,10 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.estia.resolution.wavelength_resolution.html">ess.estia.resolution.wavelength_resolution</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="ess.estia.types.html">ess.estia.types</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.estia.types.html">ess.estia.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.estia.types.BeamMonitor.html">ess.estia.types.BeamMonitor</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.estia.normalization.html">ess.estia.normalization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.estia.normalization.evaluate_reference.html">ess.estia.normalization.evaluate_reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.estia.normalization.mask_events_where_supermirror_does_not_cover.html">ess.estia.normalization.mask_events_where_supermirror_does_not_cover</a></li>
@@ -718,15 +721,15 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.maskings.html">ess.freia.maskings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.maskings.add_masks.html">ess.freia.maskings.add_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.maskings.add_roi_masks.html">ess.freia.maskings.add_roi_masks</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.corrections.html">ess.freia.corrections</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.add_coords_and_masks.html">ess.freia.corrections.add_coords_and_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.correct_sample.html">ess.freia.corrections.correct_sample</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.insert_run_normalization.html">ess.freia.corrections.insert_run_normalization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.normalize_by_monitor_histogram.html">ess.freia.corrections.normalize_by_monitor_histogram</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.normalize_by_monitor_integrated.html">ess.freia.corrections.normalize_by_monitor_integrated</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.freia.corrections.prepare_sample.html">ess.freia.corrections.prepare_sample</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.data.html">ess.freia.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -756,6 +759,12 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">ess.freia.types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.WBC1Monitor.html">ess.freia.types.WBC1Monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.PSCMonitor.html">ess.freia.types.PSCMonitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.WBC2Monitor.html">ess.freia.types.WBC2Monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.WBC3Monitor.html">ess.freia.types.WBC3Monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.ShutterMonitor.html">ess.freia.types.ShutterMonitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.NormalizationMonitor.html">ess.freia.types.NormalizationMonitor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.types.DetectorRegionOfInterest.html">ess.freia.types.DetectorRegionOfInterest</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.types.SampleSurfaceNormal.html">ess.freia.types.SampleSurfaceNormal</a></li>
 </ul>
@@ -877,6 +886,30 @@
                   
   <section id="module-ess.freia.types">
 <span id="ess-freia-types"></span><h1>ess.freia.types<a class="headerlink" href="#module-ess.freia.types" title="Link to this heading">#</a></h1>
+<p class="rubric">Module Attributes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.freia.types.WBC1Monitor.html#ess.freia.types.WBC1Monitor" title="ess.freia.types.WBC1Monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WBC1Monitor</span></code></a></p></td>
+<td><p>Bunker monitor for wavelength-band chopper WBC1 diagnostics.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.freia.types.PSCMonitor.html#ess.freia.types.PSCMonitor" title="ess.freia.types.PSCMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PSCMonitor</span></code></a></p></td>
+<td><p>Bunker monitor for pulse-shaping choppers PSC1-3 diagnostics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.freia.types.WBC2Monitor.html#ess.freia.types.WBC2Monitor" title="ess.freia.types.WBC2Monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WBC2Monitor</span></code></a></p></td>
+<td><p>Out-of-bunker monitor for WBC2 and PSC4 diagnostics.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.freia.types.WBC3Monitor.html#ess.freia.types.WBC3Monitor" title="ess.freia.types.WBC3Monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WBC3Monitor</span></code></a></p></td>
+<td><p>Out-of-bunker monitor for WBC3 and PSC5 diagnostics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="ess.freia.types.ShutterMonitor.html#ess.freia.types.ShutterMonitor" title="ess.freia.types.ShutterMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShutterMonitor</span></code></a></p></td>
+<td><p>Pre-sample monitor for beam profiling and fast-shutter diagnostics.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="ess.freia.types.NormalizationMonitor.html#ess.freia.types.NormalizationMonitor" title="ess.freia.types.NormalizationMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NormalizationMonitor</span></code></a></p></td>
+<td><p>Pre-sample flux monitor for normalization.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
@@ -912,11 +945,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="ess.freia.types.DetectorRegionOfInterest.html"
+       href="ess.freia.types.WBC1Monitor.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ess.freia.types.DetectorRegionOfInterest</p>
+        <p class="prev-next-title">ess.freia.types.WBC1Monitor</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -971,7 +1004,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

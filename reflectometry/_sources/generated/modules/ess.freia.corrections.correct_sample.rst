@@ -1,6 +1,6 @@
-ess.freia.corrections.prepare\_sample
+ess.freia.corrections.correct\_sample
 =====================================
 
 .. currentmodule:: ess.freia.corrections
 
-.. autofunction:: prepare_sample
+.. autofunction:: correct_sample

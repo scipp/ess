@@ -5,6 +5,18 @@
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      WBC1Monitor
+      PSCMonitor
+      WBC2Monitor
+      WBC3Monitor
+      ShutterMonitor
+      NormalizationMonitor
+   
    
 
    
