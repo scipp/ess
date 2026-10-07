@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
 """Coordinate conversions for POWTEX powder reduction."""
 
@@ -18,13 +18,13 @@ from ..powtex.types import (
     WavelengthDetector,
 )
 
-from .types import ElasticCoordTransformGraphMLZ
+from .types import ElasticCoordTransformGraph
 
 
 # Copied from ess.powder.conversion, which might be modified
 # in future, so we keep a copy here for now to avoid breaking
 # the MLZ workflow
-def _dspacing_from_diff_calibration_generic_impl_mlz(
+def _dspacing_from_diff_calibration_generic_impl(
     tof: sc.Variable, tzero: sc.Variable, difa: sc.Variable, difc: sc.Variable
 ) -> sc.Variable:
     """Compute d-spacing from POWGEN-style calibration coefficients."""
@@ -41,7 +41,7 @@ def _dspacing_from_diff_calibration_generic_impl_mlz(
 # Copied from ess.powder.conversion, which might be modified
 # in future, so we keep a copy here for now to avoid breaking
 # the MLZ workflow
-def _dspacing_from_diff_calibration_a0_impl_mlz(
+def _dspacing_from_diff_calibration_a0_impl(
     tof: sc.Variable, tzero: sc.Variable, difc: sc.Variable
 ) -> sc.Variable:
     out = tof - tzero
@@ -52,15 +52,15 @@ def _dspacing_from_diff_calibration_a0_impl_mlz(
 # Copied from ess.powder.conversion, which might be modified
 # in future, so we keep a copy here for now to avoid breaking
 # the MLZ workflow
-def _dspacing_from_diff_calibration_mlz(
+def _dspacing_from_diff_calibration(
     tof: sc.Variable,
     tzero: sc.Variable,
     difa: sc.Variable,
     difc: sc.Variable,
 ) -> sc.Variable:
     if sc.all(difa == sc.scalar(0.0, unit=difa.unit)).value:
-        return _dspacing_from_diff_calibration_a0_impl_mlz(tof, tzero, difc)
-    return _dspacing_from_diff_calibration_generic_impl_mlz(tof, tzero, difa, difc)
+        return _dspacing_from_diff_calibration_a0_impl(tof, tzero, difc)
+    return _dspacing_from_diff_calibration_generic_impl(tof, tzero, difa, difc)
 
 
 # Copied from ess.powder.conversion.
@@ -74,7 +74,7 @@ def _consume_positions(position, sample_position, source_position):
 
 
 def d_perp_from_lambda_and_theta(wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
-    """Compute the dperp coordinate used by the MLZ P2D workflow."""
+    """Compute the dperp coordinate used by the POWTEX P2D workflow."""
     lambda_k = sc.scalar(1.0, unit="angstrom")
     return sc.sqrt(wavelength**2 - 2.0 * lambda_k**2 * sc.log(sc.cos(0.5 * two_theta)))
 
@@ -83,12 +83,12 @@ def d_dperp_from_tof_and_calibration_coeffs() -> dict:
     """Return a graph producing wavelength, d-spacing, and dperp."""
     return {
         "wavelength": scn.conversion.tof.wavelength_from_tof,
-        "dspacing": _dspacing_from_diff_calibration_generic_impl_mlz,
+        "dspacing": _dspacing_from_diff_calibration_generic_impl,
         "dperp": d_perp_from_lambda_and_theta,
     }
 
 
-def to_dspacing_with_calibration_mlz(
+def to_dspacing_with_calibration(
     data: sc.DataArray, calibration: sc.Dataset
 ) -> sc.DataArray:
     """Transform detector time-of-flight data to calibrated d-spacing."""
@@ -97,7 +97,7 @@ def to_dspacing_with_calibration_mlz(
     graph = {"tof": scn.conversion.tof.tof_from_wavelength}
     out = out.transform_coords("tof", graph=graph, keep_intermediate=False)
 
-    pos_graph = {"dspacing": _dspacing_from_diff_calibration_mlz}
+    pos_graph = {"dspacing": _dspacing_from_diff_calibration}
     if "position" in out.coords or (
         out.bins is not None and "position" in out.bins.coords
     ):
@@ -114,9 +114,9 @@ def to_dspacing_with_calibration_mlz(
     return out
 
 
-def p2d_coordinate_transformation_graph_mlz() -> ElasticCoordTransformGraphMLZ:
+def p2d_coordinate_transformation_graph() -> ElasticCoordTransformGraph:
     """Generate the coordinate transformation graph for P2D reduction."""
-    return ElasticCoordTransformGraphMLZ(
+    return ElasticCoordTransformGraph(
         {
             **scn.conversion.graph.beamline.beamline(scatter=True),
             **d_dperp_from_tof_and_calibration_coeffs(),
@@ -124,9 +124,9 @@ def p2d_coordinate_transformation_graph_mlz() -> ElasticCoordTransformGraphMLZ:
     )
 
 
-def add_scattering_coordinates_from_positions_mlz(
+def add_scattering_coordinates_from_positions(
     data: TofDetector[RunType],
-    graph: ElasticCoordTransformGraphMLZ,
+    graph: ElasticCoordTransformGraph,
     calibration: CalibrationData,
 ) -> WavelengthDetector[RunType]:
     """Add wavelength, two-theta, d-spacing, and dperp coordinates."""
@@ -137,13 +137,13 @@ def add_scattering_coordinates_from_positions_mlz(
         graph=graph,
         keep_intermediate=False,
     )
-    out = convert_to_dspacing_mlz(data, graph, calibration)
+    out = convert_to_dspacing(data, graph, calibration)
     return WavelengthDetector[RunType](out)
 
 
-def convert_to_dspacing_mlz(
+def convert_to_dspacing(
     data: sc.DataArray,
-    graph: ElasticCoordTransformGraphMLZ,
+    graph: ElasticCoordTransformGraph,
     calibration: CalibrationData,
 ) -> sc.DataArray:
     """Convert detector data to d-spacing, using calibration when available."""
@@ -153,7 +153,7 @@ def convert_to_dspacing_mlz(
             ["dspacing"], graph=graph, keep_intermediate=False
         )
     else:
-        out = to_dspacing_with_calibration_mlz(data, calibration=calibration)
+        out = to_dspacing_with_calibration(data, calibration=calibration)
         for key in ("wavelength", "two_theta", "dperp"):
             if key in out.coords:
                 out.coords.set_aligned(key, False)
@@ -181,6 +181,6 @@ def lambda_from_d_dperp(
 
 
 providers = (
-    add_scattering_coordinates_from_positions_mlz,
-    p2d_coordinate_transformation_graph_mlz,
+    add_scattering_coordinates_from_positions,
+    p2d_coordinate_transformation_graph,
 )

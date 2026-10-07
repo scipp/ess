@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-"""Domain types for POWTEX powder workflows."""
+"""Domain types for POWTEX data reduction workflows."""
 
 from collections.abc import Callable
 from pathlib import Path
@@ -52,7 +52,7 @@ GeneralRunType = TypeVar(
 )
 
 KeepEventsMLZ = NewType("KeepEventsMLZ", bool)
-"""Flag indicating whether focussed P2D data should keep events instead of histogramming."""
+"""Flag indicating whether data should keep events instead of histogramming."""
 
 
 class ShiftNegativeIntensity(sciline.Scope[NonEmptyCanRunType, int], int):
@@ -63,12 +63,12 @@ class NegativeIntensityResetValue(sciline.Scope[NonEmptyCanRunType, float], floa
     """Replacement value for negative intensities when shifting is disabled."""
 
 
-class FilenameMLZ(sciline.Scope[GeneralRunType, Path], Path):
-    """Filename for local MLZ/POWTEX data."""
+class Filename(sciline.Scope[GeneralRunType, Path], Path):
+    """Filename for POWTEX data."""
 
 
-class FilepathMLZ(sciline.Scope[GeneralRunType, Path], Path):
-    """Directory containing local MLZ/POWTEX data."""
+class Filepath(sciline.Scope[GeneralRunType, Path], Path):
+    """Directory containing POWTEX data."""
 
 
 del sc, sciline, NewType, TypeVar

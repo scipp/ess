@@ -11,7 +11,7 @@ from ..powtex.types import (
     CalibrationRun,
     EmptyCanRun,
     EmptyVanadiumCanRun,
-    FilepathMLZ,
+    Filepath,
     SampleRun,
     VanadiumRun,
 )
@@ -48,11 +48,11 @@ def default_parameters() -> dict:
     """Return default parameters for the POWTEX texture workflow."""
     data_path = "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv"
     return {
-        FilepathMLZ[SampleRun]: data_path,
-        FilepathMLZ[VanadiumRun]: data_path,
-        FilepathMLZ[EmptyCanRun]: data_path,
-        FilepathMLZ[CalibrationRun]: data_path,
-        FilepathMLZ[EmptyVanadiumCanRun]: data_path,
+        Filepath[SampleRun]: data_path,
+        Filepath[VanadiumRun]: data_path,
+        Filepath[EmptyCanRun]: data_path,
+        Filepath[CalibrationRun]: data_path,
+        Filepath[EmptyVanadiumCanRun]: data_path,
         BinningSettings: BinningSettings(
             gamma_cut_start=sc.scalar(225.0, unit="deg"),
             gamma_cut_end=sc.scalar(315.0, unit="deg"),
@@ -93,4 +93,6 @@ def TextureReduce() -> sciline.Pipeline:
     )
 
 
-__all__ = ["TextureReduce", "default_parameters"]
+__all__ = [
+    "TextureReduce",
+]

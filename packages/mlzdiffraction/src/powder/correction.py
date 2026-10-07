@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
 """Correction algorithms for POWTEX powder reduction."""
 
@@ -29,7 +29,7 @@ from .types import (
     NormalizedIntensity2D,
 )
 
-def normalize_by_vanadium_mlz(
+def normalize_by_vanadium(
     data: EmptyCanSubtractedNoNegative2D[SampleRun],
     vanadium: EmptyCanSubtractedNoNegative2D[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
@@ -53,7 +53,7 @@ def normalize_by_vanadium_mlz(
     return NormalizedIntensity2D(normalized)
 
 
-def normalize_by_proton_charge_mlz(
+def normalize_by_proton_charge(
     data: Dspacing2D[RunType],
     proton_charge: AccumulatedProtonCharge[RunType],
 ) -> NormalizedDspacing[RunType]:
@@ -63,7 +63,7 @@ def normalize_by_proton_charge_mlz(
     return NormalizedDspacing[RunType](data / proton_charge)
 
 
-def subtract_sample_empty_can_mlz(
+def subtract_sample_empty_can(
     data: Dspacing2D[SampleRun],
     background: Dspacing2D[EmptyCanRun],
 ) -> EmptyCanSubtracted2D[SampleRun]:
@@ -77,7 +77,7 @@ def subtract_sample_empty_can_mlz(
     return EmptyCanSubtracted2D[SampleRun](data.bins.concatenate(-background))
 
 
-def subtract_vanadium_empty_can_mlz(
+def subtract_vanadium_empty_can(
     data: Dspacing2D[VanadiumRun],
     background: Dspacing2D[EmptyVanadiumCanRun],
 ) -> EmptyCanSubtracted2D[VanadiumRun]:
@@ -138,8 +138,8 @@ def handle_negative_intensity_vanadium(
 providers = (
     handle_negative_intensity_sample,
     handle_negative_intensity_vanadium,
-    normalize_by_proton_charge_mlz,
-    normalize_by_vanadium_mlz,
-    subtract_sample_empty_can_mlz,
-    subtract_vanadium_empty_can_mlz,
+    normalize_by_proton_charge,
+    normalize_by_vanadium,
+    subtract_sample_empty_can,
+    subtract_vanadium_empty_can,
 )

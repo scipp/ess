@@ -10,8 +10,8 @@ from ..powtex.types import (
     CalibrationRun,
     EmptyCanRun,
     EmptyVanadiumCanRun,
-    FilenameMLZ,
-    FilepathMLZ,
+    Filename,
+    Filepath,
     KeepEventsMLZ,
     NegativeIntensityResetValue,
     SampleRun,
@@ -20,21 +20,21 @@ from ..powtex.types import (
     VanadiumRun,
 )
 from .conversion import (
-    add_scattering_coordinates_from_positions_mlz,
-    p2d_coordinate_transformation_graph_mlz,
+    add_scattering_coordinates_from_positions,
+    p2d_coordinate_transformation_graph,
 )
 from .correction import (
     handle_negative_intensity_sample,
     handle_negative_intensity_vanadium,
-    normalize_by_vanadium_mlz,
-    subtract_sample_empty_can_mlz,
-    subtract_vanadium_empty_can_mlz,
+    normalize_by_vanadium,
+    subtract_sample_empty_can,
+    subtract_vanadium_empty_can,
 )
 from .data import (
     export_to_p2d,
     extract_masked_intensity,
-    load_powgen_calibration_mlz,
-    load_powgen_mlz,
+    load_powgen_calibration,
+    load_powgen,
     prepare_for_p2d_export,
 )
 from .filtering import flatten_to_spectra
@@ -51,16 +51,16 @@ def default_parameters() -> dict:
     """Return default parameters for the POWTEX P2D workflow."""
     data_path = "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted"
     return {
-        FilepathMLZ[SampleRun]: data_path,
-        FilepathMLZ[VanadiumRun]: data_path,
-        FilepathMLZ[EmptyCanRun]: data_path,
-        FilepathMLZ[CalibrationRun]: data_path,
-        FilepathMLZ[EmptyVanadiumCanRun]: data_path,
-        FilenameMLZ[SampleRun]: None,
-        FilenameMLZ[VanadiumRun]: None,
-        FilenameMLZ[EmptyCanRun]: None,
-        FilenameMLZ[CalibrationRun]: None,
-        FilenameMLZ[EmptyVanadiumCanRun]: None,
+        Filepath[SampleRun]: data_path,
+        Filepath[VanadiumRun]: data_path,
+        Filepath[EmptyCanRun]: data_path,
+        Filepath[CalibrationRun]: data_path,
+        Filepath[EmptyVanadiumCanRun]: data_path,
+        Filename[SampleRun]: None,
+        Filename[VanadiumRun]: None,
+        Filename[EmptyCanRun]: None,
+        Filename[CalibrationRun]: None,
+        Filename[EmptyVanadiumCanRun]: None,
         DspacingBins: sc.linspace("dspacing", 0.4, 2.0, 321, unit="angstrom"),
         DperpBins: sc.linspace("dperp", 0.2, 4.0, 381, unit="angstrom"),
         KeepEventsMLZ: False,
@@ -79,7 +79,7 @@ def PowderReduceP2D() -> sciline.Pipeline:
     """Workflow with default parameters for POWTEX P2D powder reduction."""
     return sciline.Pipeline(
         providers=(
-            add_scattering_coordinates_from_positions_mlz,
+            add_scattering_coordinates_from_positions,
             # it might be better to add masks to loaded event data
             # using powtex.masking.add_masks, because masking binned data
             # can bring additional distortion. In other words, we might
@@ -93,21 +93,21 @@ def PowderReduceP2D() -> sciline.Pipeline:
             focus_to_dspacing_dperp,
             handle_negative_intensity_sample,
             handle_negative_intensity_vanadium,
-            load_powgen_calibration_mlz,
+            load_powgen_calibration,
             # load_powgen_dperp_mask_mlz,
             # load_powgen_dspacing_mask_mlz,
-            load_powgen_mlz,
+            load_powgen,
             # load_powgen_tof_mask_mlz,
             # load_powgen_two_theta_mask_mlz,
             # load_powgen_wavelength_mask_mlz,
             # extract_accumulated_proton_charge,
             # normalize_by_proton_charge_mlz, <- this and above seem to be absent
             # in PowderReduceP2D
-            normalize_by_vanadium_mlz,
-            p2d_coordinate_transformation_graph_mlz,
+            normalize_by_vanadium,
+            p2d_coordinate_transformation_graph,
             prepare_for_p2d_export,
-            subtract_sample_empty_can_mlz,
-            subtract_vanadium_empty_can_mlz,
+            subtract_sample_empty_can,
+            subtract_vanadium_empty_can,
         ),
         params=default_parameters(),
     )

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-"""Data loading helpers for POWTEX texture reduction."""
+"""Data loading helpers for POWTEX powder and texture reduction."""
 
 from pathlib import Path
 from typing import cast
@@ -13,16 +13,16 @@ import scipp as sc
 from ..powtex.types import (
     CalibrationData,
     CalibrationRun,
-    FilenameMLZ,
-    FilepathMLZ,
+    Filename,
+    Filepath,
     RunType,
     TofDetector,
 )
 
 
 def load_powtex_csv(
-    filename: FilenameMLZ[RunType],
-    datapath: FilepathMLZ[RunType]
+    filename: Filename[RunType],
+    datapath: Filepath[RunType]
 ) -> TofDetector[RunType]:
     """Load a POWTEX CSV event file."""
     if filename is None:
@@ -59,8 +59,8 @@ def load_powtex_csv(
 
 
 def load_powtex_calibration(
-    filename: FilenameMLZ[CalibrationRun],
-    datapath: FilepathMLZ[CalibrationRun],
+    filename: Filename[CalibrationRun],
+    datapath: Filepath[CalibrationRun],
 ) -> CalibrationData:
     """Load POWTEX calibration data."""
     _ = filename

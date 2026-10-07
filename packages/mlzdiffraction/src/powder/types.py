@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
 """Domain types for POWTEX powder workflows."""
 
@@ -60,8 +60,8 @@ class MaskingData(sciline.Scope[MaskType, type], type):
     """Type for a mask function."""
 
 
-class ElasticCoordTransformGraphMLZ(sciline.Scope[dict], dict):
-    """Coordinate transformation graph for MLZ/POWTEX reductions."""
+class ElasticCoordTransformGraph(sciline.Scope[dict], dict):
+    """Coordinate transformation graph for MLZ/POWTEX reduction."""
 
 
 class SpectralDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):

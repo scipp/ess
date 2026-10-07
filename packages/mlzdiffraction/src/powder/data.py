@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-"""Data loading and P2D export helpers for POWTEX powder reduction."""
+"""Data handling for POWTEX powder reduction."""
 
 from pathlib import Path
 from typing import cast
@@ -15,8 +15,8 @@ from ..powtex.types import (
     CalibrationData,
     CalibrationRun,
     CorrectedDspacing,
-    FilenameMLZ,
-    FilepathMLZ,
+    Filename,
+    Filepath,
     Position,
     RawDataAndMetadata,
     RunType,
@@ -38,9 +38,9 @@ from .types import (
 )
 
 
-def load_powgen_mlz(
-    filename: FilenameMLZ[RunType],
-    datapath: FilepathMLZ[RunType]
+def load_powgen(
+    filename: Filename[RunType],
+    datapath: Filepath[RunType]
 ) -> TofDetector[RunType]:
     """
     Loads a powgen nxs file.
@@ -66,8 +66,8 @@ def load_powgen_mlz(
     return TofDetector[RunType](out)
 
 
-def load_powgen_calibration_mlz(
-    filename: FilenameMLZ[CalibrationRun], datapath: FilepathMLZ[CalibrationRun]
+def load_powgen_calibration(
+    filename: Filename[CalibrationRun], datapath: Filepath[CalibrationRun]
 ) -> CalibrationData:
     """Load a diamond calibration file."""
     if filename is None:
@@ -86,14 +86,14 @@ def load_powgen_calibration_mlz(
     return CalibrationData(out)
 
 
-def load_powgen_tof_mask_mlz() -> MaskingData[TofMask]:
+def load_powgen_tof_mask() -> MaskingData[TofMask]:
     """Return the time-of-flight mask for POWGEN P2D reduction."""
     mask_function = None
     #mask_function = lambda x: (x < sc.scalar(0.0, unit="us")) | (x > sc.scalar(16666.67, unit="us"))
     return MaskingData[TofMask](mask_function)
 
 
-def load_powgen_wavelength_mask_mlz() -> MaskingData[WavelengthMask]:
+def load_powgen_wavelength_mask() -> MaskingData[WavelengthMask]:
     """Return the wavelength mask for POWGEN P2D reduction."""
     return MaskingData[WavelengthMask](
         lambda x: (
@@ -106,7 +106,7 @@ def load_powgen_wavelength_mask_mlz() -> MaskingData[WavelengthMask]:
     )
 
 
-def load_powgen_two_theta_mask_mlz() -> MaskingData[TwoThetaMask]:
+def load_powgen_two_theta_mask() -> MaskingData[TwoThetaMask]:
     """Return the two-theta mask for POWGEN P2D reduction."""
 
     def deg(value: float) -> sc.Variable:
@@ -143,7 +143,7 @@ def load_powgen_two_theta_mask_mlz() -> MaskingData[TwoThetaMask]:
     )
 
 
-def load_powgen_dspacing_mask_mlz() -> MaskingData[DSpacingMask]:
+def load_powgen_dspacing_mask() -> MaskingData[DSpacingMask]:
     """Return the d-spacing mask for POWGEN P2D reduction."""
     return MaskingData[DSpacingMask](
         lambda x: (
@@ -154,7 +154,7 @@ def load_powgen_dspacing_mask_mlz() -> MaskingData[DSpacingMask]:
     )
 
 
-def load_powgen_dperp_mask_mlz() -> MaskingData[DperpMask]:
+def load_powgen_dperp_mask() -> MaskingData[DperpMask]:
     """Return the dperp mask for POWGEN P2D reduction."""
     return MaskingData[DperpMask](
         lambda x: (
@@ -165,7 +165,7 @@ def load_powgen_dperp_mask_mlz() -> MaskingData[DperpMask]:
     )
 
 
-def extract_raw_data_mlz(data: RawDataAndMetadata[RunType]) -> TofDetector[RunType]:
+def extract_raw_data(data: RawDataAndMetadata[RunType]) -> TofDetector[RunType]:
     """Return folded detector events from a loaded data group."""
     # Remove the tof binning and dimension, as it is not needed and it gets in the way
     # of masking.
@@ -185,14 +185,14 @@ def extract_accumulated_proton_charge(
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])
 
 
-def source_position_mlz(data: TofDetector[RunType]) -> Position[snx.NXsource, RunType]:
+def source_position(data: TofDetector[RunType]) -> Position[snx.NXsource, RunType]:
     """Return the source position from detector data."""
     if data is None:
         return cast(Position[snx.NXsource, RunType], None)
     return Position[snx.NXsource, RunType](data.coords["source_position"])
 
 
-def sample_position_mlz(data: TofDetector[RunType]) -> Position[snx.NXsample, RunType]:
+def sample_position(data: TofDetector[RunType]) -> Position[snx.NXsample, RunType]:
     """Return the sample position from detector data."""
     if data is None:
         return cast(Position[snx.NXsample, RunType], None)
@@ -286,16 +286,16 @@ def export_to_p2d(
 providers = (
     extract_accumulated_proton_charge,
     extract_masked_intensity,
-    extract_raw_data_mlz,
+    extract_raw_data,
     export_to_p2d,
-    load_powgen_calibration_mlz,
-    load_powgen_dperp_mask_mlz,
-    load_powgen_dspacing_mask_mlz,
-    load_powgen_mlz,
-    load_powgen_tof_mask_mlz,
-    load_powgen_two_theta_mask_mlz,
-    load_powgen_wavelength_mask_mlz,
+    load_powgen_calibration,
+    load_powgen_dperp_mask,
+    load_powgen_dspacing_mask,
+    load_powgen,
+    load_powgen_tof_mask,
+    load_powgen_two_theta_mask,
+    load_powgen_wavelength_mask,
     prepare_for_p2d_export,
-    sample_position_mlz,
-    source_position_mlz,
+    sample_position,
+    source_position,
 )
