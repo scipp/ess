@@ -32,7 +32,6 @@ from .configurations import (
     ReductionConfig,
     WorkflowConfig,
 )
-from .nexus_io import read_goniometer_values
 
 
 def build_reduction_argument_parser() -> argparse.ArgumentParser:
@@ -195,7 +194,6 @@ def reduction(
     warnings.filterwarnings("ignore", category=UserWarning)
     # Loading
     with snx.File(config.inputs.input_file) as file:
-        crystal_rotation = read_goniometer_values(file, config.inputs)
         detectors = dict(
             filter(
                 lambda kv: kv[0] not in config.inputs.ignore_list,
@@ -232,7 +230,8 @@ def reduction(
     )
 
     sample_meta = NMXSampleMetadata(
-        crystal_rotation=crystal_rotation,
+        # TODO: retrieve crystal rotation from the file correctly.
+        crystal_rotation=sc.vector([0.0, 0.0, 0.0], unit='deg'),
         name=mandi_geo.sample.name,
         position=sample_position,
     )

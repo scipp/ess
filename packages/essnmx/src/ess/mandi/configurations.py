@@ -28,21 +28,6 @@ class InputConfig(BaseModel):
         description="Detector indices to process",
         default=["bank_error", "bank_unmapped"],
     )
-    gonio_path_chi: str = Field(
-        title="Gonio meter chi value path.",
-        description="'average_value' will be used if available.",
-        default='/entry/DASlogs/BL11B:Mot:chi',  # codespell:ignore
-    )
-    gonio_path_phi: str = Field(
-        title="Gonio meter phi value path.",
-        description="'average_value' will be used if available.",
-        default='/entry/DASlogs/BL11B:Mot:phi',  # codespell:ignore
-    )
-    gonio_path_omega: str = Field(
-        title="Gonio meter omega value path.",
-        description="'average_value' will be used if available.",
-        default='/entry/DASlogs/BL11B:Mot:omega',  # codespell:ignore
-    )
 
 
 class TimeBinUnit(enum.StrEnum):
