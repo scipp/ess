@@ -5,35 +5,48 @@ Fail-safe loaders for loki files
 """
 
 from pathlib import Path
+from typing import NewType
 
 import sciline as sl
 import scipp as sc
 import scippnexus as snx
 
-from ..sans.types import (
-    BeamCenter,
+from ess.reduce.nexus import GenericNeXusWorkflow
+from ess.reduce.nexus.types import (
+    AnyRun,
     Filename,
-    Incident,
     NeXusDetectorName,
-    NeXusMonitorName,
+    NeXusName,
     RawDetector,
     RawMonitor,
-    SampleRun,
 )
-from .workflow import DETECTOR_BANK_SIZES, LokiWorkflow
+
+# from ..sans.types import (
+#     BeamCenter,
+#     Filename,
+#     Incident,
+#     NeXusDetectorName,
+#     NeXusMonitorName,
+#     RawDetector,
+#     RawMonitor,
+#     SampleRun,
+# )
+from .workflow import DETECTOR_BANK_SIZES
+
+AnyMonitor = NewType("AnyMonitor", int)
 
 
 def _make_workflow(filename: str | Path) -> sl.Pipeline:
     # Create workflow to try and load the data properly first
-    wf = LokiWorkflow()
-    wf[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    wf[Filename[SampleRun]] = filename
+
+    wf = GenericNeXusWorkflow(run_types=[AnyRun], monitor_types=[AnyMonitor])
+    wf[Filename[AnyRun]] = filename
     return wf
 
 
 def _load_detector_with_workflow(wf: sl.Pipeline, bank: str) -> sc.DataArray:
     wf[NeXusDetectorName] = bank
-    return wf.compute(RawDetector[SampleRun])
+    return wf.compute(RawDetector[AnyRun])
 
 
 def _load_detector_with_fallback(filename: str | Path, bank: str) -> sc.DataArray:
@@ -53,13 +66,15 @@ def _load_detector_with_fallback(filename: str | Path, bank: str) -> sc.DataArra
                 da.coords["y_pixel_offset"],
                 da.coords["z_pixel_offset"],
             )
-        if bank in DETECTOR_BANK_SIZES:
-            da = da.fold(dim="detector_number", sizes=DETECTOR_BANK_SIZES[bank])
+        # if bank in DETECTOR_BANK_SIZES:
+        #     da = da.fold(dim="detector_number", sizes=DETECTOR_BANK_SIZES[bank])
         return da
 
 
 def load_detectors(
-    filename: str | Path, banks: list[str] | str | None = None
+    filename: str | Path,
+    banks: list[str] | str | None = None,
+    fold: dict | None = None,
 ) -> sc.DataGroup:
     """
     Load detector data from a Loki file. We attempt to use the LokiWorkflow first and
@@ -95,8 +110,8 @@ def load_detectors(
 
 
 def _load_monitor_with_workflow(wf: sl.Pipeline, monitor: str) -> sc.DataArray:
-    wf[NeXusMonitorName[Incident]] = monitor
-    return wf.compute(RawMonitor[SampleRun, Incident])
+    wf[NeXusName[AnyMonitor]] = monitor
+    return wf.compute(RawMonitor[AnyRun, AnyMonitor])
 
 
 def _load_monitor_with_fallback(filename: str | Path, monitor: str) -> sc.DataArray:
