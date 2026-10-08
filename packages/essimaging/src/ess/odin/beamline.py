@@ -15,7 +15,7 @@ def nexus_name(name: str) -> str:
 
     Parameters
     ----------
-    entry_name:
+    name:
         Name of the detector or monitor.
     """
     name = name.lower()
