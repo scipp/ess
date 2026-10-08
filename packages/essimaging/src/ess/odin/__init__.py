@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from . import beamline, data
+from . import beamline
 from .workflows import OdinBraggEdgeWorkflow, OdinOrcaWorkflow, OdinWorkflow
 
 try:
@@ -18,5 +18,4 @@ __all__ = [
     "OdinOrcaWorkflow",
     "OdinWorkflow",
     "beamline",
-    "data",
 ]
