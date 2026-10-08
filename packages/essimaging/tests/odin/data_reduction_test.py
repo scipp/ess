@@ -34,7 +34,7 @@ def _make_workflow(wavelength_from: unwrap.WavelengthLutMode) -> sl.Pipeline:
     wf = odin.OdinBraggEdgeWorkflow(wavelength_from=wavelength_from)
     wf[Filename[SampleRun]] = odin.data.iron_simulation_sample_small()
     wf[Filename[OpenBeamRun]] = odin.data.iron_simulation_ob_small()
-    wf[NeXusDetectorName] = "timepix3_efu"
+    wf[NeXusDetectorName] = odin.nexus_name("timepix3")
     if wavelength_from == "file":
         # Shortcut to set LookupTableFilename for both SampleRun and OpenBeamRun at once
         wf[LookupTableFilename] = odin.data.odin_wavelength_lookup_table()

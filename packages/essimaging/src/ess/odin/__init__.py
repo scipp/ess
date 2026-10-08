@@ -4,6 +4,7 @@
 import importlib.metadata
 
 from . import beamline, data
+from .beamline import nexus_name
 from .workflows import OdinBraggEdgeWorkflow, OdinOrcaWorkflow, OdinWorkflow
 
 try:
@@ -19,4 +20,5 @@ __all__ = [
     "OdinWorkflow",
     "beamline",
     "data",
+    "nexus_name",
 ]
