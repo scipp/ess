@@ -25,6 +25,7 @@ from ._nexus_loader import (
     open_component_group,
     open_nexus_file,
 )
+from .safe_load import load_detectors
 from .workflow import GenericNeXusWorkflow
 
 __all__ = [
@@ -36,6 +37,7 @@ __all__ = [
     'load_all_components',
     'load_component',
     'load_data',
+    'load_detectors',
     'load_from_path',
     'open_component_group',
     'open_nexus_file',
