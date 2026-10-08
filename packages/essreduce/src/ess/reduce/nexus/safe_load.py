@@ -43,9 +43,7 @@ def _find_data_keys(entry: snx.Group, bank: str, filename: str | Path) -> list[s
         raise (ValueError(f"No data found in '{bank}' of file '{filename}'"))
     if len(keys) > 1:
         raise (
-            ValueError(
-                f"Multiple data found in '{bank}' of file " f"'{filename}': {keys}"
-            )
+            ValueError(f"Multiple data found in '{bank}' of file '{filename}': {keys}")
         )
     return keys
 
