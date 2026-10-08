@@ -33,12 +33,15 @@ from .correction import (
 from .data import (
     export_to_p2d,
     extract_masked_intensity,
-    load_powgen_calibration,
     load_powgen,
+    load_powgen_calibration,
     prepare_for_p2d_export,
 )
-from .filtering import flatten_to_spectra
-from .grouping import append_two_theta_lambda, focus_to_dspacing_dperp
+from .grouping import (
+    append_two_theta_lambda,
+    flatten_to_spectra,
+    focus_to_dspacing_dperp,
+)
 from .masking import add_masks_p2d_data
 from .types import (
     DperpBins,

@@ -8,7 +8,7 @@ from typing import cast
 import numpy as np
 import scipp as sc
 
-from ..powtex.types import DspacingDetector, KeepEventsMLZ
+from ..powtex.types import DspacingDetector, KeepEventsMLZ, WavelengthDetector
 from .conversion import lambda_from_d_dperp
 from .types import (
     DperpBins,
@@ -19,6 +19,15 @@ from .types import (
     RunType,
     SpectralDetector,
 )
+
+
+def flatten_to_spectra(data: WavelengthDetector[RunType]) -> SpectralDetector[RunType]:
+    """Flatten detector bank dimensions to a single spectrum dimension."""
+    if data is None:
+        return cast(SpectralDetector[RunType], None)
+    dims = [dim for dim in ("wire", "strip", "segment") if dim in data.dims]
+    out = data.flatten(dims=dims, to="spectrum") if dims else data
+    return SpectralDetector[RunType](out)
 
 
 # TODO: Not used / needed anymore?
@@ -72,7 +81,7 @@ def focus_to_dspacing_dperp(
 
 
 def append_two_theta_lambda(data: NormalizedIntensity2D) -> ExtendedIntensity2D:
-    """Append wavelength and two-theta grids to normalized P2D intensity."""
+    """Append wavelength and two-theta grids to normalised P2D intensity."""
     lambda_k = sc.scalar(1.0, unit="angstrom")
     d_centers = sc.midpoints(data.coords["dspacing"])
     dp_centers = sc.midpoints(data.coords["dperp"])
@@ -119,7 +128,7 @@ def append_two_theta_lambda(data: NormalizedIntensity2D) -> ExtendedIntensity2D:
 
 
 def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None):
-    """Geometric range as a Scipp variable using a relative step."""
+    """Generates logarithmic bins using start, stop, and a relative step."""
     ratio = 1.0 + relative_step
     if ratio <= 0.0:
         raise ValueError("1 + relative_step must be positive")
@@ -151,5 +160,6 @@ def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None)
 providers = (
     append_two_theta_lambda,
     bin_dspacing_dperp_mlz,
+    flatten_to_spectra,
     focus_to_dspacing_dperp,
 )

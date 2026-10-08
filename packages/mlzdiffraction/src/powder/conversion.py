@@ -163,7 +163,7 @@ def convert_to_dspacing(
 def sc_wright_omega_real(
     d: sc.Variable, dp: sc.Variable, lam_k: sc.Variable
 ) -> sc.DataArray:
-    """Return the real-valued Wright omega term used by the P2D transform."""
+    """Compute the Wright omega function used by the P2D transform."""
     from scipy.special import lambertw
 
     argument = (4.0 * d**2 - lam_k**2 * sc.log(0.25 * lam_k**2 / d**2) - dp**2)

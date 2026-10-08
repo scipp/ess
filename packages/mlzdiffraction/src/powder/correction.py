@@ -96,6 +96,8 @@ def handle_negative_intensity_sample(
     shift_flag: ShiftNegativeIntensity[SampleRun],
     reset_value: NegativeIntensityResetValue[SampleRun],
 ) -> EmptyCanSubtractedNoNegative2D[SampleRun]:
+    """Handle negative intensity values in sample data by either shifting them
+    by the most negative value or replacing them with a reset value."""
     if data is None:
         return cast(EmptyCanSubtractedNoNegative2D[SampleRun], None)
     if shift_flag:
@@ -118,6 +120,8 @@ def handle_negative_intensity_vanadium(
     shift_flag: ShiftNegativeIntensity[VanadiumRun],
     reset_value: NegativeIntensityResetValue[VanadiumRun],
 ) -> EmptyCanSubtractedNoNegative2D[VanadiumRun]:
+    """Handle negative intensity values in vanadium data by either shifting them
+    by the most negative value or replacing them with a reset value."""
     if data is None:
         return cast(EmptyCanSubtractedNoNegative2D[VanadiumRun], None)
     if shift_flag:

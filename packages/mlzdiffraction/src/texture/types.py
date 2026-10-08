@@ -24,7 +24,7 @@ class Texture3D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
 
 
 class RawData2D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """2D Texture binned in gamma and two-theta."""
+    """2-D texture binned in gamma and two-theta."""
 
 
 DetectorViewData = NewType("DetectorViewData", sc.DataArray)

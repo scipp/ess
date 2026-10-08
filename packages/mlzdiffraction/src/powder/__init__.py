@@ -3,14 +3,13 @@
 
 """Components for POWTEX powder reduction."""
 
-from . import conversion, correction, data, filtering, grouping, masking, workflow
+from . import conversion, correction, data, grouping, masking, workflow
 from .workflow import PowderReduceP2D
 
 providers = (
     *conversion.providers,
     *correction.providers,
     *data.providers,
-    *filtering.providers,
     *grouping.providers,
     *masking.providers,
     *workflow.providers,
@@ -21,7 +20,6 @@ __all__ = [
     "conversion",
     "correction",
     "data",
-    "filtering",
     "grouping",
     "masking",
     "providers",
