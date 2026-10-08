@@ -5,53 +5,26 @@ import pytest
 
 from ess.reduce.nexus import load_detectors, load_monitors
 
-# def test_load_detectors_all_banks_good_file(loki_coda_file):
-#     dg = load_detectors(
-#         loki_coda_file,
-#     )
-#     assert set(dg.keys()) == {f"loki_detector_{i}" for i in range(9)}
-#     # Banks should NOT have been re-shaped
-#     assert "detector_number" not in dg.dims
-
-
-# def test_load_detectors_all_banks_bad_file(loki_broken_file):
-#     with pytest.warns(UserWarning, match="depends_on chain"):
-#         dg = load_detectors(file)
-#     assert set(dg.keys()) == {f"loki_detector_{i}" for i in range(9)}
-#     # Banks should have been re-shaped
-#     assert "detector_number" not in dg.dims
-
 
 def test_load_detectors_needs_banks_arg(loki_coda_file):
     with pytest.raises(TypeError, match="required positional argument"):
         load_detectors(loki_coda_file)
 
 
-def test_load_detectors_one_bank_good_file(loki_coda_file):
-    dg = load_detectors(loki_coda_file, banks=["loki_detector_0"])
+@pytest.mark.parametrize("bank_name", [["loki_detector_0"], "loki_detector_0"])
+def test_load_detectors_one_bank_good_file(loki_coda_file, bank_name):
+    dg = load_detectors(loki_coda_file, banks=bank_name)
     assert set(dg.keys()) == {"loki_detector_0"}
     # Data should NOT have been reshaped
     assert dg.dims == ("detector_number",)
 
 
-def test_load_detectors_one_bank_bad_file(loki_broken_file):
+@pytest.mark.parametrize("bank_name", [["loki_detector_0"], "loki_detector_0"])
+def test_load_detectors_one_bank_bad_file(loki_broken_file, bank_name):
     with pytest.warns(UserWarning, match="depends_on chain"):
-        dg = load_detectors(loki_broken_file, banks=["loki_detector_0"])
+        dg = load_detectors(loki_broken_file, banks=bank_name)
     assert set(dg.keys()) == {"loki_detector_0"}
     # Data should NOT have been reshaped
-    assert dg.dims == ("detector_number",)
-
-
-def test_load_detectors_one_bank_good_file_from_str(loki_coda_file):
-    dg = load_detectors(loki_coda_file, banks="loki_detector_0")
-    assert set(dg.keys()) == {"loki_detector_0"}
-    assert dg.dims == ("detector_number",)
-
-
-def test_load_detectors_one_bank_bad_file_from_str(loki_broken_file):
-    with pytest.warns(UserWarning, match="depends_on chain"):
-        dg = load_detectors(loki_broken_file, banks="loki_detector_0")
-    assert set(dg.keys()) == {"loki_detector_0"}
     assert dg.dims == ("detector_number",)
 
 
@@ -72,46 +45,34 @@ def test_load_detectors_two_banks_bad_file(loki_broken_file):
     assert dg.dims == ("detector_number",)
 
 
-# def test_load_detectors_two_banks(file):
-#     if file == FILES[1]:
-#         with pytest.warns(UserWarning, match="depends_on chain"):
-#             dg = load_detectors(file, banks=["loki_detector_0", "loki_detector_4"])
-#     else:
-#         dg = load_detectors(file, banks=["loki_detector_0", "loki_detector_4"])
-#     assert set(dg.keys()) == {"loki_detector_0", "loki_detector_4"}
+def test_load_monitors_needs_monitors_arg(loki_coda_file):
+    with pytest.raises(TypeError, match="required positional argument"):
+        load_monitors(loki_coda_file)
 
 
-# def test_load_monitors_all_monitors(file):
-#     if file == FILES[1]:
-#         with pytest.warns(UserWarning, match=r"(?:Falling back|depends_on chain)"):
-#             mons = load_monitors(file)
-#     else:
-#         mons = load_monitors(file)
-#     assert set(mons.keys()) == {f"beam_monitor_m{i}" for i in range(5)}
+@pytest.mark.parametrize("monitor_name", [["beam_monitor_m0"], "beam_monitor_m0"])
+def test_load_monitors_one_monitor_good_file(loki_coda_file, monitor_name):
+    mons = load_monitors(loki_coda_file, monitors=monitor_name)
+    assert set(mons.keys()) == {"beam_monitor_m0"}
 
 
-# def test_load_monitors_one_monitor(file):
-#     if file == FILES[1]:
-#         with pytest.warns(UserWarning, match="Falling back"):
-#             mons = load_monitors(file, monitors=["beam_monitor_m0"])
-#     else:
-#         mons = load_monitors(file, monitors=["beam_monitor_m0"])
-#     assert set(mons.keys()) == {"beam_monitor_m0"}
+@pytest.mark.parametrize("monitor_name", [["beam_monitor_m0"], "beam_monitor_m0"])
+def test_load_monitors_one_monitor_bad_file(loki_broken_file, monitor_name):
+    with pytest.warns(UserWarning, match="Falling back"):
+        mons = load_monitors(loki_broken_file, monitors=monitor_name)
+    assert set(mons.keys()) == {"beam_monitor_m0"}
 
 
-# def test_load_monitors_two_monitors(file):
-#     if file == FILES[1]:
-#         with pytest.warns(UserWarning, match="Falling back"):
-#             mons = load_monitors(file, monitors=["beam_monitor_m1", "beam_monitor_m3"])
-#     else:
-#         mons = load_monitors(file, monitors=["beam_monitor_m1", "beam_monitor_m3"])
-#     assert set(mons.keys()) == {"beam_monitor_m1", "beam_monitor_m3"}
+def test_load_monitors_two_monitors_good_file(loki_coda_file):
+    mons = load_monitors(
+        loki_coda_file, monitors=["beam_monitor_m1", "beam_monitor_m3"]
+    )
+    assert set(mons.keys()) == {"beam_monitor_m1", "beam_monitor_m3"}
 
 
-# def test_load_monitors_one_monitor_from_str(file):
-#     if file == FILES[1]:
-#         with pytest.warns(UserWarning, match="Falling back"):
-#             mons = load_monitors(file, monitors="beam_monitor_m1")
-#     else:
-#         mons = load_monitors(file, monitors="beam_monitor_m1")
-#     assert set(mons.keys()) == {"beam_monitor_m1"}
+def test_load_monitors_two_monitors_bad_file(loki_broken_file):
+    with pytest.warns(UserWarning, match="Falling back"):
+        mons = load_monitors(
+            loki_broken_file, monitors=["beam_monitor_m1", "beam_monitor_m3"]
+        )
+    assert set(mons.keys()) == {"beam_monitor_m1", "beam_monitor_m3"}
