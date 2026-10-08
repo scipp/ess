@@ -4,6 +4,8 @@ from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 
 from ess.reflectometry.types import ReferenceRun, SampleRun
 
+from .types import BeamMonitor
+
 DETECTOR_BANK_SIZES = {
     "multiblade_detector": {
         "strip": 64,
@@ -19,7 +21,7 @@ def LoadNeXusWorkflow(**kwargs) -> sciline.Pipeline:
     """
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun, ReferenceRun],
-        monitor_types=[],
+        monitor_types=[BeamMonitor],
         **kwargs,
     )
     workflow[DetectorBankSizes] = DETECTOR_BANK_SIZES

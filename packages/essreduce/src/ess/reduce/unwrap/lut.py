@@ -972,11 +972,19 @@ def guess_pulse_stride_from_choppers(
     If the pulse stride is not provided, we try to guess it from the chopper parameters.
     If there is a chopper rotating slower than the pulse_period, we use its rotation
     frequency to estimate the pulse stride.
+
+    Only choppers whose rotation period is a whole number of pulse periods are used.
+    A chopper at any other frequency (e.g., 5 Hz with a 14 Hz source) is most likely
+    misconfigured and will be closed by :func:`close_non_synced_disk_choppers`.
+    Letting it set the stride would make healthy choppers incompatible with the frame
+    period, and close them as well.
     """
     stride = 1
     for chopper in choppers.values():
         f = sc.abs(chopper.frequency)
-        stride = max(stride, round((1 / pulse_period / f).to(unit="").value))
+        pulses_per_rotation = (1 / pulse_period / f).to(unit="").value
+        if abs(round(pulses_per_rotation) - pulses_per_rotation) < 1e-8:
+            stride = max(stride, round(pulses_per_rotation))
     return PulseStride[RunType](stride)
 
 

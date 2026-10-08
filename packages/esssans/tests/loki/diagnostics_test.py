@@ -5,8 +5,10 @@ import ess.loki.data  # noqa: F401
 import matplotlib
 import pytest
 import scipp as sc
+import scippneutron as scn
 from ess import loki
-from ess.loki.diagnostics import InstrumentView, LokiBankViewer
+from ess.loki import diagnostics
+from ess.loki.diagnostics import LokiBankViewer
 from ess.sans.types import (
     BeamCenter,
     Filename,
@@ -36,9 +38,64 @@ def histogrammed_loki_data(loki_data):
     return loki_data.hist()
 
 
+def test_diagnostics_available_at_top_level():
+    assert loki.LokiBankViewer is LokiBankViewer
+    assert loki.instrument_view is scn.instrument_view
+    assert loki.InstrumentView is diagnostics.InstrumentView
+    assert {'LokiBankViewer', 'instrument_view', 'InstrumentView'} <= set(loki.__all__)
+
+
+@pytest.mark.parametrize('use_positional_args', [False, True])
+def test_deprecated_instrument_view_forwards_arguments(
+    monkeypatch, use_positional_args
+):
+    data = sc.DataGroup()
+    pixel_size = sc.scalar(2.0, unit='cm')
+    result = object()
+    calls = []
+
+    def instrument_view(data, **kwargs):
+        calls.append((data, kwargs))
+        return result
+
+    monkeypatch.setattr(diagnostics, 'instrument_view', instrument_view)
+    if use_positional_args:
+        entry_point = loki.InstrumentView
+        args = (data, 'tof', pixel_size)
+        kwargs = {'cmap': 'jet'}
+    else:
+        entry_point = diagnostics.InstrumentView
+        args = (data,)
+        kwargs = {'dim': 'tof', 'pixel_size': pixel_size, 'cmap': 'jet'}
+    with pytest.warns(DeprecationWarning, match='use ess.loki.instrument_view') as w:
+        viewer = entry_point(*args, **kwargs)
+
+    assert viewer is result
+    assert len(calls) == 1
+    assert calls[0][0] is data
+    assert calls[0][1] == {'dim': 'tof', 'pixel_size': pixel_size, 'cmap': 'jet'}
+    assert w[0].filename == __file__
+
+
+@pytest.mark.parametrize('dim', [None, 'tof'])
+def test_deprecated_instrument_view_creates_figure(dim):
+    data = sc.DataArray(
+        sc.ones(dims=['pixel', 'tof'], shape=[2, 3], unit='counts'),
+        coords={
+            'position': sc.vectors(
+                dims=['pixel'], values=[[0.0, 0.0, 1.0], [1.0, 0.0, 1.0]], unit='m'
+            ),
+            'tof': sc.arange('tof', 4.0, unit='us'),
+        },
+    )
+    with pytest.warns(DeprecationWarning, match='use ess.loki.instrument_view'):
+        fig = loki.InstrumentView(data, dim=dim)
+    assert len(fig.artists) == 1
+
+
 def test_create_loki_bank_viewer(histogrammed_loki_data):
     matplotlib.use('module://ipympl.backend_nbagg')
-    viewer = LokiBankViewer(histogrammed_loki_data)
+    viewer = loki.LokiBankViewer(histogrammed_loki_data)
     assert len(viewer.tabs.children) == 9 + 1  # 9 banks + all banks tab
 
 
@@ -88,11 +145,3 @@ def test_loki_bank_viewer_change_bank(histogrammed_loki_data):
     viewer.tabs.selected_index = 2
     # Change back to all banks
     viewer.tabs.selected_index = 0
-
-
-def test_creat_loki_instrument_view(histogrammed_loki_data):
-    InstrumentView(histogrammed_loki_data)
-
-
-def test_creat_loki_instrument_view_with_dim_slider(loki_data):
-    InstrumentView(loki_data.hist(event_time_offset=10), dim='event_time_offset')
