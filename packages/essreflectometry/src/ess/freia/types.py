@@ -34,6 +34,14 @@ class SampleSurfaceNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Normal pointing out of the reflecting surface, in global coordinates."""
 
 
+class UpstreamSlitCenters(sciline.Scope[RunType, dict], dict):
+    """Open upstream slit-channel names mapped to centers in global coordinates."""
+
+
+class DownstreamSlitCenters(sciline.Scope[RunType, dict], dict):
+    """Open downstream slit-channel names mapped to centers in global coordinates."""
+
+
 class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
     """Pixel or event coordinates mapped to inclusive (lower, upper) bounds.
 
