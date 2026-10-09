@@ -425,35 +425,45 @@ class StreamProcessor:
             acc_key: nx.ancestors(graph, acc_key) & self._dynamic_keys
             for acc_key in self._accumulators
         }
-        self._keys_read_at_finalize = (
-            _find_keys_read_at_finalize(
-                graph,
-                target_keys=target_keys,
-                accumulator_keys=set(self._accumulators),
-                dynamic_keys=self._dynamic_keys,
-            )
-            if allow_bypass
-            else set()
-        )
-
-        # Chunks, accumulator values, and context are fed to the workflows rather than
-        # assigned to them, see :class:`_FedWorkflow`. Each workflow is wired up for
-        # exactly the keys the methods below feed it.
         cached_context_nodes = {
             node
             for nodes in self._context_key_to_cached_context_nodes_map.values()
             for node in nodes
         }
-        targets = set(target_keys)
+        accumulator_keys = set(self._accumulators)
+        # Each cached context node goes to the workflow(s) that read it: the chunk
+        # workflow if it is upstream of an accumulator, the finalize workflow if it is
+        # a target or downstream of an accumulator, or both.
+        read_by_chunk = _find_keys_read(
+            graph, outputs=accumulator_keys, inputs=cached_context_nodes
+        )
+        read_at_finalize = _find_keys_read(
+            graph,
+            outputs=set(target_keys),
+            inputs=accumulator_keys | cached_context_nodes,
+        )
+        self._context_nodes_read_by_chunk = cached_context_nodes & read_by_chunk
+        self._context_nodes_read_at_finalize = cached_context_nodes & read_at_finalize
+        # Dynamic keys that reach a target without passing through an accumulator.
+        # Only these are fed to the finalize workflow, and only they must outlive the
+        # chunk they arrived in.
+        self._keys_read_at_finalize = (
+            self._dynamic_keys & read_at_finalize if allow_bypass else set()
+        )
+
+        # Chunks, accumulator values, and context are fed to the workflows rather than
+        # assigned to them, see :class:`_FedWorkflow`. Each workflow is wired up for
+        # exactly the keys the methods below feed it. Every path from a context key to
+        # a target passes through a cached context node, so the chunk and finalize
+        # workflows read context only through those.
         self._context_workflow = _FedWorkflow(workflow, self._context_keys)
         self._chunk_workflow = _FedWorkflow(
-            workflow, self._dynamic_keys | (cached_context_nodes - targets)
+            workflow, self._dynamic_keys | self._context_nodes_read_by_chunk
         )
         self._finalize_workflow = _FedWorkflow(
             workflow,
-            set(self._accumulators)
-            | self._context_keys
-            | (cached_context_nodes & targets)
+            accumulator_keys
+            | self._context_nodes_read_at_finalize
             | self._keys_read_at_finalize,
         )
 
@@ -473,18 +483,14 @@ class StreamProcessor:
             needs_recompute |= self._context_key_to_cached_context_nodes_map[key]
         for key, value in context.items():
             self._context_workflow[key] = value
-            # Propagate context values to finalize workflow so providers that depend
-            # on context keys receive the updated values during finalize().
-            self._finalize_workflow[key] = value
         results = self._context_workflow.compute(needs_recompute)
         # Context values and the nodes derived from them are caches, to be reused until
         # the context changes again, so nothing is released here.
         for key, value in results.items():
-            if key in self._target_keys:
-                # Context-dependent key is direct target, independent of dynamic nodes.
-                self._finalize_workflow[key] = value
-            else:
+            if key in self._context_nodes_read_by_chunk:
                 self._chunk_workflow[key] = value
+            if key in self._context_nodes_read_at_finalize:
+                self._finalize_workflow[key] = value
 
     def add_chunk(
         self, chunks: dict[sciline.typing.Key, Any]
@@ -839,30 +845,27 @@ def _make_accumulators(
     }
 
 
-def _find_keys_read_at_finalize(
+def _find_keys_read(
     graph: nx.DiGraph,
     *,
-    target_keys: tuple[sciline.typing.Key, ...],
-    accumulator_keys: set[sciline.typing.Key],
-    dynamic_keys: set[sciline.typing.Key],
+    outputs: set[sciline.typing.Key],
+    inputs: set[sciline.typing.Key],
 ) -> set[sciline.typing.Key]:
     """
-    Find dynamic keys that reach a target without passing through an accumulator.
+    Find the keys that computing ``outputs`` reads, given values fed for ``inputs``.
 
-    Only these are fed to the finalize workflow, and only they must outlive the chunk
-    they arrived in. Computed on the graph with the accumulator inputs cut, which is
-    what finalize computes on. Feeding context cuts further edges, so this may name a
-    key that finalize turns out not to need, never miss one that it does.
+    Computed on the graph with the edges into ``inputs`` cut, since a fed input is not
+    computed from its ancestors. The result includes the outputs themselves.
     """
-    finalize_graph = graph.copy()
-    finalize_graph.remove_edges_from(
-        [edge for key in accumulator_keys for edge in graph.in_edges(key)]
+    cut_graph = graph.copy()
+    cut_graph.remove_edges_from(
+        [edge for key in inputs for edge in graph.in_edges(key)]
     )
-    reachable = set()
-    for key in target_keys:
-        if key in finalize_graph:
-            reachable |= nx.ancestors(finalize_graph, key)
-    return dynamic_keys & reachable
+    outputs = outputs & set(graph.nodes)
+    read = set(outputs)
+    for key in outputs:
+        read |= nx.ancestors(cut_graph, key)
+    return read
 
 
 def _find_descendants(
