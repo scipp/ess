@@ -32,30 +32,32 @@ def _make_workflow(filename: str | Path) -> sl.Pipeline:
     return wf
 
 
+def _find_data_keys(
+    entry: snx.Group, group_name: str, filename: str | Path
+) -> list[str]:
+    keys = list(entry[snx.NXevent_data].keys()) + list(entry[snx.NXdata].keys())
+    if not keys:
+        raise (ValueError(f"No data found in '{group_name}' of file '{filename}'"))
+    if len(keys) > 1:
+        raise (
+            ValueError(
+                f"Multiple data found in '{group_name}' of file '{filename}': {keys}"
+            )
+        )
+    return keys
+
+
 def _load_detector_with_workflow(wf: sl.Pipeline, bank: str) -> sc.DataArray:
     wf[NeXusDetectorName] = bank
     return wf.compute(RawDetector[AnyRun])
 
 
-def _find_data_keys(entry: snx.Group, bank: str, filename: str | Path) -> list[str]:
-    keys = list(entry[snx.NXevent_data].keys()) + list(entry[snx.NXdata].keys())
-    if not keys:
-        raise (ValueError(f"No data found in '{bank}' of file '{filename}'"))
-    if len(keys) > 1:
-        raise (
-            ValueError(f"Multiple data found in '{bank}' of file '{filename}': {keys}")
-        )
-    return keys
-
-
-def _load_detector_with_fallback(
-    filename: str | Path, bank: str
-) -> sc.DataArray | None:
+def _load_detector_with_fallback(filename: str | Path, bank: str) -> sc.DataArray:
     with snx.File(filename) as f:
         entry = f[f'{INSTRUMENT_PATH}/{bank}']
-        keys = _find_data_keys(entry, bank, filename)
+        keys = _find_data_keys(entry=entry, group_name=bank, filename=filename)
         da = snx.compute_positions(entry[()])[keys[0]]
-        return da
+    return da
 
 
 def load_detectors(
@@ -106,7 +108,7 @@ def _load_monitor_with_workflow(wf: sl.Pipeline, monitor: str) -> sc.DataArray:
 def _load_monitor_with_fallback(filename: str | Path, monitor: str) -> sc.DataArray:
     with snx.File(filename) as f:
         entry = f[f'{INSTRUMENT_PATH}/{monitor}']
-        keys = _find_data_keys(entry, monitor, filename)
+        keys = _find_data_keys(entry=entry, group_name=monitor, filename=filename)
         da = snx.compute_positions(entry[()])[keys[0]]
     return da
 
