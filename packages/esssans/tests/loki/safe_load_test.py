@@ -22,38 +22,18 @@ def test_load_detectors_all_banks(file):
 
 
 @pytest.mark.parametrize("file", FILES)
-def test_load_detectors_one_bank(file):
+@pytest.mark.parametrize(
+    "banks",
+    [["loki_detector_0"], ["loki_detector_0", "loki_detector_4"]],
+)
+def test_load_detectors_selected_banks(file, banks):
 
     if file == FILES[1]:
         with pytest.warns(UserWarning, match="depends_on chain"):
-            dg = loki.load_detectors(file, detectors=["loki_detector_0"])
+            dg = loki.load_detectors(file, detectors=banks)
     else:
-        dg = loki.load_detectors(file, detectors=["loki_detector_0"])
-    assert set(dg.keys()) == {"loki_detector_0"}
-
-
-@pytest.mark.parametrize("file", FILES)
-def test_load_detectors_one_bank_from_str(file):
-
-    if file == FILES[1]:
-        with pytest.warns(UserWarning, match="depends_on chain"):
-            dg = loki.load_detectors(file, detectors="loki_detector_0")
-    else:
-        dg = loki.load_detectors(file, detectors="loki_detector_0")
-    assert set(dg.keys()) == {"loki_detector_0"}
-
-
-@pytest.mark.parametrize("file", FILES)
-def test_load_detectors_two_banks(file):
-
-    if file == FILES[1]:
-        with pytest.warns(UserWarning, match="depends_on chain"):
-            dg = loki.load_detectors(
-                file, detectors=["loki_detector_0", "loki_detector_4"]
-            )
-    else:
-        dg = loki.load_detectors(file, detectors=["loki_detector_0", "loki_detector_4"])
-    assert set(dg.keys()) == {"loki_detector_0", "loki_detector_4"}
+        dg = loki.load_detectors(file, detectors=banks)
+    assert set(dg.keys()) == set(banks)
 
 
 @pytest.mark.parametrize("file", FILES)
@@ -68,35 +48,15 @@ def test_load_monitors_all_monitors(file):
 
 
 @pytest.mark.parametrize("file", FILES)
-def test_load_monitors_one_monitor(file):
+@pytest.mark.parametrize(
+    "monitors",
+    [["beam_monitor_m0"], ["beam_monitor_m1", "beam_monitor_m3"]],
+)
+def test_load_monitors_selected_monitor(file, monitors):
 
     if file == FILES[1]:
         with pytest.warns(UserWarning, match="Falling back"):
-            mons = loki.load_monitors(file, monitors=["beam_monitor_m0"])
+            mons = loki.load_monitors(file, monitors=monitors)
     else:
-        mons = loki.load_monitors(file, monitors=["beam_monitor_m0"])
-    assert set(mons.keys()) == {"beam_monitor_m0"}
-
-
-@pytest.mark.parametrize("file", FILES)
-def test_load_monitors_two_monitors(file):
-
-    if file == FILES[1]:
-        with pytest.warns(UserWarning, match="Falling back"):
-            mons = loki.load_monitors(
-                file, monitors=["beam_monitor_m1", "beam_monitor_m3"]
-            )
-    else:
-        mons = loki.load_monitors(file, monitors=["beam_monitor_m1", "beam_monitor_m3"])
-    assert set(mons.keys()) == {"beam_monitor_m1", "beam_monitor_m3"}
-
-
-@pytest.mark.parametrize("file", FILES)
-def test_load_monitors_one_monitor_from_str(file):
-
-    if file == FILES[1]:
-        with pytest.warns(UserWarning, match="Falling back"):
-            mons = loki.load_monitors(file, monitors="beam_monitor_m1")
-    else:
-        mons = loki.load_monitors(file, monitors="beam_monitor_m1")
-    assert set(mons.keys()) == {"beam_monitor_m1"}
+        mons = loki.load_monitors(file, monitors=monitors)
+    assert set(mons.keys()) == set(monitors)

@@ -39,7 +39,7 @@ _registry = make_registry(
         "DREAM-high-flux-wavelength-lut-5m-80m-bc215.h5": "md5:10c80c9de311cfa246f7b2c165eb0b49",  # noqa: E501
         "DREAM-high-flux-wavelength-lut-5m-80m-bc240.h5": "md5:9741176f8da9b34c2a15967a43e21462",  # noqa: E501
         # Small coda file
-        "coda_dream_999999_00024375_small.hdf": "md5:8aefebf6408afc259c2048366295253d",  # noqa: E501
+        "coda_dream_999999_00024365_small.hdf": "md5:1a95ac84a974a13e53005e5307ffbb6b",  # noqa: E501
     },
 )
 
@@ -300,4 +300,4 @@ def dream_coda_file() -> Path:
     Path to a DREAM coda file (09/10/2026).
     The original file was shrunk using tools/shrink_nexus.py.
     """
-    return get_path("coda_dream_999999_00024375_small.hdf")
+    return get_path("coda_dream_999999_00024365_small.hdf")
