@@ -39,7 +39,7 @@ _registry = make_registry(
         "DREAM-high-flux-wavelength-lut-5m-80m-bc215.h5": "md5:10c80c9de311cfa246f7b2c165eb0b49",  # noqa: E501
         "DREAM-high-flux-wavelength-lut-5m-80m-bc240.h5": "md5:9741176f8da9b34c2a15967a43e21462",  # noqa: E501
         # Small coda file
-        "coda_dream_999999_00024365_small.hdf": "md5:1a95ac84a974a13e53005e5307ffbb6b",
+        "coda_dream_999999_00024365_small.hdf": "md5:05428a195c0cea53b14383ea5a2ebff9",
     },
 )
 
