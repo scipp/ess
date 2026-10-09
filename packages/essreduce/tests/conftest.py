@@ -70,6 +70,17 @@ def tbl_registry() -> Registry:
 
 
 @pytest.fixture(scope='session')
+def odin_registry() -> Registry:
+    return make_registry(
+        'ess/odin',
+        files={
+            "ymir_lego_odin.hdf": "md5:59b56b4ca2a264983df2d5590853c9fa",
+        },
+        version='3',
+    )
+
+
+@pytest.fixture(scope='session')
 def bifrost_simulated_elastic(bifrost_registry: Registry) -> Path:
     """McStas simulation with elastic incoherent scattering + phonon."""
     return bifrost_registry.get_path('BIFROST_20240914T053723.h5')
@@ -118,3 +129,9 @@ def dream_coda_test_file(dream_registry: Registry) -> Path:
 def tbl_commissioning_orca_file(tbl_registry: Registry) -> Path:
     """TBL file from cold commissioning with the ORCA detector."""
     return tbl_registry.get_path('857127_00000112_small.hdf')
+
+
+@pytest.fixture(scope='session')
+def odin_lego_images(odin_registry: Registry) -> Path:
+    """Lego images for the Odin instrument."""
+    return odin_registry.get_path('ymir_lego_odin.hdf')
