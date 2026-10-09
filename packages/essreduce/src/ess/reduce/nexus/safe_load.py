@@ -5,7 +5,7 @@ Fail-safe loaders for NeXus files
 """
 
 from pathlib import Path
-from typing import NewType
+from typing import Literal, NewType
 
 import sciline as sl
 import scipp as sc
@@ -32,6 +32,14 @@ def _make_workflow(filename: str | Path) -> sl.Pipeline:
     return wf
 
 
+def _find_detectors_or_monitors(
+    filename: str | Path, kind: Literal[snx.NXdetector, snx.NXmonitor]
+) -> list[str]:
+    with snx.File(filename) as f:
+        items = f[INSTRUMENT_PATH][kind]
+    return list(items.keys())
+
+
 def _find_data_keys(
     entry: snx.Group, group_name: str, filename: str | Path
 ) -> list[str]:
@@ -47,22 +55,22 @@ def _find_data_keys(
     return keys
 
 
-def _load_detector_with_workflow(wf: sl.Pipeline, bank: str) -> sc.DataArray:
-    wf[NeXusDetectorName] = bank
+def _load_detector_with_workflow(wf: sl.Pipeline, detector: str) -> sc.DataArray:
+    wf[NeXusDetectorName] = detector
     return wf.compute(RawDetector[AnyRun])
 
 
-def _load_detector_with_fallback(filename: str | Path, bank: str) -> sc.DataArray:
+def _load_detector_with_fallback(filename: str | Path, detector: str) -> sc.DataArray:
     with snx.File(filename) as f:
-        entry = f[f'{INSTRUMENT_PATH}/{bank}']
-        keys = _find_data_keys(entry=entry, group_name=bank, filename=filename)
+        entry = f[f'{INSTRUMENT_PATH}/{detector}']
+        keys = _find_data_keys(entry=entry, group_name=detector, filename=filename)
         da = snx.compute_positions(entry[()])[keys[0]]
     return da
 
 
 def load_detectors(
     filename: str | Path,
-    banks: list[str] | str,
+    detectors: list[str] | str | None = None,
     fold: dict | None = None,
 ) -> sc.DataGroup:
     """
@@ -73,23 +81,25 @@ def load_detectors(
     ----------
     filename:
         Path to the NeXus file.
-    banks:
-        List of detector banks to load. A single string can also be provided to load
-        only one bank.
+    detectors:
+        List of detectors to load. A single string can also be provided to load
+        only one detector. If ``None``, all NXdetectors are loaded.
     """
 
-    if isinstance(banks, str):
-        banks = [banks]
+    if detectors is None:
+        detectors = _find_detectors_or_monitors(filename, snx.NXdetector)
+    if isinstance(detectors, str):
+        detectors = [detectors]
 
     wf = _make_workflow(filename)
 
     dg = sc.DataGroup()
-    for bank in banks:
+    for detector in detectors:
         try:
-            dg[bank] = _load_detector_with_workflow(wf, bank)
+            dg[detector] = _load_detector_with_workflow(wf, detector)
         except Exception:  # noqa: PERF203
             try:
-                dg[bank] = _load_detector_with_fallback(filename, bank)
+                dg[detector] = _load_detector_with_fallback(filename, detector)
             except Exception:  # noqa: S112
                 continue
 
@@ -113,7 +123,9 @@ def _load_monitor_with_fallback(filename: str | Path, monitor: str) -> sc.DataAr
     return da
 
 
-def load_monitors(filename: str | Path, monitors: list[str] | str) -> sc.DataGroup:
+def load_monitors(
+    filename: str | Path, monitors: list[str] | str | None = None
+) -> sc.DataGroup:
     """
     Load monitor data from a NeXus file. We attempt to use the GenericNeXusWorkflow
     first and fall back to raw Scippnexus code if necessary.
@@ -124,9 +136,11 @@ def load_monitors(filename: str | Path, monitors: list[str] | str) -> sc.DataGro
         Path to the NeXus file.
     monitors:
         List of monitors to load. A single string can also be provided to load
-        only one monitor.
+        only one monitor. If ``None``, all NXmonitors are loaded.
     """
 
+    if monitors is None:
+        monitors = _find_detectors_or_monitors(filename, snx.NXmonitor)
     if isinstance(monitors, str):
         monitors = [monitors]
 

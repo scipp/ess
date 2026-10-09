@@ -10,6 +10,7 @@ import importlib.metadata
 from .beamline import InstrumentConfiguration
 from .instrument_view import instrument_view
 from .io import load_geant4_csv
+from .safe_load import load_detectors, load_monitors
 from .workflows import (
     DreamGeant4MonitorHistogramWorkflow,
     DreamGeant4MonitorIntegratedWorkflow,
@@ -36,5 +37,7 @@ __all__ = [
     'InstrumentConfiguration',
     '__version__',
     'instrument_view',
+    'load_detectors',
     'load_geant4_csv',
+    'load_monitors',
 ]

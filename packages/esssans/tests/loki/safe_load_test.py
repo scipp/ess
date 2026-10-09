@@ -26,9 +26,9 @@ def test_load_detectors_one_bank(file):
 
     if file == FILES[1]:
         with pytest.warns(UserWarning, match="depends_on chain"):
-            dg = loki.load_detectors(file, banks=["loki_detector_0"])
+            dg = loki.load_detectors(file, detectors=["loki_detector_0"])
     else:
-        dg = loki.load_detectors(file, banks=["loki_detector_0"])
+        dg = loki.load_detectors(file, detectors=["loki_detector_0"])
     assert set(dg.keys()) == {"loki_detector_0"}
 
 
@@ -37,9 +37,9 @@ def test_load_detectors_one_bank_from_str(file):
 
     if file == FILES[1]:
         with pytest.warns(UserWarning, match="depends_on chain"):
-            dg = loki.load_detectors(file, banks="loki_detector_0")
+            dg = loki.load_detectors(file, detectors="loki_detector_0")
     else:
-        dg = loki.load_detectors(file, banks="loki_detector_0")
+        dg = loki.load_detectors(file, detectors="loki_detector_0")
     assert set(dg.keys()) == {"loki_detector_0"}
 
 
@@ -48,9 +48,11 @@ def test_load_detectors_two_banks(file):
 
     if file == FILES[1]:
         with pytest.warns(UserWarning, match="depends_on chain"):
-            dg = loki.load_detectors(file, banks=["loki_detector_0", "loki_detector_4"])
+            dg = loki.load_detectors(
+                file, detectors=["loki_detector_0", "loki_detector_4"]
+            )
     else:
-        dg = loki.load_detectors(file, banks=["loki_detector_0", "loki_detector_4"])
+        dg = loki.load_detectors(file, detectors=["loki_detector_0", "loki_detector_4"])
     assert set(dg.keys()) == {"loki_detector_0", "loki_detector_4"}
 
 

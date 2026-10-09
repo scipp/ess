@@ -14,7 +14,7 @@ from .workflow import DETECTOR_BANK_SIZES
 
 
 def load_detectors(
-    filename: str | Path, banks: list[str] | str | None = None
+    filename: str | Path, detectors: list[str] | str | None = None
 ) -> sc.DataGroup:
     """
     Robust loader for detector data from a Loki file.
@@ -23,29 +23,12 @@ def load_detectors(
     ----------
     filename:
         Path to the Loki file.
-    banks:
-        List of detector banks to load. A single string can also be provided to load
-        only one bank. If ``None``, all banks are loaded.
+    detectors:
+        List of detectors to load. A single string can also be provided to load
+        only one detector. If ``None``, all detectors are loaded.
     """
-    if banks is None:
-        banks = list(DETECTOR_BANK_SIZES.keys())
-    return safe_load.load_detectors(filename, banks, fold=DETECTOR_BANK_SIZES)
+    return safe_load.load_detectors(filename, detectors, fold=DETECTOR_BANK_SIZES)
 
 
-def load_monitors(
-    filename: str | Path, monitors: list[str] | str | None = None
-) -> sc.DataGroup:
-    """
-    Robust loader for monitor data from a Loki file.
-
-    Parameters
-    ----------
-    filename:
-        Path to the Loki file.
-    monitors:
-        List of monitors to load. A single string can also be provided to load
-        only one monitor. If ``None``, all monitors are loaded.
-    """
-    if monitors is None:
-        monitors = [f"beam_monitor_m{i}" for i in range(5)]
-    return safe_load.load_monitors(filename, monitors)
+load_monitors = safe_load.load_monitors
+"""Robust loader for monitor data from a Loki file."""
