@@ -28,7 +28,7 @@ def dspacing_peaks_from_cif(cif, intensity_threshold=None, **kwargs) -> sc.DataA
         The ``intensity_threshold`` must be convertible to unit ``barn``.
 
     kwargs:
-        Can be anything that :py:`NCrystal.NCMATComposer.from_cif` supports.
+        Can be anything that :py:meth:`NCrystal.NCMATComposer.from_cif` supports.
         For example: ``uiso_temperature`` or ``override_spacegroup``.
 
     Returns
