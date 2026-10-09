@@ -53,8 +53,12 @@ def loki_registry() -> Registry:
             'PolyGauss_I0-50_Rg-60.h5': 'md5:f5d60d9c2286cb197b8cd4dc82db3d7e',
             # XML file for the pixel mask
             'mask_new_July2022.xml': 'md5:421b6dc9db74126ffbc5d88164d017b0',
+            # Small CODA file for testing purposes (data from only 5 pulses)
+            'loki-coda-5-pulses.hdf': 'md5:8368779651ccf101612b35ca075d0298',
+            # File recorded during a Loki detector test
+            'loki_336349_00000342.hdf': 'md5:3aefc2c2df52439c38904da9ffa82416',
         },
-        version='2',
+        version='3',
     )
 
 
@@ -114,6 +118,18 @@ def loki_tutorial_background_run_60393(loki_registry: Registry) -> Path:
 def loki_tutorial_sample_transmission_run(loki_registry: Registry) -> Path:
     """Sample transmission run (sample + sample holder/can + transmission monitor)."""
     return loki_registry.get_path('60394-2022-02-28_2215.nxs')
+
+
+@pytest.fixture(scope='session')
+def loki_coda_file(loki_registry: Registry) -> Path:
+    """Small CODA file for testing purposes (data from only 5 pulses)."""
+    return loki_registry.get_path("loki-coda-5-pulses.hdf")
+
+
+@pytest.fixture(scope='session')
+def loki_broken_file(loki_registry: Registry) -> Path:
+    """Small LoKI file with broken transformations and monitor data."""
+    return loki_registry.get_path("loki_336349_00000342.hdf")
 
 
 @pytest.fixture(scope='session')

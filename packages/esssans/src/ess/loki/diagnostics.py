@@ -111,6 +111,12 @@ class LokiBankViewer(ipw.VBox):
 
         with plt.ioff():
             self.main_figure, axs = plt.subplots(3, 3, figsize=figsize)
+            if not hasattr(self.main_figure.canvas, "has_trait"):
+                raise RuntimeError(
+                    "The LokiBankViewer can only be used with interactive figures"
+                    "in a Jupyter notebook. Use `%matplotlib widget` at the start of "
+                    "your notebook."
+                )
             bank_figures = [plt.subplots(figsize=figsize) for _ in range(9)]
 
         self.subplots = []

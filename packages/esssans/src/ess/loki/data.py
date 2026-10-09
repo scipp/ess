@@ -60,6 +60,8 @@ _registry = make_registry(
         'loki-coda-5-pulses.hdf': 'md5:8368779651ccf101612b35ca075d0298',
         # Wavelength lookup table without choppers
         'loki-wavelength-lookup-table-no-choppers.h5': 'md5:34cc975a00383653cce4b3e2356e0dc7',  # noqa: E501
+        # File recorded during a Loki detector test
+        'loki_336349_00000342.hdf': 'md5:3aefc2c2df52439c38904da9ffa82416',
     },
     version='3',
 )
@@ -191,3 +193,13 @@ def loki_coda_file() -> Path:
     using the tools/shrink_loki_nexus.py script.
     """
     return _registry.get_path("loki-coda-5-pulses.hdf")
+
+
+def loki_broken_file() -> Path:
+    """
+    Small LoKI file with broken transformations and monitor data for testing purposes.
+    The file was recorded at the Loki instrument and contains no events.
+    It has an empty time-dependent transformation for the detector bank 0 and some badly
+    formed monitor data.
+    """
+    return _registry.get_path("loki_336349_00000342.hdf")
