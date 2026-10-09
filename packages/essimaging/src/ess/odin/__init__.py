@@ -3,12 +3,12 @@
 
 import importlib.metadata
 
-from . import beamline, data
+from . import beamline
 from .beamline import nexus_name
 from .workflows import OdinBraggEdgeWorkflow, OdinOrcaWorkflow, OdinWorkflow
 
 try:
-    __version__ = importlib.metadata.version("esstbl")
+    __version__ = importlib.metadata.version("essodin")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
@@ -19,6 +19,5 @@ __all__ = [
     "OdinOrcaWorkflow",
     "OdinWorkflow",
     "beamline",
-    "data",
     "nexus_name",
 ]

@@ -397,6 +397,26 @@ def test_lut_workflow_guesses_pulse_stride():
         assert wf.compute(unwrap.PulseStride[AnyRun]) == i
 
 
+def test_lut_workflow_pulse_stride_guess_ignores_choppers_out_of_sync_with_source():
+    wf = _make_workflow()
+    choppers = _make_choppers()
+    # 7 Hz requires a pulse stride of 2. 5 Hz is out of sync with the 14 Hz source,
+    # and would give a stride of round(14 / 5) = 3, at which the 7 Hz chopper would
+    # also be out of sync with the frame.
+    choppers['FOC_1'] = dataclasses.replace(
+        choppers['FOC_1'], frequency=sc.scalar(-7.0, unit='Hz')
+    )
+    choppers['FOC_2'] = dataclasses.replace(
+        choppers['FOC_2'], frequency=sc.scalar(5.0, unit='Hz')
+    )
+    wf[unwrap.DiskChoppers[AnyRun]] = choppers
+
+    assert wf.compute(unwrap.PulseStride[AnyRun]) == 2
+    processed = wf.compute(unwrap.FrameCompatibleDiskChoppers[AnyRun])
+    closed = [key for key, chopper in processed.items() if chopper.slit_begin.size == 0]
+    assert closed == ['FOC_2']
+
+
 @pytest.mark.parametrize("wavelength_from", ["analytical", "simulation"])
 def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
     wf = _make_workflow(wavelength_from)
