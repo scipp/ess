@@ -25,6 +25,7 @@ from ess.reduce.nexus.types import (
     NeXusName,
     NeXusTransformation,
     PreopenNeXusFile,
+    ProtonCharge,
     RawChoppers,
     RawDetector,
     RawMonitor,
@@ -1191,3 +1192,37 @@ def test_convert_raw_to_disk_choppers_moving_position():
         disk_choppers['chopper1'].axle_position,
         sc.vector([0, 0, 6], unit='m'),
     ), "Expected position to be taken from the first time point of the log"
+
+
+def test_load_proton_charge(odin_lego_images: Path) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[Filename[SampleRun]] = odin_lego_images
+    pc = wf.compute(ProtonCharge[SampleRun])
+    assert "time" in pc.coords
+    assert "time" in pc.dims
+    assert pc.unit == "uC"
+
+
+def test_load_proton_charge_label_based_time_interval(odin_lego_images: Path) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[Filename[SampleRun]] = odin_lego_images
+    unfiltered = wf.compute(ProtonCharge[SampleRun])
+    assert unfiltered.sizes['time'] > 0
+
+    wf[TimeInterval[SampleRun]] = TimeInterval(
+        slice(
+            sc.datetime("2024-08-14T14:15:36", unit='ns'),
+            sc.datetime("2024-08-14T14:15:40", unit='ns'),
+        )
+    )
+    filtered = wf.compute(ProtonCharge[SampleRun])
+    assert filtered.sizes['time'] > 0
+    assert filtered.sizes['time'] < unfiltered.sizes['time']
+
+
+def test_load_proton_charge_index_based_time_interval(odin_lego_images: Path) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[Filename[SampleRun]] = odin_lego_images
+    wf[TimeInterval[SampleRun]] = TimeInterval(slice(1, 3))
+    filtered = wf.compute(ProtonCharge[SampleRun])
+    assert filtered.sizes['time'] == 2
