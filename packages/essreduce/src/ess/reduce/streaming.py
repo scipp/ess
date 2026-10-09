@@ -3,7 +3,7 @@
 """This module provides tools for running workflows in a streaming fashion."""
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
 
@@ -277,13 +277,8 @@ class _FedWorkflow:
     repeatedly, for the largest objects in the process. Here each input is instead
     provided by a provider reading a mapping owned by this class, so feeding a value
     is a plain dict write and the graph structure, which does not depend on the
-    values, stays as it was built.
-
-    Inputs are wired up once, at construction. Wiring assigns to the pipeline before
-    inserting the provider because only assignment prunes the branch the input
-    replaces: ``Pipeline.__setitem__`` removes the ancestors of the key, whereas
-    ``Pipeline.insert`` only cuts the key's incoming edges and leaves the orphaned
-    branch in the graph, for every later ``Pipeline.get`` to walk again.
+    values, stays as it was built. Inputs are wired up once, at construction, see
+    :func:`_wire_input`.
 
     A value stays readable until it is released. Reading a key that holds no value
     raises, so a workflow computed before its inputs arrived fails, naming the key,
@@ -297,10 +292,12 @@ class _FedWorkflow:
     ) -> None:
         # Wiring mutates the pipeline, so we take a copy and own it from here on.
         self._workflow = workflow.copy()
+        # The providers hold the mapping, not this instance: capturing ``self`` would
+        # close the cycle pipeline -> provider -> closure -> self -> pipeline, which
+        # only the cyclic garbage collector can break.
         self._values: dict[sciline.typing.Key, Any] = {}
         for key in inputs:
-            self._workflow[key] = None  # prunes the branch this input replaces
-            self._insert_provider(key)
+            _wire_input(self._workflow, key, self._values)
 
     def __setitem__(self, key: sciline.typing.Key, value: Any) -> None:
         self._values[key] = value
@@ -315,23 +312,35 @@ class _FedWorkflow:
         """Compute ``keys`` from the values fed so far."""
         return self._workflow.compute(keys)
 
-    def _insert_provider(self, key: sciline.typing.Key) -> None:
-        # Binding the mapping to a local keeps the closure, and thus the pipeline
-        # holding it, from referencing this instance: capturing ``self`` would close
-        # the cycle pipeline -> provider -> closure -> self -> pipeline, which only
-        # the cyclic garbage collector can break.
-        values = self._values
 
-        def provide_input_value() -> Any:
-            try:
-                return values[key]
-            except KeyError:
-                raise ValueError(f"No value was fed for '{key}'") from None
+def _wire_input(
+    workflow: sciline.Pipeline,
+    key: sciline.typing.Key,
+    values: Mapping[sciline.typing.Key, Any],
+) -> None:
+    """
+    Make ``key`` an input of ``workflow`` that reads its value from ``values``.
 
-        # Sciline deduces the provided key from the return annotation. The key is known
-        # only at runtime, so it has to be patched in.
-        provide_input_value.__annotations__ = {'return': key}
-        self._workflow.insert(provide_input_value)
+    Reading the key raises while ``values`` holds no value for it.
+
+    Wiring assigns to the pipeline before inserting the provider because only
+    assignment prunes the branch the input replaces: ``Pipeline.__setitem__`` removes
+    the ancestors of the key, whereas ``Pipeline.insert`` only cuts the key's incoming
+    edges and leaves the orphaned branch in the graph, for every later
+    ``Pipeline.get`` to walk again.
+    """
+    workflow[key] = None  # prunes the branch this input replaces
+
+    def provide_input_value() -> Any:
+        try:
+            return values[key]
+        except KeyError:
+            raise ValueError(f"No value was fed for '{key}'") from None
+
+    # Sciline deduces the provided key from the return annotation. The key is known
+    # only at runtime, so it has to be patched in.
+    provide_input_value.__annotations__ = {'return': key}
+    workflow.insert(provide_input_value)
 
 
 class StreamProcessor:
@@ -432,8 +441,8 @@ class StreamProcessor:
         }
         accumulator_keys = set(self._accumulators)
         # Each cached context node goes to the workflow(s) that read it: the chunk
-        # workflow if it is upstream of an accumulator, the finalize workflow if it is
-        # a target or downstream of an accumulator, or both.
+        # workflow if computing an accumulator reads it, the finalize workflow if it is
+        # a target or computing a target from the accumulators reads it, or both.
         read_by_chunk = _find_keys_read(
             graph, outputs=accumulator_keys, inputs=cached_context_nodes
         )
@@ -781,10 +790,12 @@ def _build_streaming_workflow(
     workflow = sciline.Pipeline()
     for key in target_keys:
         workflow[key] = base_workflow[key]
-    for key in dynamic_keys:
-        workflow[key] = None  # hack to prune branches
-    for key in context_keys:
-        workflow[key] = None
+    # Placeholders that raise when read. The stream processor computes on copies of
+    # this workflow, each wired up for the keys it is fed, so a computation that
+    # reaches a dynamic or context key it was not fed fails instead of reading a
+    # stand-in value.
+    for key in (*dynamic_keys, *context_keys):
+        _wire_input(workflow, key, {})
 
     nodes = _find_descendants(workflow, dynamic_keys + context_keys)
     last_static = _find_parents(workflow, nodes) - nodes
@@ -861,7 +872,6 @@ def _find_keys_read(
     cut_graph.remove_edges_from(
         [edge for key in inputs for edge in graph.in_edges(key)]
     )
-    outputs = outputs & set(graph.nodes)
     read = set(outputs)
     for key in outputs:
         read |= nx.ancestors(cut_graph, key)

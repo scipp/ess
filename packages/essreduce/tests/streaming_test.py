@@ -225,8 +225,8 @@ def test_StreamProcessor_without_bypass_raises() -> None:
         accumulators=(AccumA,),  # Note: No AccumB
     )
     streaming_wf.accumulate({DynamicA: 1, DynamicB: 4})
-    # Sciline passes `None` to the provider that needs AccumB.
-    with pytest.raises(TypeError, match='unsupported operand type'):
+    # Without bypass, finalize is not fed the dynamic key that AccumB depends on.
+    with pytest.raises(ValueError, match=r'No value was fed for .*DynamicB'):
         _ = streaming_wf.finalize()
 
 
@@ -1040,9 +1040,13 @@ def test_StreamProcessor_finalize_provider_uses_context_directly() -> None:
     assert sc.identical(result[Output], sc.scalar(207))
 
 
-@pytest.mark.parametrize('derived_is_target', [False, True])
-def test_StreamProcessor_finalize_reuses_context_derived_node(
-    derived_is_target: bool,
+@pytest.mark.parametrize('chunk_reads_derived', [False, True])
+@pytest.mark.parametrize(
+    ('output_reads_derived', 'derived_is_target'),
+    [(True, False), (False, True), (True, True)],
+)
+def test_StreamProcessor_computes_context_derived_node_once_per_context_change(
+    chunk_reads_derived: bool, output_reads_derived: bool, derived_is_target: bool
 ) -> None:
     Streamed = NewType('Streamed', int)
     Context = NewType('Context', int)
@@ -1059,10 +1063,28 @@ def test_StreamProcessor_finalize_reuses_context_derived_node(
     def accumulate(streamed: Streamed) -> Accumulated:
         return Accumulated(streamed)
 
-    def make_output(accumulated: Accumulated, derived: Derived) -> Output:
+    def accumulate_scaled(streamed: Streamed, derived: Derived) -> Accumulated:
+        return Accumulated(streamed * derived)
+
+    def make_output(accumulated: Accumulated) -> Output:
+        return Output(accumulated)
+
+    def make_output_shifted(accumulated: Accumulated, derived: Derived) -> Output:
         return Output(accumulated + derived)
 
-    wf = sciline.Pipeline((derive, accumulate, make_output))
+    def scale(derived: int) -> int:
+        return derived if chunk_reads_derived else 1
+
+    def shift(derived: int) -> int:
+        return derived if output_reads_derived else 0
+
+    wf = sciline.Pipeline(
+        (
+            derive,
+            accumulate_scaled if chunk_reads_derived else accumulate,
+            make_output_shifted if output_reads_derived else make_output,
+        )
+    )
     streaming_wf = streaming.StreamProcessor(
         base_workflow=wf,
         dynamic_keys=(Streamed,),
@@ -1074,56 +1096,22 @@ def test_StreamProcessor_finalize_reuses_context_derived_node(
     streaming_wf.set_context({Context: sc.scalar(3)})
     assert derive.call_count == 1
     streaming_wf.accumulate({Streamed: sc.scalar(1)})
-    assert sc.identical(streaming_wf.finalize()[Output], sc.scalar(1 + 6))
+    result = streaming_wf.finalize()
+    assert sc.identical(result[Output], sc.scalar(1 * scale(6) + shift(6)))
     streaming_wf.accumulate({Streamed: sc.scalar(2)})
-    assert sc.identical(streaming_wf.finalize()[Output], sc.scalar(3 + 6))
+    result = streaming_wf.finalize()
+    assert sc.identical(result[Output], sc.scalar(3 * scale(6) + shift(6)))
     assert derive.call_count == 1
 
     streaming_wf.set_context({Context: sc.scalar(5)})
     assert derive.call_count == 2
-    assert sc.identical(streaming_wf.finalize()[Output], sc.scalar(3 + 10))
+    streaming_wf.accumulate({Streamed: sc.scalar(1)})
+    result = streaming_wf.finalize()
+    expected = 3 * scale(6) + 1 * scale(10) + shift(10)
+    assert sc.identical(result[Output], sc.scalar(expected))
+    if derived_is_target:
+        assert sc.identical(result[Derived], sc.scalar(10))
     streaming_wf.finalize()
-    assert derive.call_count == 2
-
-
-def test_StreamProcessor_reuses_context_derived_node_in_chunk_and_finalize() -> None:
-    Streamed = NewType('Streamed', int)
-    Context = NewType('Context', int)
-    Derived = NewType('Derived', int)
-    Accumulated = NewType('Accumulated', int)
-    Output = NewType('Output', int)
-
-    def derive(context: Context) -> Derived:
-        derive.call_count += 1
-        return Derived(context * 2)
-
-    derive.call_count = 0
-
-    def accumulate(streamed: Streamed, derived: Derived) -> Accumulated:
-        return Accumulated(streamed * derived)
-
-    def make_output(accumulated: Accumulated, derived: Derived) -> Output:
-        return Output(accumulated + derived)
-
-    wf = sciline.Pipeline((derive, accumulate, make_output))
-    streaming_wf = streaming.StreamProcessor(
-        base_workflow=wf,
-        dynamic_keys=(Streamed,),
-        context_keys=(Context,),
-        target_keys=(Output,),
-        accumulators=(Accumulated,),
-    )
-
-    streaming_wf.set_context({Context: sc.scalar(3)})
-    streaming_wf.accumulate({Streamed: sc.scalar(1)})
-    assert sc.identical(streaming_wf.finalize()[Output], sc.scalar(1 * 6 + 6))
-    streaming_wf.accumulate({Streamed: sc.scalar(2)})
-    assert sc.identical(streaming_wf.finalize()[Output], sc.scalar(3 * 6 + 6))
-    assert derive.call_count == 1
-
-    streaming_wf.set_context({Context: sc.scalar(5)})
-    streaming_wf.accumulate({Streamed: sc.scalar(1)})
-    assert sc.identical(streaming_wf.finalize()[Output], sc.scalar(3 * 6 + 10 + 10))
     assert derive.call_count == 2
 
 
