@@ -16,7 +16,10 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
     def __init__(self, sizes: dict[str, int], dim: str):
         self._sizes = sizes
         self.dim_selector = ipw.Dropdown(
-            options=sizes.keys(), value=dim, description=""
+            options=sizes.keys(),
+            value=dim,
+            description="",
+            layout={"width": "initial"},
         )
         self.slider = ipw.IntSlider(
             min=1, max=self._sizes[dim], value=1, style={"description_width": "initial"}
