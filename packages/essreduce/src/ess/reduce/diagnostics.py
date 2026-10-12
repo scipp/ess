@@ -87,7 +87,7 @@ def _slice_or_sum(
             else:
                 if ind > item.sizes[dim]:
                     # Make a blank data array to avoid indexing errors
-                    item = sc.full_like(item[dim, 0], fill_value=float("nan"))
+                    item = sc.full_like(item[dim, 0], value=float("nan"))
                 else:
                     item = item[dim, ind - 1]
         out[key] = item
