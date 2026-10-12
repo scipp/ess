@@ -48,10 +48,8 @@ with h5.File(fname, 'r+') as ds:
     for key in keys:
         print(key)  # noqa: T201
         base_path = f"entry/instrument/{key}"
-        # min_det_num = ds[base_path + '/detector_number'][()].min()
         # All first dimensions can be divided by 16
         keep = int(np.prod(list(DETECTOR_BANK_SIZES[key].values()))) // 16
-        # max_det_num = keep + min_det_num
 
         del ds[base_path + '/pixel_shape']
         tmp = base_path + "/tmp"  # noqa: S108
