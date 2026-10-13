@@ -298,10 +298,9 @@ class BankExplorer(ipw.VBox):
         slider_dims = [sl.dim for sl in self.dim_sliders]
         self._visible_dims = [dim for dim in self.data.dims if dim not in slider_dims]
         for f in chain(self.subplots, self.tab_figs):
-            # Setting the dims to empty on the canvas makes it believe it is empty.
-            # When the canvas is empty, it is ready to receive new data with new
+            # We clear the dims on the view and the canvas, to make them believe they
+            # are empty, after which they are ready to receive new data with new
             # dimensions.
-            # print("Resetting dims for figure, Current dims:", f.canvas.dims)
             for key in f.view._dims:
                 f.view._dims[key] = None
             f.canvas.dims = {}
