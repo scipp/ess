@@ -517,9 +517,10 @@ def get_calibrated_monitor(
         Offset to add to the monitor position.
     """
     transform_unit = transform.value.unit
-    if transform_unit in (None, sc.units.dimensionless):
-        # No translation in the chain, e.g., an identity for depends_on='.' or a
-        # pure rotation. Such transforms carry no length unit, use the offset's.
+    if transform_unit == sc.units.dimensionless:
+        # No translation in the chain: an identity for depends_on='.' or a pure
+        # rotation, so use the offset's unit. This cannot mask a translation with a
+        # bad unit, since resolving the chain into `transform` already fails for that.
         transform_unit = offset.unit
     return EmptyMonitor[RunType, MonitorType](
         nexus.extract_signal_data_array(monitor).assign_coords(
