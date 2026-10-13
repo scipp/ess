@@ -576,6 +576,20 @@ def test_get_calibrated_monitor_subtracts_offset_from_position(
     assert_identical(monitor.coords['position'], sc.vector([1.1, 2.2, 3.3], unit='m'))
 
 
+def test_get_calibrated_monitor_without_transformations_is_at_offset() -> None:
+    depends_on = snx.TransformationChain(parent='/entry/instrument/mon', value='.')
+    nexus_monitor = workflow.NeXusComponent[Monitor1, SampleRun](
+        sc.DataGroup(data=sc.DataArray(sc.scalar(1.2)), depends_on=depends_on)
+    )
+    offset = sc.vector([0.1, 0.2, 0.3], unit='m')
+    monitor = workflow.get_calibrated_monitor(
+        nexus_monitor,
+        offset=offset,
+        transform=NeXusTransformation.from_chain(depends_on),
+    )
+    assert_identical(monitor.coords['position'], offset)
+
+
 def test_get_calibrated_monitor_with_time_dependent_transformation(
     time_dependent_depends_on: snx.TransformationChain,
 ) -> None:
