@@ -96,6 +96,8 @@ def _slice_or_sum(
         item = da
         for sl in slices:
             dim, ind = sl
+            if dim not in item.sizes:
+                continue
             if ind is None:
                 item = item.sum(dim)
             else:
@@ -136,7 +138,7 @@ class BankExplorer(ipw.VBox):
             {k: _add_missing_coordinates(da) for k, da in data.items()}
         )
         max_sizes = {
-            dim: max(da.sizes[dim] for da in self.data.values())
+            dim: max(da.sizes.get(dim, 0) for da in self.data.values())
             for dim in self.data.dims
         }
 
@@ -181,6 +183,8 @@ class BankExplorer(ipw.VBox):
         # )
 
         self.slice_node = pp.Node(_slice_or_sum, dg=self.data, slices=self.collect_node)
+
+        return
 
         with plt.ioff():
             ncols = 3
