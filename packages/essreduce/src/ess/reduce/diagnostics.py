@@ -5,18 +5,23 @@ from __future__ import annotations
 
 import math
 import warnings
+from itertools import chain
+from typing import Literal
 
 import ipywidgets as ipw
 import matplotlib.pyplot as plt
 import plopp as pp
 import scipp as sc
+from matplotlib.backend_bases import MouseEvent
 
 
 class DimSlider(ipw.HBox, ipw.ValueWidget):
-    def __init__(self, sizes: dict[str, int], dim: str):
+    def __init__(self, sizes: dict[str, int], dim: str, visible_dims: list[str]):
+        self._lock = False
         self._sizes = sizes
+        self._visible_dims = visible_dims
         self.dim_selector = ipw.Dropdown(
-            options=sizes.keys(),
+            options=[dim, *visible_dims],
             value=dim,
             description="",
             layout={"width": "initial"},
@@ -44,10 +49,10 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
             layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
 
-    def set_observe_callback(self, callback: callable, **kwargs):
-        self.dim_selector.observe(callback, **kwargs)
-        self.slider.observe(callback, **kwargs)
-        self.sum.observe(callback, **kwargs)
+    def on_dim_change(self, callback: callable):
+        self.dim_selector.observe(callback, names='value')
+        # self.slider.observe(callback, names='value')
+        # self.sum.observe(callback, names='value')
 
     @property
     def dim(self):
@@ -57,7 +62,16 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
     # def value(self):
     #     return (self.dim, self.slider.value)
 
+    def _update_options(self, visible_dims: list[str]):
+        backup = self.dim_selector.value
+        self.dim_selector.options = [self.dim, *visible_dims]
+        self._lock = True
+        self.dim_selector.value = backup
+        self._lock = False
+
     def _dim_changed(self, _=None):
+        if self._lock:
+            return
         self.slider.max = self._sizes[self.dim]
         self._on_subwidget_change()
 
@@ -99,7 +113,7 @@ class BankExplorer(ipw.VBox):
         self,
         data: sc.DataGroup,
         figsize=(12, 9),
-        displayed_dims: list[str] | None = None,
+        show_dims: list[str] | None = None,
         **kwargs,
     ):
         """Widget to view detector banks.
@@ -108,7 +122,7 @@ class BankExplorer(ipw.VBox):
         ----------
         data:
             DataGroup containing detector banks.
-        displayed_dims:
+        show_dims:
             List of dimensions to display. If ``None``, the last two dimensions are
             displayed.
         figsize:
@@ -121,20 +135,24 @@ class BankExplorer(ipw.VBox):
         self.data = sc.DataGroup(
             {k: _add_missing_coordinates(da) for k, da in data.items()}
         )
-
-        if displayed_dims is None:
-            displayed_dims = list(self.data.dims)[-2:]
-
-        other_dims = [dim for dim in self.data.dims if dim not in displayed_dims]
-
-        self.dim_sliders = {
-            dim: DimSlider(sizes=self.data.sizes, dim=dim) for dim in other_dims
-        }
-        self.dim_nodes = {
-            dim: pp.widget_node(slider) for dim, slider in self.dim_sliders.items()
+        max_sizes = {
+            dim: max(da.sizes[dim] for da in self.data.values())
+            for dim in self.data.dims
         }
 
-        self.collect_node = pp.Node(lambda *args: args, *self.dim_nodes.values())
+        self._visible_dims = show_dims
+        if self._visible_dims is None:
+            self._visible_dims = list(self.data.dims)[-2:]
+
+        other_dims = [dim for dim in self.data.dims if dim not in self._visible_dims]
+
+        self.dim_sliders = [
+            DimSlider(sizes=max_sizes, dim=dim, visible_dims=self._visible_dims)
+            for dim in other_dims
+        ]
+        dim_nodes = [pp.widget_node(slider) for slider in self.dim_sliders]
+
+        self.collect_node = pp.Node(lambda *args: args, *dim_nodes)
 
         # self.layer_slider = ipw.IntSlider(
         #     min=1, max=4, description="Layer", style={"description_width": 'initial'}
@@ -170,9 +188,9 @@ class BankExplorer(ipw.VBox):
             self.main_figure, axs = plt.subplots(
                 nrows=nrows, ncols=ncols, figsize=figsize
             )
-            bank_figures = [
-                plt.subplots(figsize=figsize) for _ in range(len(self.data))
-            ]
+            # bank_figures = [
+            #     plt.subplots(figsize=figsize) for _ in range(len(self.data))
+            # ]
 
         self.subplots = []
         self.tab_figs = []
@@ -186,18 +204,20 @@ class BankExplorer(ipw.VBox):
             self.subplots.append(
                 pp.imagefigure(n, ax=ax, title=bank, cbar=True, **kwargs)
             )
+            ax._bank_explorer_subplot_index = i
             self.tab_figs.append(
                 pp.imagefigure(
-                    ax=bank_figures[i][1],
+                    pp.Node(sc.full_like(n(), value=float("nan"))),
                     title=bank,
                     cbar=True,
-                    figsize=figsize,
+                    # Need to make some horizontal space for the toolbar
+                    figsize=(0.96 * figsize[0], figsize[1]),
                     **kwargs,
                 )
             )
-            bank_figures[i][0].canvas.header_visible = False
 
         self.main_figure.canvas.header_visible = False
+        self.main_figure.canvas.mpl_connect('button_press_event', self.switch_to_tab)
 
         # Create color map controls
         self.cmap_vmin = ipw.Text(
@@ -213,10 +233,13 @@ class BankExplorer(ipw.VBox):
         self.cmap_vmin.observe(self.update_cmin, names='value')
         self.cmap_vmax.observe(self.update_cmax, names='value')
 
+        is_log = next(
+            iter({kwargs.get('norm'), kwargs.get('logc')} - {None}), None
+        ) in ('log', True)
         self.log_button = ipw.ToggleButton(
             description="log",
             layout={"width": "40px"},
-            value=True if kwargs.get('norm', 'linear') == 'log' else False,
+            value=is_log,
         )
         self.log_button.observe(self.toggle_log, names="value")
 
@@ -233,11 +256,15 @@ class BankExplorer(ipw.VBox):
         self.tabs = ipw.Tab(
             layout={'width': f'{figsize[0] * self.main_figure.get_dpi() + 40}px'}
         )
-        self.tabs.children = [self.main_figure.canvas] + [
-            f.fig.canvas for f in self.tab_figs
-        ]
+        # self.tabs.children = [self.main_figure.canvas] + [
+        #     f.fig.canvas for f in self.tab_figs
+        # ]
+        self.tabs.children = [self.main_figure.canvas, *self.tab_figs]
         self.tabs.titles = ["All", *self.data.keys()]
         self.tabs.observe(self.update_node_routing, names='selected_index')
+
+        for sl in self.dim_sliders:
+            sl.on_dim_change(self.on_dim_change)
 
         # dim_slider_widgets = [
         #     widget
@@ -250,7 +277,7 @@ class BankExplorer(ipw.VBox):
                 ipw.HBox(
                     [
                         widget
-                        for dslider in self.dim_sliders.values()
+                        for dslider in self.dim_sliders
                         for widget in (
                             dslider,
                             ipw.HTML('<div style="width: 20px;"></div>'),
@@ -266,6 +293,32 @@ class BankExplorer(ipw.VBox):
                 self.tabs,
             ]
         )
+
+    def on_dim_change(self, _):
+        slider_dims = [sl.dim for sl in self.dim_sliders]
+        self._visible_dims = [dim for dim in self.data.dims if dim not in slider_dims]
+        for f in chain(self.subplots, self.tab_figs):
+            # Setting the dims to empty on the canvas makes it believe it is empty.
+            # When the canvas is empty, it is ready to receive new data with new
+            # dimensions.
+            # print("Resetting dims for figure, Current dims:", f.canvas.dims)
+            for key in f.view._dims:
+                f.view._dims[key] = None
+            f.canvas.dims = {}
+        self.update_node_routing({"new": self.tabs.selected_index})
+
+    def switch_to_tab(self, event: MouseEvent) -> None:
+        """
+        Switch to the tab corresponding to the subplot that was clicked.
+
+        Parameters
+        ----------
+        event:
+            The mouse event triggered by clicking on a subplot.
+        """
+        if hasattr(event.inaxes, '_bank_explorer_subplot_index'):
+            index = event.inaxes._bank_explorer_subplot_index
+            self.tabs.selected_index = index + 1
 
     def update_colormapper_norm(self) -> None:
         if self.tabs.selected_index == 0:
