@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=9ce135cc"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@
     <link rel="prev" title="ess.ymir.normalize.cleanse_sample_images" href="ess.ymir.normalize.cleanse_sample_images.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -623,6 +623,7 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.beamline.html">ess.odin.beamline</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.beamline.choppers.html">ess.odin.beamline.choppers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.beamline.nexus_name.html">ess.odin.beamline.nexus_name</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.data.html">ess.odin.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -844,9 +845,9 @@ proton charge or monitor counts depending on the experiment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>samples</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.ymir.normalize.SampleImageStacks.html#ess.ymir.normalize.SampleImageStacks" title="ess.ymir.normalize.SampleImageStacks"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.normalize.SampleImageStacks</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.DataArray</span></code></a>)</span>) – Sample image stack to be normalized.</p></li>
-<li><p><strong>background</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.ymir.normalize.BackgroundImage.html#ess.ymir.normalize.BackgroundImage" title="ess.ymir.normalize.BackgroundImage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.normalize.BackgroundImage</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.DataArray</span></code></a>)</span>) – Background image to be used for normalization.</p></li>
-<li><p><strong>factor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.ymir.normalize.ScaleFactor.html#ess.ymir.normalize.ScaleFactor" title="ess.ymir.normalize.ScaleFactor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.normalize.ScaleFactor</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – Scale factor for the normalization.</p></li>
+<li><p><strong>samples</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.ymir.normalize.SampleImageStacks.html#ess.ymir.normalize.SampleImageStacks" title="ess.ymir.normalize.SampleImageStacks"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.normalize.SampleImageStacks</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.DataArray</span></code></a>)</span>) – Sample image stack to be normalized.</p></li>
+<li><p><strong>background</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.ymir.normalize.BackgroundImage.html#ess.ymir.normalize.BackgroundImage" title="ess.ymir.normalize.BackgroundImage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.normalize.BackgroundImage</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.DataArray</span></code></a>)</span>) – Background image to be used for normalization.</p></li>
+<li><p><strong>factor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.ymir.normalize.ScaleFactor.html#ess.ymir.normalize.ScaleFactor" title="ess.ymir.normalize.ScaleFactor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.normalize.ScaleFactor</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Variable</span></code></a>)</span>) – Scale factor for the normalization.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -856,7 +857,7 @@ proton charge or monitor counts depending on the experiment.</p>
     the operation might fail and return negative values.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.ymir.normalize.NormalizedSampleImages.html#ess.ymir.normalize.NormalizedSampleImages" title="ess.ymir.normalize.NormalizedSampleImages"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.normalize.NormalizedSampleImages</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.DataArray</span></code></a>)</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.ymir.normalize.NormalizedSampleImages.html#ess.ymir.normalize.NormalizedSampleImages" title="ess.ymir.normalize.NormalizedSampleImages"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.normalize.NormalizedSampleImages</span></code></a> (<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.DataArray</span></code></a>)</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -922,7 +923,7 @@ proton charge or monitor counts depending on the experiment.</p>
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -943,7 +944,7 @@ proton charge or monitor counts depending on the experiment.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
+Current ESSimaging version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

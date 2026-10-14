@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=9ce135cc"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -620,6 +620,32 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.chopper</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiskChopper</span>
 
+
+<div class="viewcode-block" id="nexus_name">
+<a class="viewcode-back" href="../../../generated/modules/ess.odin.beamline.nexus_name.html#ess.odin.beamline.nexus_name">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">nexus_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the NeXus path for a given detector or monitor name.</span>
+<span class="sd">    The returned path is the location inside the `/entry/instrument` group of the NeXus</span>
+<span class="sd">    file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name:</span>
+<span class="sd">        Name of the detector or monitor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;timepix&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;tmpx&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;timepix3_efu&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;orca&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;orca&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;monitor&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="c1"># Assume that the monitor number is given at the end of the string</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;beam_monitor_</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
 <span class="c1"># Choppers</span>
 <span class="n">Hz</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span>
 <span class="n">deg</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span>
@@ -777,7 +803,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -798,7 +824,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
+Current ESSimaging version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

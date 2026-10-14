@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=9ce135cc"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.imaging.tools.analysis.resample" href="ess.imaging.tools.analysis.resample.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -621,6 +621,7 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.beamline.html">ess.odin.beamline</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.beamline.choppers.html">ess.odin.beamline.choppers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.beamline.nexus_name.html">ess.odin.beamline.nexus_name</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.data.html">ess.odin.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -836,15 +837,15 @@ divisible by the block sizes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>image</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – The image to resample.</p></li>
-<li><p><strong>sizes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – A dictionary specifying the desired size of the output image for each dimension.
+<li><p><strong>image</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – The image to resample.</p></li>
+<li><p><strong>sizes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – A dictionary specifying the desired size of the output image for each dimension.
 The original sizes should be divisible by the specified sizes.
 For example, <code class="docutils literal notranslate"><span class="pre">{'x':</span> <span class="pre">128,</span> <span class="pre">'y':</span> <span class="pre">128}</span></code> will create an output image of size
 128x128.
 Any dimensions with same sizes to the resizing image will be ignored.
 If the output image sizes will be same as the input image sizes,
 it will not apply the <code class="docutils literal notranslate"><span class="pre">method</span></code> and return a copy of the input image.</p></li>
-<li><p><strong>method</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – The reduction method to apply to the blocks. This can be a string referring to
+<li><p><strong>method</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – The reduction method to apply to the blocks. This can be a string referring to
 any valid Scipp reduction method, such as ‘sum’, ‘mean’, ‘max’, etc.
 Alternatively, a custom reduction function can be provided. The function
 signature should accept a <code class="docutils literal notranslate"><span class="pre">scipp.Variable</span></code> or <code class="docutils literal notranslate"><span class="pre">scipp.DataArray</span></code> as first
@@ -855,7 +856,7 @@ otherwise.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span></p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -933,7 +934,7 @@ if they are not sorted or not linear.</p>
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -954,7 +955,7 @@ if they are not sorted or not linear.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
+Current ESSimaging version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

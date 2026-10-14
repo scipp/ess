@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=9ce135cc"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.ymir.io.dummy_progress_wrapper" href="ess.ymir.io.dummy_progress_wrapper.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.1" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -621,6 +621,7 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.beamline.html">ess.odin.beamline</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.odin.beamline.choppers.html">ess.odin.beamline.choppers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.odin.beamline.nexus_name.html">ess.odin.beamline.nexus_name</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.odin.data.html">ess.odin.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -829,16 +830,16 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span>) – Output directory to save images.</p></li>
-<li><p><strong>image_stacks</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.io.AllImageStacks</span></code> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</span>) – Image stacks to save.</p></li>
-<li><p><strong>merge_image_by_key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Flag to merge images into one file.</p></li>
-<li><p><strong>overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Flag to overwrite existing files.
+<li><p><strong>output_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span>) – Output directory to save images.</p></li>
+<li><p><strong>image_stacks</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ess.ymir.io.AllImageStacks</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>)</span>) – Image stacks to save.</p></li>
+<li><p><strong>merge_image_by_key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Flag to merge images into one file.</p></li>
+<li><p><strong>overwrite</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Flag to overwrite existing files.
 If True, it will clear the output directory before saving images.</p></li>
-<li><p><strong>image_prefix_map</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference internal" href="ess.ymir.io.ImageKey.html#ess.ymir.io.ImageKey" title="ess.ymir.io.ImageKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageKey</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>, default: <code class="docutils literal notranslate"><span class="pre">{&lt;ImageKey.SAMPLE:</span> <span class="pre">0&gt;:</span> <span class="pre">'sample',</span> <span class="pre">&lt;ImageKey.DARK_CURRENT:</span> <span class="pre">2&gt;:</span> <span class="pre">'dc',</span> <span class="pre">&lt;ImageKey.OPEN_BEAM:</span> <span class="pre">1&gt;:</span> <span class="pre">'ob'}</span></code>) – Map of image name prefixes to their corresponding image key.</p></li>
+<li><p><strong>image_prefix_map</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference internal" href="ess.ymir.io.ImageKey.html#ess.ymir.io.ImageKey" title="ess.ymir.io.ImageKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageKey</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>, default: <code class="docutils literal notranslate"><span class="pre">{&lt;ImageKey.SAMPLE:</span> <span class="pre">0&gt;:</span> <span class="pre">'sample',</span> <span class="pre">&lt;ImageKey.DARK_CURRENT:</span> <span class="pre">2&gt;:</span> <span class="pre">'dc',</span> <span class="pre">&lt;ImageKey.OPEN_BEAM:</span> <span class="pre">1&gt;:</span> <span class="pre">'ob'}</span></code>) – Map of image name prefixes to their corresponding image key.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -904,7 +905,7 @@ If True, it will clear the output directory before saving images.</p></li>
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -925,7 +926,7 @@ If True, it will clear the output directory before saving images.</p></li>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 26.9.1 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
+Current ESSimaging version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
