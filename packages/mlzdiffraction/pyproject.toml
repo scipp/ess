@@ -1,0 +1,105 @@
+[build-system]
+requires = [
+  "setuptools>=77",
+  "setuptools_scm[toml]>=8.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlzdiffraction"
+description = "Diffraction data reduction for the MLZ"
+authors = [{ name = "Scipp contributors" }]
+license = "BSD-3-Clause"
+readme = "README.md"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+requires-python = ">=3.12"
+
+# IMPORTANT:
+# Run 'tox -e deps' after making changes here. This will update requirement files.
+# Make sure to list one dependency per line.
+dependencies = [
+  "essreduce>=26.6.1",
+  "numpy>=2",
+  "pandas>=2.1.2",
+  "sciline>=25.11.0",
+  "scipp>=26.3.1",
+  "scippneutron>=26.6.0",
+  "scippnexus>=25.06.0",
+]
+
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=9.0",
+]
+docs = [
+    "autodoc-pydantic>=2.0.0",
+    "ipykernel>=6.20.0",
+    "ipympl>=0.9.0",
+    "ipython>=8.8.0,!=8.7.0",
+    "myst-parser>=2.0.0",
+    "nbsphinx>=0.9.3",
+    "pandas>=2.1.2",
+    "pyarrow>=12.0.0",
+    "pydata-sphinx-theme>=0.14",
+    "sphinx>=7",
+    "sphinx-autodoc-typehints>=1.24.0",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.5.0",
+    "sphinxcontrib-bibtex>=2.5.0",
+    "pythreejs>=2.4.1",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/scipp/ess/issues"
+"Documentation" = "https://scipp.github.io/ess/mlzdiffraction"
+"Source" = "https://github.com/scipp/ess/tree/main/packages/mlzdiffraction"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mlz*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+"mlz.diffraction" = ["py.typed"]
+
+[tool.setuptools_scm]
+root = "../.."
+tag_regex = "^mlzdiffraction/(?P<version>[vV]?\\d+(?:\\.\\d+)*(?:[._-]?\\w+)*)$"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "mlzdiffraction/*[0-9]*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = """
+--strict-config
+--strict-markers
+--import-mode=importlib
+-ra
+-v
+"""
+testpaths = "tests"
+filterwarnings = [
+  "error",
+]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+warn_unreachable = true

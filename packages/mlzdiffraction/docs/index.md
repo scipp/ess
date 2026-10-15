@@ -20,7 +20,11 @@
 
 ## Installation
 
-ToDo
+Install the environment using Pixi:
+
+```sh
+pixi install -e mlzdiffraction
+```
 
 ## Get in touch
 

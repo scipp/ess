@@ -1,14 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-import os
-import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as get_version
 
 from sphinx.util import logging
-
-sys.path.insert(0, os.path.abspath("."))
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +32,8 @@ extensions = [
     "nbsphinx",
     "myst_parser",
 ]
+
+bibtex_bibfiles = []
 
 try:
     import sciline.sphinxext.domain_types  # noqa: F401
@@ -72,6 +70,7 @@ intersphinx_mapping = {
     "pydantic": ("https://docs.pydantic.dev/latest", None),
     "python": ("https://docs.python.org/3", None),
     # Scipp:
+    "essreduce": ("https://scipp.github.io/ess/reduce", None),
     "plopp": ("https://scipp.github.io/plopp", None),
     "sciline": ("https://scipp.github.io/sciline", None),
     "scipp": ("https://scipp.github.io/", None),
@@ -104,7 +103,6 @@ sciline_domain_types_aliases = {
     "scipp._scipp.core.DType": "scipp.DType",
     "scipp._scipp.core.Unit": "scipp.Unit",
     "scipp._scipp.core.Variable": "scipp.Variable",
-    "scipp._scipp.core.Variable": "scipp.Variable",
     "scipp.core.data_group.DataGroup": "scipp.DataGroup",
 }
 
@@ -125,7 +123,7 @@ master_doc = "index"
 # built documents.
 #
 try:
-    release = get_version("essdiffraction")
+    release = get_version("mlzdiffraction")
     version = ".".join(release.split('.')[:3])  # CalVer
 except PackageNotFoundError:
     logger.info(
@@ -169,17 +167,18 @@ html_theme_options = {
     "show_nav_level": 1,
     # Adjust this to ensure external links are moved to "Move" menu
     "header_links_before_dropdown": 4,
-    "pygment_light_style": "github-light-high-contrast",
-    "pygment_dark_style": "github-dark-high-contrast",
+    "pygments_light_style": "github-light-high-contrast",
+    "pygments_dark_style": "github-dark-high-contrast",
     # ToDo: "logo": {},
     "external_links": [
+        {"name": "ESSreduce", "url": "https://scipp.github.io/ess/reduce"},
         {"name": "Sciline", "url": "https://scipp.github.io/sciline"},
         {"name": "Scipp", "url": "https://scipp.github.io"},
     ],
-        "icon_links": [
+    "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/scipp/ess/tree/main/packages/essdiffraction",
+            "url": "https://github.com/scipp/ess/tree/main/packages/mlzdiffraction",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },
@@ -197,7 +196,7 @@ html_theme_options = {
         },
     ],
     "footer_start": ["copyright", "sphinx-version"],
-    "footer_end": ["doc_version", "theme-version"],
+    "footer_end": ["theme-version"],
 }
 html_context = {
     "doc_path": "docs",

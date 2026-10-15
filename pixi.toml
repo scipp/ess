@@ -14,6 +14,7 @@ exclude-newer = "14d"
 
 [dependencies]
 python = "3.12.*"
+rich = ">=15.0.0,<16"
 
 [pypi-exclude-newer]
 scipp = "0m"
@@ -174,6 +175,15 @@ args = [
 ]
 cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/essspectroscopy/.docs_doctrees packages/essspectroscopy/docs packages/essspectroscopy/html"
 
+[feature.docs-mlzdiffraction.pypi-dependencies]
+mlzdiffraction = { path = "packages/mlzdiffraction", editable = true, extras = ["test", "docs"] }
+
+[feature.docs-mlzdiffraction.tasks.docs-mlzdiffraction]
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %}  -D nbsphinx_execute=never{% endif %} -d packages/mlzdiffraction/.docs_doctrees packages/mlzdiffraction/docs packages/mlzdiffraction/html"
+
 # ==================== Environments ====================
 
 [environments]
@@ -192,6 +202,7 @@ essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group =
 essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "default" }
 esssans = { features = ["esssans", "essreduce"], solve-group = "default" }
 essspectroscopy = { features = ["essspectroscopy", "essreduce"], solve-group = "default" }
+mlzdiffraction = { features = ["mlzdiffraction", "essreduce"], solve-group = "default" }
 
 # Docs environments (package with docs extra + pandoc)
 docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
@@ -201,6 +212,7 @@ docs-essreflectometry = { features = ["docs-essreflectometry", "docs-essreduce",
 docs-essdiffraction = { features = ["docs-essdiffraction", "docs-essreduce", "docs"], solve-group = "default" }
 docs-esssans = { features = ["docs-esssans", "docs-essreduce", "docs"], solve-group = "default" }
 docs-essspectroscopy = { features = ["docs-essspectroscopy", "docs-essreduce", "docs"], solve-group = "default" }
+docs-mlzdiffraction = { features = ["docs-mlzdiffraction", "docs-essreduce", "docs"], solve-group = "default" }
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }

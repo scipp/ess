@@ -1,15 +1,14 @@
 # API Reference
 
-The prototype is not yet packaged as `mlzdiffraction`. Until a normal
-`pyproject.toml` and package namespace are added, the importable API reference
-uses the current namespace-package path under `src`.
+The `mlzdiffraction` distribution exposes POWTEX reduction components under the
+`mlz.diffraction` namespace.
 
 ## MLZdiffraction
 
 ### Shared POWTEX submodules
 
 ```{eval-rst}
-.. currentmodule:: src.powtex
+.. currentmodule:: mlz.diffraction.powtex
 
 .. autosummary::
    :toctree: ../generated/modules
@@ -23,7 +22,7 @@ uses the current namespace-package path under `src`.
 ### POWTEX workflows
 
 ```{eval-rst}
-.. currentmodule:: src.powder
+.. currentmodule:: mlz.diffraction.powder
 
 .. autosummary::
    :toctree: ../generated/functions
@@ -32,7 +31,7 @@ uses the current namespace-package path under `src`.
    PowderReduceP2D
 ```
 ```{eval-rst}
-.. currentmodule:: src.texture
+.. currentmodule:: mlz.diffraction.texture
 
 .. autosummary::
    :toctree: ../generated/functions
@@ -44,7 +43,7 @@ uses the current namespace-package path under `src`.
 ### Powder submodules
 
 ```{eval-rst}
-.. currentmodule:: src.powder
+.. currentmodule:: mlz.diffraction.powder
 
 .. autosummary::
    :toctree: ../generated/modules
@@ -61,7 +60,7 @@ uses the current namespace-package path under `src`.
 ### Texture submodules
 
 ```{eval-rst}
-.. currentmodule:: src.texture
+.. currentmodule:: mlz.diffraction.texture
 
 .. autosummary::
    :toctree: ../generated/modules
