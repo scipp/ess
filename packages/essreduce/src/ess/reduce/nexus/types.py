@@ -1,8 +1,9 @@
 """Domain types for use with Sciline, parametrized by run- and monitor-type."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO, Generic, NewType, TypeVar
+from typing import Any, BinaryIO, Generic, NewType, Self, TypeVar
 
 import sciline
 import scipp as sc
@@ -152,6 +153,16 @@ class NeXusName(sciline.Scope[Component, str], str):
     """Name of a component in a NeXus file."""
 
 
+class NeXusManyNames(sciline.Scope[Component, tuple[str, ...]], tuple[str, ...]):
+    """Names of multiple components of the same class in a NeXus file."""
+
+    def __new__(cls, x: Iterable[str] | None) -> Self:
+        return tuple.__new__(cls, () if x is None else tuple(x))
+
+    def __init__(self, x: Iterable[str] | None) -> None:
+        self.has_data = x is not None
+
+
 class NeXusClass(sciline.Scope[Component, type], type):
     """NX_class of a component in a NeXus file."""
 
@@ -164,8 +175,10 @@ class NeXusComponent(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGro
     """Raw data from a NeXus component."""
 
 
-class AllNeXusComponents(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup):
-    """Raw data from all NeXus components of one class."""
+class NeXusManyComponents(
+    sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup
+):
+    """Raw data from multiple NeXus components of one class."""
 
 
 class NeXusData(sciline.Scope[Component, RunType, sc.DataArray], sc.DataArray):
@@ -174,6 +187,10 @@ class NeXusData(sciline.Scope[Component, RunType, sc.DataArray], sc.DataArray):
 
     This must be contained in an NXmonitor or NXdetector group.
     """
+
+
+class NeXusManyData(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup):
+    """Data group of data arrays loaded from a NXevent_data or NXdata groups."""
 
 
 class Position(sciline.Scope[Component, RunType, sc.Variable], sc.Variable):
@@ -311,26 +328,38 @@ class NeXusComponentLocationSpec(NeXusLocationSpec, Generic[Component, RunType])
 
 
 @dataclass
-class NeXusAllLocationSpec:
+class NeXusDataLocationSpec(NeXusLocationSpec, Generic[Component, RunType]):
+    """NeXus filename and parameters to identify (parts of) data to load."""
+
+
+@dataclass
+class NeXusManyLocationSpec:
     """
-    NeXus parameters to identify all components of a class to load.
+    NeXus parameters to identify many locations of a class to load.
+
+    If ``location_names is None`` corresponds to all locations of the class.
     """
 
     filename: FilePath | NeXusFile | NeXusGroup
     entry_name: NeXusEntryName | None = None
     selection: snx.typing.ScippIndex | slice = ()
+    location_names: tuple[str, ...] | None = None
 
 
 @dataclass
-class NeXusAllComponentLocationSpec(NeXusAllLocationSpec, Generic[Component, RunType]):
+class NeXusManyComponentLocationSpec(
+    NeXusManyLocationSpec, Generic[Component, RunType]
+):
     """
-    NeXus parameters to identify all components of a class to load.
+    NeXus parameters to identify multiple components of a class to load.
     """
 
 
 @dataclass
-class NeXusDataLocationSpec(NeXusLocationSpec, Generic[Component, RunType]):
-    """NeXus filename and parameters to identify (parts of) detector data to load."""
+class NeXusManyDataLocationSpec(NeXusManyLocationSpec, Generic[Component, RunType]):
+    """
+    NeXus parameters to identify (parts of) multiple data instances of a class to load.
+    """
 
 
 class NeXusTransformationChain(

@@ -22,12 +22,12 @@ from ess.bifrost.data import (
     lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,
 )
+from ess.bifrost.types import NeXusDetectorNames
 from ess.spectroscopy.types import (
     EnergyBins,
     Filename,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
-    NeXusDetectorName,
     OutFilename,
     PreopenNeXusFile,
     SampleRun,
@@ -53,7 +53,12 @@ N_PIXELS_PER_DETECTOR = 300  # Fixed, not a parameter!
 
 @pytest.fixture(scope='module')
 def detector_names() -> list[str]:
-    return bifrost.default_detector_names()[:N_DETECTORS]
+    all_names = [
+        f'channel_{channel}_{arc}_triplet'
+        for arc in range(1, 6)
+        for channel in range(1, 10)
+    ]
+    return all_names[:N_DETECTORS]
 
 
 @pytest.fixture(scope='module')
@@ -67,10 +72,11 @@ def sample() -> sqw.SqwIXSample:
 
 @pytest.fixture(scope='module')
 def common_workflow(
-    detector_names: list[NeXusDetectorName], sample: sqw.SqwIXSample
+    detector_names: list[str], sample: sqw.SqwIXSample
 ) -> sciline.Pipeline:
-    wf = bifrost.BifrostSimulationWorkflow(detector_names=detector_names)
+    wf = bifrost.BifrostSimulationWorkflow()
 
+    wf[NeXusDetectorNames] = detector_names
     wf[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     wf[LookupTableFilename] = lookup_table_simulation()
     wf[LookupTableRelativeErrorThreshold] = {

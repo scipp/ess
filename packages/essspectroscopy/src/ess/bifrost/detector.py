@@ -3,20 +3,26 @@
 
 """Detector handling for BIFROST."""
 
-import itertools
 from collections.abc import Callable
 
+import numpy as np
 import scipp as sc
 import scippnexus as snx
 from ess.spectroscopy.indirect.conversion import add_spectrometer_coords
 from ess.spectroscopy.types import (
     Analyzer,
+    Analyzers,
     EmptyDetector,
     NeXusComponent,
+    NeXusManyComponents,
+    NeXusManyData,
     NeXusTransformation,
     PrimarySpecCoordTransformGraph,
+    RawDetector,
     RunType,
     SecondarySpecCoordTransformGraph,
+    TimeInterval,
+    TransformationTimeFilter,
 )
 
 from ess.reduce.nexus.types import Position
@@ -55,10 +61,10 @@ def arc_number(
     return ArcNumber[RunType](sc.round((final_energy - minimum) / step).to(dtype='int'))
 
 
-def arc_and_channel_from_detector_number(
+def single_arc_and_channel_from_detector_number(
     detector_number: sc.Variable,
 ) -> tuple[sc.Variable, sc.Variable]:
-    """Calculate arc number and channel from detector number.
+    """Calculate arc number and channel from the detector number of a single triplet.
 
     Calculate arc and channel for this triplet based on detector_number layout.
     BIFROST detector_number ordering is (arc, tube, channel, pixel).
@@ -81,64 +87,128 @@ def arc_and_channel_from_detector_number(
 
 
 def get_calibrated_detector_bifrost(
-    detector: NeXusComponent[snx.NXdetector, RunType],
-    analyzer: Analyzer[RunType],
+    detector_components: NeXusManyComponents[snx.NXdetector, RunType],
+    analyzers: Analyzers[RunType],
     *,
-    transform: NeXusTransformation[snx.NXdetector, RunType],
     primary_graph: PrimarySpecCoordTransformGraph[RunType],
     secondary_graph: SecondarySpecCoordTransformGraph[RunType],
+    time_interval: TimeInterval[RunType],
+    time_filter: TransformationTimeFilter[snx.NXdetector, RunType],
 ) -> EmptyDetector[RunType]:
     """Extract the data array corresponding to a detector's signal field.
 
     This includes:
 
-    - Reshaping the data array is reshaped to the logical detector shape.
+    - Reshaping the data array to the logical detector shape.
     - Assigning geometry coordinate "position".
     - Assigning spectrometer coordinates such as "final_energy",
       "secondary_flight_time", and "L1".
 
     Parameters
     ----------
-    detector:
+    detector_components:
         Loaded NeXus detector.
-    analyzer:
+    analyzers:
         Loaded analyzer parameters.
-    transform:
-        Transformation that determines the detector position.
     primary_graph:
         Coordinate transformation graph for the primary spectrometer.
     secondary_graph:
         Coordinate transformation graph for the secondary spectrometer.
         Must be a closure over analyzer parameters.
         And those parameters must have a compatible shape with ``data``.
+    time_interval:
+        Specifies the time range to extract.
+    time_filter:
+        Applied to time-dependent transformations.
 
     Returns
     -------
     :
         Detector geometry and spectrometer coordinates.
     """
+    from ess.reduce.nexus.workflow import to_transformation
 
-    da = get_base_calibrated_detector_bifrost(detector, analyzer, transform=transform)
-    da = da.rename(dim_0='tube', dim_1='length')
+    entries = []
+    for analyzer in analyzers.values():
+        detector = detector_components[analyzer['detector_name']]
+        transform = to_transformation(
+            chain=detector['depends_on'],
+            interval=time_interval,
+            time_filter=time_filter,
+        )
+        da = get_base_calibrated_detector_bifrost(detector, transform=transform)
+        da = da.rename(dim_0='tube', dim_1='length')
 
-    arc, channel = arc_and_channel_from_detector_number(da.coords['detector_number'])
-    da.coords['arc'] = arc
-    da.coords['channel'] = channel
+        arc, channel = single_arc_and_channel_from_detector_number(
+            da.coords['detector_number']
+        )
+        entries.append(
+            (arc.value, channel.value, da, _extract_analyzer_parameters(da, analyzer))
+        )
 
-    da = add_spectrometer_coords(
-        da,
+    entries.sort(key=lambda t: t[:2])  # sort by (arc, channel)
+    arcs, channels, dets, analyzer_params = zip(*entries, strict=True)
+    detector = sc.concat(dets, dim='triplet')
+    if len(dets) == 1:
+        # concat does not introduce a 'triplet' dim when there is only 1 detector.
+        # But downstream code requires these coords to have that dim.
+        for key in ('detector_number', 'x_pixel_offset', 'y_pixel_offset', 'position'):
+            coord = detector.coords[key]
+            detector.coords[key] = coord.broadcast(
+                dims=['triplet', *coord.dims], shape=[1, *coord.shape]
+            )
+
+    detector = add_spectrometer_coords(
+        detector,
         primary_graph,
         SecondarySpecCoordTransformGraph[RunType](
-            {**secondary_graph, **_make_analyzer_coord_graph(da, analyzer)}
+            {
+                **secondary_graph,
+                **_build_analyzer_coord_transform_graph(analyzer_params),
+            }
         ),
     )
+    return _fold_detector_to_arc_and_channel(detector, arcs, channels)
 
-    return EmptyDetector[RunType](da)
+
+def _fold_detector_to_arc_and_channel(
+    detector: sc.DataArray, arcs: list[int], channels: list[int]
+) -> sc.DataArray:
+    """Fold an empty detector's triplet dim to (arc, channel) if possible.
+
+    The input arcs and channels must be in the same order as the detector's triplets.
+
+    Modifies the input detector!
+    """
+    unique_arcs = np.unique(arcs)
+    unique_channels = np.unique(channels)
+    expected_pairs = [
+        (arc, channel) for arc in unique_arcs for channel in unique_channels
+    ]
+    actual_pairs = list(zip(arcs, channels, strict=True))
+    if actual_pairs == expected_pairs:
+        # We have a rectangular subset of triplets -> fold them.
+        n_arcs = len(unique_arcs)
+        n_channels = len(unique_channels)
+        folded = detector.fold('triplet', sizes={'arc': n_arcs, 'channel': n_channels})
+        folded.coords['arc'] = sc.array(
+            dims=['arc'], values=arcs[::n_channels], unit=None
+        )
+        folded.coords['channel'] = sc.array(
+            dims=['channel'], values=channels[:n_channels], unit=None
+        )
+        return folded
+    else:
+        # Not a rectangular subset, cannot fold.
+        detector.coords['arc'] = sc.array(dims=['triplet'], values=arcs, unit=None)
+        detector.coords['channel'] = sc.array(
+            dims=['triplet'], values=channels, unit=None
+        )
+        return detector
 
 
 def get_base_calibrated_detector_bifrost(
     detector: NeXusComponent[snx.NXdetector, RunType],
-    analyzer: Analyzer[RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
 ) -> sc.DataArray:
@@ -152,8 +222,6 @@ def get_base_calibrated_detector_bifrost(
     ----------
     detector:
         Loaded NeXus detector.
-    analyzer:
-        Loaded analyzer parameters.
     transform:
         Transformation that determines the detector position.
 
@@ -190,10 +258,33 @@ def _assign_detector_position(
 # in the output. This could be done in the provider of SecondarySpecCoordTransformGraph
 # but that provider would then have to request the detector component to check
 # the time coordinates.
-def _make_analyzer_coord_graph(
+def _build_analyzer_coord_transform_graph(
+    analyzer_parameters: list[dict[str, sc.Variable]],
+) -> dict[str, Callable[..., sc.Variable]]:
+    """Build a coord transformation graph that binds the analyzer parameters.
+
+    The input should contain parameters for all relevant analyzers.
+    *In the same order as detector banks.*
+    """
+
+    # can't use lambda in dict comprehension because it would bind to dynamic `key`
+    def _just(value):
+        def impl():
+            return value
+
+        return impl
+
+    return {
+        key: _just(sc.concat([ap[key] for ap in analyzer_parameters], dim='triplet'))
+        for key in analyzer_parameters[0]
+    }
+
+
+def _extract_analyzer_parameters(
     detector: sc.DataArray,
     analyzer: Analyzer[RunType],
-) -> dict[str, Callable[[], sc.Variable]]:
+) -> dict[str, sc.Variable]:
+    """Get the analyzer parameters needed for coordinate transforms of EmptyDetector."""
     ana_pos: Position[snx.NXcrystal, RunType] = analyzer['position']
     if ana_pos.is_dynamic:
         if 'time' not in detector.coords:
@@ -216,79 +307,31 @@ def _make_analyzer_coord_graph(
         analyzer_transform = analyzer['transform'].value
 
     return {
-        'analyzer_dspacing': lambda: analyzer['dspacing'],
-        'analyzer_position': lambda: analyzer_position,
-        'analyzer_transform': lambda: analyzer_transform,
+        'analyzer_dspacing': analyzer['dspacing'],
+        'analyzer_position': analyzer_position,
+        'analyzer_transform': analyzer_transform,
     }
 
 
-def merge_triplets(
-    *triplets: sc.DataArray,
-) -> sc.DataArray:
-    """Merge BIFROST detector triplets into a single data array.
+def assemble_bifrost_detector_data(
+    detector: EmptyDetector[RunType],
+    neutron_data: NeXusManyData[snx.NXdetector, RunType],
+) -> RawDetector[RunType]:
+    """Custom assemble function that combines all detector banks."""
+    from ess.reduce.nexus.workflow import assemble_detector_data as reduce_assemble
 
-    This function folds the triplets into (arc, channel) dimensions based on
-    the scalar 'arc' and 'channel' coordinates assigned to each triplet. If the
-    triplets form a regular rectangular subset of the full 5x9 detector array,
-    they will be folded into those dimensions. Otherwise, they are concatenated
-    along a 'triplet' dimension.
-
-    Parameters
-    ----------
-    triplets:
-        Data arrays to merge. Each must have scalar 'arc' and 'channel' coordinates.
-
-    Returns
-    -------
-    :
-        Input data arrays either folded into (arc, channel) dimensions or
-        stacked along the "triplet" dimension.
-    """
-    if len(triplets) == 0:
-        raise ValueError("At least one triplet is required")
-
-    # Extract arc and channel from scalar coordinates
-    arc_channel_pairs = [
-        (triplet.coords['arc'].value, triplet.coords['channel'].value)
-        for triplet in triplets
-    ]
-
-    # Sort triplets by (arc, channel)
-    sorted_indices = sorted(range(len(triplets)), key=lambda i: arc_channel_pairs[i])
-    sorted_triplets = [triplets[i] for i in sorted_indices]
-    sorted_pairs = [arc_channel_pairs[i] for i in sorted_indices]
-
-    # Check if the pairs form a regular rectangular grid
-    unique_arcs = sorted({pair[0] for pair in sorted_pairs})
-    unique_channels = sorted({pair[1] for pair in sorted_pairs})
-
-    # Check if we have a complete rectangular subset
-    expected_pairs = [
-        (arc, channel) for arc in unique_arcs for channel in unique_channels
-    ]
-    concatenated = sc.concat(sorted_triplets, dim='triplet')
-    if sorted_pairs == expected_pairs:
-        # We have a regular grid, fold it
-        return concatenated.fold(
-            dim='triplet',
-            sizes={'arc': len(unique_arcs), 'channel': len(unique_channels)},
-        )
-
-    # Fall back to simple concatenation if not a regular grid
-    return concatenated
+    out = None
+    for events in neutron_data.values():
+        assembled = reduce_assemble(detector, events)
+        if out is None:
+            out = assembled
+        else:
+            out.bins.concatenate(assembled, out=out)
+    return RawDetector[RunType](out)
 
 
-def default_detector_names() -> list[str]:
-    """Return the list of detector names in a BIFROST NeXus file.
-
-    These names are based on the names in the NeXus schema.
-    """
-    # c is the channel number
-    # a is the arc number
-    return [
-        f"channel_{c}_{a}_triplet"
-        for c, a in itertools.product(range(1, 10), range(1, 6))
-    ]
-
-
-providers = (arc_number, get_calibrated_detector_bifrost)
+providers = (
+    arc_number,
+    assemble_bifrost_detector_data,
+    get_calibrated_detector_bifrost,
+)

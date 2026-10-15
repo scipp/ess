@@ -21,7 +21,6 @@ from scippneutron.metadata import RadiationProbe, SourceType
 from . import _nexus_loader as nexus
 from .types import (
     COMPONENT_CONSTRAINTS,
-    AllNeXusComponents,
     Beamline,
     Component,
     DetectorBankSizes,
@@ -35,13 +34,17 @@ from .types import (
     Measurement,
     MonitorPositionOffset,
     MonitorType,
-    NeXusAllComponentLocationSpec,
     NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
     NeXusData,
     NeXusDataLocationSpec,
     NeXusFileSpec,
+    NeXusManyComponentLocationSpec,
+    NeXusManyComponents,
+    NeXusManyData,
+    NeXusManyDataLocationSpec,
+    NeXusManyNames,
     NeXusName,
     NeXusTransformation,
     NeXusTransformationChain,
@@ -112,11 +115,17 @@ def component_spec_by_name(
     )
 
 
-def all_component_spec(
+def many_component_spec(
     filename: NeXusFileSpec[RunType],
-) -> NeXusAllComponentLocationSpec[Component, RunType]:
-    """Create a location spec for all components of a class in a NeXus file."""
-    return NeXusAllComponentLocationSpec[Component, RunType](filename=filename.value)
+    names: NeXusManyNames[Component],
+) -> NeXusManyComponentLocationSpec[Component, RunType]:
+    """Create a location spec for many components of a class in a NeXus file."""
+    if not isinstance(names, NeXusManyNames):
+        # E.g., when the user sets {NeXusManyNames[Component]: ['a', 'b']}
+        names = NeXusManyNames[Component](names)
+    return NeXusManyComponentLocationSpec[Component, RunType](
+        filename=filename.value, location_names=tuple(names) if names.has_data else None
+    )
 
 
 def unique_component_spec(
@@ -152,6 +161,19 @@ def data_by_name(
     """
     return NeXusDataLocationSpec[Component, RunType](
         filename=filename.value, component_name=name, selection=selection.value
+    )
+
+
+def many_data_spec(
+    filename: NeXusFileSpec[RunType],
+    names: NeXusManyNames[Component],
+) -> NeXusManyDataLocationSpec[Component, RunType]:
+    """Create a location spec for data of many instances of a class in a NeXus file."""
+    if not isinstance(names, NeXusManyNames):
+        # E.g., when the user sets {NeXusManyNames[Component]: ['a', 'b']}
+        names = NeXusManyNames[Component](names)
+    return NeXusManyDataLocationSpec[Component, RunType](
+        filename=filename.value, location_names=tuple(names) if names.has_data else None
     )
 
 
@@ -237,10 +259,10 @@ def load_nexus_component(
     )
 
 
-def load_all_nexus_components(
-    location: NeXusAllComponentLocationSpec[Component, RunType],
+def load_many_nexus_components(
+    location: NeXusManyComponentLocationSpec[Component, RunType],
     nx_class: NeXusClass[Component],
-) -> AllNeXusComponents[Component, RunType]:
+) -> NeXusManyComponents[Component, RunType]:
     """
     Load all NeXus components of one class from one entry a file.
 
@@ -253,8 +275,8 @@ def load_all_nexus_components(
     nx_class:
         NX_class to identify the components.
     """
-    return AllNeXusComponents[Component, RunType](
-        nexus.load_all_components(location, nx_class=nx_class, definitions=definitions)
+    return NeXusManyComponents[Component, RunType](
+        nexus.load_many_components(location, nx_class=nx_class, definitions=definitions)
     )
 
 
@@ -275,6 +297,23 @@ def load_nexus_data(
             entry_name=location.entry_name,
             selection=location.selection,
             component_name=location.component_name,
+            definitions=definitions,
+        )
+    )
+
+
+def load_many_nexus_data(
+    location: NeXusManyDataLocationSpec[Component, RunType],
+    nx_class: NeXusClass[Component],
+) -> NeXusManyData[Component, RunType]:
+    """Load data from many components of a given class."""
+    return NeXusManyData[Component, RunType](
+        nexus.load_many_data(
+            file_path=location.filename,
+            selection=location.selection,
+            nx_class=nx_class,
+            names=location.location_names,
+            entry_name=location.entry_name,
             definitions=definitions,
         )
     )
@@ -551,7 +590,7 @@ def assemble_monitor_data(
 
 
 def parse_raw_choppers(
-    choppers: AllNeXusComponents[snx.NXdisk_chopper, RunType],
+    choppers: NeXusManyComponents[snx.NXdisk_chopper, RunType],
 ) -> RawChoppers[RunType]:
     """Convert the NeXus representation of a chopper to ours.
 
@@ -816,7 +855,8 @@ _common_providers = (
     full_time_interval,
     component_spec_by_name,
     unique_component_spec,  # after component_spec_by_name, partially overrides
-    all_component_spec,
+    many_component_spec,
+    many_data_spec,
     get_transformation_chain,
     to_transformation,
     compute_position,
@@ -824,8 +864,10 @@ _common_providers = (
     load_nexus_data,
     load_nexus_component,
     load_proton_charge,
-    load_all_nexus_components,
+    load_many_nexus_components,
+    load_many_nexus_data,
     data_by_name,
+    nx_class_for_crystal,
     nx_class_for_detector,
     nx_class_for_monitor,
     nx_class_for_source,
@@ -934,6 +976,7 @@ def GenericNeXusWorkflow(
         ),
         params={
             DetectorBankSizes: DetectorBankSizes({}),
+            NeXusManyNames: NeXusManyNames(None),
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
         },

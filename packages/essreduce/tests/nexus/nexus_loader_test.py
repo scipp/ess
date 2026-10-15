@@ -16,7 +16,7 @@ import scippnexus as snx
 
 from ess.reduce import nexus
 from ess.reduce.nexus._nexus_loader import NoLockingIfNeeded
-from ess.reduce.nexus.types import FilePath, NeXusLocationSpec
+from ess.reduce.nexus.types import FilePath, NeXusLocationSpec, NeXusManyLocationSpec
 
 year_zero = sc.datetime('1970-01-01T00:00:00')
 
@@ -575,11 +575,11 @@ def test_load_sample(nexus_file, expected_sample, entry_name):
 
 @pytest.mark.parametrize('entry_name', [None, nexus.types.NeXusEntryName('entry-001')])
 def test_load_disk_choppers(nexus_file, expected_choppers, entry_name):
-    loc = NeXusLocationSpec(
+    loc = NeXusManyLocationSpec(
         filename=nexus_file,
         entry_name=entry_name,
     )
-    choppers = nexus.load_all_components(loc, nx_class=snx.NXdisk_chopper)
+    choppers = nexus.load_many_components(loc, nx_class=snx.NXdisk_chopper)
     sc.testing.assert_identical(choppers, expected_choppers)
 
 

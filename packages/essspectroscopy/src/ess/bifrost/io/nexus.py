@@ -10,24 +10,25 @@ import scipp as sc
 import scippnexus as snx
 from ess.spectroscopy.types import (
     Analyzer,
-    DynamicPosition,
+    Analyzers,
     ElasticMonitor,
     InstrumentAngle,
     NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
     NeXusFileSpec,
+    NeXusLocationSpec,
+    NeXusManyComponentLocationSpec,
+    NeXusManyComponents,
     NeXusTransformation,
+    NeXusTransformationChain,
     RunType,
     SampleAngle,
-)
-
-from ess.reduce.nexus import open_component_group
-from ess.reduce.nexus.types import (
-    NeXusLocationSpec,
-    NeXusTransformationChain,
+    TimeInterval,
     TransformationTimeFilter,
 )
+
+from ess.reduce import nexus
 
 from ..types import InstrumentAnglePath, SampleAnglePath
 
@@ -37,7 +38,7 @@ def load_sample_angle(
 ) -> SampleAngle[RunType]:
     """Load the rotation angle of a sample from a BIFROST NeXus file."""
 
-    with open_component_group(
+    with nexus.open_component_group(
         NeXusLocationSpec(filename=file_spec.value),
         nx_class=snx.NXinstrument,
         parent_class=snx.NXentry,
@@ -91,7 +92,56 @@ def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
     return NeXusClass[snx.NXsource](snx.NXmoderator)
 
 
-def load_analyzer_for_detector(
+def load_bifrost_analyzers(
+    detector_locations: NeXusManyComponentLocationSpec[snx.NXdetector, RunType],
+    detector_components: NeXusManyComponents[snx.NXdetector, RunType],
+) -> NeXusManyComponents[snx.NXcrystal, RunType]:
+    """Load analyzer components for the given detectors.
+
+    This function searches for an ``NXcrystal`` in the inputs (via the
+    ``inputs`` dataset or attribute) of each detector and loads the first NeXus
+    group it finds.
+
+    Parameters
+    ----------
+    detector_locations:
+        Location spec for the detectors.
+        Used to locate the instrument group to be searched for analyzers.
+    detector_components:
+        The loaded detector components to load analyzers for.
+
+    Returns
+    -------
+    :
+        The loaded analyzer components.
+
+    See Also
+    --------
+    .get_calibrated_analyzers:
+        A provider that combines loaded analyzer data into an ``Analyzer`` object.
+    """
+    instrument_location = NeXusLocationSpec(
+        filename=detector_locations.filename,
+        entry_name=detector_locations.entry_name,
+        component_name=None,
+        selection=detector_locations.selection,
+    )
+    out = {}
+    with nexus.open_component_group(
+        instrument_location, nx_class=snx.NXinstrument
+    ) as instrument_group:
+        for detector in detector_components.values():
+            detector_name = detector['nexus_component_name']
+            analyzer = _find_class_in_inputs(
+                instrument_group, snx.NXcrystal, instrument_group[detector_name]
+            )[()]
+            analyzer['detector_name'] = detector_name
+            out[detector_name] = analyzer
+    return NeXusManyComponents[snx.NXcrystal, RunType](sc.DataGroup(out))
+
+
+# This function is useful in the Bragg Peak monitor workflow.
+def load_bifrost_analyzer_for_detector(
     detector_location: NeXusComponentLocationSpec[snx.NXdetector, RunType],
 ) -> NeXusComponent[snx.NXcrystal, RunType]:
     """Load the analyzer component for the given detector.
@@ -105,11 +155,14 @@ def load_analyzer_for_detector(
     get_calibrated_analyzer:
         A provider that combines loaded analyzer data into an ``Analyzer`` object.
     """
-    with open_component_group(detector_location, nx_class=snx.NXdetector) as det_group:
-        analyzer_group = _find_class_in_inputs(
+    with nexus.open_component_group(
+        detector_location, nx_class=snx.NXdetector
+    ) as det_group:
+        analyzer = _find_class_in_inputs(
             group=det_group.parent, target=snx.NXcrystal, start=det_group
-        )
-        return analyzer_group[()]
+        )[()]
+        analyzer['detector_name'] = det_group.name.rsplit('/', 1)[-1]
+        return analyzer
 
 
 def _find_class_in_inputs(
@@ -167,28 +220,56 @@ def _get_inputs(group: snx.Group) -> list[str]:
     return [inputs] if isinstance(inputs, str) else inputs
 
 
+def get_calibrated_analyzers(
+    analyzer_components: NeXusManyComponents[snx.NXcrystal, RunType],
+    time_interval: TimeInterval[RunType],
+    time_filter: TransformationTimeFilter[snx.NXcrystal, RunType],
+) -> Analyzers[RunType]:
+    """Collect the data for a single analyzer.
+
+    Parameters
+    ----------
+    analyzer_components:
+        Data groups of loaded analyzers.
+    time_interval:
+        Specifies the time range to extract.
+    time_filter:
+        Applied to time-dependent transformations.
+
+    Returns
+    -------
+    :
+        Processed analyzers as a ``DataGroup``.
+    """
+    return Analyzers[RunType](
+        sc.DataGroup(
+            {
+                analyzer_name: get_calibrated_analyzer(
+                    component,
+                    nexus.workflow.to_transformation(
+                        chain=component['depends_on'],
+                        interval=time_interval,
+                        time_filter=time_filter,
+                    ),
+                )
+                for analyzer_name, component in analyzer_components.items()
+            }
+        )
+    )
+
+
 def get_calibrated_analyzer(
     analyzer_component: NeXusComponent[snx.NXcrystal, RunType],
     analyzer_transform: NeXusTransformation[snx.NXcrystal, RunType],
-    analyzer_position: DynamicPosition[snx.NXcrystal, RunType],
 ) -> Analyzer[RunType]:
     """Collect the data for a single analyzer.
-
-    This provider works together with :func:`load_analyzer_for_detector` and the
-    generic NeXus workflow from ESSreduce.
-    ``load_analyzer_for_detector`` loads a raw analyzer component.
-    Then the default providers from ESSreduce extract a transform and position like
-    for any other component.
-    Finally, this provider combines the data into a single Analyzer object.
 
     Parameters
     ----------
     analyzer_component:
-        Data group of loaded analyzers.
+        Data group of loaded analyzer.
     analyzer_transform:
         Transformation matrix of the analyzer.
-    analyzer_position:
-        The computed position vector of the analyzer.
 
     Returns
     -------
@@ -196,12 +277,12 @@ def get_calibrated_analyzer(
         A given analyzer.
         Only a subset of fields is returned.
     """
-
     return Analyzer[RunType](
         sc.DataGroup(
             dspacing=analyzer_component['d_spacing'],
-            position=analyzer_position,
+            position=nexus.workflow.compute_dynamic_position(analyzer_transform),
             transform=analyzer_transform,
+            detector_name=analyzer_component['detector_name'],
         )
     )
 
@@ -260,8 +341,10 @@ def stepwise_transformation_time_filter(transform: sc.DataArray) -> sc.DataArray
 
 providers = (
     get_calibrated_analyzer,
-    load_analyzer_for_detector,
+    get_calibrated_analyzers,
     extract_instrument_angle,
+    load_bifrost_analyzers,
+    load_bifrost_analyzer_for_detector,
     load_sample_angle,
     moderator_class_for_source,
 )
