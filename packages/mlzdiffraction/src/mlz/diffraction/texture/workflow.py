@@ -7,14 +7,6 @@ import sciline
 import scipp as sc
 
 from ..powtex.data import load_powtex_calibration, load_powtex_csv
-from ..powtex.types import (
-    CalibrationRun,
-    EmptyCanRun,
-    EmptyVanadiumCanRun,
-    Filepath,
-    SampleRun,
-    VanadiumRun,
-)
 from .conversion import project_onto_cylindrical_surface
 from .correction import (
     normalize_by_vanadium,
@@ -44,13 +36,7 @@ from .types import BinningSettings
 
 def default_parameters() -> dict:
     """Return default parameters for the POWTEX texture workflow."""
-    data_path = "/home/koshchii/Instruments/POWTEX/Scipp/data/texture/csv"
     return {
-        Filepath[SampleRun]: data_path,
-        Filepath[VanadiumRun]: data_path,
-        Filepath[EmptyCanRun]: data_path,
-        Filepath[CalibrationRun]: data_path,
-        Filepath[EmptyVanadiumCanRun]: data_path,
         BinningSettings: BinningSettings(
             gamma_cut_start=sc.scalar(225.0, unit="deg"),
             gamma_cut_end=sc.scalar(315.0, unit="deg"),

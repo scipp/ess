@@ -4,6 +4,7 @@
 """Domain types for POWTEX powder workflows."""
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import NewType, TypeVar
 
 import sciline
@@ -27,7 +28,7 @@ MaskType = TypeVar(
     "MaskType", TwoThetaMask, TofMask, WavelengthMask, DSpacingMask, DperpMask
 )
 
-P2DOutputFilename = NewType("P2DOutputFilename", str)
+P2DOutputFilename = NewType("P2DOutputFilename", Path)
 """Filename of the P2D output file."""
 
 DspacingBins = NewType("DspacingBins", sc.Variable)

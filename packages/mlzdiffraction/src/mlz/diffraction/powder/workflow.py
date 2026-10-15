@@ -7,12 +7,7 @@ import sciline
 import scipp as sc
 
 from ..powtex.types import (
-    CalibrationRun,
-    EmptyCanRun,
-    EmptyVanadiumCanRun,
-    Filename,
-    Filepath,
-    KeepEventsMLZ,
+    KeepEvents,
     NegativeIntensityResetValue,
     SampleRun,
     ShiftNegativeIntensity,
@@ -46,35 +41,20 @@ from .masking import add_masks_p2d_data
 from .types import (
     DperpBins,
     DspacingBins,
-    P2DOutputFilename,
 )
 
 
 def default_parameters() -> dict:
     """Return default parameters for the POWTEX P2D workflow."""
-    data_path = "/home/koshchii/Instruments/POWTEX/Scipp/data/yannick/converted"
     return {
-        Filepath[SampleRun]: data_path,
-        Filepath[VanadiumRun]: data_path,
-        Filepath[EmptyCanRun]: data_path,
-        Filepath[CalibrationRun]: data_path,
-        Filepath[EmptyVanadiumCanRun]: data_path,
-        Filename[SampleRun]: None,
-        Filename[VanadiumRun]: None,
-        Filename[EmptyCanRun]: None,
-        Filename[CalibrationRun]: None,
-        Filename[EmptyVanadiumCanRun]: None,
         DspacingBins: sc.linspace("dspacing", 0.4, 2.0, 321, unit="angstrom"),
         DperpBins: sc.linspace("dperp", 0.2, 4.0, 381, unit="angstrom"),
-        KeepEventsMLZ: False,
+        KeepEvents: False,
         ShiftNegativeIntensity[SampleRun]: True,
         ShiftNegativeIntensity[VanadiumRun]: False,
         NegativeIntensityResetValue[SampleRun]: 0.0,
         NegativeIntensityResetValue[VanadiumRun]: 0.0,
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
-        P2DOutputFilename: (
-            "/home/koshchii/Instruments/POWTEX/Scipp/data/output/reduced.p2d"
-        ),
     }
 
 
