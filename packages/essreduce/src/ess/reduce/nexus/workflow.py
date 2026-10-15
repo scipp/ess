@@ -36,6 +36,7 @@ from .types import (
     MonitorPositionOffset,
     MonitorType,
     NeXusAllComponentLocationSpec,
+    NeXusAllDataLocationSpec,
     NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
@@ -153,6 +154,13 @@ def data_by_name(
     return NeXusDataLocationSpec[Component, RunType](
         filename=filename.value, component_name=name, selection=selection.value
     )
+
+
+def all_data_spec(
+    filename: NeXusFileSpec[RunType],
+) -> NeXusAllDataLocationSpec[Component, RunType]:
+    """Create a location spec for all data of a class in a NeXus file."""
+    return NeXusAllDataLocationSpec[Component, RunType](filename=filename.value)
 
 
 def load_nexus_sample(
@@ -808,6 +816,7 @@ _common_providers = (
     component_spec_by_name,
     unique_component_spec,  # after component_spec_by_name, partially overrides
     all_component_spec,
+    all_data_spec,
     get_transformation_chain,
     to_transformation,
     compute_position,
