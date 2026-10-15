@@ -14,7 +14,6 @@ exclude-newer = "14d"
 
 [dependencies]
 python = "3.12.*"
-rich = ">=15.0.0,<16"
 
 [pypi-exclude-newer]
 scipp = "0m"
