@@ -6,7 +6,7 @@
 import sciline
 import scipp as sc
 
-
+from ..powtex.data import load_powtex_calibration, load_powtex_csv
 from ..powtex.types import (
     CalibrationRun,
     EmptyCanRun,
@@ -15,7 +15,6 @@ from ..powtex.types import (
     SampleRun,
     VanadiumRun,
 )
-
 from .conversion import project_onto_cylindrical_surface
 from .correction import (
     normalize_by_vanadium,
@@ -31,17 +30,16 @@ from .grouping import (
     view_2d_rings,
 )
 from .histogramming import (
+    extract_detector_view_data,
+    extract_flat_view_data,
+    extract_gamma_slices_view_data,
+    extract_two_theta_rings_view_data,
     generate_gamma_binning_data,
     generate_two_theta_binning_data,
     hist_2d,
     hist_3d,
-    extract_gamma_slices_view_data,
-    extract_flat_view_data,
-    extract_two_theta_rings_view_data,
-    extract_detector_view_data,
 )
 from .types import BinningSettings
-from ..powtex.data import load_powtex_calibration, load_powtex_csv
 
 
 def default_parameters() -> dict:

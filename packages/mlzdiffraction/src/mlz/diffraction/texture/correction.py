@@ -6,7 +6,6 @@
 from typing import cast
 
 from ..powtex.types import EmptyCanRun, EmptyVanadiumCanRun, SampleRun, VanadiumRun
-
 from .types import EmptyCanSubtracted3D, NormalisedTexture3D, Texture3D
 
 

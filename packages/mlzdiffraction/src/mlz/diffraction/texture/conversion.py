@@ -62,23 +62,25 @@ def get_cylindrical_from_cartesian(position, projection_radius):
 
     xy_radius = sc.sqrt(x**2 + y**2)
 
-    # The implementation of gamma below is performed to be consistent with user expectations,
-    # i.e. gamma = 0 corresponds to y = 0 and negative x and then increases with increasting y
+    # The implementation of gamma below is performed to be consistent with user
+    # expectations, i.e. gamma = 0 corresponds to y = 0 and negative x and then
+    # increases with increasing y.
     angle = sc.atan2(y=y, x=-x)
     gamma = sc.mod(angle, sc.scalar(2.0 * np.pi, unit=angle.unit)).to(unit="deg")
     two_theta = sc.atan2(y=xy_radius, x=z).to(unit="deg")
 
-    # determine the projection of the position onto the cylindrical surface with the given radius
+    # Determine the projection of the position onto the cylindrical surface with
+    # the given radius.
     proj_x = projection_radius / xy_radius * x
     proj_y = projection_radius / xy_radius * y
     proj_z = projection_radius / xy_radius * z
     proj_position = sc.spatial.as_vectors(proj_x, proj_y, proj_z)
 
     return {
-        #"rho": rho,
-        #"proj_x": proj_x,
-        #"proj_y": proj_y,
-        #"proj_z": proj_z,
+        # "rho": rho,
+        # "proj_x": proj_x,
+        # "proj_y": proj_y,
+        # "proj_z": proj_z,
         "gamma": gamma,
         "two_theta": two_theta,
         "proj_position": proj_position,
@@ -87,13 +89,11 @@ def get_cylindrical_from_cartesian(position, projection_radius):
 
 def get_cartesian_from_cylindrical(cylinder_radius, gamma, two_theta):
     """Convert cylindrical coordinates positions to Cartesian."""
-    x = - cylinder_radius * sc.cos(gamma)
+    x = -cylinder_radius * sc.cos(gamma)
     y = cylinder_radius * sc.sin(gamma)
     z = cylinder_radius / sc.tan(two_theta)
 
     return (x, y, z)
 
 
-providers = (
-    cylindrical_surface_projection_graph,
-)
+providers = (cylindrical_surface_projection_graph,)

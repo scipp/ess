@@ -3,6 +3,7 @@
 
 """Correction algorithms for POWTEX powder reduction."""
 
+import logging
 from typing import cast
 
 import scipp as sc
@@ -21,13 +22,15 @@ from ..powtex.types import (
     UncertaintyBroadcastMode,
     VanadiumRun,
 )
-
 from .types import (
     Dspacing2D,
     EmptyCanSubtracted2D,
     EmptyCanSubtractedNoNegative2D,
     NormalizedIntensity2D,
 )
+
+logger = logging.getLogger(__name__)
+
 
 def normalize_by_vanadium(
     data: EmptyCanSubtractedNoNegative2D[SampleRun],
@@ -105,11 +108,11 @@ def handle_negative_intensity_sample(
         min_value = min_intensity.value
         if min_value < 0.0:
             offset = sc.scalar(-min_value, unit=min_intensity.unit)
-            print(f"Sample: negative intensity values are SHIFTED by {min_value}.")
+            logger.info("Sample negative intensity values shifted by %s.", min_value)
             return EmptyCanSubtractedNoNegative2D[SampleRun](data + offset)
     else:
         if reset_value is not None:
-            print(f"Sample: negative intensity values are REPLACED by {reset_value}.")
+            logger.info("Sample negative intensity values replaced by %s.", reset_value)
             data.values[data.values < 0.0] = reset_value
             # Q: What to do with uncertainties? For now, we just keep them as they are.
     return EmptyCanSubtractedNoNegative2D[SampleRun](data)
@@ -129,11 +132,13 @@ def handle_negative_intensity_vanadium(
         min_value = min_intensity.value
         if min_value < 0.0:
             offset = sc.scalar(-min_value, unit=min_intensity.unit)
-            print(f"Vanadium: negative intensity values are SHIFTED by {min_value}.")
+            logger.info("Vanadium negative intensity values shifted by %s.", min_value)
             return EmptyCanSubtractedNoNegative2D[VanadiumRun](data + offset)
     else:
         if reset_value is not None:
-            print(f"Vanadium: negative intensity values are REPLACED by {reset_value}.")
+            logger.info(
+                "Vanadium negative intensity values replaced by %s.", reset_value
+            )
             data.values[data.values < 0.0] = reset_value
             # Q: What to do with uncertainties? For now, we just keep them as they are.
     return EmptyCanSubtractedNoNegative2D[VanadiumRun](data)

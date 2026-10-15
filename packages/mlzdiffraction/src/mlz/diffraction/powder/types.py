@@ -4,18 +4,17 @@
 """Domain types for POWTEX powder workflows."""
 
 from collections.abc import Callable
-from pathlib import Path
 from typing import NewType, TypeVar
 
 import sciline
 import scipp as sc
 
 from ..powtex.types import (
+    NonEmptyCanRunType,
+    RunType,
     TofMask,
     TwoThetaMask,
     WavelengthMask,
-    RunType,
-    NonEmptyCanRunType,
 )
 
 DSpacingMask = NewType("DSpacingMask", Callable | None)

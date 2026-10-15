@@ -5,8 +5,8 @@
 
 from .types import (
     DspacingHist,
-    GammaSliceWidth,
     GammaSlices,
+    GammaSliceWidth,
     IntegratedTwoThetaHist,
     NormalisedTexture3D,
     ProcessedData,

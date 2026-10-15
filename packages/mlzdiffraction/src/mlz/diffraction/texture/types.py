@@ -11,6 +11,7 @@ import scipp as sc
 
 from ..powtex.types import NonEmptyCanRunType, RunType
 
+
 class DspacingCylSurfaceDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data projected to the POWTEX cylindrical surface."""
 
@@ -38,7 +39,7 @@ GammaSlices = NewType("GammaSlices", sc.DataArray)
 GammaCutStart = NewType("GammaCutStart", sc.Variable)
 GammaCutEnd = NewType("GammaCutEnd", sc.Variable)
 DropPartialBins = NewType("DropPartialBins", bool)
-IncludeGapBins = NewType("IncludeGapBins", bool) # maybe not needed in future
+IncludeGapBins = NewType("IncludeGapBins", bool)  # maybe not needed in future
 
 GammaBinWidth = NewType("GammaBinWidth", sc.Variable)
 TwoThetaBinWidth = NewType("TwoThetaBinWidth", sc.Variable)
@@ -49,7 +50,8 @@ TwoThetaBinningData = NewType("TwoThetaBinningData", sc.Variable)
 DspacingBinningData = NewType("DspacingBinningData", sc.Variable)
 
 
-@dataclass #(frozen=True) <-- frozen makes it impossible to change the values of the fields after initialization
+# frozen=True makes it impossible to change the values of the fields after
+# initialization.
 @dataclass
 class BinningSettings:
     """Texture workflow binning settings."""

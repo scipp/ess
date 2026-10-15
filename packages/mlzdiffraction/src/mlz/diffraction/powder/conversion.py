@@ -9,16 +9,41 @@ import numpy as np
 import scipp as sc
 import scippneutron as scn
 
-from ess.powder.correction import merge_calibration
-
 from ..powtex.types import (
     CalibrationData,
     RunType,
     TofDetector,
     WavelengthDetector,
 )
-
 from .types import ElasticCoordTransformGraph
+
+
+# Copied from ess.powder.correction, which might be modified
+# in future, so we keep a copy here for now to avoid breaking
+# the MLZ workflow
+def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
+    """Return a copy of data with calibration parameters attached."""
+    for name, coord in calibration.coords.items():
+        if not sc.identical(into.coords[name], coord):
+            raise ValueError(
+                f"Coordinate {name} of calibration and target dataset do not agree."
+            )
+    out = into.copy(deep=False)
+    for name in ("difa", "difc", "tzero"):
+        if name in out.coords:
+            raise ValueError(
+                f"Cannot add calibration parameter '{name}' to data, "
+                "there already is metadata with the same name."
+            )
+        out.coords[name] = calibration[name].data
+    if "calibration" in out.masks:
+        raise ValueError(
+            "Cannot add calibration mask 'calibration' to data, "
+            "there already is a mask with the same name."
+        )
+    if (mask := calibration.get("mask")) is not None:
+        out.masks["calibration"] = mask.data
+    return out
 
 
 # Copied from ess.powder.conversion, which might be modified
@@ -73,10 +98,14 @@ def _consume_positions(position, sample_position, source_position):
     return sc.scalar(0)
 
 
-def d_perp_from_lambda_and_theta(wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
+def d_perp_from_lambda_and_theta(
+    wavelength: sc.Variable, two_theta: sc.Variable
+) -> sc.Variable:
     """Compute the dperp coordinate used by the POWTEX P2D workflow."""
     lambda_k = sc.scalar(1.0, unit="angstrom")
-    return sc.sqrt(wavelength**2 - 2.0 * lambda_k**2 * sc.log(sc.cos(0.5 * two_theta)))
+    return sc.sqrt(
+        wavelength**2 - 2.0 * lambda_k**2 * sc.log(sc.cos(0.5 * two_theta))
+    )
 
 
 def d_dperp_from_tof_and_calibration_coeffs() -> dict:
@@ -107,8 +136,13 @@ def to_dspacing_with_calibration(
     out = out.transform_coords("dspacing", graph=pos_graph, keep_intermediate=False)
     out.coords.pop("_tag_positions_consumed", None)
     for key in (
-        "difa", "difc", "tzero", "position",
-        "sample_position", "source_position", "Ltotal",
+        "difa",
+        "difc",
+        "tzero",
+        "position",
+        "sample_position",
+        "source_position",
+        "Ltotal",
     ):
         out.coords.pop(key, None)
     return out
@@ -148,10 +182,8 @@ def convert_to_dspacing(
 ) -> sc.DataArray:
     """Convert detector data to d-spacing, using calibration when available."""
     if calibration is None:
-         # TODO: generalize the graph to include dperp
-        out = data.transform_coords(
-            ["dspacing"], graph=graph, keep_intermediate=False
-        )
+        # TODO: generalize the graph to include dperp
+        out = data.transform_coords(["dspacing"], graph=graph, keep_intermediate=False)
     else:
         out = to_dspacing_with_calibration(data, calibration=calibration)
         for key in ("wavelength", "two_theta", "dperp"):
@@ -166,7 +198,9 @@ def sc_wright_omega_real(
     """Compute the Wright omega function used by the P2D transform."""
     from scipy.special import lambertw
 
-    argument = (4.0 * d**2 - lam_k**2 * sc.log(0.25 * lam_k**2 / d**2) - dp**2)
+    argument = (
+        4.0 * d**2 - lam_k**2 * sc.log(0.25 * lam_k**2 / d**2) - dp**2
+    )
     argument /= lam_k**2
     values = np.real(lambertw(np.exp(argument.values), 0))
     omega = sc.array(dims=argument.dims, values=values, unit=argument.unit)

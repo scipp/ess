@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import scipp as sc
 
-from ..powtex.types import (
+from .types import (
     CalibrationData,
     CalibrationRun,
     Filename,
@@ -21,8 +21,7 @@ from ..powtex.types import (
 
 
 def load_powtex_csv(
-    filename: Filename[RunType],
-    datapath: Filepath[RunType]
+    filename: Filename[RunType], datapath: Filepath[RunType]
 ) -> TofDetector[RunType]:
     """Load a POWTEX CSV event file."""
     if filename is None:
@@ -38,9 +37,7 @@ def load_powtex_csv(
         unit="mm",
     )
     event_data = sc.ones(dims=["event"], shape=[len(data)], unit="counts")
-    event_tof = sc.array(
-        dims=["event"], values=data_tof, unit="ns"
-    )
+    event_tof = sc.array(dims=["event"], values=data_tof, unit="ns")
 
     # TODO: Read these from the data file once they are available there.
     sample_pos = sc.vector(value=np.array([0.0, 0.0, 0.0]), unit="mm")

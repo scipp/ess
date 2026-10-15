@@ -5,28 +5,25 @@
 
 import math
 
-import numpy as np
 import scipp as sc
 
 from ..powtex.types import RunType, SampleRun
-
+from .conversion import get_cartesian_from_cylindrical
 from .types import (
     BinningSettings,
     DetectorViewData,
     DspacingBinWidth,
     DspacingCylSurfaceDetector,
     FlatViewData,
-    GammaBinWidth,
     GammaBinningData,
+    GammaBinWidth,
     GammaSlicesViewData,
     RawData2D,
     Texture3D,
-    TwoThetaBinWidth,
     TwoThetaBinningData,
+    TwoThetaBinWidth,
     TwoThetaRingsViewData,
 )
-
-from .conversion import get_cartesian_from_cylindrical
 
 
 def generate_gamma_binning_data(
@@ -72,32 +69,35 @@ def generate_gamma_binning_data(
     )
 
     if not drop_partial_bins:
-        if not math.isclose(
-            region_1_end, gap_start, rel_tol=1.0e-12, abs_tol=1.0e-12
-        ):
+        if not math.isclose(region_1_end, gap_start, rel_tol=1.0e-12, abs_tol=1.0e-12):
             region_1_edges = sc.concat(
                 [region_1_edges, sc.array(dims=[dim], values=[gap_start], unit="deg")],
                 dim=dim,
             )
-        if not math.isclose(
-            region_2_start, gap_end, rel_tol=1.0e-12, abs_tol=1.0e-12
-        ):
+        if not math.isclose(region_2_start, gap_end, rel_tol=1.0e-12, abs_tol=1.0e-12):
             region_2_edges = sc.concat(
                 [sc.array(dims=[dim], values=[gap_end], unit="deg"), region_2_edges],
                 dim=dim,
             )
 
     # This part below probably should be moved to a separate function
-    # region_1_centers = sc.midpoints(region_1_edges) #(region_1_edges[dim, :-1] + region_1_edges[dim, 1:]) / 2.0
-    # region_2_centers = sc.midpoints(region_2_edges) #(region_2_edges[dim, :-1] + region_2_edges[dim, 1:]) / 2.0
+    # region_1_centers = sc.midpoints(region_1_edges)
+    # region_2_centers = sc.midpoints(region_2_edges)
 
     # if include_visualization_gap:
     #     if (region_1_centers.sizes[dim] == 0 or region_2_centers.sizes[dim] == 0):
-    #         raise ValueError("Visualization-gap mode requires at least one bin on each side of the excluded interval.")
+    #         raise ValueError(
+    #             "Visualization-gap mode requires at least one bin on each side "
+    #             "of the excluded interval."
+    #         )
 
     #     visualization_gap_centers = sc.array(
     #         dims=[dim],
-    #         values=[float(region_1_centers[dim, -1].value) + width, gap_mid, float(region_2_centers[dim, 0].value) - width],
+    #         values=[
+    #             float(region_1_centers[dim, -1].value) + width,
+    #             gap_mid,
+    #             float(region_2_centers[dim, 0].value) - width,
+    #         ],
     #         unit="deg",
     #     )
 
@@ -111,7 +111,6 @@ def generate_gamma_binning_data(
     #         [region_2_centers, region_1_centers],
     #         dim=dim,
     #     )
-
 
     return GammaBinningData(
         sc.DataGroup({"region_1": region_1_edges, "region_2": region_2_edges})
@@ -253,14 +252,17 @@ def hist_3d(
     )
 
 
-def hist_2d(
-    data: Texture3D[RunType]
-) -> RawData2D[RunType]:
+def hist_2d(data: Texture3D[RunType]) -> RawData2D[RunType]:
     """Histogram projected detector data to texture coordinates."""
     # histogrammed_data_1 = data["region_1"].sum(dim="dspacing")
     # histogrammed_data_2 = data["region_2"].sum(dim="dspacing")
     return RawData2D(
-        sc.DataGroup({"region_1": data["region_1"].sum(dim="dspacing"), "region_2": data["region_2"].sum(dim="dspacing")})
+        sc.DataGroup(
+            {
+                "region_1": data["region_1"].sum(dim="dspacing"),
+                "region_2": data["region_2"].sum(dim="dspacing"),
+            }
+        )
     )
 
 
@@ -273,7 +275,9 @@ def extract_detector_view_data(data: RawData2D[SampleRun]) -> DetectorViewData:
     gamma_bin_centers_2 = sc.midpoints(histogrammed_2d_2.coords["gamma"])
 
     # TODO: check that dims match
-    gamma_bin_centers = sc.concat([gamma_bin_centers_2, gamma_bin_centers_1], dim="gamma")
+    gamma_bin_centers = sc.concat(
+        [gamma_bin_centers_2, gamma_bin_centers_1], dim="gamma"
+    )
 
     # TODO: check that reg1 and reg2 have the same two_theta coords
     two_theta_bin_centers = sc.midpoints(histogrammed_2d_1.coords["two_theta"])
@@ -290,29 +294,30 @@ def extract_detector_view_data(data: RawData2D[SampleRun]) -> DetectorViewData:
     )
 
     return DetectorViewData(
-        sc.DataArray(counts, coords={
-            "gamma": gamma_bin_centers,
-            "two_theta": two_theta_bin_centers,
-            "x": x_bin_centers,
-            "y": y_bin_centers,
-            "z": z_bin_centers,
-            "projection_radius": projection_radius
-        })
+        sc.DataArray(
+            counts,
+            coords={
+                "gamma": gamma_bin_centers,
+                "two_theta": two_theta_bin_centers,
+                "x": x_bin_centers,
+                "y": y_bin_centers,
+                "z": z_bin_centers,
+                "projection_radius": projection_radius,
+            },
+        )
     )
 
 
 def extract_flat_view_data(data: RawData2D[SampleRun]) -> FlatViewData:
-    """Return a raw flattened detector view. This will be very similar to view_3d, just the detector gap needs to be properly handles."""
-    return FlatViewData(
-        sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
-    )
+    """Return a raw flattened detector view."""
+    return FlatViewData(data)
 
 
-def extract_two_theta_rings_view_data(data: RawData2D[SampleRun]) -> TwoThetaRingsViewData:
+def extract_two_theta_rings_view_data(
+    data: RawData2D[SampleRun],
+) -> TwoThetaRingsViewData:
     """Return a raw two-theta rings view."""
-    return TwoThetaRingsViewData(
-        sc.DataGroup({"region_1": histogrammed_2d_1, "region_2": histogrammed_2d_2})
-    )
+    return TwoThetaRingsViewData(data)
 
 
 def extract_gamma_slices_view_data(data: RawData2D[SampleRun]) -> GammaSlicesViewData:

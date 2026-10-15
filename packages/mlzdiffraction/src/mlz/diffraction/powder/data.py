@@ -3,6 +3,7 @@
 
 """Data handling for POWTEX powder reduction."""
 
+import logging
 from pathlib import Path
 from typing import cast
 
@@ -22,11 +23,10 @@ from ..powtex.types import (
     RunType,
     TofDetector,
 )
-
 from .types import (
-    DSpacingMask,
     DataFrameP2D,
     DperpMask,
+    DSpacingMask,
     IntensityP2D,
     MaskedExtendedIntensity2D,
     MaskedIntensity2D,
@@ -37,10 +37,11 @@ from .types import (
     WavelengthMask,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def load_powgen(
-    filename: Filename[RunType],
-    datapath: Filepath[RunType]
+    filename: Filename[RunType], datapath: Filepath[RunType]
 ) -> TofDetector[RunType]:
     """
     Loads a powgen nxs file.
@@ -77,9 +78,7 @@ def load_powgen_calibration(
     # print(f"Loading calibration data from {filepath}")
     out = sc.Dataset(
         {
-            key: da.fold(
-                dim="spectrum", sizes={"wire": 40, "strip": 154, "segment": 7}
-            )
+            key: da.fold(dim="spectrum", sizes={"wire": 40, "strip": 154, "segment": 7})
             for key, da in ds.items()
         }
     )
@@ -89,7 +88,9 @@ def load_powgen_calibration(
 def load_powgen_tof_mask() -> MaskingData[TofMask]:
     """Return the time-of-flight mask for POWGEN P2D reduction."""
     mask_function = None
-    #mask_function = lambda x: (x < sc.scalar(0.0, unit="us")) | (x > sc.scalar(16666.67, unit="us"))
+    # mask_function = lambda x: (
+    #     x < sc.scalar(0.0, unit="us")
+    # ) | (x > sc.scalar(16666.67, unit="us"))
     return MaskingData[TofMask](mask_function)
 
 
@@ -97,11 +98,12 @@ def load_powgen_wavelength_mask() -> MaskingData[WavelengthMask]:
     """Return the wavelength mask for POWGEN P2D reduction."""
     return MaskingData[WavelengthMask](
         lambda x: (
-            x <= sc.scalar(0.3, unit="angstrom")
-        ) | (
-            x >= sc.scalar(1.25, unit="angstrom")
-        ) | (
-            (x >= sc.scalar(1.03, unit="angstrom")) & (x <= sc.scalar(1.07, unit="angstrom"))
+            (x <= sc.scalar(0.3, unit="angstrom"))
+            | (x >= sc.scalar(1.25, unit="angstrom"))
+            | (
+                (x >= sc.scalar(1.03, unit="angstrom"))
+                & (x <= sc.scalar(1.07, unit="angstrom"))
+            )
         )
     )
 
@@ -114,31 +116,21 @@ def load_powgen_two_theta_mask() -> MaskingData[TwoThetaMask]:
 
     return MaskingData[TwoThetaMask](
         lambda x: (
-            x < deg(10.0) # extra cut as in powtex
-        ) | (
-            x > deg(150.0)
-        ) | (
-            (x > deg(13.6)) & (x < deg(16.6))
-        ) | (
-            (x > deg(23.6)) & (x < deg(26.6))
-        ) | (
-            (x > deg(34.3)) & (x < deg(37.3))
-        ) | (
-            (x > deg(45.2)) & (x < deg(48.2))
-        ) | (
-            (x > deg(56.0)) & (x < deg(61.0))
-        ) | (
-            (x > deg(69.8)) & (x < deg(72.8))
-        ) | (
-            (x > deg(83.5)) & (x < deg(86.5))
-        ) | (
-            (x > deg(97.1)) & (x < deg(101.1))
-        ) | (
-            (x > deg(113.0)) & (x < deg(116.0))
-        ) | (
-            (x > deg(131.0)) & (x < deg(134.0))
-        ) | (
-            (x > deg(146.0)) & (x < deg(150.0))
+            (
+                x < deg(10.0)  # extra cut as in powtex
+            )
+            | (x > deg(150.0))
+            | ((x > deg(13.6)) & (x < deg(16.6)))
+            | ((x > deg(23.6)) & (x < deg(26.6)))
+            | ((x > deg(34.3)) & (x < deg(37.3)))
+            | ((x > deg(45.2)) & (x < deg(48.2)))
+            | ((x > deg(56.0)) & (x < deg(61.0)))
+            | ((x > deg(69.8)) & (x < deg(72.8)))
+            | ((x > deg(83.5)) & (x < deg(86.5)))
+            | ((x > deg(97.1)) & (x < deg(101.1)))
+            | ((x > deg(113.0)) & (x < deg(116.0)))
+            | ((x > deg(131.0)) & (x < deg(134.0)))
+            | ((x > deg(146.0)) & (x < deg(150.0)))
         )
     )
 
@@ -147,9 +139,8 @@ def load_powgen_dspacing_mask() -> MaskingData[DSpacingMask]:
     """Return the d-spacing mask for POWGEN P2D reduction."""
     return MaskingData[DSpacingMask](
         lambda x: (
-            x <= sc.scalar(0.4, unit="angstrom")
-        ) | (
-            x >= sc.scalar(2.0, unit="angstrom")
+            (x <= sc.scalar(0.4, unit="angstrom"))
+            | (x >= sc.scalar(2.0, unit="angstrom"))
         )
     )
 
@@ -158,9 +149,8 @@ def load_powgen_dperp_mask() -> MaskingData[DperpMask]:
     """Return the dperp mask for POWGEN P2D reduction."""
     return MaskingData[DperpMask](
         lambda x: (
-            x <= sc.scalar(0.2, unit="angstrom")
-        ) | (
-            x >= sc.scalar(4.0, unit="angstrom")
+            (x <= sc.scalar(0.2, unit="angstrom"))
+            | (x >= sc.scalar(4.0, unit="angstrom"))
         )
     )
 
@@ -241,19 +231,14 @@ def prepare_for_p2d_export(
             "lambda": data2d["lambda"].data,
             "two_theta": data2d["two_theta"].data,
         },
-        masks={
-            "combined_mask": combined_mask
-        },
+        masks={"combined_mask": combined_mask},
     )
     out = out.flatten(dims=out.dims, to="d_pixel")
     valid = ~out.masks["combined_mask"]
     return IntensityP2D(out[valid])
 
 
-def export_to_p2d(
-    data: IntensityP2D,
-    filename: P2DOutputFilename
-) -> DataFrameP2D:
+def export_to_p2d(data: IntensityP2D, filename: P2DOutputFilename) -> DataFrameP2D:
     """Export P2D-ready intensity data to a text file."""
     df = pd.DataFrame(
         {
@@ -268,18 +253,18 @@ def export_to_p2d(
     filepath = Path(filename)
     filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    header = (
-        "#Title: \n"
-        "#Inst: POWGEN.prm\n"
-        "#Binning: ddperp \n"
-        "#Bank: 1\n"
-    )
+    header = "#Title: \n#Inst: POWGEN.prm\n#Binning: ddperp \n#Bank: 1\n"
 
     formatter = "{:12.7f}".format
 
-    with open(filepath, "w") as f:
-        f.write(header + df.to_string(index=False, justify="left", formatters={column: formatter for column in df.columns}).lstrip())
-    print(f"The output file has been saved to {filepath}.")
+    with filepath.open("w") as f:
+        table = df.to_string(
+            index=False,
+            justify="left",
+            formatters=dict.fromkeys(df.columns, formatter),
+        )
+        f.write(header + table.lstrip())
+    logger.info("The output file has been saved to %s.", filepath)
     return DataFrameP2D(df)
 
 

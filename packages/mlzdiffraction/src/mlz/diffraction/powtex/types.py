@@ -10,36 +10,64 @@ from typing import NewType, TypeVar
 import sciline
 import scipp as sc
 
-from ess.powder import types as powder_t
+from ess.reduce.nexus import types as reduce_t
+from ess.reduce.uncertainty import UncertaintyBroadcastMode  # noqa: F401
 from ess.reduce.unwrap import types as unwrap_t
 
-AccumulatedProtonCharge = powder_t.AccumulatedProtonCharge
-CalibrationData = powder_t.CalibrationData
-CorrectedDetector = powder_t.CorrectedDetector
-CorrectedDspacing = powder_t.CorrectedDspacing
-DspacingDetector = powder_t.DspacingDetector
-EmptyCanRun = powder_t.EmptyCanRun
-NormalizedDspacing = powder_t.NormalizedDspacing
-Position = powder_t.Position
-RawDataAndMetadata = powder_t.RawDataAndMetadata
-SampleRun = powder_t.SampleRun
-TofMask = powder_t.TofMask
-TwoThetaMask = powder_t.TwoThetaMask
-UncertaintyBroadcastMode = powder_t.UncertaintyBroadcastMode
-VanadiumRun = powder_t.VanadiumRun
-WavelengthMask = powder_t.WavelengthMask
+CalibrationData = NewType("CalibrationData", sc.Dataset | None)
+"""Detector calibration data."""
+EmptyCanRun = NewType("EmptyCanRun", int)
+"""Empty-can run."""
+EmptyVanadiumCanRun = NewType("EmptyVanadiumCanRun", int)
+"""Empty-can run for a vanadium measurement."""
+Position = reduce_t.Position
+SampleRun = reduce_t.SampleRun
+VanadiumRun = NewType("VanadiumRun", int)
+"""Vanadium run."""
+
+RunType = TypeVar("RunType", SampleRun, EmptyCanRun, VanadiumRun, EmptyVanadiumCanRun)
+
+
+class AccumulatedProtonCharge(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Total proton charge."""
+
+
+class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data with masks and corrections applied."""
+
+
+class CorrectedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data in d-spacing space after corrections."""
+
+
+class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data with wavelength, two-theta, and d-spacing coordinates."""
+
+
+class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data in d-spacing space normalized by a reference run."""
+
+
+class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """Raw detector data and associated metadata."""
+
+
+TofMask = NewType("TofMask", Callable | None)
+"""Callable returning a mask for time-of-flight regions."""
+
+TwoThetaMask = NewType("TwoThetaMask", Callable | None)
+"""Callable returning a mask for two-theta regions."""
+
+WavelengthMask = NewType("WavelengthMask", Callable | None)
+"""Callable returning a mask for wavelength regions."""
 
 TofDetector = unwrap_t.TofDetector
 TofMonitor = unwrap_t.TofMonitor
 WavelengthDetector = unwrap_t.WavelengthDetector
 
-EmptyVanadiumCanRun = NewType("EmptyVanadiumCanRun", int)
-"""Empty-can run for a vanadium measurement."""
-
 CalibrationRun = NewType("CalibrationRun", int)
 """Calibration run."""
 
-RunType = TypeVar("RunType", SampleRun, EmptyCanRun, VanadiumRun, EmptyVanadiumCanRun)
 NonEmptyCanRunType = TypeVar("NonEmptyCanRunType", SampleRun, VanadiumRun)
 EmptyCanRunType = TypeVar("EmptyCanRunType", EmptyCanRun, EmptyVanadiumCanRun)
 GeneralRunType = TypeVar(
