@@ -103,7 +103,7 @@ def _find_class_in_inputs(
 ) -> snx.Group:
     """Search for a NeXus class in a group's inputs.
 
-    This function uses a breadth-first search through ``'input'`` attributes.
+    This function uses a breadth-first search through ``'inputs'`` datasets.
     It begins at ``start`` and walks along chains of inputs until a group with the
     given class is found, the chain ends, or the chain leads outside ``group``.
 
@@ -113,6 +113,8 @@ def _find_class_in_inputs(
         The group that contains all possible next named groups
     target:
         The NeXus class to look for.
+    start:
+        The group to start the search from.
 
     Returns
     -------
@@ -135,9 +137,14 @@ def _find_class_in_inputs(
 
 def _get_inputs(group: snx.Group) -> list[str]:
     try:
-        inputs = group.attrs['inputs']
+        inputs = group['inputs']
     except KeyError:
-        return []
+        try:
+            # Older ESS encoding. The NeXus standard requires 'inputs' to be a dataset
+            # but ESS used an attribute for BIFROST files for a while.
+            inputs = group.attrs['inputs']
+        except KeyError:
+            return []
     # Deal with nexusformat (Python module) or kafka-to-nexus (filewriter)
     # silently converting a len(list[str]) == 1 attribute to a str attribute:
     return [inputs] if isinstance(inputs, str) else inputs
