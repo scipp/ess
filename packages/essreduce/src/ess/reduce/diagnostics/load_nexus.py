@@ -28,11 +28,13 @@ INSTRUMENT_PATH = '/entry/instrument'
 AnyMonitor = NewType("AnyMonitor", int)
 
 
-def _make_workflow(filename: str | Path, fold: dict | None = None) -> sl.Pipeline:
+def _make_workflow(
+    filename: str | Path, bank_sizes: DetectorBankSizes | None = None
+) -> sl.Pipeline:
     wf = GenericNeXusWorkflow(run_types=[AnyRun], monitor_types=[AnyMonitor])
     wf[Filename[AnyRun]] = filename
-    if fold is not None:
-        wf[DetectorBankSizes] = fold
+    if bank_sizes is not None:
+        wf[DetectorBankSizes] = bank_sizes
     return wf
 
 
@@ -98,7 +100,7 @@ def _robust_load(
     filename: str | Path,
     kind: Literal[snx.NXdetector, snx.NXmonitor],
     entries: list[str] | str | None = None,
-    fold: dict | None = None,
+    bank_sizes: DetectorBankSizes | None = None,
 ) -> sc.DataGroup:
 
     user_requested = None
@@ -110,7 +112,7 @@ def _robust_load(
     if user_requested is None:
         user_requested = entries
 
-    wf = _make_workflow(filename, fold=fold)
+    wf = _make_workflow(filename, bank_sizes=bank_sizes)
 
     dg = sc.DataGroup()
     for item in entries:
@@ -126,7 +128,7 @@ def _robust_load(
                 dg[item] = _load_with_fallback(
                     filename,
                     path=item,
-                    fold=fold.get(item) if fold is not None else None,
+                    bank_sizes=bank_sizes.get(item) if bank_sizes is not None else None,
                 )
             except Exception:  # noqa: S112
                 continue
@@ -154,7 +156,7 @@ def load_detectors(
     filename: str | Path,
     *,
     detectors: list[str] | str | None = None,
-    fold: dict | None = None,
+    bank_sizes: DetectorBankSizes | None = None,
 ) -> sc.DataGroup:
     """
     Load detector data from a NeXus file. We attempt to use the GenericNeXusWorkflow
@@ -170,13 +172,15 @@ def load_detectors(
     detectors:
         List of detectors to load. A single string can also be provided to load
         only one detector. If ``None``, all NXdetectors are loaded.
-    fold:
+    bank_sizes:
         Dictionary specifying how to fold each detector's data array. The keys should
         correspond to detector names, and the values should be dictionaries mapping
         dimension names to fold sizes. If ``None``, no folding is applied.
     """
 
-    return _robust_load(filename, kind=snx.NXdetector, entries=detectors, fold=fold)
+    return _robust_load(
+        filename, kind=snx.NXdetector, entries=detectors, bank_sizes=bank_sizes
+    )
 
 
 def load_monitors(

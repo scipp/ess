@@ -8,9 +8,9 @@ Components for DREAM
 import importlib.metadata
 from functools import partial
 
-from ess.reduce.nexus import safe_load
-
 from scippneutron import instrument_view
+
+from ess.reduce.diagnostics import load as diagnostics_load
 
 from .beamline import InstrumentConfiguration
 from .io import load_geant4_csv
@@ -24,8 +24,10 @@ from .workflows import (
     DreamWorkflow,
 )
 
-load_detectors = partial(safe_load.load_detectors, fold=DETECTOR_BANK_SIZES)
-load_monitors = safe_load.load_monitors
+load_detectors = partial(
+    diagnostics_load.load_detectors, bank_sizes=DETECTOR_BANK_SIZES
+)
+load_monitors = diagnostics_load.load_monitors
 
 
 try:
@@ -33,7 +35,7 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-del importlib, partial, safe_load, DETECTOR_BANK_SIZES
+del importlib, partial, diagnostics_load, DETECTOR_BANK_SIZES
 
 __all__ = [
     'DreamGeant4MonitorHistogramWorkflow',

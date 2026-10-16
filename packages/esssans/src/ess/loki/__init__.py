@@ -2,9 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import importlib.metadata
-from functools import partial
-
-from ess.reduce.diagnostics import load as diagnostics_load
 
 from . import workflow
 from .diagnostics import InstrumentView, LokiBankViewer, instrument_view
@@ -13,10 +10,7 @@ from .larmor_workflow import (
     LokiAtLarmorWorkflow,
     larmor_default_parameters,
 )
-from .workflow import DETECTOR_BANK_SIZES, LokiWorkflow, loki_default_parameters
-
-load_detectors = partial(diagnostics_load.load_detectors, fold=DETECTOR_BANK_SIZES)
-load_monitors = diagnostics_load.load_monitors
+from .workflow import LokiWorkflow, loki_default_parameters
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -24,7 +18,7 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 
-del importlib, partial, diagnostics_load, DETECTOR_BANK_SIZES
+del importlib
 
 
 __all__ = [
@@ -35,8 +29,6 @@ __all__ = [
     'LokiWorkflow',
     'instrument_view',
     'larmor_default_parameters',
-    'load_detectors',
-    'load_monitors',
     'loki_default_parameters',
     'workflow',
 ]

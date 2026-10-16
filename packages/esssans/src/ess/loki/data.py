@@ -199,7 +199,7 @@ def loki_broken_file() -> Path:
     """
     Small LoKI file with broken transformations and monitor data for testing purposes.
     The file was recorded at the Loki instrument and contains no events.
-    It has an empty time-dependent transformation for the detector bank 0 and some badly
-    formed monitor data.
+    It has an empty time-dependent transformation for loki_detector_0 and
+    beam_monitor_m4.
     """
     return _registry.get_path("loki_336349_00000342.hdf")
