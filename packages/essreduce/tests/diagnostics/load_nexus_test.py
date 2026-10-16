@@ -12,7 +12,7 @@ def test_load_detectors_all_banks_good_file(loki_coda_file):
 
 
 def test_load_detectors_all_banks_bad_file(loki_broken_file):
-    # Mutliple warnings are typically raised, so we simply catch all UserWarnings
+    # Multiple warnings are typically raised, so we simply catch all UserWarnings
     with pytest.warns(UserWarning):  # noqa: PT030
         dg = load_detectors(loki_broken_file)
     assert set(dg.keys()) == {f"loki_detector_{i}" for i in range(9)}

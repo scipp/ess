@@ -138,8 +138,8 @@ def _robust_load(
                 warnings.warn(msg, UserWarning, stacklevel=2)
         elif isinstance(dg[item], sc.DataGroup):
             warnings.warn(
-                f"{item} could not be loaded as a DataArray, falled back to "
-                "loading it as a DataGroup",
+                f"{item} could not be loaded as a DataArray; loaded it as a DataGroup "
+                "as a fallback",
                 UserWarning,
                 stacklevel=2,
             )
