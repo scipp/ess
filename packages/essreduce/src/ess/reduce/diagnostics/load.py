@@ -4,6 +4,7 @@
 Fail-safe loaders for NeXus files
 """
 
+import warnings
 from pathlib import Path
 from typing import Literal, NewType
 
@@ -55,27 +56,97 @@ def _find_data_keys(
     return keys
 
 
-def _load_detector_with_workflow(wf: sl.Pipeline, detector: str) -> sc.DataArray:
-    wf[NeXusDetectorName] = detector
-    return wf.compute(RawDetector[AnyRun])
+def _load_with_workflow(
+    wf: sl.Pipeline, path: str, kind: Literal[snx.NXdetector, snx.NXmonitor]
+) -> sc.DataArray:
+    if kind == snx.NXdetector:
+        wf[NeXusDetectorName] = path
+        return wf.compute(RawDetector[AnyRun])
+    if kind == snx.NXmonitor:
+        wf[NeXusName[AnyMonitor]] = path
+        return wf.compute(RawMonitor[AnyRun, AnyMonitor])
+    raise ValueError(
+        f"Unsupported kind when loading with workflow: {kind}. "
+        f"Expected one of: {snx.NXdetector}, {snx.NXmonitor}."
+    )
 
 
-def _load_detector_with_fallback(filename: str | Path, detector: str) -> sc.DataArray:
+def _load_with_fallback(filename: str | Path, path: str) -> sc.DataArray:
     with snx.File(filename) as f:
-        entry = f[f'{INSTRUMENT_PATH}/{detector}']
-        keys = _find_data_keys(entry=entry, group_name=detector, filename=filename)
+        entry = f[f'{INSTRUMENT_PATH}/{path}']
+        keys = _find_data_keys(entry=entry, group_name=path, filename=filename)
         da = snx.compute_positions(entry[()])[keys[0]]
     return da
 
 
+#  with snx.File(filename) as f:
+#         entry = f[f'{INSTRUMENT_PATH}/{monitor}']
+#         keys = _find_data_keys(entry=entry, group_name=monitor, filename=filename)
+#         da = snx.compute_positions(entry[()])[keys[0]]
+#     return da
+
+
+def _robust_load(
+    filename: str | Path,
+    kind: Literal[snx.NXdetector, snx.NXmonitor],
+    entries: list[str] | str | None = None,
+) -> sc.DataGroup:
+
+    user_requested = None
+    if entries is None:
+        user_requested = []
+        entries = _find_detectors_or_monitors(filename, kind)
+    if isinstance(entries, str):
+        entries = [entries]
+    if user_requested is None:
+        user_requested = entries
+
+    wf = _make_workflow(filename)
+
+    dg = sc.DataGroup()
+    for item in entries:
+        try:
+            dg[item] = _load_with_workflow(wf, path=item, kind=kind)
+        except Exception:
+            warnings.warn(
+                f"{item}: loading with default loader failed, attempting fallback",
+                stacklevel=2,
+            )
+            try:
+                dg[item] = _load_with_fallback(filename, path=item)
+            except Exception:  # noqa: S112
+                continue
+
+        if item not in dg:
+            msg = f"Failed to load {item}"
+            if item in user_requested:
+                # If the item was explicitly requested by the user, raise an error
+                raise RuntimeError(msg)
+            else:
+                # Otherwise, issue a warning instead
+                warnings.warn(msg, stacklevel=2)
+        elif isinstance(dg[item], sc.DataGroup):
+            warnings.warn(
+                f"{item} could not be loaded as a DataArray, falled back to "
+                "loading it as a DataGroup",
+                stacklevel=2,
+            )
+
+    return dg
+
+
 def load_detectors(
     filename: str | Path,
+    *,
     detectors: list[str] | str | None = None,
     fold: dict | None = None,
 ) -> sc.DataGroup:
     """
     Load detector data from a NeXus file. We attempt to use the GenericNeXusWorkflow
     first and fall back to raw Scippnexus code if necessary.
+    By default, an attempt at loading each detector as a DataArray is made. If this
+    fails (because signal shapes are incompatible or some fields are missing),
+    the loader will fall back to loading the detector as a DataGroup.
 
     Parameters
     ----------
@@ -86,22 +157,7 @@ def load_detectors(
         only one detector. If ``None``, all NXdetectors are loaded.
     """
 
-    if detectors is None:
-        detectors = _find_detectors_or_monitors(filename, snx.NXdetector)
-    if isinstance(detectors, str):
-        detectors = [detectors]
-
-    wf = _make_workflow(filename)
-
-    dg = sc.DataGroup()
-    for detector in detectors:
-        try:
-            dg[detector] = _load_detector_with_workflow(wf, detector)
-        except Exception:  # noqa: PERF203
-            try:
-                dg[detector] = _load_detector_with_fallback(filename, detector)
-            except Exception:  # noqa: S112
-                continue
+    dg = _robust_load(filename, kind=snx.NXdetector, entries=detectors)
 
     if fold is not None:
         for key, da in dg.items():
@@ -110,25 +166,15 @@ def load_detectors(
     return dg
 
 
-def _load_monitor_with_workflow(wf: sl.Pipeline, monitor: str) -> sc.DataArray:
-    wf[NeXusName[AnyMonitor]] = monitor
-    return wf.compute(RawMonitor[AnyRun, AnyMonitor])
-
-
-def _load_monitor_with_fallback(filename: str | Path, monitor: str) -> sc.DataArray:
-    with snx.File(filename) as f:
-        entry = f[f'{INSTRUMENT_PATH}/{monitor}']
-        keys = _find_data_keys(entry=entry, group_name=monitor, filename=filename)
-        da = snx.compute_positions(entry[()])[keys[0]]
-    return da
-
-
 def load_monitors(
-    filename: str | Path, monitors: list[str] | str | None = None
+    filename: str | Path, *, monitors: list[str] | str | None = None
 ) -> sc.DataGroup:
     """
     Load monitor data from a NeXus file. We attempt to use the GenericNeXusWorkflow
     first and fall back to raw Scippnexus code if necessary.
+    By default, an attempt at loading each monitor as a DataArray is made. If this
+    fails (because signal shapes are incompatible or some fields are missing),
+    the loader will fall back to loading the monitor as a DataGroup.
 
     Parameters
     ----------
@@ -139,21 +185,4 @@ def load_monitors(
         only one monitor. If ``None``, all NXmonitors are loaded.
     """
 
-    if monitors is None:
-        monitors = _find_detectors_or_monitors(filename, snx.NXmonitor)
-    if isinstance(monitors, str):
-        monitors = [monitors]
-
-    wf = _make_workflow(filename)
-
-    dg = sc.DataGroup()
-    for monitor in monitors:
-        try:
-            dg[monitor] = _load_monitor_with_workflow(wf, monitor)
-        except Exception:  # noqa: PERF203
-            try:
-                dg[monitor] = _load_monitor_with_fallback(filename, monitor)
-            except Exception:  # noqa: S112
-                continue
-
-    return dg
+    return _robust_load(filename, kind=snx.NXmonitor, entries=monitors)
