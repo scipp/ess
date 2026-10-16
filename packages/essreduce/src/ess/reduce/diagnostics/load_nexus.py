@@ -77,19 +77,19 @@ def _load_with_workflow(
 
 
 def _load_with_fallback(
-    filename: str | Path, path: str, fold: dict | None = None
+    filename: str | Path, path: str, bank_sizes: dict | None = None
 ) -> sc.DataArray:
     with snx.File(filename) as f:
         entry = f[f'{INSTRUMENT_PATH}/{path}']
         keys = _find_data_keys(entry=entry, group_name=path, filename=filename)
         da = snx.compute_positions(entry[()])[keys[0]]
-    if fold is not None:
+    if bank_sizes is not None:
         if da.ndim == 1:
-            da = da.fold(dim=da.dim, sizes=fold)
+            da = da.fold(dim=da.dim, sizes=bank_sizes)
         else:
             warnings.warn(
-                f"Could not fold data array '{path}' with fold {fold} because it has "
-                "more than 1 dimension",
+                f"Could not reshape data array '{path}' with bank_sizes {bank_sizes} "
+                f"because it has more than 1 dimension",
                 UserWarning,
                 stacklevel=2,
             )
@@ -124,14 +124,19 @@ def _robust_load(
                 UserWarning,
                 stacklevel=2,
             )
-            try:
-                dg[item] = _load_with_fallback(
-                    filename,
-                    path=item,
-                    bank_sizes=bank_sizes.get(item) if bank_sizes is not None else None,
-                )
-            except Exception:  # noqa: S112
-                continue
+            # try:
+            #     dg[item] = _load_with_fallback(
+            #         filename,
+            #         path=item,
+            #         bank_sizes=bank_sizes.get(item) if bank_sizes is not None else None,
+            #     )
+            # except Exception:  # noqa: S112
+            #     continue
+            dg[item] = _load_with_fallback(
+                filename,
+                path=item,
+                bank_sizes=bank_sizes.get(item) if bank_sizes is not None else None,
+            )
 
         if item not in dg:
             msg = f"Failed to load {item}"
@@ -173,9 +178,9 @@ def load_detectors(
         List of detectors to load. A single string can also be provided to load
         only one detector. If ``None``, all NXdetectors are loaded.
     bank_sizes:
-        Dictionary specifying how to fold each detector's data array. The keys should
+        Dictionary specifying how to reshape each detector's data array. The keys should
         correspond to detector names, and the values should be dictionaries mapping
-        dimension names to fold sizes. If ``None``, no folding is applied.
+        dimension names to reshaped sizes. If ``None``, no reshaping is applied.
     """
 
     return _robust_load(

@@ -3,7 +3,7 @@
 
 import pytest
 
-from ess.reduce.diagnostics.load import load_detectors, load_monitors
+from ess.reduce.diagnostics.load_nexus import load_detectors, load_monitors
 
 
 def test_load_detectors_all_banks_good_file(loki_coda_file):
@@ -54,26 +54,30 @@ def test_load_detectors_two_banks_bad_file(loki_broken_file):
     assert dg.dims == ("detector_number",)
 
 
-def test_load_detectors_one_bank_with_fold(loki_coda_file):
-    fold = {'loki_detector_0': {'layer': 4, 'tube': 56, 'straw': 7, 'pixel': -1}}
-    dg = load_detectors(loki_coda_file, detectors=["loki_detector_0"], fold=fold)
+def test_load_detectors_one_bank_with_bank_sizes(loki_coda_file):
+    bank_sizes = {'loki_detector_0': {'layer': 4, 'tube': 56, 'straw': 7, 'pixel': -1}}
+    dg = load_detectors(
+        loki_coda_file, detectors=["loki_detector_0"], bank_sizes=bank_sizes
+    )
     assert set(dg.keys()) == {"loki_detector_0"}
-    # Data should have been reshaped according to the fold
-    assert set(dg.dims) == set(fold['loki_detector_0'].keys())
+    # Data should have been reshaped according to the bank_sizes
+    assert set(dg.dims) == set(bank_sizes['loki_detector_0'].keys())
 
 
-def test_load_detectors_two_banks_with_fold(loki_coda_file):
-    fold = {
+def test_load_detectors_two_banks_with_bank_sizes(loki_coda_file):
+    bank_sizes = {
         'loki_detector_1': {'layer': 4, 'tube': 16, 'straw': 7, 'pixel': -1},
         'loki_detector_3': {'layer': 4, 'tube': 16, 'straw': 7, 'pixel': -1},
     }
     dg = load_detectors(
-        loki_coda_file, detectors=["loki_detector_1", "loki_detector_3"], fold=fold
+        loki_coda_file,
+        detectors=["loki_detector_1", "loki_detector_3"],
+        bank_sizes=bank_sizes,
     )
     assert set(dg.keys()) == {"loki_detector_1", "loki_detector_3"}
-    # Data should have been reshaped according to the fold
+    # Data should have been reshaped according to the bank_sizes
     for bank in ["loki_detector_1", "loki_detector_3"]:
-        assert set(dg[bank].dims) == set(fold[bank].keys())
+        assert set(dg[bank].dims) == set(bank_sizes[bank].keys())
 
 
 def test_load_monitors_all_monitors_good_file(loki_coda_file):
