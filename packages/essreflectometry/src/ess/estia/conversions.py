@@ -2,12 +2,10 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from ess.reduce.nexus.types import DetectorBankSizes, Position
-from scipp.constants import pi
-from scippneutron._utils import elem_dtype
 from scippneutron.conversion import graph
 from scippnexus import NXsample, NXsource
 
-from ..reflectometry.conversions import reflectometry_q
+from ..reflectometry import conversions as reflectometry_conversions
 from ..reflectometry.types import (
     CoordTransformationGraph,
     DetectorRotation,
@@ -47,15 +45,10 @@ def reflectometry_q_x(
     :
         Qx-values.
     """
-    dtype = elem_dtype(wavelength)
-    c = (2 * pi).astype(dtype)
-    return (
-        c
-        * (
-            sc.cos(theta.astype(dtype, copy=False))
-            - sc.cos(sample_rotation.to(unit=theta.unit, dtype=dtype))
-        )
-        / wavelength
+    return reflectometry_conversions.reflectometry_q_x(
+        wavelength=wavelength,
+        incident_angle=sample_rotation,
+        reflection_angle=theta,
     )
 
 
@@ -125,7 +118,7 @@ def coordinate_transformation_graph(
         **graph.beamline.beamline(scatter=True),
         "theta": theta,
         "divergence_angle": divergence_angle,
-        "Q": reflectometry_q,
+        "Q": reflectometry_conversions.reflectometry_q,
         "Qx": reflectometry_q_x,
         'sample_size': lambda: sc.scalar(20.0, unit='mm'),
         'blade': lambda: sc.arange('blade', bank['blade'] - 1, -1, -1),
