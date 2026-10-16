@@ -8,7 +8,7 @@ from typing import cast
 import numpy as np
 import scipp as sc
 
-from ..powtex.types import DspacingDetector, KeepEventsMLZ, WavelengthDetector
+from ..powtex.types import DspacingDetector, KeepEvents, WavelengthDetector
 from .conversion import lambda_from_d_dperp
 from .types import (
     DperpBins,
@@ -35,7 +35,7 @@ def bin_dspacing_dperp_mlz(
     data: SpectralDetector[RunType],
     dspacing_bins: DspacingBins,
     dperp_bins: DperpBins,
-    keep_events: KeepEventsMLZ,
+    keep_events: KeepEvents,
 ) -> DspacingDetector[RunType]:
     """Bin detector data in d-spacing and dperp."""
     if data is None:
@@ -64,7 +64,7 @@ def focus_to_dspacing_dperp(
     data: SpectralDetector[RunType],
     dspacing_bins: DspacingBins,
     dperp_bins: DperpBins,
-    keep_events: KeepEventsMLZ,
+    keep_events: KeepEvents,
 ) -> Dspacing2D[RunType]:
     """Focus detector spectra to d-spacing and dperp."""
     if data is None:

@@ -79,7 +79,7 @@ GeneralRunType = TypeVar(
     CalibrationRun,
 )
 
-KeepEventsMLZ = NewType("KeepEventsMLZ", bool)
+KeepEvents = NewType("KeepEvents", bool)
 """Flag indicating whether data should keep events instead of histogramming."""
 
 
