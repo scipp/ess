@@ -10,13 +10,27 @@ from typing import NewType, TypeVar
 import sciline
 import scipp as sc
 
-from ..powtex.types import (
-    NonEmptyCanRunType,
-    RunType,
-    TofMask,
-    TwoThetaMask,
-    WavelengthMask,
-)
+from ..powtex import types as powtex_t
+
+CalibrationData = powtex_t.CalibrationData
+CalibrationRun = powtex_t.CalibrationRun
+EmptyCanRun = powtex_t.EmptyCanRun
+EmptyVanadiumCanRun = powtex_t.EmptyVanadiumCanRun
+Filename = powtex_t.Filename
+Filepath = powtex_t.Filepath
+KeepEvents = powtex_t.KeepEvents
+NonEmptyCanRunType = powtex_t.NonEmptyCanRunType
+RunType = powtex_t.RunType
+SampleRun = powtex_t.SampleRun
+ShiftNegativeIntensity = powtex_t.ShiftNegativeIntensity
+NegativeIntensityResetValue = powtex_t.NegativeIntensityResetValue
+TofDetector = powtex_t.TofDetector
+TofMask = powtex_t.TofMask
+TwoThetaMask = powtex_t.TwoThetaMask
+UncertaintyBroadcastMode = powtex_t.UncertaintyBroadcastMode
+VanadiumRun = powtex_t.VanadiumRun
+WavelengthDetector = powtex_t.WavelengthDetector
+WavelengthMask = powtex_t.WavelengthMask
 
 DSpacingMask = NewType("DSpacingMask", Callable | None)
 """Callable masking d-spacing data, or ``None`` if no mask is applied."""
