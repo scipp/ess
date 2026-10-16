@@ -742,6 +742,10 @@ class _NXdataWithoutAuxSignals(snx.NXdata):
             for key, value in children.items()
             if key not in ('frame_total', 'reference_time')
         }
+        # The attribute names the dropped children, ScippNeXus would look them up.
+        attrs = {
+            key: value for key, value in attrs.items() if key != 'auxiliary_signals'
+        }
         super().__init__(attrs=attrs, children=children)
 
 
