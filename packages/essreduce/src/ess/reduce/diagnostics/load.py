@@ -11,7 +11,7 @@ import sciline as sl
 import scipp as sc
 import scippnexus as snx
 
-from .types import (
+from ..nexus.types import (
     AnyRun,
     Filename,
     NeXusDetectorName,
@@ -19,7 +19,7 @@ from .types import (
     RawDetector,
     RawMonitor,
 )
-from .workflow import GenericNeXusWorkflow
+from ..nexus.workflow import GenericNeXusWorkflow
 
 INSTRUMENT_PATH = '/entry/instrument'
 
