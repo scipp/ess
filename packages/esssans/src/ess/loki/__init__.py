@@ -4,7 +4,7 @@
 import importlib.metadata
 from functools import partial
 
-from ess.reduce.nexus import safe_load
+from ess.reduce.diagnostics import load as diagnostics_load
 
 from . import workflow
 from .diagnostics import InstrumentView, LokiBankViewer, instrument_view
@@ -15,8 +15,8 @@ from .larmor_workflow import (
 )
 from .workflow import DETECTOR_BANK_SIZES, LokiWorkflow, loki_default_parameters
 
-load_detectors = partial(safe_load.load_detectors, fold=DETECTOR_BANK_SIZES)
-load_monitors = safe_load.load_monitors
+load_detectors = partial(diagnostics_load.load_detectors, fold=DETECTOR_BANK_SIZES)
+load_monitors = diagnostics_load.load_monitors
 
 try:
     __version__ = importlib.metadata.version(__package__ or __name__)
@@ -24,7 +24,7 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 
-del importlib, partial, safe_load, DETECTOR_BANK_SIZES
+del importlib, partial, diagnostics_load, DETECTOR_BANK_SIZES
 
 
 __all__ = [

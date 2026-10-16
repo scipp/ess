@@ -14,6 +14,7 @@ import scippnexus as snx
 
 from ..nexus.types import (
     AnyRun,
+    DetectorBankSizes,
     Filename,
     NeXusDetectorName,
     NeXusName,
@@ -27,9 +28,11 @@ INSTRUMENT_PATH = '/entry/instrument'
 AnyMonitor = NewType("AnyMonitor", int)
 
 
-def _make_workflow(filename: str | Path) -> sl.Pipeline:
+def _make_workflow(filename: str | Path, fold: dict | None = None) -> sl.Pipeline:
     wf = GenericNeXusWorkflow(run_types=[AnyRun], monitor_types=[AnyMonitor])
     wf[Filename[AnyRun]] = filename
+    if fold is not None:
+        wf[DetectorBankSizes] = fold
     return wf
 
 
@@ -71,25 +74,31 @@ def _load_with_workflow(
     )
 
 
-def _load_with_fallback(filename: str | Path, path: str) -> sc.DataArray:
+def _load_with_fallback(
+    filename: str | Path, path: str, fold: dict | None = None
+) -> sc.DataArray:
     with snx.File(filename) as f:
         entry = f[f'{INSTRUMENT_PATH}/{path}']
         keys = _find_data_keys(entry=entry, group_name=path, filename=filename)
         da = snx.compute_positions(entry[()])[keys[0]]
+    if fold is not None:
+        if da.ndim == 1:
+            da = da.fold(dim=da.dim, sizes=fold)
+        else:
+            warnings.warn(
+                f"Could not fold data array '{path}' with fold {fold} because it has "
+                "more than 1 dimension",
+                UserWarning,
+                stacklevel=2,
+            )
     return da
-
-
-#  with snx.File(filename) as f:
-#         entry = f[f'{INSTRUMENT_PATH}/{monitor}']
-#         keys = _find_data_keys(entry=entry, group_name=monitor, filename=filename)
-#         da = snx.compute_positions(entry[()])[keys[0]]
-#     return da
 
 
 def _robust_load(
     filename: str | Path,
     kind: Literal[snx.NXdetector, snx.NXmonitor],
     entries: list[str] | str | None = None,
+    fold: dict | None = None,
 ) -> sc.DataGroup:
 
     user_requested = None
@@ -101,7 +110,7 @@ def _robust_load(
     if user_requested is None:
         user_requested = entries
 
-    wf = _make_workflow(filename)
+    wf = _make_workflow(filename, fold=fold)
 
     dg = sc.DataGroup()
     for item in entries:
@@ -110,10 +119,15 @@ def _robust_load(
         except Exception:
             warnings.warn(
                 f"{item}: loading with default loader failed, attempting fallback",
+                UserWarning,
                 stacklevel=2,
             )
             try:
-                dg[item] = _load_with_fallback(filename, path=item)
+                dg[item] = _load_with_fallback(
+                    filename,
+                    path=item,
+                    fold=fold.get(item) if fold is not None else None,
+                )
             except Exception:  # noqa: S112
                 continue
 
@@ -124,11 +138,12 @@ def _robust_load(
                 raise RuntimeError(msg)
             else:
                 # Otherwise, issue a warning instead
-                warnings.warn(msg, stacklevel=2)
+                warnings.warn(msg, UserWarning, stacklevel=2)
         elif isinstance(dg[item], sc.DataGroup):
             warnings.warn(
                 f"{item} could not be loaded as a DataArray, falled back to "
                 "loading it as a DataGroup",
+                UserWarning,
                 stacklevel=2,
             )
 
@@ -155,15 +170,13 @@ def load_detectors(
     detectors:
         List of detectors to load. A single string can also be provided to load
         only one detector. If ``None``, all NXdetectors are loaded.
+    fold:
+        Dictionary specifying how to fold each detector's data array. The keys should
+        correspond to detector names, and the values should be dictionaries mapping
+        dimension names to fold sizes. If ``None``, no folding is applied.
     """
 
-    dg = _robust_load(filename, kind=snx.NXdetector, entries=detectors)
-
-    if fold is not None:
-        for key, da in dg.items():
-            if key in fold:
-                dg[key] = da.fold(dim=da.dim, sizes=fold[key])
-    return dg
+    return _robust_load(filename, kind=snx.NXdetector, entries=detectors, fold=fold)
 
 
 def load_monitors(

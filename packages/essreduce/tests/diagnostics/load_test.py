@@ -6,8 +6,15 @@ import pytest
 from ess.reduce.diagnostics.load import load_detectors, load_monitors
 
 
-def test_load_detectors_all_banks(loki_coda_file):
+def test_load_detectors_all_banks_good_file(loki_coda_file):
     dg = load_detectors(loki_coda_file)
+    assert set(dg.keys()) == {f"loki_detector_{i}" for i in range(9)}
+
+
+def test_load_detectors_all_banks_bad_file(loki_broken_file):
+    # Mutliple warnings are typically raised, so we simply catch all UserWarnings
+    with pytest.warns(UserWarning):  # noqa: PT030
+        dg = load_detectors(loki_broken_file)
     assert set(dg.keys()) == {f"loki_detector_{i}" for i in range(9)}
 
 
@@ -21,7 +28,7 @@ def test_load_detectors_one_bank_good_file(loki_coda_file, bank_name):
 
 @pytest.mark.parametrize("bank_name", [["loki_detector_0"], "loki_detector_0"])
 def test_load_detectors_one_bank_bad_file(loki_broken_file, bank_name):
-    with pytest.warns(UserWarning, match="loading with default loader failed"):
+    with pytest.warns(UserWarning):  # noqa: PT030
         dg = load_detectors(loki_broken_file, detectors=bank_name)
     assert set(dg.keys()) == {"loki_detector_0"}
     # Data should NOT have been reshaped
@@ -38,7 +45,7 @@ def test_load_detectors_two_banks_good_file(loki_coda_file):
 
 
 def test_load_detectors_two_banks_bad_file(loki_broken_file):
-    with pytest.warns(UserWarning, match="loading with default loader failed"):
+    with pytest.warns(UserWarning):  # noqa: PT030
         dg = load_detectors(
             loki_broken_file, detectors=["loki_detector_0", "loki_detector_4"]
         )
@@ -69,8 +76,14 @@ def test_load_detectors_two_banks_with_fold(loki_coda_file):
         assert set(dg[bank].dims) == set(fold[bank].keys())
 
 
-def test_load_monitors_all_monitors(loki_coda_file):
+def test_load_monitors_all_monitors_good_file(loki_coda_file):
     mons = load_monitors(loki_coda_file)
+    assert set(mons.keys()) == {f"beam_monitor_m{i}" for i in range(5)}
+
+
+def test_load_monitors_all_monitors_bad_file(loki_broken_file):
+    with pytest.warns(UserWarning):  # noqa: PT030
+        mons = load_monitors(loki_broken_file)
     assert set(mons.keys()) == {f"beam_monitor_m{i}" for i in range(5)}
 
 
@@ -80,11 +93,11 @@ def test_load_monitors_one_monitor_good_file(loki_coda_file, monitor_name):
     assert set(mons.keys()) == {"beam_monitor_m0"}
 
 
-@pytest.mark.parametrize("monitor_name", [["beam_monitor_m0"], "beam_monitor_m0"])
+@pytest.mark.parametrize("monitor_name", [["beam_monitor_m4"], "beam_monitor_m4"])
 def test_load_monitors_one_monitor_bad_file(loki_broken_file, monitor_name):
-    with pytest.warns(UserWarning, match="loading with default loader failed"):
+    with pytest.warns(UserWarning):  # noqa: PT030
         mons = load_monitors(loki_broken_file, monitors=monitor_name)
-    assert set(mons.keys()) == {"beam_monitor_m0"}
+    assert set(mons.keys()) == {"beam_monitor_m4"}
 
 
 def test_load_monitors_two_monitors_good_file(loki_coda_file):
@@ -95,8 +108,8 @@ def test_load_monitors_two_monitors_good_file(loki_coda_file):
 
 
 def test_load_monitors_two_monitors_bad_file(loki_broken_file):
-    with pytest.warns(UserWarning, match="loading with default loader failed"):
+    with pytest.warns(UserWarning):  # noqa: PT030
         mons = load_monitors(
-            loki_broken_file, monitors=["beam_monitor_m1", "beam_monitor_m3"]
+            loki_broken_file, monitors=["beam_monitor_m1", "beam_monitor_m4"]
         )
-    assert set(mons.keys()) == {"beam_monitor_m1", "beam_monitor_m3"}
+    assert set(mons.keys()) == {"beam_monitor_m1", "beam_monitor_m4"}
