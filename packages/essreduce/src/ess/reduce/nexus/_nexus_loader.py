@@ -355,7 +355,7 @@ def _deduce_component_parent_class(
         return parent_class
 
     match nx_class:
-        case snx.NXsample:
+        case snx.NXsample | snx.NXinstrument:
             return snx.NXentry
         case _:
             # Most components are in the instrument,
@@ -549,32 +549,99 @@ def load_data(
     :
         Data array with events or a histogram.
     """
-    with open_nexus_file(file_path, definitions=definitions) as f:
-        entry = _unique_child_group(f, snx.NXentry, entry_name)
-        instrument = _unique_child_group(entry, snx.NXinstrument, None)
-
-        # This only loads the `Group` for the component, it does not build an
-        # `NXdetector`, `NXmonitor`, etc. So this does not use the application
+    with _open_component_parent(
+        NeXusLocationSpec(
+            filename=file_path, entry_name=entry_name, selection=selection
+        ),
+        parent_class=snx.NXinstrument,
+        definitions=definitions,
+    ) as instrument:
+        # `instrument[component_name]` loads the `Group` for the component, it does not
+        # build an `NXdetector`, `NXmonitor`, etc. So this does not use the application
         # definitions which would drop the data by default. The definitions are
-        # only applied below in `data[sel]`.
-        component = instrument[component_name]
+        # only applied in `load_data_from_group`.
+        return _load_data_from_group(instrument[component_name], selection)
 
-        if _contains_nx_class(component, snx.NXevent_data):
-            data = _unique_child_group(component, snx.NXevent_data, None)
-            sel = _to_snx_selection(selection, for_events=True)
-        elif _contains_nx_class(component, snx.NXdata):
-            data = _unique_child_group(component, snx.NXdata, None)
-            sel = _to_snx_selection(selection, for_events=False)
-        elif _contains_nx_class(component, snx.NXlog):
-            data = _unique_child_group(component, snx.NXlog, "data")
-            sel = _to_snx_selection(selection, for_events=False)
-        else:
-            raise ValueError(
-                f"NeXus group '{component.name}' contains neither "
-                "NXevent_data nor NXdata."
-            )
 
-        return data[sel]
+def load_all_data(
+    file_path: FilePath | NeXusFile | NeXusGroup,
+    selection: snx.typing.ScippIndex | slice = (),
+    *,
+    nx_class: type[snx.NXobject],
+    entry_name: NeXusEntryName | None = None,
+    definitions: Mapping | NoNewDefinitionsType = NoNewDefinitions,
+    parent_class: type[snx.NXobject] | None = None,
+) -> sc.DataGroup[sc.DataArray]:
+    """Load all data for components of a given class from NeXus.
+
+    Loads either event data from ``NXevent_data`` groups or histogram data from
+    ``NXdata`` groups depending on which the groups of the given class contain.
+    Event data is grouped by ``'event_time_zero'`` as in the NeXus file.
+    Histogram data is returned as encoded in the file.
+
+    Parameters
+    ----------
+    file_path:
+        Indicates where to load data from.
+        One of:
+
+        - Path to a NeXus file on disk.
+        - File handle or buffer for reading binary data.
+        - A ScippNexus group of the root of a NeXus file.
+    selection:
+        Select which aprt of the data to load.
+        By default, load all data.
+        Supports anything that ScippNexus supports.
+    nx_class:
+        NeXus class of the components to load.
+    entry_name:
+        Name of the entry that contains the detector.
+        If ``None``, the entry will be located based
+        on its NeXus class, but there cannot be more than 1.
+    definitions:
+        Definitions used by scippnexus loader, see :py:`scippnexus.File`
+        for documentation.
+    parent_class:
+        NeXus class of the parent group of the components to load.
+        Is deduced from ``nx_class`` if ``None``.
+
+    Returns
+    -------
+    :
+        Data group of data arrays with events or a histograms.
+    """
+    with _open_component_parent(
+        NeXusLocationSpec(
+            filename=file_path, entry_name=entry_name, selection=selection
+        ),
+        parent_class=_deduce_component_parent_class(nx_class, parent_class),
+        definitions=definitions,
+    ) as parent:
+        data = sc.DataGroup()
+        for name, group in parent[nx_class].items():
+            loaded = _load_data_from_group(group, selection)
+            data[name] = loaded
+    return data
+
+
+def _load_data_from_group(
+    group: snx.Group, selection: snx.typing.ScippIndex | slice = ()
+) -> sc.DataArray:
+    if _contains_nx_class(group, snx.NXevent_data):
+        data = _unique_child_group(group, snx.NXevent_data, None)
+        sel = _to_snx_selection(selection, for_events=True)
+    elif _contains_nx_class(group, snx.NXdata):
+        data = _unique_child_group(group, snx.NXdata, None)
+        sel = _to_snx_selection(selection, for_events=False)
+    elif _contains_nx_class(group, snx.NXlog):
+        data = _unique_child_group(group, snx.NXlog, "data")
+        sel = _to_snx_selection(selection, for_events=False)
+    else:
+        raise ValueError(
+            f"NeXus group '{group.name}' contains neither NXevent_data nor NXdata."
+        )
+
+    return data[sel]
 
 
 def group_event_data(
