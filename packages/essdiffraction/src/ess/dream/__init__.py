@@ -6,16 +6,12 @@ Components for DREAM
 """
 
 import importlib.metadata
-from functools import partial
 
 from scippneutron import instrument_view
-
-from ess.reduce.diagnostics import load as diagnostics_load
 
 from .beamline import InstrumentConfiguration
 from .io import load_geant4_csv
 from .workflows import (
-    DETECTOR_BANK_SIZES,
     DreamGeant4MonitorHistogramWorkflow,
     DreamGeant4MonitorIntegratedWorkflow,
     DreamGeant4ProtonChargeWorkflow,
@@ -24,18 +20,12 @@ from .workflows import (
     DreamWorkflow,
 )
 
-load_detectors = partial(
-    diagnostics_load.load_detectors, bank_sizes=DETECTOR_BANK_SIZES
-)
-load_monitors = diagnostics_load.load_monitors
-
-
 try:
     __version__ = importlib.metadata.version("essdiffraction")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-del importlib, partial, diagnostics_load, DETECTOR_BANK_SIZES
+del importlib
 
 __all__ = [
     'DreamGeant4MonitorHistogramWorkflow',
@@ -47,7 +37,5 @@ __all__ = [
     'InstrumentConfiguration',
     '__version__',
     'instrument_view',
-    'load_detectors',
     'load_geant4_csv',
-    'load_monitors',
 ]

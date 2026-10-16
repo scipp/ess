@@ -2,8 +2,8 @@
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
 import pytest
-from ess import dream
 from ess.dream import data
+from ess.dream.diagnostics import load_detectors, load_monitors
 
 TEST_BANK_SIZES = {
     "endcap_backward_detector": {
@@ -33,7 +33,7 @@ TEST_BANK_SIZES = {
 
 
 def test_load_detectors_all_banks():
-    dg = dream.load_detectors(data.dream_coda_file(), fold=TEST_BANK_SIZES)
+    dg = load_detectors(data.dream_coda_file(), bank_sizes=TEST_BANK_SIZES)
     assert set(dg.keys()) == {
         "endcap_backward_detector",
         "endcap_forward_detector",
@@ -50,8 +50,8 @@ def test_load_detectors_all_banks():
     [["mantle_detector"], ["endcap_backward_detector"], ["endcap_forward_detector"]],
 )
 def test_load_detectors_selected_banks(banks):
-    dg = dream.load_detectors(
-        data.dream_coda_file(), detectors=banks, fold=TEST_BANK_SIZES
+    dg = load_detectors(
+        data.dream_coda_file(), detectors=banks, bank_sizes=TEST_BANK_SIZES
     )
     assert set(dg.keys()) == set(banks)
     # Banks should have been re-shaped
@@ -59,8 +59,7 @@ def test_load_detectors_selected_banks(banks):
 
 
 def test_load_monitors_all_monitors():
-    with pytest.warns(UserWarning, match="Failed to load"):
-        mons = dream.load_monitors(data.dream_coda_file())
+    mons = load_monitors(data.dream_coda_file())
     assert set(mons.keys()) == {"monitor_bunker", "monitor_cave"}
 
 
@@ -69,6 +68,5 @@ def test_load_monitors_all_monitors():
     [["monitor_bunker"], ["monitor_bunker", "monitor_cave"]],
 )
 def test_load_monitors_selected_monitors(monitors):
-    with pytest.warns(UserWarning, match="Failed to load"):
-        mons = dream.load_monitors(data.dream_coda_file(), monitors=monitors)
+    mons = load_monitors(data.dream_coda_file(), monitors=monitors)
     assert set(mons.keys()) == set(monitors)
