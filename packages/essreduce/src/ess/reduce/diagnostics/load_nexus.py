@@ -12,6 +12,7 @@ import sciline as sl
 import scipp as sc
 import scippnexus as snx
 
+from ..nexus._nexus_loader import _unique_child_group, read_nexus_file_info
 from ..nexus.types import (
     AnyRun,
     DetectorBankSizes,
@@ -22,8 +23,6 @@ from ..nexus.types import (
     RawMonitor,
 )
 from ..nexus.workflow import GenericNeXusWorkflow
-
-INSTRUMENT_PATH = '/entry/instrument'
 
 AnyMonitor = NewType("AnyMonitor", int)
 
@@ -38,17 +37,7 @@ def _make_workflow(
     return wf
 
 
-def _find_detectors_or_monitors(
-    filename: str | Path, kind: Literal[snx.NXdetector, snx.NXmonitor]
-) -> list[str]:
-    with snx.File(filename) as f:
-        items = f[INSTRUMENT_PATH][kind]
-    return list(items.keys())
-
-
-def _find_data_keys(
-    entry: snx.Group, group_name: str, filename: str | Path
-) -> list[str]:
+def _find_data_key(entry: snx.Group, group_name: str, filename: str | Path) -> str:
     keys = list(entry[snx.NXevent_data].keys()) + list(entry[snx.NXdata].keys())
     if not keys:
         raise (ValueError(f"No data found in '{group_name}' of file '{filename}'"))
@@ -58,7 +47,7 @@ def _find_data_keys(
                 f"Multiple data found in '{group_name}' of file '{filename}': {keys}"
             )
         )
-    return keys
+    return keys[0]
 
 
 def _load_with_workflow(
@@ -80,9 +69,11 @@ def _load_with_fallback(
     filename: str | Path, path: str, bank_sizes: dict | None = None
 ) -> sc.DataArray:
     with snx.File(filename) as f:
-        entry = f[f'{INSTRUMENT_PATH}/{path}']
-        keys = _find_data_keys(entry=entry, group_name=path, filename=filename)
-        da = snx.compute_positions(entry[()])[keys[0]]
+        entry = _unique_child_group(f, snx.NXentry, None)
+        instrument = _unique_child_group(entry, snx.NXinstrument, None)
+        group = instrument[path]
+        key = _find_data_key(entry=group, group_name=path, filename=filename)
+        da = snx.compute_positions(group[()])[key]
     if bank_sizes is not None:
         if da.ndim == 1:
             da = da.fold(dim=da.dim, sizes=bank_sizes)
@@ -106,7 +97,11 @@ def _robust_load(
     user_requested = None
     if entries is None:
         user_requested = []
-        entries = _find_detectors_or_monitors(filename, kind)
+        file_info = read_nexus_file_info(filename)
+        if kind == snx.NXdetector:
+            entries = list(file_info.detectors.keys())
+        elif kind == snx.NXmonitor:
+            entries = list(file_info.monitors.keys())
     if isinstance(entries, str):
         entries = [entries]
     if user_requested is None:
@@ -124,19 +119,14 @@ def _robust_load(
                 UserWarning,
                 stacklevel=2,
             )
-            # try:
-            #     dg[item] = _load_with_fallback(
-            #         filename,
-            #         path=item,
-            #         bank_sizes=bank_sizes.get(item) if bank_sizes is not None else None,
-            #     )
-            # except Exception:  # noqa: S112
-            #     continue
-            dg[item] = _load_with_fallback(
-                filename,
-                path=item,
-                bank_sizes=bank_sizes.get(item) if bank_sizes is not None else None,
-            )
+            try:
+                dg[item] = _load_with_fallback(
+                    filename,
+                    path=item,
+                    bank_sizes=bank_sizes.get(item) if bank_sizes is not None else None,
+                )
+            except Exception:  # noqa: S112
+                continue
 
         if item not in dg:
             msg = f"Failed to load {item}"
