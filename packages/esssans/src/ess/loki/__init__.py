@@ -17,7 +17,9 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
+
 del importlib
+
 
 __all__ = [
     'InstrumentView',
