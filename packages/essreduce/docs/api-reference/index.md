@@ -27,14 +27,15 @@
    :template: module-template.rst
    :recursive:
 
+   diagnostics
    live
    logging
    nexus
    normalization
    polarization
    streaming
-   time_of_flight
    ui
    uncertainty
+   unwrap
    widgets
 ```
