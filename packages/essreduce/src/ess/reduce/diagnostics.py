@@ -137,6 +137,9 @@ class BankExplorer(ipw.VBox):
         self.data = sc.DataGroup(
             {k: _add_missing_coordinates(da) for k, da in data.items()}
         )
+        self.masks = {
+            k: sc.zeros(sizes=da.sizes, dtype=bool) for k, da in self.data.items()
+        }
         max_sizes = {
             dim: max(da.sizes.get(dim, 0) for da in self.data.values())
             for dim in self.data.dims
@@ -182,9 +185,21 @@ class BankExplorer(ipw.VBox):
         #     (self.straw_sum, 'value'), (self.straw_slider, 'disabled')
         # )
 
-        self.slice_node = pp.Node(_slice_or_sum, dg=self.data, slices=self.collect_node)
+        self.mask_node = pp.Node(lambda: self.masks)
 
-        return
+        self.apply_masks_node = pp.Node(
+            lambda dg, masks: sc.DataGroup(
+                {key: da.assign_masks({"mask": masks[key]}) for key, da in dg.items()}
+            ),
+            dg=self.data,
+            masks=self.mask_node,
+        )
+
+        self.slice_node = pp.Node(
+            _slice_or_sum, dg=self.apply_masks_node, slices=self.collect_node
+        )
+
+        # return
 
         with plt.ioff():
             ncols = 3
@@ -221,7 +236,9 @@ class BankExplorer(ipw.VBox):
             )
 
         self.main_figure.canvas.header_visible = False
-        self.main_figure.canvas.mpl_connect('button_press_event', self.switch_to_tab)
+        self._tab_switch_connection = self.main_figure.canvas.mpl_connect(
+            'button_press_event', self.switch_to_tab
+        )
 
         # Create color map controls
         self.cmap_vmin = ipw.Text(
@@ -379,13 +396,45 @@ class BankExplorer(ipw.VBox):
         if change['new'] == 0:
             for f, n in zip(self.subplots, self.nodes, strict=True):
                 n.add_view(f.view)
+            self.tab_switch_connection = self.main_figure.canvas.mpl_connect(
+                'button_press_event', self.switch_to_tab
+            )
         else:
             n = self.nodes[change['new'] - 1]
             f = self.tab_figs[change['new'] - 1]
             n.add_view(f.view)
+            self.main_figure.canvas.mpl_disconnect(self._tab_switch_connection)
+            self._tab_switch_connection = None
+            self._mask_connection = f.fig.canvas.mpl_connect(
+                'button_press_event', self.add_mask
+            )
         self.slice_node.notify_children(message=None)
         self.update_colormapper_norm()
         self._lock = True
         self.update_cmin({'new': self.cmap_vmin.value})
         self._lock = False
         self.update_cmax({'new': self.cmap_vmax.value})
+
+    def add_mask(self, event: MouseEvent) -> None:
+        if event.inaxes is None:
+            return
+
+        print("Mouse event:", event)
+        # Current tab index
+        current_tab_index = self.tabs.selected_index
+        # Fig view dims:
+        ydim = self.tab_figs[current_tab_index - 1].view._dims['y']
+        # Find closest y integer and mask the row
+        y = int(round(event.ydata))
+
+        # Find slider dims and indices
+        slices = [(ydim, y)] + [sl.value for sl in self.dim_sliders]
+
+        key = list(self.data.keys())[current_tab_index - 1]
+        print("Current key:", key)
+        m = self.masks[key]
+        for s in slices:
+            m = m[s]
+        # Set the mask at the computed location
+        m.values[...] = ~m.values[...]
+        self.mask_node.notify_children(message=None)
