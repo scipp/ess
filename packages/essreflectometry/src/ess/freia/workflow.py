@@ -14,6 +14,7 @@ from ..reflectometry.types import (
     DetectorSpatialResolution,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
+    NeXusMonitorName,
     ReferenceRun,
     SampleRun,
 )
@@ -57,6 +58,12 @@ def default_parameters() -> dict:
     """Return default parameters for the NeXus Freia workflow."""
     return {
         NeXusDetectorName: "multiblade_detector",
+        NeXusMonitorName[WBC1Monitor]: 'monitor_1',
+        NeXusMonitorName[PSCMonitor]: 'monitor_2',
+        NeXusMonitorName[WBC2Monitor]: 'monitor_3',
+        NeXusMonitorName[WBC3Monitor]: 'monitor_4',
+        NeXusMonitorName[ShutterMonitor]: 'monitor_5',
+        NeXusMonitorName[NormalizationMonitor]: 'monitor_6',
         DetectorBankSizes: {
             "multiblade_detector": {"strip": 64, "blade": 32, "wire": 32},
         },
