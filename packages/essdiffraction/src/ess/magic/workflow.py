@@ -26,13 +26,13 @@ def MagicWorkflow() -> sl.Pipeline:
 
 
 def MagicMcStasWorkflow() -> sl.Pipeline:
-    """Workflow for reading raw MAGIC McStas events, with detector bank A by default.
+    """Workflow for MAGIC McStas events and geometry, with detector bank A by default.
 
-    Currently provides only ``RawMcStasEvents[RunType]``. Geometry and reduction
-    providers are not yet included.
+    Provides ``RawMcStasEvents[RunType]`` and ``EmptyDetector[RunType]`` independently.
+    Event assignment and reduction providers are not yet included.
     """
     return sl.Pipeline(
-        providers=(mcstas.load_mcstas_events,),
+        providers=(mcstas.load_mcstas_events, mcstas.mcstas_detector_geometry),
         constraints={RunType: [SampleRun]},
         params={DetectorBank: DetectorBank.detector_a},
     )

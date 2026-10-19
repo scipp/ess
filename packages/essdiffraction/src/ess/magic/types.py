@@ -7,8 +7,15 @@ from typing import NewType
 import sciline as sl
 import scipp as sc
 
-from ess.reduce.nexus.types import Filename, RawDetector, RunType, SampleRun
+from ess.reduce.nexus.types import (
+    EmptyDetector,
+    Filename,
+    RawDetector,
+    RunType,
+    SampleRun,
+)
 
+EmptyDetector = EmptyDetector
 RawDetector = RawDetector
 Filename = Filename
 RunType = RunType
