@@ -76,10 +76,13 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
         self._on_subwidget_change()
 
     def _on_subwidget_change(self, _=None):
+        print("Subwidget change detected")
+        print(f"Sum value: {self.sum.value}, Slider value: {self.slider.value}")
         if self.sum.value:
             self.value = (self.dim, None)
         else:
             self.value = (self.dim, self.slider.value)
+        print(f"Updated value: {self.value}")
 
 
 def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
@@ -89,25 +92,45 @@ def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
 
 
 def _slice_or_sum(
-    dg: sc.DataGroup, slices: list[tuple[str, int | None]]
-) -> sc.DataGroup:
-    out = sc.DataGroup()
-    for key, da in dg.items():
-        item = da
-        for sl in slices:
-            dim, ind = sl
-            if dim not in item.sizes:
-                continue
-            if ind is None:
-                item = item.sum(dim)
+    da: sc.DataArray, slices: list[tuple[str, int | None]]
+) -> sc.DataArray:
+    print(f"Slices: {slices}")
+    out = da
+    for sl in slices:
+        dim, ind = sl
+        if dim not in out.sizes:
+            continue
+        if ind is None:
+            out = out.sum(dim)
+        else:
+            if ind > out.sizes[dim]:
+                # Make a blank data array to avoid indexing errors
+                out = sc.full_like(out[dim, 0], value=float("nan"))
             else:
-                if ind > item.sizes[dim]:
-                    # Make a blank data array to avoid indexing errors
-                    item = sc.full_like(item[dim, 0], value=float("nan"))
-                else:
-                    item = item[dim, ind - 1]
-        out[key] = item
+                out = out[dim, ind - 1]
     return out
+
+
+# def _slice_or_sum(
+#     dg: sc.DataGroup, slices: list[tuple[str, int | None]]
+# ) -> sc.DataGroup:
+#     out = sc.DataGroup()
+#     for key, da in dg.items():
+#         item = da
+#         for sl in slices:
+#             dim, ind = sl
+#             if dim not in item.sizes:
+#                 continue
+#             if ind is None:
+#                 item = item.sum(dim)
+#             else:
+#                 if ind > item.sizes[dim]:
+#                     # Make a blank data array to avoid indexing errors
+#                     item = sc.full_like(item[dim, 0], value=float("nan"))
+#                 else:
+#                     item = item[dim, ind - 1]
+#         out[key] = item
+#     return out
 
 
 class BankExplorer(ipw.VBox):
@@ -151,42 +174,23 @@ class BankExplorer(ipw.VBox):
 
         other_dims = [dim for dim in self.data.dims if dim not in self._visible_dims]
 
-        self.dim_sliders = [
-            DimSlider(sizes=max_sizes, dim=dim, visible_dims=self._visible_dims)
-            for dim in other_dims
-        ]
-        dim_nodes = [pp.widget_node(slider) for slider in self.dim_sliders]
+        self.bank_dim_sliders = {
+            key: [
+                DimSlider(sizes=max_sizes, dim=dim, visible_dims=self._visible_dims)
+                for dim in other_dims
+            ]
+            for key in self.data.keys()
+        }
 
-        self.collect_node = pp.Node(lambda *args: args, *dim_nodes)
-
-        # self.layer_slider = ipw.IntSlider(
-        #     min=1, max=4, description="Layer", style={"description_width": 'initial'}
-        # )
-        # self.layer_sum = ipw.Checkbox(
-        #     description="Sum", value=False, indent=False, layout={"width": "initial"}
-        # )
-
-        # self.layer_ind_node = pp.widget_node(self.layer_slider)
-        # self.layer_sum_node = pp.widget_node(self.layer_sum)
-
-        # self.straw_slider = ipw.IntSlider(
-        #     min=1, max=7, description="Straw", style={"description_width": 'initial'}
-        # )
-        # self.straw_sum = ipw.Checkbox(
-        #     description="Sum", value=False, indent=False, layout={"width": "initial"}
-        # )
-        # self.straw_ind_node = pp.widget_node(self.straw_slider)
-        # self.straw_sum_node = pp.widget_node(self.straw_sum)
-
-        # self.layer_link = ipw.jslink(
-        #     (self.layer_sum, 'value'), (self.layer_slider, 'disabled')
-        # )
-        # self.straw_link = ipw.jslink(
-        #     (self.straw_sum, 'value'), (self.straw_slider, 'disabled')
-        # )
+        self.collect_nodes = {
+            key: pp.Node(
+                lambda *args: args,
+                *[pp.widget_node(slider) for slider in self.bank_dim_sliders[key]],
+            )
+            for key in self.data.keys()
+        }
 
         self.mask_node = pp.Node(lambda: self.masks)
-
         self.apply_masks_node = pp.Node(
             lambda dg, masks: sc.DataGroup(
                 {key: da.assign_masks({"mask": masks[key]}) for key, da in dg.items()}
@@ -195,9 +199,47 @@ class BankExplorer(ipw.VBox):
             masks=self.mask_node,
         )
 
-        self.slice_node = pp.Node(
-            _slice_or_sum, dg=self.apply_masks_node, slices=self.collect_node
+        self.bank_selection_nodes = {
+            key: pp.Node(lambda dg, key: dg[key], dg=self.apply_masks_node, key=key)
+            for key in self.data.keys()
+        }
+
+        self.slice_nodes = {
+            key: pp.Node(
+                _slice_or_sum,
+                da=self.bank_selection_nodes[key],
+                slices=self.collect_nodes[key],
+            )
+            for key in self.data.keys()
+        }
+
+        # There is a significant performance penalty in Matplotlib if we display the
+        # data from the same node on both the 'All detectors' subplots and the
+        # individual bank figures. To avoid this, we have to create separate dim
+        # sliders for the 'All detectors' view. In turn, we need separate nodes in the
+        # node tree below.
+        self.all_dim_sliders = [
+            DimSlider(sizes=max_sizes, dim=dim, visible_dims=self._visible_dims)
+            for dim in other_dims
+        ]
+        self.all_collect_node = pp.Node(
+            lambda *args: args,
+            *[pp.widget_node(slider) for slider in self.all_dim_sliders],
         )
+        self.allbanks_slice_nodes = {
+            key: pp.Node(
+                _slice_or_sum,
+                da=self.bank_selection_nodes[key],
+                slices=self.all_collect_node,
+            )
+            for key in self.data.keys()
+        }
+
+        # Master dim sliders
+        self.master_dim_sliders = [
+            DimSlider(sizes=max_sizes, dim=dim, visible_dims=self._visible_dims)
+            for dim in other_dims
+        ]
 
         # return
 
@@ -213,20 +255,23 @@ class BankExplorer(ipw.VBox):
 
         self.subplots = []
         self.tab_figs = []
-        self.nodes = []
+        # self.nodes = []
         for i, (bank, ax) in enumerate(
             zip(self.data.keys(), axs.flatten(), strict=True)
         ):
-            # bank = f"loki_detector_{i}"
-            n = pp.Node(lambda dg, key: dg[key], dg=self.slice_node, key=bank)
-            self.nodes.append(n)
             self.subplots.append(
-                pp.imagefigure(n, ax=ax, title=bank, cbar=True, **kwargs)
+                pp.imagefigure(
+                    self.allbanks_slice_nodes[bank],
+                    ax=ax,
+                    title=bank,
+                    cbar=True,
+                    **kwargs,
+                )
             )
             ax._bank_explorer_subplot_index = i
             self.tab_figs.append(
                 pp.imagefigure(
-                    pp.Node(sc.full_like(n(), value=float("nan"))),
+                    self.slice_nodes[bank],
                     title=bank,
                     cbar=True,
                     # Need to make some horizontal space for the toolbar
@@ -282,9 +327,9 @@ class BankExplorer(ipw.VBox):
         # ]
         self.tabs.children = [self.main_figure.canvas, *self.tab_figs]
         self.tabs.titles = ["All", *self.data.keys()]
-        self.tabs.observe(self.update_node_routing, names='selected_index')
+        self.tabs.observe(self.update_slider_control, names='selected_index')
 
-        for sl in self.dim_sliders:
+        for sl in self.master_dim_sliders:
             sl.on_dim_change(self.on_dim_change)
 
         # dim_slider_widgets = [
@@ -293,12 +338,15 @@ class BankExplorer(ipw.VBox):
         #     for widget in (dslider, ipw.HTML('<div style="width: 20px;"></div>'))
         # ]
 
+        self.links = {}
+        self.link_master_to_all()
+
         super().__init__(
             [
                 ipw.HBox(
                     [
                         widget
-                        for dslider in self.dim_sliders
+                        for dslider in self.master_dim_sliders
                         for widget in (
                             dslider,
                             ipw.HTML('<div style="width: 20px;"></div>'),
@@ -315,8 +363,35 @@ class BankExplorer(ipw.VBox):
             ]
         )
 
+    def link_master_to_all(self):
+        for link in self.links.values():
+            link.unlink()
+        for dim_slider, master_slider in zip(
+            self.all_dim_sliders, self.master_dim_sliders, strict=True
+        ):
+            self.links[f"allbanks_{dim_slider.dim}"] = ipw.jslink(
+                (master_slider.slider, 'value'), (dim_slider.slider, 'value')
+            )
+
+    def link_master_to_one(self, key: str):
+        for link in self.links.values():
+            link.unlink()
+        for bank_slider, master_slider in zip(
+            self.bank_dim_sliders[key], self.master_dim_sliders, strict=True
+        ):
+            self.links[f"{key}_{bank_slider.dim}"] = ipw.jslink(
+                (master_slider.slider, 'value'), (bank_slider.slider, 'value')
+            )
+
+    def update_slider_control(self, change: dict) -> None:
+        if change['new'] == 0:
+            self.link_master_to_all()
+        else:
+            key = self.tabs.titles[self.tabs.selected_index]
+            self.link_master_to_one(key)
+
     def on_dim_change(self, _):
-        slider_dims = [sl.dim for sl in self.dim_sliders]
+        slider_dims = [sl.dim for sl in self.master_dim_sliders]
         self._visible_dims = [dim for dim in self.data.dims if dim not in slider_dims]
         for f in chain(self.subplots, self.tab_figs):
             # We clear the dims on the view and the canvas, to make them believe they
@@ -390,30 +465,31 @@ class BankExplorer(ipw.VBox):
         self.cmap_vmax.value = ''
         self._lock = False
 
-    def update_node_routing(self, change: dict) -> None:
-        for n in self.nodes:
-            n.views.clear()
-        if change['new'] == 0:
-            for f, n in zip(self.subplots, self.nodes, strict=True):
-                n.add_view(f.view)
-            self.tab_switch_connection = self.main_figure.canvas.mpl_connect(
-                'button_press_event', self.switch_to_tab
-            )
-        else:
-            n = self.nodes[change['new'] - 1]
-            f = self.tab_figs[change['new'] - 1]
-            n.add_view(f.view)
-            self.main_figure.canvas.mpl_disconnect(self._tab_switch_connection)
-            self._tab_switch_connection = None
-            self._mask_connection = f.fig.canvas.mpl_connect(
-                'button_press_event', self.add_mask
-            )
-        self.slice_node.notify_children(message=None)
-        self.update_colormapper_norm()
-        self._lock = True
-        self.update_cmin({'new': self.cmap_vmin.value})
-        self._lock = False
-        self.update_cmax({'new': self.cmap_vmax.value})
+    # def update_node_routing(self, change: dict) -> None:
+    #     return
+    #     for n in self.nodes:
+    #         n.views.clear()
+    #     if change['new'] == 0:
+    #         for f, n in zip(self.subplots, self.nodes, strict=True):
+    #             n.add_view(f.view)
+    #         self.tab_switch_connection = self.main_figure.canvas.mpl_connect(
+    #             'button_press_event', self.switch_to_tab
+    #         )
+    #     else:
+    #         n = self.nodes[change['new'] - 1]
+    #         f = self.tab_figs[change['new'] - 1]
+    #         n.add_view(f.view)
+    #         self.main_figure.canvas.mpl_disconnect(self._tab_switch_connection)
+    #         self._tab_switch_connection = None
+    #         self._mask_connection = f.fig.canvas.mpl_connect(
+    #             'button_press_event', self.add_mask
+    #         )
+    #     self.slice_node.notify_children(message=None)
+    #     self.update_colormapper_norm()
+    #     self._lock = True
+    #     self.update_cmin({'new': self.cmap_vmin.value})
+    #     self._lock = False
+    #     self.update_cmax({'new': self.cmap_vmax.value})
 
     def add_mask(self, event: MouseEvent) -> None:
         if event.inaxes is None:
