@@ -70,6 +70,12 @@ def default_parameters() -> dict:
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
+            "monitor_1": float('inf'),
+            "monitor_2": float('inf'),
+            "monitor_3": float('inf'),
+            "monitor_4": float('inf'),
+            "monitor_5": float('inf'),
+            "monitor_6": float('inf'),
         },
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
