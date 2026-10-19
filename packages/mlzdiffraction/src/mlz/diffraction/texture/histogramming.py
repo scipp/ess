@@ -6,6 +6,7 @@
 import math
 
 import scipp as sc
+import numpy as np
 
 from ..powtex.types import RunType, SampleRun
 from .conversion import get_cartesian_from_cylindrical
@@ -254,13 +255,11 @@ def hist_3d(
 
 def hist_2d(data: Texture3D[RunType]) -> RawData2D[RunType]:
     """Histogram projected detector data to texture coordinates."""
-    # histogrammed_data_1 = data["region_1"].sum(dim="dspacing")
-    # histogrammed_data_2 = data["region_2"].sum(dim="dspacing")
     return RawData2D(
         sc.DataGroup(
             {
                 "region_1": data["region_1"].sum(dim="dspacing"),
-                "region_2": data["region_2"].sum(dim="dspacing"),
+                "region_2": data["region_2"].sum(dim="dspacing")
             }
         )
     )
@@ -309,8 +308,41 @@ def extract_detector_view_data(data: RawData2D[SampleRun]) -> DetectorViewData:
 
 
 def extract_flat_view_data(data: RawData2D[SampleRun]) -> FlatViewData:
-    """Return a raw flattened detector view."""
-    return FlatViewData(data)
+    """Return a raw flattened detector view. Note, in order to properly
+    visualize the gap in the detector, the gamma bin edges are modified
+    to include a gap in the middle and one needs to work with bin edge
+    coordinates for proper visualization."""
+
+    gamma_region_1_last_edge = data["region_1"].coords["gamma"][-1]
+    gamma_region_2_first_edge = data["region_2"].coords["gamma"][0]
+    gamma_gap = (gamma_region_1_last_edge + gamma_region_2_first_edge) / 2.0
+
+    gamma_bin_edges = sc.concat(
+        [data["region_1"].coords["gamma"],  gamma_gap, data["region_2"].coords["gamma"]],
+        dim="gamma",
+    )
+
+    two_theta_bin_edges = data["region_1"].coords["two_theta"]
+
+    counts_1 = data["region_1"].data
+    counts_2 = data["region_2"].data
+    # Create a placeholder for the gap in the middle with NaN values.
+    # The gap in the middle generates two bins with NaN values:
+    # from the last bin edge of region_1 to the gap point and from
+    # the gap point to the first bin edge of region_2.
+    counts_gap = sc.full(dims=["gamma", "two_theta"], shape=[2, counts_1.shape[1]], value=np.nan, unit=counts_1.unit)
+
+    counts = sc.concat([counts_1, counts_gap, counts_2], dim="gamma")
+
+    return FlatViewData(
+        sc.DataArray(
+            counts,
+            coords={
+                "gamma": gamma_bin_edges,
+                "two_theta": two_theta_bin_edges
+            },
+        )
+    )
 
 
 def extract_two_theta_rings_view_data(
