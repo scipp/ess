@@ -76,13 +76,10 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
         self._on_subwidget_change()
 
     def _on_subwidget_change(self, _=None):
-        print("Subwidget change detected")
-        print(f"Sum value: {self.sum.value}, Slider value: {self.slider.value}")
         if self.sum.value:
             self.value = (self.dim, None)
         else:
             self.value = (self.dim, self.slider.value)
-        print(f"Updated value: {self.value}")
 
 
 def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
@@ -94,7 +91,6 @@ def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
 def _slice_or_sum(
     da: sc.DataArray, slices: list[tuple[str, int | None]]
 ) -> sc.DataArray:
-    print(f"Slices: {slices}")
     out = da
     for sl in slices:
         dim, ind = sl
@@ -369,8 +365,11 @@ class BankExplorer(ipw.VBox):
         for dim_slider, master_slider in zip(
             self.all_dim_sliders, self.master_dim_sliders, strict=True
         ):
-            self.links[f"allbanks_{dim_slider.dim}"] = ipw.jslink(
+            self.links[f"slider_allbanks_{dim_slider.dim}"] = ipw.jslink(
                 (master_slider.slider, 'value'), (dim_slider.slider, 'value')
+            )
+            self.links[f"checkbox_allbanks_{dim_slider.dim}"] = ipw.jslink(
+                (master_slider.sum, 'value'), (dim_slider.sum, 'value')
             )
 
     def link_master_to_one(self, key: str):
@@ -381,6 +380,9 @@ class BankExplorer(ipw.VBox):
         ):
             self.links[f"{key}_{bank_slider.dim}"] = ipw.jslink(
                 (master_slider.slider, 'value'), (bank_slider.slider, 'value')
+            )
+            self.links[f"checkbox_{key}_{bank_slider.dim}"] = ipw.jslink(
+                (master_slider.sum, 'value'), (bank_slider.sum, 'value')
             )
 
     def update_slider_control(self, change: dict) -> None:
