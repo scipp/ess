@@ -15,19 +15,68 @@ import scipp as sc
 from matplotlib.backend_bases import MouseEvent
 
 
+class DimSelector(ipw.HBox):
+    def __init__(self, visible_dims: list[str], all_dims: list[str]):
+        self.xdim_selector = ipw.Dropdown(
+            options=all_dims,
+            value=visible_dims[0],
+            description="Horizontal:",
+            layout={"width": "initial"},
+        )
+        self.ydim_selector = ipw.Dropdown(
+            options=all_dims,
+            value=visible_dims[1],
+            description="Vertical:",
+            layout={"width": "initial"},
+        )
+        self.lock = False
+
+        super().__init__(
+            [
+                ipw.Label(value="Select dimensions:"),
+                self.xdim_selector,
+                self.ydim_selector,
+            ],
+            layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
+        )
+        self.xdim_selector.observe(self._check_xdim, names='value')
+        self.ydim_selector.observe(self._check_ydim, names='value')
+
+    def on_dim_change(self, callback: callable):
+        self.xdim_selector.observe(callback, names='value')
+        self.ydim_selector.observe(callback, names='value')
+
+    def _check_xdim(self, change):
+        if self.lock:
+            return
+        if change['new'] == self.ydim_selector.value:
+            self.ydim_selector.value = change['old']
+
+    def _check_ydim(self, change):
+        if self.lock:
+            return
+        if change['new'] == self.xdim_selector.value:
+            self.xdim_selector.value = change['old']
+
+
 class DimSlider(ipw.HBox, ipw.ValueWidget):
     def __init__(self, sizes: dict[str, int], dim: str, visible_dims: list[str]):
         self._lock = False
         self._sizes = sizes
         self._visible_dims = visible_dims
-        self.dim_selector = ipw.Dropdown(
-            options=[dim, *visible_dims],
-            value=dim,
-            description="",
-            layout={"width": "initial"},
-        )
+        # self.dim_selector = ipw.Dropdown(
+        #     options=[dim, *visible_dims],
+        #     value=dim,
+        #     description="",
+        #     layout={"width": "initial"},
+        # )
+        self._dim = dim
         self.slider = ipw.IntSlider(
-            min=1, max=self._sizes[dim], value=1, style={"description_width": "initial"}
+            description=f"{dim}:",
+            min=1,
+            max=self._sizes[dim],
+            value=1,
+            style={"description_width": "initial"},
         )
         self.sum = ipw.Checkbox(
             description="Sum", value=False, indent=False, layout={"width": "initial"}
@@ -40,40 +89,47 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
 
         self.value = (self.dim, self.slider.value)
 
-        self.dim_selector.observe(self._dim_changed, names='value')
+        # self.dim_selector.observe(self._dim_changed, names='value')
         self.slider.observe(self._on_subwidget_change, names='value')
         self.sum.observe(self._on_subwidget_change, names='value')
 
         super().__init__(
-            [self.dim_selector, self.slider, self.sum],
+            [self.slider, self.sum],
             layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
 
-    def on_dim_change(self, callback: callable):
-        self.dim_selector.observe(callback, names='value')
-        # self.slider.observe(callback, names='value')
-        # self.sum.observe(callback, names='value')
+    # def on_dim_change(self, callback: callable):
+    #     self.dim_selector.observe(callback, names='value')
+    #     # self.slider.observe(callback, names='value')
+    #     # self.sum.observe(callback, names='value')
 
     @property
     def dim(self):
-        return self.dim_selector.value
+        return self._dim
+
+    @dim.setter
+    def dim(self, value):
+        self._dim = value
+        self.slider.description = f"{value}:"
+        self.slider.max = self._sizes[value]
 
     # @property
     # def value(self):
     #     return (self.dim, self.slider.value)
 
-    def _update_options(self, visible_dims: list[str]):
-        backup = self.dim_selector.value
-        self.dim_selector.options = [self.dim, *visible_dims]
-        self._lock = True
-        self.dim_selector.value = backup
-        self._lock = False
+    # def update_options(self, visible_dims: list[str]):
+    #     new_dims = [self.dim, *visible_dims]
+    #     if set(new_dims) == set(self.dim_selector.options):
+    #         return
+    #     backup = self.dim_selector.value
+    #     self.dim_selector.options = new_dims
+    #     self.dim_selector.value = backup
 
-    def _dim_changed(self, _=None):
-        if self._lock:
-            return
-        self.slider.max = self._sizes[self.dim]
-        self._on_subwidget_change()
+    # def _dim_changed(self, _=None):
+    #     if self._lock:
+    #         return
+    #     self.slider.max = self._sizes[self.dim]
+    #     self._on_subwidget_change()
 
     def _on_subwidget_change(self, _=None):
         if self.sum.value:
@@ -159,7 +215,7 @@ class BankExplorer(ipw.VBox):
         self.masks = {
             k: sc.zeros(sizes=da.sizes, dtype=bool) for k, da in self.data.items()
         }
-        max_sizes = {
+        self.max_sizes = {
             dim: max(da.sizes.get(dim, 0) for da in self.data.values())
             for dim in self.data.dims
         }
@@ -172,7 +228,9 @@ class BankExplorer(ipw.VBox):
 
         self.bank_dim_sliders = {
             key: [
-                DimSlider(sizes=max_sizes, dim=dim, visible_dims=self._visible_dims)
+                DimSlider(
+                    sizes=self.data[key].sizes, dim=dim, visible_dims=self._visible_dims
+                )
                 for dim in other_dims
             ]
             for key in self.data.keys()
@@ -215,7 +273,7 @@ class BankExplorer(ipw.VBox):
         # sliders for the 'All detectors' view. In turn, we need separate nodes in the
         # node tree below.
         self.all_dim_sliders = [
-            DimSlider(sizes=max_sizes, dim=dim, visible_dims=self._visible_dims)
+            DimSlider(sizes=self.max_sizes, dim=dim, visible_dims=self._visible_dims)
             for dim in other_dims
         ]
         self.all_collect_node = pp.Node(
@@ -231,11 +289,11 @@ class BankExplorer(ipw.VBox):
             for key in self.data.keys()
         }
 
-        # Master dim sliders
-        self.master_dim_sliders = [
-            DimSlider(sizes=max_sizes, dim=dim, visible_dims=self._visible_dims)
-            for dim in other_dims
-        ]
+        # # Master dim sliders
+        # self.master_dim_sliders = [
+        #     DimSlider(sizes=self.max_sizes, dim=dim, visible_dims=self._visible_dims)
+        #     for dim in other_dims
+        # ]
 
         # return
 
@@ -281,6 +339,10 @@ class BankExplorer(ipw.VBox):
             'button_press_event', self.switch_to_tab
         )
 
+        self.dim_selector = DimSelector(
+            visible_dims=self._visible_dims, all_dims=self.data.dims
+        )
+
         # Create color map controls
         self.cmap_vmin = ipw.Text(
             description='Min:',
@@ -305,6 +367,8 @@ class BankExplorer(ipw.VBox):
         )
         self.log_button.observe(self.toggle_log, names="value")
 
+        self.dim_selector.on_dim_change(self.on_dim_change)
+
         # layer_box = ipw.HBox(
         #     [self.layer_slider, self.layer_sum],
         #     layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
@@ -321,12 +385,44 @@ class BankExplorer(ipw.VBox):
         # self.tabs.children = [self.main_figure.canvas] + [
         #     f.fig.canvas for f in self.tab_figs
         # ]
-        self.tabs.children = [self.main_figure.canvas, *self.tab_figs]
-        self.tabs.titles = ["All", *self.data.keys()]
-        self.tabs.observe(self.update_slider_control, names='selected_index')
+        # self.tabs.children = [ipw.VBox([self._all_dim_sliders, self.main_figure.canvas]),
+        #                       *[ipw.VBox([self.banks_dim_sliders[i], f]) for i, f in enumerate(self.tab_figs)]]
 
-        for sl in self.master_dim_sliders:
-            sl.on_dim_change(self.on_dim_change)
+        self.tabs.children = [
+            ipw.VBox(
+                [
+                    ipw.HBox(
+                        [
+                            widget
+                            for dslider in self.all_dim_sliders
+                            for widget in (dslider, space)
+                        ]
+                    ),
+                    self.main_figure.canvas,
+                ]
+            ),
+            *[
+                ipw.VBox(
+                    [
+                        ipw.HBox(
+                            [
+                                widget
+                                for dslider in self.bank_dim_sliders[key]
+                                for widget in (dslider, space)
+                            ]
+                        ),
+                        f,
+                    ]
+                )
+                for key, f in zip(self.data.keys(), self.tab_figs, strict=True)
+            ],
+        ]
+
+        self.tabs.titles = ["All", *self.data.keys()]
+        # self.tabs.observe(self.update_slider_control, names='selected_index')
+
+        # for sl in self.master_dim_sliders:
+        #     sl.on_dim_change(self.on_dim_change)
 
         # dim_slider_widgets = [
         #     widget
@@ -334,21 +430,23 @@ class BankExplorer(ipw.VBox):
         #     for widget in (dslider, ipw.HTML('<div style="width: 20px;"></div>'))
         # ]
 
-        self.links = {}
-        self.link_master_to_all()
+        # self.links = {}
+        # self.link_master_to_all()
 
         super().__init__(
             [
                 ipw.HBox(
+                    # [
+                    #     widget
+                    #     for dslider in self.master_dim_sliders
+                    #     for widget in (
+                    #         dslider,
+                    #         ipw.HTML('<div style="width: 20px;"></div>'),
+                    #     )
+                    # ]
                     [
-                        widget
-                        for dslider in self.master_dim_sliders
-                        for widget in (
-                            dslider,
-                            ipw.HTML('<div style="width: 20px;"></div>'),
-                        )
-                    ]
-                    + [
+                        self.dim_selector,
+                        space,
                         ipw.Label("Colorscale:"),
                         self.cmap_vmin,
                         self.cmap_vmax,
@@ -359,42 +457,49 @@ class BankExplorer(ipw.VBox):
             ]
         )
 
-    def link_master_to_all(self):
-        for link in self.links.values():
-            link.unlink()
-        for dim_slider, master_slider in zip(
-            self.all_dim_sliders, self.master_dim_sliders, strict=True
-        ):
-            self.links[f"slider_allbanks_{dim_slider.dim}"] = ipw.jslink(
-                (master_slider.slider, 'value'), (dim_slider.slider, 'value')
-            )
-            self.links[f"checkbox_allbanks_{dim_slider.dim}"] = ipw.jslink(
-                (master_slider.sum, 'value'), (dim_slider.sum, 'value')
-            )
+    # def unlink_all(self):
+    #     for link in self.links.values():
+    #         link.unlink()
 
-    def link_master_to_one(self, key: str):
-        for link in self.links.values():
-            link.unlink()
-        for bank_slider, master_slider in zip(
-            self.bank_dim_sliders[key], self.master_dim_sliders, strict=True
-        ):
-            self.links[f"{key}_{bank_slider.dim}"] = ipw.jslink(
-                (master_slider.slider, 'value'), (bank_slider.slider, 'value')
-            )
-            self.links[f"checkbox_{key}_{bank_slider.dim}"] = ipw.jslink(
-                (master_slider.sum, 'value'), (bank_slider.sum, 'value')
-            )
+    # def link_master_to_all(self):
+    #     self.unlink_all()
+    #     for dim_slider, master_slider in zip(
+    #         self.all_dim_sliders, self.master_dim_sliders, strict=True
+    #     ):
+    #         self.links[f"slider_allbanks_{dim_slider.dim}"] = ipw.jslink(
+    #             (master_slider.slider, 'value'), (dim_slider.slider, 'value')
+    #         )
+    #         self.links[f"checkbox_allbanks_{dim_slider.dim}"] = ipw.jslink(
+    #             (master_slider.sum, 'value'), (dim_slider.sum, 'value')
+    #         )
 
-    def update_slider_control(self, change: dict) -> None:
-        if change['new'] == 0:
-            self.link_master_to_all()
-        else:
-            key = self.tabs.titles[self.tabs.selected_index]
-            self.link_master_to_one(key)
+    # def link_master_to_one(self, key: str):
+    #     self.unlink_all()
+    #     for bank_slider, master_slider in zip(
+    #         self.bank_dim_sliders[key], self.master_dim_sliders, strict=True
+    #     ):
+    #         self.links[f"{key}_{bank_slider.dim}"] = ipw.jslink(
+    #             (master_slider.slider, 'value'), (bank_slider.slider, 'value')
+    #         )
+    #         self.links[f"checkbox_{key}_{bank_slider.dim}"] = ipw.jslink(
+    #             (master_slider.sum, 'value'), (bank_slider.sum, 'value')
+    #         )
 
-    def on_dim_change(self, _):
-        slider_dims = [sl.dim for sl in self.master_dim_sliders]
-        self._visible_dims = [dim for dim in self.data.dims if dim not in slider_dims]
+    # def update_slider_control(self, change: dict) -> None:
+    #     if change['new'] == 0:
+    #         self.link_master_to_all()
+    #         for sl in self.master_dim_sliders:
+    #             sl.max = self.max_sizes[sl.dim]
+    #     else:
+    #         key = self.tabs.titles[self.tabs.selected_index]
+    #         self.unlink_all()
+    #         for sl in self.master_dim_sliders:
+    #             sl.max = self.data[key].sizes[sl.dim]
+    #         self.link_master_to_one(key)
+
+    def on_dim_change(self, change):
+        # slider_dims = [sl.dim for sl in self.master_dim_sliders]
+        # visible_dims = [dim for dim in self.data.dims if dim not in slider_dims]
         for f in chain(self.subplots, self.tab_figs):
             # We clear the dims on the view and the canvas, to make them believe they
             # are empty, after which they are ready to receive new data with new
@@ -402,7 +507,20 @@ class BankExplorer(ipw.VBox):
             for key in f.view._dims:
                 f.view._dims[key] = None
             f.canvas.dims = {}
-        self.update_node_routing({"new": self.tabs.selected_index})
+            f.view.artists.clear()
+            f.ax.clear()
+        # self.update_node_routing({"new": self.tabs.selected_index})
+        for sl in chain(
+            # self.master_dim_sliders,
+            self.all_dim_sliders,
+            *self.bank_dim_sliders.values(),
+        ):
+            if sl.dim == change['new']:
+                sl.dim = change['old']
+                # sl.slider.max = self.data.sizes[sl.dim]
+            # sl.update_options(visible_dims)
+
+        # self.apply_masks_node.notify_children(message=None)
 
     def switch_to_tab(self, event: MouseEvent) -> None:
         """
