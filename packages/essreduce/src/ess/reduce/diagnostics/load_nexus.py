@@ -94,6 +94,9 @@ def _robust_load(
     bank_sizes: DetectorBankSizes | None = None,
 ) -> sc.DataGroup:
 
+    if not Path(filename).exists():
+        raise FileNotFoundError(f"File '{filename}' does not exist")
+
     user_requested = None
     if entries is None:
         user_requested = []
@@ -125,14 +128,14 @@ def _robust_load(
                     path=item,
                     bank_sizes=bank_sizes.get(item) if bank_sizes is not None else None,
                 )
-            except Exception:  # noqa: S112
-                continue
+            except Exception:  # noqa: S110
+                pass
 
         if item not in dg:
             msg = f"Failed to load {item}"
             if item in user_requested:
                 # If the item was explicitly requested by the user, raise an error
-                raise RuntimeError(msg)
+                raise ValueError(msg)
             else:
                 # Otherwise, issue a warning instead
                 warnings.warn(msg, UserWarning, stacklevel=2)

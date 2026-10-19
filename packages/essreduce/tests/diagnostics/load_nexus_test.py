@@ -80,6 +80,21 @@ def test_load_detectors_two_banks_with_bank_sizes(loki_coda_file):
         assert set(dg[bank].dims) == set(bank_sizes[bank].keys())
 
 
+def test_load_detectors_bad_detector_name_raises(loki_coda_file):
+    with pytest.raises(ValueError, match="Failed to load non_existent_detector"):
+        # Need to catch the warning that says the workflow failed and we are using the
+        # fallback instead
+        with pytest.warns(UserWarning):  # noqa: PT030
+            load_detectors(loki_coda_file, detectors=["non_existent_detector"])
+
+
+def test_load_detectors_bad_file_name_raises():
+    with pytest.raises(FileNotFoundError):
+        load_detectors("non_existent_file.nxs")
+    with pytest.raises(FileNotFoundError):
+        load_detectors("non_existent_file.nxs", detectors=["loki_detector_0"])
+
+
 def test_load_monitors_all_monitors_good_file(loki_coda_file):
     mons = load_monitors(loki_coda_file)
     assert set(mons.keys()) == {f"beam_monitor_m{i}" for i in range(5)}
@@ -117,3 +132,18 @@ def test_load_monitors_two_monitors_bad_file(loki_broken_file):
             loki_broken_file, monitors=["beam_monitor_m1", "beam_monitor_m4"]
         )
     assert set(mons.keys()) == {"beam_monitor_m1", "beam_monitor_m4"}
+
+
+def test_load_monitors_bad_monitor_name_raises(loki_coda_file):
+    with pytest.raises(ValueError, match="Failed to load non_existent_monitor"):
+        # Need to catch the warning that says the workflow failed and we are using the
+        # fallback instead
+        with pytest.warns(UserWarning):  # noqa: PT030
+            load_monitors(loki_coda_file, monitors=["non_existent_monitor"])
+
+
+def test_load_monitors_bad_file_name_raises():
+    with pytest.raises(FileNotFoundError):
+        load_monitors("non_existent_file.nxs")
+    with pytest.raises(FileNotFoundError):
+        load_monitors("non_existent_file.nxs", monitors=["beam_monitor_m0"])
