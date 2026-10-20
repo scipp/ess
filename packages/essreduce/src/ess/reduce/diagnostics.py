@@ -26,12 +26,20 @@ class MaskControl(ipw.HBox):
                 ("single", "genderless", "Mask single pixel"),
             )
         }
+        self._clear = ipw.Button(
+            icon='trash', tooltip='Clear masks', layout=BUTTON_STYLE
+        )
         self._lock = False
         self.mode = None
         for button in self._modes.values():
             button.observe(self._sync_modes, names='value')
+
         super().__init__(
-            [ipw.HTML(value="Masking: &nbsp;&nbsp;&nbsp;"), *self._modes.values()]
+            [
+                ipw.HTML(value="Masking: &nbsp;&nbsp;&nbsp;"),
+                *self._modes.values(),
+                self._clear,
+            ]
         )
 
     def _sync_modes(self, change: dict):
@@ -52,6 +60,10 @@ class MaskControl(ipw.HBox):
     def on_change(self, callback: callable):
         for button in self._modes.values():
             button.observe(callback, names='value')
+
+    def on_clear(self, callback: callable):
+        self._clear.on_click(callback)
+        print("Clear button connected")
 
 
 class DimSlider(ipw.HBox, ipw.ValueWidget):
@@ -242,10 +254,14 @@ class BankExplorer(ipw.VBox):
             )
             for key in self.data.keys()
         }
+        self.all_mask_selection_nodes = {
+            key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
+            for key in self.data.keys()
+        }
         self.all_slice_masks_nodes = {
             key: pp.Node(
                 _slice_or_reduce,
-                da=self.mask_selection_nodes[key],
+                da=self.all_mask_selection_nodes[key],
                 slices=self.all_collect_node,
                 op="any",
             )
@@ -366,7 +382,8 @@ class BankExplorer(ipw.VBox):
 
         self.mask_control = MaskControl()
         self.mask_connections = []
-        self.mask_control.on_change(self.on_toggle_masking)
+        self.mask_control.on_change(self.toggle_masking)
+        self.mask_control.on_clear(self.clear_masks)
 
         super().__init__(
             [
@@ -478,7 +495,7 @@ class BankExplorer(ipw.VBox):
         else:
             self.tab_figs[key].canvas.draw()
 
-    def on_toggle_masking(self, _) -> None:
+    def toggle_masking(self, _) -> None:
         if self.mask_control.mode is not None:
             self.mask_connections = {
                 key: f.fig.canvas.mpl_connect('button_press_event', self.maybe_add_mask)
@@ -551,3 +568,21 @@ class BankExplorer(ipw.VBox):
         self.mask_selection_nodes[key].notify_children(message=None)
         # Set the previous pixel to the current one
         self._previous_pixel = (x, y)
+
+    def clear_masks(self, _) -> None:
+        print("Clearing masks")
+        ind = self.tabs.selected_index
+        if ind == 0:
+            keys = self.masks.keys()
+            slices = [sl.value for sl in self.all_dim_sliders]
+        else:
+            keys = [self._tab_index_to_key[ind]]
+            slices = [sl.value for sl in self.bank_dim_sliders[keys[0]]]
+
+        for key in keys:
+            m = self.masks[key]
+            for s in [sli for sli in slices if sli[1] is not None]:
+                m = m[s]
+            m.values[...] = False
+            self.all_mask_selection_nodes[key].notify_children(message=None)
+            self.mask_selection_nodes[key].notify_children(message=None)
