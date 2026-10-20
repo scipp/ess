@@ -266,7 +266,7 @@ def hist_2d(data: Texture3D[RunType]) -> RawData2D[RunType]:
 
 
 def extract_detector_view_data(data: RawData2D[SampleRun]) -> DetectorViewData:
-    """Return a raw detector view."""
+    """Return a scipp DataArray with data for the detector view."""
     histogrammed_2d_1 = data["region_1"]
     histogrammed_2d_2 = data["region_2"]
 
@@ -308,10 +308,10 @@ def extract_detector_view_data(data: RawData2D[SampleRun]) -> DetectorViewData:
 
 
 def extract_flat_view_data(data: RawData2D[SampleRun]) -> FlatViewData:
-    """Return a raw flattened detector view. Note, in order to properly
-    visualize the gap in the detector, the gamma bin edges are modified
-    to include a gap in the middle and one needs to work with bin edge
-    coordinates for proper visualization."""
+    """Return a scipp DataArray with data for a raw flattened detector view.
+    Note, in order to properly visualize the gap in the detector, the gamma
+    bin edges are modified to include a gap in the middle and one needs to
+    work with bin edge coordinates for proper visualization."""
 
     gamma_region_1_last_edge = data["region_1"].coords["gamma"][-1]
     gamma_region_2_first_edge = data["region_2"].coords["gamma"][0]
@@ -348,8 +348,38 @@ def extract_flat_view_data(data: RawData2D[SampleRun]) -> FlatViewData:
 def extract_two_theta_rings_view_data(
     data: RawData2D[SampleRun],
 ) -> TwoThetaRingsViewData:
-    """Return a raw two-theta rings view."""
-    return TwoThetaRingsViewData(data)
+    """ Return a scipp DataArray with data for a raw two-theta rings view"""
+    histogrammed_2d_1 = data["region_1"]
+    histogrammed_2d_2 = data["region_2"]
+
+    gamma_bin_centers_1 = sc.midpoints(histogrammed_2d_1.coords["gamma"])
+    gamma_bin_centers_2 = sc.midpoints(histogrammed_2d_2.coords["gamma"])
+
+    # TODO: check that dims match
+    gamma_bin_centers = sc.concat(
+        [gamma_bin_centers_1, gamma_bin_centers_2], dim="gamma"
+    )
+
+    rings_radius = sc.full_like(gamma_bin_centers, 800)
+
+    counts_1 = histogrammed_2d_1.data
+    counts_2 = histogrammed_2d_2.data
+
+    counts = sc.concat([counts_1, counts_2], dim="gamma")
+
+    two_theta_bin_centers = sc.midpoints(histogrammed_2d_1.coords["two_theta"])
+
+
+    return TwoThetaRingsViewData(
+        sc.DataArray(
+            counts,
+            coords={
+                "gamma": gamma_bin_centers,
+                "two_theta": two_theta_bin_centers,
+                "r": rings_radius
+            },
+        )
+    )
 
 
 def extract_gamma_slices_view_data(data: RawData2D[SampleRun]) -> GammaSlicesViewData:
