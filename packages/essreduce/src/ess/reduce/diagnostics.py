@@ -14,27 +14,31 @@ import plopp as pp
 import scipp as sc
 from matplotlib.backend_bases import MouseEvent
 
+BUTTON_STYLE = {"width": "40px"}
+
 
 class MaskControl(ipw.HBox):
     def __init__(self):
         self._modes = {
             key: ipw.ToggleButton(
-                icon=icon, value=False, tooltip=tip, layout={"width": "38px"}
+                icon=icon, value=False, tooltip=tip, layout=BUTTON_STYLE
             )
             for key, icon, tip in (
                 ("horizontal", "grip-lines", "Mask horizontally"),
                 ("vertical", "grip-lines-vertical", "Mask vertically"),
-                ("single", "dot-circle", "Mask single pixel"),
+                ("single", "genderless", "Mask single pixel"),
             )
         }
         self._lock = False
         self.mode = None
         for button in self._modes.values():
             button.observe(self._sync_modes, names='value')
-        super().__init__([ipw.Label(value="Masking:"), *self._modes.values()])
+        super().__init__(
+            [ipw.HTML(value="Masking: &nbsp;&nbsp;&nbsp;"), *self._modes.values()]
+        )
 
     def _sync_modes(self, change: dict):
-        if self._lock or (not change['new']):
+        if self._lock:
             return
         if not change['new']:
             self.mode = None
@@ -343,7 +347,7 @@ class BankExplorer(ipw.VBox):
 
         self.subplots = {}
         self.tab_figs = {}
-        # self.nodes = []
+        _kwargs = {**{"hide_log_buttons": True, "autoscale": False}, **kwargs}
         for i, (bank, ax) in enumerate(
             zip(self.data.keys(), axs.flatten(), strict=True)
         ):
@@ -352,7 +356,7 @@ class BankExplorer(ipw.VBox):
                 ax=ax,
                 title=bank,
                 cbar=True,
-                **kwargs,
+                **_kwargs,
             )
             ax._bank_explorer_subplot_index = i
             self.tab_figs[bank] = pp.imagefigure(
@@ -361,7 +365,7 @@ class BankExplorer(ipw.VBox):
                 cbar=True,
                 # Need to make some horizontal space for the toolbar
                 figsize=(0.96 * figsize[0], figsize[1]),
-                **kwargs,
+                **_kwargs,
             )
 
         self.main_figure.canvas.header_visible = False
@@ -387,11 +391,12 @@ class BankExplorer(ipw.VBox):
             iter({kwargs.get('norm'), kwargs.get('logc')} - {None}), None
         ) in ('log', True)
         self.log_button = ipw.ToggleButton(
-            description="log",
-            layout={"width": "40px"},
-            value=is_log,
+            description="log", layout=BUTTON_STYLE, value=is_log
         )
         self.log_button.observe(self.toggle_log, names="value")
+
+        self.fit_button = ipw.Button(description="fit", layout=BUTTON_STYLE)
+        self.fit_button.on_click(self.fit_cmap_range)
 
         # layer_box = ipw.HBox(
         #     [self.layer_slider, self.layer_sum],
@@ -443,7 +448,7 @@ class BankExplorer(ipw.VBox):
         }
 
         self.tabs.titles = list(self._tab_index_to_key.values())
-        # self.tabs.observe(self.selected_tab_changed, names='selected_index')
+        self.tabs.observe(self.selected_tab_changed, names='selected_index')
 
         # for sl in self.master_dim_sliders:
         #     sl.on_dim_change(self.on_dim_change)
@@ -471,6 +476,7 @@ class BankExplorer(ipw.VBox):
                         self.cmap_vmin,
                         self.cmap_vmax,
                         self.log_button,
+                        self.fit_button,
                     ]
                 ),
                 self.tabs,
@@ -490,16 +496,16 @@ class BankExplorer(ipw.VBox):
             index = event.inaxes._bank_explorer_subplot_index
             self.tabs.selected_index = index + 1
 
-    # def selected_tab_changed(self, change: dict) -> None:
-    #     """
-    #     Handle the event when the selected tab changes.
+    def selected_tab_changed(self, change: dict) -> None:
+        """
+        Handle the event when the selected tab changes.
 
-    #     Parameters
-    #     ----------
-    #     change:
-    #         The change dictionary containing information about the tab change.
-    #     """
-    #     if change["new"] == 0:
+        Parameters
+        ----------
+        change:
+            The change dictionary containing information about the tab change.
+        """
+        self.update_colormapper_norm()
 
     def update_colormapper_norm(self) -> None:
         ind = self.tabs.selected_index
@@ -522,10 +528,13 @@ class BankExplorer(ipw.VBox):
         except ValueError:
             new = None
 
-        if self.tabs.selected_index == 0:
+        ind = self.tabs.selected_index
+        key = self._tab_index_to_key[ind]
+
+        if ind == 0:
             figs = self.subplots.values()
         else:
-            figs = [self.tab_figs[self.tabs.selected_index - 1]]
+            figs = [self.tab_figs[key]]
 
         for f in figs:
             if new is None:
@@ -535,10 +544,10 @@ class BankExplorer(ipw.VBox):
             if not self._lock:
                 f.view.colormapper.autoscale()
         if not self._lock:
-            if self.tabs.selected_index == 0:
+            if ind == 0:
                 self.main_figure.canvas.draw_idle()
             else:
-                self.tab_figs[self.tabs.selected_index - 1].canvas.draw()
+                self.tab_figs[key].canvas.draw()
 
     def update_cmin(self, change: dict) -> None:
         self._update_min_or_max(change, 'min')
@@ -551,6 +560,21 @@ class BankExplorer(ipw.VBox):
         self.cmap_vmin.value = ''
         self.cmap_vmax.value = ''
         self._lock = False
+
+    def fit_cmap_range(self, _=None) -> None:
+        ind = self.tabs.selected_index
+        key = self._tab_index_to_key[ind]
+
+        if ind == 0:
+            figs = self.subplots.values()
+        else:
+            figs = [self.tab_figs[key]]
+        for f in figs:
+            f.view.colormapper.autoscale()
+        if ind == 0:
+            self.main_figure.canvas.draw_idle()
+        else:
+            self.tab_figs[key].canvas.draw()
 
     # def update_node_routing(self, change: dict) -> None:
     #     return
@@ -596,16 +620,20 @@ class BankExplorer(ipw.VBox):
         if event.inaxes is None:
             return
 
-        print("Mouse event:", event)
         # Current tab index
         key = self._tab_index_to_key[self.tabs.selected_index]
+
+        # Ignore the event if the pan/zoom tool is active
+        if self.tab_figs[key].toolbar.tools['panzoom'].value is not None:
+            return
+
         # Fig view dims:
         masking_mode = self.mask_control.mode
 
         xdim = self.tab_figs[key].view._dims['x']
-        x = int(round(event.xdata))
+        x = round(event.xdata)
         ydim = self.tab_figs[key].view._dims['y']
-        y = int(round(event.ydata))
+        y = round(event.ydata)
 
         # Find slider dims and indices
         slices = []
