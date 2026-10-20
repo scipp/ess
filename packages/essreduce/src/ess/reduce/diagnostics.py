@@ -18,11 +18,13 @@ from matplotlib.backend_bases import MouseEvent
 class MaskControl(ipw.HBox):
     def __init__(self):
         self._modes = {
-            key: ipw.ToggleButton(icon=icon, value=False, layout={"width": "38px"})
-            for key, icon in (
-                ("horizontal", "grip-lines"),
-                ("vertical", "grip-lines-vertical"),
-                ("single", "dot-circle"),
+            key: ipw.ToggleButton(
+                icon=icon, value=False, tooltip=tip, layout={"width": "38px"}
+            )
+            for key, icon, tip in (
+                ("horizontal", "grip-lines", "Mask horizontally"),
+                ("vertical", "grip-lines-vertical", "Mask vertically"),
+                ("single", "dot-circle", "Mask single pixel"),
             )
         }
         self._lock = False
@@ -258,9 +260,9 @@ class BankExplorer(ipw.VBox):
         # the masked data will be zeroed during the reduction and will no longer be
         # easily visible on the figures. Instead, we slices the masks as well and only
         # apply them just before displaying the data on the figures.
-        self.mask_node = pp.Node(lambda: self.masks)
+        # self.mask_node = pp.Node(lambda: self.masks)
         self.mask_selection_nodes = {
-            key: pp.Node(lambda masks, key: masks[key], masks=self.mask_node, key=key)
+            key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
             for key in self.data.keys()
         }
         self.slice_masks_nodes = {
@@ -621,4 +623,4 @@ class BankExplorer(ipw.VBox):
             m = m[s]
         # Set the mask at the computed location
         m.values[...] = False if m.values.any() else True
-        self.mask_node.notify_children(message=None)
+        self.mask_selection_nodes[key].notify_children(message=None)
