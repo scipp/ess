@@ -68,10 +68,11 @@ LookupTableFilename = unwrap.LookupTableFilename
 
 
 class Analyzer(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]):
-    """A single wavelength analyzer loaded from an NXcrystal.
+    """A single wavelength analyzer loaded from an NXcrystal."""
 
-    Can be obtained from ``Analyzers``.
-    """
+
+class Analyzers(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]):
+    """All wavelength analyzers loaded from a NXcrystals."""
 
 
 class DataAtSample(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
@@ -140,7 +141,6 @@ class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 
 SQWBinSizes = NewType('SQWBinSizes', dict[str, int])
-
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
 

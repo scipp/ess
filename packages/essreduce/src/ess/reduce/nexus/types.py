@@ -311,6 +311,11 @@ class NeXusComponentLocationSpec(NeXusLocationSpec, Generic[Component, RunType])
 
 
 @dataclass
+class NeXusDataLocationSpec(NeXusLocationSpec, Generic[Component, RunType]):
+    """NeXus filename and parameters to identify (parts of) data to load."""
+
+
+@dataclass
 class NeXusAllLocationSpec:
     """
     NeXus parameters to identify all components of a class to load.
@@ -329,8 +334,10 @@ class NeXusAllComponentLocationSpec(NeXusAllLocationSpec, Generic[Component, Run
 
 
 @dataclass
-class NeXusDataLocationSpec(NeXusLocationSpec, Generic[Component, RunType]):
-    """NeXus filename and parameters to identify (parts of) detector data to load."""
+class NeXusAllDataLocationSpec(NeXusAllLocationSpec, Generic[Component, RunType]):
+    """
+    NeXus parameters to identify (parts of) all data of a class to load
+    """
 
 
 class NeXusTransformationChain(
