@@ -29,6 +29,9 @@ class MaskControl(ipw.HBox):
         self._clear = ipw.Button(
             icon='trash', tooltip='Clear masks', layout=BUTTON_STYLE
         )
+        self._filename = ipw.Text(value='', layout={"width": "150px"})
+        self._save = ipw.Button(icon='save', tooltip='Save masks', layout=BUTTON_STYLE)
+
         self._lock = False
         self.mode = None
         for button in self._modes.values():
@@ -39,6 +42,8 @@ class MaskControl(ipw.HBox):
                 ipw.HTML(value="Masking: &nbsp;&nbsp;&nbsp;"),
                 *self._modes.values(),
                 self._clear,
+                self._filename,
+                self._save,
             ]
         )
 
@@ -63,7 +68,9 @@ class MaskControl(ipw.HBox):
 
     def on_clear(self, callback: callable):
         self._clear.on_click(callback)
-        print("Clear button connected")
+
+    def on_save(self, callback: callable):
+        self._save.on_click(callback)
 
 
 class DimSlider(ipw.HBox, ipw.ValueWidget):
@@ -81,7 +88,7 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
             style={"description_width": "initial"},
         )
         self.sum = ipw.Checkbox(
-            description="Sum", value=False, indent=False, layout={"width": "initial"}
+            description="sum", value=False, indent=False, layout={"width": "initial"}
         )
 
         self._link = ipw.jslink((self.sum, 'value'), (self.slider, 'disabled'))
@@ -384,6 +391,7 @@ class BankExplorer(ipw.VBox):
         self.mask_connections = []
         self.mask_control.on_change(self.toggle_masking)
         self.mask_control.on_clear(self.clear_masks)
+        self.mask_control.on_save(self.save_masks)
 
         super().__init__(
             [
@@ -586,3 +594,9 @@ class BankExplorer(ipw.VBox):
             m.values[...] = False
             self.all_mask_selection_nodes[key].notify_children(message=None)
             self.mask_selection_nodes[key].notify_children(message=None)
+
+    def save_masks(self, _) -> None:
+        filename = self._filename.value
+        if not filename:
+            return
+        sc.DataGroup(self.masks).save_hdf5(filename)
