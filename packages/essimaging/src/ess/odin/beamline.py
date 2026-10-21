@@ -20,13 +20,14 @@ def nexus_name(name: str) -> str:
     """
     name = name.lower()
     if ("timepix" in name) or ("tmpx" in name):
-        return "timepix3_efu"
+        return "timepix3"
     if "orca" in name:
         return "orca"
     if "monitor" in name:
         # Assume that the monitor number is given at the end of the string
         num = name[-1]
         return f"beam_monitor_{num}"
+    raise ValueError(f"Unknown detector or monitor name: {name}")
 
 
 # Choppers
