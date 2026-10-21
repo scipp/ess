@@ -1,10 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-
-from types import MappingProxyType
-
-import scipp as sc
-from scippneutron.chopper import DiskChopper
+# Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
 
 def nexus_name(name: str) -> str:
@@ -19,11 +14,17 @@ def nexus_name(name: str) -> str:
         Name of the detector or monitor.
     """
     name = name.lower()
-    if ("timepix" in name) or ("tmpx" in name):
-        return "timepix3"
-    if "orca" in name:
-        return "orca"
-    if "monitor" in name:
+    if ("he3" in name) or ("helium" in name):
         # Assume that the monitor number is given at the end of the string
         num = name[-1]
-        return f"beam_monitor_{num}"
+        return f"he3_bank_{num}"
+    if "multiblade" in name:
+        return "multiblade"
+    if "ngem" in name:
+        return "ngem"
+    if "orca" in name:
+        return "orca"
+    if ("timepix" in name) or ("tmpx" in name) or ("tpx3" in name):
+        return "timepix3"
+    if "monitor" in name:
+        return "beam_monitor_1"

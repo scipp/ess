@@ -19,7 +19,7 @@ def nexus_name(name: str) -> str:
         Name of the detector or monitor.
     """
     name = name.lower()
-    if ("timepix" in name) or ("tmpx" in name):
+    if ("timepix" in name) or ("tmpx" in name) or ("tpx3" in name):
         return "timepix3"
     if "orca" in name:
         return "orca"
