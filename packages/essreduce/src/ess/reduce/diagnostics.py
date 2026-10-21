@@ -55,7 +55,8 @@ class MaskControl(ipw.HBox):
                 ipw.HTML(value="&nbsp;&nbsp; Save to file: &nbsp;"),
                 self.filename_input,
                 self.save_button,
-            ]
+            ],
+            layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
 
     def _sync_modes(self, change: dict):
@@ -622,7 +623,7 @@ class BankExplorer(ipw.VBox):
             self.mask_selection_nodes[key].notify_children(message=None)
 
     def save_masks(self, _) -> None:
-        filename = self._filename.value
+        filename = self.mask_control.filename_input.value
         if not filename:
             return
         sc.DataGroup(self.masks).save_hdf5(filename)
