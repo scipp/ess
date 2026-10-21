@@ -16,7 +16,7 @@ BUTTON_STYLE = {"width": "40px"}
 
 class MaskControl(ipw.HBox):
     def __init__(self):
-        self._modes = {
+        self.mode_buttons = {
             key: ipw.ToggleButton(
                 icon=icon, value=False, tooltip=tip, layout=BUTTON_STYLE
             )
@@ -26,24 +26,35 @@ class MaskControl(ipw.HBox):
                 ("single", "genderless", "Mask single pixel"),
             )
         }
-        self._clear = ipw.Button(
+        self.clear_button = ipw.Button(
             icon='trash', tooltip='Clear masks', layout=BUTTON_STYLE
         )
-        self._filename = ipw.Text(value='', layout={"width": "150px"})
-        self._save = ipw.Button(icon='save', tooltip='Save masks', layout=BUTTON_STYLE)
+        self.continuous_button = ipw.ToggleButton(
+            icon='unlock',
+            value=False,
+            tooltip='Enable/disable continuous masking',
+            layout=BUTTON_STYLE,
+        )
+        self.filename_input = ipw.Text(value='', layout={"width": "150px"})
+        self.save_button = ipw.Button(
+            icon='save', tooltip='Save masks', layout=BUTTON_STYLE
+        )
 
         self._lock = False
         self.mode = None
-        for button in self._modes.values():
+        for button in self.mode_buttons.values():
             button.observe(self._sync_modes, names='value')
+        self.continuous_button.observe(self.on_continuous_toggle, names='value')
 
         super().__init__(
             [
                 ipw.HTML(value="Masking: &nbsp;&nbsp;&nbsp;"),
-                *self._modes.values(),
-                self._clear,
-                self._filename,
-                self._save,
+                *self.mode_buttons.values(),
+                self.clear_button,
+                self.continuous_button,
+                ipw.HTML(value="&nbsp;&nbsp; Save to file: &nbsp;"),
+                self.filename_input,
+                self.save_button,
             ]
         )
 
@@ -54,7 +65,7 @@ class MaskControl(ipw.HBox):
             self.mode = None
             return
         self._lock = True
-        for mode, button in self._modes.items():
+        for mode, button in self.mode_buttons.items():
             if button.value:
                 if button is change['owner']:
                     self.mode = mode
@@ -63,14 +74,20 @@ class MaskControl(ipw.HBox):
         self._lock = False
 
     def on_change(self, callback: callable):
-        for button in self._modes.values():
+        for button in self.mode_buttons.values():
             button.observe(callback, names='value')
 
     def on_clear(self, callback: callable):
-        self._clear.on_click(callback)
+        self.clear_button.on_click(callback)
 
     def on_save(self, callback: callable):
-        self._save.on_click(callback)
+        self.save_button.on_click(callback)
+
+    def on_continuous_toggle(self, change: dict):
+        if change['new']:
+            self.continuous_button.icon = 'lock'
+        else:
+            self.continuous_button.icon = 'unlock'
 
 
 class DimSlider(ipw.HBox, ipw.ValueWidget):
@@ -517,8 +534,17 @@ class BankExplorer(ipw.VBox):
             self.mask_connections = {}
 
     def maybe_add_mask(self, event: MouseEvent) -> None:
-        if self._previous_pixel is None:
-            self.add_mask(event)
+        self._previous_pixel = None
+        self.add_mask(event)
+
+        # if not self.mask_control.continuous_check.value:
+        #     # self.add_mask(event)
+        #     # self._previous_pixel = None
+        #     return
+
+        # if self._previous_pixel is None:
+        #     self.add_mask(event)
+        if self.mask_control.continuous_button.value:
             self._mouse_move_connection = event.canvas.mpl_connect(
                 'motion_notify_event', self.add_mask
             )
@@ -531,7 +557,7 @@ class BankExplorer(ipw.VBox):
         event.canvas.mpl_disconnect(self._mouse_release_connection)
         self._mouse_move_connection = None
         self._mouse_release_connection = None
-        self._previous_pixel = None
+        # self._previous_pixel = None
 
     def add_mask(self, event: MouseEvent) -> None:
         if event.inaxes is None:
