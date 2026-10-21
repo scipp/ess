@@ -20,7 +20,7 @@ from .types import (
     GammaBinningData,
     GammaBinWidth,
     GammaSlicesViewData,
-    RawData2D,
+    RawSampleData2D,
     Texture3D,
     TwoThetaBinningData,
     TwoThetaBinWidth,
@@ -222,9 +222,9 @@ def hist_3d(
     )
 
 
-def hist_2d(data: Texture3D[RunType]) -> RawData2D[RunType]:
+def hist_2d(data: Texture3D[SampleRun]) -> RawSampleData2D:
     """Histogram projected detector data to texture coordinates."""
-    return RawData2D(
+    return RawSampleData2D(
         sc.DataGroup(
             {
                 "region_1": data["region_1"].sum(dim="dspacing"),
@@ -234,7 +234,7 @@ def hist_2d(data: Texture3D[RunType]) -> RawData2D[RunType]:
     )
 
 
-def extract_detector_view_data(data: RawData2D[SampleRun]) -> DetectorViewData:
+def extract_detector_view_data(data: RawSampleData2D) -> DetectorViewData:
     """Return a scipp DataArray with data for the detector view."""
     histogrammed_2d_1 = data["region_1"]
     histogrammed_2d_2 = data["region_2"]
@@ -276,7 +276,7 @@ def extract_detector_view_data(data: RawData2D[SampleRun]) -> DetectorViewData:
     )
 
 
-def extract_flat_view_data(data: RawData2D[SampleRun]) -> FlatViewData:
+def extract_flat_view_data(data: RawSampleData2D) -> FlatViewData:
     """Return a scipp DataArray with data for a raw flattened detector view.
     Note, in order to properly visualize the gap in the detector, the gamma
     bin edges are modified to include a gap in the middle and one needs to
@@ -315,7 +315,7 @@ def extract_flat_view_data(data: RawData2D[SampleRun]) -> FlatViewData:
 
 
 def extract_two_theta_rings_view_data(
-    data: RawData2D[SampleRun],
+    data: RawSampleData2D,
 ) -> TwoThetaRingsViewData:
     """Return a scipp DataArray with data for a raw two-theta rings view"""
     histogrammed_2d_1 = data["region_1"]
@@ -361,7 +361,7 @@ def extract_two_theta_rings_view_data(
     )
 
 
-def extract_gamma_slices_view_data(data: RawData2D[SampleRun]) -> GammaSlicesViewData:
+def extract_gamma_slices_view_data(data: RawSampleData2D) -> GammaSlicesViewData:
     """Return a scipp DataArray with data for a raw gamma-slices view."""
     gamma_region_1_last_edge = data["region_1"].coords["gamma"][-1]
     gamma_region_2_first_edge = data["region_2"].coords["gamma"][0]

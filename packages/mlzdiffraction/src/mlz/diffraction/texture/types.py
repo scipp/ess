@@ -24,14 +24,11 @@ class Texture3D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """Texture data binned in gamma, two-theta, and d-spacing."""
 
 
-class RawData2D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """2-D texture binned in gamma and two-theta."""
-
-
 DetectorViewData = NewType("DetectorViewData", sc.DataArray)
 FlatViewData = NewType("FlatViewData", sc.DataArray)
 TwoThetaRingsViewData = NewType("TwoThetaRingsViewData", sc.DataArray)
 GammaSlicesViewData = NewType("GammaSlicesViewData", sc.DataArray)
+RawSampleData2D = NewType("RawSampleData2D", sc.DataArray)
 
 TwoThetaRings = NewType("TwoThetaRings", sc.DataArray)
 GammaSlices = NewType("GammaSlices", sc.DataArray)
