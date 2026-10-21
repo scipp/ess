@@ -348,26 +348,35 @@ def extract_flat_view_data(data: RawData2D[SampleRun]) -> FlatViewData:
 def extract_two_theta_rings_view_data(
     data: RawData2D[SampleRun],
 ) -> TwoThetaRingsViewData:
-    """ Return a scipp DataArray with data for a raw two-theta rings view"""
+    """Return a scipp DataArray with data for a raw two-theta rings view"""
     histogrammed_2d_1 = data["region_1"]
     histogrammed_2d_2 = data["region_2"]
 
     gamma_bin_centers_1 = sc.midpoints(histogrammed_2d_1.coords["gamma"])
     gamma_bin_centers_2 = sc.midpoints(histogrammed_2d_2.coords["gamma"])
-
     # TODO: check that dims match
     gamma_bin_centers = sc.concat(
         [gamma_bin_centers_1, gamma_bin_centers_2], dim="gamma"
     )
 
+    two_theta_bin_centers = sc.midpoints(histogrammed_2d_1.coords["two_theta"])
+
     rings_radius = sc.full_like(gamma_bin_centers, 800)
 
     counts_1 = histogrammed_2d_1.data
     counts_2 = histogrammed_2d_2.data
-
     counts = sc.concat([counts_1, counts_2], dim="gamma")
 
-    two_theta_bin_centers = sc.midpoints(histogrammed_2d_1.coords["two_theta"])
+    gamma_widths_1 = sc.abs(
+        data["region_1"].coords["gamma"]["gamma", 1:] - data["region_1"].coords["gamma"]["gamma", :-1]
+    )
+    gamma_widths_2 = sc.abs(
+        data["region_2"].coords["gamma"]["gamma", 1:] - data["region_2"].coords["gamma"]["gamma", :-1]
+    )
+    gamma_widths = sc.concat(
+        [gamma_widths_1, gamma_widths_2],
+        dim="gamma"
+    )
 
 
     return TwoThetaRingsViewData(
@@ -375,6 +384,7 @@ def extract_two_theta_rings_view_data(
             counts,
             coords={
                 "gamma": gamma_bin_centers,
+                "gamma_width": gamma_widths,
                 "two_theta": two_theta_bin_centers,
                 "r": rings_radius
             },
