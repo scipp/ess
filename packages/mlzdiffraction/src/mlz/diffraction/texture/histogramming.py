@@ -5,8 +5,9 @@
 
 import math
 
-import scipp as sc
 import numpy as np
+import scipp as sc
+from typing import cast
 
 from ..powtex.types import RunType, SampleRun
 from .conversion import get_cartesian_from_cylindrical
@@ -193,6 +194,10 @@ def hist_3d(
     dspacing_bin_width: DspacingBinWidth,
 ) -> Texture3D[RunType]:
     """Histogram projected detector data to texture coordinates."""
+
+    if data is None:
+        return cast(Texture3D[RunType], None)
+
     dmin = sc.min(data.coords["dspacing"])
     dmax = sc.max(data.coords["dspacing"])
     dspacing_binning = sc.arange(

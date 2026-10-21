@@ -4,6 +4,7 @@
 """Coordinate conversions for POWTEX texture reduction."""
 
 import numpy as np
+from typing import cast
 import scipp as sc
 import scippneutron as scn
 from scippneutron.conversion.tof import dspacing_from_tof
@@ -21,6 +22,9 @@ def project_onto_cylindrical_surface(
 ) -> DspacingCylSurfaceDetector[RunType]:
     """Project detector data to a cylindrical surface."""
     _ = calibration_data
+
+    if data is None:
+        return cast(DspacingCylSurfaceDetector[RunType], None)
 
     data.coords["projection_radius"] = PROJECTION_RADIUS
 
