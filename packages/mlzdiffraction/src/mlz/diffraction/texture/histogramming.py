@@ -383,8 +383,40 @@ def extract_two_theta_rings_view_data(
 
 
 def extract_gamma_slices_view_data(data: RawData2D[SampleRun]) -> GammaSlicesViewData:
-    """Return a raw gamma-slices view."""
-    return GammaSlicesViewData(data)
+    """Return a scipp DataArray with data for a raw gamma-slices view."""
+    gamma_region_1_last_edge = data["region_1"].coords["gamma"][-1]
+    gamma_region_2_first_edge = data["region_2"].coords["gamma"][0]
+    gamma_gap = (gamma_region_1_last_edge + gamma_region_2_first_edge) / 2.0
+
+    gamma_bin_edges = sc.concat(
+        [data["region_1"].coords["gamma"],  gamma_gap, data["region_2"].coords["gamma"]],
+        dim="gamma",
+    )
+
+    two_theta_bin_edges = data["region_1"].coords["two_theta"]
+
+    gamma_bin_centers = sc.midpoints(gamma_bin_edges)
+    two_theta_bin_centers = sc.midpoints(two_theta_bin_edges)
+
+    counts_1 = data["region_1"].data
+    counts_2 = data["region_2"].data
+    # Create a placeholder for the gap in the middle with NaN values.
+    # The gap in the middle generates two bins with NaN values:
+    # from the last bin edge of region_1 to the gap point and from
+    # the gap point to the first bin edge of region_2.
+    counts_gap = sc.full(dims=["gamma", "two_theta"], shape=[2, counts_1.shape[1]], value=np.nan, unit=counts_1.unit)
+
+    counts = sc.concat([counts_1, counts_gap, counts_2], dim="gamma")
+
+    return GammaSlicesViewData(
+        sc.DataArray(
+            counts,
+            coords={
+                "gamma": gamma_bin_centers,
+                "two_theta": two_theta_bin_centers
+            },
+        )
+    )
 
 
 providers = (
