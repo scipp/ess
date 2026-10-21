@@ -28,3 +28,4 @@ def nexus_name(name: str) -> str:
         return "timepix3"
     if "monitor" in name:
         return "beam_monitor_1"
+    raise ValueError(f"TBL: Unknown detector or monitor name: {name}")

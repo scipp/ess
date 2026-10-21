@@ -27,7 +27,7 @@ def nexus_name(name: str) -> str:
         # Assume that the monitor number is given at the end of the string
         num = name[-1]
         return f"beam_monitor_{num}"
-    raise ValueError(f"Unknown detector or monitor name: {name}")
+    raise ValueError(f"Odin: Unknown detector or monitor name: {name}")
 
 
 # Choppers
