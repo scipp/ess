@@ -90,6 +90,45 @@ class MaskControl(ipw.HBox):
             self.continuous_button.icon = 'unlock'
 
 
+class ColorControl(ipw.HBox):
+    def __init__(self, log: bool = False):
+
+        self.vmin = ipw.Text(
+            description='Min:',
+            layout={'width': '130px'},
+            style={"description_width": 'initial'},
+        )
+        self.vmax = ipw.Text(
+            description='Max:',
+            layout={'width': '130px'},
+            style={"description_width": 'initial'},
+        )
+        self.vmin.observe(self.update_color_range, names='value')
+        self.vmax.observe(self.update_color_range, names='value')
+
+        self.log_button = ipw.ToggleButton(
+            description="log", layout=BUTTON_STYLE, value=log
+        )
+        self.log_button.observe(self.toggle_log, names="value")
+
+        self.fit_button = ipw.Button(description="fit", layout=BUTTON_STYLE)
+        self.fit_button.on_click(self.fit_cmap_range)
+
+        super().__init__(
+            [
+                ipw.Label("Colorscale:"),
+                self.vmin,
+                self.vmax,
+                self.log_button,
+                self.fit_button,
+            ],
+            layout={
+                'border': '1px solid black',
+                'padding': '0px 10px 0px 10px',
+            },
+        )
+
+
 class DimSlider(ipw.HBox, ipw.ValueWidget):
     def __init__(self, sizes: dict[str, int], dim: str, visible_dims: list[str]):
         self._lock = False
@@ -337,30 +376,30 @@ class BankExplorer(ipw.VBox):
             'button_press_event', self.switch_to_tab
         )
 
-        # Create color map controls
-        self.cmap_vmin = ipw.Text(
-            description='Min:',
-            layout={'width': '130px'},
-            style={"description_width": 'initial'},
-        )
-        self.cmap_vmax = ipw.Text(
-            description='Max:',
-            layout={'width': '130px'},
-            style={"description_width": 'initial'},
-        )
-        self.cmap_vmin.observe(self.update_color_range, names='value')
-        self.cmap_vmax.observe(self.update_color_range, names='value')
+        # # Create color map controls
+        # self.cmap_vmin = ipw.Text(
+        #     description='Min:',
+        #     layout={'width': '130px'},
+        #     style={"description_width": 'initial'},
+        # )
+        # self.cmap_vmax = ipw.Text(
+        #     description='Max:',
+        #     layout={'width': '130px'},
+        #     style={"description_width": 'initial'},
+        # )
+        # self.cmap_vmin.observe(self.update_color_range, names='value')
+        # self.cmap_vmax.observe(self.update_color_range, names='value')
 
-        is_log = next(
-            iter({kwargs.get('norm'), kwargs.get('logc')} - {None}), None
-        ) in ('log', True)
-        self.log_button = ipw.ToggleButton(
-            description="log", layout=BUTTON_STYLE, value=is_log
-        )
-        self.log_button.observe(self.toggle_log, names="value")
+        # is_log = next(
+        #     iter({kwargs.get('norm'), kwargs.get('logc')} - {None}), None
+        # ) in ('log', True)
+        # self.log_button = ipw.ToggleButton(
+        #     description="log", layout=BUTTON_STYLE, value=is_log
+        # )
+        # self.log_button.observe(self.toggle_log, names="value")
 
-        self.fit_button = ipw.Button(description="fit", layout=BUTTON_STYLE)
-        self.fit_button.on_click(self.fit_cmap_range)
+        # self.fit_button = ipw.Button(description="fit", layout=BUTTON_STYLE)
+        # self.fit_button.on_click(self.fit_cmap_range)
 
         space = ipw.HTML('<div style="width: 20px;"></div>')
 
@@ -412,25 +451,12 @@ class BankExplorer(ipw.VBox):
         self.mask_control.on_clear(self.clear_masks)
         self.mask_control.on_save(self.save_masks)
 
+        self.color_control = ColorControl()
+
         super().__init__(
             [
                 ipw.HBox(
-                    [
-                        self.mask_control,
-                        ipw.HBox(
-                            [
-                                ipw.Label("Colorscale:"),
-                                self.cmap_vmin,
-                                self.cmap_vmax,
-                                self.log_button,
-                                self.fit_button,
-                            ],
-                            layout={
-                                'border': '1px solid black',
-                                'padding': '0px 10px 0px 10px',
-                            },
-                        ),
-                    ],
+                    [self.mask_control, self.color_control],
                     layout={
                         'width': self.tabs.layout.width,
                         'justify_content': 'space-between',
