@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
-from __future__ import annotations
-
 import math
+from typing import Literal
 
 import ipywidgets as ipw
 import matplotlib.pyplot as plt
@@ -136,7 +135,7 @@ def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
 
 
 def _slice_or_reduce(
-    da: sc.DataArray, slices: list[tuple[str, int | None]], op: str
+    da: sc.DataArray, slices: list[tuple[str, int | None]], op: Literal["sum", "any"]
 ) -> sc.DataArray:
     out = da
     for sl in slices:
@@ -148,7 +147,9 @@ def _slice_or_reduce(
         else:
             if ind >= out.sizes[dim]:
                 # Make a blank data array to avoid indexing errors
-                out = sc.full_like(out[dim, 0], value=float("nan"))
+                out = sc.full_like(
+                    out[dim, 0], value={"sum": float("nan"), "any": False}[op]
+                )
             else:
                 out = out[dim, ind]
     return out
@@ -416,17 +417,37 @@ class BankExplorer(ipw.VBox):
                 ipw.HBox(
                     [
                         self.mask_control,
-                        space,
-                        ipw.Label("Colorscale:"),
-                        self.cmap_vmin,
-                        self.cmap_vmax,
-                        self.log_button,
-                        self.fit_button,
-                    ]
+                        ipw.HBox(
+                            [
+                                ipw.Label("Colorscale:"),
+                                self.cmap_vmin,
+                                self.cmap_vmax,
+                                self.log_button,
+                                self.fit_button,
+                            ],
+                            layout={
+                                'border': '1px solid black',
+                                'padding': '0px 10px 0px 10px',
+                            },
+                        ),
+                    ],
+                    layout={
+                        'width': self.tabs.layout.width,
+                        'justify_content': 'space-between',
+                        'align_items': 'center',
+                    },
                 ),
                 self.tabs,
             ]
         )
+
+    @property
+    def current_tab(self) -> int:
+        return self.tabs.selected_index
+
+    @property
+    def current_key(self) -> str:
+        return self._tab_index_to_key[self.current_tab]
 
     def switch_to_tab(self, event: MouseEvent) -> None:
         """
@@ -451,6 +472,14 @@ class BankExplorer(ipw.VBox):
             The change dictionary containing information about the tab change.
         """
         self.update_colormapper_norm()
+        ind = change["new"]
+        if ind == 0:
+            old = change["old"]
+            key = self._tab_index_to_key[old]
+            self.all_mask_selection_nodes[key].notify_children(message=None)
+        else:
+            key = self._tab_index_to_key[ind]
+            self.mask_selection_nodes[key].notify_children(message=None)
 
     def update_colormapper_norm(self) -> None:
         ind = self.tabs.selected_index
@@ -605,7 +634,6 @@ class BankExplorer(ipw.VBox):
         self._previous_pixel = (x, y)
 
     def clear_masks(self, _) -> None:
-        print("Clearing masks")
         ind = self.tabs.selected_index
         if ind == 0:
             keys = self.masks.keys()
