@@ -81,6 +81,7 @@ _SIMULATION_PROVIDERS = (
 def BifrostSimulationWorkflow(
     *,
     detector_names: list[str] | None = None,
+    **kwargs,
 ) -> sciline.Pipeline:
     """Data reduction workflow for simulated BIFROST data.
 
@@ -88,7 +89,9 @@ def BifrostSimulationWorkflow(
     ----------
     detector_names:
         Names of ``NXdetector`` groups in the input NeXus file.
-        If ``Nonw``, all detector will be processed and merged.
+        If ``None``, all detector will be processed and merged.
+    kwargs:
+        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.
 
     Returns
     -------
@@ -103,6 +106,7 @@ def BifrostSimulationWorkflow(
             OverlapMonitor,
             PSCMonitor,
         ),
+        **kwargs,
     )
     for provider in _SIMULATION_PROVIDERS:
         workflow.insert(provider)
@@ -121,6 +125,7 @@ def BifrostSimulationWorkflow(
 def BifrostWorkflow(
     *,
     detector_names: list[str] | None = None,
+    **kwargs,
 ) -> sciline.Pipeline:
     """Data reduction workflow for BIFROST.
 
@@ -128,12 +133,13 @@ def BifrostWorkflow(
     ----------
     detector_names:
         Names of ``NXdetector`` groups in the input NeXus file.
-        If ``Nonw``, all detector will be processed and merged.
-
+        If ``None``, all detector will be processed and merged.
+    kwargs:
+        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.
     Returns
     -------
     :
-        A pipeline for reducing simulated BIFROST data."""
+        A pipeline for reducing BIFROST data."""
     workflow = TofWorkflow(
         run_types=(SampleRun,),
         monitor_types=(
@@ -142,6 +148,7 @@ def BifrostWorkflow(
             OverlapMonitor,
             PSCMonitor,
         ),
+        **kwargs,
     )
     for provider in _PROVIDERS:
         workflow.insert(provider)
