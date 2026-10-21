@@ -348,8 +348,8 @@ class BankExplorer(ipw.VBox):
             layout={'width': '130px'},
             style={"description_width": 'initial'},
         )
-        self.cmap_vmin.observe(self.update_cmin, names='value')
-        self.cmap_vmax.observe(self.update_cmax, names='value')
+        self.cmap_vmin.observe(self.update_color_range, names='value')
+        self.cmap_vmax.observe(self.update_color_range, names='value')
 
         is_log = next(
             iter({kwargs.get('norm'), kwargs.get('logc')} - {None}), None
@@ -472,6 +472,7 @@ class BankExplorer(ipw.VBox):
             The change dictionary containing information about the tab change.
         """
         self.update_colormapper_norm()
+        self.update_color_range()
         ind = change["new"]
         if ind == 0:
             old = change["old"]
@@ -494,15 +495,18 @@ class BankExplorer(ipw.VBox):
         self.reset_cmap_range()
         self.update_colormapper_norm()
 
-    def _update_min_or_max(self, change: dict, bound: str) -> None:
-        try:
-            new = float(change["new"])
-            if self.log_button.value and new <= 0:
-                return
-        except ValueError:
-            new = None
+    def update_color_range(self, _=None) -> None:
+        bounds = {
+            key: float(item.value) if len(item.value) > 0 else None
+            for key, item in [("cmin", self.cmap_vmin), ("cmax", self.cmap_vmax)]
+        }
 
-        ind = self.tabs.selected_index
+        if self.log_button.value:
+            for bound in bounds.values():
+                if (bound is not None) and (bound <= 0):
+                    return
+
+        ind = self.current_tab
         key = self._tab_index_to_key[ind]
 
         if ind == 0:
@@ -511,10 +515,11 @@ class BankExplorer(ipw.VBox):
             figs = [self.tab_figs[key]]
 
         for f in figs:
-            if new is None:
-                getattr(f.view.colormapper, f"_c{bound}").pop('user', None)
-            else:
-                setattr(f.view.colormapper, f"c{bound}", new)
+            for bound, new in bounds.items():
+                if new is None:
+                    getattr(f.view.colormapper, f"_{bound}").pop('user', None)
+                else:
+                    setattr(f.view.colormapper, bound, new)
             if not self._lock:
                 f.view.colormapper.autoscale()
         if not self._lock:
@@ -522,12 +527,6 @@ class BankExplorer(ipw.VBox):
                 self.main_figure.canvas.draw_idle()
             else:
                 self.tab_figs[key].canvas.draw()
-
-    def update_cmin(self, change: dict) -> None:
-        self._update_min_or_max(change, 'min')
-
-    def update_cmax(self, change: dict) -> None:
-        self._update_min_or_max(change, 'max')
 
     def reset_cmap_range(self, _=None) -> None:
         self._lock = True
