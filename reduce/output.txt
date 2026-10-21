@@ -1,4 +1,4 @@
-Results of doctest builder run on 2026-10-07 13:15:24
+Results of doctest builder run on 2026-10-21 13:14:38
 =====================================================
 
 Document: generated/modules/ess.reduce.nexus.types.DetectorPositionOffset
@@ -177,9 +177,57 @@ Document: generated/modules/ess.reduce.polarization.types.ReducedSampleDataBySpi
 4 passed and 0 failed.
 Test passed.
 
+Document: generated/modules/ess.reduce.unwrap.types.DetectorLtotal
+------------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.unwrap.types.MonitorLtotal
+-----------------------------------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.unwrap.types.TofDetector
+---------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.unwrap.types.TofMonitor
+--------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.unwrap.types.WavelengthDetector
+----------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
+Document: generated/modules/ess.reduce.unwrap.types.WavelengthMonitor
+---------------------------------------------------------------------
+1 items passed all tests:
+   4 tests in default
+4 tests in 1 items.
+4 passed and 0 failed.
+Test passed.
+
 Doctest summary
 ===============
-   79 tests
+  101 tests
     0 failures in tests
     0 failures in setup code
     0 failures in cleanup code

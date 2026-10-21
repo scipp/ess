@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../_static/documentation_options.js?v=5c0e2681"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="Workflow Widget in Jupyter Notebooks" href="widget.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.10.1" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -811,7 +811,7 @@ Instead, authors should apply good judgment when naming TypeVars.</p>
 Users should not have to worry about the concrete type of parameters.</p>
 <p><strong>Example</strong></p>
 <ul>
-<li><p>Numbers should use the appropriate abstract type from <a class="reference external" href="https://docs.python.org/3/library/numbers.html#module-numbers" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numbers</span></code></a>.
+<li><p>Numbers should use the appropriate abstract type from <a class="reference external" href="https://docs.python.org/3/library/numbers.html#module-numbers" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numbers</span></code></a>.
 E.g.,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">P</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span>
 <span class="n">pipeline</span><span class="p">[</span><span class="n">P</span><span class="p">]</span> <span class="o">=</span> <span class="mf">3.0</span>  <span class="c1"># works</span>
@@ -819,9 +819,9 @@ E.g.,</p>
 </pre></div>
 </div>
 </li>
-<li><p>Use <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Sequence</span></code></a> instead of <code class="docutils literal notranslate"><span class="pre">list</span></code> or <code class="docutils literal notranslate"><span class="pre">tuple</span></code>.</p>
+<li><p>Use <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Sequence</span></code></a> instead of <code class="docutils literal notranslate"><span class="pre">list</span></code> or <code class="docutils literal notranslate"><span class="pre">tuple</span></code>.</p>
 <ul class="simple">
-<li><p>But do <em>not</em> use <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Iterable</span></code></a>!
+<li><p>But do <em>not</em> use <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Iterable</span></code></a>!
 Parameters may be consumed multiple times and iterables are not guaranteed to support that.</p></li>
 </ul>
 </li>
@@ -1102,7 +1102,7 @@ Not all guidelines are testable.</p>
 
   <p class="copyright">
     
-      © Copyright 2024 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -1123,7 +1123,7 @@ Not all guidelines are testable.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.10.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

@@ -66,7 +66,6 @@ ess.reduce.nexus.types
       NeXusTransformation
       NeXusTransformationChain
       Position
-      ProductionInfo
       ProtonCharge
       RawChoppers
       RawDetector

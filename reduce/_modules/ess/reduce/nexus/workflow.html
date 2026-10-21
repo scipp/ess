@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../../_static/documentation_options.js?v=5c0e2681"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -492,7 +492,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.10.1" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -975,7 +975,6 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">&quot;&quot;&quot;Workflow and workflow components for interacting with NeXus files.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
@@ -1020,7 +1019,6 @@ window.runMermaid = runMermaid;</script>
     <span class="n">NeXusTransformationChain</span><span class="p">,</span>
     <span class="n">Position</span><span class="p">,</span>
     <span class="n">PreopenNeXusFile</span><span class="p">,</span>
-    <span class="n">ProductionInfo</span><span class="p">,</span>
     <span class="n">ProtonCharge</span><span class="p">,</span>
     <span class="n">RawChoppers</span><span class="p">,</span>
     <span class="n">RawDetector</span><span class="p">,</span>
@@ -1226,13 +1224,6 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<div class="viewcode-block" id="nx_class_for_production_info">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.nx_class_for_production_info.html#ess.reduce.nexus.workflow.nx_class_for_production_info">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">nx_class_for_production_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">NeXusClass</span><span class="p">[</span><span class="n">ProductionInfo</span><span class="p">]:</span>
-    <span class="k">return</span> <span class="n">NeXusClass</span><span class="p">[</span><span class="n">ProductionInfo</span><span class="p">](</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">)</span></div>
-
-
-
 <div class="viewcode-block" id="load_nexus_component">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.load_nexus_component.html#ess.reduce.nexus.workflow.load_nexus_component">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_nexus_component</span><span class="p">(</span>
@@ -1348,6 +1339,33 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_interval_from_time_dependent_log</span><span class="p">(</span>
+    <span class="n">log</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="n">TimeInterval</span><span class="p">[</span><span class="n">RunType</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract a time interval from a time-dependent log.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">start</span>
+    <span class="n">stop</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">stop</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+        <span class="c1"># NXlog entries are generally interpreted as the previous value being valid</span>
+        <span class="c1"># until the next entry. We therefore need to select the previous value, and</span>
+        <span class="c1"># any index after the last entry refers to the last entry, i.e., there is no</span>
+        <span class="c1"># &quot;end&quot; time in the files. We add a dummy end so we can use Scipp&#39;s label-</span>
+        <span class="c1"># based indexing for histogram data.</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
+        <span class="c1"># Add 1000 days as a dummy end time. This is hopefully long enough to cover</span>
+        <span class="c1"># all reasonable use cases.</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">24_000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;hours&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">time</span><span class="p">,</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta</span><span class="p">],</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">label_based_index_to_positional_index</span><span class="p">(</span>
+            <span class="n">sizes</span><span class="o">=</span><span class="n">log</span><span class="o">.</span><span class="n">sizes</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">interval</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">log</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">log</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_apply_time_filter</span><span class="p">(</span>
     <span class="n">transform</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">user_filter</span><span class="p">:</span> <span class="n">TransformationTimeFilter</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
@@ -1394,25 +1412,9 @@ window.runMermaid = runMermaid;</script>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">sizes</span> <span class="o">==</span> <span class="p">{}</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
             <span class="k">continue</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">start</span>
-        <span class="n">stop</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">stop</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-            <span class="c1"># NXlog entries are generally interpreted as the previous value being valid</span>
-            <span class="c1"># until the next entry. We therefore need to select the previous value, and</span>
-            <span class="c1"># any index after the last entry refers to the last entry, i.e., there is no</span>
-            <span class="c1"># &quot;end&quot; time in the files. We add a dummy end so we can use Scipp&#39;s label-</span>
-            <span class="c1"># based indexing for histogram data.</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
-            <span class="c1"># Add 1000 days as a dummy end time. This is hopefully long enough to cover</span>
-            <span class="c1"># all reasonable use cases.</span>
-            <span class="n">delta</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">24_000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;hours&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">time</span><span class="p">,</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta</span><span class="p">],</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">label_based_index_to_positional_index</span><span class="p">(</span>
-                <span class="n">sizes</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">sizes</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">interval</span><span class="o">.</span><span class="n">value</span>
-            <span class="p">)</span>
-            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">_apply_time_filter</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">time_filter</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">_apply_time_filter</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="n">time_filter</span><span class="p">)</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">_apply_time_filter</span><span class="p">(</span>
+            <span class="n">_extract_interval_from_time_dependent_log</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">interval</span><span class="p">),</span> <span class="n">time_filter</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]</span><span class="o">.</span><span class="n">from_chain</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span></div>
 
@@ -1567,6 +1569,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Offset to add to the monitor position.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">transform_unit</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">unit</span>
+    <span class="k">if</span> <span class="n">transform_unit</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">:</span>
+        <span class="c1"># No translation in the chain: an identity for depends_on=&#39;.&#39; or a pure</span>
+        <span class="c1"># rotation, so use the offset&#39;s unit. This cannot mask a translation with a</span>
+        <span class="c1"># bad unit, since resolving the chain into `transform` already fails for that.</span>
+        <span class="n">transform_unit</span> <span class="o">=</span> <span class="n">offset</span><span class="o">.</span><span class="n">unit</span>
     <span class="k">return</span> <span class="n">EmptyMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">](</span>
         <span class="n">nexus</span><span class="o">.</span><span class="n">extract_signal_data_array</span><span class="p">(</span><span class="n">monitor</span><span class="p">)</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
             <span class="n">position</span><span class="o">=</span><span class="n">transform</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="n">transform_unit</span><span class="p">)</span>
@@ -1662,41 +1669,27 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="load_proton_charge">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.load_proton_charge.html#ess.reduce.nexus.workflow.load_proton_charge">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_proton_charge</span><span class="p">(</span>
-    <span class="n">parent_location</span><span class="p">:</span> <span class="n">NeXusComponentLocationSpec</span><span class="p">[</span><span class="n">ProductionInfo</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_component</span><span class="p">:</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="n">interval</span><span class="p">:</span> <span class="n">TimeInterval</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProtonCharge</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the time-dependent proton charge from a NeXus file.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    parent_location:</span>
-<span class="sd">        Location spec for the ``ProductionInfo`` that holds the proton charge.</span>
+<span class="sd">    source_component:</span>
+<span class="sd">        The NXsource component from which to load the proton charge.</span>
 <span class="sd">        The charge is loaded from the &quot;pulse_charge&quot; subgroup.</span>
 <span class="sd">    interval:</span>
 <span class="sd">        Time range to load.</span>
-<span class="sd">        Overrides ``parent_location.selection``.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
 <span class="sd">        The proton charge as a data array.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># The ProductionInfo location spec does not encode a time interval, that</span>
-    <span class="c1"># would require a NeXusDataLocationSpec. But we don&#39;t expose the precise</span>
-    <span class="c1"># path of the proton charge in the graph and can&#39;t build a data spec.</span>
-    <span class="c1">#</span>
-    <span class="c1"># The else branch is a workaround for https://github.com/scipp/scippnexus/pull/299</span>
-    <span class="n">selection</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="p">()</span>
-    <span class="n">charge_location</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-        <span class="n">parent_location</span><span class="p">,</span>
-        <span class="c1"># The pulse charge is a log and not a component, so we build the path</span>
-        <span class="c1"># based on the parent ProductionInfo component.</span>
-        <span class="n">component_name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">parent_location</span><span class="o">.</span><span class="n">component_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/pulse_charge&quot;</span><span class="p">,</span>
-        <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="c1"># This loads all children in the NXlog, extract the value.</span>
-    <span class="n">dg</span> <span class="o">=</span> <span class="n">nexus</span><span class="o">.</span><span class="n">load_from_path</span><span class="p">(</span><span class="n">charge_location</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="n">definitions</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ProtonCharge</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">dg</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span></div>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">source_component</span><span class="p">[</span><span class="s1">&#39;pulse_charge&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">_extract_interval_from_time_dependent_log</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ProtonCharge</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">out</span><span class="p">)</span></div>
 
 
 
@@ -1814,6 +1807,10 @@ window.runMermaid = runMermaid;</script>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">children</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;frame_total&#39;</span><span class="p">,</span> <span class="s1">&#39;reference_time&#39;</span><span class="p">)</span>
         <span class="p">}</span>
+        <span class="c1"># The attribute names the dropped children, ScippNeXus would look them up.</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">&#39;auxiliary_signals&#39;</span>
+        <span class="p">}</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="n">children</span><span class="p">)</span>
 
 
@@ -1908,7 +1905,6 @@ window.runMermaid = runMermaid;</script>
     <span class="n">nx_class_for_source</span><span class="p">,</span>
     <span class="n">nx_class_for_sample</span><span class="p">,</span>
     <span class="n">nx_class_for_disk_chopper</span><span class="p">,</span>
-    <span class="n">nx_class_for_production_info</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">_monitor_providers</span> <span class="o">=</span> <span class="p">(</span>
@@ -2022,7 +2018,6 @@ window.runMermaid = runMermaid;</script>
             <span class="n">DetectorBankSizes</span><span class="p">:</span> <span class="n">DetectorBankSizes</span><span class="p">({}),</span>
             <span class="n">PreopenNeXusFile</span><span class="p">:</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
             <span class="n">TransformationTimeFilter</span><span class="p">:</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
-            <span class="n">NeXusName</span><span class="p">[</span><span class="n">ProductionInfo</span><span class="p">]:</span> <span class="s2">&quot;/entry/neutron_prod_info&quot;</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="n">constraints</span><span class="o">=</span><span class="n">_gather_constraints</span><span class="p">(</span>
             <span class="n">run_types</span><span class="o">=</span><span class="n">run_types</span><span class="p">,</span> <span class="n">monitor_types</span><span class="o">=</span><span class="n">monitor_types</span>
@@ -2087,7 +2082,7 @@ window.runMermaid = runMermaid;</script>
 
   <p class="copyright">
     
-      © Copyright 2024 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -2108,7 +2103,7 @@ window.runMermaid = runMermaid;</script>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.10.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

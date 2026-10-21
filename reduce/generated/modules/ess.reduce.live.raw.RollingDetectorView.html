@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../_static/documentation_options.js?v=5c0e2681"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.reduce.live.raw.LogicalView" href="ess.reduce.live.raw.LogicalView.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.10.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -491,6 +491,14 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.reduce.diagnostics.html">ess.reduce.diagnostics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.diagnostics.load_nexus.html">ess.reduce.diagnostics.load_nexus</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.diagnostics.load_nexus.load_detectors.html">ess.reduce.diagnostics.load_nexus.load_detectors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.diagnostics.load_nexus.load_monitors.html">ess.reduce.diagnostics.load_nexus.load_monitors</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="ess.reduce.live.html">ess.reduce.live</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="ess.reduce.live.raw.html">ess.reduce.live.raw</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.live.raw.gaussian_position_noise.html">ess.reduce.live.raw.gaussian_position_noise</a></li>
@@ -583,7 +591,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.NeXusTransformation.html">ess.reduce.nexus.types.NeXusTransformation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.NeXusTransformationChain.html">ess.reduce.nexus.types.NeXusTransformationChain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.Position.html">ess.reduce.nexus.types.Position</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.ProductionInfo.html">ess.reduce.nexus.types.ProductionInfo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.ProtonCharge.html">ess.reduce.nexus.types.ProtonCharge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.RawChoppers.html">ess.reduce.nexus.types.RawChoppers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.types.RawDetector.html">ess.reduce.nexus.types.RawDetector</a></li>
@@ -626,7 +633,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_detector.html">ess.reduce.nexus.workflow.nx_class_for_detector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_disk_chopper.html">ess.reduce.nexus.workflow.nx_class_for_disk_chopper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_monitor.html">ess.reduce.nexus.workflow.nx_class_for_monitor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_production_info.html">ess.reduce.nexus.workflow.nx_class_for_production_info</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_sample.html">ess.reduce.nexus.workflow.nx_class_for_sample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.nx_class_for_source.html">ess.reduce.nexus.workflow.nx_class_for_source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.reduce.nexus.workflow.parse_raw_choppers.html">ess.reduce.nexus.workflow.parse_raw_choppers</a></li>
@@ -769,6 +775,95 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.reduce.uncertainty.UncertaintyBroadcastMode.html">ess.reduce.uncertainty.UncertaintyBroadcastMode</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.reduce.unwrap.html">ess.reduce.unwrap</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.unwrap.fakes.html">ess.reduce.unwrap.fakes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.fakes.psc_choppers.html">ess.reduce.unwrap.fakes.psc_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.fakes.pulse_skipping_choppers.html">ess.reduce.unwrap.fakes.pulse_skipping_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.fakes.source_position.html">ess.reduce.unwrap.fakes.source_position</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.fakes.FakeBeamline.html">ess.reduce.unwrap.fakes.FakeBeamline</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.unwrap.interpolator_numba.html">ess.reduce.unwrap.interpolator_numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.interpolator_numba.interpolate.html">ess.reduce.unwrap.interpolator_numba.interpolate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.interpolator_numba.Interpolator.html">ess.reduce.unwrap.interpolator_numba.Interpolator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.unwrap.interpolator_scipy.html">ess.reduce.unwrap.interpolator_scipy</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.interpolator_scipy.Interpolator.html">ess.reduce.unwrap.interpolator_scipy.Interpolator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.unwrap.lut.html">ess.reduce.unwrap.lut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.NumberOfSimulatedNeutrons.html">ess.reduce.unwrap.lut.NumberOfSimulatedNeutrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.DistanceResolution.html">ess.reduce.unwrap.lut.DistanceResolution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.TimeResolution.html">ess.reduce.unwrap.lut.TimeResolution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.PulsePeriod.html">ess.reduce.unwrap.lut.PulsePeriod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.SimulationSeed.html">ess.reduce.unwrap.lut.SimulationSeed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.SimulationFacility.html">ess.reduce.unwrap.lut.SimulationFacility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.SimulationMinWavelength.html">ess.reduce.unwrap.lut.SimulationMinWavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.SimulationMaxWavelength.html">ess.reduce.unwrap.lut.SimulationMaxWavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.chopper_distance_along_beam.html">ess.reduce.unwrap.lut.chopper_distance_along_beam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.close_non_synced_disk_choppers.html">ess.reduce.unwrap.lut.close_non_synced_disk_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.compute_frame_sequence.html">ess.reduce.unwrap.lut.compute_frame_sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.default_parameters.html">ess.reduce.unwrap.lut.default_parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.get_active_choppers.html">ess.reduce.unwrap.lut.get_active_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.guess_pulse_stride_from_choppers.html">ess.reduce.unwrap.lut.guess_pulse_stride_from_choppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.load_lookup_table_from_file.html">ess.reduce.unwrap.lut.load_lookup_table_from_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.ltotal_range_from_ltotal_detector.html">ess.reduce.unwrap.lut.ltotal_range_from_ltotal_detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.ltotal_range_from_ltotal_monitor.html">ess.reduce.unwrap.lut.ltotal_range_from_ltotal_monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.make_wavelength_lut_from_polygons.html">ess.reduce.unwrap.lut.make_wavelength_lut_from_polygons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.make_wavelength_lut_from_simulation.html">ess.reduce.unwrap.lut.make_wavelength_lut_from_simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.providers.html">ess.reduce.unwrap.lut.providers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.simulate_chopper_cascade_using_tof.html">ess.reduce.unwrap.lut.simulate_chopper_cascade_using_tof</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.ActiveDiskChoppers.html">ess.reduce.unwrap.lut.ActiveDiskChoppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.BeamlineComponentReading.html">ess.reduce.unwrap.lut.BeamlineComponentReading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.ChopperFrameSequence.html">ess.reduce.unwrap.lut.ChopperFrameSequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.FrameCompatibleDiskChoppers.html">ess.reduce.unwrap.lut.FrameCompatibleDiskChoppers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.LtotalRange.html">ess.reduce.unwrap.lut.LtotalRange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.PulseStride.html">ess.reduce.unwrap.lut.PulseStride</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.SimulationResults.html">ess.reduce.unwrap.lut.SimulationResults</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.lut.SourceBounds.html">ess.reduce.unwrap.lut.SourceBounds</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.unwrap.resample.html">ess.reduce.unwrap.resample</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.resample.find_strictly_increasing_sections.html">ess.reduce.unwrap.resample.find_strictly_increasing_sections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.resample.get_min_max.html">ess.reduce.unwrap.resample.get_min_max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.resample.make_regular_grid.html">ess.reduce.unwrap.resample.make_regular_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.resample.rebin_strictly_increasing.html">ess.reduce.unwrap.resample.rebin_strictly_increasing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.unwrap.to_wavelength.html">ess.reduce.unwrap.to_wavelength</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.to_wavelength.detector_ltotal_from_straight_line_approximation.html">ess.reduce.unwrap.to_wavelength.detector_ltotal_from_straight_line_approximation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.to_wavelength.detector_wavelength_data.html">ess.reduce.unwrap.to_wavelength.detector_wavelength_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.to_wavelength.mask_large_uncertainty_in_lut.html">ess.reduce.unwrap.to_wavelength.mask_large_uncertainty_in_lut</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.to_wavelength.monitor_ltotal_from_straight_line_approximation.html">ess.reduce.unwrap.to_wavelength.monitor_ltotal_from_straight_line_approximation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.to_wavelength.monitor_wavelength_data.html">ess.reduce.unwrap.to_wavelength.monitor_wavelength_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.to_wavelength.providers.html">ess.reduce.unwrap.to_wavelength.providers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.to_wavelength.WavelengthInterpolator.html">ess.reduce.unwrap.to_wavelength.WavelengthInterpolator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.unwrap.types.html">ess.reduce.unwrap.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.PulseStrideOffset.html">ess.reduce.unwrap.types.PulseStrideOffset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.LookupTableRelativeErrorThreshold.html">ess.reduce.unwrap.types.LookupTableRelativeErrorThreshold</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.DetectorLtotal.html">ess.reduce.unwrap.types.DetectorLtotal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.ErrorLimitedLookupTable.html">ess.reduce.unwrap.types.ErrorLimitedLookupTable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.FrameUnwrapBackend.html">ess.reduce.unwrap.types.FrameUnwrapBackend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.LookupTable.html">ess.reduce.unwrap.types.LookupTable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.LookupTableFilename.html">ess.reduce.unwrap.types.LookupTableFilename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.MonitorLtotal.html">ess.reduce.unwrap.types.MonitorLtotal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.TofDetector.html">ess.reduce.unwrap.types.TofDetector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.TofMonitor.html">ess.reduce.unwrap.types.TofMonitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.WavelengthDetector.html">ess.reduce.unwrap.types.WavelengthDetector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.WavelengthLutMode.html">ess.reduce.unwrap.types.WavelengthLutMode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.types.WavelengthMonitor.html">ess.reduce.unwrap.types.WavelengthMonitor</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ess.reduce.unwrap.workflow.html">ess.reduce.unwrap.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.workflow.GenericUnwrapWorkflow.html">ess.reduce.unwrap.workflow.GenericUnwrapWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.reduce.unwrap.workflow.LookupTableWorkflow.html">ess.reduce.unwrap.workflow.LookupTableWorkflow</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.reduce.widgets.html">ess.reduce.widgets</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.reduce.widgets.bin_edges_parameter_widget.html">ess.reduce.widgets.bin_edges_parameter_widget</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.reduce.widgets.boolean_parameter_widget.html">ess.reduce.widgets.boolean_parameter_widget</a></li>
@@ -894,9 +989,9 @@ window of the most recent counts.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>detector_number</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – Detector number for each pixel. This is used for mapping event_id to pixel.</p></li>
-<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Size of the rolling window. This is the maximum window size, smaller windows
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Size of the rolling window. This is the maximum window size, smaller windows
 can be accessed using the <cite>get</cite> method.</p></li>
-<li><p><strong>projection</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>], <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Optional projection function to apply to the counts before storing them in
+<li><p><strong>projection</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>], <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Optional projection function to apply to the counts before storing them in
 the history. This can be used to project the data onto a different
 coordinate system or to reduce the dimensionality of the data.</p></li>
 </ul>
@@ -970,10 +1065,10 @@ coordinate system or to reduce the dimensionality of the data.</p></li>
 <dd><p>Add counts in the form of a sequence of pixel IDs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – List of pixel IDs.</p>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – List of pixel IDs.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -987,7 +1082,7 @@ coordinate system or to reduce the dimensionality of the data.</p></li>
 <dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – Events grouped by pixel ID, given by binned data.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1000,7 +1095,7 @@ coordinate system or to reduce the dimensionality of the data.</p></li>
 cache.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1025,17 +1120,17 @@ change in the future.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nexus_file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – NeXus file providing detector parameters such as detector_number and pixel
+<li><p><strong>nexus_file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – NeXus file providing detector parameters such as detector_number and pixel
 positions.</p></li>
-<li><p><strong>detector_name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the detector in the NeXus file.</p></li>
-<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Size of the rolling window.</p></li>
-<li><p><strong>projection</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'xy_plane'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cylinder_mantle_y'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cylinder_mantle_z'</span></code>], <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>], <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Projection to use for the detector data. This can be a string selecting a
+<li><p><strong>detector_name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the detector in the NeXus file.</p></li>
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Size of the rolling window.</p></li>
+<li><p><strong>projection</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'xy_plane'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cylinder_mantle_y'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cylinder_mantle_z'</span></code>], <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>], <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Projection to use for the detector data. This can be a string selecting a
 predefined projection or a function that takes a DataArray and returns a
 DataArray. The predefined projections are ‘xy_plane’, ‘cylinder_mantle_y’,
 and ‘cylinder_mantle_z’.</p></li>
-<li><p><strong>resolution</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Resolution to use for histogramming the detector data. Only required for
+<li><p><strong>resolution</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Resolution to use for histogramming the detector data. Only required for
 ‘xy_plane’, ‘cylinder_mantle_y’, and ‘cylinder_mantle_z’ projections.</p></li>
-<li><p><strong>pixel_noise</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'cylindrical'</span></code>], <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Noise to add to the pixel positions. This can be a scalar value to add
+<li><p><strong>pixel_noise</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'cylindrical'</span></code>], <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Noise to add to the pixel positions. This can be a scalar value to add
 Gaussian noise to the pixel positions or the string ‘cylindrical’ to add
 noise to the pixel positions of a cylindrical detector. Adding noise can be
 useful to avoid artifacts when projecting the data.</p></li>
@@ -1053,7 +1148,7 @@ useful to avoid artifacts when projecting the data.</p></li>
 <dd><p>Get the sum of counts over a window of the most recent counts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Size of the window to use. If None, the full history is used.</p>
+<dd class="field-odd"><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Size of the window to use. If None, the full history is used.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span> – Sum of counts over the window.</p>
@@ -1079,8 +1174,8 @@ useful to avoid artifacts when projecting the data.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>weights</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Raw pixel weights to transform. If None, default weights of 1 are used.</p></li>
-<li><p><strong>threshold</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">0.1</span></code>) – Threshold for identifying bins with a low weight. If the weight is below the
+<li><p><strong>weights</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Raw pixel weights to transform. If None, default weights of 1 are used.</p></li>
+<li><p><strong>threshold</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">0.1</span></code>) – Threshold for identifying bins with a low weight. If the weight is below the
 threshold times the median weight, the bin is marked as invalid. This is
 relevant to avoid issues with color scales in plots, where noise in bins
 with low weight may dominate the color scale if auto-scaling is used.</p></li>
@@ -1102,9 +1197,9 @@ automatically inferred from detector_number.sizes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>detector_number</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Variable.html#scipp.Variable" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – Detector number for each pixel.</p></li>
-<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Size of the rolling window.</p></li>
-<li><p><strong>transform</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>], <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>]</span>) – Transform function for the LogicalView.</p></li>
-<li><p><strong>reduction_dim</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Reduction dimension(s) for the LogicalView. If None or empty,
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Size of the rolling window.</p></li>
+<li><p><strong>transform</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>], <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a>]</span>) – Transform function for the LogicalView.</p></li>
+<li><p><strong>reduction_dim</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Reduction dimension(s) for the LogicalView. If None or empty,
 no reduction is performed (pure transform).</p></li>
 </ul>
 </dd>
@@ -1177,7 +1272,7 @@ no reduction is performed (pure transform).</p></li>
 
   <p class="copyright">
     
-      © Copyright 2024 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -1198,7 +1293,7 @@ no reduction is performed (pure transform).</p></li>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.10.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

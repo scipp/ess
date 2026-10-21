@@ -52,7 +52,6 @@ ess.reduce.nexus.workflow
       nx_class_for_detector
       nx_class_for_disk_chopper
       nx_class_for_monitor
-      nx_class_for_production_info
       nx_class_for_sample
       nx_class_for_source
       parse_raw_choppers
