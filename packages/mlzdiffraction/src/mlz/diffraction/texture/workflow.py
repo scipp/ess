@@ -38,10 +38,9 @@ def default_parameters() -> dict:
     """Return default parameters for the POWTEX texture workflow."""
     return {
         BinningSettings: BinningSettings(
-            gamma_cut_start=sc.scalar(225.0, unit="deg"),
-            gamma_cut_end=sc.scalar(315.0, unit="deg"),
+            gamma_cut_start=sc.scalar(225.0, unit="deg"), # voxel edge
+            gamma_cut_end=sc.scalar(315.0, unit="deg"), # voxel edge
             drop_partial_bins=True,
-            include_gamma_gap_bins=False,
             two_theta_min=sc.scalar(45.0, unit="deg"),
             two_theta_max=sc.scalar(135.0, unit="deg"),
         ),

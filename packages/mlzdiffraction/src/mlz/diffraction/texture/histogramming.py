@@ -35,7 +35,6 @@ def generate_gamma_binning_data(
     excluded_start = binning_settings.gamma_cut_start
     excluded_end = binning_settings.gamma_cut_end
     drop_partial_bins = binning_settings.drop_partial_bins
-    include_visualization_gap = binning_settings.include_gamma_gap_bins
 
     gap_center = (excluded_start + excluded_end) / 2.0
 
@@ -49,9 +48,6 @@ def generate_gamma_binning_data(
 
     if not 0.0 <= gap_start < gap_end <= 360.0:
         raise ValueError("Expected 0 deg <= excluded_start < excluded_end <= 360 deg.")
-
-    if include_visualization_gap and not gap_start < gap_mid < gap_end:
-        raise ValueError("gap_center must lie inside the excluded interval.")
 
     # region_1 corresponds to the interval [0 deg, excluded_start)
     # region_2 corresponds to the interval [excluded_end, 360 deg)
@@ -80,38 +76,6 @@ def generate_gamma_binning_data(
                 [sc.array(dims=[dim], values=[gap_end], unit="deg"), region_2_edges],
                 dim=dim,
             )
-
-    # This part below probably should be moved to a separate function
-    # region_1_centers = sc.midpoints(region_1_edges)
-    # region_2_centers = sc.midpoints(region_2_edges)
-
-    # if include_visualization_gap:
-    #     if (region_1_centers.sizes[dim] == 0 or region_2_centers.sizes[dim] == 0):
-    #         raise ValueError(
-    #             "Visualization-gap mode requires at least one bin on each side "
-    #             "of the excluded interval."
-    #         )
-
-    #     visualization_gap_centers = sc.array(
-    #         dims=[dim],
-    #         values=[
-    #             float(region_1_centers[dim, -1].value) + width,
-    #             gap_mid,
-    #             float(region_2_centers[dim, 0].value) - width,
-    #         ],
-    #         unit="deg",
-    #     )
-
-    #     bin_centers = sc.concat(
-    #         [region_1_centers, visualization_gap_centers, region_2_centers],
-    #         dim=dim,
-    #     )
-    # else:
-    #     # Preserve the original high-angle-first ordering.
-    #     bin_centers = sc.concat(
-    #         [region_2_centers, region_1_centers],
-    #         dim=dim,
-    #     )
 
     return GammaBinningData(
         sc.DataGroup({"region_1": region_1_edges, "region_2": region_2_edges})

@@ -59,7 +59,6 @@ class BinningSettings:
     gamma_cut_start: sc.Variable
     gamma_cut_end: sc.Variable
     drop_partial_bins: bool
-    include_gamma_gap_bins: bool
     two_theta_min: sc.Variable
     two_theta_max: sc.Variable
 
