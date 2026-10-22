@@ -4,7 +4,7 @@
 import sciline
 import scipp as sc
 import scippnexus as snx
-from ess.reduce.nexus.types import TransformationTimeFilter
+from ess.reduce.nexus.types import NeXusName, TransformationTimeFilter
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ess.reduce.unwrap import WavelengthLutMode
 from ess.reduce.workflow import register_workflow
@@ -31,6 +31,7 @@ from . import (
     orso,
 )
 from .corrections import RunNormalization, insert_run_normalization
+from .types import BeamMonitor
 
 _general_providers = (
     *reflectometry_providers,
@@ -84,6 +85,7 @@ def default_parameters() -> dict:
     """Return default parameters for the NeXus Estia workflow."""
     return {
         NeXusDetectorName: "multiblade_detector",
+        NeXusName[BeamMonitor]: "beam_monitor",
         SampleRotationOffset[RunType]: sc.scalar(0.0, unit='deg'),
         CorrectionsToApply: corrections.default_corrections,
         DetectorSpatialResolution: 0.0025 * sc.units.m,
