@@ -55,6 +55,7 @@
    :recursive:
 
    data
+   diagnostics
    workflow
 ```
 

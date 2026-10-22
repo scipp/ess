@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import NewType
 
+import h5py
+import numpy as np
 import pytest
 import sciline as sl
 import scipp as sc
@@ -25,6 +27,7 @@ from ess.reduce.nexus.types import (
     NeXusName,
     NeXusTransformation,
     PreopenNeXusFile,
+    ProtonCharge,
     RawChoppers,
     RawDetector,
     RawMonitor,
@@ -575,6 +578,20 @@ def test_get_calibrated_monitor_subtracts_offset_from_position(
     assert_identical(monitor.coords['position'], sc.vector([1.1, 2.2, 3.3], unit='m'))
 
 
+def test_get_calibrated_monitor_without_transformations_is_at_offset() -> None:
+    depends_on = snx.TransformationChain(parent='/entry/instrument/mon', value='.')
+    nexus_monitor = workflow.NeXusComponent[Monitor1, SampleRun](
+        sc.DataGroup(data=sc.DataArray(sc.scalar(1.2)), depends_on=depends_on)
+    )
+    offset = sc.vector([0.1, 0.2, 0.3], unit='m')
+    monitor = workflow.get_calibrated_monitor(
+        nexus_monitor,
+        offset=offset,
+        transform=NeXusTransformation.from_chain(depends_on),
+    )
+    assert_identical(monitor.coords['position'], offset)
+
+
 def test_get_calibrated_monitor_with_time_dependent_transformation(
     time_dependent_depends_on: snx.TransformationChain,
 ) -> None:
@@ -740,6 +757,57 @@ def test_load_histogram_monitor_workflow(dream_coda_test_file: Path) -> None:
     assert 'time' in da.coords.keys()
     assert 'frame_time' in da.coords.keys()
     assert da.variances is not None
+
+
+@pytest.fixture
+def histogram_monitor_with_auxiliary_signals(tmp_path: Path) -> Path:
+    """Histogram monitor in the layout the file writer uses for da00 data."""
+    path = tmp_path / 'monitor.nxs'
+    with h5py.File(path, 'w') as f:
+        entry = f.create_group('entry')
+        entry.attrs['NX_class'] = 'NXentry'
+        instrument = entry.create_group('instrument')
+        instrument.attrs['NX_class'] = 'NXinstrument'
+        monitor = instrument.create_group('monitor')
+        monitor.attrs['NX_class'] = 'NXmonitor'
+        monitor['depends_on'] = 'transformations/translation'
+        transformations = monitor.create_group('transformations')
+        transformations.attrs['NX_class'] = 'NXtransformations'
+        translation = transformations.create_dataset('translation', data=1.5)
+        translation.attrs.update(
+            units='m', transformation_type='translation', vector=[0, 0, 1]
+        )
+        translation.attrs['depends_on'] = '.'
+        data = monitor.create_group('data')
+        data.attrs.update(
+            NX_class='NXdata',
+            signal='signal',
+            axes=['time', 'frame_time'],
+            auxiliary_signals=['frame_total'],
+        )
+        data['signal'] = np.ones((3, 4), dtype='int32')
+        data['signal'].attrs['units'] = 'counts'
+        data['time'] = np.arange(3, dtype='uint64')
+        data['time'].attrs['units'] = 'ns'
+        data['frame_time'] = np.arange(5, dtype='int64')
+        data['frame_time'].attrs['units'] = 'ns'
+        data['frame_total'] = np.ones((3, 2), dtype='int32')
+        data['frame_total'].attrs['units'] = 'counts'
+        data['reference_time'] = np.zeros((3, 2), dtype='int64')
+        data['reference_time'].attrs['units'] = 'us'
+    return path
+
+
+def test_load_histogram_monitor_with_auxiliary_signals(
+    histogram_monitor_with_auxiliary_signals: Path,
+) -> None:
+    wf = LoadMonitorWorkflow(run_types=[SampleRun], monitor_types=[Monitor1])
+    wf[Filename[SampleRun]] = histogram_monitor_with_auxiliary_signals
+    wf[NeXusName[Monitor1]] = 'monitor'
+    da = wf.compute(RawMonitor[SampleRun, Monitor1])
+    assert da.sizes == {'time': 3, 'frame_time': 4}
+    assert set(da.coords) == {'time', 'frame_time', 'position'}
+    assert_identical(da.coords['position'], sc.vector([0.0, 0.0, 1.5], unit='m'))
 
 
 def test_load_detector_workflow(loki_tutorial_sample_run_60250: Path) -> None:
@@ -1191,3 +1259,37 @@ def test_convert_raw_to_disk_choppers_moving_position():
         disk_choppers['chopper1'].axle_position,
         sc.vector([0, 0, 6], unit='m'),
     ), "Expected position to be taken from the first time point of the log"
+
+
+def test_load_proton_charge(odin_lego_images: Path) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[Filename[SampleRun]] = odin_lego_images
+    pc = wf.compute(ProtonCharge[SampleRun])
+    assert "time" in pc.coords
+    assert "time" in pc.dims
+    assert pc.unit == "uC"
+
+
+def test_load_proton_charge_label_based_time_interval(odin_lego_images: Path) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[Filename[SampleRun]] = odin_lego_images
+    unfiltered = wf.compute(ProtonCharge[SampleRun])
+    assert unfiltered.sizes['time'] > 0
+
+    wf[TimeInterval[SampleRun]] = TimeInterval(
+        slice(
+            sc.datetime("2024-08-14T14:15:36", unit='ns'),
+            sc.datetime("2024-08-14T14:15:40", unit='ns'),
+        )
+    )
+    filtered = wf.compute(ProtonCharge[SampleRun])
+    assert filtered.sizes['time'] > 0
+    assert filtered.sizes['time'] < unfiltered.sizes['time']
+
+
+def test_load_proton_charge_index_based_time_interval(odin_lego_images: Path) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[Filename[SampleRun]] = odin_lego_images
+    wf[TimeInterval[SampleRun]] = TimeInterval(slice(1, 3))
+    filtered = wf.compute(ProtonCharge[SampleRun])
+    assert filtered.sizes['time'] == 2

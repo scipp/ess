@@ -32,8 +32,8 @@ def tiff_from_event_data(
     time_bins: int | sc.Variable,
     pulse_stride: int,
     pulse_stride_offset: int = 0,
-    detector_group_path: str = "/entry/instrument/event_mode_detectors/timepix3",
-    event_data_field_path: str = "timepix3_events",
+    detector_group_path: str = "/entry/instrument/timepix3_efu",
+    event_data_field_path: str = "data",
 ) -> None:
     '''
     Write a tiff image file representing the data from the nexus file.
