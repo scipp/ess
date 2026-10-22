@@ -2,8 +2,9 @@
 Trim a TBL NeXus file to keep only certain entries.
 """
 
-import h5py
 import posixpath
+
+import h5py
 
 input_file = "coda_tbl_999999_00026230.hdf"
 output_file = "filtered.hdf"
@@ -28,21 +29,17 @@ keep_paths = [
 
 def filter_hdf5(input_file, output_file, keep_paths):
     # Normalize paths and remove duplicates
-    keep_paths = sorted(set(posixpath.normpath(p) for p in keep_paths))
+    keep_paths = sorted({posixpath.normpath(p) for p in keep_paths})
 
     # If a parent is already selected, its entire subtree is retained.
     selected = []
     for path in keep_paths:
         if not path.startswith("/") or path == "/":
             raise ValueError(f"Expected a non-root absolute path: {path}")
-        if not any(
-            path.startswith(parent.rstrip("/") + "/")
-            for parent in selected
-        ):
+        if not any(path.startswith(parent.rstrip("/") + "/") for parent in selected):
             selected.append(path)
 
-    with h5py.File(input_file, "r") as src, \
-         h5py.File(output_file, "w") as dst:
+    with h5py.File(input_file, "r") as src, h5py.File(output_file, "w") as dst:
 
         def ensure_parent_groups(path):
             """Create required parent groups and preserve their attributes."""
@@ -70,7 +67,7 @@ def filter_hdf5(input_file, output_file, keep_paths):
             # group descendants, and object attributes.
             src.copy(path, dst_parent, name=name)
 
-    print(f"Filtered file written to: {output_file}")
+    print(f"Filtered file written to: {output_file}")  # noqa: T201
 
 
 filter_hdf5(input_file, output_file, keep_paths)
