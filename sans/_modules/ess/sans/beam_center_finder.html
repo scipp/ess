@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -35,12 +35,12 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -180,7 +180,7 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -242,11 +242,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -259,8 +266,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -271,8 +277,7 @@
           
           
           
-          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -283,8 +288,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
       
@@ -359,7 +363,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -411,11 +415,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -428,8 +439,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -440,8 +450,7 @@
           
           
           
-          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -452,8 +461,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
         
@@ -516,6 +524,7 @@
 <span class="c1"># Copyright (c) 2023 Scipp contributors (https://github.com/scipp)</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
@@ -634,7 +643,6 @@
                 <span class="o">&gt;</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">distance_to_center</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">beam_stop_arm_width</span>
             <span class="p">)</span>
 
-    <span class="n">center</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">center</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">center</span><span class="o">.</span><span class="n">data</span>
 
 
@@ -694,14 +702,35 @@
     <span class="k">if</span> <span class="n">beam_stop_arm_width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">beam_stop_arm_width</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">beam_center</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">BeamCenter</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">sciline</span><span class="o">.</span><span class="n">UnsatisfiedRequirement</span><span class="p">:</span>
-        <span class="n">beam_center</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
-        <span class="n">workflow</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">beam_center</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">_with_default_beam_center</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">_find_beam_center</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">beam_stop_radius</span><span class="p">,</span> <span class="n">beam_stop_arm_width</span><span class="p">)</span> <span class="o">+</span> <span class="n">beam_center</span></div>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
+    <span class="n">com</span> <span class="o">=</span> <span class="n">_find_beam_center</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">beam_stop_radius</span><span class="p">,</span> <span class="n">beam_stop_arm_width</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">BeamCenter</span><span class="p">(</span><span class="n">com</span> <span class="o">-</span> <span class="n">_sample_position</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">graph</span><span class="p">))</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sample_position</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sample position as defined by the coordinate transformation graph.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span><span class="s1">&#39;sample_position&#39;</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span>
+        <span class="s1">&#39;sample_position&#39;</span>
+    <span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_with_default_beam_center</span><span class="p">(</span><span class="n">workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a workflow that can compute detector data even without a beam center set.</span>
+
+<span class="sd">    Computing the detector data may require a beam center, but the beam center found by</span>
+<span class="sd">    the functions below does not depend on it: it is derived from the pixel positions,</span>
+<span class="sd">    which the beam center does not modify.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">BeamCenter</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">sciline</span><span class="o">.</span><span class="n">UnsatisfiedRequirement</span><span class="p">:</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">workflow</span>
 
 
 <div class="viewcode-block" id="beam_center_from_center_of_mass">
@@ -713,9 +742,37 @@
 <span class="sd">    The center-of-mass is simply the weighted mean of the positions.</span>
 <span class="sd">    Areas with low counts are excluded from the center of mass calculation, as they</span>
 <span class="sd">    typically fall into asymmetric regions of the detector panel and would thus lead</span>
-<span class="sd">    to a biased result. The beam is assumed to be roughly aligned with the Z axis.</span>
-<span class="sd">    The returned beam center is the component normal to the beam direction, projected</span>
-<span class="sd">    onto the X-Y plane.</span>
+<span class="sd">    to a biased result.</span>
+
+<span class="sd">    The result is the center-of-mass relative to the sample, i.e., the transverse offset</span>
+<span class="sd">    of the beam together with the distance from the sample at which that offset was</span>
+<span class="sd">    determined. See :py:class:`ess.sans.types.BeamCenter`.</span>
+
+<span class="sd">    On a bank with depth, the reported distance is the intensity-weighted mean depth,</span>
+<span class="sd">    not the geometric center of the bank: layers closer to the sample see more counts</span>
+<span class="sd">    and pull it forward. That is consistent rather than wrong. The transverse position</span>
+<span class="sd">    of the beam is linear in the distance from the sample, so any intensity-weighted</span>
+<span class="sd">    average of points on the beam is again a point on the beam. The weighting moves the</span>
+<span class="sd">    result along the beam, not away from it, and the reported distance says where it</span>
+<span class="sd">    ended up.</span>
+
+<span class="sd">    This holds as long as the intensity is symmetric around the beam at every depth. It</span>
+<span class="sd">    is not exactly true: masking, the shadow of the beam stop and, with gravity, the</span>
+<span class="sd">    wavelength-dependent drop all bias the center-of-mass, and they do so differently at</span>
+<span class="sd">    different depths. The resulting uncertainty on the distance is a few centimetres for</span>
+<span class="sd">    a Loki bank, which is of the order of the depth of the bank itself. The distance is</span>
+<span class="sd">    used to extrapolate the transverse offset to other banks, where an error of a few</span>
+<span class="sd">    centimetres out of several metres is negligible, but it means the variation of the</span>
+<span class="sd">    correction *within* one bank is not resolved any better than the noise on it.</span>
+
+<span class="sd">    The result is anchored at the sample position, so an error in the sample position at</span>
+<span class="sd">    the time of determination tilts the inferred beam direction by that error divided by</span>
+<span class="sd">    the distance. One millimetre of transverse error at five metres is 0.2 mrad, which</span>
+<span class="sd">    is 0.24 mm of transverse error on a bank one metre from the sample. Errors along the</span>
+<span class="sd">    beam are second order and negligible. Note that this is an error on the beam</span>
+<span class="sd">    direction and does not require the sample to be in the same place for the run the</span>
+<span class="sd">    beam center is applied to: the direction is re-anchored at that run&#39;s own sample</span>
+<span class="sd">    position.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -727,12 +784,7 @@
 <span class="sd">    :</span>
 <span class="sd">        The beam center position as a vector.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">beam_center</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">BeamCenter</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">sciline</span><span class="o">.</span><span class="n">UnsatisfiedRequirement</span><span class="p">:</span>
-        <span class="n">beam_center</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
-        <span class="n">workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">workflow</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">beam_center</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">_with_default_beam_center</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">])</span>
     <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
 
@@ -765,34 +817,60 @@
     <span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">select</span><span class="p">]</span>
     <span class="n">com</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pos</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span> <span class="o">/</span> <span class="n">v</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-    <span class="c1"># We compute the shift between the incident beam direction and the center-of-mass</span>
-    <span class="n">incident_beam</span> <span class="o">=</span> <span class="n">summed</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span><span class="s1">&#39;incident_beam&#39;</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span>
-        <span class="s1">&#39;incident_beam&#39;</span>
-    <span class="p">]</span>
-    <span class="n">n_beam</span> <span class="o">=</span> <span class="n">incident_beam</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">incident_beam</span><span class="p">)</span>
-    <span class="n">com_shift</span> <span class="o">=</span> <span class="n">com</span> <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">com</span><span class="p">,</span> <span class="n">n_beam</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_beam</span>
-    <span class="n">xy</span> <span class="o">=</span> <span class="p">[</span><span class="n">com_shift</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">com_shift</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">beam_center</span> <span class="o">+</span> <span class="n">_offsets_to_vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">summed</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span></div>
+    <span class="c1"># The center-of-mass is a point on the beam, so relative to the sample it is the</span>
+    <span class="c1"># beam center, including the distance at which it was determined.</span>
+    <span class="k">return</span> <span class="n">BeamCenter</span><span class="p">(</span><span class="n">com</span> <span class="o">-</span> <span class="n">_sample_position</span><span class="p">(</span><span class="n">summed</span><span class="p">,</span> <span class="n">graph</span><span class="p">))</span></div>
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_offsets_to_vector</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_BeamPlane</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert x,y offsets inside the plane normal to the beam to a vector in absolute</span>
-<span class="sd">    coordinates.</span>
+<span class="sd">    Plane normal to the incident beam in which beam-center offsets are expressed.</span>
+
+<span class="sd">    ``axis`` points from the sample to the plane, i.e., it carries the distance at which</span>
+<span class="sd">    the beam center is determined. Offsets alone do not define a beam direction, so</span>
+<span class="sd">    searching for a beam center means searching within such a plane.</span>
+
+<span class="sd">    ``unit_x`` and ``unit_y`` must be the beam-aligned unit vectors belonging to the</span>
+<span class="sd">    same ``incident_beam``. The third axis of that frame is the normalized incident</span>
+<span class="sd">    beam, so the frame is orthonormal and ``offsets`` and ``beam_center`` are exact</span>
+<span class="sd">    inverses of each other.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span>
-    <span class="c1"># Get two vectors that define the plane normal to the beam</span>
-    <span class="n">coords</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
-        <span class="p">[</span><span class="s1">&#39;cyl_x_unit_vector&#39;</span><span class="p">,</span> <span class="s1">&#39;cyl_y_unit_vector&#39;</span><span class="p">],</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">coords</span>
-    <span class="n">center</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cyl_x_unit_vector&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cyl_y_unit_vector&#39;</span><span class="p">]</span>
-    <span class="n">center</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">u</span>
-    <span class="k">return</span> <span class="n">center</span>
+
+    <span class="n">unit_x</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">unit_y</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_beam_center</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">unit_x</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">unit_y</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">incident_beam</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">beam_center</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_BeamPlane&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plane containing ``beam_center``, normal to ``incident_beam``.&quot;&quot;&quot;</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="n">incident_beam</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">incident_beam</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_BeamPlane</span><span class="p">(</span>
+            <span class="n">unit_x</span><span class="o">=</span><span class="n">unit_x</span><span class="p">,</span>
+            <span class="n">unit_y</span><span class="o">=</span><span class="n">unit_y</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beam_center</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span> <span class="o">*</span> <span class="n">direction</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">offsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_center</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Components of ``beam_center`` within the plane.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beam_center</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_y</span><span class="p">)]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">beam_center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Beam center given by offsets within the plane.&quot;&quot;&quot;</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_x</span> <span class="o">+</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_y</span>
+        <span class="n">center</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="o">.</span><span class="n">unit</span>
+        <span class="k">return</span> <span class="n">center</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_iofq_in_quadrants</span><span class="p">(</span>
-    <span class="n">xy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">beam_center</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="n">workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
     <span class="n">detector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">norm</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
@@ -802,8 +880,8 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    xy:</span>
-<span class="sd">        The x,y offsets in the plane normal to the beam.</span>
+<span class="sd">    beam_center:</span>
+<span class="sd">        The beam center to use, see :py:class:`ess.sans.types.BeamCenter`.</span>
 <span class="sd">    detector:</span>
 <span class="sd">        The raw detector.</span>
 <span class="sd">    norm:</span>
@@ -820,9 +898,9 @@
     <span class="n">phi_bins</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;phi&#39;</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
     <span class="n">quadrants</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;south-west&#39;</span><span class="p">,</span> <span class="s1">&#39;south-east&#39;</span><span class="p">,</span> <span class="s1">&#39;north-east&#39;</span><span class="p">,</span> <span class="s1">&#39;north-west&#39;</span><span class="p">]</span>
 
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">workflow</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">_offsets_to_vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">detector</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">BeamCenter</span><span class="p">]</span> <span class="o">=</span> <span class="n">beam_center</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">])</span>
     <span class="n">calibrated</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">CorrectedDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">,</span> <span class="n">Numerator</span><span class="p">])</span>
     <span class="n">with_phi</span> <span class="o">=</span> <span class="n">calibrated</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
         <span class="s1">&#39;phi&#39;</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">keep_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_inputs</span><span class="o">=</span><span class="kc">False</span>
@@ -841,8 +919,8 @@
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">quad</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quadrants</span><span class="p">):</span>
         <span class="c1"># Select pixels based on phi</span>
         <span class="n">sel</span> <span class="o">=</span> <span class="p">(</span><span class="n">phi</span> <span class="o">&gt;=</span> <span class="n">phi_bins</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">phi</span> <span class="o">&lt;</span> <span class="n">phi_bins</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
-        <span class="c1"># The beam center is applied when computing EmptyDetector, set quadrant</span>
-        <span class="c1"># *before* that step.</span>
+        <span class="c1"># Restrict the raw detector to the quadrant, so the denominator (solid angle)</span>
+        <span class="c1"># covers the same pixels as the numerator.</span>
         <span class="n">workflow</span><span class="p">[</span><span class="n">NeXusComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">detector</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
         <span class="p">)</span>
@@ -853,7 +931,12 @@
     <span class="k">return</span> <span class="n">out</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_cost</span><span class="p">(</span><span class="n">xy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_cost</span><span class="p">(</span>
+    <span class="n">beam_center</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">,</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">norm</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cost function for determining how close the :math:`I(Q)` curves are in all four</span>
 <span class="sd">    quadrants. The cost is defined as</span>
@@ -873,10 +956,13 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    xy:</span>
-<span class="sd">        The x,y offsets in the plane normal to the beam.</span>
-<span class="sd">    *args:</span>
-<span class="sd">        Arguments passed to :func:`iofq_in_quadrants`.</span>
+<span class="sd">    beam_center:</span>
+<span class="sd">        The beam center at which to evaluate the cost, see</span>
+<span class="sd">        :py:class:`ess.sans.types.BeamCenter`.</span>
+<span class="sd">    detector:</span>
+<span class="sd">        The raw detector.</span>
+<span class="sd">    norm:</span>
+<span class="sd">        The denominator data for normalization.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -903,7 +989,7 @@
 <span class="sd">    one. The Mantid implementation is available</span>
 <span class="sd">    `here &lt;https://github.com/mantidproject/mantid/blob/main/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py`_.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
-    <span class="n">iofq</span> <span class="o">=</span> <span class="n">_iofq_in_quadrants</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">iofq</span> <span class="o">=</span> <span class="n">_iofq_in_quadrants</span><span class="p">(</span><span class="n">beam_center</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">detector</span><span class="p">,</span> <span class="n">norm</span><span class="p">)</span>
     <span class="n">all_q</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">da</span><span class="p">)</span> <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="n">iofq</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;quadrant&#39;</span><span class="p">)</span>
     <span class="n">ref</span> <span class="o">=</span> <span class="n">all_q</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;quadrant&#39;</span><span class="p">)</span>
     <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">all_q</span> <span class="o">-</span> <span class="n">ref</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
@@ -917,7 +1003,7 @@
             <span class="s1">&#39;try restricting your Q range, or increasing the size of your Q bins to &#39;</span>
             <span class="s1">&#39;improve statistics in the denominator.&#39;</span>
         <span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beam center finder: x=</span><span class="si">%s</span><span class="s1">, y=</span><span class="si">%s</span><span class="s1">, cost=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">out</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beam center finder: beam_center=</span><span class="si">%s</span><span class="s1">, cost=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">beam_center</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span>
 
 
@@ -1041,6 +1127,8 @@
         <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># This function determines the beam center, so it must run without one being set.</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">_with_default_beam_center</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
     <span class="c1"># Avoid reshape of detector, which would break boolean-indexing by cost function</span>
     <span class="n">workflow</span><span class="p">[</span><span class="n">DetectorBankSizes</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">results</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
@@ -1059,12 +1147,28 @@
     <span class="n">workflow</span><span class="p">[</span><span class="n">QBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_bins</span>
 
     <span class="c1"># Use center of mass to get initial guess for beam center</span>
-    <span class="n">com_shift</span> <span class="o">=</span> <span class="n">beam_center_from_center_of_mass</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initial guess for beam center: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">com_shift</span><span class="p">)</span>
+    <span class="n">com</span> <span class="o">=</span> <span class="n">beam_center_from_center_of_mass</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initial guess for beam center: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">com</span><span class="p">)</span>
 
     <span class="n">coords</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
-        <span class="p">[</span><span class="s1">&#39;cylindrical_x&#39;</span><span class="p">,</span> <span class="s1">&#39;cylindrical_y&#39;</span><span class="p">],</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span>
+        <span class="p">[</span>
+            <span class="s1">&#39;cyl_x_unit_vector&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cyl_y_unit_vector&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;incident_beam&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cylindrical_x&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cylindrical_y&#39;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span>
     <span class="p">)</span><span class="o">.</span><span class="n">coords</span>
+    <span class="c1"># The refinement below only varies the offsets within the plane normal to the beam.</span>
+    <span class="c1"># The distance at which the beam center is determined is taken from the initial</span>
+    <span class="c1"># guess and kept fixed.</span>
+    <span class="n">plane</span> <span class="o">=</span> <span class="n">_BeamPlane</span><span class="o">.</span><span class="n">from_beam_center</span><span class="p">(</span>
+        <span class="n">unit_x</span><span class="o">=</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cyl_x_unit_vector&#39;</span><span class="p">],</span>
+        <span class="n">unit_y</span><span class="o">=</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cyl_y_unit_vector&#39;</span><span class="p">],</span>
+        <span class="n">incident_beam</span><span class="o">=</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;incident_beam&#39;</span><span class="p">],</span>
+        <span class="n">beam_center</span><span class="o">=</span><span class="n">com</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cylindrical_x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cylindrical_x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
         <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cylindrical_y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;cylindrical_y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
@@ -1072,15 +1176,14 @@
 
     <span class="c1"># Refine using Scipy optimize</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
-        <span class="n">_cost</span><span class="p">,</span>
-        <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="n">com_shift</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">com_shift</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
-        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">detector</span><span class="p">,</span> <span class="n">norm</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">xy</span><span class="p">:</span> <span class="n">_cost</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">beam_center</span><span class="p">(</span><span class="n">xy</span><span class="p">),</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">detector</span><span class="p">,</span> <span class="n">norm</span><span class="p">),</span>
+        <span class="n">x0</span><span class="o">=</span><span class="n">plane</span><span class="o">.</span><span class="n">offsets</span><span class="p">(</span><span class="n">com</span><span class="p">),</span>
         <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="n">minimizer</span><span class="p">,</span>
         <span class="n">tol</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">center</span> <span class="o">=</span> <span class="n">_offsets_to_vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="n">plane</span><span class="o">.</span><span class="n">beam_center</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Final beam center value: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">center</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beam center finder minimizer info: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">center</span></div>
@@ -1115,8 +1218,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1127,7 +1230,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -1148,12 +1251,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSsans version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
+Current ESSsans version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

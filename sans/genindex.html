@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -35,12 +35,12 @@
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="_static/documentation_options.js?v=379d82f2"></script>
+    <script src="_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -180,7 +180,7 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -242,11 +242,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -259,8 +266,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -271,8 +277,7 @@
           
           
           
-          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -283,8 +288,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
       
@@ -359,7 +363,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -411,11 +415,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -428,8 +439,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -440,8 +450,7 @@
           
           
           
-          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -452,8 +461,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
         
@@ -522,6 +530,8 @@
 </li>
         <li><a href="generated/modules/ess.isissans.mantidio.DataWorkspace.html#ess.isissans.mantidio.DataWorkspace.__init__">(ess.isissans.mantidio.DataWorkspace method)</a>
 </li>
+        <li><a href="generated/modules/ess.loki.diagnostics.bank_viewer.LokiBankViewer.html#ess.loki.diagnostics.bank_viewer.LokiBankViewer.__init__">(ess.loki.diagnostics.bank_viewer.LokiBankViewer method)</a>
+</li>
         <li><a href="generated/modules/ess.sans.conversions.ElasticCoordTransformGraph.html#ess.sans.conversions.ElasticCoordTransformGraph.__init__">(ess.sans.conversions.ElasticCoordTransformGraph method)</a>
 </li>
         <li><a href="generated/modules/ess.sans.logging.Formatter.html#ess.sans.logging.Formatter.__init__">(ess.sans.logging.Formatter method)</a>
@@ -560,6 +570,8 @@
 </li>
         <li><a href="generated/modules/ess.sans.types.TransmissionFraction.html#ess.sans.types.TransmissionFraction.__init__">(ess.sans.types.TransmissionFraction method)</a>
 </li>
+        <li><a href="generated/modules/ess.sans.types.TransmissionRun.html#ess.sans.types.TransmissionRun.__init__">(ess.sans.types.TransmissionRun method)</a>
+</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -579,8 +591,6 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/modules/ess.sans.common.beam_center_to_detector_position_offset.html#ess.sans.common.beam_center_to_detector_position_offset">beam_center_to_detector_position_offset() (in module ess.sans.common)</a>
-</li>
       <li><a href="generated/modules/ess.sans.types.BeamCenter.html#ess.sans.types.BeamCenter">BeamCenter (in module ess.sans.types)</a>
 </li>
       <li><a href="generated/modules/ess.sans.i_of_q.bin_in_q.html#ess.sans.i_of_q.bin_in_q">bin_in_q() (in module ess.sans.i_of_q)</a>
@@ -728,14 +738,42 @@
 </li>
       </ul></li>
       <li>
+    ess.loki.diagnostics
+
+      <ul>
+        <li><a href="generated/modules/ess.loki.diagnostics.html#module-ess.loki.diagnostics">module</a>
+</li>
+      </ul></li>
+      <li>
+    ess.loki.diagnostics.bank_viewer
+
+      <ul>
+        <li><a href="generated/modules/ess.loki.diagnostics.bank_viewer.html#module-ess.loki.diagnostics.bank_viewer">module</a>
+</li>
+      </ul></li>
+      <li>
+    ess.loki.diagnostics.instrument_view
+
+      <ul>
+        <li><a href="generated/modules/ess.loki.diagnostics.instrument_view.html#module-ess.loki.diagnostics.instrument_view">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    ess.loki.diagnostics.load_nexus
+
+      <ul>
+        <li><a href="generated/modules/ess.loki.diagnostics.load_nexus.html#module-ess.loki.diagnostics.load_nexus">module</a>
+</li>
+      </ul></li>
+      <li>
     ess.loki.workflow
 
       <ul>
         <li><a href="generated/modules/ess.loki.workflow.html#module-ess.loki.workflow">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     ess.sans.beam_center_finder
 
@@ -831,9 +869,13 @@
 </li>
       <li><a href="generated/modules/ess.sans.logging.get_logger.html#ess.sans.logging.get_logger">get_logger() (in module ess.sans.logging)</a>
 </li>
+      <li><a href="generated/modules/ess.isissans.general.get_monitor_data.html#ess.isissans.general.get_monitor_data">get_monitor_data() (in module ess.isissans.general)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/modules/ess.isissans.general.get_monitor_data.html#ess.isissans.general.get_monitor_data">get_monitor_data() (in module ess.isissans.general)</a>
+      <li><a href="generated/modules/ess.isissans.zoom.get_monitor_data_from_transmission_run.html#ess.isissans.zoom.get_monitor_data_from_transmission_run">get_monitor_data_from_transmission_run() (in module ess.isissans.zoom)</a>
+</li>
+      <li><a href="generated/modules/ess.isissans.zoom.get_monitor_data_no_variances.html#ess.isissans.zoom.get_monitor_data_no_variances">get_monitor_data_no_variances() (in module ess.isissans.zoom)</a>
 </li>
       <li><a href="generated/modules/ess.isissans.general.get_sample_position.html#ess.isissans.general.get_sample_position">get_sample_position() (in module ess.isissans.general)</a>
 </li>
@@ -891,6 +933,8 @@
 </li>
       <li><a href="generated/modules/ess.sans.logging.log_call.html#ess.sans.logging.log_call">log_call() (in module ess.sans.logging)</a>
 </li>
+      <li><a href="generated/modules/ess.loki.data.loki_broken_file.html#ess.loki.data.loki_broken_file">loki_broken_file() (in module ess.loki.data)</a>
+</li>
       <li><a href="generated/modules/ess.loki.data.loki_coda_file.html#ess.loki.data.loki_coda_file">loki_coda_file() (in module ess.loki.data)</a>
 </li>
       <li><a href="generated/modules/ess.loki.workflow.loki_default_parameters.html#ess.loki.workflow.loki_default_parameters">loki_default_parameters() (in module ess.loki.workflow)</a>
@@ -935,6 +979,8 @@
 </li>
       <li><a href="generated/functions/ess.loki.LokiAtLarmorWorkflow.html#ess.loki.LokiAtLarmorWorkflow">LokiAtLarmorWorkflow() (in module ess.loki)</a>
 </li>
+      <li><a href="generated/modules/ess.loki.diagnostics.bank_viewer.LokiBankViewer.html#ess.loki.diagnostics.bank_viewer.LokiBankViewer">LokiBankViewer (class in ess.loki.diagnostics.bank_viewer)</a>
+</li>
       <li><a href="generated/modules/ess.loki.workflow.LokiWorkflow.html#ess.loki.workflow.LokiWorkflow">LokiWorkflow() (in module ess.loki.workflow)</a>
 </li>
       <li><a href="generated/modules/ess.isissans.sans2d.LowCountThreshold.html#ess.isissans.sans2d.LowCountThreshold">LowCountThreshold (in module ess.isissans.sans2d)</a>
@@ -978,6 +1024,14 @@
         <li><a href="generated/modules/ess.isissans.zoom.html#module-ess.isissans.zoom">ess.isissans.zoom</a>
 </li>
         <li><a href="generated/modules/ess.loki.data.html#module-ess.loki.data">ess.loki.data</a>
+</li>
+        <li><a href="generated/modules/ess.loki.diagnostics.html#module-ess.loki.diagnostics">ess.loki.diagnostics</a>
+</li>
+        <li><a href="generated/modules/ess.loki.diagnostics.bank_viewer.html#module-ess.loki.diagnostics.bank_viewer">ess.loki.diagnostics.bank_viewer</a>
+</li>
+        <li><a href="generated/modules/ess.loki.diagnostics.instrument_view.html#module-ess.loki.diagnostics.instrument_view">ess.loki.diagnostics.instrument_view</a>
+</li>
+        <li><a href="generated/modules/ess.loki.diagnostics.load_nexus.html#module-ess.loki.diagnostics.load_nexus">ess.loki.diagnostics.load_nexus</a>
 </li>
         <li><a href="generated/modules/ess.loki.workflow.html#module-ess.loki.workflow">ess.loki.workflow</a>
 </li>
@@ -1174,6 +1228,8 @@
 </li>
       <li><a href="generated/modules/ess.sans.types.TransmissionFraction.html#ess.sans.types.TransmissionFraction">TransmissionFraction (class in ess.sans.types)</a>
 </li>
+      <li><a href="generated/modules/ess.sans.types.TransmissionRun.html#ess.sans.types.TransmissionRun">TransmissionRun (class in ess.sans.types)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1208,11 +1264,13 @@
 </li>
       <li><a href="generated/modules/ess.isissans.data.zoom_tutorial_empty_beam_run.html#ess.isissans.data.zoom_tutorial_empty_beam_run">zoom_tutorial_empty_beam_run() (in module ess.isissans.data)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.isissans.data.zoom_tutorial_mask_filenames.html#ess.isissans.data.zoom_tutorial_mask_filenames">zoom_tutorial_mask_filenames() (in module ess.isissans.data)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/modules/ess.isissans.data.zoom_tutorial_sample_run.html#ess.isissans.data.zoom_tutorial_sample_run">zoom_tutorial_sample_run() (in module ess.isissans.data)</a>
+</li>
+      <li><a href="generated/modules/ess.isissans.zoom.ZoomTransmissionFractionWorkflow.html#ess.isissans.zoom.ZoomTransmissionFractionWorkflow">ZoomTransmissionFractionWorkflow() (in module ess.isissans.zoom)</a>
 </li>
       <li><a href="generated/modules/ess.isissans.zoom.ZoomTutorialWorkflow.html#ess.isissans.zoom.ZoomTutorialWorkflow">ZoomTutorialWorkflow() (in module ess.isissans.zoom)</a>
 </li>
@@ -1251,8 +1309,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1263,7 +1321,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -1284,12 +1342,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSsans version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
+Current ESSsans version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

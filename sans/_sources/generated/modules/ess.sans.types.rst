@@ -68,6 +68,7 @@
       ReducedQxQy
       SolidAngle
       TransmissionFraction
+      TransmissionRun
    
    
 

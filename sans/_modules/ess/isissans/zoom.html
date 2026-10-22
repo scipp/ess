@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -35,12 +35,12 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -180,7 +180,7 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -242,11 +242,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -259,8 +266,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -271,8 +277,7 @@
           
           
           
-          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -283,8 +288,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
       
@@ -359,7 +363,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -411,11 +415,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -428,8 +439,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -440,8 +450,7 @@
           
           
           
-          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -452,8 +461,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
         
@@ -514,16 +522,36 @@
   <h1>Source code for ess.isissans.zoom</h1><div class="highlight"><pre>
 <span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
 <span class="c1"># Copyright (c) 2024 Scipp contributors (https://github.com/scipp)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.sans</span><span class="w"> </span><span class="kn">import</span> <span class="n">SansWorkflow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.sans.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_xml_detector_masking</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.sans.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">typical_outputs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.sans.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Filename</span><span class="p">,</span>
+    <span class="n">Incident</span><span class="p">,</span>
+    <span class="n">MonitorType</span><span class="p">,</span>
+    <span class="n">NeXusComponent</span><span class="p">,</span>
+    <span class="n">NeXusMonitorName</span><span class="p">,</span>
+    <span class="n">RunType</span><span class="p">,</span>
+    <span class="n">SampleRun</span><span class="p">,</span>
+    <span class="n">Transmission</span><span class="p">,</span>
+    <span class="n">TransmissionRun</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXsource</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Position</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_workflow</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_parameters</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_tutorial_direct_beam</span><span class="p">,</span> <span class="n">load_tutorial_run</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">MonitorSpectrumNumber</span><span class="p">,</span> <span class="n">default_parameters</span><span class="p">,</span> <span class="n">get_monitor_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoadedFileContents</span><span class="p">,</span> <span class="n">load_tutorial_direct_beam</span><span class="p">,</span> <span class="n">load_tutorial_run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.mantidio</span><span class="w"> </span><span class="kn">import</span> <span class="n">providers</span> <span class="k">as</span> <span class="n">mantid_providers</span>
+
+<span class="c1"># In this case the &quot;sample&quot; is the analyzer cell, of which we want to measure</span>
+<span class="c1"># the transmission fraction.</span>
+<span class="n">sample_run_type</span> <span class="o">=</span> <span class="n">RunType</span>
 
 
 <div class="viewcode-block" id="set_mantid_log_level">
@@ -576,6 +604,107 @@
     <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">load_tutorial_direct_beam</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">workflow</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_time</span><span class="p">(</span><span class="n">dg</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">dg</span><span class="p">[</span><span class="s1">&#39;run_start&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">dg</span><span class="p">[</span><span class="s1">&#39;run_end&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+    <span class="k">return</span> <span class="n">start</span> <span class="o">+</span> <span class="n">delta</span> <span class="o">//</span> <span class="mi">2</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_time_dependent_monitor</span><span class="p">(</span><span class="o">*</span><span class="n">monitor_groups</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
+    <span class="n">monitors</span> <span class="o">=</span> <span class="p">[</span><span class="n">grp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="n">monitor_groups</span><span class="p">]</span>
+    <span class="n">monitor</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">monitors</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">grp</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="n">monitor_groups</span><span class="p">]</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">_get_unique_position</span><span class="p">(</span><span class="o">*</span><span class="n">positions</span><span class="p">)</span>
+    <span class="n">datetime</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span>
+    <span class="n">monitor</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="k">del</span> <span class="n">monitor</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;spectrum&#39;</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">monitor</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;detector_id&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">monitor</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_unique_position</span><span class="p">(</span><span class="o">*</span><span class="n">positions</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="n">unique</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sc</span><span class="o">.</span><span class="n">identical</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">unique</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Monitors have different source positions&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">unique</span>
+
+
+<div class="viewcode-block" id="get_monitor_data_no_variances">
+<a class="viewcode-back" href="../../../generated/modules/ess.isissans.zoom.get_monitor_data_no_variances.html#ess.isissans.zoom.get_monitor_data_no_variances">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_monitor_data_no_variances</span><span class="p">(</span>
+    <span class="n">dg</span><span class="p">:</span> <span class="n">LoadedFileContents</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">nexus_name</span><span class="p">:</span> <span class="n">NeXusMonitorName</span><span class="p">[</span><span class="n">MonitorType</span><span class="p">],</span>
+    <span class="n">spectrum_number</span><span class="p">:</span> <span class="n">MonitorSpectrumNumber</span><span class="p">[</span><span class="n">MonitorType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">MonitorType</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Same as :py:func:`ess.isissans.get_monitor_data` but dropping variances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">monitor</span> <span class="o">=</span> <span class="n">get_monitor_data</span><span class="p">(</span>
+        <span class="n">dg</span><span class="p">,</span> <span class="n">nexus_name</span><span class="o">=</span><span class="n">nexus_name</span><span class="p">,</span> <span class="n">spectrum_number</span><span class="o">=</span><span class="n">spectrum_number</span>
+    <span class="p">)</span>
+    <span class="n">monitor</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">monitor</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">MonitorType</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span><span class="n">monitor</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_monitor_data_from_transmission_run">
+<a class="viewcode-back" href="../../../generated/modules/ess.isissans.zoom.get_monitor_data_from_transmission_run.html#ess.isissans.zoom.get_monitor_data_from_transmission_run">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_monitor_data_from_transmission_run</span><span class="p">(</span>
+    <span class="n">dg</span><span class="p">:</span> <span class="n">LoadedFileContents</span><span class="p">[</span><span class="n">TransmissionRun</span><span class="p">[</span><span class="n">RunType</span><span class="p">]],</span>
+    <span class="n">spectrum_number</span><span class="p">:</span> <span class="n">MonitorSpectrumNumber</span><span class="p">[</span><span class="n">MonitorType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">MonitorType</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">RunType</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract incident or transmission monitor from ZOOM direct-beam run</span>
+
+<span class="sd">    The files in this case do not contain detector data, only monitor data. Mantid</span>
+<span class="sd">    stores this as a Workspace2D, where each spectrum corresponds to a monitor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note we index with a scipp.Variable, i.e., by the spectrum number used at ISIS</span>
+    <span class="n">monitor</span> <span class="o">=</span> <span class="n">dg</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;spectrum&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">spectrum_number</span><span class="o">.</span><span class="n">value</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">monitor</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_time</span><span class="p">(</span><span class="n">dg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">monitor</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">monitor</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="ZoomTransmissionFractionWorkflow">
+<a class="viewcode-back" href="../../../generated/modules/ess.isissans.zoom.ZoomTransmissionFractionWorkflow.html#ess.isissans.zoom.ZoomTransmissionFractionWorkflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ZoomTransmissionFractionWorkflow</span><span class="p">(</span><span class="n">runs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Workflow computing time-dependent SANS transmission fraction from ZOOM data.</span>
+
+<span class="sd">    The time-dependence is obtained by using a sequence of runs.</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        workflow = ZoomTransmissionFractionWorkflow(cell_runs)</span>
+
+<span class="sd">    Note that in this case the &quot;sample&quot; (of which the transmission is to be computed)</span>
+<span class="sd">    is the He3 analyzer cell.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    runs:</span>
+<span class="sd">        List of filenames of the runs to use for the transmission fraction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">ZoomWorkflow</span><span class="p">()</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">get_monitor_data_no_variances</span><span class="p">)</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">get_monitor_data_from_transmission_run</span><span class="p">)</span>
+
+    <span class="n">mapped</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="n">Filename</span><span class="p">[</span><span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]:</span> <span class="n">runs</span><span class="p">})</span>
+    <span class="k">for</span> <span class="n">mon_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Incident</span><span class="p">,</span> <span class="n">Transmission</span><span class="p">):</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">NeXusComponent</span><span class="p">[</span><span class="n">mon_type</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">mapped</span><span class="p">[</span>
+            <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">mon_type</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">_get_time_dependent_monitor</span><span class="p">)</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="n">Position</span><span class="p">[</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">mapped</span><span class="p">[</span>
+            <span class="n">Position</span><span class="p">[</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">TransmissionRun</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">_get_unique_position</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">workflow</span></div>
+
 </pre></div>
 
                 </article>
@@ -606,8 +735,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -618,7 +747,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -639,12 +768,12 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSsans version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
+Current ESSsans version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

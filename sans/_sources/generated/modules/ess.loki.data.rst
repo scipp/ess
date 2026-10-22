@@ -14,6 +14,7 @@
    .. autosummary::
       :toctree:
    
+      loki_broken_file
       loki_coda_file
       loki_lookup_table_no_choppers
       loki_tutorial_agbeh_sample_run

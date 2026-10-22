@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -37,12 +37,12 @@
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=379d82f2"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,7 +62,7 @@
     <link rel="prev" title="Direct beam iterations for LoKI" href="loki-direct-beam.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.6.0" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -186,7 +186,7 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -248,11 +248,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -265,8 +272,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -277,8 +283,7 @@
           
           
           
-          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -289,8 +294,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
       
@@ -363,7 +367,7 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-external" href="https://scipp.github.io/essreduce">
+  <a class="nav-link nav-external" href="https://scipp.github.io/ess/reduce">
     ESSreduce
   </a>
 </li>
@@ -415,11 +419,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -432,8 +443,7 @@
           
           
           
-          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/scipp/ess/tree/main/packages/esssans" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -444,8 +454,7 @@
           
           
           
-          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/esssans/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
         <li class="nav-item">
           
@@ -456,8 +465,7 @@
           
           
           
-          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Conda</span></a>
+          <a href="https://anaconda.org/conda-forge/esssans" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-lg" data-prefix="fa-custom" data-icon="anaconda" aria-hidden="true"></i><span class="visually-hidden">Conda</span></a>
         </li>
 </ul></div>
         
@@ -651,7 +659,7 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Downloading file &#39;direct-beam-loki-all-pixels.h5&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/2/direct-beam-loki-all-pixels.h5&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
+Downloading file &#39;direct-beam-loki-all-pixels.h5&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/3/direct-beam-loki-all-pixels.h5&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
 </pre></div></div>
 </div>
 </section>
@@ -675,7 +683,7 @@ Downloading file &#39;direct-beam-loki-all-pixels.h5&#39; from &#39;https://publ
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/2/60395-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
+Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/3/60395-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
 </pre></div></div>
 </div>
 <section id="Computing-the-beam-center">
@@ -713,7 +721,7 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
 <path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
 </symbol>
 </defs>
-</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.Variable (336 Bytes)</div></div><ul class='sc-sections'><li class='sc-section-item'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-standalone-var-name'><span>()</span></div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>[-0.02864121 -0.01850989  0.        ]</div></span></div><input id='attrs-239d1ecb-6270-4b67-a9e8-bffe4d1da8a0' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-239d1ecb-6270-4b67-a9e8-bffe4d1da8a0' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-961352ee-fa0d-4fe3-a8b2-5455f1f2bf2d' class='sc-var-data-in' type='checkbox'><label for='data-961352ee-fa0d-4fe3-a8b2-5455f1f2bf2d' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([-0.02864121, -0.01850989,  0.        ])</pre></li></ul></li></ul></div></div></div>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.Variable (336 Bytes)</div></div><ul class='sc-sections'><li class='sc-section-item'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-standalone-var-name'><span>()</span></div><div class='sc-var-dtype'>vector3</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>[-0.02864121 -0.01850989  4.11258332]</div></span></div><input id='attrs-f1985e0d-bc25-41b2-8d11-e2be3aa2e7c8' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-f1985e0d-bc25-41b2-8d11-e2be3aa2e7c8' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-39bfae99-dc51-4b5a-b9ac-acfacad6fd13' class='sc-var-data-in' type='checkbox'><label for='data-39bfae99-dc51-4b5a-b9ac-acfacad6fd13' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([-0.02864121, -0.01850989,  4.11258332])</pre></li></ul></li></ul></div></div></div>
 </div>
 <p>and set that value in our workflow</p>
 <div class="nbinput nblast docutils container">
@@ -820,7 +828,7 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
 <path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
 </symbol>
 </defs>
-</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (9.88 KB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-426585a1-4a8e-4c41-aad6-d6fce5ec4c2f' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-426585a1-4a8e-4c41-aad6-d6fce5ec4c2f' class='sc-section-summary' >Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span>band</span>: 10</li><li><span class='sc-has-index'>Q</span>: 100</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-68b35984-84f9-4ed2-b42a-130bd76d4cfa' class='sc-section-summary-in' type='checkbox'  checked><label for='section-68b35984-84f9-4ed2-b42a-130bd76d4cfa' class='sc-section-summary'  title='Expand/collapse section'>Coordinates: <span>(2)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>Q</span></div><div class='sc-var-dims'>(Q [bin-edge])</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>1/Å</div><div class='sc-value-preview sc-preview'><span><div>0.01, 0.013, ..., 0.297, 0.3</div></span></div><input id='attrs-60adb2ce-6d3a-45b2-b811-1a3dbafceb2b' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-60adb2ce-6d3a-45b2-b811-1a3dbafceb2b' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-77b9bb9d-9c6f-4f78-a8bd-aedbc4c75c65' class='sc-var-data-in' type='checkbox'><label for='data-77b9bb9d-9c6f-4f78-a8bd-aedbc4c75c65' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([0.01  , 0.0129, 0.0158, 0.0187, 0.0216, 0.0245, 0.0274, 0.0303,
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (9.88 KB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-584e120e-c37f-47b1-b8eb-f75f5c61cd3e' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-584e120e-c37f-47b1-b8eb-f75f5c61cd3e' class='sc-section-summary' >Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span>band</span>: 10</li><li><span class='sc-has-index'>Q</span>: 100</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-8f6fd680-4773-4ab5-b39b-142d056760d1' class='sc-section-summary-in' type='checkbox'  checked><label for='section-8f6fd680-4773-4ab5-b39b-142d056760d1' class='sc-section-summary'  title='Expand/collapse section'>Coordinates: <span>(2)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>Q</span></div><div class='sc-var-dims'>(Q [bin-edge])</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>1/Å</div><div class='sc-value-preview sc-preview'><span><div>0.01, 0.013, ..., 0.297, 0.3</div></span></div><input id='attrs-7e399a74-c49e-49a0-babc-1d1c3995f1ec' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-7e399a74-c49e-49a0-babc-1d1c3995f1ec' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1cac0a94-08c6-4d9b-920f-d0b9dd89ac00' class='sc-var-data-in' type='checkbox'><label for='data-1cac0a94-08c6-4d9b-920f-d0b9dd89ac00' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([0.01  , 0.0129, 0.0158, 0.0187, 0.0216, 0.0245, 0.0274, 0.0303,
        0.0332, 0.0361, 0.039 , 0.0419, 0.0448, 0.0477, 0.0506, 0.0535,
        0.0564, 0.0593, 0.0622, 0.0651, 0.068 , 0.0709, 0.0738, 0.0767,
        0.0796, 0.0825, 0.0854, 0.0883, 0.0912, 0.0941, 0.097 , 0.0999,
@@ -832,78 +840,78 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
        0.2188, 0.2217, 0.2246, 0.2275, 0.2304, 0.2333, 0.2362, 0.2391,
        0.242 , 0.2449, 0.2478, 0.2507, 0.2536, 0.2565, 0.2594, 0.2623,
        0.2652, 0.2681, 0.271 , 0.2739, 0.2768, 0.2797, 0.2826, 0.2855,
-       0.2884, 0.2913, 0.2942, 0.2971, 0.3   ])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>wavelength</span></div><div class='sc-var-dims'>(wavelength [bin-edge], band)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>Å</div><div class='sc-value-preview sc-preview'><span><div>1.0, 2.2, ..., 11.800, 13.0</div></span></div><input id='attrs-8d8ba8e3-88ec-40c8-bdfa-151ca855daa6' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-8d8ba8e3-88ec-40c8-bdfa-151ca855daa6' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-220e93af-863c-483c-9465-448d57898a89' class='sc-var-data-in' type='checkbox'><label for='data-220e93af-863c-483c-9465-448d57898a89' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[ 1. ,  2.2,  3.4,  4.6,  5.8,  7. ,  8.2,  9.4, 10.6, 11.8],
-       [ 2.2,  3.4,  4.6,  5.8,  7. ,  8.2,  9.4, 10.6, 11.8, 13. ]])</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-3a8df624-16f1-46fc-862b-6db6a71229d2' class='sc-section-summary-in' type='checkbox'  checked><label for='section-3a8df624-16f1-46fc-862b-6db6a71229d2' class='sc-section-summary'  title='Expand/collapse section'>Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(band, Q)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>nan, nan, ..., nan, nan</div></span><span><div>σ = nan, nan, ..., nan, nan</div></span></div><input id='attrs-ced68544-cbe3-46e1-bb5a-5d319df6fcd2' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-ced68544-cbe3-46e1-bb5a-5d319df6fcd2' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-15f74839-34f4-4569-ae8e-6247b2dc8cff' class='sc-var-data-in' type='checkbox'><label for='data-15f74839-34f4-4569-ae8e-6247b2dc8cff' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[        nan,         nan,         nan, 16.498554  , 22.03877   ,
-        18.144753  , 19.77915   , 18.301622  , 16.09548   , 15.046941  ,
-        13.772168  , 12.483344  , 11.029077  ,  9.595518  ,  9.074957  ,
-         8.517315  ,  7.7743254 ,  7.2002525 ,  6.303477  ,  5.6797647 ,
-         5.3551106 ,  4.918209  ,  4.677788  ,  4.3118553 ,  4.250331  ,
-         3.5744076 ,  3.6266332 ,  3.6057808 ,  3.2159753 ,  2.9583995 ,
-         2.85916   ,  2.7116146 ,  2.314634  ,  2.1628356 ,  2.3555186 ,
-         2.2522283 ,  2.0228667 ,  1.964533  ,  1.8187557 ,  1.8704543 ,
-         1.6520243 ,  1.7082405 ,  1.4324958 ,  1.6213167 ,  1.5083147 ,
-         1.5743253 ,  1.3733706 ,  1.4291272 ,  1.2758293 ,  1.2886342 ,
-         1.2935892 ,  1.1102705 ,  1.1351321 ,  1.1272362 ,  1.0824966 ,
-         1.0580165 ,  0.9360758 ,  1.122127  ,  0.82690275,  0.9673933 ,
-         0.9352398 ,  0.7904505 ,  0.7767739 ,  0.78703344,  0.78699005,
-         0.8018871 ,  0.66917473,  0.6995284 ,  0.722801  ,  0.73345387,
-         0.6573347 ,  0.6667191 ,  0.65287876,  0.6013578 ,  0.5774253 ,
-         0.61284256,  0.5769481 ,  0.571553  ,  0.5561032 ,  0.56240165,
-         0.5350077 ,  0.44995785,  0.5557416 ,  0.5183371 ,  0.5592329 ,
-         0.51910126,  0.46053445,  0.46901828,  0.49248704,  0.49375892,
-         0.5125013 ,  0.5181372 ,  0.42628056,  0.4341445 ,  0.39038756,
-         0.41769513,  0.4166556 ,  0.49408832,  0.31573722,  0.4108131 ],
-       [        nan, 15.614047  , 21.428892  , 23.977348  , 24.725563  ,
-        23.202833  , 21.900478  , 20.155891  , 17.526497  , 15.486251  ,
-        14.04802   , 12.675447  , 10.8612385 , 10.187511  ,  9.302666  ,
-         8.299561  ,  7.595243  ,  6.8958235 ,  6.3311024 ,  5.8269243 ,
-         5.31479   ,  5.100129  ,  4.729024  ,  4.4383125 ,  4.133469  ,
-         3.7978227 ,  3.665327  ,  3.3618834 ,  3.1310046 ,  2.965422  ,
-         2.8001823 ,  2.665258  ,  2.6134233 ,  2.4364333 ,  2.3499901 ,
-         2.1971107 ,  2.1071372 ,  1.9657588 ,  1.8982953 ,  1.8610744 ,
-         1.7295455 ,  1.7083342 ,  1.584945  ,  1.5413234 ,  1.4549319 ,
-         1.4341471 ,  1.2939454 ,  1.2933041 ,  1.3317852 ,  1.1871632 ,
-         1.2219687 ,  1.1617064 ,  1.1039405 ,  1.06917   ,  1.0651119 ,
-         1.0324172 ,  0.99374896,  0.96932477,  0.9332259 ,  0.9088961 ,
-         0.8802868 ,  0.88077104,  0.8207948 ,  0.7895792 ,  0.8342074 ,
-         0.76388055,  0.79792523,  0.77855587,  0.71993345,  0.6988931 ,
-         0.6765426 ,  0.70153445,  0.709234  ,  0.67300606,  0.6125371 ,
-         0.69973993,  0.6253826 ,  0.6252858 ,  0.6383145 ,  0.60474783,
-         0.6554094 ,  0.58374673,  0.5779102 ,  0.51224613,  0.5221791 ,
-         0.487709  ,  0.45309797,  0.3616395 ,  0.4891572 ,  0.47841412,
-         0.55166423,  0.45731097,  0.4205565 ,  0.55336666,  0.52639866,
-         0.3025086 ,  0.2136294 ,  0.3551966 ,  0.49634615,  0.52362806],
-       [18.270077  , 23.646338  , 30.00351   , 29.884922  , 27.554354  ,
-        24.2386    , 22.10438   , 19.381857  , 17.602573  , 15.327395  ,
-        13.452604  , 12.613775  , 11.202464  , 10.214075  ,  9.003089  ,
-         8.217347  ,  7.534762  ,  6.9285545 ,  6.3605466 ,  5.7665586 ,
-         5.463199  ,  4.9171114 ,  4.575467  ,  4.2486405 ,  4.009794  ,
-         3.7460122 ,  3.6154964 ,  3.340802  ,  3.131535  ,  3.023417  ,
-         2.8177652 ,  2.7751353 ,  2.5480216 ,  2.402505  ,  2.291049  ,
-         2.1704957 ,  2.0578716 ,  1.9641644 ,  1.9090726 ,  1.8108426 ,
-         1.7666879 ,  1.6171775 ,  1.7159432 ,  1.52451   ,  1.464568  ,
-         1.4866716 ,  1.377004  ,  1.3600427 ,  1.2634621 ,  1.2042112 ,
-         1.3019496 ,  1.2295935 ,  1.0428252 ,  1.164818  ,  1.0411378 ,
-         1.0709895 ,  1.0314896 ,  1.0336883 ,  1.0094591 ,  0.75274086,
-         1.041449  ,  0.7990785 ,  1.0062538 ,  0.9636973 ,  0.9293953 ,
-         0.5872571 ,  0.73471963,  0.47189522,  0.65595937,  0.6793336 ,
-         0.8393278 ,  0.        ,         nan,         nan,         nan,
+       0.2884, 0.2913, 0.2942, 0.2971, 0.3   ])</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-aligned'>wavelength</span></div><div class='sc-var-dims'>(wavelength [bin-edge], band)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>Å</div><div class='sc-value-preview sc-preview'><span><div>1.0, 2.2, ..., 11.800, 13.0</div></span></div><input id='attrs-f4375970-9b81-4d4b-b9cc-7191ee52f48d' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-f4375970-9b81-4d4b-b9cc-7191ee52f48d' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d613bc19-ebef-471a-96eb-9f15098f3b77' class='sc-var-data-in' type='checkbox'><label for='data-d613bc19-ebef-471a-96eb-9f15098f3b77' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[ 1. ,  2.2,  3.4,  4.6,  5.8,  7. ,  8.2,  9.4, 10.6, 11.8],
+       [ 2.2,  3.4,  4.6,  5.8,  7. ,  8.2,  9.4, 10.6, 11.8, 13. ]])</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-f7fa58d9-6cde-42ed-886c-5310f4005141' class='sc-section-summary-in' type='checkbox'  checked><label for='section-f7fa58d9-6cde-42ed-886c-5310f4005141' class='sc-section-summary'  title='Expand/collapse section'>Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(band, Q)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>𝟙</div><div class='sc-value-preview sc-preview'><span><div>nan, nan, ..., nan, nan</div></span><span><div>σ = nan, nan, ..., nan, nan</div></span></div><input id='attrs-b973c4b0-cc97-4de8-9547-a0d7b5e21742' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-b973c4b0-cc97-4de8-9547-a0d7b5e21742' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-502e1d80-e6fe-4fac-916f-d2c8acfa38f0' class='sc-var-data-in' type='checkbox'><label for='data-502e1d80-e6fe-4fac-916f-d2c8acfa38f0' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[        nan,         nan,         nan, 17.33073   , 21.22958   ,
+        18.759237  , 19.606556  , 18.393658  , 15.843838  , 15.172715  ,
+        13.776271  , 12.430657  , 10.952371  ,  9.575821  ,  9.115545  ,
+         8.546961  ,  7.831182  ,  7.1652985 ,  6.2922974 ,  5.6743493 ,
+         5.400613  ,  4.935057  ,  4.654241  ,  4.2770877 ,  4.277777  ,
+         3.5873513 ,  3.6244195 ,  3.6001785 ,  3.2255173 ,  2.9607508 ,
+         2.8386385 ,  2.7731783 ,  2.2471333 ,  2.1766956 ,  2.356063  ,
+         2.269681  ,  1.9811469 ,  1.9471017 ,  1.857686  ,  1.8608929 ,
+         1.6524316 ,  1.7140576 ,  1.450289  ,  1.6121984 ,  1.5083845 ,
+         1.5699053 ,  1.3757813 ,  1.4248453 ,  1.2816547 ,  1.2764422 ,
+         1.2840197 ,  1.1186063 ,  1.1401426 ,  1.1324377 ,  1.0768738 ,
+         1.0579582 ,  0.9421128 ,  1.1256821 ,  0.8213458 ,  0.95571554,
+         0.9478695 ,  0.7896818 ,  0.7946448 ,  0.7646219 ,  0.79343635,
+         0.79303026,  0.6849092 ,  0.692005  ,  0.7320207 ,  0.7284866 ,
+         0.6490663 ,  0.6776349 ,  0.6323403 ,  0.6107359 ,  0.5678705 ,
+         0.6144648 ,  0.5906976 ,  0.5755532 ,  0.5398323 ,  0.5754395 ,
+         0.525023  ,  0.4556538 ,  0.53957653,  0.56278694,  0.5263156 ,
+         0.5223261 ,  0.45293257,  0.4753399 ,  0.5102624 ,  0.47453374,
+         0.494729  ,  0.52825093,  0.44751942,  0.4228252 ,  0.39543065,
+         0.42079365,  0.42512408,  0.49971348,  0.30227548,  0.4080124 ],
+       [        nan, 17.080856  , 21.393906  , 23.746784  , 24.827177  ,
+        23.167162  , 21.89077   , 20.156693  , 17.477985  , 15.557836  ,
+        14.0869665 , 12.625227  , 10.831016  , 10.200814  ,  9.285798  ,
+         8.322462  ,  7.5914187 ,  6.8989577 ,  6.3207593 ,  5.8661876 ,
+         5.2871823 ,  5.11252   ,  4.7099977 ,  4.4490547 ,  4.1376057 ,
+         3.8126304 ,  3.6370702 ,  3.3781004 ,  3.1251018 ,  2.9707572 ,
+         2.8029547 ,  2.6627426 ,  2.6080437 ,  2.4387276 ,  2.360703  ,
+         2.194442  ,  2.1099534 ,  1.9488436 ,  1.9000906 ,  1.866484  ,
+         1.7271637 ,  1.7039111 ,  1.5994234 ,  1.5297236 ,  1.4609171 ,
+         1.4344062 ,  1.2889665 ,  1.2986106 ,  1.3309561 ,  1.1921663 ,
+         1.220246  ,  1.1589292 ,  1.0985521 ,  1.0747961 ,  1.0596936 ,
+         1.0372893 ,  0.98896843,  0.97662437,  0.9369166 ,  0.8967333 ,
+         0.88143164,  0.88346595,  0.8221925 ,  0.7935901 ,  0.81649673,
+         0.77162385,  0.79996634,  0.7878301 ,  0.7114667 ,  0.70414764,
+         0.67351866,  0.70960337,  0.7040089 ,  0.6715846 ,  0.6127806 ,
+         0.69527817,  0.6245149 ,  0.63073206,  0.633368  ,  0.63154733,
+         0.6217649 ,  0.5948253 ,  0.59056884,  0.49028954,  0.5433322 ,
+         0.48092592,  0.4387316 ,  0.35320097,  0.49086657,  0.48944727,
+         0.5422226 ,  0.468682  ,  0.4330823 ,  0.5305541 ,  0.50555474,
+         0.33601812,  0.19133678,  0.32872242,  0.49270916,  0.5170332 ],
+       [18.352688  , 23.891499  , 30.007236  , 29.879866  , 27.45103   ,
+        24.350807  , 22.051147  , 19.407795  , 17.604277  , 15.284914  ,
+        13.479119  , 12.612606  , 11.195129  , 10.241836  ,  8.9875555 ,
+         8.237958  ,  7.535661  ,  6.933026  ,  6.3547454 ,  5.748536  ,
+         5.4764323 ,  4.9034476 ,  4.59019   ,  4.2491693 ,  4.0026793 ,
+         3.757513  ,  3.603931  ,  3.340231  ,  3.1389413 ,  3.012693  ,
+         2.82899   ,  2.7690876 ,  2.5449538 ,  2.4049659 ,  2.2847912 ,
+         2.1666288 ,  2.0774322 ,  1.9521166 ,  1.9111058 ,  1.8121003 ,
+         1.7731702 ,  1.6202635 ,  1.714534  ,  1.5186602 ,  1.453506  ,
+         1.4951514 ,  1.3866723 ,  1.346517  ,  1.2754242 ,  1.1983097 ,
+         1.289172  ,  1.2344973 ,  1.0530046 ,  1.1353236 ,  1.0586144 ,
+         1.079373  ,  1.0185906 ,  1.0428712 ,  0.99106276,  0.8072381 ,
+         0.9609366 ,  0.864716  ,  0.99296266,  0.9898433 ,  0.8907642 ,
+         0.5817202 ,  0.6623146 ,  0.5557281 ,  0.47527775,  0.9453356 ,
+         0.79087627,  0.        ,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan],
-       [26.22236   , 34.080795  , 33.656803  , 29.778631  , 27.053778  ,
-        24.07045   , 21.676239  , 19.150822  , 17.21855   , 15.340007  ,
-        13.70343   , 12.659902  , 10.977159  ,  9.913331  ,  9.033146  ,
-         8.373644  ,  7.4583254 ,  6.926276  ,  6.330674  ,  5.853978  ,
-         5.3743625 ,  4.977142  ,  4.6558633 ,  4.3892593 ,  4.1681337 ,
-         3.7471626 ,  3.6686234 ,  3.353136  ,  3.218143  ,  2.996705  ,
-         2.885566  ,  2.7119076 ,  2.6089816 ,  2.2634292 ,  2.3746216 ,
-         2.1377032 ,  2.2307296 ,  1.9642634 ,  1.9316655 ,  1.7898605 ,
-         1.6640713 ,  1.8990364 ,  1.5980707 ,  1.9001255 ,  1.4502964 ,
-         1.3384821 ,  1.5960914 ,  0.9666515 ,  1.5100173 ,  1.3976538 ,
-         0.69457626,  1.5561328 ,  0.        ,         nan,         nan,
+       [26.214663  , 34.128162  , 33.693756  , 29.707685  , 27.058796  ,
+        24.094288  , 21.674784  , 19.200819  , 17.185144  , 15.344079  ,
+        13.7030325 , 12.641649  , 11.006543  ,  9.925899  ,  9.010193  ,
+         8.358134  ,  7.480674  ,  6.9340596 ,  6.3210516 ,  5.8387065 ,
+         5.3764935 ,  4.9958696 ,  4.6312437 ,  4.4185896 ,  4.1380835 ,
+         3.7577646 ,  3.6651688 ,  3.3512824 ,  3.2142086 ,  2.9906824 ,
+         2.8965151 ,  2.7143579 ,  2.6049397 ,  2.2677095 ,  2.3804638 ,
+         2.1425917 ,  2.204415  ,  1.978181  ,  1.9261978 ,  1.8062567 ,
+         1.6693882 ,  1.8658229 ,  1.6278636 ,  1.8803986 ,  1.4535701 ,
+         1.3365978 ,  1.5672517 ,  0.9862537 ,  1.4751518 ,  1.5219762 ,
+         0.66644037,  1.4926025 ,  0.        ,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
@@ -913,14 +921,14 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan],
-       [34.733936  , 36.154076  , 32.49664   , 30.656942  , 26.742035  ,
-        24.233747  , 22.073801  , 19.354525  , 17.348988  , 15.624532  ,
-        13.766566  , 12.338172  , 11.26941   , 10.485272  ,  9.219593  ,
-         8.4426365 ,  7.8324814 ,  7.4495144 ,  6.4842486 ,  6.2015395 ,
-         5.855372  ,  5.553704  ,  5.111838  ,  4.4047713 ,  4.26138   ,
-         3.9998047 ,  3.6194472 ,  3.2301602 ,  3.1570487 ,  3.0243287 ,
-         3.2177436 ,  2.7934213 ,  2.6810668 ,  2.5029414 ,  2.5179653 ,
-         1.9542639 ,  1.5509299 ,  1.6113038 ,  1.6823893 ,  0.595544  ,
+       [34.64481   , 36.087677  , 32.558685  , 30.6135    , 26.715248  ,
+        24.307404  , 22.089216  , 19.367199  , 17.306992  , 15.6280155 ,
+        13.804192  , 12.320535  , 11.27295   , 10.476484  ,  9.2002125 ,
+         8.472747  ,  7.8141856 ,  7.4571366 ,  6.4804482 ,  6.2072268 ,
+         5.841395  ,  5.567188  ,  5.1026664 ,  4.413732  ,  4.2524405 ,
+         3.9766405 ,  3.6608021 ,  3.2553647 ,  3.137061  ,  2.992128  ,
+         3.2026079 ,  2.8431325 ,  2.6700687 ,  2.49038   ,  2.498615  ,
+         1.9027253 ,  1.5772562 ,  1.5785815 ,  1.6396358 ,  0.5682092 ,
          0.        ,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
@@ -933,13 +941,13 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan],
-       [38.108475  , 34.738777  , 32.427685  , 28.459803  , 27.37966   ,
-        23.534328  , 21.049917  , 19.041897  , 16.901348  , 15.205222  ,
-        14.077536  , 11.905102  , 11.274114  , 10.208785  ,  9.189215  ,
-         8.218592  ,  7.444044  ,  6.6681337 ,  6.418974  ,  5.6865067 ,
-         5.4839616 ,  5.156853  ,  5.0491624 ,  4.368853  ,  4.251303  ,
-         3.8902192 ,  3.7501328 ,  3.5654254 ,  3.583549  ,  2.8615003 ,
-         3.3546686 ,  2.72656   ,  5.149181  ,  0.        ,         nan,
+       [38.10364   , 34.790665  , 32.347095  , 28.452509  , 27.419125  ,
+        23.485533  , 21.140419  , 18.98307   , 16.90902   , 15.202782  ,
+        14.068089  , 11.939117  , 11.251274  , 10.204635  ,  9.171263  ,
+         8.226126  ,  7.46916   ,  6.6524644 ,  6.403032  ,  5.6965613 ,
+         5.5005064 ,  5.1332707 ,  5.0293946 ,  4.379981  ,  4.2369742 ,
+         3.9329236 ,  3.7490964 ,  3.6139896 ,  3.503083  ,  2.756085  ,
+         3.5463967 ,  2.6385014 ,  4.9701047 ,  0.        ,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
@@ -953,32 +961,12 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan],
-       [37.72267   , 34.860878  , 29.374023  , 29.649258  , 25.04075   ,
-        23.872423  , 21.368666  , 18.93073   , 16.644382  , 15.144709  ,
-        13.452746  , 11.665393  , 11.274928  , 10.048433  ,  8.926835  ,
-         7.7726517 ,  7.4531    ,  6.8853445 ,  5.7375927 ,  6.3014917 ,
-         5.6354127 ,  5.0291567 ,  4.715703  ,  4.5593204 ,  4.5669394 ,
-         2.0183043 ,  5.7967467 ,  0.        ,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan,
-                nan,         nan,         nan,         nan,         nan],
-       [37.621502  , 34.127785  , 31.632088  , 28.462576  , 26.319082  ,
-        24.416359  , 21.07696   , 18.90907   , 16.899208  , 15.154028  ,
-        13.7943945 , 12.346458  , 11.62305   , 10.361106  ,  8.747904  ,
-         8.548429  ,  7.90811   ,  7.4801593 ,  6.982302  ,  5.569559  ,
-         6.2166324 ,  5.9329667 ,  2.2388153 , 17.643854  ,         nan,
-                nan,         nan,         nan,         nan,         nan,
+       [37.711784  , 34.87301   , 29.27726   , 29.677658  , 25.124187  ,
+        23.802166  , 21.42051   , 18.900661  , 16.692755  , 15.135437  ,
+        13.422919  , 11.67332   , 11.224243  , 10.075849  ,  8.94616   ,
+         7.764982  ,  7.4383354 ,  6.9286203 ,  5.754572  ,  6.270034  ,
+         5.643407  ,  5.0477524 ,  4.7294946 ,  4.4720435 ,  4.760675  ,
+         1.9746791 ,  5.635054  ,  0.        ,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
@@ -993,11 +981,11 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan],
-       [37.103283  , 33.683205  , 28.856398  , 28.455183  , 24.813055  ,
-        23.919529  , 21.362164  , 18.474102  , 16.803345  , 15.773205  ,
-        13.38567   , 11.221708  , 10.881648  , 10.37097   ,  9.122548  ,
-         9.256982  ,  8.296889  ,  6.5425    ,  4.708054  ,  9.715418  ,
-         9.274822  ,         nan,         nan,         nan,         nan,
+       [37.52753   , 34.228718  , 31.654161  , 28.322351  , 26.279984  ,
+        24.44551   , 21.104223  , 18.886705  , 16.9402    , 15.137547  ,
+        13.784859  , 12.383924  , 11.633734  , 10.329023  ,  8.824441  ,
+         8.469765  ,  7.9532757 ,  7.468796  ,  7.01348   ,  5.4526153 ,
+         6.337018  ,  5.6435575 ,  2.7838428 , 17.061737  ,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
@@ -1013,10 +1001,30 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan],
-       [37.367237  , 34.050106  , 32.491924  , 28.51312   , 26.642475  ,
-        22.851746  , 21.92655   , 18.289907  , 17.39823   , 14.47427   ,
-        13.920855  , 12.223945  , 10.504754  ,  9.472872  ,  9.578261  ,
-        10.427909  ,  7.7673616 ,  4.3008933 ,  0.        ,         nan,
+       [36.957783  , 33.67889   , 28.976227  , 28.356838  , 24.862339  ,
+        24.004791  , 21.32266   , 18.55048   , 16.699003  , 15.813704  ,
+        13.363457  , 11.176433  , 10.959348  , 10.276185  ,  9.212644  ,
+         9.182367  ,  8.301752  ,  6.5055394 ,  4.631433  ,  9.512543  ,
+         8.735599  ,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan,
+                nan,         nan,         nan,         nan,         nan],
+       [37.36541   , 34.001728  , 32.51696   , 28.425264  , 26.696014  ,
+        22.85719   , 21.944557  , 18.26361   , 17.313206  , 14.419689  ,
+        13.947976  , 12.309884  , 10.547964  ,  9.447043  ,  9.55451   ,
+        10.353554  ,  7.6308913 ,  4.18596   ,  0.        ,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
@@ -1033,74 +1041,74 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan,
                 nan,         nan,         nan,         nan,         nan]],
-      dtype=float32)<br><br>Variances (σ²):<br>array([[           nan,            nan,            nan, 1.38169098e+02,
-        1.35484085e+01, 3.64025712e+00, 2.18506432e+00, 1.35300922e+00,
-        8.59074891e-01, 6.63835347e-01, 5.16113639e-01, 3.99243861e-01,
-        3.09626400e-01, 2.32294112e-01, 2.03393847e-01, 1.77975744e-01,
-        1.48668438e-01, 1.28803968e-01, 1.02423027e-01, 8.50298405e-02,
-        7.59012997e-02, 6.57269806e-02, 5.89706078e-02, 5.22926301e-02,
-        5.02162576e-02, 3.87136005e-02, 3.81159633e-02, 3.69475931e-02,
-        3.09219025e-02, 2.64972020e-02, 2.52692532e-02, 2.26610135e-02,
-        1.83537118e-02, 1.60335265e-02, 1.81159042e-02, 1.65723134e-02,
-        1.40322829e-02, 1.35565661e-02, 1.18881287e-02, 1.21301347e-02,
-        1.03053171e-02, 1.05648767e-02, 8.39531515e-03, 9.44469031e-03,
-        8.40093754e-03, 8.94227624e-03, 7.25141726e-03, 7.55053340e-03,
-        6.45099999e-03, 6.48732577e-03, 6.34379825e-03, 5.44769829e-03,
-        5.31860394e-03, 5.17733209e-03, 4.94596548e-03, 4.74553136e-03,
-        3.90956365e-03, 4.93221916e-03, 3.32281459e-03, 4.09323256e-03,
-        3.86036723e-03, 3.14914063e-03, 2.95548071e-03, 3.05214152e-03,
-        2.92129186e-03, 3.03624501e-03, 2.57557142e-03, 2.58336635e-03,
-        2.58220360e-03, 2.74822908e-03, 2.30463617e-03, 2.44353106e-03,
-        2.37762718e-03, 2.15879246e-03, 2.07314361e-03, 2.21667672e-03,
-        2.01060297e-03, 2.04529171e-03, 1.96462078e-03, 1.96440914e-03,
-        1.87956402e-03, 1.78791827e-03, 1.95776531e-03, 1.94851996e-03,
-        2.12227367e-03, 1.97004993e-03, 1.79265859e-03, 1.77326123e-03,
-        1.87964120e-03, 1.87013962e-03, 1.93164416e-03, 2.18114723e-03,
-        1.78091286e-03, 1.82338001e-03, 1.63587451e-03, 1.84792804e-03,
-        1.85838516e-03, 2.18017353e-03, 1.51539966e-03, 1.93400471e-03],
-       [           nan, 4.31191492e+00, 9.76314843e-01, 5.49028993e-01,
-        3.94757897e-01, 2.87499994e-01, 2.35408828e-01, 1.96453005e-01,
-        1.49935693e-01, 1.17798984e-01, 9.75612998e-02, 8.01029429e-02,
-        6.01775236e-02, 5.31036928e-02, 4.47125323e-02, 3.61025110e-02,
-        3.06246467e-02, 2.56165154e-02, 2.18348950e-02, 1.87386982e-02,
-        1.59360468e-02, 1.46744801e-02, 1.27762686e-02, 1.13541652e-02,
-        9.93919466e-03, 8.57039075e-03, 7.99262896e-03, 6.88297907e-03,
-        6.05901517e-03, 5.54076442e-03, 4.95609501e-03, 4.54202248e-03,
-        4.37445100e-03, 3.89181077e-03, 3.59422551e-03, 3.21083982e-03,
-        2.97943340e-03, 2.63723498e-03, 2.49901251e-03, 2.39343988e-03,
-        2.12709745e-03, 2.07168749e-03, 1.83590606e-03, 1.74556579e-03,
-        1.60703226e-03, 1.55892351e-03, 1.34235003e-03, 1.34185015e-03,
-        1.40495820e-03, 1.18799019e-03, 1.25358545e-03, 1.17413176e-03,
-        1.11343339e-03, 1.06590148e-03, 1.07524765e-03, 1.04454183e-03,
-        1.01166638e-03, 9.95552749e-04, 9.74646886e-04, 9.78586846e-04,
-        9.61358834e-04, 9.67727276e-04, 9.34227952e-04, 9.30195849e-04,
-        1.01509260e-03, 9.83500853e-04, 1.06429402e-03, 1.09147991e-03,
-        1.05616753e-03, 1.09606714e-03, 1.10326998e-03, 1.22322771e-03,
-        1.32415979e-03, 1.30614534e-03, 1.31740980e-03, 1.53745105e-03,
-        1.54719257e-03, 1.65210559e-03, 1.83108600e-03, 1.80146121e-03,
-        2.22112006e-03, 2.10560206e-03, 2.26951344e-03, 2.24092463e-03,
-        2.58429302e-03, 2.62452452e-03, 2.82284850e-03, 2.64519593e-03,
-        3.91416764e-03, 4.56960034e-03, 5.07314410e-03, 4.82623838e-03,
-        5.00994222e-03, 7.75514217e-03, 9.53060575e-03, 7.19146477e-03,
-        5.87424124e-03, 9.88178141e-03, 1.90834813e-02, 2.16085967e-02],
-       [1.95580435e+00, 6.41512394e-01, 5.86823106e-01, 5.06498754e-01,
-        4.24947709e-01, 3.28853548e-01, 2.72902966e-01, 2.11486131e-01,
-        1.74859509e-01, 1.34416640e-01, 1.04561992e-01, 9.19023454e-02,
-        7.33753070e-02, 6.15201704e-02, 4.84212711e-02, 4.08005752e-02,
-        3.46879214e-02, 2.95801200e-02, 2.52422970e-02, 2.10925285e-02,
-        1.90034527e-02, 1.57109275e-02, 1.37061337e-02, 1.19887581e-02,
-        1.07379556e-02, 9.51602124e-03, 8.85299221e-03, 7.69143598e-03,
-        6.84309378e-03, 6.45116251e-03, 5.65468706e-03, 5.53867128e-03,
-        4.79454920e-03, 4.37267451e-03, 4.07283241e-03, 3.78629891e-03,
-        3.53811565e-03, 3.37472046e-03, 3.26163275e-03, 3.07684066e-03,
-        3.03838518e-03, 2.72946362e-03, 3.08941025e-03, 2.73178564e-03,
-        2.71844049e-03, 2.92230654e-03, 2.80446000e-03, 2.96850759e-03,
-        2.94844690e-03, 2.95293517e-03, 3.62573587e-03, 3.71962576e-03,
-        3.39780003e-03, 4.26899595e-03, 4.37228614e-03, 5.23131806e-03,
-        5.85266994e-03, 7.01261591e-03, 8.35866481e-03, 7.49922171e-03,
-        1.23499688e-02, 1.12942951e-02, 1.97618622e-02, 2.36766823e-02,
-        3.08697410e-02, 2.53793355e-02, 4.63242456e-02, 4.52126861e-02,
-        1.09174550e-01, 2.33033359e-01, 7.09730029e-01, 0.00000000e+00,
+      dtype=float32)<br><br>Variances (σ²):<br>array([[           nan,            nan,            nan, 1.02355179e+02,
+        1.15481548e+01, 3.78083253e+00, 2.15655136e+00, 1.36406720e+00,
+        8.35149646e-01, 6.73671067e-01, 5.15163541e-01, 3.97144258e-01,
+        3.06686670e-01, 2.31592759e-01, 2.04890624e-01, 1.78571761e-01,
+        1.50499240e-01, 1.27837166e-01, 1.02303900e-01, 8.48728716e-02,
+        7.70538524e-02, 6.59323931e-02, 5.85256331e-02, 5.15199415e-02,
+        5.07953577e-02, 3.88774499e-02, 3.80434729e-02, 3.68277207e-02,
+        3.10290698e-02, 2.65384186e-02, 2.51390617e-02, 2.33418029e-02,
+        1.76019464e-02, 1.62043106e-02, 1.81108043e-02, 1.67211238e-02,
+        1.37254866e-02, 1.33479303e-02, 1.22215301e-02, 1.20802643e-02,
+        1.02794152e-02, 1.06495572e-02, 8.45295005e-03, 9.38485749e-03,
+        8.40296783e-03, 8.92842188e-03, 7.25316070e-03, 7.55806267e-03,
+        6.45033829e-03, 6.42879913e-03, 6.28582714e-03, 5.50709805e-03,
+        5.35090454e-03, 5.18337404e-03, 4.94908076e-03, 4.69977641e-03,
+        3.93922953e-03, 4.94798133e-03, 3.31130228e-03, 4.01445106e-03,
+        3.93184368e-03, 3.18049151e-03, 2.99936486e-03, 2.98593054e-03,
+        2.94531952e-03, 3.00013344e-03, 2.59928801e-03, 2.57328665e-03,
+        2.61384528e-03, 2.71953200e-03, 2.28950568e-03, 2.47617438e-03,
+        2.29428359e-03, 2.21777870e-03, 2.01793178e-03, 2.23614532e-03,
+        2.04963074e-03, 2.07109982e-03, 1.91864744e-03, 1.99068943e-03,
+        1.84785249e-03, 1.79964560e-03, 1.92284584e-03, 2.10057735e-03,
+        1.99813140e-03, 1.99011737e-03, 1.77709502e-03, 1.80806569e-03,
+        1.93377258e-03, 1.81071635e-03, 1.84854190e-03, 2.24846136e-03,
+        1.83255901e-03, 1.79699250e-03, 1.65044551e-03, 1.86257565e-03,
+        1.87281007e-03, 2.22930987e-03, 1.46980572e-03, 1.91732962e-03],
+       [           nan, 4.28445673e+00, 9.63348925e-01, 5.39015591e-01,
+        3.97752374e-01, 2.86842316e-01, 2.35180229e-01, 1.96505651e-01,
+        1.49163395e-01, 1.18744403e-01, 9.80669558e-02, 7.95073509e-02,
+        5.99473529e-02, 5.31784818e-02, 4.46019545e-02, 3.62749435e-02,
+        3.05828098e-02, 2.56325547e-02, 2.17700414e-02, 1.89469401e-02,
+        1.58004668e-02, 1.47384340e-02, 1.26997642e-02, 1.13969138e-02,
+        9.95490514e-03, 8.62951856e-03, 7.89366942e-03, 6.93140225e-03,
+        6.03958638e-03, 5.55552356e-03, 4.96471720e-03, 4.53072181e-03,
+        4.36638808e-03, 3.89400916e-03, 3.62281594e-03, 3.20113148e-03,
+        2.98690447e-03, 2.60042795e-03, 2.50524632e-03, 2.40083481e-03,
+        2.12616404e-03, 2.06335075e-03, 1.86002359e-03, 1.72839209e-03,
+        1.61148945e-03, 1.56128057e-03, 1.33821392e-03, 1.34896778e-03,
+        1.40080217e-03, 1.19519013e-03, 1.25338812e-03, 1.16838911e-03,
+        1.10670936e-03, 1.07474590e-03, 1.06858253e-03, 1.05300965e-03,
+        1.00729428e-03, 1.00601849e-03, 9.80340410e-04, 9.58568184e-04,
+        9.65824001e-04, 9.69900400e-04, 9.40615253e-04, 9.33869102e-04,
+        9.84263374e-04, 9.98335425e-04, 1.06808916e-03, 1.10569107e-03,
+        1.04286463e-03, 1.10277464e-03, 1.09780894e-03, 1.24356907e-03,
+        1.30520610e-03, 1.30971719e-03, 1.30557735e-03, 1.53534871e-03,
+        1.53308560e-03, 1.66026456e-03, 1.83098146e-03, 1.88684079e-03,
+        2.07859161e-03, 2.17120466e-03, 2.28627212e-03, 2.15277495e-03,
+        2.63525406e-03, 2.64332653e-03, 2.69262912e-03, 2.55597802e-03,
+        3.87698924e-03, 4.54493379e-03, 5.06891822e-03, 5.00848889e-03,
+        5.00522880e-03, 7.53196701e-03, 9.04903375e-03, 7.79883005e-03,
+        5.32398419e-03, 9.12285876e-03, 1.87993329e-02, 2.10647583e-02],
+       [1.87541091e+00, 6.51101470e-01, 5.86948514e-01, 5.06549716e-01,
+        4.21842635e-01, 3.31808537e-01, 2.71629184e-01, 2.11973101e-01,
+        1.74938440e-01, 1.33698851e-01, 1.04969732e-01, 9.18591693e-02,
+        7.32810348e-02, 6.18271604e-02, 4.82615903e-02, 4.09878790e-02,
+        3.47012952e-02, 2.96152160e-02, 2.51984056e-02, 2.09768210e-02,
+        1.90855805e-02, 1.56350005e-02, 1.37695735e-02, 1.19974036e-02,
+        1.07065374e-02, 9.56301950e-03, 8.81214533e-03, 7.68793467e-03,
+        6.87213801e-03, 6.40851818e-03, 5.69349295e-03, 5.51772397e-03,
+        4.78328252e-03, 4.38278029e-03, 4.05189209e-03, 3.77866556e-03,
+        3.59397940e-03, 3.34289484e-03, 3.26786912e-03, 3.08158062e-03,
+        3.06468946e-03, 2.73452001e-03, 3.08440858e-03, 2.71660555e-03,
+        2.70022289e-03, 2.93756556e-03, 2.83280108e-03, 2.92903068e-03,
+        2.97854492e-03, 2.93223071e-03, 3.58349038e-03, 3.73939611e-03,
+        3.40441568e-03, 4.14582435e-03, 4.43749409e-03, 5.25229285e-03,
+        5.79313142e-03, 7.02099875e-03, 8.10070056e-03, 7.85673410e-03,
+        1.14245322e-02, 1.23913866e-02, 1.92257259e-02, 2.36905292e-02,
+        2.96805464e-02, 2.49058269e-02, 4.09623347e-02, 5.23983650e-02,
+        7.61196986e-02, 3.02251726e-01, 6.30044758e-01, 0.00000000e+00,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
@@ -1108,19 +1116,19 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan],
-       [9.14153218e-01, 9.40065265e-01, 8.69568884e-01, 6.76885903e-01,
-        5.53954303e-01, 4.40456808e-01, 3.55843604e-01, 2.78890580e-01,
-        2.27060333e-01, 1.81326330e-01, 1.45897672e-01, 1.24477692e-01,
-        9.49732438e-02, 7.83858225e-02, 6.53403401e-02, 5.64673021e-02,
-        4.54048812e-02, 3.95412408e-02, 3.34357284e-02, 2.86961440e-02,
-        2.45281141e-02, 2.12401599e-02, 1.87223591e-02, 1.67877004e-02,
-        1.53627917e-02, 1.28264483e-02, 1.24560567e-02, 1.08170100e-02,
-        1.02761360e-02, 9.33128688e-03, 9.00813099e-03, 8.47953837e-03,
-        8.16290174e-03, 7.00270757e-03, 7.97660183e-03, 7.47804064e-03,
-        8.63282755e-03, 7.98672624e-03, 9.03444085e-03, 9.40896943e-03,
-        1.01028262e-02, 1.49208847e-02, 1.53846191e-02, 2.43779290e-02,
-        2.38974169e-02, 3.31321731e-02, 5.37615418e-02, 5.03612347e-02,
-        1.39743671e-01, 2.32176349e-01, 4.78730500e-01, 2.44249535e+00,
+       [9.15210903e-01, 9.42496419e-01, 8.71155858e-01, 6.73916698e-01,
+        5.54175556e-01, 4.41200584e-01, 3.55914086e-01, 2.80190617e-01,
+        2.26247266e-01, 1.81327164e-01, 1.45942152e-01, 1.24154426e-01,
+        9.54671055e-02, 7.85375759e-02, 6.50313348e-02, 5.63020669e-02,
+        4.56442200e-02, 3.96144576e-02, 3.33423354e-02, 2.85773743e-02,
+        2.45344061e-02, 2.13744268e-02, 1.85649898e-02, 1.69714186e-02,
+        1.51643734e-02, 1.28898760e-02, 1.24361161e-02, 1.08095231e-02,
+        1.02639152e-02, 9.31818783e-03, 9.05635674e-03, 8.50393064e-03,
+        8.14368390e-03, 7.03455601e-03, 8.00265744e-03, 7.49371247e-03,
+        8.48450605e-03, 8.06491449e-03, 8.98281205e-03, 9.48688388e-03,
+        1.00889103e-02, 1.45573374e-02, 1.56443268e-02, 2.39596944e-02,
+        2.37696040e-02, 3.23931947e-02, 5.30957207e-02, 4.99527715e-02,
+        1.33328810e-01, 2.47825697e-01, 4.40629423e-01, 2.24727392e+00,
         0.00000000e+00,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
@@ -1133,16 +1141,16 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan],
-       [1.66862547e+00, 1.67982602e+00, 1.33667827e+00, 1.17649007e+00,
-        8.94468546e-01, 7.31724143e-01, 6.07070982e-01, 4.68921781e-01,
-        3.78384173e-01, 3.08178872e-01, 2.41364479e-01, 1.95000961e-01,
-        1.63096786e-01, 1.42016262e-01, 1.10898733e-01, 9.32417065e-02,
-        8.11134428e-02, 7.33587667e-02, 5.65497577e-02, 5.20328991e-02,
-        4.73679639e-02, 4.34317254e-02, 3.81060168e-02, 3.02708391e-02,
-        2.92442665e-02, 2.72125416e-02, 2.41207574e-02, 2.13342793e-02,
-        2.27034781e-02, 2.36428361e-02, 2.99330857e-02, 2.96098478e-02,
-        3.49124148e-02, 4.20452505e-02, 6.07052036e-02, 6.63099438e-02,
-        8.21586698e-02, 1.55300558e-01, 3.26843619e-01, 3.57088089e-01,
+       [1.66135132e+00, 1.67352855e+00, 1.34157991e+00, 1.17355335e+00,
+        8.93078685e-01, 7.35560536e-01, 6.07868791e-01, 4.69577432e-01,
+        3.76638323e-01, 3.08275878e-01, 2.42624432e-01, 1.94475204e-01,
+        1.63218871e-01, 1.41816705e-01, 1.10424757e-01, 9.38693061e-02,
+        8.07840750e-02, 7.34948814e-02, 5.64644523e-02, 5.21341041e-02,
+        4.71495837e-02, 4.36101779e-02, 3.80297936e-02, 3.03792749e-02,
+        2.91669499e-02, 2.69615073e-02, 2.45615374e-02, 2.16045044e-02,
+        2.25319099e-02, 2.32179705e-02, 2.96839774e-02, 3.02357264e-02,
+        3.46049219e-02, 4.15767320e-02, 5.97010553e-02, 6.36648759e-02,
+        8.25074241e-02, 1.49036914e-01, 3.10363799e-01, 3.25030804e-01,
         0.00000000e+00,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
@@ -1158,15 +1166,15 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan],
-       [3.19763637e+00, 2.59294558e+00, 2.23017502e+00, 1.70610034e+00,
-        1.56503236e+00, 1.15924728e+00, 9.30188358e-01, 7.60445297e-01,
-        6.03416085e-01, 4.89848703e-01, 4.19004112e-01, 3.04260671e-01,
-        2.72466898e-01, 2.25206420e-01, 1.83793381e-01, 1.48357943e-01,
-        1.24929719e-01, 1.02891669e-01, 9.76283103e-02, 8.04265887e-02,
-        7.80211538e-02, 7.27034807e-02, 7.39150122e-02, 6.36634529e-02,
-        6.88242838e-02, 7.41316527e-02, 8.69786665e-02, 1.13989837e-01,
-        1.68558955e-01, 2.18568221e-01, 4.85058844e-01, 9.80032146e-01,
-        9.16854572e+00, 0.00000000e+00,            nan,            nan,
+       [3.19742417e+00, 2.60046864e+00, 2.21964216e+00, 1.70607865e+00,
+        1.56858456e+00, 1.15474427e+00, 9.37663496e-01, 7.56147087e-01,
+        6.03853405e-01, 4.89692688e-01, 4.18454170e-01, 3.05898279e-01,
+        2.71412224e-01, 2.24997550e-01, 1.83180466e-01, 1.48597866e-01,
+        1.25781000e-01, 1.02423772e-01, 9.71847400e-02, 8.07549879e-02,
+        7.84014612e-02, 7.22196400e-02, 7.34202117e-02, 6.39269501e-02,
+        6.83337525e-02, 7.51600116e-02, 8.66981745e-02, 1.15424857e-01,
+        1.61464363e-01, 2.06682459e-01, 5.07240534e-01, 9.17342126e-01,
+        8.54616261e+00, 0.00000000e+00,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
@@ -1183,38 +1191,13 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan],
-       [5.07512856e+00, 4.23443127e+00, 2.99931192e+00, 3.00306392e+00,
-        2.14697480e+00, 1.93526793e+00, 1.55198121e+00, 1.22007036e+00,
-        9.50576425e-01, 7.87985444e-01, 6.23728931e-01, 4.74648803e-01,
-        4.41279888e-01, 3.57140809e-01, 2.88086385e-01, 2.27885649e-01,
-        2.15575591e-01, 1.93833843e-01, 1.47560924e-01, 1.86503857e-01,
-        1.73952550e-01, 1.75995708e-01, 2.04561889e-01, 2.86973029e-01,
-        4.88813430e-01, 3.97081345e-01, 3.70416522e+00, 0.00000000e+00,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan,
-                   nan,            nan,            nan,            nan],
-       [7.88650799e+00, 6.37330055e+00, 5.39507389e+00, 4.36629438e+00,
-        3.69414830e+00, 3.15917921e+00, 2.35998225e+00, 1.90277696e+00,
-        1.52520823e+00, 1.23300624e+00, 1.03142393e+00, 8.32126081e-01,
-        7.50768602e-01, 6.15234554e-01, 4.66183752e-01, 4.58357960e-01,
-        4.23402697e-01, 4.35327172e-01, 4.65040863e-01, 4.43911761e-01,
-        7.84386992e-01, 1.46266294e+00, 1.79768920e+00, 1.12264305e+02,
-                   nan,            nan,            nan,            nan,
+       [5.07189226e+00, 4.23700714e+00, 2.98102593e+00, 3.00734186e+00,
+        2.16054606e+00, 1.92505956e+00, 1.55919349e+00, 1.21637535e+00,
+        9.55734909e-01, 7.87134767e-01, 6.21093154e-01, 4.75251108e-01,
+        4.37522411e-01, 3.58940035e-01, 2.89233208e-01, 2.27543265e-01,
+        2.14937761e-01, 1.96075886e-01, 1.47993684e-01, 1.85347885e-01,
+        1.74169004e-01, 1.76674649e-01, 2.04901353e-01, 2.77725697e-01,
+        5.08131742e-01, 3.80037397e-01, 3.49860811e+00, 0.00000000e+00,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
@@ -1233,12 +1216,12 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan],
-       [1.17136345e+01, 9.42963505e+00, 6.91027689e+00, 6.64901018e+00,
-        5.02657509e+00, 4.63917542e+00, 3.69925308e+00, 2.80720210e+00,
-        2.29253387e+00, 2.02856612e+00, 1.49529517e+00, 1.09244120e+00,
-        1.05571687e+00, 1.00297034e+00, 8.50140393e-01, 9.87354159e-01,
-        1.02678180e+00, 1.05650699e+00, 1.34647691e+00, 9.45866394e+00,
-        8.92846527e+01,            nan,            nan,            nan,
+       [7.85041571e+00, 6.40885448e+00, 5.39898634e+00, 4.32810879e+00,
+        3.68342280e+00, 3.16658473e+00, 2.36580396e+00, 1.89843118e+00,
+        1.53226614e+00, 1.23041880e+00, 1.02998829e+00, 8.36879730e-01,
+        7.52109230e-01, 6.11939311e-01, 4.73827869e-01, 4.51089472e-01,
+        4.27382290e-01, 4.33819890e-01, 4.67795461e-01, 4.29455876e-01,
+        7.98560917e-01, 1.35861588e+00, 2.10793805e+00, 1.04796112e+02,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
@@ -1258,11 +1241,36 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan],
-       [1.75085621e+01, 1.42842684e+01, 1.28237133e+01, 9.83891678e+00,
-        8.56277180e+00, 6.30903339e+00, 5.74693012e+00, 4.05571651e+00,
-        3.67481899e+00, 2.63464761e+00, 2.47253442e+00, 1.99718153e+00,
-        1.57699776e+00, 1.51142156e+00, 1.92626846e+00, 3.17659664e+00,
-        4.32819462e+00, 9.78433609e+00, 0.00000000e+00,            nan,
+       [1.16289339e+01, 9.42718220e+00, 6.96438360e+00, 6.60564375e+00,
+        5.04528332e+00, 4.67074394e+00, 3.68645096e+00, 2.82889009e+00,
+        2.26563001e+00, 2.03829050e+00, 1.49077940e+00, 1.08447230e+00,
+        1.07022429e+00, 9.86986041e-01, 8.64271700e-01, 9.70020056e-01,
+        1.03183448e+00, 1.04320979e+00, 1.30190158e+00, 9.05539417e+00,
+        7.91724014e+01,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan,
+                   nan,            nan,            nan,            nan],
+       [1.75066910e+01, 1.42463112e+01, 1.28418770e+01, 9.78141594e+00,
+        8.59563541e+00, 6.31201649e+00, 5.75610209e+00, 4.04440928e+00,
+        3.64062476e+00, 2.61634374e+00, 2.48245645e+00, 2.02371931e+00,
+        1.58839703e+00, 1.50280297e+00, 1.91623163e+00, 3.12686992e+00,
+        4.17321968e+00, 9.26512814e+00, 0.00000000e+00,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
                    nan,            nan,            nan,            nan,
@@ -1324,8 +1332,8 @@ Downloading file &#39;60395-2022-02-28_2215.nxs&#39; from &#39;https://public.es
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Downloading file &#39;60387-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/2/60387-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
-Downloading file &#39;60386-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/2/60386-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
+Downloading file &#39;60387-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/3/60387-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
+Downloading file &#39;60386-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/3/60386-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -1381,8 +1389,8 @@ Downloading file &#39;60386-2022-02-28_2215.nxs&#39; from &#39;https://public.es
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Downloading file &#39;60385-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/2/60385-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
-Downloading file &#39;60384-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/2/60384-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
+Downloading file &#39;60385-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/3/60385-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
+Downloading file &#39;60384-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/3/60384-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1419,8 +1427,8 @@ Downloading file &#39;60384-2022-02-28_2215.nxs&#39; from &#39;https://public.es
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Downloading file &#39;60389-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/2/60389-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
-Downloading file &#39;60388-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/2/60388-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
+Downloading file &#39;60389-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/3/60389-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
+Downloading file &#39;60388-2022-02-28_2215.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/ess/loki/3/60388-2022-02-28_2215.nxs&#39; to &#39;/home/runner/.cache/ess/loki&#39;.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1481,8 +1489,8 @@ Downloading file &#39;60388-2022-02-28_2215.nxs&#39; from &#39;https://public.es
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1493,7 +1501,7 @@ Downloading file &#39;60388-2022-02-28_2215.nxs&#39; from &#39;https://public.es
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -1514,12 +1522,12 @@ Downloading file &#39;60388-2022-02-28_2215.nxs&#39; from &#39;https://public.es
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSsans version: 26.6.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
+Current ESSsans version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>
