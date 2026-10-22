@@ -13,18 +13,20 @@ from ..powtex.types import RunType, SampleRun
 from .conversion import get_cartesian_from_cylindrical
 from .types import (
     BinningSettings,
-    DetectorViewData,
+    DetectorViewRawData,
     DspacingBinWidth,
     DspacingCylSurfaceDetector,
-    FlatViewData,
+    FlatViewRawData,
     GammaBinningData,
     GammaBinWidth,
-    GammaSlicesViewData,
-    RawSampleData2D,
+    GammaSlicesViewRawData,
+    NormalisedTexture3D,
+    NormalisedTexture2D,
+    SampleRawData2D,
     Texture3D,
     TwoThetaBinningData,
     TwoThetaBinWidth,
-    TwoThetaRingsViewData,
+    TwoThetaRingsViewRawData,
 )
 
 
@@ -222,9 +224,9 @@ def hist_3d(
     )
 
 
-def hist_2d(data: Texture3D[SampleRun]) -> RawSampleData2D:
+def hist_2d(data: Texture3D[SampleRun]) -> SampleRawData2D:
     """Histogram projected detector data to texture coordinates."""
-    return RawSampleData2D(
+    return SampleRawData2D(
         sc.DataGroup(
             {
                 "region_1": data["region_1"].sum(dim="dspacing"),
@@ -234,7 +236,7 @@ def hist_2d(data: Texture3D[SampleRun]) -> RawSampleData2D:
     )
 
 
-def extract_detector_view_data(data: RawSampleData2D) -> DetectorViewData:
+def extract_detector_view_data(data: SampleRawData2D) -> DetectorViewRawData:
     """Return a scipp DataArray with data for the detector view."""
     histogrammed_2d_1 = data["region_1"]
     histogrammed_2d_2 = data["region_2"]
@@ -261,7 +263,7 @@ def extract_detector_view_data(data: RawSampleData2D) -> DetectorViewData:
         projection_radius, gamma_bin_centers, two_theta_bin_centers
     )
 
-    return DetectorViewData(
+    return DetectorViewRawData(
         sc.DataArray(
             counts,
             coords={
@@ -276,7 +278,7 @@ def extract_detector_view_data(data: RawSampleData2D) -> DetectorViewData:
     )
 
 
-def extract_flat_view_data(data: RawSampleData2D) -> FlatViewData:
+def extract_flat_view_data(data: SampleRawData2D) -> FlatViewRawData:
     """Return a scipp DataArray with data for a raw flattened detector view.
     Note, in order to properly visualize the gap in the detector, the gamma
     bin edges are modified to include a gap in the middle and one needs to
@@ -303,7 +305,7 @@ def extract_flat_view_data(data: RawSampleData2D) -> FlatViewData:
 
     counts = sc.concat([counts_1, counts_gap, counts_2], dim="gamma")
 
-    return FlatViewData(
+    return FlatViewRawData(
         sc.DataArray(
             counts,
             coords={
@@ -315,8 +317,8 @@ def extract_flat_view_data(data: RawSampleData2D) -> FlatViewData:
 
 
 def extract_two_theta_rings_view_data(
-    data: RawSampleData2D,
-) -> TwoThetaRingsViewData:
+    data: SampleRawData2D,
+) -> TwoThetaRingsViewRawData:
     """Return a scipp DataArray with data for a raw two-theta rings view"""
     histogrammed_2d_1 = data["region_1"]
     histogrammed_2d_2 = data["region_2"]
@@ -348,7 +350,7 @@ def extract_two_theta_rings_view_data(
     )
 
 
-    return TwoThetaRingsViewData(
+    return TwoThetaRingsViewRawData(
         sc.DataArray(
             counts,
             coords={
@@ -361,7 +363,7 @@ def extract_two_theta_rings_view_data(
     )
 
 
-def extract_gamma_slices_view_data(data: RawSampleData2D) -> GammaSlicesViewData:
+def extract_gamma_slices_view_data(data: SampleRawData2D) -> GammaSlicesViewRawData:
     """Return a scipp DataArray with data for a raw gamma-slices view."""
     gamma_region_1_last_edge = data["region_1"].coords["gamma"][-1]
     gamma_region_2_first_edge = data["region_2"].coords["gamma"][0]
@@ -387,13 +389,25 @@ def extract_gamma_slices_view_data(data: RawSampleData2D) -> GammaSlicesViewData
 
     counts = sc.concat([counts_1, counts_gap, counts_2], dim="gamma")
 
-    return GammaSlicesViewData(
+    return GammaSlicesViewRawData(
         sc.DataArray(
             counts,
             coords={
                 "gamma": gamma_bin_centers,
                 "two_theta": two_theta_bin_centers
             },
+        )
+    )
+
+
+def integrate_dspacing(data: NormalisedTexture3D) -> NormalisedTexture2D:
+    """Histogram projected detector data to texture coordinates."""
+    return NormalisedTexture2D(
+        sc.DataGroup(
+            {
+                "region_1": data["region_1"].sum(dim="dspacing"),
+                "region_2": data["region_2"].sum(dim="dspacing")
+            }
         )
     )
 
@@ -407,4 +421,5 @@ providers = (
     extract_flat_view_data,
     extract_two_theta_rings_view_data,
     extract_gamma_slices_view_data,
+    integrate_dspacing,
 )

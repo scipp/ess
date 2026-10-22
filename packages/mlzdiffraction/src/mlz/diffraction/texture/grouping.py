@@ -5,30 +5,35 @@
 
 from .types import (
     DspacingHist,
-    GammaSlices,
+    GammaSlicesViewData,
     GammaSliceWidth,
     IntegratedTwoThetaHist,
-    NormalisedTexture3D,
+    NormalisedTexture2D,
     ProcessedData,
+    StatisticsData,
     TwoThetaHist,
-    TwoThetaRings,
+    TwoThetaRingsViewData,
 )
 
 
-def view_2d_rings(data: NormalisedTexture3D) -> TwoThetaRings:
+def view_2d_rings(data: NormalisedTexture2D) -> TwoThetaRingsViewData:
     """Return the two-theta ring view."""
-    return TwoThetaRings(data)
+    return TwoThetaRingsViewData(data)
 
 
-def view_1d_gamma_slices(data: NormalisedTexture3D) -> GammaSlices:
+def view_1d_gamma_slices(data: NormalisedTexture2D) -> GammaSlicesViewData:
     """Return the gamma-slice view."""
-    return GammaSlices(data)
+    return GammaSlicesViewData(data)
+
+def extract_rings_statistics(data: NormalisedTexture2D) -> StatisticsData:
+    """Return the gamma rings statistics data."""
+    return StatisticsData(data)
 
 
 def generate_dspacing_hist(
     gamma_bin_width: GammaSliceWidth,
-    dummy_gamma_view: GammaSlices,
-    dummy_theta_view: TwoThetaRings,
+    dummy_gamma_view: GammaSlicesViewData,
+    dummy_theta_view: TwoThetaRingsViewData,
 ) -> DspacingHist:
     """Generate a d-spacing histogram placeholder."""
     _ = gamma_bin_width
@@ -38,8 +43,8 @@ def generate_dspacing_hist(
 
 def generate_two_theta_hist(
     gamma_bin_width: GammaSliceWidth,
-    dummy_gamma_view: GammaSlices,
-    dummy_theta_view: TwoThetaRings,
+    dummy_gamma_view: GammaSlicesViewData,
+    dummy_theta_view: TwoThetaRingsViewData,
 ) -> TwoThetaHist:
     """Generate a two-theta histogram placeholder."""
     _ = gamma_bin_width
@@ -49,8 +54,8 @@ def generate_two_theta_hist(
 
 def generate_integrated_two_theta_hist(
     gamma_bin_width: GammaSliceWidth,
-    dummy_gamma_view: GammaSlices,
-    dummy_theta_view: TwoThetaRings,
+    dummy_gamma_view: GammaSlicesViewData,
+    dummy_theta_view: TwoThetaRingsViewData,
 ) -> IntegratedTwoThetaHist:
     """Generate an integrated two-theta histogram placeholder."""
     _ = gamma_bin_width
@@ -71,6 +76,7 @@ def export_data(
 
 providers = (
     export_data,
+    extract_rings_statistics,
     generate_dspacing_hist,
     generate_integrated_two_theta_hist,
     generate_two_theta_hist,
