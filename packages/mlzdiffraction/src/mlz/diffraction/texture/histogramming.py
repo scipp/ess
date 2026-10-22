@@ -19,6 +19,7 @@ from .types import (
     FlatViewRawData,
     GammaBinningData,
     GammaBinWidth,
+    GammaSlicesViewData,
     GammaSlicesViewRawData,
     NormalisedTexture3D,
     NormalisedTexture2D,
@@ -26,6 +27,7 @@ from .types import (
     Texture3D,
     TwoThetaBinningData,
     TwoThetaBinWidth,
+    TwoThetaRingsViewData,
     TwoThetaRingsViewRawData,
 )
 
@@ -316,9 +318,7 @@ def extract_flat_view_data(data: SampleRawData2D) -> FlatViewRawData:
     )
 
 
-def extract_two_theta_rings_view_data(
-    data: SampleRawData2D,
-) -> TwoThetaRingsViewRawData:
+def _two_theta_rings_data(data: sc.DataGroup) -> sc.DataArray:
     """Return a scipp DataArray with data for a raw two-theta rings view"""
     histogrammed_2d_1 = data["region_1"]
     histogrammed_2d_2 = data["region_2"]
@@ -349,21 +349,30 @@ def extract_two_theta_rings_view_data(
         dim="gamma"
     )
 
-
-    return TwoThetaRingsViewRawData(
-        sc.DataArray(
-            counts,
-            coords={
-                "gamma": gamma_bin_centers,
-                "gamma_width": gamma_widths,
-                "two_theta": two_theta_bin_centers,
-                "r": rings_radius
-            },
-        )
+    return sc.DataArray(
+        counts,
+        coords={
+            "gamma": gamma_bin_centers,
+            "gamma_width": gamma_widths,
+            "two_theta": two_theta_bin_centers,
+            "r": rings_radius
+        },
     )
 
 
-def extract_gamma_slices_view_data(data: SampleRawData2D) -> GammaSlicesViewRawData:
+def extract_two_theta_rings_view_raw_data(
+    data: SampleRawData2D
+) -> TwoThetaRingsViewRawData:
+    return TwoThetaRingsViewRawData(_two_theta_rings_data(data))
+
+
+def extract_two_theta_rings_view_data(
+    data: NormalisedTexture2D,
+) -> TwoThetaRingsViewData:
+    return TwoThetaRingsViewData(_two_theta_rings_data(data))
+
+
+def _gamma_slices_view_data(data: sc.DataGroup) -> sc.DataArray:
     """Return a scipp DataArray with data for a raw gamma-slices view."""
     gamma_region_1_last_edge = data["region_1"].coords["gamma"][-1]
     gamma_region_2_first_edge = data["region_2"].coords["gamma"][0]
@@ -389,15 +398,21 @@ def extract_gamma_slices_view_data(data: SampleRawData2D) -> GammaSlicesViewRawD
 
     counts = sc.concat([counts_1, counts_gap, counts_2], dim="gamma")
 
-    return GammaSlicesViewRawData(
-        sc.DataArray(
-            counts,
-            coords={
-                "gamma": gamma_bin_centers,
-                "two_theta": two_theta_bin_centers
-            },
-        )
+    return sc.DataArray(
+        counts,
+        coords={
+            "gamma": gamma_bin_centers,
+            "two_theta": two_theta_bin_centers
+        },
     )
+
+
+def extract_gamma_slices_view_raw_data(data: SampleRawData2D) -> GammaSlicesViewRawData:
+    return GammaSlicesViewRawData(_gamma_slices_view_data(data))
+
+
+def extract_gamma_slices_view_data(data: NormalisedTexture2D) -> GammaSlicesViewData:
+    return GammaSlicesViewData(_gamma_slices_view_data(data))
 
 
 def integrate_dspacing(data: NormalisedTexture3D) -> NormalisedTexture2D:
@@ -420,6 +435,8 @@ providers = (
     extract_detector_view_data,
     extract_flat_view_data,
     extract_two_theta_rings_view_data,
+    extract_two_theta_rings_view_raw_data,
     extract_gamma_slices_view_data,
+    extract_gamma_slices_view_raw_data,
     integrate_dspacing,
 )

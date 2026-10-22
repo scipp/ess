@@ -20,7 +20,7 @@ class CylindricalSurfaceTransformGraph(sl.Scope[dict], dict):
     """Graph for projecting 3-D POWTEX data onto a cylindrical surface."""
 
 
-class Texture3D(sl.Scope[RunType, sc.DataArray], sc.DataArray):
+class Texture3D(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """Texture data binned in gamma, two-theta, and d-spacing."""
 
 
@@ -61,12 +61,12 @@ class BinningSettings:
     two_theta_max: sc.Variable
 
 
-class EmptyCanSubtracted3D(sl.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataArray):
+class EmptyCanSubtracted3D(sl.Scope[NonEmptyCanRunType, sc.DataGroup], sc.DataGroup):
     """Texture data after empty-can subtraction."""
 
 
-NormalisedTexture3D = NewType("NormalisedTexture3D", sc.DataArray)
-NormalisedTexture2D = NewType("NormalisedTexture2D", sc.DataArray)
+NormalisedTexture2D = NewType("NormalisedTexture2D", sc.DataGroup)
+NormalisedTexture3D = NewType("NormalisedTexture3D", sc.DataGroup)
 
 GammaSliceWidth = NewType("GammaSliceWidth", sc.DataArray)
 
