@@ -73,3 +73,5 @@ api-reference/index
 developer/index
 about/index
 ```
+
+<!-- Temporary docs-only CI validation. -->
