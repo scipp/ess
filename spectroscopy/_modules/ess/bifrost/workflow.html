@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=271db7d1"></script>
+    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.0" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -609,6 +609,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">BifrostSimulationWorkflow</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">detector_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data reduction workflow for simulated BIFROST data.</span>
 
@@ -616,7 +617,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    detector_names:</span>
 <span class="sd">        Names of ``NXdetector`` groups in the input NeXus file.</span>
-<span class="sd">        If ``Nonw``, all detector will be processed and merged.</span>
+<span class="sd">        If ``None``, all detector will be processed and merged.</span>
+<span class="sd">    kwargs:</span>
+<span class="sd">        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -631,6 +634,7 @@
             <span class="n">OverlapMonitor</span><span class="p">,</span>
             <span class="n">PSCMonitor</span><span class="p">,</span>
         <span class="p">),</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">_SIMULATION_PROVIDERS</span><span class="p">:</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
@@ -652,6 +656,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">BifrostWorkflow</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">detector_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data reduction workflow for BIFROST.</span>
 
@@ -659,12 +664,13 @@
 <span class="sd">    ----------</span>
 <span class="sd">    detector_names:</span>
 <span class="sd">        Names of ``NXdetector`` groups in the input NeXus file.</span>
-<span class="sd">        If ``Nonw``, all detector will be processed and merged.</span>
-
+<span class="sd">        If ``None``, all detector will be processed and merged.</span>
+<span class="sd">    kwargs:</span>
+<span class="sd">        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    :</span>
-<span class="sd">        A pipeline for reducing simulated BIFROST data.&quot;&quot;&quot;</span>
+<span class="sd">        A pipeline for reducing BIFROST data.&quot;&quot;&quot;</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">TofWorkflow</span><span class="p">(</span>
         <span class="n">run_types</span><span class="o">=</span><span class="p">(</span><span class="n">SampleRun</span><span class="p">,),</span>
         <span class="n">monitor_types</span><span class="o">=</span><span class="p">(</span>
@@ -673,6 +679,7 @@
             <span class="n">OverlapMonitor</span><span class="p">,</span>
             <span class="n">PSCMonitor</span><span class="p">,</span>
         <span class="p">),</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">_PROVIDERS</span><span class="p">:</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
@@ -776,7 +783,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -797,7 +804,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

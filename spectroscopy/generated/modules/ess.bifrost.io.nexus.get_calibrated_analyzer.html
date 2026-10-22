@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=271db7d1"></script>
+    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,10 +56,10 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="ess.bifrost.io.nexus.load_analyzer_for_detector" href="ess.bifrost.io.nexus.load_analyzer_for_detector.html" />
-    <link rel="prev" title="ess.bifrost.io.nexus" href="ess.bifrost.io.nexus.html" />
+    <link rel="prev" title="ess.bifrost.io.nexus.extract_instrument_angle" href="ess.bifrost.io.nexus.extract_instrument_angle.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.9.0" />
+  <meta name="docsearch:version" content="26.10.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -481,6 +481,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.bifrost.BifrostSimulationWorkflow.html">ess.bifrost.BifrostSimulationWorkflow</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ess.spectroscopy.direct.html">ess.spectroscopy.direct</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.html">ess.spectroscopy.indirect</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.html">ess.spectroscopy.indirect.conversion</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.add_incident_energy.html">ess.spectroscopy.indirect.conversion.add_incident_energy</a></li>
@@ -576,9 +577,9 @@
 </ul>
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="ess.bifrost.io.nexus.html">ess.bifrost.io.nexus</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.extract_instrument_angle.html">ess.bifrost.io.nexus.extract_instrument_angle</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">ess.bifrost.io.nexus.get_calibrated_analyzer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_analyzer_for_detector.html">ess.bifrost.io.nexus.load_analyzer_for_detector</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_instrument_angle.html">ess.bifrost.io.nexus.load_instrument_angle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_sample_angle.html">ess.bifrost.io.nexus.load_sample_angle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.moderator_class_for_source.html">ess.bifrost.io.nexus.moderator_class_for_source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.stepwise_transformation_time_filter.html">ess.bifrost.io.nexus.stepwise_transformation_time_filter</a></li>
@@ -710,13 +711,13 @@ Finally, this provider combines the data into a single Analyzer object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>analyzer_component</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.NeXusComponent.html#ess.reduce.nexus.types.NeXusComponent" title="(in ESSreduce v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusComponent</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Data group of loaded analyzers.</p></li>
-<li><p><strong>analyzer_transform</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.NeXusTransformation.html#ess.reduce.nexus.types.NeXusTransformation" title="(in ESSreduce v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusTransformation</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Transformation matrix of the analyzer.</p></li>
-<li><p><strong>analyzer_position</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.DynamicPosition.html#ess.reduce.nexus.types.DynamicPosition" title="(in ESSreduce v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicPosition</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – The computed position vector of the analyzer.</p></li>
+<li><p><strong>analyzer_component</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.NeXusComponent.html#ess.reduce.nexus.types.NeXusComponent" title="(in ESSreduce v26.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusComponent</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Data group of loaded analyzers.</p></li>
+<li><p><strong>analyzer_transform</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.NeXusTransformation.html#ess.reduce.nexus.types.NeXusTransformation" title="(in ESSreduce v26.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusTransformation</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Transformation matrix of the analyzer.</p></li>
+<li><p><strong>analyzer_position</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.DynamicPosition.html#ess.reduce.nexus.types.DynamicPosition" title="(in ESSreduce v26.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicPosition</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – The computed position vector of the analyzer.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.spectroscopy.types.Analyzer.html#ess.spectroscopy.types.Analyzer" title="ess.spectroscopy.types.Analyzer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Analyzer</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span> – A given analyzer.
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="ess.spectroscopy.types.Analyzer.html#ess.spectroscopy.types.Analyzer" title="ess.spectroscopy.types.Analyzer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Analyzer</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span> – A given analyzer.
 Only a subset of fields is returned.</p>
 </dd>
 </dl>
@@ -735,12 +736,12 @@ Only a subset of fields is returned.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="ess.bifrost.io.nexus.html"
+       href="ess.bifrost.io.nexus.extract_instrument_angle.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ess.bifrost.io.nexus</p>
+        <p class="prev-next-title">ess.bifrost.io.nexus.extract_instrument_angle</p>
       </div>
     </a>
     <a class="right-next"
@@ -782,7 +783,7 @@ Only a subset of fields is returned.</p>
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -803,7 +804,7 @@ Only a subset of fields is returned.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.9.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
