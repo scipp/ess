@@ -7,10 +7,12 @@ from scipp.testing import assert_allclose, assert_identical
 
 from ess.freia.conversions import (
     assign_incident_angle,
+    assign_incident_angle_from_slit_logs,
     incident_beam_directions,
     outgoing_direction,
     scattering_angle,
     theta,
+    time_at_slit,
 )
 
 
@@ -130,3 +132,123 @@ def test_single_incident_beam_returns_scalar():
     )
 
     assert_identical(assigned, angle)
+
+
+def _events(offsets=(30, 40, 50, 60), speeds=(1000.0, 1000.0, 1000.0, 1000.0)):
+    size = len(offsets)
+    return {
+        'event_time_zero': sc.datetimes(dims=['event'], values=[0] * size, unit='us'),
+        'event_time_offset': sc.array(dims=['event'], values=offsets, unit='ms'),
+        'wavelength': (
+            sc.constants.h
+            / sc.constants.m_n
+            / sc.array(dims=['event'], values=speeds, unit='m/s')
+        ).to(unit='nm'),
+        'Ltotal': sc.scalar(30.0, unit='m'),
+        'source_position': sc.vector([0.0, 0.0, 0.0], unit='m'),
+    }
+
+
+def _log(position, times, states):
+    return sc.DataArray(
+        sc.array(dims=['time'], values=states, dtype='bool'),
+        coords={
+            'time': sc.datetimes(dims=['time'], values=times, unit='ms'),
+            'position': sc.vector([0.0, 0.0, position], unit='m'),
+        },
+    )
+
+
+def test_time_at_slit_includes_emission_delay_and_uses_relative_source_distance():
+    inputs = _events(offsets=[30, 32, 42], speeds=[1000.0] * 3)
+    inputs['source_position'] = sc.vector([0.0, 0.0, -10.0], unit='m')
+    result = time_at_slit(
+        **inputs, slit_position=sc.vector([0.0, 0.0, 1000.0], unit='cm')
+    )
+    assert_identical(
+        result,
+        sc.datetimes(
+            dims=['event'], values=[20_000_000, 22_000_000, 32_000_000], unit='ns'
+        ),
+    )
+
+
+def test_time_at_slit_depends_on_wavelength_and_pixel_flight_path():
+    inputs = _events(offsets=[32, 82], speeds=[1000.0, 500.0])
+    inputs['Ltotal'] = sc.array(dims=['event'], values=[30.0, 40.0], unit='m')
+    result = time_at_slit(**inputs, slit_position=sc.vector([0.0, 0.0, 20.0], unit='m'))
+    assert_identical(
+        result, sc.datetimes(dims=['event'], values=[22_000_000, 42_000_000], unit='ns')
+    )
+
+
+def test_each_slit_is_checked_at_its_own_distance_and_ambiguous_events_are_unassigned():
+    angles = {'a': sc.scalar(0.3, unit='deg'), 'b': sc.scalar(1.0, unit='deg')}
+    # At 20 m, crossing times are 20, 30, 40, 50 ms.
+    # At 25 m, they are 25, 35, 45, 55 ms.
+    # Reversed key order makes sure beams are paired by name.
+    logs = {
+        'b': _log(25.0, [0, 30, 50], [False, True, False]),
+        'a': _log(20.0, [0, 25, 35, 45], [True, False, True, False]),
+    }
+    result = assign_incident_angle_from_slit_logs(
+        **_events(), incident_angles=angles, slit_status_logs=logs
+    )
+    assert_allclose(
+        result['event', :2],
+        sc.array(dims=['event'], values=[0.3, 1.0], unit='deg').to(unit='rad'),
+    )
+    assert sc.all(sc.isnan(result['event', 2:])).value
+    # An angular assignment would choose b for all four of these neutrons.
+    nearest = assign_incident_angle(
+        sc.full(dims=['event'], shape=[4], value=1.0, unit='deg'), angles
+    )
+    assert_allclose(nearest, sc.full(dims=['event'], shape=[4], value=1.0, unit='deg'))
+
+
+def test_slit_assignment_uses_neutron_crossing_time_instead_of_pulse_or_detector_time():
+    inputs = _events(offsets=[30, 32, 42], speeds=[1000.0] * 3)
+    # Crossings at 20, 22, 32 ms. All pulse and detector times are outside
+    # the opening, but the middle neutron crossed while the slit was open.
+    result = assign_incident_angle_from_slit_logs(
+        **inputs,
+        incident_angles={'a': sc.scalar(1.0, unit='deg')},
+        slit_status_logs={'a': _log(20.0, [0, 21, 23], [False, True, False])},
+    )
+    assert np.isnan(result.values[[0, 2]]).all()
+    assert_allclose(result['event', 1], sc.scalar(1.0, unit='deg').to(unit='rad'))
+
+
+def test_status_changes_apply_at_the_slit_crossing_timestamp():
+    result = assign_incident_angle_from_slit_logs(
+        **_events(offsets=[30, 31, 32, 33, 34], speeds=[1000.0] * 5),
+        incident_angles={'a': sc.scalar(1.0, unit='deg')},
+        slit_status_logs={'a': _log(20.0, [0, 21, 23], [False, True, False])},
+    )
+    assert_allclose(
+        result,
+        sc.array(
+            dims=['event'], values=[np.nan, 1.0, 1.0, np.nan, np.nan], unit='deg'
+        ).to(unit='rad'),
+        equal_nan=True,
+    )
+
+
+@pytest.mark.parametrize(
+    ('unknown_times', 'unknown_states'), [([], []), ([100], [False])]
+)
+def test_unknown_slit_status_does_not_silently_identify_another_beam(
+    unknown_times, unknown_states
+):
+    result = assign_incident_angle_from_slit_logs(
+        **_events(),
+        incident_angles={
+            'a': sc.scalar(0.3, unit='deg'),
+            'b': sc.scalar(1.0, unit='deg'),
+        },
+        slit_status_logs={
+            'a': _log(20.0, [0], [True]),
+            'b': _log(25.0, unknown_times, unknown_states),
+        },
+    )
+    assert sc.all(sc.isnan(result)).value

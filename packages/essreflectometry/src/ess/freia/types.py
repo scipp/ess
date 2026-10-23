@@ -35,11 +35,11 @@ class SampleSurfaceNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 
 class UpstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Open upstream slit-channel names mapped to centers in global coordinates."""
+    """Upstream beam names mapped to fixed slit centers in global coordinates."""
 
 
 class DownstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Open downstream slit-channel names mapped to centers in global coordinates."""
+    """Downstream beam names mapped to fixed slit centers in global coordinates."""
 
 
 class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
@@ -48,4 +48,23 @@ class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
     Select corresponding reflected and direct peaks separately for SampleRun and
     ReferenceRun, for example using ``scattering_angle`` and ``height``.
     An empty dictionary explicitly selects the entire detector.
+    """
+
+
+class IncidentAngleGraph(sciline.Scope[RunType, dict], dict):
+    """Coordinate graph fragment defining how incident angles are assigned."""
+
+
+class SlitStatusLogs(sciline.Scope[RunType, dict], dict):
+    """Incident beam names mapped to the status logs of their controlling slits.
+
+    Keys match UpstreamSlitCenters and DownstreamSlitCenters. Each log contains
+    boolean data (True means open), a datetime ``time`` coordinate, and a scalar
+    vector ``position`` coordinate giving the controlling slit's global position.
+
+    A logged state applies until the next entry; the final state persists.
+    Status before the first entry is unknown, leaving the event unassigned.
+    Each log is sampled at the neutron's time at that slit's source distance.
+    Exactly one open slit identifies the beam; zero or multiple open slits leave
+    the event unassigned. No geometrical fallback is used.
     """

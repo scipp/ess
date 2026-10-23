@@ -29,7 +29,12 @@ def add_coords_and_masks(
 ) -> CorrectedDetector[RunType]:
     """Transform coordinates and mask events before run normalization."""
     da = add_coords(da, graph)
-    return CorrectedDetector[RunType](add_roi_masks(da, roi))
+    da = add_roi_masks(da, roi)
+    if 'incident_angle' in da.bins.coords:
+        da = da.bins.assign_masks(
+            incident_beam_unassigned=~sc.isfinite(da.bins.coords['incident_angle'])
+        )
+    return CorrectedDetector[RunType](da)
 
 
 def normalize_by_monitor_histogram(

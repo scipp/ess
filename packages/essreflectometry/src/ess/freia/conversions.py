@@ -17,9 +17,116 @@ from ..reflectometry.types import (
 )
 from .types import (
     DownstreamSlitCenters,
+    IncidentAngleGraph,
     SampleSurfaceNormal,
+    SlitStatusLogs,
     UpstreamSlitCenters,
 )
+
+
+def time_at_slit(
+    event_time_zero: sc.Variable,
+    event_time_offset: sc.Variable,
+    wavelength: sc.Variable,
+    Ltotal: sc.Variable,
+    source_position: sc.Variable,
+    slit_position: sc.Variable,
+) -> sc.Variable:
+    """Estimate absolute event times at the slit's distance from the source.
+
+    Back-propagate from detector arrival using the reconstructed wavelength.
+    This retains source emission delays and does not assume that the neutron
+    left the source at the pulse timestamp.
+
+    Parameters
+    ----------
+    event_time_zero:
+        Absolute pulse timestamps associated with detector events.
+    event_time_offset:
+        Detector arrival offsets relative to those timestamps.
+    wavelength:
+        Reconstructed neutron wavelengths.
+    Ltotal:
+        Total source-to-detector flight paths.
+    source_position:
+        Source position in global coordinates.
+    slit_position:
+        Fixed slit position in the same global frame as the source.
+
+    Returns
+    -------
+    :
+        Absolute timestamps at the source-to-slit distance.
+    """
+    source_to_slit_distance = sc.norm(
+        slit_position.to(unit=source_position.unit) - source_position
+    ).to(unit=Ltotal.unit)
+    slit_to_detector_flight_time = tof.tof_from_wavelength(
+        wavelength=wavelength, Ltotal=Ltotal - source_to_slit_distance
+    )
+    detector_arrival_offset = event_time_offset.to(unit='s', dtype='float64')
+    slit_crossing_offset_ns = sc.round(
+        (detector_arrival_offset - slit_to_detector_flight_time.to(unit='s')).to(
+            unit='ns'
+        )
+    )
+    return event_time_zero.to(unit='ns') + slit_crossing_offset_ns.astype('int64')
+
+
+def assign_incident_angle_from_slit_logs(
+    event_time_zero: sc.Variable,
+    event_time_offset: sc.Variable,
+    wavelength: sc.Variable,
+    Ltotal: sc.Variable,
+    source_position: sc.Variable,
+    incident_angles: dict[str, sc.Variable],
+    slit_status_logs: dict[str, sc.DataArray],
+) -> sc.Variable:
+    """Assign the incident angle when all slit states are known and one is open.
+
+    Each beam's log is evaluated at the neutron's crossing time at its own
+    controlling slit. Unknown status, no open slit or multiple open slits
+    yields NaN. The measured reflection angle does not enter this assignment.
+    """
+    unassigned_incident_angle = sc.scalar(float('nan'), unit='rad')
+    assigned_incident_angle = unassigned_incident_angle
+    open_slit_count = sc.scalar(0, dtype='int32', unit=None)
+    all_slit_states_known = sc.scalar(True)
+    # Encode unknown separately from the boolean states: -1 unknown, 0 closed, 1 open.
+    unknown_slit_state = sc.scalar(-1, dtype='int32', unit=None)
+    open_slit_state = sc.scalar(1, dtype='int32', unit=None)
+    for beam_name, beam_incident_angle in incident_angles.items():
+        slit_log = slit_status_logs[beam_name]
+        slit_crossing_time = time_at_slit(
+            event_time_zero,
+            event_time_offset,
+            wavelength,
+            Ltotal,
+            source_position,
+            slit_log.coords['position'],
+        )
+        slit_state = sc.lookup(
+            slit_log.astype('int32').assign_coords(
+                time=slit_log.coords['time'].to(unit='ns')
+            ),
+            dim='time',
+            mode='previous',
+            fill_value=unknown_slit_state,
+        )(slit_crossing_time)
+        all_slit_states_known = all_slit_states_known & (
+            slit_state != unknown_slit_state
+        )
+        slit_is_open = slit_state == open_slit_state
+        assigned_incident_angle = sc.where(
+            slit_is_open, beam_incident_angle.to(unit='rad'), assigned_incident_angle
+        )
+        open_slit_count = open_slit_count + slit_is_open.astype('int32')
+    exactly_one_slit_open = open_slit_count == sc.scalar(1, unit=None)
+    return sc.where(
+        all_slit_states_known & exactly_one_slit_open,
+        assigned_incident_angle,
+        unassigned_incident_angle,
+    )
 
 
 def outgoing_direction(
@@ -145,37 +252,83 @@ def sample_coordinate_transformation_graph(
     ) | {'theta': theta, 'Q': reflectometry_q}
 
 
-def offspecular_sample_coordinate_transformation_graph(
-    source_position: Position[NXsource, SampleRun],
-    sample_position: Position[NXsample, SampleRun],
-    sample_surface_normal: SampleSurfaceNormal[SampleRun],
-    gravity: GravityVector,
-    upstream_slit_centers: UpstreamSlitCenters[SampleRun],
-    downstream_slit_centers: DownstreamSlitCenters[SampleRun],
-) -> CoordTransformationGraph[SampleRun]:
-    """Assign incidence by comparing measured and expected reflection angles."""
-    transformation_graph = coordinate_transformation_graph(
-        source_position, sample_position, sample_surface_normal, gravity
-    )
-    directions = incident_beam_directions(
-        upstream_slit_centers, downstream_slit_centers
-    )
-    expected_reflection_angles = {
-        key: incident_angle(direction, sample_surface_normal)
-        for key, direction in directions.items()
+def _incident_angles_from_slits(
+    upstream_slit_centers, downstream_slit_centers, sample_surface_normal
+):
+    return {
+        beam_name: incident_angle(direction, sample_surface_normal)
+        for beam_name, direction in incident_beam_directions(
+            upstream_slit_centers, downstream_slit_centers
+        ).items()
     }
+
+
+def closest_beam_incident_angle_graph(
+    upstream_slit_centers: UpstreamSlitCenters[RunType],
+    downstream_slit_centers: DownstreamSlitCenters[RunType],
+    sample_surface_normal: SampleSurfaceNormal[RunType],
+) -> IncidentAngleGraph[RunType]:
+    """Provide incidence assignment using the closest expected reflection angle."""
+    beam_incident_angles = _incident_angles_from_slits(
+        upstream_slit_centers, downstream_slit_centers, sample_surface_normal
+    )
+
+    def select_incident_angle(reflection_angle: sc.Variable) -> sc.Variable:
+        return assign_incident_angle(reflection_angle, beam_incident_angles)
+
+    return {'incident_angle': select_incident_angle}
+
+
+def slit_log_incident_angle_graph(
+    upstream_slit_centers: UpstreamSlitCenters[RunType],
+    downstream_slit_centers: DownstreamSlitCenters[RunType],
+    sample_surface_normal: SampleSurfaceNormal[RunType],
+    source_position: Position[NXsource, RunType],
+    slit_status_logs: SlitStatusLogs[RunType],
+) -> IncidentAngleGraph[RunType]:
+    """Provide incidence assignment using each slit's status at neutron crossing."""
+    beam_incident_angles = _incident_angles_from_slits(
+        upstream_slit_centers, downstream_slit_centers, sample_surface_normal
+    )
 
     def select_incident_angle(
-        reflection_angle: sc.Variable,
+        event_time_zero: sc.Variable,
+        event_time_offset: sc.Variable,
+        wavelength: sc.Variable,
+        Ltotal: sc.Variable,
     ) -> sc.Variable:
-        return assign_incident_angle(reflection_angle, expected_reflection_angles)
+        return assign_incident_angle_from_slit_logs(
+            event_time_zero,
+            event_time_offset,
+            wavelength,
+            Ltotal,
+            source_position,
+            beam_incident_angles,
+            slit_status_logs,
+        )
 
-    return transformation_graph | {
-        'incident_angle': select_incident_angle,
-        'reflection_angle': theta,
-        'Qx': reflectometry_q_x,
-        'Qz': reflectometry_q_z,
-    }
+    return {'incident_angle': select_incident_angle}
+
+
+def offspecular_coordinate_transformation_graph(
+    source_position: Position[NXsource, RunType],
+    sample_position: Position[NXsample, RunType],
+    sample_surface_normal: SampleSurfaceNormal[RunType],
+    gravity: GravityVector,
+    incident_angle_graph: IncidentAngleGraph[RunType],
+) -> CoordTransformationGraph[RunType]:
+    """Combine an incidence assignment with the shared offspecular coordinates."""
+    return (
+        coordinate_transformation_graph(
+            source_position, sample_position, sample_surface_normal, gravity
+        )
+        | incident_angle_graph
+        | {
+            'reflection_angle': theta,
+            'Qx': reflectometry_q_x,
+            'Qz': reflectometry_q_z,
+        }
+    )
 
 
 def add_coords(
