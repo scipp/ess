@@ -36,7 +36,12 @@ from ess.beer.mcstas.beamline import (
     PulseShapingMode,
     simulation_choppers,
 )
-from ess.beer.types import DetectorBank, DHKLList, WavelengthDetector
+from ess.beer.types import (
+    BeamlineParameters,
+    DetectorBank,
+    DHKLList,
+    WavelengthDetector,
+)
 from ess.powder.types import (
     DspacingBins,
     DspacingDetector,
@@ -213,7 +218,7 @@ def _beer_powder_mcstas_workflow(wavelength_from):
         pytest.param(BeerPowderMcStasWorkflow, 6, id='powder-mcstas'),
     ],
 )
-def test_beer_workflows_compute_dspacing_bins_without_loading_events(
+def test_beer_workflows_compute_bins_and_parameters_without_loading_events(
     monkeypatch, make_workflow, mode, pulse_skipping
 ):
     wf = make_workflow()
@@ -223,7 +228,9 @@ def test_beer_workflows_compute_dspacing_bins_without_loading_events(
     wf[DspacingNBins] = 123
 
     def fail_if_events_are_loaded(*args, **kwargs):
-        raise AssertionError('event data must not be used to determine bin edges')
+        raise AssertionError(
+            'event data must not be used for bins or beamline parameters'
+        )
 
     monkeypatch.setattr(mcstastox.Read, 'get_event_data', fail_if_events_are_loaded)
 
@@ -233,12 +240,17 @@ def test_beer_workflows_compute_dspacing_bins_without_loading_events(
         chopper_mode = ModulationMode.ds0 if mode == 7 else PulseShapingMode.ds1
         wf[DiskChoppers[SampleRun]] = simulation_choppers(chopper_mode, source_position)
 
-    bins = wf.compute(DspacingBins)
+    result = wf.compute((DspacingBins, BeamlineParameters[SampleRun]))
+    bins = result[DspacingBins]
+    parameters = result[BeamlineParameters[SampleRun]]
 
     assert wf.compute(PulseStride[SampleRun]) == (2 if pulse_skipping else 1)
     assert bins.sizes == {'dspacing': 124}
     assert sc.all(sc.isfinite(bins)).value
     assert sc.all(bins[1:] > bins[:-1]).value
+    assert parameters['lambda_min'] < parameters['lambda_max']
+    assert sc.isfinite(parameters['mean_Ltotal']).value
+    assert sc.isfinite(parameters['mean_two_theta']).value
 
 
 def test_powder_mcstas_analytical_workflow_computes_q():
