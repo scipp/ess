@@ -18617,12 +18617,14 @@ packages:
   - dask>=2022.1.0
   - graphviz>=0.20
   - essreduce>=26.10.1
+  - lazy-loader>=0.4
   - numpy>=1.26.4
   - pandas>=2.1.2
   - plopp>=26.5.0
   - scippneutron>=26.10.0
   - numba>=0.63 ; extra == 'test'
   - ipympl>=0.9.4 ; extra == 'test'
+  - ipywidgets>=8.1 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
   - scipy>=1.15.0 ; extra == 'test'
