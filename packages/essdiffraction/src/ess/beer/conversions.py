@@ -9,6 +9,7 @@ from ess.reduce.nexus.types import DiskChoppers, Position
 from ess.reduce.unwrap.lut import chopper_distance_along_beam
 from ess.reduce.unwrap.types import DetectorLtotal
 
+from .parameters import effective_chopper_position
 from .types import (
     DHKLList,
     PulseLength,
@@ -81,19 +82,6 @@ def _modulation_period(choppers: DiskChoppers[RunType]) -> sc.Variable:
     return max(periods)
 
 
-def _modulation_chopper_position(
-    choppers: DiskChoppers[RunType],
-) -> sc.Variable:
-    return sc.concat(
-        [
-            chopper.axle_position
-            for name, chopper in choppers.items()
-            if not name.startswith('FC')
-        ],
-        dim='chopper',
-    ).mean()
-
-
 def _modulation_coordinate_transformation_graph(
     source_position: Position[snx.NXsource, RunType],
     sample_position: Position[snx.NXsample, RunType],
@@ -106,7 +94,7 @@ def _modulation_coordinate_transformation_graph(
         source_position, sample_position, gravity
     )
     ltotal = detector_ltotal - chopper_distance_along_beam(
-        _modulation_chopper_position(choppers), source_position
+        effective_chopper_position(choppers), source_position
     )
     graph['Ltotal'] = lambda: ltotal
     return graph
@@ -203,7 +191,7 @@ def modulation_time_of_arrival(
         [center_time(chopper) for chopper in definition_choppers],
         dim='chopper',
     ).mean()
-    modulation_position = _modulation_chopper_position(choppers).fields.z
+    modulation_position = effective_chopper_position(choppers).fields.z
 
     frame_chopper = choppers['FC2A']
     inverse_velocity = (center_time(frame_chopper) - nominal_time_at_chopper) / (
