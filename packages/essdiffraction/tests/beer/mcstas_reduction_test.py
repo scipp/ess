@@ -2,7 +2,6 @@ import importlib
 import re
 import sys
 
-import mcstastox
 import numpy as np
 import pytest
 import sciline as sl
@@ -47,6 +46,7 @@ from ess.powder.types import (
     DspacingDetector,
     DspacingNBins,
     ElasticCoordTransformGraph,
+    EmptyDetector,
     KeepEvents,
     MaskedDetectorIDs,
     NormalizedDspacing,
@@ -55,6 +55,7 @@ from ess.powder.types import (
     TofMask,
     TwoThetaMask,
     UncertaintyBroadcastMode,
+    VanadiumRun,
     WavelengthMask,
 )
 from scipp.testing import assert_allclose
@@ -218,21 +219,12 @@ def _beer_powder_mcstas_workflow(wavelength_from):
         pytest.param(BeerPowderMcStasWorkflow, 6, id='powder-mcstas'),
     ],
 )
-def test_beer_workflows_compute_bins_and_parameters_without_loading_events(
-    monkeypatch, make_workflow, mode, pulse_skipping
-):
+def test_beer_workflows_compute_dspacing_bins(make_workflow, mode, pulse_skipping):
     wf = make_workflow()
     wf[Filename[SampleRun]] = mcstas_silicon_new_model(mode)
     wf[DetectorBank] = DetectorBank.north
     wf[DHKLList] = silicon_peaks_array()
     wf[DspacingNBins] = 123
-
-    def fail_if_events_are_loaded(*args, **kwargs):
-        raise AssertionError(
-            'event data must not be used for bins or beamline parameters'
-        )
-
-    monkeypatch.setattr(mcstastox.Read, 'get_event_data', fail_if_events_are_loaded)
 
     if pulse_skipping:
         # Use pulse-skipping choppers with the existing detector geometry.
@@ -240,14 +232,37 @@ def test_beer_workflows_compute_bins_and_parameters_without_loading_events(
         chopper_mode = ModulationMode.ds0 if mode == 7 else PulseShapingMode.ds1
         wf[DiskChoppers[SampleRun]] = simulation_choppers(chopper_mode, source_position)
 
-    result = wf.compute((DspacingBins, BeamlineParameters[SampleRun]))
-    bins = result[DspacingBins]
-    parameters = result[BeamlineParameters[SampleRun]]
+    bins = wf.compute(DspacingBins)
 
     assert wf.compute(PulseStride[SampleRun]) == (2 if pulse_skipping else 1)
     assert bins.sizes == {'dspacing': 124}
     assert sc.all(sc.isfinite(bins)).value
     assert sc.all(bins[1:] > bins[:-1]).value
+
+
+@pytest.mark.parametrize(
+    ('factory', 'run_type', 'mode', 'bank'),
+    [
+        (BeerPowderMcStasWorkflow, SampleRun, 6, DetectorBank.south),
+        (BeerPowderMcStasWorkflow, VanadiumRun, 6, DetectorBank.north),
+        (BeerModulationAutoMcStasWorkflow, SampleRun, 7, DetectorBank.north),
+        (BeerModulationKnownPeaksMcStasWorkflow, SampleRun, 7, DetectorBank.both),
+    ],
+)
+def test_beamline_parameters_match_selected_bank_geometry(
+    factory, run_type, mode, bank
+):
+    workflow = factory()
+    workflow[Filename[run_type]] = mcstas_silicon_new_model(mode)
+    workflow[DetectorBank] = bank
+
+    parameters = workflow.compute(BeamlineParameters[run_type])
+
+    detector = workflow.compute(EmptyDetector[run_type])
+    sample_position = workflow.compute(Position[snx.NXsample, run_type])
+    assert_allclose(
+        parameters['L2'], sc.norm(detector.coords['position'] - sample_position)
+    )
     assert parameters['lambda_min'] < parameters['lambda_max']
     assert sc.isfinite(parameters['mean_Ltotal']).value
     assert sc.isfinite(parameters['mean_two_theta']).value
