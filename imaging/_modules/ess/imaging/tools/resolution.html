@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../../_static/documentation_options.js?v=5c0e2681"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.10.1" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -733,15 +733,60 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_radial_profile</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Integrate ellipses around center of image.&#39;&#39;&#39;</span>
-    <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="n">cy</span><span class="p">,</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">((</span><span class="n">cx</span> <span class="o">*</span> <span class="n">cy</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">cx</span><span class="p">)</span> <span class="o">/</span> <span class="n">cx</span><span class="p">,</span> <span class="p">(</span><span class="n">cx</span> <span class="o">*</span> <span class="n">cy</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">cy</span><span class="p">)</span> <span class="o">/</span> <span class="n">cy</span><span class="p">)</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="n">tbin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">data</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
-    <span class="n">nr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
-    <span class="k">return</span> <span class="n">tbin</span> <span class="o">/</span> <span class="p">(</span><span class="n">nr</span> <span class="o">+</span> <span class="mf">1e-15</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_radial_profile</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return frequencies and radial means of an fftshifted spectrum.&quot;&quot;&quot;</span>
+    <span class="n">fy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">fx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">fy</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">fx</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="c1"># Use the finest FFT spacing, so the zero-frequency bin contains only</span>
+    <span class="c1"># zero-frequency component.</span>
+    <span class="c1"># The tolerance keeps frequencies on a bin boundary in that bin despite rounding.</span>
+    <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">radius</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">bins</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+    <span class="n">populated</span> <span class="o">=</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">bins</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">weights</span><span class="o">=</span><span class="n">radius</span><span class="o">.</span><span class="n">ravel</span><span class="p">())[</span><span class="n">populated</span><span class="p">]</span> <span class="o">/</span> <span class="n">count</span><span class="p">[</span><span class="n">populated</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">bins</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">weights</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ravel</span><span class="p">())[</span><span class="n">populated</span><span class="p">]</span> <span class="o">/</span> <span class="n">count</span><span class="p">[</span><span class="n">populated</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">profile</span>
+
+
+<div class="viewcode-block" id="normalized_radial_spectrum">
+<a class="viewcode-back" href="../../../../generated/modules/ess.imaging.tools.resolution.normalized_radial_spectrum.html#ess.imaging.tools.resolution.normalized_radial_spectrum">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalized_radial_spectrum</span><span class="p">(</span><span class="n">image</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the normalized, radially averaged Fourier-amplitude spectrum.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image:</span>
+<span class="sd">        A two-dimensional image sampled on equally spaced square pixels. Pixel</span>
+<span class="sd">        coordinates are not used; the frequency is expressed per image pixel.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Fourier-amplitude spectrum with a dimensionless ``frequency`` coordinate</span>
+<span class="sd">        in cycles (line pairs) per pixel. Each coordinate is the mean frequency</span>
+<span class="sd">        magnitude in its radial bin. Only bins up to 0.5 cycles per pixel are</span>
+<span class="sd">        included, inside the circle bounded by the axial Nyquist frequencies.</span>
+<span class="sd">        The zero-frequency amplitude is normalized to one.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This is an amplitude spectrum, not a power spectrum. It can be used to inspect</span>
+<span class="sd">    the measured and reference spectra underlying :func:`modulation_transfer_function`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">image</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">amplitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
+    <span class="n">frequency</span><span class="p">,</span> <span class="n">profile</span> <span class="o">=</span> <span class="n">_radial_profile</span><span class="p">(</span><span class="n">amplitude</span><span class="p">)</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="n">frequency</span> <span class="o">&lt;=</span> <span class="mf">0.5</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">profile</span><span class="p">[</span><span class="n">keep</span><span class="p">]),</span>
+        <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;frequency&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">frequency</span><span class="p">[</span><span class="n">keep</span><span class="p">])},</span>
+    <span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="modulation_transfer_function">
@@ -857,24 +902,10 @@
 
 <span class="sd">    The modulation transfer function at frequency :math:`f` can be estimated as the ratio of the Fourier transform of the image (integrated over constant frequency magnitude) to the Fourier transform of the open beam image multiplied by the sample mask (also integrated over constant frequency magnitude).</span>
 <span class="sd">    &#39;&#39;&#39;</span>  <span class="c1"># noqa: E501</span>
-    <span class="n">_measured</span> <span class="o">=</span> <span class="n">measured_image</span><span class="o">.</span><span class="n">values</span>
-    <span class="c1"># Can&#39;t do inplace because dtype of sum might be different from dtype of input</span>
-    <span class="n">_measured</span> <span class="o">=</span> <span class="n">_measured</span> <span class="o">/</span> <span class="n">_measured</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="n">_reference</span> <span class="o">=</span> <span class="p">(</span><span class="n">open_beam_image</span> <span class="o">*</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">measured_image</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">_reference</span> <span class="o">=</span> <span class="n">_reference</span> <span class="o">/</span> <span class="n">_reference</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="n">f_ideal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">_reference</span><span class="p">)))</span>
-    <span class="n">f_measured</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">_measured</span><span class="p">)))</span>
-    <span class="n">_mtf</span> <span class="o">=</span> <span class="n">_radial_profile</span><span class="p">(</span><span class="n">f_measured</span><span class="p">)</span> <span class="o">/</span> <span class="n">_radial_profile</span><span class="p">(</span><span class="n">f_ideal</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-        <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">_mtf</span><span class="p">),</span>
-        <span class="c1"># Unit of frequency is line_pairs / pixel but since both of those are</span>
-        <span class="c1"># a kind of counts I think in our unit system that is best</span>
-        <span class="c1"># represented as &#39;dimensionless&#39;.</span>
-        <span class="c1"># The largest frequency magnitude in 2d fft is sqrt(1/2).</span>
-        <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;frequency&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">_mtf</span><span class="p">))},</span>
-        <span class="c1"># We&#39;re only interested in frequencies below 0.5 oscillations per pixel</span>
-        <span class="c1"># because those above are unphysical.</span>
-    <span class="p">)[</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)]</span></div>
+    <span class="n">reference</span> <span class="o">=</span> <span class="p">(</span><span class="n">open_beam_image</span> <span class="o">*</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">measured_image</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">normalized_radial_spectrum</span><span class="p">(</span><span class="n">measured_image</span><span class="p">)</span> <span class="o">/</span> <span class="n">normalized_radial_spectrum</span><span class="p">(</span>
+        <span class="n">reference</span>
+    <span class="p">)</span></div>
 
 
 
@@ -1008,7 +1039,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSimaging version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
+Current ESSimaging version: 26.10.1 (<a href="https://github.com/scipp/ess/releases?q=essimaging">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
