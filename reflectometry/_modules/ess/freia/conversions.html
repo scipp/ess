@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../_static/documentation_options.js?v=5c0e2681"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.10.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -513,13 +513,21 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">graph</span><span class="p">,</span> <span class="n">tof</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXsample</span><span class="p">,</span> <span class="n">NXsource</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">reflectometry_q</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.conversions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">reflectometry_q</span><span class="p">,</span>
+    <span class="n">reflectometry_q_x</span><span class="p">,</span>
+    <span class="n">reflectometry_q_z</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..reflectometry.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CoordTransformationGraph</span><span class="p">,</span>
     <span class="n">RunType</span><span class="p">,</span>
     <span class="n">SampleRun</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleSurfaceNormal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DownstreamSlitCenters</span><span class="p">,</span>
+    <span class="n">SampleSurfaceNormal</span><span class="p">,</span>
+    <span class="n">UpstreamSlitCenters</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="outgoing_direction">
@@ -568,6 +576,64 @@
 
 
 
+<div class="viewcode-block" id="incident_beam_directions">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.incident_beam_directions.html#ess.freia.conversions.incident_beam_directions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">incident_beam_directions</span><span class="p">(</span>
+    <span class="n">upstream_slit_centers</span><span class="p">:</span> <span class="n">UpstreamSlitCenters</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">downstream_slit_centers</span><span class="p">:</span> <span class="n">DownstreamSlitCenters</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute candidate incident directions from corresponding slit openings.</span>
+
+<span class="sd">    The two inputs map the names of open channels to their centers in the</span>
+<span class="sd">    upstream and downstream slit assemblies. Matching keys describe one</span>
+<span class="sd">    possible incident beam.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">upstream_slit_centers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">!=</span> <span class="n">downstream_slit_centers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;UpstreamSlitCenters and DownstreamSlitCenters must have the same keys.&#39;</span>
+        <span class="p">)</span>
+    <span class="n">directions</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">upstream</span> <span class="ow">in</span> <span class="n">upstream_slit_centers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">beam</span> <span class="o">=</span> <span class="n">downstream_slit_centers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">-</span> <span class="n">upstream</span>
+        <span class="n">directions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">beam</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">beam</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">directions</span></div>
+
+
+
+<div class="viewcode-block" id="assign_incident_angle">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.assign_incident_angle.html#ess.freia.conversions.assign_incident_angle">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">assign_incident_angle</span><span class="p">(</span>
+    <span class="n">reflection_angle</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">expected_reflection_angles</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign incidence using the closest expected specular reflection angle.&quot;&quot;&quot;</span>
+    <span class="n">angles</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">expected_reflection_angles</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">closest</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">expected_reflection_angles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">closest</span>
+
+    <span class="n">min_distance</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">reflection_angle</span> <span class="o">-</span> <span class="n">closest</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">angles</span><span class="p">:</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">reflection_angle</span> <span class="o">-</span> <span class="n">angle</span><span class="p">)</span>
+        <span class="n">is_closer</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">&lt;</span> <span class="n">min_distance</span>
+        <span class="n">closest</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_closer</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">closest</span><span class="p">)</span>
+        <span class="n">min_distance</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_closer</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">min_distance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">closest</span></div>
+
+
+
+<div class="viewcode-block" id="incident_angle">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.incident_angle.html#ess.freia.conversions.incident_angle">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">incident_angle</span><span class="p">(</span>
+    <span class="n">incident_direction</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Angle at which the assigned incident beam approaches the sample.&quot;&quot;&quot;</span>
+    <span class="n">normal</span> <span class="o">=</span> <span class="n">sample_surface_normal</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sample_surface_normal</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="o">-</span><span class="n">sc</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">incident_direction</span><span class="p">,</span> <span class="n">normal</span><span class="p">))</span></div>
+
+
+
 <div class="viewcode-block" id="coordinate_transformation_graph">
 <a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.coordinate_transformation_graph.html#ess.freia.conversions.coordinate_transformation_graph">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">coordinate_transformation_graph</span><span class="p">(</span>
@@ -608,6 +674,42 @@
     <span class="k">return</span> <span class="n">coordinate_transformation_graph</span><span class="p">(</span>
         <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">sample_surface_normal</span><span class="p">,</span> <span class="n">gravity</span>
     <span class="p">)</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;theta&#39;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">reflectometry_q</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="offspecular_sample_coordinate_transformation_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.offspecular_sample_coordinate_transformation_graph.html#ess.freia.conversions.offspecular_sample_coordinate_transformation_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">offspecular_sample_coordinate_transformation_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">SampleSurfaceNormal</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">upstream_slit_centers</span><span class="p">:</span> <span class="n">UpstreamSlitCenters</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+    <span class="n">downstream_slit_centers</span><span class="p">:</span> <span class="n">DownstreamSlitCenters</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordTransformationGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign incidence by comparing measured and expected reflection angles.&quot;&quot;&quot;</span>
+    <span class="n">transformation_graph</span> <span class="o">=</span> <span class="n">coordinate_transformation_graph</span><span class="p">(</span>
+        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">sample_surface_normal</span><span class="p">,</span> <span class="n">gravity</span>
+    <span class="p">)</span>
+    <span class="n">directions</span> <span class="o">=</span> <span class="n">incident_beam_directions</span><span class="p">(</span>
+        <span class="n">upstream_slit_centers</span><span class="p">,</span> <span class="n">downstream_slit_centers</span>
+    <span class="p">)</span>
+    <span class="n">expected_reflection_angles</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">incident_angle</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="n">sample_surface_normal</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="n">directions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_incident_angle</span><span class="p">(</span>
+        <span class="n">reflection_angle</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">assign_incident_angle</span><span class="p">(</span><span class="n">reflection_angle</span><span class="p">,</span> <span class="n">expected_reflection_angles</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">transformation_graph</span> <span class="o">|</span> <span class="p">{</span>
+        <span class="s1">&#39;incident_angle&#39;</span><span class="p">:</span> <span class="n">select_incident_angle</span><span class="p">,</span>
+        <span class="s1">&#39;reflection_angle&#39;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span>
+        <span class="s1">&#39;Qx&#39;</span><span class="p">:</span> <span class="n">reflectometry_q_x</span><span class="p">,</span>
+        <span class="s1">&#39;Qz&#39;</span><span class="p">:</span> <span class="n">reflectometry_q_z</span><span class="p">,</span>
+    <span class="p">}</span></div>
 
 
 
@@ -668,7 +770,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -689,7 +791,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.10.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

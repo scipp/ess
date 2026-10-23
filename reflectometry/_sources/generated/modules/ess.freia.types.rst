@@ -32,7 +32,9 @@
       :template: class-template.rst
    
       DetectorRegionOfInterest
+      DownstreamSlitCenters
       SampleSurfaceNormal
+      UpstreamSlitCenters
    
    
 

@@ -28,6 +28,7 @@
       FreiaMcStasWorkflow
       FreiaMonitorHistogramWorkflow
       FreiaMonitorIntegratedWorkflow
+      FreiaOffspecWorkflow
       FreiaProtonChargeWorkflow
       FreiaUnnormalizedWorkflow
       FreiaWorkflow

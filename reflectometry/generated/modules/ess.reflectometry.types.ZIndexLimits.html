@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../_static/documentation_options.js?v=5c0e2681"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.reflectometry.types.YIndexLimits" href="ess.reflectometry.types.YIndexLimits.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.10.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -713,7 +713,11 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.conversions.html">ess.freia.conversions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.add_coords.html">ess.freia.conversions.add_coords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.assign_incident_angle.html">ess.freia.conversions.assign_incident_angle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.coordinate_transformation_graph.html">ess.freia.conversions.coordinate_transformation_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.incident_angle.html">ess.freia.conversions.incident_angle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.incident_beam_directions.html">ess.freia.conversions.incident_beam_directions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.offspecular_sample_coordinate_transformation_graph.html">ess.freia.conversions.offspecular_sample_coordinate_transformation_graph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.outgoing_direction.html">ess.freia.conversions.outgoing_direction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.sample_coordinate_transformation_graph.html">ess.freia.conversions.sample_coordinate_transformation_graph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.conversions.scattering_angle.html">ess.freia.conversions.scattering_angle</a></li>
@@ -766,7 +770,9 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.types.ShutterMonitor.html">ess.freia.types.ShutterMonitor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.types.NormalizationMonitor.html">ess.freia.types.NormalizationMonitor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.types.DetectorRegionOfInterest.html">ess.freia.types.DetectorRegionOfInterest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.DownstreamSlitCenters.html">ess.freia.types.DownstreamSlitCenters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.types.SampleSurfaceNormal.html">ess.freia.types.SampleSurfaceNormal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.types.UpstreamSlitCenters.html">ess.freia.types.UpstreamSlitCenters</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.freia.normalization.html">ess.freia.normalization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -783,6 +789,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaMcStasWorkflow.html">ess.freia.workflow.FreiaMcStasWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaMonitorHistogramWorkflow.html">ess.freia.workflow.FreiaMonitorHistogramWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaMonitorIntegratedWorkflow.html">ess.freia.workflow.FreiaMonitorIntegratedWorkflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaOffspecWorkflow.html">ess.freia.workflow.FreiaOffspecWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaProtonChargeWorkflow.html">ess.freia.workflow.FreiaProtonChargeWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaUnnormalizedWorkflow.html">ess.freia.workflow.FreiaUnnormalizedWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.freia.workflow.FreiaWorkflow.html">ess.freia.workflow.FreiaWorkflow</a></li>
@@ -967,7 +974,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -988,7 +995,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.10.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
