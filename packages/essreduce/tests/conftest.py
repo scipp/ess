@@ -53,8 +53,12 @@ def loki_registry() -> Registry:
             'PolyGauss_I0-50_Rg-60.h5': 'md5:f5d60d9c2286cb197b8cd4dc82db3d7e',
             # XML file for the pixel mask
             'mask_new_July2022.xml': 'md5:421b6dc9db74126ffbc5d88164d017b0',
+            # Small CODA file for testing purposes (data from only 5 pulses)
+            'loki-coda-5-pulses.hdf': 'md5:8368779651ccf101612b35ca075d0298',
+            # File recorded during a Loki detector test
+            'loki_336349_00000342.hdf': 'md5:3aefc2c2df52439c38904da9ffa82416',
         },
-        version='2',
+        version='3',
     )
 
 
@@ -66,6 +70,17 @@ def tbl_registry() -> Registry:
             "857127_00000112_small.hdf": "md5:0db89493b859dbb2f7354c3711ed7fbd",
         },
         version='2',
+    )
+
+
+@pytest.fixture(scope='session')
+def odin_registry() -> Registry:
+    return make_registry(
+        'ess/odin',
+        files={
+            "ymir_lego_odin.hdf": "md5:59b56b4ca2a264983df2d5590853c9fa",
+        },
+        version='3',
     )
 
 
@@ -106,6 +121,18 @@ def loki_tutorial_sample_transmission_run(loki_registry: Registry) -> Path:
 
 
 @pytest.fixture(scope='session')
+def loki_coda_file(loki_registry: Registry) -> Path:
+    """Small CODA file for testing purposes (data from only 5 pulses)."""
+    return loki_registry.get_path("loki-coda-5-pulses.hdf")
+
+
+@pytest.fixture(scope='session')
+def loki_broken_file(loki_registry: Registry) -> Path:
+    """Small LoKI file with broken transformations and monitor data."""
+    return loki_registry.get_path("loki_336349_00000342.hdf")
+
+
+@pytest.fixture(scope='session')
 def dream_coda_test_file(dream_registry: Registry) -> Path:
     """CODA file for DREAM where most pulses have been removed.
 
@@ -118,3 +145,9 @@ def dream_coda_test_file(dream_registry: Registry) -> Path:
 def tbl_commissioning_orca_file(tbl_registry: Registry) -> Path:
     """TBL file from cold commissioning with the ORCA detector."""
     return tbl_registry.get_path('857127_00000112_small.hdf')
+
+
+@pytest.fixture(scope='session')
+def odin_lego_images(odin_registry: Registry) -> Path:
+    """Lego images for the Odin instrument."""
+    return odin_registry.get_path('ymir_lego_odin.hdf')
