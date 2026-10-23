@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
 from . import (
+    diagnostics,  # noqa: F401
     nexus,  # noqa: F401
     normalization,  # noqa: F401
     polarization,  # noqa: F401

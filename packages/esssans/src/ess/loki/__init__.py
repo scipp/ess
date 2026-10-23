@@ -4,6 +4,7 @@
 import importlib.metadata
 
 from . import workflow
+from .diagnostics import InstrumentView, LokiBankViewer, instrument_view
 from .larmor_workflow import (
     LokiAtLarmorTutorialWorkflow,
     LokiAtLarmorWorkflow,
@@ -16,12 +17,17 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
+
 del importlib
 
+
 __all__ = [
+    'InstrumentView',
     'LokiAtLarmorTutorialWorkflow',
     'LokiAtLarmorWorkflow',
+    'LokiBankViewer',
     'LokiWorkflow',
+    'instrument_view',
     'larmor_default_parameters',
     'loki_default_parameters',
     'workflow',

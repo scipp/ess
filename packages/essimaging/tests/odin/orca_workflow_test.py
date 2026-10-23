@@ -37,7 +37,7 @@ def workflow() -> sl.Pipeline:
     wf = odin.OdinOrcaWorkflow()
     wf[Filename[AllRuns]] = odin.data.odin_lego_images()
     wf[MaskingRules] = {}
-    wf[NeXusDetectorName] = 'histogram_mode_detectors/orca'
+    wf[NeXusDetectorName] = odin.nexus_name('orca')
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     return wf
 

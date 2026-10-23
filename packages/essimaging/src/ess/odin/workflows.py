@@ -33,24 +33,25 @@ from ..imaging.types import (
     SampleRun,
     TofDetector,
 )
+from .beamline import nexus_name
 from .masking import providers as masking_providers
 
 
 def default_parameters() -> dict:
     """Return the default workflow parameters for Odin."""
     return {
-        NeXusMonitorName[BeamMonitor1]: "beam_monitor_1",
-        NeXusMonitorName[BeamMonitor2]: "beam_monitor_2",
-        NeXusMonitorName[BeamMonitor3]: "beam_monitor_3",
-        NeXusMonitorName[BeamMonitor4]: "beam_monitor_4",
+        NeXusMonitorName[BeamMonitor1]: nexus_name("monitor_1"),
+        NeXusMonitorName[BeamMonitor2]: nexus_name("monitor_2"),
+        NeXusMonitorName[BeamMonitor3]: nexus_name("monitor_3"),
+        NeXusMonitorName[BeamMonitor4]: nexus_name("monitor_4"),
         PulseStrideOffset: None,
         LookupTableRelativeErrorThreshold: {
-            "event_mode_detectors/timepix3": float("inf"),
-            "histogram_mode_detectors/orca": float("inf"),
-            "beam_monitor_1": float("inf"),
-            "beam_monitor_2": float("inf"),
-            "beam_monitor_3": float("inf"),
-            "beam_monitor_4": float("inf"),
+            nexus_name("timepix"): float("inf"),
+            nexus_name("orca"): float("inf"),
+            nexus_name("monitor_1"): float("inf"),
+            nexus_name("monitor_2"): float("inf"),
+            nexus_name("monitor_3"): float("inf"),
+            nexus_name("monitor_4"): float("inf"),
         },
     }
 
@@ -199,9 +200,7 @@ def OdinOrcaWorkflow(**kwargs) -> sciline.Pipeline:
         normalize_by_proton_charge_orca_all_runs,
     ):
         wf.insert(provider)
-    wf[NeXusName[ImageKey]] = (
-        '/entry/instrument/histogram_mode_detectors/orca/image_key'
-    )
+    wf[NeXusName[ImageKey]] = f'/entry/instrument/{nexus_name("orca")}/image_key'
     return wf
 
 

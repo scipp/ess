@@ -15,6 +15,7 @@ del importlib
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submodules=[
+        "diagnostics",
         "nexus",
         "normalization",
         "polarization",
