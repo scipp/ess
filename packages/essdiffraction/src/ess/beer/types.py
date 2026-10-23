@@ -24,8 +24,8 @@ class StreakClusteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 class BeamlineParameters(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """BEER wavelength, chopper, and detector geometry parameters.
 
-    Computed without event data. See :func:`ess.beer.parameters.beamline_parameters`
-    for the entries and their conventions.
+    See :func:`ess.beer.parameters.beamline_parameters` for the entries and their
+    conventions.
     """
 
 

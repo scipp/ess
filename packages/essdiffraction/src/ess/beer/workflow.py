@@ -62,7 +62,7 @@ default_parameters = {
 
 
 def _insert_beamline_parameters_and_binning(workflow: sl.Pipeline) -> None:
-    """Add event-independent beamline parameters and d-spacing binning."""
+    """Add beamline parameters and d-spacing binning."""
     # Bin edges need chopper frames regardless of how event wavelengths are computed.
     for provider in (
         unwrap_lut.get_active_choppers,

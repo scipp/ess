@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
-"""BEER beamline parameters independent of detector events."""
+"""BEER beamline parameters."""
 
 from collections.abc import Mapping
 
@@ -36,7 +36,7 @@ def beamline_parameters(
     sample_position: Position[snx.NXsample, RunType],
     choppers: ActiveDiskChoppers[RunType],
 ) -> BeamlineParameters[RunType]:
-    """Collect BEER beamline parameters without loading detector events.
+    """Collect BEER beamline parameters.
 
     ``lambda_min`` and ``lambda_max`` bound the wavelength envelope transmitted by
     the chopper cascade. ``lambda_0`` is the midpoint of that envelope, rather than
