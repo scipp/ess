@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+from typing import Literal
+
 import sciline
 import scipp as sc
 from ess.reduce.nexus.types import DetectorBankSizes
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ess.reduce.unwrap import WavelengthLutMode
+from ess.reduce.unwrap.types import KeepEventTimeOffset
 from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 from ess.reduce.workflow import register_workflow
 
@@ -167,29 +170,29 @@ def FreiaWorkflow(
 @register_workflow
 def FreiaOffspecWorkflow(
     *,
-    wavelength_from: WavelengthLutMode = "file",
+    incident_beam_from: Literal['closest', 'slit_logs'] = 'closest',
+    wavelength_from: WavelengthLutMode = 'file',
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for unnormalized, coplanar off-specular FREIA data.
 
-    Assign each neutron to the slit beam with the closest expected specular
-    reflection angle. Compute ``Qx`` and ``Qz`` from that beam's incidence angle
-    and the neutron's gravity-corrected reflection angle. With one open beam,
-    the incidence angle is a shared scalar.
-
-    Supply :class:`~ess.freia.types.UpstreamSlitCenters` and
-    :class:`~ess.freia.types.DownstreamSlitCenters` for ``SampleRun`` as
-    dictionaries with matching slit-channel names. Each dictionary must
-    contain the simultaneously open FREIA slit channels. The output is
-    ``CorrectedDetector[SampleRun]``; this workflow has no reference normalization step.
-    By default the detector ROI is empty, so the entire detector is retained.
+    Supply UpstreamSlitCenters and DownstreamSlitCenters for SampleRun as
+    dictionaries pairing the fixed openings of each candidate incident beam.
+    The assigned ``incident_angle`` and measured ``reflection_angle`` determine
+    ``Qx`` and ``Qz``. The output is ``CorrectedDetector[SampleRun]``.
 
     Parameters
     ----------
+    incident_beam_from:
+        ``'closest'`` assigns the beam whose specular reflection angle is closest
+        to the measured reflection angle. ``'slit_logs'`` instead uses
+        ``SlitStatusLogs[SampleRun]`` for all candidate beams, evaluating each
+        log at the neutron's estimated time at that slit. Exactly one open slit
+        determines the incident beam. Otherwise the incidence is NaN and the
+        event is masked as ``incident_beam_unassigned``; no closest-beam fallback
+        is applied.
     wavelength_from:
-        Mode for creating the wavelength lookup table. Possible values are
-        'analytical', 'simulation', and 'file'. See
-        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+        Wavelength lookup table mode: 'analytical', 'simulation', or 'file'.
     """
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun],
@@ -197,13 +200,19 @@ def FreiaOffspecWorkflow(
         wavelength_from=wavelength_from,
         **kwargs,
     )
+    assignment_provider = {
+        'closest': conversions.closest_beam_incident_angle_graph,
+        'slit_logs': conversions.slit_log_incident_angle_graph,
+    }[incident_beam_from]
     for provider in (
-        conversions.offspecular_sample_coordinate_transformation_graph,
+        conversions.offspecular_coordinate_transformation_graph,
+        assignment_provider,
         corrections.add_coords_and_masks,
     ):
         workflow.insert(provider)
     for name, param in default_parameters().items():
         workflow[name] = param
+    workflow[KeepEventTimeOffset] = incident_beam_from == 'slit_logs'
     workflow[DetectorRegionOfInterest[SampleRun]] = {}
     return workflow
 

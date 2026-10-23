@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 import numpy as np
+import pytest
 import scipp as sc
 from ess.reduce.nexus.types import GravityVector, Position
 from scipp.testing import assert_allclose, assert_identical
@@ -12,6 +13,7 @@ from ess.freia.types import (
     DetectorRegionOfInterest,
     DownstreamSlitCenters,
     SampleSurfaceNormal,
+    SlitStatusLogs,
     UpstreamSlitCenters,
     WavelengthMonitor,
 )
@@ -19,6 +21,7 @@ from ess.reflectometry.corrections import footprint_on_sample
 from ess.reflectometry.types import (
     BeamSize,
     CoordTransformationGraph,
+    CorrectedDetector,
     QBins,
     ReducibleData,
     ReferenceRun,
@@ -141,3 +144,86 @@ def test_offspec_workflow_provides_qx_and_qz():
     assert {'incident_angle', 'reflection_angle', 'Qx', 'Qz'} <= graph.keys()
     assert 'hypothetical_incident_direction' not in graph
     assert 'incident_direction' not in graph
+
+
+@pytest.mark.parametrize(
+    ('method', 'expected'),
+    [('closest', [1.0, 1.0, 1.0, 1.0]), ('slit_logs', [0.3, 1.0, np.nan, np.nan])],
+)
+def test_offspec_workflow_assigns_incidence_with_independent_methods(method, expected):
+    wf = FreiaOffspecWorkflow(incident_beam_from=method)
+    wf[GravityVector] = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
+    wf[Position[NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    wf[Position[NXsource, SampleRun]] = sc.vector([0.0, 0.0, -29.0], unit='m')
+    wf[SampleSurfaceNormal[SampleRun]] = sc.vector([0.0, 1.0, 0.0])
+    angles = {'a': 0.3, 'b': 1.0}
+    wf[UpstreamSlitCenters[SampleRun]] = {
+        name: sc.vector([0.0, 2 * np.tan(np.deg2rad(angle)), -2.0], unit='m')
+        for name, angle in angles.items()
+    }
+    wf[DownstreamSlitCenters[SampleRun]] = {
+        name: sc.vector([0.0, np.tan(np.deg2rad(angle)), -1.0], unit='m')
+        for name, angle in angles.items()
+    }
+    # All four reflected rays look like the 1 degree beam to the closest method.
+    data = (
+        sc.DataArray(
+            sc.ones(dims=['event'], shape=[4], with_variances=True, unit='counts'),
+            coords={
+                'pixel': sc.zeros(dims=['event'], shape=[4], dtype='int64', unit=None),
+                'event_time_zero': sc.datetimes(
+                    dims=['event'], values=[0] * 4, unit='ns'
+                ),
+                'event_time_offset': sc.array(
+                    dims=['event'], values=[30, 40, 50, 60], unit='ms'
+                ),
+                'wavelength': (
+                    sc.constants.h
+                    / sc.constants.m_n
+                    / sc.full(dims=['event'], shape=[4], value=1000.0, unit='m/s')
+                ).to(unit='angstrom'),
+            },
+        )
+        .group('pixel')
+        .assign_coords(
+            position=sc.vectors(
+                dims=['pixel'],
+                values=[[0.0, np.sin(np.deg2rad(1.0)), np.cos(np.deg2rad(1.0))]],
+                unit='m',
+            ),
+            Ltotal=sc.scalar(30.0, unit='m'),
+        )
+    )
+    wf[WavelengthDetector[SampleRun]] = data
+
+    def log(z, times, states):
+        return sc.DataArray(
+            sc.array(dims=['time'], values=states),
+            coords={
+                'time': sc.datetimes(dims=['time'], values=times, unit='ms'),
+                'position': sc.vector([0.0, 0.0, z], unit='m'),
+            },
+        )
+
+    wf[SlitStatusLogs[SampleRun]] = {
+        'a': log(-9.0, [0, 25, 35, 45], [True, False, True, False]),
+        'b': log(-4.0, [0, 30, 50], [False, True, False]),
+    }
+
+    result = wf.compute(CorrectedDetector[SampleRun])
+    assigned = result.bins.coords['incident_angle'].bins.constituents['data']
+    assert_allclose(
+        assigned,
+        sc.array(dims=['event'], values=expected, unit='deg').to(unit='rad'),
+        equal_nan=True,
+    )
+    assert {'reflection_angle', 'Qx', 'Qz'} <= set(result.bins.coords)
+    assert_identical(result.bins.data, data.bins.data)
+    assert_identical(
+        result.bins.masks['incident_beam_unassigned'].bins.constituents['data'],
+        sc.array(
+            dims=['event'],
+            values=[False, False, method == 'slit_logs', method == 'slit_logs'],
+        ),
+    )
+    assert result.sum().value == (2.0 if method == 'slit_logs' else 4.0)
