@@ -18621,13 +18621,13 @@ packages:
   - numpy>=1.26.4
   - pandas>=2.1.2
   - plopp>=26.5.0
+  - scipy>=1.15.0
   - scippneutron>=26.10.0
   - numba>=0.63 ; extra == 'test'
   - ipympl>=0.9.4 ; extra == 'test'
   - ipywidgets>=8.1 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
-  - scipy>=1.15.0 ; extra == 'test'
   - anywidget>=0.8.0 ; extra == 'test'
   - pythreejs>=2.4.1 ; extra == 'test'
   - autodoc-pydantic>=2.0.0 ; extra == 'docs'

@@ -56,6 +56,7 @@
 
    data
    diagnostics
+   straw_calibration
    workflow
 ```
 
