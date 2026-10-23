@@ -499,6 +499,11 @@ def estimate_source_distance(
     between layers biases the result. Such systematic errors are not included in
     the returned variance.
 
+    For a source that is large and close to the mask, the slit images overlap and
+    the fitted peaks are magnified less than the images of a point source at the
+    centre of the source. The result is then an effective distance, which is larger
+    than the distance of the centre of the source.
+
     Parameters
     ----------
     peaks:
