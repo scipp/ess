@@ -70,7 +70,7 @@ NormalisedTexture3D = NewType("NormalisedTexture3D", sc.DataGroup)
 
 GammaSliceWidth = NewType("GammaSliceWidth", sc.DataArray)
 
-DspacingHist = NewType("DspacingHist", sc.DataArray)
+DspacingViewData = NewType("DspacingViewData", sc.DataArray)
 TwoThetaHist = NewType("TwoThetaHist", sc.DataArray)
 IntegratedTwoThetaHist = NewType("IntegratedTwoThetaHist", sc.DataArray)
 

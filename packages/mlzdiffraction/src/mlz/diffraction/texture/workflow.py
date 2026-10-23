@@ -16,7 +16,7 @@ from .correction import (
 from .grouping import (
     export_data,
     extract_rings_statistics,
-    generate_dspacing_hist,
+    extract_dspacing_hist_view_data,
     generate_integrated_two_theta_hist,
     generate_two_theta_hist,
 )
@@ -71,7 +71,7 @@ def TextureReduce() -> sciline.Pipeline:
             subtract_empty_can_from_sample,
             subtract_empty_can_from_vanadium,
             normalize_by_vanadium,
-            generate_dspacing_hist,
+            extract_dspacing_hist_view_data,
             generate_two_theta_hist,
             generate_integrated_two_theta_hist,
             export_data,
