@@ -121,7 +121,8 @@ def _radial_profile(data: NDArray) -> tuple[NDArray, NDArray]:
     fy = np.fft.fftshift(np.fft.fftfreq(data.shape[0]))
     fx = np.fft.fftshift(np.fft.fftfreq(data.shape[1]))
     radius = np.hypot(fy[:, None], fx[None, :])
-    # Use the finest FFT spacing, so the DC bin contains only the DC component.
+    # Use the finest FFT spacing, so the zero-frequency bin contains only
+    # zero-frequency component.
     # The tolerance keeps frequencies on a bin boundary in that bin despite rounding.
     bins = np.floor(radius * max(data.shape) + 1e-12).astype(np.intp)
     count = np.bincount(bins.ravel())
