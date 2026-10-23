@@ -721,7 +721,7 @@ def _get_start_time(group: snx.Group) -> sc.Variable | None:
         return None
     try:
         return events['event_time_zero'][0]
-    except KeyError:
+    except (KeyError, IndexError):
         return None
 
 
@@ -732,7 +732,7 @@ def _get_end_time(group: snx.Group) -> sc.Variable | None:
         return None
     try:
         return events['event_time_zero'][-1]
-    except KeyError:
+    except (KeyError, IndexError):
         return None
 
 

@@ -1,10 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 import numpy as np
+import pytest
 import scipp as sc
-from scipp.testing import assert_allclose
+from scipp.testing import assert_allclose, assert_identical
 
-from ess.freia.conversions import outgoing_direction, scattering_angle, theta
+from ess.freia.conversions import (
+    assign_incident_angle,
+    incident_beam_directions,
+    outgoing_direction,
+    scattering_angle,
+    theta,
+)
 
 
 def test_scattering_and_reflection_angles():
@@ -52,3 +59,74 @@ def test_scattering_angle_with_gravity():
         sc.zeros(dims=['event'], shape=[2], unit='rad'),
         atol=sc.scalar(1e-10, unit='rad'),
     )
+
+
+def test_incident_directions_are_computed_from_corresponding_slit_centers():
+    upstream = {
+        'top': sc.vector([0.0, 0.0, -2.0], unit='m'),
+        'middle': sc.vector([0.0, 0.1, -2.0], unit='m'),
+        'bottom': sc.vector([0.0, 0.2, -2.0], unit='m'),
+    }
+    # Deliberately use a different order to ensure channels are paired by name.
+    downstream = {
+        'bottom': sc.vector([0.0, 0.5, 1.0], unit='m'),
+        'top': sc.vector([0.0, -0.1, -1.0], unit='m'),
+        'middle': sc.vector([0.0, 0.1, 0.0], unit='m'),
+    }
+
+    result = incident_beam_directions(upstream, downstream)
+
+    assert result.keys() == upstream.keys()
+    for key, upstream_center in upstream.items():
+        expected = downstream[key] - upstream_center
+        expected /= sc.norm(expected)
+        assert_allclose(result[key], expected)
+
+
+def test_incident_directions_require_matching_slit_names():
+    upstream = {
+        key: sc.vector([0.0, 0.0, -2.0], unit='m')
+        for key in ('top', 'middle', 'bottom')
+    }
+    downstream = upstream.copy()
+    downstream['other'] = downstream.pop('bottom')
+
+    with pytest.raises(ValueError, match='must have the same keys'):
+        incident_beam_directions(upstream, downstream)
+
+
+@pytest.mark.parametrize('channels', [('top',), ('top', 'middle')])
+def test_incident_directions_support_one_or_two_slit_channels(channels):
+    upstream = {key: sc.vector([0.0, 0.0, -2.0], unit='m') for key in channels}
+    downstream = {key: sc.vector([0.0, 0.0, -1.0], unit='m') for key in channels}
+
+    result = incident_beam_directions(upstream, downstream)
+
+    assert result.keys() == upstream.keys()
+
+
+def test_assigns_each_neutron_to_closest_expected_reflection_angle():
+    incident_angles = {
+        'top': sc.scalar(0.3, unit='deg').to(unit='rad'),
+        'middle': sc.scalar(1.0, unit='deg').to(unit='rad'),
+        'bottom': sc.scalar(3.5, unit='deg').to(unit='rad'),
+    }
+    reflection_angles = sc.array(dims=['event'], values=[0.4, 1.2, 3.0], unit='deg').to(
+        unit='rad'
+    )
+
+    assigned = assign_incident_angle(reflection_angles, incident_angles)
+
+    assert_allclose(
+        assigned,
+        sc.array(dims=['event'], values=[0.3, 1.0, 3.5], unit='deg').to(unit='rad'),
+    )
+
+
+def test_single_incident_beam_returns_scalar():
+    angle = sc.scalar(1.0, unit='rad')
+    assigned = assign_incident_angle(
+        sc.array(dims=['event'], values=[0.0, 2.0], unit='rad'), {'middle': angle}
+    )
+
+    assert_identical(assigned, angle)
