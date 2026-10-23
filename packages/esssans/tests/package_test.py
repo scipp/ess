@@ -3,7 +3,6 @@
 import subprocess
 import sys
 
-import pytest
 from ess import isissans, loki, sans
 
 """Tests of package integrity.
@@ -19,11 +18,27 @@ def test_has_version():
     assert hasattr(sans, '__version__')
 
 
-@pytest.mark.parametrize('module', ['ess.loki', 'ess.loki.workflow'])
-def test_import_works_without_ipywidgets(module: str) -> None:
-    # A fresh interpreter, since other tests in this process import ipywidgets.
-    # `None` in sys.modules makes `import ipywidgets` fail as if not installed.
-    code = f"import sys; sys.modules['ipywidgets'] = None; import {module}"
+# Not runtime dependencies, so no module may need them at import time.
+OPTIONAL_WIDGET_PACKAGES = ('ipympl', 'ipywidgets', 'pythreejs')
+MODULES = (
+    'ess.isissans',
+    'ess.loki',
+    'ess.loki.workflow',
+    'ess.sans',
+    'ess.sans.workflow',
+)
+
+
+def test_import_works_without_optional_widget_packages():
+    # A fresh interpreter, since other tests in this process import these packages.
+    # `None` in sys.modules makes an import fail as if the package was not installed.
+    code = '; '.join(
+        [
+            'import sys',
+            *(f'sys.modules[{name!r}] = None' for name in OPTIONAL_WIDGET_PACKAGES),
+            *(f'import {module}' for module in MODULES),
+        ]
+    )
     result = subprocess.run(  # noqa: S603 - fixed command, no external input
         [sys.executable, '-c', code], capture_output=True, text=True, check=False
     )
@@ -32,3 +47,4 @@ def test_import_works_without_ipywidgets(module: str) -> None:
 
 if __name__ == '__main__':
     test_has_version()
+    test_import_works_without_optional_widget_packages()
