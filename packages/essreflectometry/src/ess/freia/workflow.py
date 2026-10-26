@@ -186,8 +186,9 @@ def FreiaOffspecWorkflow(
     incident_beam_from:
         ``'closest'`` assigns the beam whose specular reflection angle is closest
         to the measured reflection angle. ``'slit_logs'`` instead uses
-        ``SlitStatusLogs[SampleRun]`` for all candidate beams, evaluating each
-        log at the neutron's estimated time at that slit. Exactly one open slit
+        ``SlitStatusLogs[SampleRun]`` for all candidate beams, evaluating all
+        logs at a shared ``time_at_slit`` coordinate. The common approximate
+        position is the mean downstream slit center. Exactly one open slit
         determines the incident beam. Otherwise the incidence is NaN and the
         event is masked as ``incident_beam_unassigned``; no closest-beam fallback
         is applied.

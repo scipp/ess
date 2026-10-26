@@ -196,18 +196,17 @@ def test_offspec_workflow_assigns_incidence_with_independent_methods(method, exp
     )
     wf[WavelengthDetector[SampleRun]] = data
 
-    def log(z, times, states):
+    def log(times, states):
         return sc.DataArray(
             sc.array(dims=['time'], values=states),
             coords={
                 'time': sc.datetimes(dims=['time'], values=times, unit='ms'),
-                'position': sc.vector([0.0, 0.0, z], unit='m'),
             },
         )
 
     wf[SlitStatusLogs[SampleRun]] = {
-        'a': log(-9.0, [0, 25, 35, 45], [True, False, True, False]),
-        'b': log(-4.0, [0, 30, 50], [False, True, False]),
+        'a': log([0, 33, 43, 53], [True, False, True, False]),
+        'b': log([0, 33, 53], [False, True, False]),
     }
 
     result = wf.compute(CorrectedDetector[SampleRun])
@@ -218,6 +217,18 @@ def test_offspec_workflow_assigns_incidence_with_independent_methods(method, exp
         equal_nan=True,
     )
     assert {'reflection_angle', 'Qx', 'Qz'} <= set(result.bins.coords)
+    if method == 'slit_logs':
+        # One crossing-time coordinate serves all slit logs, independent of
+        # the different transverse slit centers that set the incidence angles.
+        crossing_times = result.bins.coords['time_at_slit'].bins.constituents['data']
+        expected_times = sc.datetimes(
+            dims=['event'], values=[28, 38, 48, 58], unit='ms'
+        ).to(unit='ns')
+        assert sc.all(
+            sc.abs(crossing_times - expected_times) < sc.scalar(3, unit='ns')
+        ).value
+    else:
+        assert 'time_at_slit' not in result.bins.coords
     assert_identical(result.bins.data, data.bins.data)
     assert_identical(
         result.bins.masks['incident_beam_unassigned'].bins.constituents['data'],

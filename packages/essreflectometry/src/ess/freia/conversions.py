@@ -63,29 +63,23 @@ def time_at_slit(
     ).to(unit=Ltotal.unit)
     slit_to_detector_flight_time = tof.tof_from_wavelength(
         wavelength=wavelength, Ltotal=Ltotal - source_to_slit_distance
-    )
-    detector_arrival_offset = event_time_offset.to(unit='s', dtype='float64')
-    slit_crossing_offset_ns = sc.round(
-        (detector_arrival_offset - slit_to_detector_flight_time.to(unit='s')).to(
-            unit='ns'
-        )
-    )
-    return event_time_zero.to(unit='ns') + slit_crossing_offset_ns.astype('int64')
+    ).to(unit='ns', dtype='float64')
+    detector_arrival_offset = event_time_offset.to(unit='ns', dtype='float64')
+    slit_crossing_offset = sc.round(
+        detector_arrival_offset - slit_to_detector_flight_time
+    ).astype('int64')
+    return event_time_zero.to(unit='ns') + slit_crossing_offset
 
 
 def assign_incident_angle_from_slit_logs(
-    event_time_zero: sc.Variable,
-    event_time_offset: sc.Variable,
-    wavelength: sc.Variable,
-    Ltotal: sc.Variable,
-    source_position: sc.Variable,
+    time_at_slit: sc.Variable,
     incident_angles: dict[str, sc.Variable],
     slit_status_logs: dict[str, sc.DataArray],
 ) -> sc.Variable:
     """Assign the incident angle when all slit states are known and one is open.
 
-    Each beam's log is evaluated at the neutron's crossing time at its own
-    controlling slit. Unknown status, no open slit or multiple open slits
+    All logs are evaluated at the same neutron crossing time, using a common
+    approximate slit position. Unknown status, no open slit or multiple open slits
     yields NaN. The measured reflection angle does not enter this assignment.
     """
     unassigned_incident_angle = sc.scalar(float('nan'), unit='rad')
@@ -95,16 +89,9 @@ def assign_incident_angle_from_slit_logs(
     # Encode unknown separately from the boolean states: -1 unknown, 0 closed, 1 open.
     unknown_slit_state = sc.scalar(-1, dtype='int32', unit=None)
     open_slit_state = sc.scalar(1, dtype='int32', unit=None)
+    slit_crossing_time = time_at_slit.to(unit='ns')
     for beam_name, beam_incident_angle in incident_angles.items():
         slit_log = slit_status_logs[beam_name]
-        slit_crossing_time = time_at_slit(
-            event_time_zero,
-            event_time_offset,
-            wavelength,
-            Ltotal,
-            source_position,
-            slit_log.coords['position'],
-        )
         slit_state = sc.lookup(
             slit_log.astype('int32').assign_coords(
                 time=slit_log.coords['time'].to(unit='ns')
@@ -283,31 +270,27 @@ def slit_log_incident_angle_graph(
     upstream_slit_centers: UpstreamSlitCenters[RunType],
     downstream_slit_centers: DownstreamSlitCenters[RunType],
     sample_surface_normal: SampleSurfaceNormal[RunType],
-    source_position: Position[NXsource, RunType],
     slit_status_logs: SlitStatusLogs[RunType],
 ) -> IncidentAngleGraph[RunType]:
-    """Provide incidence assignment using each slit's status at neutron crossing."""
+    """Provide one crossing-time coordinate and use it to look up all slit logs."""
     beam_incident_angles = _incident_angles_from_slits(
         upstream_slit_centers, downstream_slit_centers, sample_surface_normal
     )
 
-    def select_incident_angle(
-        event_time_zero: sc.Variable,
-        event_time_offset: sc.Variable,
-        wavelength: sc.Variable,
-        Ltotal: sc.Variable,
-    ) -> sc.Variable:
+    slit_position = sc.mean(
+        sc.concat(list(downstream_slit_centers.values()), dim='slit')
+    )
+
+    def select_incident_angle(time_at_slit: sc.Variable) -> sc.Variable:
         return assign_incident_angle_from_slit_logs(
-            event_time_zero,
-            event_time_offset,
-            wavelength,
-            Ltotal,
-            source_position,
-            beam_incident_angles,
-            slit_status_logs,
+            time_at_slit, beam_incident_angles, slit_status_logs
         )
 
-    return {'incident_angle': select_incident_angle}
+    return {
+        'slit_position': lambda: slit_position,
+        'time_at_slit': time_at_slit,
+        'incident_angle': select_incident_angle,
+    }
 
 
 def offspecular_coordinate_transformation_graph(

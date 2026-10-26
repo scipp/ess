@@ -59,12 +59,12 @@ class SlitStatusLogs(sciline.Scope[RunType, dict], dict):
     """Incident beam names mapped to the status logs of their controlling slits.
 
     Keys match UpstreamSlitCenters and DownstreamSlitCenters. Each log contains
-    boolean data (True means open), a datetime ``time`` coordinate, and a scalar
-    vector ``position`` coordinate giving the controlling slit's global position.
+    boolean data (True means open) and a datetime ``time`` coordinate.
 
     A logged state applies until the next entry; the final state persists.
     Status before the first entry is unknown, leaving the event unassigned.
-    Each log is sampled at the neutron's time at that slit's source distance.
+    All logs are sampled at the same ``time_at_slit`` event coordinate, using
+    the mean downstream slit center as their common approximate position.
     Exactly one open slit identifies the beam; zero or multiple open slits leave
     the event unassigned. No geometrical fallback is used.
     """

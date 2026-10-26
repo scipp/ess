@@ -149,12 +149,11 @@ def _events(offsets=(30, 40, 50, 60), speeds=(1000.0, 1000.0, 1000.0, 1000.0)):
     }
 
 
-def _log(position, times, states):
+def _log(times, states):
     return sc.DataArray(
         sc.array(dims=['time'], values=states, dtype='bool'),
         coords={
             'time': sc.datetimes(dims=['time'], values=times, unit='ms'),
-            'position': sc.vector([0.0, 0.0, position], unit='m'),
         },
     )
 
@@ -182,17 +181,29 @@ def test_time_at_slit_depends_on_wavelength_and_pixel_flight_path():
     )
 
 
-def test_each_slit_is_checked_at_its_own_distance_and_ambiguous_events_are_unassigned():
+def test_time_at_slit_rounds_only_after_subtracting_flight_time():
+    inputs = _events(offsets=[0, 0], speeds=[1000.0, 1000.0])
+    inputs['Ltotal'] = sc.scalar(0.03, unit='m')
+    inputs['event_time_offset'] = sc.array(
+        dims=['event'], values=[30.00025, 30.00075], unit='us'
+    )
+    result = time_at_slit(**inputs, slit_position=sc.vector([0.0, 0.0, 0.02], unit='m'))
+    assert_identical(
+        result, sc.datetimes(dims=['event'], values=[20_000, 20_001], unit='ns')
+    )
+
+
+def test_all_slit_logs_use_the_same_event_times_and_ambiguous_events_are_unassigned():
     angles = {'a': sc.scalar(0.3, unit='deg'), 'b': sc.scalar(1.0, unit='deg')}
-    # At 20 m, crossing times are 20, 30, 40, 50 ms.
-    # At 25 m, they are 25, 35, 45, 55 ms.
     # Reversed key order makes sure beams are paired by name.
     logs = {
-        'b': _log(25.0, [0, 30, 50], [False, True, False]),
-        'a': _log(20.0, [0, 25, 35, 45], [True, False, True, False]),
+        'b': _log([0, 25, 45], [False, True, False]),
+        'a': _log([0, 25, 35, 45], [True, False, True, False]),
     }
     result = assign_incident_angle_from_slit_logs(
-        **_events(), incident_angles=angles, slit_status_logs=logs
+        sc.datetimes(dims=['event'], values=[20, 30, 40, 50], unit='ms'),
+        incident_angles=angles,
+        slit_status_logs=logs,
     )
     assert_allclose(
         result['event', :2],
@@ -211,9 +222,9 @@ def test_slit_assignment_uses_neutron_crossing_time_instead_of_pulse_or_detector
     # Crossings at 20, 22, 32 ms. All pulse and detector times are outside
     # the opening, but the middle neutron crossed while the slit was open.
     result = assign_incident_angle_from_slit_logs(
-        **inputs,
+        time_at_slit(**inputs, slit_position=sc.vector([0.0, 0.0, 20.0], unit='m')),
         incident_angles={'a': sc.scalar(1.0, unit='deg')},
-        slit_status_logs={'a': _log(20.0, [0, 21, 23], [False, True, False])},
+        slit_status_logs={'a': _log([0, 21, 23], [False, True, False])},
     )
     assert np.isnan(result.values[[0, 2]]).all()
     assert_allclose(result['event', 1], sc.scalar(1.0, unit='deg').to(unit='rad'))
@@ -221,9 +232,9 @@ def test_slit_assignment_uses_neutron_crossing_time_instead_of_pulse_or_detector
 
 def test_status_changes_apply_at_the_slit_crossing_timestamp():
     result = assign_incident_angle_from_slit_logs(
-        **_events(offsets=[30, 31, 32, 33, 34], speeds=[1000.0] * 5),
+        sc.datetimes(dims=['event'], values=[20, 21, 22, 23, 24], unit='ms'),
         incident_angles={'a': sc.scalar(1.0, unit='deg')},
-        slit_status_logs={'a': _log(20.0, [0, 21, 23], [False, True, False])},
+        slit_status_logs={'a': _log([0, 21, 23], [False, True, False])},
     )
     assert_allclose(
         result,
@@ -241,14 +252,14 @@ def test_unknown_slit_status_does_not_silently_identify_another_beam(
     unknown_times, unknown_states
 ):
     result = assign_incident_angle_from_slit_logs(
-        **_events(),
+        sc.datetimes(dims=['event'], values=[20, 30, 40, 50], unit='ms'),
         incident_angles={
             'a': sc.scalar(0.3, unit='deg'),
             'b': sc.scalar(1.0, unit='deg'),
         },
         slit_status_logs={
-            'a': _log(20.0, [0], [True]),
-            'b': _log(25.0, unknown_times, unknown_states),
+            'a': _log([0], [True]),
+            'b': _log(unknown_times, unknown_states),
         },
     )
     assert sc.all(sc.isnan(result)).value
