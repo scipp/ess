@@ -243,16 +243,17 @@ def extract_detector_view_data(data: SampleRawData2D) -> DetectorViewRawData:
     histogrammed_2d_1 = data["region_1"]
     histogrammed_2d_2 = data["region_2"]
 
-    gamma_bin_centers_1 = sc.midpoints(histogrammed_2d_1.coords["gamma"])
-    gamma_bin_centers_2 = sc.midpoints(histogrammed_2d_2.coords["gamma"])
+    gamma_bin_edges_1 = histogrammed_2d_1.coords["gamma"]
+    gamma_bin_edges_2 = histogrammed_2d_2.coords["gamma"]
 
-    # TODO: check that dims match
-    gamma_bin_centers = sc.concat(
-        [gamma_bin_centers_2, gamma_bin_centers_1], dim="gamma"
+    # Concatenate gamma bin edges without duplicating the shared (360 deg, 0 deg) boundary.
+    gamma_bin_edges = sc.concat(
+        [gamma_bin_edges_2["gamma", :-1], gamma_bin_edges_1],
+        dim="gamma",
     )
 
-    # TODO: check that reg1 and reg2 have the same two_theta coords
-    two_theta_bin_centers = sc.midpoints(histogrammed_2d_1.coords["two_theta"])
+    # Both regions must have identical two-theta bin edges.
+    two_theta_bin_edges = histogrammed_2d_1.coords["two_theta"]
 
     counts_1 = histogrammed_2d_1.data
     counts_2 = histogrammed_2d_2.data
@@ -261,19 +262,19 @@ def extract_detector_view_data(data: SampleRawData2D) -> DetectorViewRawData:
 
     projection_radius = histogrammed_2d_1.coords["projection_radius"]
 
-    x_bin_centers, y_bin_centers, z_bin_centers = get_cartesian_from_cylindrical(
-        projection_radius, gamma_bin_centers, two_theta_bin_centers
+    x_bin_edges, y_bin_edges, z_bin_edges = get_cartesian_from_cylindrical(
+        projection_radius, gamma_bin_edges, two_theta_bin_edges
     )
 
     return DetectorViewRawData(
         sc.DataArray(
             counts,
             coords={
-                "gamma": gamma_bin_centers,
-                "two_theta": two_theta_bin_centers,
-                "x": x_bin_centers,
-                "y": y_bin_centers,
-                "z": z_bin_centers,
+                "gamma": gamma_bin_edges,
+                "two_theta": two_theta_bin_edges,
+                "x": x_bin_edges,
+                "y": y_bin_edges,
+                "z": z_bin_edges,
                 "projection_radius": projection_radius,
             },
         )
