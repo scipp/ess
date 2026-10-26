@@ -783,6 +783,7 @@ class DetectorExplorer(ipw.VBox):
 
         m = _slice_mask(self.masks[key], slices)
         m.values[...] = False if m.values.all() else True
+        self.all_mask_selection_nodes[key].notify_children(message=None)
         self.mask_selection_nodes[key].notify_children(message=None)
 
         self._previous_pixel = (x, y)
@@ -791,7 +792,7 @@ class DetectorExplorer(ipw.VBox):
         """
         Clear currently visible masks for the current tab or the entire dataset.
         """
-        if self.current_tab == 0:
+        if self.current_key == "All":
             keys = self.masks.keys()
             slices = [sl.value for sl in self.all_dim_sliders]
         else:
