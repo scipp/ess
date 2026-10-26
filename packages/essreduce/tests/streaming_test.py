@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
-import gc
-import sysconfig
 import weakref
 from typing import Any, NewType
 
@@ -1066,13 +1064,6 @@ class WindowAccumulator(streaming.Accumulator[Any]):
         self._value = None
 
 
-def _collect_if_free_threaded() -> None:
-    # Free-threaded CPython can defer reference counting until garbage collection.
-    # On regular CPython, keep checking that values are released immediately.
-    if sysconfig.get_config_var('Py_GIL_DISABLED'):
-        gc.collect()
-
-
 def test_StreamProcessor_finalize_does_not_retain_accumulated_value() -> None:
     accumulator = WindowAccumulator()
     base_workflow = sciline.Pipeline(
@@ -1089,9 +1080,8 @@ def test_StreamProcessor_finalize_does_not_retain_accumulated_value() -> None:
     streaming_wf.finalize()
 
     # The accumulator dropped the value in on_finalize, so nothing should keep it
-    # alive. On regular CPython, this must hold without running the cyclic garbage
-    # collector, i.e., the assertion relies on CPython's reference counting.
-    _collect_if_free_threaded()
+    # alive. This must hold without running the cyclic garbage collector, i.e., the
+    # assertion relies on CPython's reference counting.
     assert ref() is None
 
 
@@ -1110,8 +1100,7 @@ def test_StreamProcessor_accumulate_does_not_retain_chunk() -> None:
     streaming_wf.accumulate({DynamicA: chunk, DynamicB: sc.scalar(4.0)})
     del chunk
 
-    # On regular CPython, this relies on reference counting; see the test above.
-    _collect_if_free_threaded()
+    # Relies on CPython's reference counting, see the test above.
     assert ref() is None
 
 
@@ -1178,7 +1167,6 @@ def test_StreamProcessor_with_bypass_releases_chunks_not_read_at_finalize() -> N
     del terminated, bypassed
 
     # allow_bypass is not all-or-nothing: only what finalize reads directly is kept.
-    _collect_if_free_threaded()
     assert ref_terminated() is None
     assert ref_bypassed() is not None
     result = streaming_wf.finalize()
