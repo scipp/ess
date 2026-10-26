@@ -76,7 +76,7 @@ class MaskControl(ipw.HBox):
         if not change['new']:
             return
         self._lock = True
-        for button in self.mode_buttons.items():
+        for button in self.mode_buttons.values():
             if button.value and (button is not change['owner']):
                 button.value = False
         self._lock = False
