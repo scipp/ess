@@ -12,6 +12,13 @@ from matplotlib.backend_bases import MouseEvent
 
 BUTTON_STYLE = {"width": "40px"}
 
+# def current_tab(self) -> int:
+#     return self.tabs.selected_index
+
+
+def get_current_key(tabs) -> str:
+    return tabs.titles[tabs.selected_index]
+
 
 class MaskControl(ipw.HBox):
     def __init__(self):
@@ -91,7 +98,12 @@ class MaskControl(ipw.HBox):
 
 
 class ColorControl(ipw.HBox):
-    def __init__(self, log: bool = False):
+    def __init__(self, tabs, tag_figs, subplots, log: bool = False):
+
+        self._tabs = tabs
+        self._tab_figs = tag_figs
+        self._subplots = subplots
+        self._lock = False
 
         self.vmin = ipw.Text(
             description='Min:',
@@ -127,6 +139,82 @@ class ColorControl(ipw.HBox):
                 'padding': '0px 10px 0px 10px',
             },
         )
+
+    def update_colormapper_norm(self) -> None:
+        key = get_current_key(self._tabs)
+        # ind = self._tabs.selected_index
+        if key == "All":
+            figs = self._subplots.values()
+        else:
+            figs = [self._tab_figs[key]]
+        for f in figs:
+            f.view.colormapper.norm = "log" if self.log_button.value else "linear"
+
+    def toggle_log(self, _: dict) -> None:
+        self.reset_cmap_range()
+        self.update_colormapper_norm()
+
+    def update_color_range(self, _=None) -> None:
+        bounds = {
+            key: float(item.value) if len(item.value) > 0 else None
+            for key, item in [("cmin", self.vmin), ("cmax", self.vmax)]
+        }
+
+        if self.log_button.value:
+            for bound in bounds.values():
+                if (bound is not None) and (bound <= 0):
+                    return
+
+        key = get_current_key(self._tabs)
+
+        if key == "All":
+            figs = list(self._subplots.values())
+        else:
+            figs = [self._tab_figs[key]]
+
+        for f in figs:
+            for bound, new in bounds.items():
+                if new is None:
+                    getattr(f.view.colormapper, f"_{bound}").pop('user', None)
+                else:
+                    setattr(f.view.colormapper, bound, new)
+            if not self._lock:
+                f.view.colormapper.autoscale()
+        if not self._lock:
+            # If this is the subplots, by taking the first figure and calling draw,
+            # it is actually calling draw on the main figure canvas so it updates all
+            # subplots in one go.
+            figs[0].canvas.draw()
+
+            # if is_subplots:
+            #     self.main_figure.canvas.draw_idle()
+            # else:
+            #     self.tab_figs[key].canvas.draw()
+
+    def reset_cmap_range(self, _=None) -> None:
+        self._lock = True
+        self.vmin.value = ''
+        self.vmax.value = ''
+        self._lock = False
+
+    def fit_cmap_range(self, _=None) -> None:
+        # ind = self.tabs.selected_index
+        # key = self._tab_index_to_key[ind]
+        self.reset_cmap_range()
+
+        key = get_current_key(self._tabs)
+
+        if key == "All":
+            figs = list(self._subplots.values())
+        else:
+            figs = [self._tab_figs[key]]
+        for f in figs:
+            f.view.colormapper.autoscale()
+        figs[0].canvas.draw()
+        # if ind == 0:
+        #     self.main_figure.canvas.draw_idle()
+        # else:
+        #     self.tab_figs[key].canvas.draw()
 
 
 class DimSlider(ipw.HBox, ipw.ValueWidget):
@@ -272,9 +360,8 @@ class BankExplorer(ipw.VBox):
         # Before displaying on the figures, a reduction operation is sometimes applied.
         # If we apply the masks early in the node tree (e.g. just after the input data),
         # the masked data will be zeroed during the reduction and will no longer be
-        # easily visible on the figures. Instead, we slices the masks as well and only
+        # easily visible on the figures. Instead, we slice the masks as well and only
         # apply them just before displaying the data on the figures.
-        # self.mask_node = pp.Node(lambda: self.masks)
         self.mask_selection_nodes = {
             key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
             for key in self.data.keys()
@@ -451,7 +538,12 @@ class BankExplorer(ipw.VBox):
         self.mask_control.on_clear(self.clear_masks)
         self.mask_control.on_save(self.save_masks)
 
-        self.color_control = ColorControl()
+        self.color_control = ColorControl(
+            tabs=self.tabs,
+            tag_figs=self.tab_figs,
+            subplots=self.subplots,
+            # tab_index_to_key=self._tab_index_to_key,
+        )
 
         super().__init__(
             [
@@ -497,83 +589,84 @@ class BankExplorer(ipw.VBox):
         change:
             The change dictionary containing information about the tab change.
         """
-        self.update_colormapper_norm()
-        self.update_color_range()
+        self.color_control.update_colormapper_norm()
+        self.color_control.update_color_range()
+
         ind = change["new"]
         if ind == 0:
             old = change["old"]
-            key = self._tab_index_to_key[old]
+            key = self.tabs.titles[old]
             self.all_mask_selection_nodes[key].notify_children(message=None)
         else:
-            key = self._tab_index_to_key[ind]
+            key = get_current_key(self.tabs)
             self.mask_selection_nodes[key].notify_children(message=None)
 
-    def update_colormapper_norm(self) -> None:
-        ind = self.tabs.selected_index
-        if ind == 0:
-            figs = self.subplots.values()
-        else:
-            figs = [self.tab_figs[self._tab_index_to_key[ind]]]
-        for f in figs:
-            f.view.colormapper.norm = "log" if self.log_button.value else "linear"
+    # def update_colormapper_norm(self) -> None:
+    #     ind = self.tabs.selected_index
+    #     if ind == 0:
+    #         figs = self.subplots.values()
+    #     else:
+    #         figs = [self.tab_figs[self._tab_index_to_key[ind]]]
+    #     for f in figs:
+    #         f.view.colormapper.norm = "log" if self.log_button.value else "linear"
 
-    def toggle_log(self, _: dict) -> None:
-        self.reset_cmap_range()
-        self.update_colormapper_norm()
+    # def toggle_log(self, _: dict) -> None:
+    #     self.reset_cmap_range()
+    #     self.update_colormapper_norm()
 
-    def update_color_range(self, _=None) -> None:
-        bounds = {
-            key: float(item.value) if len(item.value) > 0 else None
-            for key, item in [("cmin", self.cmap_vmin), ("cmax", self.cmap_vmax)]
-        }
+    # def update_color_range(self, _=None) -> None:
+    #     bounds = {
+    #         key: float(item.value) if len(item.value) > 0 else None
+    #         for key, item in [("cmin", self.cmap_vmin), ("cmax", self.cmap_vmax)]
+    #     }
 
-        if self.log_button.value:
-            for bound in bounds.values():
-                if (bound is not None) and (bound <= 0):
-                    return
+    #     if self.log_button.value:
+    #         for bound in bounds.values():
+    #             if (bound is not None) and (bound <= 0):
+    #                 return
 
-        ind = self.current_tab
-        key = self._tab_index_to_key[ind]
+    #     ind = self.current_tab
+    #     key = self._tab_index_to_key[ind]
 
-        if ind == 0:
-            figs = self.subplots.values()
-        else:
-            figs = [self.tab_figs[key]]
+    #     if ind == 0:
+    #         figs = self.subplots.values()
+    #     else:
+    #         figs = [self.tab_figs[key]]
 
-        for f in figs:
-            for bound, new in bounds.items():
-                if new is None:
-                    getattr(f.view.colormapper, f"_{bound}").pop('user', None)
-                else:
-                    setattr(f.view.colormapper, bound, new)
-            if not self._lock:
-                f.view.colormapper.autoscale()
-        if not self._lock:
-            if ind == 0:
-                self.main_figure.canvas.draw_idle()
-            else:
-                self.tab_figs[key].canvas.draw()
+    #     for f in figs:
+    #         for bound, new in bounds.items():
+    #             if new is None:
+    #                 getattr(f.view.colormapper, f"_{bound}").pop('user', None)
+    #             else:
+    #                 setattr(f.view.colormapper, bound, new)
+    #         if not self._lock:
+    #             f.view.colormapper.autoscale()
+    #     if not self._lock:
+    #         if ind == 0:
+    #             self.main_figure.canvas.draw_idle()
+    #         else:
+    #             self.tab_figs[key].canvas.draw()
 
-    def reset_cmap_range(self, _=None) -> None:
-        self._lock = True
-        self.cmap_vmin.value = ''
-        self.cmap_vmax.value = ''
-        self._lock = False
+    # def reset_cmap_range(self, _=None) -> None:
+    #     self._lock = True
+    #     self.cmap_vmin.value = ''
+    #     self.cmap_vmax.value = ''
+    #     self._lock = False
 
-    def fit_cmap_range(self, _=None) -> None:
-        ind = self.tabs.selected_index
-        key = self._tab_index_to_key[ind]
+    # def fit_cmap_range(self, _=None) -> None:
+    #     ind = self.tabs.selected_index
+    #     key = self._tab_index_to_key[ind]
 
-        if ind == 0:
-            figs = self.subplots.values()
-        else:
-            figs = [self.tab_figs[key]]
-        for f in figs:
-            f.view.colormapper.autoscale()
-        if ind == 0:
-            self.main_figure.canvas.draw_idle()
-        else:
-            self.tab_figs[key].canvas.draw()
+    #     if ind == 0:
+    #         figs = self.subplots.values()
+    #     else:
+    #         figs = [self.tab_figs[key]]
+    #     for f in figs:
+    #         f.view.colormapper.autoscale()
+    #     if ind == 0:
+    #         self.main_figure.canvas.draw_idle()
+    #     else:
+    #         self.tab_figs[key].canvas.draw()
 
     def toggle_masking(self, _) -> None:
         if self.mask_control.mode is not None:
