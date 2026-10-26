@@ -13,32 +13,14 @@ from matplotlib.backend_bases import MouseEvent
 
 BUTTON_STYLE = {"width": "40px"}
 
-# def current_tab(self) -> int:
-#     return self.tabs.selected_index
-
-
-# def get_current_key(tabs) -> str:
-#     return tabs.titles[tabs.selected_index]
-
 
 class MaskControl(ipw.HBox):
-    def __init__(
-        self,
-        # tabs,
-        # tab_figs,
-        # masks,
-        # mask_selection_nodes,
-        # all_mask_selection_nodes,
-        # bank_dim_sliders,
-        # all_dim_sliders,
-    ):
-        # self._tabs = tabs
-        # self._tab_figs = tab_figs
-        # self._masks = masks
-        # self._mask_selection_nodes = mask_selection_nodes
-        # self._all_mask_selection_nodes = all_mask_selection_nodes
-        # self._bank_dim_sliders = bank_dim_sliders
-        # self._all_dim_sliders = all_dim_sliders
+    def __init__(self):
+        """
+        Widget for controlling masking options.
+        The widget includes buttons for selecting masking modes (horizontal, vertical,
+        single pixel), and options for clearing and saving masks.
+        """
 
         self.mode_buttons = {
             key: ipw.ToggleButton(
@@ -71,16 +53,9 @@ class MaskControl(ipw.HBox):
         )
 
         self._lock = False
-        self.mode = None
         for button in self.mode_buttons.values():
             button.observe(self._sync_modes, names='value')
         self.continuous_button.observe(self._on_continuous_toggle, names='value')
-
-        # # self._connections = []
-        # for button in self.mode_buttons.values():
-        #     button.observe(self.toggle_masking, names='value')
-        # self.clear_button.on_click(self.clear_masks)
-        # self.save_button.on_click(self.save_masks)
 
         super().__init__(
             [
@@ -95,145 +70,64 @@ class MaskControl(ipw.HBox):
             layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
 
-    def _sync_modes(self, change: dict):
+    def _sync_modes(self, change: dict) -> None:
         if self._lock:
             return
         if not change['new']:
-            self.mode = None
             return
         self._lock = True
-        for mode, button in self.mode_buttons.items():
-            if button.value:
-                if button is change['owner']:
-                    self.mode = mode
-                else:
-                    button.value = False
+        for button in self.mode_buttons.items():
+            if button.value and (button is not change['owner']):
+                button.value = False
         self._lock = False
 
-    def _on_continuous_toggle(self, change: dict):
+    @property
+    def mode(self) -> str | None:
+        for mode, button in self.mode_buttons.items():
+            if button.value:
+                return mode
+        return None
+
+    @mode.setter
+    def mode(self, value: str | None) -> None:
+        if value is None:
+            for button in self.mode_buttons.values():
+                button.value = False
+        else:
+            if value not in self.mode_buttons:
+                raise ValueError(f"Invalid mode: {value}")
+            self.mode_buttons[value].value = True
+
+    def _on_continuous_toggle(self, change: dict) -> None:
         if change['new']:
             self.continuous_button.icon = 'lock'
         else:
             self.continuous_button.icon = 'unlock'
 
-    def on_change(self, callback: callable):
-        for button in self.mode_buttons.values():
-            button.observe(callback, names='value')
-
-    def on_clear(self, callback: callable):
+    def on_clear(self, callback: callable) -> None:
+        """
+        Register a callback to be called when the clear button is clicked.
+        """
         self.clear_button.on_click(callback)
 
-    def on_save(self, callback: callable):
+    def on_save(self, callback: callable) -> None:
+        """
+        Register a callback to be called when the save button is clicked.
+        """
         self.save_button.on_click(callback)
-
-    # def toggle_masking(self, _) -> None:
-    #     if self.mode is not None:
-    #         self._connections = {
-    #             key: f.fig.canvas.mpl_connect('button_press_event', self.handle_click)
-    #             for key, f in self._tab_figs.items()
-    #         }
-    #         self._previous_pixel = None
-    #     else:
-    #         for key, conn in self._connections.items():
-    #             f = self._tab_figs[key]
-    #             f.fig.canvas.mpl_disconnect(conn)
-    #         self._connections = {}
-
-    # def handle_click(self, event: MouseEvent) -> None:
-    #     self._previous_pixel = None
-    #     self.add_mask(event)
-
-    #     # if not self.mask_control.continuous_check.value:
-    #     #     # self.add_mask(event)
-    #     #     # self._previous_pixel = None
-    #     #     return
-
-    #     # if self._previous_pixel is None:
-    #     #     self.add_mask(event)
-    #     if self.continuous_button.value:
-    #         self._mouse_move_connection = event.canvas.mpl_connect(
-    #             'motion_notify_event', self.add_mask
-    #         )
-    #         self._mouse_release_connection = event.canvas.mpl_connect(
-    #             'button_release_event', self.stop_continuous_mask
-    #         )
-
-    # def stop_continuous_mask(self, event: MouseEvent) -> None:
-    #     event.canvas.mpl_disconnect(self._mouse_move_connection)
-    #     event.canvas.mpl_disconnect(self._mouse_release_connection)
-    #     self._mouse_move_connection = None
-    #     self._mouse_release_connection = None
-    #     # self._previous_pixel = None
-
-    # def add_mask(self, event: MouseEvent) -> None:
-    #     if event.inaxes is None:
-    #         return
-
-    #     key = get_current_key(self._tabs)
-
-    #     # Ignore the event if the pan/zoom tool is active
-    #     if self._tab_figs[key].toolbar.tools['panzoom'].value is not None:
-    #         return
-
-    #     x = round(event.xdata)
-    #     y = round(event.ydata)
-    #     # masking_mode = self.mode
-    #     if self._previous_pixel is None:
-    #         self._previous_pixel = (x, y)
-    #     else:
-    #         if (self.mode == "single") and ((x, y) == self._previous_pixel):
-    #             return
-    #         if (self.mode == "horizontal") and (y == self._previous_pixel[1]):
-    #             return
-    #         if (self.mode == "vertical") and (x == self._previous_pixel[0]):
-    #             return
-
-    #     xdim = self._tab_figs[key].view._dims['x']
-    #     ydim = self._tab_figs[key].view._dims['y']
-
-    #     # Find slider dims and indices
-    #     slices = []
-    #     if self.mode in ("horizontal", "single"):
-    #         slices.append((ydim, y))
-    #     if self.mode in ("vertical", "single"):
-    #         slices.append((xdim, x))
-    #     slices.extend([sl.value for sl in self._bank_dim_sliders[key]])
-
-    #     m = slice_mask(self._masks[key], slices)
-    #     m.values[...] = False if m.values.any() else True
-    #     self._mask_selection_nodes[key].notify_children(message=None)
-
-    #     # Set the previous pixel to the current one
-    #     self._previous_pixel = (x, y)
-
-    # def clear_masks(self, _) -> None:
-    #     ind = self.tabs.selected_index
-    #     if ind == 0:
-    #         keys = self._masks.keys()
-    #         slices = [sl.value for sl in self._all_dim_sliders]
-    #     else:
-    #         keys = [self._tab_index_to_key[ind]]
-    #         slices = [sl.value for sl in self._bank_dim_sliders[keys[0]]]
-
-    #     for key in keys:
-    #         m = slice_mask(self._masks[key], slices)
-    #         m.values[...] = False
-    #         self._all_mask_selection_nodes[key].notify_children(message=None)
-    #         self._mask_selection_nodes[key].notify_children(message=None)
-
-    # def save_masks(self, _) -> None:
-    #     filename = self.filename_input.value
-    #     if not filename:
-    #         return
-    #     sc.DataGroup(self._masks).save_hdf5(filename)
 
 
 class ColorControl(ipw.HBox):
     def __init__(self, log: bool = False):
+        """
+        The color control widget allows controlling the color scale limits and toggling
+        logarithmic scaling.
 
-        # self._tabs = tabs
-        # self._tab_figs = tab_figs
-        # self._subplots = subplots
+        Parameters
+        ----------
+        log:
+            Whether to enable logarithmic scaling initially, by default ``False``.
+        """
         self._lock = False
 
         self.vmin = ipw.Text(
@@ -246,16 +140,10 @@ class ColorControl(ipw.HBox):
             layout={'width': '130px'},
             style={"description_width": 'initial'},
         )
-        # self.vmin.observe(self.update_color_range, names='value')
-        # self.vmax.observe(self.update_color_range, names='value')
-
         self.log_button = ipw.ToggleButton(
             description="log", layout=BUTTON_STYLE, value=log
         )
-        # self.log_button.observe(self.toggle_log, names="value")
-
         self.fit_button = ipw.Button(description="fit", layout=BUTTON_STYLE)
-        # self.fit_button.on_click(self.fit_cmap_range)
 
         super().__init__(
             [
@@ -272,94 +160,41 @@ class ColorControl(ipw.HBox):
         )
 
     def on_limit_change(self, callback: Callable) -> None:
+        """
+        Register a callback to be called when the color scale limits are changed.
+        """
         self.vmin.observe(callback, names='value')
         self.vmax.observe(callback, names='value')
 
     def on_log_toggle(self, callback: Callable) -> None:
+        """
+        Register a callback to be called when the logarithmic toggle button is clicked.
+        """
         self.log_button.observe(callback, names='value')
 
     def on_fit_click(self, callback: Callable) -> None:
+        """
+        Register a callback to be called when the fit button is clicked.
+        """
         self.fit_button.on_click(callback)
-
-    # def update_colormapper_norm(self) -> None:
-    #     key = get_current_key(self._tabs)
-    #     # ind = self._tabs.selected_index
-    #     if key == "All":
-    #         figs = self._subplots.values()
-    #     else:
-    #         figs = [self._tab_figs[key]]
-    #     for f in figs:
-    #         f.view.colormapper.norm = "log" if self.log_button.value else "linear"
-
-    # def toggle_log(self, _: dict) -> None:
-    #     self.reset_cmap_range()
-    #     self.update_colormapper_norm()
-
-    # def update_color_range(self, _=None) -> None:
-    #     bounds = {
-    #         key: float(item.value) if len(item.value) > 0 else None
-    #         for key, item in [("cmin", self.vmin), ("cmax", self.vmax)]
-    #     }
-
-    #     if self.log_button.value:
-    #         for bound in bounds.values():
-    #             if (bound is not None) and (bound <= 0):
-    #                 return
-
-    #     key = get_current_key(self._tabs)
-
-    #     if key == "All":
-    #         figs = list(self._subplots.values())
-    #     else:
-    #         figs = [self._tab_figs[key]]
-
-    #     for f in figs:
-    #         for bound, new in bounds.items():
-    #             if new is None:
-    #                 getattr(f.view.colormapper, f"_{bound}").pop('user', None)
-    #             else:
-    #                 setattr(f.view.colormapper, bound, new)
-    #         if not self._lock:
-    #             f.view.colormapper.autoscale()
-    #     if not self._lock:
-    #         # If this is the subplots, by taking the first figure and calling draw,
-    #         # it is actually calling draw on the main figure canvas so it updates all
-    #         # subplots in one go.
-    #         figs[0].canvas.draw()
-
-    #         # if is_subplots:
-    #         #     self.main_figure.canvas.draw_idle()
-    #         # else:
-    #         #     self.tab_figs[key].canvas.draw()
-
-    # def reset_cmap_range(self, _=None) -> None:
-    #     self._lock = True
-    #     self.vmin.value = ''
-    #     self.vmax.value = ''
-    #     self._lock = False
-
-    # def fit_cmap_range(self, _=None) -> None:
-    #     # ind = self.tabs.selected_index
-    #     # key = self._tab_index_to_key[ind]
-    #     self.reset_cmap_range()
-
-    #     key = get_current_key(self._tabs)
-
-    #     if key == "All":
-    #         figs = list(self._subplots.values())
-    #     else:
-    #         figs = [self._tab_figs[key]]
-    #     for f in figs:
-    #         f.view.colormapper.autoscale()
-    #     figs[0].canvas.draw()
-    #     # if ind == 0:
-    #     #     self.main_figure.canvas.draw_idle()
-    #     # else:
-    #     #     self.tab_figs[key].canvas.draw()
 
 
 class DimSlider(ipw.HBox, ipw.ValueWidget):
     def __init__(self, sizes: dict[str, int], dim: str, visible_dims: list[str]):
+        """
+        The DimSlider widget is used to control at which index to slice a particular
+        dimension of a data array. In addition, it provides an option to sum over the
+        dimension instead of selecting a specific index.
+
+        Parameters
+        ----------
+        sizes:
+            A dictionary mapping dimension names to their sizes.
+        dim:
+            The dimension this slider controls.
+        visible_dims:
+            A list of currently visible dimensions.
+        """
         self._lock = False
         self._sizes = sizes
         self._visible_dims = visible_dims
@@ -399,12 +234,38 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
 
 
 def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
+    """
+    Add missing coordinates to a DataArray. The coordinates are created as arange
+    arrays based on the size of each dimension.
+
+    Parameters
+    ----------
+    da:
+        The DataArray to process.
+    """
     return da.assign_coords({dim: sc.arange(dim, sz) for dim, sz in da.sizes.items()})
 
 
 def _slice_or_reduce(
     da: sc.DataArray, slices: list[tuple[str, int | None]], op: Literal["sum", "all"]
 ) -> sc.DataArray:
+    """
+    Slice or reduce a DataArray based on the provided slices and operation.
+    If the index for a dimension is ``None``, the specified operation is applied along
+    that dimension. Otherwise, the DataArray is sliced at the given index.
+    If an index is out of bounds for a dimension, a blank DataArray is created to avoid
+    indexing errors.
+
+    Parameters
+    ----------
+    da:
+        The DataArray to process.
+    slices:
+        A list of tuples, each containing a dimension name and an index or ``None``.
+    op:
+        The reduction operation to apply when the index is ``None``. Supported values
+        are ``"sum"`` and ``"all"``.
+    """
     out = da
     for sl in slices:
         dim, ind = sl
@@ -448,7 +309,7 @@ class BankExplorer(ipw.VBox):
         show_dims: list[str] | None = None,
         **kwargs,
     ):
-        """Widget to view detector banks.
+        """GUI to view and mask detector banks.
 
         Parameters
         ----------
@@ -617,41 +478,11 @@ class BankExplorer(ipw.VBox):
             )
 
         self.main_figure.canvas.header_visible = False
-        self._tab_switch_connection = self.main_figure.canvas.mpl_connect(
-            'button_press_event', self.switch_to_tab
-        )
-
-        # # Create color map controls
-        # self.cmap_vmin = ipw.Text(
-        #     description='Min:',
-        #     layout={'width': '130px'},
-        #     style={"description_width": 'initial'},
-        # )
-        # self.cmap_vmax = ipw.Text(
-        #     description='Max:',
-        #     layout={'width': '130px'},
-        #     style={"description_width": 'initial'},
-        # )
-        # self.cmap_vmin.observe(self.update_color_range, names='value')
-        # self.cmap_vmax.observe(self.update_color_range, names='value')
-
-        # is_log = next(
-        #     iter({kwargs.get('norm'), kwargs.get('logc')} - {None}), None
-        # ) in ('log', True)
-        # self.log_button = ipw.ToggleButton(
-        #     description="log", layout=BUTTON_STYLE, value=is_log
-        # )
-        # self.log_button.observe(self.toggle_log, names="value")
-
-        # self.fit_button = ipw.Button(description="fit", layout=BUTTON_STYLE)
-        # self.fit_button.on_click(self.fit_cmap_range)
-
-        # space = ipw.HTML('<div style="width: 20px;"></div>')
+        self.main_figure.canvas.mpl_connect('button_press_event', self.switch_to_tab)
 
         self.tabs = ipw.Tab(
             layout={'width': f'{figsize[0] * self.main_figure.get_dpi() + 40}px'}
         )
-
         self.tabs.children = [
             ipw.VBox([_box_of_sliders(self.all_dim_sliders), self.main_figure.canvas]),
             *[
@@ -659,20 +490,15 @@ class BankExplorer(ipw.VBox):
                 for key, f in zip(self.data.keys(), self.tab_figs.values(), strict=True)
             ],
         ]
-
-        # self._tab_index_to_key = {
-        #     0: "All",
-        #     **{i + 1: key for i, key in enumerate(self.data.keys())},
-        # }
-
         self.tabs.titles = ["All", *self.data.keys()]
         self.tabs.observe(self.selected_tab_changed, names='selected_index')
 
         self.mask_control = MaskControl()
-        self._mask_connections = {}
-        self.mask_control.on_change(self.toggle_masking)
+        # self.mask_control.on_change(self.toggle_masking)
         self.mask_control.on_clear(self.clear_masks)
         self.mask_control.on_save(self.save_masks)
+        for f in self.tab_figs.values():
+            f.fig.canvas.mpl_connect('button_press_event', self.handle_mask_click)
 
         self.color_control = ColorControl()
         self.color_control.on_limit_change(self.update_color_range)
@@ -695,14 +521,25 @@ class BankExplorer(ipw.VBox):
 
     @property
     def current_tab(self) -> int:
+        """
+        Get the index of the currently selected tab.
+        """
         return self.tabs.selected_index
 
     @property
     def current_key(self) -> str:
+        """
+        Get the key corresponding to the currently selected tab.
+        """
         return self.tabs.titles[self.current_tab]
 
     @property
     def current_figs(self) -> list:
+        """
+        Get the list of figures corresponding to the currently selected tab.
+        If the "All" tab is selected, return all subplots; otherwise, return the
+        a list with a single item containing the figure for the current tab.
+        """
         key = self.current_key
         if key == "All":
             return list(self.subplots.values())
@@ -718,13 +555,52 @@ class BankExplorer(ipw.VBox):
         event:
             The mouse event triggered by clicking on a subplot.
         """
+        # Ignore the event if it occurred outside any axes
+        if event.inaxes is None:
+            return
+        # Ignore the event if the pan/zoom tool is active
+        if event.inaxes.get_navigate_mode() is not None:
+            return
         if hasattr(event.inaxes, '_bank_explorer_subplot_index'):
             index = event.inaxes._bank_explorer_subplot_index
             self.tabs.selected_index = index + 1
 
+    def _get_old_and_new_sliders(self, old_tab: int, new_tab: int):
+        old_key = self.tabs.titles[old_tab]
+        new_key = self.tabs.titles[new_tab]
+        old_sliders = (
+            self.all_dim_sliders if old_tab == 0 else self.bank_dim_sliders[old_key]
+        )
+        new_sliders = (
+            self.all_dim_sliders if new_tab == 0 else self.bank_dim_sliders[new_key]
+        )
+        return old_sliders, new_sliders
+
+    def update_slider_sums(self, old_tab: int, new_tab: int) -> None:
+        old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
+        old_slider_sums = {sl.dim: sl.sum.value for sl in old_sliders}
+        for sl in new_sliders:
+            if sl.sum.value != old_slider_sums[sl.dim]:
+                sl.sum.value = old_slider_sums[sl.dim]
+
+    def update_slider_inds(self, old_tab: int, new_tab: int) -> None:
+        old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
+        old_slider_inds = dict(slider.value for slider in old_sliders)
+        for sl in new_sliders:
+            if sl.sum.value:
+                continue
+            new_value = min(old_slider_inds[sl.dim], sl.slider.max)
+            if sl.slider.value != new_value:
+                sl.slider.value = new_value
+
     def selected_tab_changed(self, change: dict) -> None:
         """
-        Handle the event when the selected tab changes.
+        When the selected tab changes, update the color range and normalization.
+        In addition, if we switched from a single figure tab to the "All" tab, we update
+        the slider positions to match those from the previously selected tab.
+        If we switched from the "All" tab to a single figure tab, we update the slider
+        positions for the new tab based on the previous "All" tab slider positions,
+        without exceeding the maximum allowed values for the sliders of the new tab.
 
         Parameters
         ----------
@@ -733,54 +609,34 @@ class BankExplorer(ipw.VBox):
         """
         self.update_colormapper_norm()
         self.update_color_range()
-        self.update_mask_connections()
 
         new_tab, old_tab = change["new"], change["old"]
-
-        # ind = change["new"]
-        if new_tab == 0:
-            # old = change["old"]
-            key = self.tabs.titles[old_tab]
-            # Set the slider positions to the ones from the old tab
-            old_slider_inds = dict(
-                slider.value for slider in self.bank_dim_sliders[key]
-            )
-            notification_needed = True
-            for sl in self.all_dim_sliders:
-                if sl.slider.value != old_slider_inds[sl.dim]:
-                    sl.slider.value = old_slider_inds[sl.dim]
-                    # If we changed the slider value, the plot update was already
-                    # triggered by moving the slider itself
-                    notification_needed = False
-            if notification_needed:
-                self.all_mask_selection_nodes[key].notify_children(message=None)
-        else:
-            key = self.current_key
-            notification_needed = True
-            if old_tab == 0:
-                old_slider_inds = dict(slider.value for slider in self.all_dim_sliders)
-                for sl in self.bank_dim_sliders[key]:
-                    new_value = min(old_slider_inds[sl.dim], sl.slider.max)
-                    if sl.slider.value != new_value:
-                        sl.slider.value = new_value
-                        notification_needed = False
-
-            if notification_needed:
-                self.mask_selection_nodes[self.current_key].notify_children(
-                    message=None
-                )
+        self.update_slider_sums(old_tab, new_tab)
+        if 0 in (old_tab, new_tab):
+            self.update_slider_inds(old_tab, new_tab)
 
     def update_colormapper_norm(self) -> None:
+        """
+        Update the colormapper normalization (logarithmic or linear) for all current
+        figures.
+        """
         for f in self.current_figs:
             f.view.colormapper.norm = (
                 "log" if self.color_control.log_button.value else "linear"
             )
 
     def toggle_log(self, _: dict) -> None:
+        """
+        Toggle the colormapper normalization between logarithmic and linear.
+        """
         self.reset_cmap_range()
         self.update_colormapper_norm()
 
     def update_color_range(self, _=None) -> None:
+        """
+        Update the color range (vmin and vmax) for all current figures based on the
+        values in the color control widgets.
+        """
         bounds = {
             key: float(item.value) if len(item.value) > 0 else None
             for key, item in [
@@ -793,20 +649,6 @@ class BankExplorer(ipw.VBox):
             for bound in bounds.values():
                 if (bound is not None) and (bound <= 0):
                     return
-
-        # ind = self.current_tab
-        # key = self._tab_index_to_key[ind]
-
-        # if ind == 0:
-        #     figs = self.subplots.values()
-        # else:
-        #     figs = [self.tab_figs[key]]
-
-        # key = get_current_key(self._tabs)
-        # if key == "All":
-        #     figs = list(self._subplots.values())
-        # else:
-        #     figs = [self._tab_figs[key]]
 
         figs = self.current_figs
         for f in figs:
@@ -822,84 +664,47 @@ class BankExplorer(ipw.VBox):
             # it is actually calling draw on the main figure canvas so it updates all
             # subplots in one go.
             figs[0].canvas.draw()
-            # if ind == 0:
-            #     self.main_figure.canvas.draw_idle()
-            # else:
-            #     self.tab_figs[key].canvas.draw()
 
     def reset_cmap_range(self, _=None) -> None:
+        """
+        Reset the color map range (vmin and vmax) to their default state.
+        """
         self._lock = True
         self.color_control.vmin.value = ''
         self.color_control.vmax.value = ''
         self._lock = False
 
     def fit_cmap_range(self, _=None) -> None:
-        # ind = self.tabs.selected_index
-        # key = self._tab_index_to_key[ind]
-
+        """
+        Fit the color map range (vmin and vmax) to the data for all current figures.
+        """
         self.reset_cmap_range()
-        # key = get_current_key(self.tabs)
-
-        # if key == "All":
-        #     figs = list(self.subplots.values())
-        # else:
-        #     figs = [self.tab_figs[key]]
-
         figs = self.current_figs
-
         for f in figs:
             f.view.colormapper.autoscale()
         figs[0].canvas.draw()
 
-        # if ind == 0:
-        #     figs = self.subplots.values()
-        # else:
-        #     figs = [self.tab_figs[key]]
-        # for f in figs:
-        #     f.view.colormapper.autoscale()
-        # if ind == 0:
-        #     self.main_figure.canvas.draw_idle()
-        # else:
-        #     self.tab_figs[key].canvas.draw()
-
-    def update_mask_connections(self) -> None:
-        self.clear_mask_connections()
-        self._mask_connections.update(
-            {
-                key: f.fig.canvas.mpl_connect(
-                    'button_press_event', self.handle_mask_click
-                )
-                for key, f in self.tab_figs.items()
-            }
-        )
-
-    def clear_mask_connections(self) -> None:
-        if not self._mask_connections:
-            return
-        for key, conn in self._mask_connections.items():
-            f = self.tab_figs[key]
-            f.fig.canvas.mpl_disconnect(conn)
-        self._mask_connections.clear()
-
-    def toggle_masking(self, _) -> None:
-        if self.mask_control.mode is not None:
-            if not self._mask_connections:
-                self.update_mask_connections()
-            self._previous_pixel = None
-        else:
-            self.clear_mask_connections()
-
     def handle_mask_click(self, event: MouseEvent) -> None:
+        """
+        If the mouse button is clicked within an axes and a masking mode is selected,
+        initiate the masking process:
+        - We add a mask at the current position.
+        - If continuous masking is enabled, we connect mouse move and release events to
+          allow continuous masking.
+        """
+        # Ignore the event if it occurred outside any axes
+        if event.inaxes is None:
+            return
+        # Ignore the event if the pan/zoom tool is active
+        if event.inaxes.get_navigate_mode() is not None:
+            return
+        # Ignore the event if no masking mode is selected
+        if self.mask_control.mode is None:
+            return
+
         self._previous_pixel = None
         self.add_mask(event)
 
-        # if not self.mask_control.continuous_check.value:
-        #     # self.add_mask(event)
-        #     # self._previous_pixel = None
-        #     return
-
-        # if self._previous_pixel is None:
-        #     self.add_mask(event)
         if self.mask_control.continuous_button.value:
             self._mouse_move_connection = event.canvas.mpl_connect(
                 'motion_notify_event', self.add_mask
@@ -909,22 +714,24 @@ class BankExplorer(ipw.VBox):
             )
 
     def stop_continuous_mask(self, event: MouseEvent) -> None:
+        """
+        Stop the continuous masking process by disconnecting the mouse move and release
+        events.
+        """
         event.canvas.mpl_disconnect(self._mouse_move_connection)
         event.canvas.mpl_disconnect(self._mouse_release_connection)
         self._mouse_move_connection = None
         self._mouse_release_connection = None
-        # self._previous_pixel = None
 
     def add_mask(self, event: MouseEvent) -> None:
+        """
+        Add a mask at the current mouse position based on the selected masking mode.
+        If continuous masking is enabled, this method will be called repeatedly as the
+        mouse moves.
+        """
+        # Still need to protect against outside of axes events as it may come from
+        # other events like mouse move during continuous masking.
         if event.inaxes is None:
-            return
-
-        # Current tab index
-        # key = self._tab_index_to_key[self.tabs.selected_index]
-        key = self.current_key
-
-        # Ignore the event if the pan/zoom tool is active
-        if self.tab_figs[key].toolbar.tools['panzoom'].value is not None:
             return
 
         x = round(event.xdata)
@@ -940,6 +747,7 @@ class BankExplorer(ipw.VBox):
             if (masking_mode == "vertical") and (x == self._previous_pixel[0]):
                 return
 
+        key = self.current_key
         xdim = self.tab_figs[key].view._dims['x']
         ydim = self.tab_figs[key].view._dims['y']
 
@@ -958,7 +766,9 @@ class BankExplorer(ipw.VBox):
         self._previous_pixel = (x, y)
 
     def clear_masks(self, _) -> None:
-        # ind = self.tabs.selected_index
+        """
+        Clear currently visible masks for the current tab or the entire dataset.
+        """
         if self.current_tab == 0:
             keys = self.masks.keys()
             slices = [sl.value for sl in self.all_dim_sliders]
@@ -973,6 +783,12 @@ class BankExplorer(ipw.VBox):
             self.mask_selection_nodes[key].notify_children(message=None)
 
     def save_masks(self, _) -> None:
+        """
+        Save the current masks to an HDF5 file specified by the filename input.
+        If no filename is provided, the method will return without saving. This should
+        in principle never happen because the save button should be disabled when no
+        filename is provided.
+        """
         filename = self.mask_control.filename_input.value
         if not filename:
             return
