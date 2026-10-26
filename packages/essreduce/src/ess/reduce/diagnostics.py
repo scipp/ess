@@ -61,7 +61,13 @@ class MaskControl(ipw.HBox):
         )
         self.filename_input = ipw.Text(value='', layout={"width": "150px"})
         self.save_button = ipw.Button(
-            icon='save', tooltip='Save masks', layout=BUTTON_STYLE
+            icon='save', tooltip='Save masks', layout=BUTTON_STYLE, disabled=True
+        )
+        self.filename_input.observe(
+            lambda change: setattr(
+                self.save_button, 'disabled', not bool(change['new'])
+            ),
+            names='value',
         )
 
         self._lock = False
@@ -729,13 +735,40 @@ class BankExplorer(ipw.VBox):
         self.update_color_range()
         self.update_mask_connections()
 
-        ind = change["new"]
-        if ind == 0:
-            old = change["old"]
-            key = self.tabs.titles[old]
-            self.all_mask_selection_nodes[key].notify_children(message=None)
+        new_tab, old_tab = change["new"], change["old"]
+
+        # ind = change["new"]
+        if new_tab == 0:
+            # old = change["old"]
+            key = self.tabs.titles[old_tab]
+            # Set the slider positions to the ones from the old tab
+            old_slider_inds = dict(
+                slider.value for slider in self.bank_dim_sliders[key]
+            )
+            notification_needed = True
+            for sl in self.all_dim_sliders:
+                if sl.slider.value != old_slider_inds[sl.dim]:
+                    sl.slider.value = old_slider_inds[sl.dim]
+                    # If we changed the slider value, the plot update was already
+                    # triggered by moving the slider itself
+                    notification_needed = False
+            if notification_needed:
+                self.all_mask_selection_nodes[key].notify_children(message=None)
         else:
-            self.mask_selection_nodes[self.current_key].notify_children(message=None)
+            key = self.current_key
+            notification_needed = True
+            if old_tab == 0:
+                old_slider_inds = dict(slider.value for slider in self.all_dim_sliders)
+                for sl in self.bank_dim_sliders[key]:
+                    new_value = min(old_slider_inds[sl.dim], sl.slider.max)
+                    if sl.slider.value != new_value:
+                        sl.slider.value = new_value
+                        notification_needed = False
+
+            if notification_needed:
+                self.mask_selection_nodes[self.current_key].notify_children(
+                    message=None
+                )
 
     def update_colormapper_norm(self) -> None:
         for f in self.current_figs:
