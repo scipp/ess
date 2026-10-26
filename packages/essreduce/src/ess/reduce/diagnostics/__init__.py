@@ -5,6 +5,7 @@ Utilities for inspecting detector and monitor data, when trying to inspect or de
 data recorded during experiments.
 """
 
+from .detector_explorer import DetectorExplorer
 from .load_nexus import load_detectors, load_monitors
 
-__all__ = ['load_detectors', 'load_monitors']
+__all__ = ['DetectorExplorer', 'load_detectors', 'load_monitors']

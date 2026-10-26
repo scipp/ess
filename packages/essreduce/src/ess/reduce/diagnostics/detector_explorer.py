@@ -284,6 +284,12 @@ def _slice_or_reduce(
     return out
 
 
+def _apply_masks_and_transpose(
+    da: sc.DataArray, mask: sc.Variable, dims: list[str] | tuple[str, ...]
+) -> sc.DataArray:
+    return da.assign_masks({"mask": mask}).transpose(dims)
+
+
 def _slice_mask(mask: sc.Variable, slices: list[tuple[str, slice]]) -> sc.Variable:
     out = mask
     for s in [sli for sli in slices if sli[1] is not None]:
@@ -301,7 +307,7 @@ def _box_of_sliders(sliders: list[DimSlider]) -> ipw.HBox:
     )
 
 
-class BankExplorer(ipw.VBox):
+class DetectorExplorer(ipw.VBox):
     def __init__(
         self,
         data: sc.DataGroup,
@@ -396,9 +402,10 @@ class BankExplorer(ipw.VBox):
         }
         self.apply_masks_nodes = {
             key: pp.Node(
-                lambda da, mask: da.assign_masks({"mask": mask}),
+                _apply_masks_and_transpose,
                 da=self.slice_data_nodes[key],
                 mask=self.slice_masks_nodes[key],
+                dims=self._visible_dims,
             )
             for key in self.data.keys()
         }
@@ -440,9 +447,10 @@ class BankExplorer(ipw.VBox):
         }
         self.all_apply_masks_nodes = {
             key: pp.Node(
-                lambda da, mask: da.assign_masks({"mask": mask}),
+                _apply_masks_and_transpose,
                 da=self.all_slice_data_nodes[key],
                 mask=self.all_slice_masks_nodes[key],
+                dims=self._visible_dims,
             )
             for key in self.data.keys()
         }
