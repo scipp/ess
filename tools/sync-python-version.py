@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) Scipp contributors (https://github.com/scipp)
+# /// script
+# requires-python = ">=3.12"
+#
+# [tool.pixi.workspace]
+# channels = ["conda-forge"]
+# ///
 """Sync requires-python with pixi.toml.
 
 The Python minor version pinned in pixi.toml (e.g. ``python = "3.12.*"``)

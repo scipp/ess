@@ -12,6 +12,8 @@ from ess.bifrost.data import (
 )
 from ess.bifrost.io.mcstas import load_sample_angle
 from ess.bifrost.live import BifrostQCutWorkflow, CutAxis, CutAxis1, CutAxis2, CutData
+from ess.bifrost.types import InstrumentAnglePath
+from ess.bifrost.workflow import simulation_default_parameters
 from ess.spectroscopy.types import (
     Filename,
     LookupTableFilename,
@@ -39,6 +41,9 @@ class TestBifrostQCutWorkflow:
         # The test file is from a simulation and
         # looks slightly different from production files.
         workflow.insert(load_sample_angle)
+        workflow[InstrumentAnglePath] = simulation_default_parameters()[
+            InstrumentAnglePath
+        ]
 
         workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
         workflow[LookupTableFilename] = lookup_table_simulation()

@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.12"
+#
+# [tool.pixi.workspace]
+# channels = ["conda-forge"]
+# ///
+
 import argparse
 import glob
 import logging
@@ -13,7 +20,7 @@ if any matching package depends on it(dependency-name).
 
 Example 1 - update minimum version of plopp to 26.5.0 for all packages:
 ```
-pixi run --frozen python tools/bump-dependency-version.py \
+pixi run --frozen --script tools/bump-dependency-version.py -- \
   --package ess* \
   --dependency-name plopp \
   --version 26.5.0
@@ -21,7 +28,7 @@ pixi run --frozen python tools/bump-dependency-version.py \
 
 Example 2 - update minimum version of pytest to 8.0 for all packages:
 ```
-pixi run --frozen python tools/bump-dependency-version.py \
+pixi run --frozen --script tools/bump-dependency-version.py -- \
   --package ess* \
   --dependency-name pytest \
   --extra test \
@@ -30,7 +37,7 @@ pixi run --frozen python tools/bump-dependency-version.py \
 
 Example 3 - update minimum version of ipywidgets to 30.0 for essnmx and essdiffraction:
 ```
-pixi run --frozen python tools/bump-dependency-version.py \
+pixi run --frozen --script tools/bump-dependency-version.py -- \
   --package essnmx \
   --package essdiffraction \
   --dependency-name ipywidgets \

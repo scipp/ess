@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.12"
+#
+# [tool.pixi.workspace]
+# channels = ["conda-forge"]
+# ///
+
 import sys
 from pathlib import Path
 

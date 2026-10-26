@@ -23,6 +23,11 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
+      # Run tests by default if detection fails or returns no result.
+      non_docs: >-
+        ${{ steps.non-docs.outcome != 'success' ||
+            steps.non-docs.outputs.non_docs == '' ||
+            steps.non-docs.outputs.non_docs == 'true' }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v4
@@ -99,6 +104,18 @@ jobs:
               - '.pre-commit-config.yaml'
               - '.python-version'
 
+      - name: Detect non-documentation changes
+        uses: dorny/paths-filter@v4
+        id: non-docs
+        continue-on-error: true  # Failure only disables the docs-only optimization.
+        with:
+          # A file must be outside both documentation trees to require unit tests.
+          predicate-quantifier: every
+          filters: |
+            non_docs:
+              - '!docs/**'
+              - '!packages/*/docs/**'
+
   formatting:
     name: Formatting and static analysis
     runs-on: ubuntu-24.04
@@ -108,7 +125,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
-          pixi-version: v0.78.0
+          pixi-version: v0.82.1
           frozen: true
           environments: lint
       - run: pixi run -e lint lint
@@ -116,7 +133,9 @@ jobs:
   test:
     name: Test ${{ matrix.package }}
     needs: [ changes, formatting ]
-    if: needs.changes.outputs.packages != '[]'
+    if: |
+      needs.changes.outputs.packages != '[]' &&
+      needs.changes.outputs.non_docs == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -128,7 +147,7 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
-          pixi-version: v0.78.0
+          pixi-version: v0.82.1
           frozen: true
           environments: ${{ matrix.package }}
       - name: Run tests
