@@ -29,9 +29,11 @@ from ess.reduce.nexus.types import (
     TransformationTimeFilter,
 )
 
+from ..types import InstrumentAnglePath, SampleAnglePath
+
 
 def load_sample_angle(
-    file_spec: NeXusFileSpec[RunType],
+    file_spec: NeXusFileSpec[RunType], path: SampleAnglePath
 ) -> SampleAngle[RunType]:
     """Load the rotation angle of a sample from a BIFROST NeXus file."""
 
@@ -40,7 +42,7 @@ def load_sample_angle(
         nx_class=snx.NXinstrument,
         parent_class=snx.NXentry,
     ) as instrument:
-        log: snx.Group = instrument['114_sample_stack/rotation_stage']  # type: ignore[assignment]
+        log: snx.Group = instrument[path]  # type: ignore[assignment]
         if isinstance(log['value'], snx.Group):
             # The NXlog is nested in this group, e.g., the group can be an NXpositioner
             # with children 'value', 'target_value', etc.
@@ -51,14 +53,14 @@ def load_sample_angle(
 
     if transform.transformation_type != 'rotation':
         raise ValueError(
-            "Expected the sample angle at rotation_stage to be a rotation,"
+            f"Expected the sample angle at {path} to be a rotation,"
             f" got '{transform.transformation_type}' instead.'"
         )
     return SampleAngle[RunType](transform.value)  # type: ignore[return-value]
 
 
 def extract_instrument_angle(
-    chain: NeXusTransformationChain[ElasticMonitor, RunType],
+    chain: NeXusTransformationChain[ElasticMonitor, RunType], path: InstrumentAnglePath
 ) -> InstrumentAngle[RunType]:
     """Extract the rotation angle for the BIFROST detector."""
     # This function extracts the angle from a transformation chain instead of loading it
@@ -67,23 +69,14 @@ def extract_instrument_angle(
     # We could use any detector or the elastic monitor to get a chain that contains
     # the angle. Using the monitor is simplest because there is only one, and we
     # do not have to deal with multiple detectors.
-    # The monitor is mounted on the detector tank, so the tank angle is the first
-    # transformation in the chain that is not part of the monitor's own group.
-    # This does not depend on the name of the tank angle or whether it is
-    # stored as an NXlog or a static value.
-    monitor_prefix = f'{chain.parent}/'
-    depends_on = chain
-    while (path := depends_on.absolute_path()) is not None:
+    try:
         transformation = chain.transformations[path]
-        if not path.startswith(monitor_prefix):
-            break
-        depends_on = transformation.depends_on
-    else:
+    except KeyError:
         raise ValueError(
-            'Could not find the detector tank angle: the transformation chain of '
-            f'{chain.parent} has no transformation outside that group: '
+            f'The transformation chain of {chain.parent} does not contain the '
+            f'detector tank angle {path}. The chain contains '
             f'{list(chain.transformations)}'
-        )
+        ) from None
     if transformation.transformation_type != 'rotation':
         raise ValueError(
             f"Expected the instrument angle at {path} to be a rotation, "
@@ -274,5 +267,7 @@ providers = (
 )
 
 parameters = {
+    InstrumentAnglePath: '/entry/instrument/detector_tank/transformations/tank_angle',
+    SampleAnglePath: '/entry/instrument/sample_stage/transformations/sample_rotation',
     TransformationTimeFilter: stepwise_transformation_time_filter,
 }
