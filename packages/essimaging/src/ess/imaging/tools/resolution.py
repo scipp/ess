@@ -116,15 +116,57 @@ def maximum_resolution_achievable(
     )
 
 
-def _radial_profile(data: NDArray) -> NDArray:
-    '''Integrate ellipses around center of image.'''
-    y, x = np.indices(data.shape)
-    cy, cx = np.array(data.shape) / 2.0
-    r = np.hypot((cx * cy) ** 0.5 * (x - cx) / cx, (cx * cy) ** 0.5 * (y - cy) / cy)
-    r = r.astype(np.int32)
-    tbin = np.bincount(r.ravel(), data.ravel())
-    nr = np.bincount(r.ravel())
-    return tbin / (nr + 1e-15)
+def _radial_profile(data: NDArray) -> tuple[NDArray, NDArray]:
+    """Return frequencies and radial means of an fftshifted spectrum."""
+    fy = np.fft.fftshift(np.fft.fftfreq(data.shape[0]))
+    fx = np.fft.fftshift(np.fft.fftfreq(data.shape[1]))
+    radius = np.hypot(fy[:, None], fx[None, :])
+    # Use the finest FFT spacing, so the zero-frequency bin contains only
+    # zero-frequency component.
+    # The tolerance keeps frequencies on a bin boundary in that bin despite rounding.
+    bins = np.floor(radius * max(data.shape) + 1e-12).astype(np.intp)
+    count = np.bincount(bins.ravel())
+    populated = count > 0
+    frequency = (
+        np.bincount(bins.ravel(), weights=radius.ravel())[populated] / count[populated]
+    )
+    profile = (
+        np.bincount(bins.ravel(), weights=data.ravel())[populated] / count[populated]
+    )
+    return frequency, profile
+
+
+def normalized_radial_spectrum(image: sc.DataArray) -> sc.DataArray:
+    """Return the normalized, radially averaged Fourier-amplitude spectrum.
+
+    Parameters
+    ----------
+    image:
+        A two-dimensional image sampled on equally spaced square pixels. Pixel
+        coordinates are not used; the frequency is expressed per image pixel.
+
+    Returns
+    -------
+    :
+        Fourier-amplitude spectrum with a dimensionless ``frequency`` coordinate
+        in cycles (line pairs) per pixel. Each coordinate is the mean frequency
+        magnitude in its radial bin. Only bins up to 0.5 cycles per pixel are
+        included, inside the circle bounded by the axial Nyquist frequencies.
+        The zero-frequency amplitude is normalized to one.
+
+    Notes
+    -----
+    This is an amplitude spectrum, not a power spectrum. It can be used to inspect
+    the measured and reference spectra underlying :func:`modulation_transfer_function`.
+    """
+    values = image.values / image.values.sum()
+    amplitude = np.abs(np.fft.fftshift(np.fft.fft2(values)))
+    frequency, profile = _radial_profile(amplitude)
+    keep = frequency <= 0.5
+    return sc.DataArray(
+        sc.array(dims=['frequency'], values=profile[keep]),
+        coords={'frequency': sc.array(dims=['frequency'], values=frequency[keep])},
+    )
 
 
 def modulation_transfer_function(
@@ -238,24 +280,10 @@ def modulation_transfer_function(
 
     The modulation transfer function at frequency :math:`f` can be estimated as the ratio of the Fourier transform of the image (integrated over constant frequency magnitude) to the Fourier transform of the open beam image multiplied by the sample mask (also integrated over constant frequency magnitude).
     '''  # noqa: E501
-    _measured = measured_image.values
-    # Can't do inplace because dtype of sum might be different from dtype of input
-    _measured = _measured / _measured.sum()
-    _reference = (open_beam_image * target).to(unit=measured_image.unit).values
-    _reference = _reference / _reference.sum()
-    f_ideal = np.abs(np.fft.fftshift(np.fft.fft2(_reference)))
-    f_measured = np.abs(np.fft.fftshift(np.fft.fft2(_measured)))
-    _mtf = _radial_profile(f_measured) / _radial_profile(f_ideal)
-    return sc.DataArray(
-        sc.array(dims=['frequency'], values=_mtf),
-        # Unit of frequency is line_pairs / pixel but since both of those are
-        # a kind of counts I think in our unit system that is best
-        # represented as 'dimensionless'.
-        # The largest frequency magnitude in 2d fft is sqrt(1/2).
-        coords={'frequency': sc.linspace('frequency', 0, (1 / 2) ** 0.5, len(_mtf))},
-        # We're only interested in frequencies below 0.5 oscillations per pixel
-        # because those above are unphysical.
-    )['frequency', : sc.scalar(0.5)]
+    reference = (open_beam_image * target).to(unit=measured_image.unit)
+    return normalized_radial_spectrum(measured_image) / normalized_radial_spectrum(
+        reference
+    )
 
 
 def estimate_cut_off_frequency(mtf: sc.DataArray) -> sc.Variable:

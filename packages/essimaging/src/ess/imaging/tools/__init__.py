@@ -8,6 +8,7 @@ from .resolution import (
     maximum_resolution_achievable,
     modulation_transfer_function,
     mtf_less_than,
+    normalized_radial_spectrum,
 )
 from .saturation import saturation_indicator
 
@@ -18,6 +19,7 @@ __all__ = [
     "maximum_resolution_achievable",
     "modulation_transfer_function",
     "mtf_less_than",
+    "normalized_radial_spectrum",
     "resample",
     "resize",
     "saturation_indicator",

@@ -32,7 +32,7 @@ def tiff_from_event_data(
     time_bins: int | sc.Variable,
     pulse_stride: int,
     pulse_stride_offset: int = 0,
-    detector_group_path: str = "/entry/instrument/timepix3_efu",
+    detector_group_path: str = "/entry/instrument/timepix3",
     event_data_field_path: str = "data",
 ) -> None:
     '''
