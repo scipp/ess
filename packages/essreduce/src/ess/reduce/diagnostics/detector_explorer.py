@@ -7,6 +7,7 @@ from typing import Literal
 
 import ipywidgets as ipw
 import matplotlib.pyplot as plt
+import numpy as np
 import plopp as pp
 import scipp as sc
 from matplotlib.backend_bases import MouseEvent
@@ -331,6 +332,8 @@ class DetectorExplorer(ipw.VBox):
         """
         self._lock = False
 
+        if not hasattr(data, 'items'):
+            data = sc.DataGroup({data.name or 'detector_0': data})
         self.data = sc.DataGroup(
             {k: _add_missing_coordinates(da) for k, da in data.items()}
         )
@@ -455,27 +458,30 @@ class DetectorExplorer(ipw.VBox):
             for key in self.data.keys()
         }
 
+        nkeys = len(self.data)
+        ncols = min(3, nkeys)
+        nrows = math.ceil(len(self.data) / ncols)
         with plt.ioff():
-            ncols = 3
-            nrows = math.ceil(len(self.data) / ncols)
             self.main_figure, axs = plt.subplots(
                 nrows=nrows, ncols=ncols, figsize=figsize
             )
+        if nrows == 1 and ncols == 1:
+            axs = np.array([axs])
+        else:
+            axs = axs.flatten()
 
         self.subplots = {}
         self.tab_figs = {}
         _kwargs = {**{"hide_log_buttons": True, "autoscale": False}, **kwargs}
-        for i, (bank, ax) in enumerate(
-            zip(self.data.keys(), axs.flatten(), strict=True)
-        ):
+        for i, bank in enumerate(self.data.keys()):
             self.subplots[bank] = pp.imagefigure(
                 self.all_apply_masks_nodes[bank],
-                ax=ax,
+                ax=axs[i],
                 title=bank,
                 cbar=True,
                 **_kwargs,
             )
-            ax._bank_explorer_subplot_index = i
+            axs[i]._bank_explorer_subplot_index = i
             self.tab_figs[bank] = pp.imagefigure(
                 self.apply_masks_nodes[bank],
                 title=bank,
@@ -491,18 +497,26 @@ class DetectorExplorer(ipw.VBox):
         self.tabs = ipw.Tab(
             layout={'width': f'{figsize[0] * self.main_figure.get_dpi() + 40}px'}
         )
-        self.tabs.children = [
-            ipw.VBox([_box_of_sliders(self.all_dim_sliders), self.main_figure.canvas]),
-            *[
-                ipw.VBox([_box_of_sliders(self.bank_dim_sliders[key]), f])
-                for key, f in zip(self.data.keys(), self.tab_figs.values(), strict=True)
-            ],
+        children = [
+            ipw.VBox([_box_of_sliders(self.bank_dim_sliders[key]), f])
+            for key, f in zip(self.data.keys(), self.tab_figs.values(), strict=True)
         ]
-        self.tabs.titles = ["All", *self.data.keys()]
+        if len(self.data) > 1:
+            children = [
+                ipw.VBox(
+                    [_box_of_sliders(self.all_dim_sliders), self.main_figure.canvas]
+                ),
+                *children,
+            ]
+
+        self.tabs.children = children
+        titles = list(self.data.keys())
+        if len(self.data) > 1:
+            titles = ["All", *titles]
+        self.tabs.titles = titles
         self.tabs.observe(self.selected_tab_changed, names='selected_index')
 
         self.mask_control = MaskControl()
-        # self.mask_control.on_change(self.toggle_masking)
         self.mask_control.on_clear(self.clear_masks)
         self.mask_control.on_save(self.save_masks)
         for f in self.tab_figs.values():
