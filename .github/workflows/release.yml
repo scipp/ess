@@ -172,8 +172,6 @@ jobs:
       - name: Generate release note
         run: pixi run --script tools/collect-release-notes.py -- --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LASTVERSION}
         env:
-            # We have no lock files for scripts
-            PIXI_FROZEN: false
             PIXI_NO_INSTALL: false
       - name: Download existing release note
         env:
