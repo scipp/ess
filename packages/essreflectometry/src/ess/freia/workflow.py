@@ -171,7 +171,7 @@ def FreiaWorkflow(
 def FreiaOffspecWorkflow(
     *,
     incident_beam_from: Literal['closest', 'slit_logs'] = 'closest',
-    wavelength_from: WavelengthLutMode = 'file',
+    wavelength_from: WavelengthLutMode = "file",
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for unnormalized, coplanar off-specular FREIA data.

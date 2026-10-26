@@ -87,11 +87,11 @@ def assign_incident_angle_from_slit_logs(
     open_slit_count = sc.scalar(0, dtype='int32', unit=None)
     all_slit_states_known = sc.scalar(True)
     # Encode unknown separately from the boolean states: -1 unknown, 0 closed, 1 open.
-    unknown_slit_state = sc.scalar(-1, dtype='int32', unit=None)
-    open_slit_state = sc.scalar(1, dtype='int32', unit=None)
     slit_crossing_time = time_at_slit.to(unit='ns')
     for beam_name, beam_incident_angle in incident_angles.items():
         slit_log = slit_status_logs[beam_name]
+        unknown_slit_state = sc.scalar(-1, dtype='int32', unit=slit_log.unit)
+        open_slit_state = sc.scalar(1, dtype='int32', unit=slit_log.unit)
         slit_state = sc.lookup(
             slit_log.astype('int32').assign_coords(
                 time=slit_log.coords['time'].to(unit='ns')
@@ -105,7 +105,9 @@ def assign_incident_angle_from_slit_logs(
         )
         slit_is_open = slit_state == open_slit_state
         assigned_incident_angle = sc.where(
-            slit_is_open, beam_incident_angle.to(unit='rad'), assigned_incident_angle
+            slit_is_open,
+            beam_incident_angle.to(unit='rad', dtype='float64'),
+            assigned_incident_angle,
         )
         open_slit_count = open_slit_count + slit_is_open.astype('int32')
     exactly_one_slit_open = open_slit_count == sc.scalar(1, unit=None)
