@@ -62,27 +62,31 @@ def extract_instrument_angle(
 ) -> InstrumentAngle[RunType]:
     """Extract the rotation angle for the BIFROST detector."""
     # This function extracts the angle from a transformation chain instead of loading it
-    # directly from a file to avoid loading `detector_tank_angle` multiple times
+    # directly from a file to avoid loading the tank angle multiple times
     # as that would cause problems in livedata.
     # We could use any detector or the elastic monitor to get a chain that contains
     # the angle. Using the monitor is simplest because there is only one, and we
     # do not have to deal with multiple detectors.
-    try:
-        transformation = next(
-            iter(
-                t
-                for name, t in chain.transformations.items()
-                if 'detector_tank_angle' in name
-            )
-        )
-    except StopIteration:
+    # The monitor is mounted on the detector tank, so the tank angle is the first
+    # transformation in the chain that is not part of the monitor's own group.
+    # This does not depend on the name of the tank angle or whether it is
+    # stored as an NXlog or a static value.
+    monitor_prefix = f'{chain.parent}/'
+    depends_on = chain
+    while (path := depends_on.absolute_path()) is not None:
+        transformation = chain.transformations[path]
+        if not path.startswith(monitor_prefix):
+            break
+        depends_on = transformation.depends_on
+    else:
         raise ValueError(
-            'Could not find detector_tank_angle transformation in chain with '
+            'Could not find the detector tank angle: the transformation chain of '
+            f'{chain.parent} has no transformation outside that group: '
             f'{list(chain.transformations)}'
-        ) from None
+        )
     if transformation.transformation_type != 'rotation':
         raise ValueError(
-            "Expected the instrument angle at detector_tank_angle to be a rotation, "
+            f"Expected the instrument angle at {path} to be a rotation, "
             f"got '{transformation.transformation_type}' instead.'"
         )
     return InstrumentAngle[RunType](transformation.value)  # type: ignore[return-value]
@@ -100,7 +104,8 @@ def load_analyzer_for_detector(
     """Load the analyzer component for the given detector.
 
     This function searches for an ``NXcrystal`` in the inputs (via the
-    'input' attribute) of the detector and loads the first NeXus group it finds.
+    ``inputs`` dataset or attribute) of the detector and loads the first NeXus
+    group it finds.
 
     See Also
     --------
@@ -153,7 +158,7 @@ def _find_class_in_inputs(
 
 def _get_inputs(group: snx.Group) -> list[str]:
     try:
-        inputs = group['inputs']
+        inputs = group['inputs'][()]
     except KeyError:
         try:
             # Older ESS encoding. The NeXus standard requires 'inputs' to be a dataset
@@ -161,7 +166,10 @@ def _get_inputs(group: snx.Group) -> list[str]:
             inputs = group.attrs['inputs']
         except KeyError:
             return []
-    # Deal with nexusformat (Python module) or kafka-to-nexus (filewriter)
+    if isinstance(inputs, sc.Variable):  # 1-d dataset
+        inputs = list(inputs.values)
+    # A scalar dataset loads as a str.
+    # Also deal with nexusformat (Python module) or kafka-to-nexus (filewriter)
     # silently converting a len(list[str]) == 1 attribute to a str attribute:
     return [inputs] if isinstance(inputs, str) else inputs
 
