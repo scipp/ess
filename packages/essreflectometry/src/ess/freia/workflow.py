@@ -190,8 +190,7 @@ def FreiaOffspecWorkflow(
         logs at a shared ``time_at_slit`` coordinate. The common approximate
         position is the mean downstream slit center. Exactly one open slit
         determines the incident beam. Otherwise the incidence is NaN and the
-        event is masked as ``incident_beam_unassigned``; no closest-beam fallback
-        is applied.
+        event is masked as ``incident_beam_unassigned``.
     wavelength_from:
         Wavelength lookup table mode: 'analytical', 'simulation', or 'file'.
     """

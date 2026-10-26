@@ -34,9 +34,8 @@ def time_at_slit(
 ) -> sc.Variable:
     """Estimate absolute event times at the slit's distance from the source.
 
-    Back-propagate from detector arrival using the reconstructed wavelength.
-    This retains source emission delays and does not assume that the neutron
-    left the source at the pulse timestamp.
+    Back-propagate from detector arrival using the reconstructed wavelength,
+    retaining source emission delays.
 
     Parameters
     ----------
@@ -80,7 +79,7 @@ def assign_incident_angle_from_slit_logs(
 
     All logs are evaluated at the same neutron crossing time, using a common
     approximate slit position. Unknown status, no open slit or multiple open slits
-    yields NaN. The measured reflection angle does not enter this assignment.
+    yields NaN.
     """
     unassigned_incident_angle = sc.scalar(float('nan'), unit='rad')
     assigned_incident_angle = unassigned_incident_angle
@@ -149,7 +148,7 @@ def theta(
     """Specular reflection angle between the outgoing ray and the sample surface.
 
     Use the full three-dimensional direction. Under specular reflection this
-    also determines the incidence angle, without requiring the incoming ray.
+    also determines the incidence angle.
     """
     normal = sample_surface_normal / sc.norm(sample_surface_normal)
     return sc.asin(sc.dot(outgoing_direction, normal))

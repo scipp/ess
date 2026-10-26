@@ -66,5 +66,5 @@ class SlitStatusLogs(sciline.Scope[RunType, dict], dict):
     All logs are sampled at the same ``time_at_slit`` event coordinate, using
     the mean downstream slit center as their common approximate position.
     Exactly one open slit identifies the beam; zero or multiple open slits leave
-    the event unassigned. No geometrical fallback is used.
+    the event unassigned.
     """
