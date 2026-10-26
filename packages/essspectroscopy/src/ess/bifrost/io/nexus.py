@@ -29,9 +29,11 @@ from ess.reduce.nexus.types import (
     TransformationTimeFilter,
 )
 
+from ..types import InstrumentAnglePath, SampleAnglePath
+
 
 def load_sample_angle(
-    file_spec: NeXusFileSpec[RunType],
+    file_spec: NeXusFileSpec[RunType], path: SampleAnglePath
 ) -> SampleAngle[RunType]:
     """Load the rotation angle of a sample from a BIFROST NeXus file."""
 
@@ -40,7 +42,7 @@ def load_sample_angle(
         nx_class=snx.NXinstrument,
         parent_class=snx.NXentry,
     ) as instrument:
-        log: snx.Group = instrument['114_sample_stack/rotation_stage']  # type: ignore[assignment]
+        log: snx.Group = instrument[path]  # type: ignore[assignment]
         if isinstance(log['value'], snx.Group):
             # The NXlog is nested in this group, e.g., the group can be an NXpositioner
             # with children 'value', 'target_value', etc.
@@ -51,38 +53,33 @@ def load_sample_angle(
 
     if transform.transformation_type != 'rotation':
         raise ValueError(
-            "Expected the sample angle at rotation_stage to be a rotation,"
+            f"Expected the sample angle at {path} to be a rotation,"
             f" got '{transform.transformation_type}' instead.'"
         )
     return SampleAngle[RunType](transform.value)  # type: ignore[return-value]
 
 
 def extract_instrument_angle(
-    chain: NeXusTransformationChain[ElasticMonitor, RunType],
+    chain: NeXusTransformationChain[ElasticMonitor, RunType], path: InstrumentAnglePath
 ) -> InstrumentAngle[RunType]:
     """Extract the rotation angle for the BIFROST detector."""
     # This function extracts the angle from a transformation chain instead of loading it
-    # directly from a file to avoid loading `detector_tank_angle` multiple times
+    # directly from a file to avoid loading the tank angle multiple times
     # as that would cause problems in livedata.
     # We could use any detector or the elastic monitor to get a chain that contains
     # the angle. Using the monitor is simplest because there is only one, and we
     # do not have to deal with multiple detectors.
     try:
-        transformation = next(
-            iter(
-                t
-                for name, t in chain.transformations.items()
-                if 'detector_tank_angle' in name
-            )
-        )
-    except StopIteration:
+        transformation = chain.transformations[path]
+    except KeyError:
         raise ValueError(
-            'Could not find detector_tank_angle transformation in chain with '
+            f'The transformation chain of {chain.parent} does not contain the '
+            f'detector tank angle {path}. The chain contains '
             f'{list(chain.transformations)}'
         ) from None
     if transformation.transformation_type != 'rotation':
         raise ValueError(
-            "Expected the instrument angle at detector_tank_angle to be a rotation, "
+            f"Expected the instrument angle at {path} to be a rotation, "
             f"got '{transformation.transformation_type}' instead.'"
         )
     return InstrumentAngle[RunType](transformation.value)  # type: ignore[return-value]
@@ -100,7 +97,8 @@ def load_analyzer_for_detector(
     """Load the analyzer component for the given detector.
 
     This function searches for an ``NXcrystal`` in the inputs (via the
-    'input' attribute) of the detector and loads the first NeXus group it finds.
+    ``inputs`` dataset or attribute) of the detector and loads the first NeXus
+    group it finds.
 
     See Also
     --------
@@ -153,7 +151,7 @@ def _find_class_in_inputs(
 
 def _get_inputs(group: snx.Group) -> list[str]:
     try:
-        inputs = group['inputs']
+        inputs = group['inputs'][()]
     except KeyError:
         try:
             # Older ESS encoding. The NeXus standard requires 'inputs' to be a dataset
@@ -161,7 +159,10 @@ def _get_inputs(group: snx.Group) -> list[str]:
             inputs = group.attrs['inputs']
         except KeyError:
             return []
-    # Deal with nexusformat (Python module) or kafka-to-nexus (filewriter)
+    if isinstance(inputs, sc.Variable):  # 1-d dataset
+        inputs = list(inputs.values)
+    # A scalar dataset loads as a str.
+    # Also deal with nexusformat (Python module) or kafka-to-nexus (filewriter)
     # silently converting a len(list[str]) == 1 attribute to a str attribute:
     return [inputs] if isinstance(inputs, str) else inputs
 
@@ -266,5 +267,7 @@ providers = (
 )
 
 parameters = {
+    InstrumentAnglePath: '/entry/instrument/detector_tank/transformations/tank_angle',
+    SampleAnglePath: '/entry/instrument/sample_stage/transformations/sample_rotation',
     TransformationTimeFilter: stepwise_transformation_time_filter,
 }
