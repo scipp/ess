@@ -18475,7 +18475,7 @@ packages:
   - graphviz>=0.20
   - plopp>=23.10.0
   - tifffile>=2026.5.2
-  - essreduce>=26.6.2
+  - essreduce>=26.10.1
   - scitiff>=26.6
   - numba>=0.63 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
