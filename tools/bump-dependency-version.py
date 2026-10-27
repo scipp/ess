@@ -1,6 +1,5 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = []
 #
 # [tool.pixi.workspace]
 # channels = ["conda-forge"]
