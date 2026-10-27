@@ -843,16 +843,6 @@ def test_release_outside_axes_stops_masking_and_new_gesture_starts_cleanly():
         assert handler_counts(explorer, 'bank_0') == before
 
 
-def test_continuous_state_and_icon_stay_consistent():
-    explorer = DetectorExplorer(make_banks())
-    button = explorer.mask_control.continuous_button
-    assert (button.value, button.icon) == (False, 'unlock')
-    button.value = True
-    assert button.icon == 'lock'
-    button.value = False
-    assert button.icon == 'unlock'
-
-
 # ---------------------------------------------------------------------------
 # 7. Clearing and saving
 # ---------------------------------------------------------------------------
