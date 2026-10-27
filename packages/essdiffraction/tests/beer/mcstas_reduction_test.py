@@ -2,6 +2,7 @@ import importlib
 import re
 import sys
 
+import mcstastox
 import numpy as np
 import pytest
 import sciline as sl
@@ -249,9 +250,13 @@ def test_beer_workflows_compute_dspacing_bins(make_workflow, mode, pulse_skippin
         (BeerModulationKnownPeaksMcStasWorkflow, SampleRun, 7, DetectorBank.both),
     ],
 )
-def test_beamline_parameters_match_selected_bank_geometry(
-    factory, run_type, mode, bank
+def test_beamline_parameters_match_workflow_geometry_without_events_or_peak_list(
+    factory, run_type, mode, bank, monkeypatch
 ):
+    def fail_if_events_loaded(*args, **kwargs):
+        pytest.fail('Computing beamline parameters must not load events.')
+
+    monkeypatch.setattr(mcstastox.Read, 'get_event_data', fail_if_events_loaded)
     workflow = factory()
     workflow[Filename[run_type]] = mcstas_silicon_new_model(mode)
     workflow[DetectorBank] = bank
@@ -266,6 +271,16 @@ def test_beamline_parameters_match_selected_bank_geometry(
     assert parameters['lambda_min'] < parameters['lambda_max']
     assert sc.isfinite(parameters['mean_Ltotal']).value
     assert sc.isfinite(parameters['mean_two_theta']).value
+    assert_allclose(parameters['L1'] + parameters['L2'], parameters['Ltotal'])
+
+    # Only the full known-peaks transformation graph needs a peak list.
+    workflow[DHKLList] = sc.array(dims=['peak'], values=[1.0], unit='angstrom')
+    graph = workflow.compute(ElasticCoordTransformGraph[run_type])
+    geometry = detector.transform_coords(
+        ['L1', 'L2', 'Ltotal', 'two_theta'], graph=graph, keep_intermediate=False
+    ).coords
+    for name in ('L1', 'L2', 'Ltotal', 'two_theta'):
+        assert_allclose(parameters[name], geometry[name])
 
 
 def test_powder_mcstas_analytical_workflow_computes_q():

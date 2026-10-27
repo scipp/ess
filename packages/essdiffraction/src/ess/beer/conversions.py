@@ -1,22 +1,36 @@
+from collections.abc import Mapping
+
 import scipp as sc
 import scipp.constants
+import scippneutron as scn
 import scippnexus as snx
-from ess.powder.conversion import powder_coordinate_transformation_graph
 from ess.powder.types import ElasticCoordTransformGraph, GravityVector, RunType
+from scippneutron.chopper import DiskChopper
 from scippneutron.conversion.tof import wavelength_from_tof
 
 from ess.reduce.nexus.types import DiskChoppers, Position
-from ess.reduce.unwrap.lut import chopper_distance_along_beam
+from ess.reduce.unwrap.lut import ActiveDiskChoppers, chopper_distance_along_beam
 from ess.reduce.unwrap.types import DetectorLtotal
 
-from .parameters import effective_chopper_position
 from .types import (
+    BeamlineGeometryGraph,
     DHKLList,
     PulseLength,
     RawDetector,
     StreakClusteredData,
     WavelengthDetector,
 )
+
+
+def effective_chopper_position(choppers: Mapping[str, DiskChopper]) -> sc.Variable:
+    """Midpoint of the named BEER pulse-shaping or modulation choppers."""
+    names = {'PSC1', 'PSC2', 'PSC3', 'MCA', 'MCB', 'MCC'}
+    if unknown := choppers.keys() - names - {'FC1A', 'FC1B', 'FC2A', 'FC2B'}:
+        raise ValueError(f'Unrecognized BEER chopper names: {sorted(unknown)}')
+    positions = [ch.axle_position for name, ch in choppers.items() if name in names]
+    if not positions:
+        raise ValueError('No BEER pulse-shaping or modulation choppers found.')
+    return sc.concat(positions, dim='chopper').mean()
 
 
 def compute_wavelength_in_each_cluster(
@@ -82,22 +96,48 @@ def _modulation_period(choppers: DiskChoppers[RunType]) -> sc.Variable:
     return max(periods)
 
 
-def _modulation_coordinate_transformation_graph(
+def powder_beamline_geometry_graph(
     source_position: Position[snx.NXsource, RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
-    detector_ltotal: DetectorLtotal[RunType],
-    choppers: DiskChoppers[RunType],
-) -> ElasticCoordTransformGraph[RunType]:
-    """Use chopper-to-detector distance as ``Ltotal`` in modulation workflows."""
-    graph = powder_coordinate_transformation_graph(
-        source_position, sample_position, gravity
+) -> BeamlineGeometryGraph[RunType]:
+    """Geometry with source-based flight paths for powder reduction."""
+    return BeamlineGeometryGraph[RunType](
+        {
+            **scn.conversion.graph.beamline.beamline(scatter=True),
+            'source_position': lambda: source_position,
+            'sample_position': lambda: sample_position,
+            'gravity': lambda: gravity,
+        }
     )
-    ltotal = detector_ltotal - chopper_distance_along_beam(
+
+
+def modulation_beamline_geometry_graph(
+    source_position: Position[snx.NXsource, RunType],
+    sample_position: Position[snx.NXsample, RunType],
+    gravity: GravityVector,
+    choppers: ActiveDiskChoppers[RunType],
+) -> BeamlineGeometryGraph[RunType]:
+    """Geometry with chopper-based flight paths for both modulation workflows."""
+    graph = powder_beamline_geometry_graph(source_position, sample_position, gravity)
+    source_to_chopper = chopper_distance_along_beam(
         effective_chopper_position(choppers), source_position
+    ).to(unit='m')
+    # Keep the incident-beam direction for scattering angles, but use the chopper
+    # as the flight-path origin. The shared Ltotal node then adds L1 and L2.
+    graph['L1'] = lambda incident_beam: (
+        scn.conversion.beamline.L1(incident_beam=incident_beam) - source_to_chopper
     )
-    graph['Ltotal'] = lambda: ltotal
     return graph
+
+
+def elastic_coordinate_transformation_graph(
+    geometry: BeamlineGeometryGraph[RunType],
+) -> ElasticCoordTransformGraph[RunType]:
+    """Extend the workflow's geometry with elastic wavelength conversions."""
+    return ElasticCoordTransformGraph[RunType](
+        {**scn.conversion.graph.tof.elastic('wavelength'), **geometry}
+    )
 
 
 def _linear_regression_by_bin(
@@ -211,16 +251,11 @@ def modulation_time_of_arrival(
 
 
 def automatic_coordinate_transformation_graph(
-    source_position: Position[snx.NXsource, RunType],
-    sample_position: Position[snx.NXsample, RunType],
-    gravity: GravityVector,
-    detector_ltotal: DetectorLtotal[RunType],
+    geometry: BeamlineGeometryGraph[RunType],
     choppers: DiskChoppers[RunType],
 ) -> ElasticCoordTransformGraph[RunType]:
     """Coordinate transformations for automatic modulation reduction."""
-    graph = _modulation_coordinate_transformation_graph(
-        source_position, sample_position, gravity, detector_ltotal, choppers
-    )
+    graph = elastic_coordinate_transformation_graph(geometry)
 
     def tof(event_time_offset: sc.Variable, Ltotal: sc.Variable):
         return modulation_time_of_arrival(event_time_offset, Ltotal, choppers)[1]
@@ -264,18 +299,14 @@ def _tof_from_dhkl(
 
 
 def known_peaks_coordinate_transformation_graph(
-    source_position: Position[snx.NXsource, RunType],
-    sample_position: Position[snx.NXsample, RunType],
-    gravity: GravityVector,
+    geometry: BeamlineGeometryGraph[RunType],
     detector_ltotal: DetectorLtotal[RunType],
     choppers: DiskChoppers[RunType],
     pulse_length: PulseLength,
     dhkl_list: DHKLList,
 ) -> ElasticCoordTransformGraph[RunType]:
     """Coordinate transformations for modulation with known peak positions."""
-    graph = _modulation_coordinate_transformation_graph(
-        source_position, sample_position, gravity, detector_ltotal, choppers
-    )
+    graph = elastic_coordinate_transformation_graph(geometry)
     mod_period = _modulation_period(choppers)
 
     def modulation_times(event_time_offset: sc.Variable, Ltotal: sc.Variable):

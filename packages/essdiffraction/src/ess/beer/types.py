@@ -29,6 +29,10 @@ class BeamlineParameters(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
     """
 
 
+class BeamlineGeometryGraph(sciline.Scope[RunType, dict], dict):
+    """Workflow-specific geometry transformations, independent of events and peaks."""
+
+
 RawDetector = RawDetector
 Filename = Filename
 SampleRun = SampleRun

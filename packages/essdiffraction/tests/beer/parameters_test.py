@@ -3,73 +3,132 @@
 
 from dataclasses import replace
 
+import pytest
 import scipp as sc
+from ess.beer.conversions import (
+    effective_chopper_position,
+    modulation_beamline_geometry_graph,
+    powder_beamline_geometry_graph,
+)
 from ess.beer.parameters import beamline_parameters
+from ess.beer.types import BeamlineGeometryGraph, SampleRun
 from scipp.testing import assert_allclose, assert_identical
 from scippneutron.chopper import DiskChopper
 
 
-def test_beamline_parameters_use_chopper_origin_and_unweighted_pixel_means():
-    source = sc.vector([3.0, 4.0, 5.0], unit='m')
-    sample = sc.vector([3.0, 4.0, 165.0], unit='m')
-    # Choppers at 6 m and 10 m from the source define an effective origin at 8 m.
-    # Transverse axle offsets and the frame chopper must not affect this distance.
-    psc1 = DiskChopper(
-        axle_position=source + sc.vector([0.0, 1.0, 6.0], unit='m'),
+@pytest.fixture
+def choppers():
+    mca = DiskChopper(
+        axle_position=sc.vector([0.0, 1.0, 6.0], unit='m'),
         frequency=sc.scalar(10.0, unit='Hz'),
         beam_position=sc.scalar(0.0, unit='deg'),
         phase=sc.scalar(0.0, unit='deg'),
         slit_begin=sc.array(dims=['slit'], values=[0.0], unit='deg'),
         slit_end=sc.array(dims=['slit'], values=[30.0], unit='deg'),
     )
-    choppers = {
-        'PSC1': psc1,
-        'PSC2': replace(
-            psc1,
-            axle_position=source + sc.vector([0.0, 2.0, 10.0], unit='m'),
+    return {
+        'MCA': mca,
+        'MCB': replace(
+            mca,
+            axle_position=sc.vector([0.0, 2.0, 10.0], unit='m'),
             frequency=sc.scalar(-10.0, unit='Hz'),
         ),
-        'FC1': replace(
-            psc1,
-            axle_position=source + sc.vector([0.0, 0.0, 100.0], unit='m'),
+        'FC1A': replace(
+            mca,
+            axle_position=sc.vector([0.0, 0.0, 100.0], unit='m'),
             frequency=sc.scalar(14.0, unit='Hz'),
         ),
     }
-    ltotal = sc.array(dims=['pixel'], values=[162.0, 164.0, float('nan')], unit='m')
-    two_theta = sc.array(dims=['pixel'], values=[60.0, 120.0, float('nan')], unit='deg')
+
+
+def test_beamline_parameters_use_supplied_graph_and_nanmeans(choppers):
+    geometry = {
+        'L1': sc.scalar(100.0, unit='m'),
+        'L2': sc.array(dims=['pixel'], values=[2.0, 4.0, float('nan')], unit='m'),
+        'Ltotal': sc.array(
+            dims=['pixel'], values=[102.0, 104.0, float('nan')], unit='m'
+        ),
+        'two_theta': sc.array(
+            dims=['pixel'], values=[60.0, 120.0, float('nan')], unit='deg'
+        ),
+    }
+    detector = sc.DataArray(
+        sc.ones(sizes={'pixel': 3}),
+        coords={f'input_{name}': value for name, value in geometry.items()},
+    )
+    graph = BeamlineGeometryGraph[SampleRun](
+        {name: f'input_{name}' for name in geometry}
+    )
 
     result = beamline_parameters(
         sc.array(dims=['bound'], values=[1.0, 3.0], unit='angstrom'),
-        ltotal,
-        two_theta,
-        source,
-        sample,
+        detector,
+        graph,
         choppers,
     )
 
-    assert_identical(result['lambda_min'], sc.scalar(1.0, unit='angstrom'))
-    assert_identical(result['lambda_max'], sc.scalar(3.0, unit='angstrom'))
-    assert_identical(result['lambda_0'], sc.scalar(2.0, unit='angstrom'))
-    assert_identical(result['L1'], sc.scalar(152.0, unit='m'))
-    assert_allclose(
-        result['L2'],
-        sc.array(dims=['pixel'], values=[2.0, 4.0, float('nan')], unit='m'),
-        equal_nan=True,
-    )
-    assert_allclose(
-        result['Ltotal'],
-        sc.array(dims=['pixel'], values=[154.0, 156.0, float('nan')], unit='m'),
-        equal_nan=True,
-    )
-    assert_identical(result['two_theta'], two_theta)
-    assert_identical(result['mean_L2'], sc.scalar(3.0, unit='m'))
-    assert_identical(result['mean_Ltotal'], sc.scalar(155.0, unit='m'))
-    assert_identical(result['mean_two_theta'], sc.scalar(90.0, unit='deg'))
-    assert_identical(
-        result['chopper_frequency'],
-        sc.DataGroup(
-            PSC1=sc.scalar(10.0, unit='Hz'),
-            PSC2=sc.scalar(-10.0, unit='Hz'),
-            FC1=sc.scalar(14.0, unit='Hz'),
+    expected = sc.DataGroup(
+        **geometry,
+        lambda_min=sc.scalar(1.0, unit='angstrom'),
+        lambda_max=sc.scalar(3.0, unit='angstrom'),
+        lambda_0=sc.scalar(2.0, unit='angstrom'),
+        mean_L2=sc.scalar(3.0, unit='m'),
+        mean_Ltotal=sc.scalar(103.0, unit='m'),
+        mean_two_theta=sc.scalar(90.0, unit='deg'),
+        chopper_frequency=sc.DataGroup(
+            MCA=sc.scalar(10.0, unit='Hz'),
+            MCB=sc.scalar(-10.0, unit='Hz'),
+            FC1A=sc.scalar(14.0, unit='Hz'),
         ),
     )
+    assert_identical(result, expected)
+
+
+@pytest.mark.parametrize(
+    ('modulation', 'chopper_unit', 'expected_l1'),
+    [(False, 'm', 160.0), (True, 'm', 152.0), (True, 'cm', 152.0)],
+    ids=['powder', 'modulation', 'modulation-cm'],
+)
+def test_beamline_geometry(modulation, chopper_unit, expected_l1, choppers):
+    source = sc.vector([3.0, 4.0, 5.0], unit='m')
+    sample = source + sc.vector([0.0, 0.0, 160.0], unit='m')
+    gravity = sc.vector([0.0, -9.81, 0.0], unit='m/s^2')
+    choppers = {
+        name: replace(
+            ch, axle_position=(source + ch.axle_position).to(unit=chopper_unit)
+        )
+        for name, ch in choppers.items()
+    }
+    graph = (
+        modulation_beamline_geometry_graph(source, sample, gravity, choppers)
+        if modulation
+        else powder_beamline_geometry_graph(source, sample, gravity)
+    )
+    detector = sc.DataArray(
+        sc.scalar(0.0),
+        coords={'position': sample + sc.vector([2.0, 0.0, 0.0], unit='m')},
+    )
+
+    coords = detector.transform_coords(
+        ['L1', 'L2', 'Ltotal', 'two_theta'], graph=graph
+    ).coords
+
+    # Only the longitudinal positions of MCA and MCB set the modulation origin.
+    assert_allclose(coords['L1'], sc.scalar(expected_l1, unit='m'))
+    assert_allclose(coords['L2'], sc.scalar(2.0, unit='m'))
+    assert_allclose(coords['Ltotal'], sc.scalar(expected_l1 + 2.0, unit='m'))
+    assert_allclose(coords['two_theta'].to(unit='deg'), sc.scalar(90.0, unit='deg'))
+
+
+def test_effective_chopper_position_rejects_renamed_chopper(choppers):
+    choppers['renamed_MCB'] = choppers.pop('MCB')
+
+    with pytest.raises(ValueError, match=r'Unrecognized BEER chopper names.*MCB'):
+        effective_chopper_position(choppers)
+
+
+def test_effective_chopper_position_requires_definition_choppers(choppers):
+    with pytest.raises(
+        ValueError, match='No BEER pulse-shaping or modulation choppers'
+    ):
+        effective_chopper_position({'FC1A': choppers['FC1A']})
