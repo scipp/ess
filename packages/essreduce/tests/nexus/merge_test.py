@@ -23,9 +23,22 @@ def _group(parent: h5py.Group, name: str, nx_class: str) -> h5py.Group:
 
 
 def _stream(group: h5py.Group, name: str, data: list, dtype: str) -> h5py.Dataset:
-    """A dataset like those the file writer appends to while a run is going on."""
+    """
+    A dataset like those the file writer appends to while a run is going on.
+
+    Compressed, unlike in files of the file writer, to test that the merge keeps
+    the storage layout and filters.
+    """
     return group.create_dataset(
-        name, data=np.asarray(data, dtype=dtype), maxshape=(None,), chunks=(4,)
+        name,
+        data=np.asarray(data, dtype=dtype),
+        maxshape=(None,),
+        chunks=(4,),
+        compression='gzip',
+        compression_opts=7,
+        shuffle=True,
+        fletcher32=True,
+        fillvalue=-1,
     )
 
 
@@ -161,12 +174,17 @@ def test_write_appends_hard_linked_dataset_once(merged: Path) -> None:
         assert isinstance(link, h5py.SoftLink)
 
 
-def test_write_keeps_attributes_and_storage_layout(merged: Path) -> None:
-    with h5py.File(merged) as f:
+def test_write_keeps_attributes_and_storage_layout(
+    runs: list[Path], merged: Path
+) -> None:
+    with h5py.File(runs[0]) as run, h5py.File(merged) as f:
         assert f[TEMPERATURE].attrs['NX_class'] == 'NXlog'
         assert f[f'{TEMPERATURE}/value'].attrs['units'] == 'K'
-        assert f[f'{EVENTS}/event_id'].chunks == (4,)
-        assert f[f'{EVENTS}/event_id'].maxshape == (None,)
+        for path in (f'{EVENTS}/event_id', f'{TEMPERATURE}/value'):
+            assert f[path].compression == 'gzip'
+            assert f[path].maxshape == (None,)
+            # Chunks, filters, and fill value
+            assert f[path].id.get_create_plist() == run[path].id.get_create_plist()
 
 
 def test_write_takes_end_time_of_last_run_and_records_all_runs(
