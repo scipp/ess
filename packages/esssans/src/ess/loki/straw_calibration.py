@@ -85,6 +85,7 @@ def find_slit_peaks(
     dim: str = 'pixel',
     max_offset: sc.Variable | None = None,
     min_significance: float = 5.0,
+    fit_half_width: float = 0.3,
 ) -> sc.DataArray:
     """Find the peaks of the slit images in the counts of each straw.
 
@@ -100,7 +101,8 @@ def find_slit_peaks(
        offset within ``max_offset`` of the centre of the active region.
        Without this anchor, the comb could be shifted by one slit when the
        outermost slit images fall outside the active region.
-    4. A Gaussian on a linear background is fitted around each tooth of the comb.
+    4. A Gaussian on a linear background is fitted around each tooth of the comb,
+       within ``fit_half_width`` times the spacing of the teeth.
        The fit range is restricted to the active region. Peaks are rejected if the
        fit fails, the amplitude is not significant, the width is at the limits of
        the fit, or the centre is less than one width away from the end of the fit
@@ -125,6 +127,13 @@ def find_slit_peaks(
         spacing of LoKI's calibration mask.
     min_significance:
         Minimum ratio of the fitted peak amplitude to its standard deviation.
+    fit_half_width:
+        Half-width of the fit window around each peak, as a fraction of the spacing
+        of the peaks, at most 0.5.
+        The default suits peaks with a standard deviation of up to about a tenth of
+        the spacing. Wider peaks need a wider window, since otherwise the window
+        holds too little background on either side and the fit rejects the peak as
+        not significant.
 
     Returns
     -------
@@ -142,6 +151,8 @@ def find_slit_peaks(
         raise ValueError(f"The coordinate for '{dim}' must hold pixel centres.")
     if 'slit' not in expected.dims:
         raise ValueError("Expected positions must have a 'slit' dimension.")
+    if not 0 < fit_half_width <= 0.5:
+        raise ValueError(f'fit_half_width must be in (0, 0.5], got {fit_half_width}.')
     if max_offset is None:
         max_offset = sc.scalar(30.0, unit='mm')
     x = counts.coords[dim]
@@ -164,6 +175,7 @@ def find_slit_peaks(
             e_i,
             max_offset=max_offset.to(unit=unit).value,
             min_significance=min_significance,
+            fit_half_width=fit_half_width,
         )
         for x_i, y_i, e_i in zip(
             x.broadcast(sizes=counts.sizes)
@@ -306,6 +318,7 @@ def _find_straw_peaks(
     *,
     max_offset: float,
     min_significance: float,
+    fit_half_width: float,
 ) -> tuple[np.ndarray, tuple[float, float]]:
     """Return ``(peaks, (begin, end))`` where peaks has shape ``(nslit, 3)``."""
     peaks = np.full((len(expected), 3), np.nan)
@@ -319,7 +332,7 @@ def _find_straw_peaks(
     scale, offset = _align_comb(
         x, y, expected, begin=begin, end=end, max_offset=max_offset
     )
-    half_width = 0.3 * scale * _expected_spacing(expected)
+    half_width = fit_half_width * scale * _expected_spacing(expected)
     for k, e in enumerate(expected):
         fit = _fit_peak(
             x,

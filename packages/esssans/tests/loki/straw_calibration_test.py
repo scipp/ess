@@ -25,11 +25,14 @@ def response(scale: float, offset: float, cubic: float) -> Callable:
 
 
 def straw_counts(
-    rng: np.random.Generator, slit_images: np.ndarray, to_nominal: Callable
+    rng: np.random.Generator,
+    slit_images: np.ndarray,
+    to_nominal: Callable,
+    peak_width: float = PEAK_WIDTH,
 ) -> np.ndarray:
     """Counts per pixel for slit images on a flat background."""
     background = rng.uniform(-ACTIVE_HALF_LENGTH, ACTIVE_HALF_LENGTH, 400_000)
-    peaks = rng.normal(np.repeat(slit_images, 20_000), PEAK_WIDTH)
+    peaks = rng.normal(np.repeat(slit_images, 20_000), peak_width)
     true = np.concatenate([background, peaks])
     true = true[np.abs(true) < ACTIVE_HALF_LENGTH]
     pitch = abs((PIXELS[1] - PIXELS[0]).value)
@@ -184,6 +187,32 @@ def test_find_slit_peaks_accepts_decreasing_expected_positions(
     reversed_slits = sc.array(dims=['slit'], values=SLITS.values[::-1], unit='mm')
     result = cal.find_slit_peaks(counts, reversed_slits)
     np.testing.assert_array_equal(result.values[..., ::-1], peaks.values)
+
+
+def test_find_slit_peaks_finds_wide_peaks_with_wider_fit_window() -> None:
+    # Peaks this wide fill the default fit window, leaving too little background.
+    rng = np.random.default_rng(7)
+    counts = make_counts(
+        [[straw_counts(rng, SLITS.values, r, peak_width=25.0) for r in RESPONSES]]
+    )
+    default = cal.find_slit_peaks(counts, SLITS)
+    wide = cal.find_slit_peaks(counts, SLITS, fit_half_width=0.45)
+    assert default.masks['not_found'].values.sum() > 25
+    inner = wide['slit', 1:-1]
+    assert not inner.masks['not_found'].values.any()
+    for straw, r in enumerate(RESPONSES):
+        np.testing.assert_allclose(
+            inner['tube', 0]['straw', straw].values, r(SLITS.values[1:-1]), atol=2.0
+        )
+
+
+@pytest.mark.parametrize('fit_half_width', [0.0, 0.6])
+def test_find_slit_peaks_raises_if_fit_half_width_out_of_range(
+    unmagnified: tuple[sc.DataArray, sc.DataArray], fit_half_width: float
+) -> None:
+    counts, _ = unmagnified
+    with pytest.raises(ValueError, match='fit_half_width'):
+        cal.find_slit_peaks(counts, SLITS, fit_half_width=fit_half_width)
 
 
 def test_find_slit_peaks_raises_if_counts_have_masks(
