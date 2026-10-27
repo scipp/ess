@@ -572,14 +572,14 @@ def test_clicking_outside_axes_or_on_colorbar_does_nothing():
 def test_pan_zoom_mode_suppresses_navigation_and_masking():
     explorer = DetectorExplorer(make_banks())
     ax = explorer.subplots['bank_1'].ax
-    ax.set_navigate_mode('PAN')
-    fire(explorer.main_figure.canvas, ax, 'button_press_event', 1, 1)
+    explorer.main_figure.canvas.toolbar.pan()
+    canvas = explorer.main_figure.canvas
+    fire(canvas, ax, 'button_press_event', 1, 1)
     assert explorer.current_tab == 0
 
     select(explorer, 'bank_1')
     explorer.mask_control.mode = 'single'
-    tab_ax = explorer.tab_figs['bank_1'].ax
-    tab_ax.set_navigate_mode('ZOOM')
+    explorer.tab_figs['bank_1'].fig.canvas.toolbar.zoom()
     press(explorer, 'bank_1', 1, 1)
     assert not explorer.masks['bank_1'].values.any()
 
