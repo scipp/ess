@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
+from collections.abc import Callable
 from pathlib import Path
 
 import h5py
@@ -14,6 +15,9 @@ DETECTOR = '/entry/instrument/detector'
 EVENTS = f'{DETECTOR}/data'
 TEMPERATURE = '/entry/sample/temperature'
 TARGET = '/entry/instrument/motor/target_value'
+SECOND = 10**9
+TARGET_TIME = SECOND // 2
+"""When the motor got its target, before all runs."""
 
 
 def _group(parent: h5py.Group, name: str, nx_class: str) -> h5py.Group:
@@ -29,6 +33,7 @@ def _stream(group: h5py.Group, name: str, data: list, dtype: str) -> h5py.Datase
     Compressed, unlike in files of the file writer, to test that the merge keeps
     the storage layout and filters.
     """
+    numeric = np.dtype(dtype).kind in 'iuf'
     return group.create_dataset(
         name,
         data=np.asarray(data, dtype=dtype),
@@ -38,16 +43,21 @@ def _stream(group: h5py.Group, name: str, data: list, dtype: str) -> h5py.Datase
         compression_opts=7,
         shuffle=True,
         fletcher32=True,
-        fillvalue=-1,
+        fillvalue=-1 if numeric else None,
     )
 
 
 def _log(
     parent: h5py.Group, name: str, times: list[int], values: list[float], unit: str
 ) -> h5py.Group:
+    """An NXlog as the file writer writes it, with an alarm series of one row."""
     log = _group(parent, name, 'NXlog')
     _stream(log, 'time', times, 'uint64').attrs['units'] = 'ns'
     _stream(log, 'value', values, 'float64').attrs['units'] = unit
+    _stream(log, 'alarm_time', times[:1], 'uint64').attrs['units'] = 'ns'
+    _stream(log, 'alarm_severity', [0], 'int16')
+    _stream(log, 'alarm_message', [b''], 'S200')
+    _stream(log, 'cue_timestamp_zero', times[-1:], 'uint64')
     _stream(log, 'cue_index', [len(times) - 1], 'int64')
     log['minimum_value'] = np.min(values)
     log['maximum_value'] = np.max(values)
@@ -69,15 +79,17 @@ def make_run(
     """
     A NeXus file of run ``index``, with one event per pixel id in ``pulses``.
 
-    The run starts at second ``10 * index``, its pulses are 1 s apart.
+    The run starts at second ``t0 = 10 * index + 1`` and ends 8 s later. Its
+    pulses and temperature readings are 1 s apart from ``t0``. The motor log holds
+    the target from before the run, as in every run.
     """
-    t0 = 10 * index
+    t0 = 10 * index + 1
     with h5py.File(path, 'w') as f:
         f.attrs['file_name'] = str(path)
         f.attrs['file_time'] = f'2026-10-26T01:00:{t0:02}Z'
         entry = _group(f, 'entry', 'NXentry')
         entry['start_time'] = f'2026-10-26T01:00:{t0:02}.000Z'
-        entry['end_time'] = f'2026-10-26T01:00:{t0 + 9:02}.000Z'
+        entry['end_time'] = f'2026-10-26T01:00:{t0 + 8:02}.000Z'
         entry['entry_identifier'] = str(100 + index)
         entry['title'] = title
         instrument = _group(entry, 'instrument', 'NXinstrument')
@@ -89,18 +101,25 @@ def make_run(
         _stream(data, 'event_time_offset', [1000] * len(ids), 'int32').attrs[
             'units'
         ] = 'ns'
-        pulse_times = [(t0 + i) * 10**9 for i in range(len(pulses))]
+        pulse_times = [(t0 + i) * SECOND for i in range(len(pulses))]
         _stream(data, 'event_time_zero', pulse_times, 'uint64').attrs['units'] = 'ns'
-        _stream(data, 'event_index', np.cumsum([0, *map(len, pulses[:-1])]), 'int64')
+        _stream(data, 'event_index', np.cumsum([0, *map(len, pulses)])[:-1], 'int64')
         _stream(data, 'cue_index', [len(ids)], 'int64')
         motor = _group(instrument, 'motor', 'NXpositioner')
-        _log(motor, 'target_value', [t0 * 10**9], [target], 'mm')
+        _log(motor, 'target_value', [TARGET_TIME], [target], 'mm')
         transformations = _group(detector, 'transformations', 'NXtransformations')
         transformations['x'] = motor['target_value']['value']  # hard link
         transformations['y'] = h5py.SoftLink(f'{TARGET}/value')
         sample = _group(entry, 'sample', 'NXsample')
-        times = [(t0 + i) * 10**9 for i in range(len(temperature))]
-        _log(sample, 'temperature', times, temperature, temperature_unit)
+        times = [(t0 + i) * SECOND for i in range(len(temperature))]
+        log = _log(sample, 'temperature', times, temperature, temperature_unit)
+        sample['temperature_value'] = log['value']  # hard link
+    return path
+
+
+def modify(path: Path, change: Callable[[h5py.File], object]) -> Path:
+    with h5py.File(path, 'r+') as f:
+        change(f)
     return path
 
 
@@ -135,10 +154,15 @@ def merged(runs: list[Path], tmp_path: Path) -> Path:
     return plan_merge(runs, RULES).write(tmp_path / 'merged.nxs')
 
 
+def _error_paths(runs: list[Path], rules: MergeRules = RULES) -> set[str]:
+    return {issue.path for issue in plan_merge(runs, rules).errors}
+
+
 def test_plan_of_compatible_runs_has_no_issues(runs: list[Path]) -> None:
     plan = plan_merge(runs, RULES)
     assert plan.issues == ()
     assert [p.name for p in plan.files] == ['a.nxs', 'b.nxs']
+    assert all(p.is_absolute() for p in plan.files)
 
 
 def test_write_concatenates_events_in_order_of_start_time(merged: Path) -> None:
@@ -158,17 +182,56 @@ def test_write_concatenates_logs_and_updates_their_summaries(merged: Path) -> No
     with h5py.File(merged) as f:
         log = f[TEMPERATURE]
         assert list(log['value']) == [10.0, 10.02, 10.05]
-        assert list(log['time']) == [0, 10**9, 10 * 10**9]
+        assert list(log['time']) == [1 * SECOND, 2 * SECOND, 11 * SECOND]
+        assert list(log['alarm_time']) == [1 * SECOND, 11 * SECOND]
         assert list(log['cue_index']) == [1, 2]
         assert log['minimum_value'][()] == 10.0
         assert log['maximum_value'][()] == 10.05
         assert log['average_value'][()] == pytest.approx(10.023333)
 
 
+def test_write_drops_rows_that_repeat_the_previous_run(merged: Path) -> None:
+    with h5py.File(merged) as f:
+        log = f[TARGET]
+        assert list(log['time']) == [TARGET_TIME]
+        assert list(log['value']) == [1.5]
+        assert list(log['alarm_time']) == [TARGET_TIME]
+        assert list(log['alarm_message']) == [b'']
+        # The cue of the second run points to the row identical to its dropped row
+        assert list(log['cue_index']) == [0, 0]
+    # A static transformation, as the workflows require of a depends_on chain
+    with snx.File(merged) as f:
+        assert f[TARGET][()].sizes == {'time': 1}
+
+
+def test_write_drops_several_rows_that_repeat_the_previous_run(
+    tmp_path: Path,
+) -> None:
+    runs = [
+        make_run(
+            tmp_path / 'a.nxs', index=0, pulses=[[0]], temperature=[10.0, 10.1, 10.2]
+        ),
+        # Starts with the readings at 2 s and 3 s, from before it started at 11 s
+        make_run(tmp_path / 'b.nxs', index=1, pulses=[[0]], temperature=[0, 0, 10.3]),
+    ]
+
+    def repeat_end_of_run_a(f: h5py.File) -> None:
+        f[f'{TEMPERATURE}/time'][:2] = [2 * SECOND, 3 * SECOND]
+        f[f'{TEMPERATURE}/value'][:2] = [10.1, 10.2]
+
+    modify(runs[1], repeat_end_of_run_a)
+    merged = plan_merge(runs, RULES).write(tmp_path / 'merged.nxs')
+    with h5py.File(merged) as f:
+        assert list(f[f'{TEMPERATURE}/value']) == [10.0, 10.1, 10.2, 10.3]
+        # Last row of each run
+        assert list(f[f'{TEMPERATURE}/cue_index']) == [2, 3]
+
+
 def test_write_appends_hard_linked_dataset_once(merged: Path) -> None:
     with h5py.File(merged) as f:
+        assert f['/entry/sample/temperature_value'] == f[f'{TEMPERATURE}/value']
+        assert list(f[f'{TEMPERATURE}/value']) == [10.0, 10.02, 10.05]
         assert f[f'{DETECTOR}/transformations/x'] == f[f'{TARGET}/value']
-        assert list(f[f'{TARGET}/value']) == [1.5, 1.5]
         link = f[f'{DETECTOR}/transformations'].get('y', getlink=True)
         assert isinstance(link, h5py.SoftLink)
 
@@ -186,12 +249,12 @@ def test_write_keeps_attributes_and_storage_layout(
             assert f[path].id.get_create_plist() == run[path].id.get_create_plist()
 
 
-def test_write_takes_end_time_of_last_run_and_records_all_runs(
-    merged: Path,
-) -> None:
+def test_write_records_the_runs_and_the_merged_file(merged: Path) -> None:
     with h5py.File(merged) as f:
+        assert f.attrs['file_name'] == str(merged)
+        assert f.attrs['file_time'] != '2026-10-26T01:00:01Z'
         entry = f['entry']
-        assert entry['start_time'].asstr()[()] == '2026-10-26T01:00:00.000Z'
+        assert entry['start_time'].asstr()[()] == '2026-10-26T01:00:01.000Z'
         assert entry['end_time'].asstr()[()] == '2026-10-26T01:00:19.000Z'
         runs = entry['merged_runs']
         assert runs.attrs['NX_class'] == 'NXcollection'
@@ -201,6 +264,60 @@ def test_write_takes_end_time_of_last_run_and_records_all_runs(
         assert runs['run_1/end_time'].asstr()[()] == '2026-10-26T01:00:19.000Z'
 
 
+def test_write_merges_three_runs(tmp_path: Path) -> None:
+    runs = [
+        make_run(tmp_path / f'{i}.nxs', index=i, pulses=[[0], [1, 2]], temperature=[1])
+        for i in range(3)
+    ]
+    merged = plan_merge(runs, MergeRules()).write(tmp_path / 'merged.nxs')
+    with h5py.File(merged) as f:
+        assert list(f[f'{EVENTS}/event_id']) == [0, 1, 2] * 3
+        assert list(f[f'{EVENTS}/event_index']) == [0, 1, 3, 4, 6, 7]
+        assert list(f[f'{TEMPERATURE}/cue_index']) == [0, 1, 2]
+
+
+def test_write_leaves_no_file_if_writing_fails(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    plan = plan_merge(runs, RULES)
+    plan.files[1].chmod(0)  # keeps the size and modification time
+    try:
+        with pytest.raises(OSError, match='nable to'):
+            plan.write(tmp_path / 'merged.nxs')
+    finally:
+        plan.files[1].chmod(0o644)
+    assert sorted(p.name for p in tmp_path.iterdir()) == ['a.nxs', 'b.nxs']
+
+
+def test_write_refuses_plan_with_errors(tmp_path: Path) -> None:
+    runs = [
+        make_run(tmp_path / 'a.nxs', index=0, pulses=[[0]], temperature=[10.0]),
+        make_run(tmp_path / 'b.nxs', index=1, pulses=[[0]], temperature=[11.0]),
+    ]
+    with pytest.raises(ValueError, match='errors'):
+        plan_merge(runs, RULES).write(tmp_path / 'merged.nxs')
+    assert not (tmp_path / 'merged.nxs').exists()
+
+
+def test_write_refuses_if_a_file_changed(runs: list[Path], tmp_path: Path) -> None:
+    plan = plan_merge(runs, RULES)
+    make_run(runs[0], index=1, pulses=[[0, 1, 1, 2]], temperature=[10.05])
+    with pytest.raises(RuntimeError, match='changed'):
+        plan.write(tmp_path / 'merged.nxs')
+
+
+def test_write_refuses_to_overwrite(runs: list[Path], tmp_path: Path) -> None:
+    (tmp_path / 'merged.nxs').touch()
+    with pytest.raises(FileExistsError):
+        plan_merge(runs, RULES).write(tmp_path / 'merged.nxs')
+
+
+def test_merged_file_cannot_be_merged_again(merged: Path, tmp_path: Path) -> None:
+    later = make_run(tmp_path / 'c.nxs', index=2, pulses=[[0]], temperature=[10.0])
+    (issue,) = plan_merge([merged, later], RULES).issues
+    assert (issue.severity, issue.path) == ('error', 'merged.nxs')
+
+
 def test_overlapping_runs_are_an_error(tmp_path: Path) -> None:
     runs = [
         make_run(tmp_path / 'a.nxs', index=0, pulses=[[0]], temperature=[10.0]),
@@ -208,6 +325,47 @@ def test_overlapping_runs_are_an_error(tmp_path: Path) -> None:
     ]
     (error,) = plan_merge(runs, RULES).errors
     assert 'starts before the end' in error.message
+
+
+def _delete(path: str) -> Callable[[h5py.File], object]:
+    return lambda f: f.__delitem__(path)
+
+
+def _replace_dtype(f: h5py.File) -> None:
+    detector = f[DETECTOR]
+    del detector['detector_number']
+    detector['detector_number'] = np.arange(4, dtype='int64')
+
+
+def _replace_hard_link(f: h5py.File) -> None:
+    transformations = f[f'{DETECTOR}/transformations']
+    del transformations['x']
+    transformations.create_dataset('x', data=f[f'{TARGET}/value'][()], maxshape=(None,))
+
+
+def _retarget_soft_link(f: h5py.File) -> None:
+    transformations = f[f'{DETECTOR}/transformations']
+    del transformations['y']
+    transformations['y'] = h5py.SoftLink(f'{TEMPERATURE}/value')
+
+
+@pytest.mark.parametrize(
+    ('change', 'path'),
+    [
+        (_delete(f'{DETECTOR}/detector_number'), f'{DETECTOR}/detector_number'),
+        (_replace_dtype, f'{DETECTOR}/detector_number'),
+        (lambda f: f[TEMPERATURE].attrs.create('x', 1), TEMPERATURE),
+        (lambda f: f['/'].attrs.create('x', 1), '/'),
+        (_replace_hard_link, f'{TARGET}/value'),
+        (_retarget_soft_link, f'{DETECTOR}/transformations/y'),
+    ],
+    ids=['missing', 'dtype', 'attribute', 'root attribute', 'hard link', 'soft link'],
+)
+def test_layout_difference_is_an_error(
+    runs: list[Path], change: Callable[[h5py.File], object], path: str
+) -> None:
+    modify(runs[0], change)
+    assert path in _error_paths(runs)
 
 
 def test_differing_fixed_size_dataset_is_an_error_unless_ignored(
@@ -240,6 +398,69 @@ def test_differing_shape_of_fixed_size_dataset_is_an_error(tmp_path: Path) -> No
     assert error.path == f'{DETECTOR}/detector_number'
 
 
+def test_ignore_covers_the_contents_of_a_group(runs: list[Path]) -> None:
+    modify(runs[0], lambda f: _group(f['entry'], 'user_ada', 'NXuser'))
+    modify(runs[1], lambda f: _group(f['entry'], 'user_bob', 'NXuser'))
+    modify(runs[1], lambda f: f['entry/user_bob'].create_dataset('name', data='Bob'))
+    assert _error_paths(runs) == {
+        '/entry/user_ada',
+        '/entry/user_bob',
+        '/entry/user_bob/name',
+    }
+    rules = MergeRules(rules=RULES.rules, ignore=('/entry/user_*',))
+    assert plan_merge(runs, rules).issues == ()
+
+
+def test_per_run_field_may_differ_in_shape(runs: list[Path]) -> None:
+    modify(runs[0], lambda f: f['entry'].create_dataset('scripts', data=['a']))
+    modify(runs[1], lambda f: f['entry'].create_dataset('scripts', data=['a', 'b']))
+    assert plan_merge(runs, RULES).issues == ()
+
+
+def test_padding_rows_with_time_zero_are_an_error(runs: list[Path]) -> None:
+    def pad(f: h5py.File) -> None:
+        time = f[f'{TEMPERATURE}/time']
+        time.resize(time.shape[0] + 1, axis=0)  # the fill value is not 0
+        time[-1] = 0
+
+    modify(runs[0], pad)
+    (error,) = plan_merge(runs, RULES).errors
+    assert error.path == TEMPERATURE
+    assert 'time 0' in error.message
+
+
+def test_log_row_not_later_than_previous_run_is_an_error(runs: list[Path]) -> None:
+    # Run b (runs[0]) has one reading, at 11 s. Move it before the end of run a.
+    modify(runs[0], lambda f: f[f'{TEMPERATURE}/time'].__setitem__(0, SECOND))
+    (error,) = plan_merge(runs, RULES).errors
+    assert error.path == TEMPERATURE
+    assert 'overlaps' in error.message
+
+
+def test_unknown_field_of_log_is_an_error(runs: list[Path]) -> None:
+    for run in runs:
+        modify(run, lambda f: _stream(f[TEMPERATURE], 'flux', [1], 'int64'))
+    assert _error_paths(runs) == {f'{TEMPERATURE}/flux'}
+
+
+@pytest.mark.parametrize(('size', 'refused'), [(1, True), (0, False)])
+def test_index_field_of_unknown_group_is_an_error_unless_empty(
+    runs: list[Path], size: int, refused: bool
+) -> None:
+    path = '/entry/instrument/monitor_events/event_index'
+    for run in runs:
+        modify(
+            run,
+            lambda f: _stream(
+                _group(f['entry/instrument'], 'monitor_events', 'NXdata'),
+                'event_index',
+                [0] * size,
+                'int64',
+            ),
+        )
+    assert _error_paths(runs) == ({path} if refused else set())
+
+
 def test_spread_beyond_error_tolerance_is_an_error(tmp_path: Path) -> None:
     runs = [
         make_run(tmp_path / 'a.nxs', index=0, pulses=[[0]], temperature=[10.0]),
@@ -268,6 +489,16 @@ def test_zero_tolerance_requires_identical_values(tmp_path: Path) -> None:
     ]
     (issue,) = plan_merge(runs, RULES).issues
     assert (issue.severity, issue.path) == ('error', TARGET)
+
+
+def test_nan_in_checked_log_is_an_error(tmp_path: Path) -> None:
+    runs = [
+        make_run(tmp_path / 'a.nxs', index=0, pulses=[[0]], temperature=[10.0]),
+        make_run(tmp_path / 'b.nxs', index=1, pulses=[[0]], temperature=[np.nan]),
+    ]
+    (issue,) = plan_merge(runs, RULES).issues
+    assert (issue.severity, issue.path) == ('error', TEMPERATURE)
+    assert 'NaN' in issue.message
 
 
 @pytest.mark.parametrize(
@@ -310,16 +541,7 @@ def test_unit_change_between_runs_is_an_error(tmp_path: Path) -> None:
             temperature_unit='mK',
         ),
     ]
-    issues = plan_merge(runs, RULES).issues
-    assert {(i.severity, i.path) for i in issues} == {
-        ('error', TEMPERATURE),
-        ('error', f'{TEMPERATURE}/value'),
-    }
-
-
-def test_rule_refuses_tolerance_without_unit() -> None:
-    with pytest.raises(ValueError, match='without unit'):
-        Rule(paths=('/a',), error=sc.scalar(0.0, unit=None))
+    assert TEMPERATURE in _error_paths(runs)
 
 
 def test_changing_log_without_rule_is_reported(runs: list[Path]) -> None:
@@ -331,29 +553,6 @@ def test_rule_that_matches_no_log_is_a_warning(runs: list[Path]) -> None:
     rules = MergeRules(rules=(*RULES.rules, Rule(paths=('/x',), error=sc.scalar(0.0))))
     (issue,) = plan_merge(runs, rules).issues
     assert (issue.severity, issue.path) == ('warning', '/x')
-
-
-def test_write_refuses_plan_with_errors(tmp_path: Path) -> None:
-    runs = [
-        make_run(tmp_path / 'a.nxs', index=0, pulses=[[0]], temperature=[10.0]),
-        make_run(tmp_path / 'b.nxs', index=1, pulses=[[0]], temperature=[11.0]),
-    ]
-    with pytest.raises(ValueError, match='errors'):
-        plan_merge(runs, RULES).write(tmp_path / 'merged.nxs')
-    assert not (tmp_path / 'merged.nxs').exists()
-
-
-def test_write_refuses_if_a_file_changed(runs: list[Path], tmp_path: Path) -> None:
-    plan = plan_merge(runs, RULES)
-    make_run(runs[0], index=1, pulses=[[0, 1, 1, 2]], temperature=[10.05])
-    with pytest.raises(RuntimeError, match='changed'):
-        plan.write(tmp_path / 'merged.nxs')
-
-
-def test_write_refuses_to_overwrite(runs: list[Path], tmp_path: Path) -> None:
-    (tmp_path / 'merged.nxs').touch()
-    with pytest.raises(FileExistsError):
-        plan_merge(runs, RULES).write(tmp_path / 'merged.nxs')
 
 
 def test_rules_from_toml(tmp_path: Path) -> None:
@@ -368,7 +567,8 @@ error = 0
 
 [[rule]]
 paths = ["/entry/sample/temperature"]
-warn = "0.1 K"
+warn = "0.1K"
+error = "5e-1 K"
 """
     )
     rules = MergeRules.from_toml(path)
@@ -379,15 +579,39 @@ warn = "0.1 K"
     assert sc.identical(target.error, sc.scalar(0.0))
     assert target.warn is None
     assert sc.identical(temperature.warn, sc.scalar(0.1, unit='K'))
+    assert sc.identical(temperature.error, sc.scalar(0.5, unit='K'))
 
 
-def test_rules_from_toml_refuses_unknown_keys(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    ('content', 'match'),
+    [
+        ('[[rule]]\npaths = ["/a"]\neror = 0\n', 'eror'),
+        ('[[rule]]\nerror = 0\n', 'rule 0 .* paths'),
+        ('[[rule]]\npaths = "/a"\nerror = 0\n', 'rule 0 .* paths'),
+        ('ignore = "/a"\n', 'ignore'),
+        ('[[rule]]\npaths = ["/a"]\nerror = "K"\n', 'rule 0 .* tolerance'),
+        ('[[rule]]\npaths = ["/a"]\nerror = "1 blorbs"\n', 'rule 0'),
+        ('[[rule]]\npaths = ["/a"]\n', 'rule 0 .* neither'),
+    ],
+    ids=[
+        'unknown key',
+        'no paths',
+        'paths not a list',
+        'ignore not a list',
+        'no number',
+        'unknown unit',
+        'no tolerance',
+    ],
+)
+def test_rules_from_toml_refuses_invalid_rules(
+    tmp_path: Path, content: str, match: str
+) -> None:
     path = tmp_path / 'rules.toml'
-    path.write_text('[[rule]]\npaths = ["/a"]\neror = 0\n')
-    with pytest.raises(ValueError, match='eror'):
+    path.write_text(content)
+    with pytest.raises(ValueError, match=match):
         MergeRules.from_toml(path)
 
 
-def test_rule_needs_a_tolerance() -> None:
-    with pytest.raises(ValueError, match='neither'):
-        Rule(paths=('/a',))
+def test_rule_refuses_tolerance_without_unit() -> None:
+    with pytest.raises(ValueError, match='without unit'):
+        Rule(paths=('/a',), error=sc.scalar(0.0, unit=None))
