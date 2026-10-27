@@ -5,7 +5,15 @@ Utilities for inspecting detector and monitor data, when trying to inspect or de
 data recorded during experiments.
 """
 
-from .detector_explorer import DetectorExplorer
+import lazy_loader as lazy
+
 from .load_nexus import load_detectors, load_monitors
+
+__getattr__, __dir__, _ = lazy.attach(
+    __name__,
+    submod_attrs={
+        'detector_explorer': ['DetectorExplorer'],
+    },
+)
 
 __all__ = ['DetectorExplorer', 'load_detectors', 'load_monitors']
