@@ -20,7 +20,7 @@ def test_create_loki_bank_viewer(histogrammed_loki_data):
 
 def test_loki_bank_viewer_plotting_args(histogrammed_loki_data):
     viewer = LokiBankViewer(histogrammed_loki_data, norm='log', cmap='jet')
-    for fig in viewer.subplots:
+    for fig in viewer.subplots.values():
         mapper = fig.view.colormapper
         assert mapper.norm == 'log'
         assert mapper.cmap.name == 'jet'
@@ -28,28 +28,28 @@ def test_loki_bank_viewer_plotting_args(histogrammed_loki_data):
 
 def test_loki_bank_viewer_toggle_log_scale(histogrammed_loki_data):
     viewer = LokiBankViewer(histogrammed_loki_data)
-    for fig in viewer.subplots:
+    for fig in viewer.subplots.values():
         mapper = fig.view.colormapper
         assert mapper.norm == 'linear'
-    viewer.log_button.value = True
-    for fig in viewer.subplots:
+    viewer.color_control.log_button.value = True
+    for fig in viewer.subplots.values():
         mapper = fig.view.colormapper
         assert mapper.norm == 'log'
 
 
 def test_loki_bank_viewer_sum_all_layers(histogrammed_loki_data):
     viewer = LokiBankViewer(histogrammed_loki_data)
-    old_max = [fig.view.colormapper.vmax for fig in viewer.subplots]
-    viewer.layer_sum.value = True
-    for i, fig in enumerate(viewer.subplots):
+    old_max = [fig.view.colormapper.vmax for fig in viewer.subplots.values()]
+    viewer.all_dim_sliders[0].sum.value = True
+    for i, fig in enumerate(viewer.subplots.values()):
         assert fig.view.colormapper.vmax >= old_max[i]
 
 
 def test_loki_bank_viewer_sum_all_straws(histogrammed_loki_data):
     viewer = LokiBankViewer(histogrammed_loki_data)
-    old_max = [fig.view.colormapper.vmax for fig in viewer.subplots]
-    viewer.straw_sum.value = True
-    for i, fig in enumerate(viewer.subplots):
+    old_max = [fig.view.colormapper.vmax for fig in viewer.subplots.values()]
+    viewer.all_dim_sliders[1].sum.value = True
+    for i, fig in enumerate(viewer.subplots.values()):
         assert fig.view.colormapper.vmax >= old_max[i]
 
 
