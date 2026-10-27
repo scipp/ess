@@ -323,8 +323,8 @@ def test_overlapping_runs_are_an_error(tmp_path: Path) -> None:
         make_run(tmp_path / 'a.nxs', index=0, pulses=[[0]], temperature=[10.0]),
         make_run(tmp_path / 'b.nxs', index=0, pulses=[[0]], temperature=[10.0]),
     ]
-    (error,) = plan_merge(runs, RULES).errors
-    assert 'starts before the end' in error.message
+    errors = plan_merge(runs, RULES).errors
+    assert any('starts before the end' in error.message for error in errors)
 
 
 def _delete(path: str) -> Callable[[h5py.File], object]:
@@ -435,6 +435,28 @@ def test_log_row_not_later_than_previous_run_is_an_error(runs: list[Path]) -> No
     (error,) = plan_merge(runs, RULES).errors
     assert error.path == TEMPERATURE
     assert 'overlaps' in error.message
+
+
+def test_unsorted_log_is_an_error(runs: list[Path]) -> None:
+    # Run a (runs[1]) has readings at 1 s and 2 s.
+    modify(runs[1], lambda f: f[f'{TEMPERATURE}/time'].__setitem__(0, 3 * SECOND))
+    (error,) = plan_merge(runs, RULES).errors
+    assert error.path == TEMPERATURE
+    assert 'not sorted' in error.message
+
+
+def test_unsorted_pulses_within_a_run_are_fine(runs: list[Path]) -> None:
+    # Run a (runs[1]) has pulses at 1 s, 2 s, and 3 s.
+    modify(runs[1], lambda f: f[f'{EVENTS}/event_time_zero'].__setitem__(0, 3 * SECOND))
+    assert plan_merge(runs, RULES).issues == ()
+
+
+def test_overlapping_pulses_are_an_error(runs: list[Path]) -> None:
+    # Run b (runs[0]) has a pulse at 11 s. Move it before the last pulse of run a.
+    modify(runs[0], lambda f: f[f'{EVENTS}/event_time_zero'].__setitem__(0, 3 * SECOND))
+    (error,) = plan_merge(runs, RULES).errors
+    assert error.path == EVENTS
+    assert 'overlap' in error.message
 
 
 def test_unknown_field_of_log_is_an_error(runs: list[Path]) -> None:

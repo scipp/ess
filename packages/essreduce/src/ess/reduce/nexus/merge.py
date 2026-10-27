@@ -346,7 +346,7 @@ def plan_merge(files: Sequence[Path | str], rules: MergeRules) -> MergePlan:
     """
     Check whether the runs in ``files`` can be merged.
 
-    Reads metadata and NXlogs only, not event data.
+    Reads metadata, NXlogs, and pulse times only, not events.
 
     Parameters
     ----------
@@ -381,6 +381,7 @@ def plan_merge(files: Sequence[Path | str], rules: MergeRules) -> MergePlan:
                 *_check_order(runs),
                 *_check_layout(runs, rules),
                 *_check_streams(sources),
+                *_check_pulses(sources),
                 *_check_logs(sources, rules),
             ]
     paths = tuple(path for path, _ in runs)
@@ -586,6 +587,31 @@ def _check_streams(sources: list[h5py.File]) -> Iterator[Issue]:
                 yield Issue('error', path, f'cannot offset {name} in a {nx_class}')
 
 
+def _check_pulses(sources: list[h5py.File]) -> Iterator[Issue]:
+    """
+    Refuse runs whose pulses overlap, as the merged file could count events twice.
+
+    Messages from Kafka arrive out of order, so the pulses of a run are not
+    sorted. The earliest pulse of a run must be later than the latest pulse of
+    the runs before.
+    """
+    for path, node in _layout(sources[0]).items():
+        if _nx_class(node) != 'NXevent_data' or 'event_time_zero' not in node:
+            continue
+        latest = None
+        for source in sources:
+            if (pulses := source.get(f'{path}/event_time_zero')) is None:
+                break  # reported by _check_layout
+            times = pulses[()]
+            if times.size == 0:
+                continue
+            if latest is not None and times.min() <= latest:
+                name = Path(source.filename).name
+                yield Issue('error', path, f'pulses in {name} overlap previous runs')
+                break
+            latest = times.max() if latest is None else max(latest, times.max())
+
+
 def _check_logs(sources: list[h5py.File], rules: MergeRules) -> Iterator[Issue]:
     used: set[int] = set()  # ids, a Rule is not hashable
     seen: set[h5py.Dataset] = set()  # logs whose fields are hard-linked are alike
@@ -614,13 +640,18 @@ def _check_log_series(path: str, logs: list[h5py.Group]) -> Iterator[Issue]:
         if time_name not in logs[0]:
             continue
         for log in logs:
-            if np.any(log[time_name][()] == 0):
+            times = log[time_name][()]
+            name = Path(log.file.filename).name
+            if np.any(times == 0):
                 yield Issue(
                     'error',
                     path,
-                    f'{time_name} in {Path(log.file.filename).name} has rows with '
-                    'time 0, possibly padding by the file writer',
+                    f'{time_name} in {name} has rows with time 0, possibly padding '
+                    'by the file writer',
                 )
+                return
+            if np.any(times[1:] < times[:-1]):
+                yield Issue('error', path, f'{time_name} in {name} is not sorted')
                 return
         try:
             _leading_duplicates(logs, time_name)
