@@ -290,6 +290,9 @@ linkcheck_ignore = [
     r"https?://confluence.ess.eu",
     # This returns '403 Forbidden' but the link works in a browser.
     "https://www.sciencedirect.com/science/article/pii/S2773183922000374",
+    # These links work, but their hosts reject linkcheck requests from CI with 403.
+    r'https://zenodo\.org/(badge/|doi/)',
+    r'https://subversion\.xray\.aps\.anl\.gov/EXPGUI/gsas/all/GSAS%20Manual\.pdf$',
     # Linkcheck seems to be denied access by some DOI resolvers.
     # Since DOIs are supposed to be permanent, we don't need to check them.'
     r'https?://doi\.org/',
