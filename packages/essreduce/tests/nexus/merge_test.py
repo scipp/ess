@@ -64,6 +64,7 @@ def make_run(
     target: float = 1.5,
     pixels: int = 4,
     title: str = 'water',
+    temperature_unit: str = 'K',
 ) -> Path:
     """
     A NeXus file of run ``index``, with one event per pixel id in ``pulses``.
@@ -99,15 +100,13 @@ def make_run(
         transformations['y'] = h5py.SoftLink(f'{TARGET}/value')
         sample = _group(entry, 'sample', 'NXsample')
         times = [(t0 + i) * 10**9 for i in range(len(temperature))]
-        _log(sample, 'temperature', times, temperature, 'K')
+        _log(sample, 'temperature', times, temperature, temperature_unit)
     return path
 
 
 RULES = MergeRules(
     rules=(
-        Rule(
-            paths=('/entry/instrument/*/target_value',), error=sc.scalar(0.0, unit=None)
-        ),
+        Rule(paths=('/entry/instrument/*/target_value',), error=sc.scalar(0.0)),
         Rule(
             paths=(TEMPERATURE,),
             warn=sc.scalar(0.1, unit='K'),
@@ -271,13 +270,56 @@ def test_zero_tolerance_requires_identical_values(tmp_path: Path) -> None:
     assert (issue.severity, issue.path) == ('error', TARGET)
 
 
-def test_tolerance_in_incompatible_unit_is_an_error(runs: list[Path]) -> None:
-    rules = MergeRules(
-        rules=(Rule(paths=(TEMPERATURE,), warn=sc.scalar(1.0, unit='m')),)
-    )
+@pytest.mark.parametrize(
+    'tolerance',
+    [sc.scalar(1.0, unit='m'), sc.scalar(1.0)],
+    ids=['other dimension', 'dimensionless'],
+)
+def test_tolerance_in_incompatible_unit_is_an_error(
+    runs: list[Path], tolerance: sc.Variable
+) -> None:
+    rules = MergeRules(rules=(Rule(paths=(TEMPERATURE,), warn=tolerance),))
     (issue,) = plan_merge(runs, rules).issues
     assert (issue.severity, issue.path) == ('error', TEMPERATURE)
     assert 'cannot convert' in issue.message
+
+
+def test_tolerance_is_converted_to_unit_of_log(tmp_path: Path) -> None:
+    runs = [
+        make_run(
+            tmp_path / f'{i}.nxs',
+            index=i,
+            pulses=[[0]],
+            temperature=[10_000.0 + 200 * i],
+            temperature_unit='mK',
+        )
+        for i in range(2)
+    ]
+    (issue,) = plan_merge(runs, RULES).issues  # 200 mK, warn at 0.1 K
+    assert (issue.severity, issue.path) == ('warning', TEMPERATURE)
+
+
+def test_unit_change_between_runs_is_an_error(tmp_path: Path) -> None:
+    runs = [
+        make_run(tmp_path / 'a.nxs', index=0, pulses=[[0]], temperature=[10.0]),
+        make_run(
+            tmp_path / 'b.nxs',
+            index=1,
+            pulses=[[0]],
+            temperature=[10_000.0],
+            temperature_unit='mK',
+        ),
+    ]
+    issues = plan_merge(runs, RULES).issues
+    assert {(i.severity, i.path) for i in issues} == {
+        ('error', TEMPERATURE),
+        ('error', f'{TEMPERATURE}/value'),
+    }
+
+
+def test_rule_refuses_tolerance_without_unit() -> None:
+    with pytest.raises(ValueError, match='without unit'):
+        Rule(paths=('/a',), error=sc.scalar(0.0, unit=None))
 
 
 def test_changing_log_without_rule_is_reported(runs: list[Path]) -> None:
@@ -286,9 +328,7 @@ def test_changing_log_without_rule_is_reported(runs: list[Path]) -> None:
 
 
 def test_rule_that_matches_no_log_is_a_warning(runs: list[Path]) -> None:
-    rules = MergeRules(
-        rules=(*RULES.rules, Rule(paths=('/x',), error=sc.scalar(0.0, unit=None)))
-    )
+    rules = MergeRules(rules=(*RULES.rules, Rule(paths=('/x',), error=sc.scalar(0.0))))
     (issue,) = plan_merge(runs, rules).issues
     assert (issue.severity, issue.path) == ('warning', '/x')
 
@@ -336,7 +376,7 @@ warn = "0.1 K"
     target, temperature = rules.rules
     assert rules.rule_for(TARGET) is target
     assert rules.rule_for(TEMPERATURE) is temperature
-    assert sc.identical(target.error, sc.scalar(0.0, unit=None))
+    assert sc.identical(target.error, sc.scalar(0.0))
     assert target.warn is None
     assert sc.identical(temperature.warn, sc.scalar(0.1, unit='K'))
 

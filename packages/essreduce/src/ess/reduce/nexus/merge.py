@@ -87,13 +87,19 @@ class Rule:
     warn: sc.Variable | None = None
     """A larger spread is a warning."""
     error: sc.Variable | None = None
-    """A larger spread is an error. ``0`` requires identical values."""
+    """A larger spread is an error. Zero, in any unit, requires identical values."""
 
     def __post_init__(self) -> None:
         if self.warn is None and self.error is None:
             raise ValueError(f'rule for {self.paths} sets neither warn nor error')
         for tolerance in (self.warn, self.error):
-            if tolerance is not None and tolerance.value < 0:
+            if tolerance is None:
+                continue
+            # A unit-less tolerance would silently take the log's unit, which
+            # file producers change, e.g., from mm to m.
+            if tolerance.unit is None:
+                raise ValueError(f'rule for {self.paths} has a tolerance without unit')
+            if tolerance.value < 0:
                 raise ValueError(f'rule for {self.paths} has a negative tolerance')
 
     def matches(self, path: str) -> bool:
@@ -121,8 +127,9 @@ class MergeRules:
         """
         Rules from a TOML file.
 
-        A tolerance is a number in the unit of the log's values, or a string with a
-        unit, such as ``'0.5 K'``, converted to the unit of the log's values:
+        A tolerance is a string with a unit, such as ``'0.5 K'``, converted to the
+        unit of the log's values. A number is dimensionless, except that ``0``
+        requires identical values in any unit:
 
         .. code-block:: toml
 
@@ -169,8 +176,8 @@ def _parse_tolerance(value: float | str | None) -> sc.Variable | None:
         return None
     if isinstance(value, str):
         number, *unit = value.split(maxsplit=1)
-        return sc.scalar(float(number), unit=unit[0] if unit else None)
-    return sc.scalar(float(value), unit=None)
+        return sc.scalar(float(number), unit=unit[0] if unit else '')
+    return sc.scalar(float(value))
 
 
 @dataclass(frozen=True)
@@ -451,9 +458,12 @@ def _check_log(
     merged = np.concatenate([v[()].astype('float64', copy=False) for v in values])
     if merged.size == 0:
         return
+    units = [_unit(v) for v in values]
+    if len(set(units)) > 1:
+        yield Issue('error', path, f'units differ between runs: {units}')
+        return
+    unit = units[0]
     spread = float(np.max(np.nanmax(merged, axis=0) - np.nanmin(merged, axis=0)))
-    unit = values[0].attrs.get('units')
-    unit = unit.decode() if isinstance(unit, bytes) else unit
     if rule is None:
         if spread > 0:
             yield Issue('info', path, f'not checked, spread is {spread:g} {unit}')
@@ -470,14 +480,20 @@ def _check_log(
             yield Issue(
                 severity,
                 path,
-                f'spread {spread:g} {unit} exceeds {severity} tolerance {limit:g}',
+                f'spread {spread:g} {unit} exceeds {severity} tolerance '
+                f'{tolerance.value:g} {tolerance.unit}',
             )
             return
 
 
+def _unit(dataset: h5py.Dataset) -> str | None:
+    unit = dataset.attrs.get('units')
+    return unit.decode() if isinstance(unit, bytes) else unit
+
+
 def _in_unit(tolerance: sc.Variable, unit: str | None) -> float:
-    if tolerance.unit is None:
-        return tolerance.value
+    if tolerance.value == 0:
+        return 0.0  # the same in any unit, and needs none
     return tolerance.to(unit=unit, dtype='float64').value
 
 
