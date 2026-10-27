@@ -65,7 +65,7 @@ _INDEX_FIELDS = {
 }
 """Fields that index into a sibling field, mapped to the name of that sibling."""
 _BLOCK_BYTES = 64 * 1024**2
-"""Bytes of a dataset copied at once when appending a run."""
+"""Most bytes of a dataset held in memory at once when appending a run."""
 
 _Node = h5py.Group | h5py.Dataset | h5py.SoftLink | h5py.ExternalLink
 
