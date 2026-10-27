@@ -23,8 +23,7 @@ def beamline_parameters(
     an intensity-weighted wavelength.
 
     ``mean_L2``, ``mean_Ltotal``, and ``mean_two_theta`` are unweighted means over
-    the selected detector bank(s), ignoring NaNs. These scalar approximations can
-    be used for output calibration.
+    the selected detector bank(s), ignoring NaNs.
 
     ``chopper_frequency`` is a DataGroup mapping active chopper names to signed
     rotation frequencies, including modulation choppers where present.
