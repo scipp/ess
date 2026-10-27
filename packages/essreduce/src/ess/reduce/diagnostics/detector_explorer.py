@@ -12,7 +12,8 @@ import plopp as pp
 import scipp as sc
 from matplotlib.backend_bases import MouseEvent
 
-BUTTON_STYLE = {"width": "40px"}
+BUTTON_STYLE = {"width": "3.0em"}
+THIN_BUTTON_STYLE = {'width': '1.23em', 'padding': '0px'}
 
 
 class MaskControl(ipw.HBox):
@@ -201,6 +202,15 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
             value=0,
             style={"description_width": "initial"},
         )
+        self.prev = ipw.Button(
+            icon="chevron-left",
+            tooltip="Move slider left",
+            disabled=True,
+            layout=THIN_BUTTON_STYLE,
+        )
+        self.next = ipw.Button(
+            icon="chevron-right", tooltip="Move slider right", layout=THIN_BUTTON_STYLE
+        )
         self.sum = ipw.Checkbox(
             description="sum", value=False, indent=False, layout={"width": "initial"}
         )
@@ -210,9 +220,16 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
 
         self.slider.observe(self._on_subwidget_change, names='value')
         self.sum.observe(self._on_subwidget_change, names='value')
+        self.slider.observe(self._update_navigation_status, names='value')
+        self.prev.on_click(
+            lambda _: setattr(self.slider, 'value', self.slider.value - 1)
+        )
+        self.next.on_click(
+            lambda _: setattr(self.slider, 'value', self.slider.value + 1)
+        )
 
         super().__init__(
-            [self.slider, self.sum],
+            [self.slider, self.prev, self.next, self.sum],
             layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
 
@@ -225,6 +242,10 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
             self.value = (self.dim, None)
         else:
             self.value = (self.dim, self.slider.value)
+
+    def _update_navigation_status(self, _=None):
+        self.prev.disabled = self.slider.value <= self.slider.min
+        self.next.disabled = self.slider.value >= self.slider.max
 
 
 def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
