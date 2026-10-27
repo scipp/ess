@@ -30,16 +30,16 @@ class MaskControl(ipw.HBox):
             for key, icon, tip in (
                 ("horizontal", "grip-lines", "Mask horizontally"),
                 ("vertical", "grip-lines-vertical", "Mask vertically"),
-                ("single", "genderless", "Mask single pixel"),
+                ("single", "crosshairs", "Mask single pixel"),
             )
         }
         self.clear_button = ipw.Button(
             icon='trash', tooltip='Clear masks', layout=BUTTON_STYLE
         )
         self.continuous_button = ipw.ToggleButton(
-            icon='unlock',
+            icon='paint-brush',
             value=False,
-            tooltip='Enable/disable continuous masking',
+            tooltip='Mask while dragging',
             layout=BUTTON_STYLE,
         )
         self.filename_input = ipw.Text(value='', layout={"width": "150px"})
@@ -56,7 +56,6 @@ class MaskControl(ipw.HBox):
         self._lock = False
         for button in self.mode_buttons.values():
             button.observe(self._sync_modes, names='value')
-        self.continuous_button.observe(self._on_continuous_toggle, names='value')
 
         super().__init__(
             [
@@ -98,12 +97,6 @@ class MaskControl(ipw.HBox):
             if value not in self.mode_buttons:
                 raise ValueError(f"Invalid mode: {value}")
             self.mode_buttons[value].value = True
-
-    def _on_continuous_toggle(self, change: dict) -> None:
-        if change['new']:
-            self.continuous_button.icon = 'lock'
-        else:
-            self.continuous_button.icon = 'unlock'
 
     def on_clear(self, callback: callable) -> None:
         """
