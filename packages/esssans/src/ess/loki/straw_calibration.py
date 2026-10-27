@@ -361,6 +361,10 @@ def fit_straw_calibration(peaks: sc.DataArray, *, max_degree: int = 3) -> sc.Dat
     The degree of the polynomial is ``min(max_degree, n - 3)`` where ``n`` is the
     number of peaks found in the straw, so the fit always has at least two degrees
     of freedom. Straws with fewer than four peaks are not calibrated.
+    Neither are straws whose polynomial is not increasing over the active region,
+    since two nominal positions would map to the same true position.
+    This happens mostly when the polynomial is extrapolated to straw ends without
+    peaks.
     Peaks are excluded if any mask of ``peaks`` is set.
     The fit is unweighted since the deviations from the polynomial are dominated by
     systematic effects rather than by the statistical uncertainties of the peak
@@ -374,8 +378,8 @@ def fit_straw_calibration(peaks: sc.DataArray, *, max_degree: int = 3) -> sc.Dat
     Parameters
     ----------
     peaks:
-        Measured peak positions with dims ``(..., slit)`` and coord ``expected``,
-        typically from :func:`find_slit_peaks`.
+        Measured peak positions with dims ``(..., slit)`` and coords ``expected``,
+        ``active_begin``, and ``active_end``, typically from :func:`find_slit_peaks`.
     max_degree:
         Maximum degree of the polynomial.
 
@@ -411,19 +415,35 @@ def fit_straw_calibration(peaks: sc.DataArray, *, max_degree: int = 3) -> sc.Dat
     measured = measured.transpose(order).values.reshape(-1, nslit)
     expected = expected.transpose(order).values.reshape(-1, nslit)
     valid = ~_combined_mask(peaks).transpose(order).values.reshape(-1, nslit)
+    active = np.stack(
+        [
+            (peaks.coords[name] / reference_length)
+            .to(unit='dimensionless')
+            .broadcast(sizes=straw_sizes)
+            .transpose(list(straw_sizes))
+            .values.reshape(-1)
+            for name in ('active_begin', 'active_end')
+        ],
+        axis=-1,
+    )
 
     nstraw = len(measured)
     coefficients = np.full((nstraw, max_degree + 1), np.nan)
     degree = np.full(nstraw, -1)
     residual_stddev = np.full(nstraw, np.nan)
     fit_range = np.full((nstraw, 2), np.nan)
-    for i, (m, e, v) in enumerate(zip(measured, expected, valid, strict=True)):
+    for i, (m, e, v, a) in enumerate(
+        zip(measured, expected, valid, active, strict=True)
+    ):
         n = np.count_nonzero(v)
         deg = min(max_degree, n - 3)
         if deg < 1:
             continue
+        c = np.polynomial.polynomial.polyfit(m[v], e[v], deg)
+        if not _is_increasing(c, *a):
+            continue
         coefficients[i] = 0.0
-        coefficients[i, : deg + 1] = np.polynomial.polynomial.polyfit(m[v], e[v], deg)
+        coefficients[i, : deg + 1] = c
         degree[i] = deg
         residual = e[v] - np.polynomial.polynomial.polyval(m[v], coefficients[i])
         residual_stddev[i] = np.sqrt(np.sum(residual**2) / (n - deg - 1))
@@ -453,6 +473,16 @@ def fit_straw_calibration(peaks: sc.DataArray, *, max_degree: int = 3) -> sc.Dat
         },
         masks={'uncalibrated': degree < sc.index(1)},
     )
+
+
+def _is_increasing(coefficients: np.ndarray, begin: float, end: float) -> bool:
+    """Whether the derivative of the polynomial is positive in ``[begin, end]``."""
+    derivative = np.polynomial.Polynomial(coefficients).deriv()
+    # The minimum of the derivative is at an end of the range or at an extremum.
+    extrema = derivative.deriv().roots()
+    extrema = extrema[np.isreal(extrema)].real
+    extrema = extrema[(extrema > begin) & (extrema < end)]
+    return bool(np.all(derivative(np.r_[begin, end, extrema]) > 0))
 
 
 def calibrate_positions(coefficients: sc.DataArray, x: sc.Variable) -> sc.DataArray:

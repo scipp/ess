@@ -246,7 +246,11 @@ def test_fit_straw_calibration_recovers_true_positions(
 def make_peaks(n_valid: int) -> sc.DataArray:
     return sc.DataArray(
         SLITS * 0.9 + sc.scalar(3.0, unit='mm'),
-        coords={'expected': SLITS},
+        coords={
+            'expected': SLITS,
+            'active_begin': sc.scalar(-ACTIVE_HALF_LENGTH, unit='mm'),
+            'active_end': sc.scalar(ACTIVE_HALF_LENGTH, unit='mm'),
+        },
         masks={'not_found': sc.arange('slit', 10, unit=None) >= sc.index(n_valid)},
     )
 
@@ -266,6 +270,27 @@ def test_fit_straw_calibration_masks_straws_with_too_few_peaks() -> None:
     coefficients = cal.fit_straw_calibration(make_peaks(3))
     assert coefficients.masks['uncalibrated'].value
     assert np.isnan(coefficients.values).all()
+
+
+@pytest.mark.parametrize(
+    ('active_half_length', 'uncalibrated'), [(350.0, False), (467.0, True)]
+)
+def test_fit_straw_calibration_masks_straws_not_increasing_in_active_region(
+    active_half_length: float, uncalibrated: bool
+) -> None:
+    # The derivative of this cubic is zero at +-400 mm, beyond the outermost peak.
+    measured = sc.linspace('slit', -300.0, 300.0, num=7, unit='mm')
+    peaks = sc.DataArray(
+        measured,
+        coords={
+            'expected': measured - measured**3 / (3 * sc.scalar(400.0, unit='mm') ** 2),
+            'active_begin': sc.scalar(-active_half_length, unit='mm'),
+            'active_end': sc.scalar(active_half_length, unit='mm'),
+        },
+    )
+    coefficients = cal.fit_straw_calibration(peaks)
+    assert coefficients.masks['uncalibrated'].value == uncalibrated
+    assert np.isnan(coefficients.values).all() == uncalibrated
 
 
 def test_fit_straw_calibration_excludes_peaks_with_any_mask() -> None:
