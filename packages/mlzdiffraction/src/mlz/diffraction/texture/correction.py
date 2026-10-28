@@ -6,7 +6,7 @@
 from typing import cast
 
 from ..powtex.types import EmptyCanRun, EmptyVanadiumCanRun, SampleRun, VanadiumRun
-from .types import EmptyCanSubtracted3D, NormalisedTexture3D, Texture3D
+from .types import EmptyCanSubtracted3D, CalibratedTexture3D, Texture3D
 
 
 def subtract_empty_can_from_sample(
@@ -37,13 +37,13 @@ def subtract_empty_can_from_vanadium(
 def normalize_by_vanadium(
     data: EmptyCanSubtracted3D[SampleRun],
     vanadium: EmptyCanSubtracted3D[VanadiumRun],
-) -> NormalisedTexture3D:
+) -> CalibratedTexture3D:
     """Normalize sample texture data by vanadium texture data."""
     if data is None:
-        return cast(NormalisedTexture3D, None)
+        return cast(CalibratedTexture3D, None)
     if vanadium is None:
-        return NormalisedTexture3D(data)
-    return NormalisedTexture3D(data / vanadium)
+        return CalibratedTexture3D(data)
+    return CalibratedTexture3D(data / vanadium)
 
 
 providers = (

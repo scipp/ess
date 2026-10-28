@@ -11,8 +11,8 @@ from .types import (
     GammaSlicesViewData,
     GammaSliceWidth,
     IntegratedTwoThetaViewData,
-    NormalisedTexture2D,
-    NormalisedTexture3D,
+    CalibratedTexture2D,
+    CalibratedTexture3D,
     ProcessedData,
     StatisticsData,
     TwoThetaViewData,
@@ -20,23 +20,13 @@ from .types import (
 )
 
 
-def view_2d_rings(data: NormalisedTexture2D) -> TwoThetaRingsViewData:
-    """Return the two-theta ring view."""
-    return TwoThetaRingsViewData(data)
-
-
-def view_1d_gamma_slices(data: NormalisedTexture2D) -> GammaSlicesViewData:
-    """Return the gamma-slice view."""
-    return GammaSlicesViewData(data)
-
-
-def extract_rings_statistics(data: NormalisedTexture2D) -> StatisticsData:
+def extract_rings_statistics(data: CalibratedTexture2D) -> StatisticsData:
     """Return the gamma rings statistics data."""
     return StatisticsData(data)
 
 
 def extract_dspacing_hist_view_data(
-    data: NormalisedTexture3D
+    data: CalibratedTexture3D
 ) -> DspacingViewData:
     """Generate a d-spacing histogram."""
     histogrammed_2d_1 = data["region_1"].sum(dim="two_theta")
@@ -72,7 +62,7 @@ def extract_dspacing_hist_view_data(
 
 
 def extract_two_theta_hist_view_data(
-    data: NormalisedTexture3D
+    data: CalibratedTexture3D
 ) -> TwoThetaViewData:
     """Generate a two-theta histogram."""
     histogrammed_2d_1 = data["region_1"].sum(dim="dspacing")
@@ -108,7 +98,7 @@ def extract_two_theta_hist_view_data(
 
 
 def extract_integrated_two_theta_hist_view_data(
-    data: NormalisedTexture3D
+    data: CalibratedTexture3D
 ) -> IntegratedTwoThetaViewData:
     """Generate an integrated two-theta histogram."""
     integrated_1 = data["region_1"].sum(dim="dspacing").sum(dim="gamma")
@@ -133,6 +123,4 @@ providers = (
     extract_dspacing_hist_view_data,
     extract_integrated_two_theta_hist_view_data,
     extract_two_theta_hist_view_data,
-    view_1d_gamma_slices,
-    view_2d_rings,
 )

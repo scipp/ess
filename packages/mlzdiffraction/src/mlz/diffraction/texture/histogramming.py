@@ -12,7 +12,7 @@ from typing import cast
 from ..powtex.types import RunType, SampleRun
 from .conversion import get_cartesian_from_cylindrical
 from .types import (
-    BinningSettings,
+    InstrumentViewSettings,
     DetectorViewRawData,
     DspacingBinWidth,
     DspacingCylSurfaceDetector,
@@ -21,9 +21,9 @@ from .types import (
     GammaBinWidth,
     GammaSlicesViewData,
     GammaSlicesViewRawData,
-    NormalisedTexture3D,
-    NormalisedTexture2D,
-    SampleRawData2D,
+    CalibratedTexture3D,
+    CalibratedTexture2D,
+    RawSampleData2D,
     Texture3D,
     TwoThetaBinningData,
     TwoThetaBinWidth,
@@ -34,19 +34,16 @@ from .types import (
 
 def generate_gamma_binning_data(
     bin_width: GammaBinWidth,
-    binning_settings: BinningSettings,
+    binning_settings: InstrumentViewSettings,
 ) -> GammaBinningData:
     """Generate gamma binning data with the POWTEX detector gap removed."""
     excluded_start = binning_settings.gamma_cut_start
     excluded_end = binning_settings.gamma_cut_end
     drop_partial_bins = binning_settings.drop_partial_bins
 
-    gap_center = (excluded_start + excluded_end) / 2.0
-
     width = float(bin_width.to(unit="deg").value)
     gap_start = float(excluded_start.to(unit="deg").value)
     gap_end = float(excluded_end.to(unit="deg").value)
-    gap_mid = float(gap_center.to(unit="deg").value)
 
     if width <= 0.0:
         raise ValueError("bin_width must be positive.")
@@ -89,11 +86,12 @@ def generate_gamma_binning_data(
 
 def generate_two_theta_binning_data(
     bin_width: TwoThetaBinWidth,
-    binning_settings: BinningSettings,
+    binning_settings: InstrumentViewSettings,
 ) -> TwoThetaBinningData:
-    """Generate two-theta bin edges."""
+    """Generate two-theta bin edges that are symmetric relative to the two-theta mid-point."""
     angle_unit = bin_width.unit
     drop_partial_bins = binning_settings.drop_partial_bins
+
     min_angle = binning_settings.two_theta_min.to(unit=angle_unit)
     max_angle = binning_settings.two_theta_max.to(unit=angle_unit)
     mid_angle = (min_angle + max_angle) * 0.5
@@ -114,9 +112,6 @@ def generate_two_theta_binning_data(
         bin_width=bin_width,
         drop_partial_bins=drop_partial_bins,
     )
-    # bin_centers = (
-    #     bin_edges[dim, :-1] + bin_edges[dim, 1:]
-    # ) / 2.0
 
     return TwoThetaBinningData(sc.concat([lower_edges, upper_edges], dim=dim))
 
@@ -191,13 +186,13 @@ def generate_bin_edges_reverse(
     return edges
 
 
-def hist_3d(
+def histogram_3d(
     data: DspacingCylSurfaceDetector[RunType],
     gamma_binning: GammaBinningData,
     two_theta_binning: TwoThetaBinningData,
     dspacing_bin_width: DspacingBinWidth,
 ) -> Texture3D[RunType]:
-    """Histogram projected detector data to texture coordinates."""
+    """Histogram projected detector data to texture-relevant coordinates."""
 
     if data is None:
         return cast(Texture3D[RunType], None)
@@ -226,9 +221,9 @@ def hist_3d(
     )
 
 
-def hist_2d(data: Texture3D[SampleRun]) -> SampleRawData2D:
-    """Histogram projected detector data to texture coordinates."""
-    return SampleRawData2D(
+def extract_raw_sample_data_2d(data: Texture3D[SampleRun]) -> RawSampleData2D:
+    """Histogram projected 2d detector data."""
+    return RawSampleData2D(
         sc.DataGroup(
             {
                 "region_1": data["region_1"].sum(dim="dspacing"),
@@ -238,7 +233,7 @@ def hist_2d(data: Texture3D[SampleRun]) -> SampleRawData2D:
     )
 
 
-def extract_detector_view_data(data: SampleRawData2D) -> DetectorViewRawData:
+def extract_detector_view_data(data: RawSampleData2D) -> DetectorViewRawData:
     """Return a scipp DataArray with data for the detector view."""
     histogrammed_2d_1 = data["region_1"]
     histogrammed_2d_2 = data["region_2"]
@@ -281,7 +276,7 @@ def extract_detector_view_data(data: SampleRawData2D) -> DetectorViewRawData:
     )
 
 
-def extract_flat_view_data(data: SampleRawData2D) -> FlatViewRawData:
+def extract_flat_view_data(data: RawSampleData2D) -> FlatViewRawData:
     """Return a scipp DataArray with data for a raw flattened detector view.
     Note, in order to properly visualize the gap in the detector, the gamma
     bin edges are modified to include a gap in the middle and one needs to
@@ -362,13 +357,13 @@ def _two_theta_rings_data(data: sc.DataGroup) -> sc.DataArray:
 
 
 def extract_two_theta_rings_view_raw_data(
-    data: SampleRawData2D
+    data: RawSampleData2D
 ) -> TwoThetaRingsViewRawData:
     return TwoThetaRingsViewRawData(_two_theta_rings_data(data))
 
 
 def extract_two_theta_rings_view_data(
-    data: NormalisedTexture2D,
+    data: CalibratedTexture2D,
 ) -> TwoThetaRingsViewData:
     return TwoThetaRingsViewData(_two_theta_rings_data(data))
 
@@ -408,17 +403,17 @@ def _gamma_slices_view_data(data: sc.DataGroup) -> sc.DataArray:
     )
 
 
-def extract_gamma_slices_view_raw_data(data: SampleRawData2D) -> GammaSlicesViewRawData:
+def extract_gamma_slices_view_raw_data(data: RawSampleData2D) -> GammaSlicesViewRawData:
     return GammaSlicesViewRawData(_gamma_slices_view_data(data))
 
 
-def extract_gamma_slices_view_data(data: NormalisedTexture2D) -> GammaSlicesViewData:
+def extract_gamma_slices_view_data(data: CalibratedTexture2D) -> GammaSlicesViewData:
     return GammaSlicesViewData(_gamma_slices_view_data(data))
 
 
-def integrate_dspacing(data: NormalisedTexture3D) -> NormalisedTexture2D:
+def integrate_dspacing(data: CalibratedTexture3D) -> CalibratedTexture2D:
     """Histogram projected detector data to texture coordinates."""
-    return NormalisedTexture2D(
+    return CalibratedTexture2D(
         sc.DataGroup(
             {
                 "region_1": data["region_1"].sum(dim="dspacing"),
@@ -429,15 +424,15 @@ def integrate_dspacing(data: NormalisedTexture3D) -> NormalisedTexture2D:
 
 
 providers = (
-    generate_gamma_binning_data,
-    generate_two_theta_binning_data,
-    hist_3d,
-    hist_2d,
     extract_detector_view_data,
     extract_flat_view_data,
-    extract_two_theta_rings_view_data,
-    extract_two_theta_rings_view_raw_data,
     extract_gamma_slices_view_data,
     extract_gamma_slices_view_raw_data,
+    extract_raw_sample_data_2d,
+    extract_two_theta_rings_view_data,
+    extract_two_theta_rings_view_raw_data,
+    generate_gamma_binning_data,
+    generate_two_theta_binning_data,
+    histogram_3d,
     integrate_dspacing,
 )

@@ -37,37 +37,30 @@ class Texture3D(sl.Scope[RunType, sc.DataGroup], sc.DataGroup):
 
 DetectorViewRawData = NewType("DetectorViewRawData", sc.DataArray)
 FlatViewRawData = NewType("FlatViewRawData", sc.DataArray)
-TwoThetaRingsViewRawData = NewType("TwoThetaRingsViewRawData", sc.DataArray)
 GammaSlicesViewRawData = NewType("GammaSlicesViewRawData", sc.DataArray)
-SampleRawData2D = NewType("SampleRawData2D", sc.DataArray)
+RawSampleData2D = NewType("RawSampleData2D", sc.DataArray)
+TwoThetaRingsViewRawData = NewType("TwoThetaRingsViewRawData", sc.DataArray)
 
 GammaSlicesViewData = NewType("GammaSlicesViewData", sc.DataArray)
-TwoThetaRingsViewData = NewType("TwoThetaRingsViewData", sc.DataArray)
 StatisticsData = NewType("StatisticsData", sc.DataArray)
+TwoThetaRingsViewData = NewType("TwoThetaRingsViewData", sc.DataArray)
 
-GammaCutStart = NewType("GammaCutStart", sc.Variable)
-GammaCutEnd = NewType("GammaCutEnd", sc.Variable)
-DropPartialBins = NewType("DropPartialBins", bool)
-IncludeGapBins = NewType("IncludeGapBins", bool)  # maybe not needed in future
-
+DspacingBinWidth = NewType("DspacingBinWidth", sc.Variable)
 GammaBinWidth = NewType("GammaBinWidth", sc.Variable)
 TwoThetaBinWidth = NewType("TwoThetaBinWidth", sc.Variable)
-DspacingBinWidth = NewType("DspacingBinWidth", sc.Variable)
 
+DspacingBinningData = NewType("DspacingBinningData", sc.Variable)
 GammaBinningData = NewType("GammaBinningData", sc.DataGroup)
 TwoThetaBinningData = NewType("TwoThetaBinningData", sc.Variable)
-DspacingBinningData = NewType("DspacingBinningData", sc.Variable)
-
 
 # frozen=True makes it impossible to change the values of the fields after
 # initialization.
 @dataclass
-class BinningSettings:
-    """Texture workflow binning settings."""
-
+class InstrumentViewSettings:
+    """Texture workflow detector geometry settings for visualisations."""
+    drop_partial_bins: bool
     gamma_cut_start: sc.Variable
     gamma_cut_end: sc.Variable
-    drop_partial_bins: bool
     two_theta_min: sc.Variable
     two_theta_max: sc.Variable
 
@@ -76,8 +69,8 @@ class EmptyCanSubtracted3D(sl.Scope[NonEmptyCanRunType, sc.DataGroup], sc.DataGr
     """Texture data after empty-can subtraction."""
 
 
-NormalisedTexture2D = NewType("NormalisedTexture2D", sc.DataGroup)
-NormalisedTexture3D = NewType("NormalisedTexture3D", sc.DataGroup)
+CalibratedTexture2D = NewType("CalibratedTexture2D", sc.DataGroup)
+CalibratedTexture3D = NewType("CalibratedTexture3D", sc.DataGroup)
 
 GammaSliceWidth = NewType("GammaSliceWidth", sc.DataArray)
 
