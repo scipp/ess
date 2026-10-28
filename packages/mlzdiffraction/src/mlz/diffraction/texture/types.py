@@ -9,8 +9,19 @@ from typing import NewType
 import sciline as sl
 import scipp as sc
 
-from ..powtex.types import NonEmptyCanRunType, RunType
+from ..powtex import types as powtex_t
 
+CalibrationData = powtex_t.CalibrationData
+CalibrationRun = powtex_t.CalibrationRun
+EmptyCanRun = powtex_t.EmptyCanRun
+EmptyVanadiumCanRun = powtex_t.EmptyVanadiumCanRun
+Filename = powtex_t.Filename
+Filepath = powtex_t.Filepath
+NonEmptyCanRunType = powtex_t.NonEmptyCanRunType
+RunType = powtex_t.RunType
+SampleRun = powtex_t.SampleRun
+TofDetector = powtex_t.TofDetector
+VanadiumRun = powtex_t.VanadiumRun
 
 class DspacingCylSurfaceDetector(sl.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data projected to the POWTEX cylindrical surface."""
