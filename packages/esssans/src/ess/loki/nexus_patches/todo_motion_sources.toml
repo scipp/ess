@@ -1,0 +1,107 @@
+# Motion NXlogs of LoKI beamstop axes and the detector carriage are empty.
+#
+# The file-writer configuration used a source name with a "TODO-" prefix for
+# `<component>/transformations/motion`, so no values were written. The motor
+# readback (RBV) was written to the NXlog `<component>/value` instead.
+# This patch replaces each empty `motion` log by the readback log and copies the
+# transformation attributes of the original `motion` log.
+#
+# Observed in run 336349 (2026-10-07).
+
+[[op]]
+kind = "remove"
+path = "/entry/instrument/beamstop_x/transformations/motion"
+
+[[op]]
+kind = "move"
+source = "/entry/instrument/beamstop_x/value"
+target = "/entry/instrument/beamstop_x/transformations/motion"
+
+[[op]]
+kind = "set_attrs"
+path = "/entry/instrument/beamstop_x/transformations/motion"
+attrs = { depends_on = "/entry/instrument/beamstop_x/transformations/distance", transformation_type = "translation", vector = [0.0, 0.0, 1.0] }
+
+[[op]]
+kind = "remove"
+path = "/entry/instrument/beamstop_y/transformations/motion"
+
+[[op]]
+kind = "move"
+source = "/entry/instrument/beamstop_y/value"
+target = "/entry/instrument/beamstop_y/transformations/motion"
+
+[[op]]
+kind = "set_attrs"
+path = "/entry/instrument/beamstop_y/transformations/motion"
+attrs = { depends_on = "/entry/instrument/beamstop_x/transformations/motion", transformation_type = "translation", vector = [1.0, 0.0, 0.0], offset = [0.0, 0.0, 0.0], offset_units = "m" }
+
+[[op]]
+kind = "remove"
+path = "/entry/instrument/beamstop_z1/transformations/motion"
+
+[[op]]
+kind = "move"
+source = "/entry/instrument/beamstop_z1/value"
+target = "/entry/instrument/beamstop_z1/transformations/motion"
+
+[[op]]
+kind = "set_attrs"
+path = "/entry/instrument/beamstop_z1/transformations/motion"
+attrs = { depends_on = "/entry/instrument/beamstop_y/transformations/motion", transformation_type = "translation", vector = [0.0, 1.0, 0.0], offset = [0.0, 0.0, 0.0], offset_units = "m" }
+
+[[op]]
+kind = "remove"
+path = "/entry/instrument/beamstop_z2/transformations/motion"
+
+[[op]]
+kind = "move"
+source = "/entry/instrument/beamstop_z2/value"
+target = "/entry/instrument/beamstop_z2/transformations/motion"
+
+[[op]]
+kind = "set_attrs"
+path = "/entry/instrument/beamstop_z2/transformations/motion"
+attrs = { depends_on = "/entry/instrument/beamstop_y/transformations/motion", transformation_type = "translation", vector = [0.0, 1.0, 0.0], offset = [0.0, 0.0, 0.0], offset_units = "m" }
+
+[[op]]
+kind = "remove"
+path = "/entry/instrument/beamstop_z3/transformations/motion"
+
+[[op]]
+kind = "move"
+source = "/entry/instrument/beamstop_z3/value"
+target = "/entry/instrument/beamstop_z3/transformations/motion"
+
+[[op]]
+kind = "set_attrs"
+path = "/entry/instrument/beamstop_z3/transformations/motion"
+attrs = { depends_on = "/entry/instrument/beamstop_y/transformations/motion", transformation_type = "translation", vector = [0.0, 1.0, 0.0], offset = [0.0, 0.0, 0.0], offset_units = "m" }
+
+[[op]]
+kind = "remove"
+path = "/entry/instrument/beamstop_z4/transformations/motion"
+
+[[op]]
+kind = "move"
+source = "/entry/instrument/beamstop_z4/value"
+target = "/entry/instrument/beamstop_z4/transformations/motion"
+
+[[op]]
+kind = "set_attrs"
+path = "/entry/instrument/beamstop_z4/transformations/motion"
+attrs = { depends_on = "/entry/instrument/beamstop_y/transformations/motion", transformation_type = "translation", vector = [0.0, 1.0, 0.0], offset = [0.0, 0.0, 0.0], offset_units = "m" }
+
+[[op]]
+kind = "remove"
+path = "/entry/instrument/detector_carriage/transformations/motion"
+
+[[op]]
+kind = "move"
+source = "/entry/instrument/detector_carriage/value"
+target = "/entry/instrument/detector_carriage/transformations/motion"
+
+[[op]]
+kind = "set_attrs"
+path = "/entry/instrument/detector_carriage/transformations/motion"
+attrs = { depends_on = "/entry/instrument/detector_carriage/transformations/detector_carriage_zero", transformation_type = "translation", vector = [0.0, 0.0, 1.0], offset = [0.0, 0.0, 0.0], offset_units = "m" }
