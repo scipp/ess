@@ -18,6 +18,7 @@ from scipp.core import label_based_index_to_positional_index
 from scippneutron.chopper import DiskChopper, extract_chopper_from_nexus
 from scippneutron.metadata import RadiationProbe, SourceType
 
+from ..logging import get_logger
 from . import _nexus_loader as nexus
 from .types import (
     COMPONENT_CONSTRAINTS,
@@ -41,10 +42,12 @@ from .types import (
     NeXusComponentLocationSpec,
     NeXusData,
     NeXusDataLocationSpec,
+    NeXusFilePatch,
     NeXusFileSpec,
     NeXusName,
     NeXusTransformation,
     NeXusTransformationChain,
+    PatchedFilePath,
     Position,
     PreopenNeXusFile,
     ProtonCharge,
@@ -65,13 +68,26 @@ no_offset = sc.vector([0, 0, 0], unit="m")
 
 
 def file_path_to_file_spec(
-    filename: Filename[RunType], preopen: PreopenNeXusFile
+    filename: Filename[RunType],
+    preopen: PreopenNeXusFile,
+    patch: NeXusFilePatch[RunType],
 ) -> NeXusFileSpec[RunType]:
+    location = filename
+    if patch:
+        get_logger().info(
+            "Applying NeXus patch with %d operations to %s", len(patch), filename
+        )
+        location = PatchedFilePath(path=filename, patch=patch)
     return NeXusFileSpec[RunType](
-        nexus.open_nexus_file(filename, definitions=definitions)
+        nexus.open_nexus_file(location, definitions=definitions)
         if preopen
-        else filename
+        else location
     )
+
+
+def no_nexus_file_patch() -> NeXusFilePatch[RunType]:
+    """Load NeXus files without patching them."""
+    return NeXusFilePatch[RunType]([])
 
 
 def no_monitor_position_offset() -> MonitorPositionOffset[RunType, MonitorType]:
@@ -813,6 +829,7 @@ definitions['NXdata'] = _NXdataWithoutAuxSignals
 _common_providers = (
     gravity_vector_neg_y,
     file_path_to_file_spec,
+    no_nexus_file_patch,
     full_time_interval,
     component_spec_by_name,
     unique_component_spec,  # after component_spec_by_name, partially overrides

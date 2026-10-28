@@ -12,7 +12,7 @@ Providers / functions are available from here directly.
 The submodule :mod:`types` defines all domain types.
 """
 
-from . import types
+from . import patch, types
 from ._nexus_loader import (
     compute_component_position,
     compute_detector_position,
@@ -39,5 +39,6 @@ __all__ = [
     'load_from_path',
     'open_component_group',
     'open_nexus_file',
+    'patch',
     'types',
 ]
