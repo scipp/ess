@@ -16,6 +16,7 @@ _registry = make_registry(
         "mcstas-wfm-silicon.h5": "md5:07892a4b705faa769f5be8d3601b529e",
         "mcstas-wfm-direct-beam.h5": "md5:b7a2f51615bdaec6957bf3af30751ebf",
         "Si-15SiO2-air.txt": "md5:2bac8babb5f7042fd2e3cbd62e22a278",
+        "freia-wavelength-lookup-table-no-choppers-5m-35m.h5": "md5:e28793b7e1c12986ee63a1df68723268",  # noqa: E501
     },
 )
 
@@ -35,8 +36,14 @@ def freia_mcstas_silicon_reflectivity() -> Path:
     return _registry.get_path("Si-15SiO2-air.txt")
 
 
+def freia_wavelength_lookup_table_no_choppers() -> Path:
+    """Return the FREIA wavelength lookup table without choppers."""
+    return _registry.get_path("freia-wavelength-lookup-table-no-choppers-5m-35m.h5")
+
+
 __all__ = [
     "freia_mcstas_reference_run",
     "freia_mcstas_sample_run",
     "freia_mcstas_silicon_reflectivity",
+    "freia_wavelength_lookup_table_no_choppers",
 ]
