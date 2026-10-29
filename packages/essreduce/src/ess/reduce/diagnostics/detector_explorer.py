@@ -195,12 +195,20 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
         self._visible_dims = visible_dims
         self._dim = dim
 
+        if dim not in self._sizes:
+            slider_max = None
+            disabled = True
+        else:
+            slider_max = self._sizes[dim] - 1
+            disabled = False
+
         self.slider = ipw.IntSlider(
             description=f"{dim} ",
             min=0,
-            max=self._sizes[dim] - 1,
+            max=slider_max,
             value=0,
             style={"description_width": "initial"},
+            disabled=disabled,
         )
         self.prev = ipw.Button(
             icon="chevron-left",
@@ -209,10 +217,17 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
             layout=THIN_BUTTON_STYLE,
         )
         self.next = ipw.Button(
-            icon="chevron-right", tooltip="Move slider right", layout=THIN_BUTTON_STYLE
+            icon="chevron-right",
+            tooltip="Move slider right",
+            layout=THIN_BUTTON_STYLE,
+            disabled=disabled,
         )
         self.sum = ipw.Checkbox(
-            description="sum", value=False, indent=False, layout={"width": "initial"}
+            description="sum",
+            value=disabled,
+            indent=False,
+            layout={"width": "initial"},
+            disabled=disabled,
         )
 
         self._link = ipw.jslink((self.sum, 'value'), (self.slider, 'disabled'))
@@ -620,19 +635,27 @@ class DetectorExplorer(ipw.VBox):
 
     def update_slider_sums(self, old_tab: int, new_tab: int) -> None:
         old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
-        old_slider_sums = {sl.dim: sl.sum.value for sl in old_sliders}
+        old_slider_sums = {sl.dim: sl.sum for sl in old_sliders}
         for sl in new_sliders:
-            if sl.sum.value != old_slider_sums[sl.dim]:
-                sl.sum.value = old_slider_sums[sl.dim]
+            if (
+                (not sl.sum.disabled)
+                and (not old_slider_sums[sl.dim].disabled)
+                and (sl.sum.value != old_slider_sums[sl.dim].value)
+            ):
+                sl.sum.value = old_slider_sums[sl.dim].value
 
     def update_slider_inds(self, old_tab: int, new_tab: int) -> None:
         old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
-        old_slider_inds = dict(slider.value for slider in old_sliders)
+        old_slider_sliders = {sl.dim: sl.slider for sl in old_sliders}
         for sl in new_sliders:
             if sl.sum.value:
                 continue
-            new_value = min(old_slider_inds[sl.dim], sl.slider.max)
-            if sl.slider.value != new_value:
+            new_value = min(old_slider_sliders[sl.dim].value, sl.slider.max)
+            if (
+                (not sl.slider.disabled)
+                and (not old_slider_sliders[sl.dim].disabled)
+                and (sl.slider.value != new_value)
+            ):
                 sl.slider.value = new_value
 
     def selected_tab_changed(self, change: dict) -> None:
