@@ -258,7 +258,13 @@ def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
     da:
         The DataArray to process.
     """
-    return da.assign_coords({dim: sc.arange(dim, sz) for dim, sz in da.sizes.items()})
+    return da.assign_coords(
+        {
+            dim: sc.arange(dim, sz)
+            for dim, sz in da.sizes.items()
+            if dim not in da.coords
+        }
+    )
 
 
 def _slice_or_reduce(
