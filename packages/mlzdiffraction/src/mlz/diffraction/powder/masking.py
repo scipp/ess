@@ -8,8 +8,8 @@ import scipp as sc
 from .types import (
     DperpMask,
     DSpacingMask,
-    ExtendedIntensity2D,
-    MaskedExtendedIntensity2D,
+    ExtendedData2D,
+    MaskedData2D,
     MaskingData,
     TwoThetaMask,
     WavelengthMask,
@@ -17,7 +17,7 @@ from .types import (
 
 
 def apply_masks_p2d(
-    data: ExtendedIntensity2D,
+    data: ExtendedData2D,
     wavelength_mask_func: WavelengthMask,
     two_theta_mask_func: TwoThetaMask,
     dspacing_mask_func: DSpacingMask,
@@ -37,14 +37,14 @@ def apply_masks_p2d(
 
 
 def add_masks_p2d_data(
-    data: ExtendedIntensity2D,
+    data: ExtendedData2D,
     wavelength_mask_func: MaskingData[WavelengthMask],
     two_theta_mask_func: MaskingData[TwoThetaMask],
     dspacing_mask_func: MaskingData[DSpacingMask],
     dperp_mask_func: MaskingData[DperpMask],
-) -> MaskedExtendedIntensity2D:
+) -> MaskedData2D:
     """Apply masks to the extended P2D dataset."""
-    return MaskedExtendedIntensity2D(
+    return MaskedData2D(
         apply_masks_p2d(
             data,
             wavelength_mask_func,

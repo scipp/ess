@@ -14,8 +14,8 @@ from .types import (
     DperpBins,
     Dspacing2D,
     DspacingBins,
-    ExtendedIntensity2D,
-    NormalizedIntensity2D,
+    ExtendedData2D,
+    NormalisedIntensity2D,
     RunType,
     SpectralDetector,
 )
@@ -74,19 +74,20 @@ def focus_to_dspacing_dperp(
             if name in data.bins.coords:
                 data = data.bins.drop_coords(name)
         data = data.bins.concat()
-    args = {dspacing_bins.dim: dspacing_bins, dperp_bins.dim: dperp_bins}
+    args = {dperp_bins.dim: dperp_bins, dspacing_bins.dim: dspacing_bins}
     out = data.bin(args) if keep_events else data.hist(args)
     out.coords.pop("gd_prtn_chrg", None)
     return Dspacing2D[RunType](out)
 
 
-def append_two_theta_lambda(data: NormalizedIntensity2D) -> ExtendedIntensity2D:
-    """Append wavelength and two-theta grids to normalised P2D intensity."""
+def extend_data(data: NormalisedIntensity2D) -> ExtendedData2D:
+    """Append wavelength, two-theta, dspacing, and dperp 2d grids to normalised intensity."""
     lambda_k = sc.scalar(1.0, unit="angstrom")
     d_centers = sc.midpoints(data.coords["dspacing"])
     dp_centers = sc.midpoints(data.coords["dperp"])
 
     lam_2d = lambda_from_d_dperp(d_centers, dp_centers, lambda_k).transpose()
+
     dspacing_2d = sc.broadcast(
         d_centers,
         dims=["dperp", "dspacing"],
@@ -158,7 +159,7 @@ def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None)
 
 
 providers = (
-    append_two_theta_lambda,
+    extend_data,
     bin_dspacing_dperp_mlz,
     flatten_to_spectra,
     focus_to_dspacing_dperp,

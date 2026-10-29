@@ -51,16 +51,16 @@ DspacingBins = NewType("DspacingBins", sc.Variable)
 DperpBins = NewType("DperpBins", sc.Variable)
 """Bin edges for dperp."""
 
-NormalizedIntensity2D = NewType("NormalizedIntensity2D", sc.DataArray)
-"""2-D intensity of normalized sample data."""
+NormalisedIntensity2D = NewType("NormalisedIntensity2D", sc.DataArray)
+"""2-D intensity of normalised sample data."""
 
-ExtendedIntensity2D = NewType("ExtendedIntensity2D", sc.Dataset)
-"""2-D intensity with auxiliary two-theta and wavelength data."""
+ExtendedData2D = NewType("ExtendedData2D", sc.Dataset)
+"""2-D intensity with auxiliary 2-D two-theta, wavelength, dspacing, and dperp data."""
 
-MaskedExtendedIntensity2D = NewType("MaskedExtendedIntensity2D", sc.Dataset)
-"""Extended 2-D intensity with masks."""
+MaskedData2D = NewType("MaskedData2D", sc.Dataset)
+"""Extended 2-D data with masks."""
 
-MaskedIntensity2D = NewType("MaskedIntensity2D", sc.DataArray)
+Intensity2D = NewType("Intensity2D", sc.DataArray)
 """2-D intensity with combined masks applied."""
 
 IntensityP2D = NewType("IntensityP2D", sc.DataArray)
@@ -92,7 +92,7 @@ class EmptyCanSubtracted2D(
     """2-D intensity after empty-can subtraction."""
 
 
-class EmptyCanSubtractedNoNegative2D(
+class AdjustedIntensity2D(
     sciline.Scope[NonEmptyCanRunType, sc.DataArray], sc.DataArray
 ):
     """2-D intensity after empty-can subtraction and negative-value handling."""

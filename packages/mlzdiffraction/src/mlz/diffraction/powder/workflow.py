@@ -11,7 +11,6 @@ from ..powtex.types import (
     NegativeIntensityResetValue,
     SampleRun,
     ShiftNegativeIntensity,
-    UncertaintyBroadcastMode,
     VanadiumRun,
 )
 from .conversion import (
@@ -21,19 +20,19 @@ from .conversion import (
 from .correction import (
     handle_negative_intensity_sample,
     handle_negative_intensity_vanadium,
-    normalize_by_vanadium,
+    normalise_by_vanadium,
     subtract_sample_empty_can,
     subtract_vanadium_empty_can,
 )
 from .data import (
     export_to_p2d,
-    extract_masked_intensity,
+    extract_intensity_2d,
     load_powgen,
     load_powgen_calibration,
     prepare_for_p2d_export,
 )
 from .grouping import (
-    append_two_theta_lambda,
+    extend_data,
     flatten_to_spectra,
     focus_to_dspacing_dperp,
 )
@@ -54,7 +53,6 @@ def default_parameters() -> dict:
         ShiftNegativeIntensity[VanadiumRun]: False,
         NegativeIntensityResetValue[SampleRun]: 0.0,
         NegativeIntensityResetValue[VanadiumRun]: 0.0,
-        UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
 
 
@@ -69,24 +67,16 @@ def PowderReduceP2D() -> sciline.Pipeline:
             # want to use in the future add_masks after file loading
             # instead of add_masks_p2d_data after histogramming.
             add_masks_p2d_data,
-            append_two_theta_lambda,
             export_to_p2d,
-            extract_masked_intensity,
+            extend_data,
+            extract_intensity_2d,
             flatten_to_spectra,
             focus_to_dspacing_dperp,
             handle_negative_intensity_sample,
             handle_negative_intensity_vanadium,
             load_powgen_calibration,
-            # load_powgen_dperp_mask_mlz,
-            # load_powgen_dspacing_mask_mlz,
             load_powgen,
-            # load_powgen_tof_mask_mlz,
-            # load_powgen_two_theta_mask_mlz,
-            # load_powgen_wavelength_mask_mlz,
-            # extract_accumulated_proton_charge,
-            # normalize_by_proton_charge_mlz, <- this and above seem to be absent
-            # in PowderReduceP2D
-            normalize_by_vanadium,
+            normalise_by_vanadium,
             p2d_coordinate_transformation_graph,
             prepare_for_p2d_export,
             subtract_sample_empty_can,

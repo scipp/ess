@@ -15,7 +15,7 @@ from ..powtex.types import (
     EmptyCanRun,
     EmptyVanadiumCanRun,
     NegativeIntensityResetValue,
-    NormalizedDspacing,
+    NormalisedDspacing,
     RunType,
     SampleRun,
     ShiftNegativeIntensity,
@@ -25,23 +25,23 @@ from ..powtex.types import (
 from .types import (
     Dspacing2D,
     EmptyCanSubtracted2D,
-    EmptyCanSubtractedNoNegative2D,
-    NormalizedIntensity2D,
+    AdjustedIntensity2D,
+    NormalisedIntensity2D,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def normalize_by_vanadium(
-    data: EmptyCanSubtractedNoNegative2D[SampleRun],
-    vanadium: EmptyCanSubtractedNoNegative2D[VanadiumRun],
+def normalise_by_vanadium(
+    data: AdjustedIntensity2D[SampleRun],
+    vanadium: AdjustedIntensity2D[VanadiumRun],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-) -> NormalizedIntensity2D:
-    """Normalize sample intensity by a vanadium measurement."""
+) -> NormalisedIntensity2D:
+    """Normalise sample intensity by a vanadium measurement."""
     if data is None:
-        return cast(NormalizedIntensity2D, None)
+        return cast(NormalisedIntensity2D, None)
     if vanadium is None:
-        return NormalizedIntensity2D(data)
+        return NormalisedIntensity2D(data)
     norm = broadcast_uncertainties(
         vanadium, prototype=data, mode=uncertainty_broadcast_mode
     )
@@ -49,21 +49,21 @@ def normalize_by_vanadium(
     # might otherwise produce a unit with a large scale if the proton charges in data
     # and vanadium were measured with different units.
     # norm = norm.to(unit=data.unit, copy=False) <- Seems not needed in our worlflow
-    normalized = data / norm
+    normalised = data / norm
     mask = norm.data == sc.scalar(0.0, unit=norm.unit)
     if mask.any():
-        normalized.masks["zero_vanadium"] = mask
-    return NormalizedIntensity2D(normalized)
+        normalised.masks["zero_vanadium"] = mask
+    return NormalisedIntensity2D(normalised)
 
 
 def normalize_by_proton_charge(
     data: Dspacing2D[RunType],
     proton_charge: AccumulatedProtonCharge[RunType],
-) -> NormalizedDspacing[RunType]:
+) -> NormalisedDspacing[RunType]:
     """Normalize data by accumulated proton charge."""
     if data is None:
-        return cast(NormalizedDspacing[RunType], None)
-    return NormalizedDspacing[RunType](data / proton_charge)
+        return cast(NormalisedDspacing[RunType], None)
+    return NormalisedDspacing[RunType](data / proton_charge)
 
 
 def subtract_sample_empty_can(
@@ -98,42 +98,42 @@ def handle_negative_intensity_sample(
     data: EmptyCanSubtracted2D[SampleRun],
     shift_flag: ShiftNegativeIntensity[SampleRun],
     reset_value: NegativeIntensityResetValue[SampleRun],
-) -> EmptyCanSubtractedNoNegative2D[SampleRun]:
+) -> AdjustedIntensity2D[SampleRun]:
     """Handle negative intensity values in sample data by either shifting them
     by the most negative value or replacing them with a reset value."""
     if data is None:
-        return cast(EmptyCanSubtractedNoNegative2D[SampleRun], None)
+        return cast(AdjustedIntensity2D[SampleRun], None)
     if shift_flag:
         min_intensity = sc.min(data)
         min_value = min_intensity.value
         if min_value < 0.0:
             offset = sc.scalar(-min_value, unit=min_intensity.unit)
             logger.info("Sample negative intensity values shifted by %s.", min_value)
-            return EmptyCanSubtractedNoNegative2D[SampleRun](data + offset)
+            return AdjustedIntensity2D[SampleRun](data + offset)
     else:
         if reset_value is not None:
             logger.info("Sample negative intensity values replaced by %s.", reset_value)
             data.values[data.values < 0.0] = reset_value
             # Q: What to do with uncertainties? For now, we just keep them as they are.
-    return EmptyCanSubtractedNoNegative2D[SampleRun](data)
+    return AdjustedIntensity2D[SampleRun](data)
 
 
 def handle_negative_intensity_vanadium(
     data: EmptyCanSubtracted2D[VanadiumRun],
     shift_flag: ShiftNegativeIntensity[VanadiumRun],
     reset_value: NegativeIntensityResetValue[VanadiumRun],
-) -> EmptyCanSubtractedNoNegative2D[VanadiumRun]:
+) -> AdjustedIntensity2D[VanadiumRun]:
     """Handle negative intensity values in vanadium data by either shifting them
     by the most negative value or replacing them with a reset value."""
     if data is None:
-        return cast(EmptyCanSubtractedNoNegative2D[VanadiumRun], None)
+        return cast(AdjustedIntensity2D[VanadiumRun], None)
     if shift_flag:
         min_intensity = sc.min(data)
         min_value = min_intensity.value
         if min_value < 0.0:
             offset = sc.scalar(-min_value, unit=min_intensity.unit)
             logger.info("Vanadium negative intensity values shifted by %s.", min_value)
-            return EmptyCanSubtractedNoNegative2D[VanadiumRun](data + offset)
+            return AdjustedIntensity2D[VanadiumRun](data + offset)
     else:
         if reset_value is not None:
             logger.info(
@@ -141,14 +141,14 @@ def handle_negative_intensity_vanadium(
             )
             data.values[data.values < 0.0] = reset_value
             # Q: What to do with uncertainties? For now, we just keep them as they are.
-    return EmptyCanSubtractedNoNegative2D[VanadiumRun](data)
+    return AdjustedIntensity2D[VanadiumRun](data)
 
 
 providers = (
     handle_negative_intensity_sample,
     handle_negative_intensity_vanadium,
     normalize_by_proton_charge,
-    normalize_by_vanadium,
+    normalise_by_vanadium,
     subtract_sample_empty_can,
     subtract_vanadium_empty_can,
 )

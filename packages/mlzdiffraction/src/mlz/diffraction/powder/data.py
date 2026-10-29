@@ -28,8 +28,8 @@ from .types import (
     DperpMask,
     DSpacingMask,
     IntensityP2D,
-    MaskedExtendedIntensity2D,
-    MaskedIntensity2D,
+    Intensity2D,
+    MaskedData2D,
     MaskingData,
     P2DOutputFilename,
     TofMask,
@@ -88,9 +88,6 @@ def load_powgen_calibration(
 def load_powgen_tof_mask() -> MaskingData[TofMask]:
     """Return the time-of-flight mask for POWGEN P2D reduction."""
     mask_function = None
-    # mask_function = lambda x: (
-    #     x < sc.scalar(0.0, unit="us")
-    # ) | (x > sc.scalar(16666.67, unit="us"))
     return MaskingData[TofMask](mask_function)
 
 
@@ -189,15 +186,15 @@ def sample_position(data: TofDetector[RunType]) -> Position[snx.NXsample, RunTyp
     return Position[snx.NXsample, RunType](data.coords["sample_position"])
 
 
-def extract_masked_intensity(
-    data: MaskedExtendedIntensity2D,
-) -> MaskedIntensity2D:
+def extract_intensity_2d(
+    data: MaskedData2D,
+) -> Intensity2D:
     """Extract intensity and attach a combined mask."""
     out = data["intensity"].copy()
     combined_mask = _calculate_combined_mask(data, out.dims)
     if combined_mask is not None:
         out.masks["combined_mask"] = combined_mask
-    return MaskedIntensity2D(out)
+    return Intensity2D(out)
 
 
 def _calculate_combined_mask(ds: sc.Dataset, target_dims: tuple[str, ...]):
@@ -216,7 +213,7 @@ def _calculate_combined_mask(ds: sc.Dataset, target_dims: tuple[str, ...]):
 
 
 def prepare_for_p2d_export(
-    data2d: MaskedExtendedIntensity2D,
+    data2d: MaskedData2D,
 ) -> IntensityP2D:
     """Flatten masked 2-D intensity into P2D export rows."""
     target_dims = data2d["intensity"].dims
@@ -269,8 +266,8 @@ def export_to_p2d(data: IntensityP2D, filename: P2DOutputFilename) -> DataFrameP
 
 
 providers = (
+    extract_intensity_2d,
     extract_accumulated_proton_charge,
-    extract_masked_intensity,
     extract_raw_data,
     export_to_p2d,
     load_powgen_calibration,

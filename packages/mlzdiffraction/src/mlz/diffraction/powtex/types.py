@@ -44,8 +44,8 @@ class DspacingDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data with wavelength, two-theta, and d-spacing coordinates."""
 
 
-class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Detector data in d-spacing space normalized by a reference run."""
+class NormalisedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
+    """Detector data in d-spacing space normalised by a reference run."""
 
 
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
