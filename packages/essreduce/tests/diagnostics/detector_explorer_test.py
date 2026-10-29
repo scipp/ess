@@ -196,6 +196,24 @@ def test_initial_masks_are_false_and_independent_between_banks():
         assert not explorer.masks[bank].values.any()
 
 
+def test_slider_disabled_if_one_bank_does_not_have_slider_dim():
+    data = make_banks()
+    data['bank_1'] = data['bank_1'].sum('layer')
+    explorer = DetectorExplorer(data)
+
+    assert not explorer.bank_dim_sliders['bank_0'][0].slider.disabled
+    assert not explorer.bank_dim_sliders['bank_0'][0].sum.disabled
+    assert explorer.bank_dim_sliders['bank_1'][0].slider.disabled
+    assert explorer.bank_dim_sliders['bank_1'][0].sum.disabled
+    assert not explorer.bank_dim_sliders['bank_2'][0].slider.disabled
+    assert not explorer.bank_dim_sliders['bank_2'][0].sum.disabled
+
+    # Check that no error is raised when interacting with the sliders
+    explorer.bank_dim_sliders['bank_0'][0].slider.value += 1
+    explorer.bank_dim_sliders['bank_2'][0].slider.value += 1
+    explorer.all_dim_sliders[0].slider.value += 1
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
