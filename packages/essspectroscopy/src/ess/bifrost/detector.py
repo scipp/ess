@@ -55,10 +55,10 @@ def arc_number(
     return ArcNumber[RunType](sc.round((final_energy - minimum) / step).to(dtype='int'))
 
 
-def arc_and_channel_from_detector_number(
+def single_arc_and_channel_from_detector_number(
     detector_number: sc.Variable,
 ) -> tuple[sc.Variable, sc.Variable]:
-    """Calculate arc number and channel from detector number.
+    """Calculate arc number and channel from the detector number of a single triplet.
 
     Calculate arc and channel for this triplet based on detector_number layout.
     BIFROST detector_number ordering is (arc, tube, channel, pixel).
@@ -118,10 +118,12 @@ def get_calibrated_detector_bifrost(
         Detector geometry and spectrometer coordinates.
     """
 
-    da = get_base_calibrated_detector_bifrost(detector, analyzer, transform=transform)
+    da = get_base_calibrated_detector_bifrost(detector, transform=transform)
     da = da.rename(dim_0='tube', dim_1='length')
 
-    arc, channel = arc_and_channel_from_detector_number(da.coords['detector_number'])
+    arc, channel = single_arc_and_channel_from_detector_number(
+        da.coords['detector_number']
+    )
     da.coords['arc'] = arc
     da.coords['channel'] = channel
 
@@ -138,7 +140,6 @@ def get_calibrated_detector_bifrost(
 
 def get_base_calibrated_detector_bifrost(
     detector: NeXusComponent[snx.NXdetector, RunType],
-    analyzer: Analyzer[RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
 ) -> sc.DataArray:
@@ -152,8 +153,6 @@ def get_base_calibrated_detector_bifrost(
     ----------
     detector:
         Loaded NeXus detector.
-    analyzer:
-        Loaded analyzer parameters.
     transform:
         Transformation that determines the detector position.
 
