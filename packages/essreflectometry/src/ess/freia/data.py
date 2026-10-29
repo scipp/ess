@@ -37,7 +37,14 @@ def freia_mcstas_silicon_reflectivity() -> Path:
 
 
 def freia_wavelength_lookup_table_no_choppers() -> Path:
-    """Return the FREIA wavelength lookup table without choppers."""
+    """
+    Return the FREIA wavelength lookup table without choppers.
+    This table was computed using `Create a wavelength lookup table for TBL
+    <https://scipp.github.io/ess/imaging/tbl/tbl-make-wavelength-lookup-table.html>`_
+    with ``NumberOfSimulatedNeutrons = 5_000_000``.
+    We re-used the TBL table as it covers a distance range which fits the FREIA
+    instrument configuration.
+    """
     return _registry.get_path("freia-wavelength-lookup-table-no-choppers-5m-35m.h5")
 
 
