@@ -11,30 +11,67 @@ from ..reflectometry.types import (
     CoordTransformationGraph,
     CorrectedDetector,
     ReducibleData,
+    ReferenceRun,
     RunType,
     Sample,
     SampleRun,
     SampleSize,
     WavelengthDetector,
 )
-from .conversions import add_coords
 from .maskings import add_roi_masks
 from .types import DetectorRegionOfInterest, WavelengthMonitor
 
 
-def add_coords_and_masks(
-    da: WavelengthDetector[RunType],
-    graph: CoordTransformationGraph[RunType],
-    roi: DetectorRegionOfInterest[RunType],
-) -> CorrectedDetector[RunType]:
-    """Transform coordinates and mask events before run normalization."""
-    da = add_coords(da, graph)
+def add_sample_coords_and_masks(
+    da: WavelengthDetector[SampleRun],
+    graph: CoordTransformationGraph[SampleRun],
+    roi: DetectorRegionOfInterest[SampleRun],
+) -> CorrectedDetector[SampleRun]:
+    """Compute specular sample coordinates and mask events outside the ROI."""
+    da = da.transform_coords(
+        ['scattering_angle', 'theta', 'Q'],
+        graph=graph,
+        rename_dims=False,
+        keep_intermediate=False,
+    )
+    return CorrectedDetector[SampleRun](add_roi_masks(da, roi))
+
+
+def add_reference_coords_and_masks(
+    da: WavelengthDetector[ReferenceRun],
+    graph: CoordTransformationGraph[ReferenceRun],
+    roi: DetectorRegionOfInterest[ReferenceRun],
+) -> CorrectedDetector[ReferenceRun]:
+    """Compute direct-beam coordinates and mask events outside the ROI."""
+    da = da.transform_coords(
+        # Direct-beam normalization needs the direction and sample normal.
+        ['scattering_angle', 'outgoing_direction', 'sample_surface_normal'],
+        graph=graph,
+        rename_dims=False,
+        keep_intermediate=False,
+    )
+    return CorrectedDetector[ReferenceRun](add_roi_masks(da, roi))
+
+
+def add_offspecular_coords_and_masks(
+    da: WavelengthDetector[SampleRun],
+    graph: CoordTransformationGraph[SampleRun],
+    roi: DetectorRegionOfInterest[SampleRun],
+) -> CorrectedDetector[SampleRun]:
+    """Compute off-specular coordinates and mask ROI and unassigned-beam events."""
+    da = da.transform_coords(
+        ['scattering_angle', 'incident_angle', 'reflection_angle', 'Qx', 'Qz'],
+        graph=graph,
+        rename_dims=False,
+        keep_intermediate=False,
+    )
     da = add_roi_masks(da, roi)
+    # Closest-beam assignment with one candidate has scalar incidence.
     if 'incident_angle' in da.bins.coords:
         da = da.bins.assign_masks(
             incident_beam_unassigned=~sc.isfinite(da.bins.coords['incident_angle'])
         )
-    return CorrectedDetector[RunType](da)
+    return CorrectedDetector[SampleRun](da)
 
 
 def normalize_by_monitor_histogram(
@@ -105,4 +142,8 @@ def correct_sample(
     return Sample(corrected.bins.assign_masks(footprint=invalid))
 
 
-providers = (add_coords_and_masks, correct_sample)
+providers = (
+    add_sample_coords_and_masks,
+    add_reference_coords_and_masks,
+    correct_sample,
+)

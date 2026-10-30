@@ -13,7 +13,8 @@ from ess.freia.types import (
     DetectorRegionOfInterest,
     DownstreamSlitCenters,
     SampleSurfaceNormal,
-    SlitStatusLogs,
+    ShutterPositions,
+    ShutterStatusLogs,
     UpstreamSlitCenters,
     WavelengthMonitor,
 )
@@ -91,11 +92,24 @@ def test_reduce_reflectivity_with_monitor_and_footprint():
             coords={'wavelength': wf.compute(WavelengthBins)},
         )
 
-    results = wf.compute((ReflectivityOverQ, ReducibleData[ReferenceRun]))
+    results = wf.compute(
+        (ReflectivityOverQ, ReducibleData[ReferenceRun], CorrectedDetector[SampleRun])
+    )
     result = results[ReflectivityOverQ]
     direct_beam = results[ReducibleData[ReferenceRun]]
     assert 'theta' not in direct_beam.bins.coords
     assert 'Q' not in direct_beam.bins.coords
+    for data in (direct_beam, results[CorrectedDetector[SampleRun]]):
+        coords = set(data.coords) | set(data.bins.coords)
+        assert not {'incident_beam', 'scattered_beam', 'L1', 'L2'} & coords
+        assert 'scattering_angle' in coords
+    assert 'outgoing_direction' in direct_beam.bins.coords
+    assert 'sample_surface_normal' in direct_beam.coords
+    sample = results[CorrectedDetector[SampleRun]]
+    assert {'theta', 'Q'} <= set(sample.bins.coords)
+    assert not {'outgoing_direction', 'sample_surface_normal'} & (
+        set(sample.coords) | set(sample.bins.coords)
+    )
 
     fraction = footprint_on_sample(sc.scalar(30.0, unit='deg'), beam_size, sample_size)
     # Q bins contain wavelengths 4 and 2 angstrom, respectively.
@@ -146,9 +160,37 @@ def test_offspec_workflow_provides_qx_and_qz():
     assert 'incident_direction' not in graph
 
 
+def test_offspec_workflow_supports_scalar_incidence_for_a_single_beam():
+    source = _make_workflow(RunNormalization.none)
+    wf = FreiaOffspecWorkflow()
+    for key in (
+        WavelengthDetector[SampleRun],
+        Position[NXsample, SampleRun],
+        Position[NXsource, SampleRun],
+        SampleSurfaceNormal[SampleRun],
+        GravityVector,
+    ):
+        wf[key] = source.compute(key)
+    wf[UpstreamSlitCenters[SampleRun]] = {'beam': sc.vector([0.0, 0.0, -2.0], unit='m')}
+    wf[DownstreamSlitCenters[SampleRun]] = {
+        'beam': sc.vector([0.0, 0.0, -1.0], unit='m')
+    }
+
+    result = wf.compute(CorrectedDetector[SampleRun])
+
+    assert_allclose(
+        result.coords['incident_angle'], sc.scalar(10.0, unit='deg').to(unit='rad')
+    )
+    assert sc.all(sc.isfinite(result.bins.coords['Qx'])).value
+    assert sc.all(sc.isfinite(result.bins.coords['Qz'])).value
+    assert_identical(
+        result.bins.data, source.compute(WavelengthDetector[SampleRun]).bins.data
+    )
+
+
 @pytest.mark.parametrize(
     ('method', 'expected'),
-    [('closest', [1.0, 1.0, 1.0, 1.0]), ('slit_logs', [0.3, 1.0, np.nan, np.nan])],
+    [('closest', [1.0, 1.0, 1.0, 1.0]), ('shutter_logs', [0.3, 1.0, np.nan, np.nan])],
 )
 def test_offspec_workflow_assigns_incidence_with_independent_methods(method, expected):
     wf = FreiaOffspecWorkflow(incident_beam_from=method)
@@ -204,10 +246,17 @@ def test_offspec_workflow_assigns_incidence_with_independent_methods(method, exp
             },
         )
 
-    wf[SlitStatusLogs[SampleRun]] = {
-        'a': log([0, 33, 43, 53], [True, False, True, False]),
-        'b': log([0, 33, 53], [False, True, False]),
-    }
+    if method == 'shutter_logs':
+        # Shutters are independent of the slit geometry and at different distances
+        # from the source. Reverse their key order to check pairing by beam name.
+        wf[ShutterPositions[SampleRun]] = {
+            'b': sc.vector([0.0, 0.0, -9.0], unit='m'),
+            'a': sc.vector([0.0, 0.0, -19.0], unit='m'),
+        }
+        wf[ShutterStatusLogs[SampleRun]] = {
+            'a': log([0, 15, 25, 35], [True, False, True, False]),
+            'b': log([0, 25, 45], [False, True, False]),
+        }
 
     result = wf.compute(CorrectedDetector[SampleRun])
     assigned = result.bins.coords['incident_angle'].bins.constituents['data']
@@ -216,25 +265,26 @@ def test_offspec_workflow_assigns_incidence_with_independent_methods(method, exp
         sc.array(dims=['event'], values=expected, unit='deg').to(unit='rad'),
         equal_nan=True,
     )
-    assert {'reflection_angle', 'Qx', 'Qz'} <= set(result.bins.coords)
-    if method == 'slit_logs':
-        # One crossing-time coordinate serves all slit logs, independent of
-        # the different transverse slit centers that set the incidence angles.
-        crossing_times = result.bins.coords['time_at_slit'].bins.constituents['data']
-        expected_times = sc.datetimes(
-            dims=['event'], values=[28, 38, 48, 58], unit='ms'
-        ).to(unit='ns')
-        assert sc.all(
-            sc.abs(crossing_times - expected_times) < sc.scalar(3, unit='ns')
-        ).value
-    else:
-        assert 'time_at_slit' not in result.bins.coords
+    assert {'scattering_angle', 'reflection_angle', 'Qx', 'Qz'} <= set(
+        result.bins.coords
+    )
+    assert not {
+        'incident_beam',
+        'scattered_beam',
+        'outgoing_direction',
+        'sample_surface_normal',
+        'L1',
+        'L2',
+        'theta',
+        'Q',
+    } & (set(result.coords) | set(result.bins.coords))
+    assert not any(name.startswith('time_at_shutter') for name in result.bins.coords)
     assert_identical(result.bins.data, data.bins.data)
     assert_identical(
         result.bins.masks['incident_beam_unassigned'].bins.constituents['data'],
         sc.array(
             dims=['event'],
-            values=[False, False, method == 'slit_logs', method == 'slit_logs'],
+            values=[False, False, method == 'shutter_logs', method == 'shutter_logs'],
         ),
     )
-    assert result.sum().value == (2.0 if method == 'slit_logs' else 4.0)
+    assert result.sum().value == (2.0 if method == 'shutter_logs' else 4.0)

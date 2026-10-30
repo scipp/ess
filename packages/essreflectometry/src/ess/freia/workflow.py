@@ -170,7 +170,7 @@ def FreiaWorkflow(
 @register_workflow
 def FreiaOffspecWorkflow(
     *,
-    incident_beam_from: Literal['closest', 'slit_logs'] = 'closest',
+    incident_beam_from: Literal['closest', 'shutter_logs'] = 'closest',
     wavelength_from: WavelengthLutMode = "file",
     **kwargs,
 ) -> sciline.Pipeline:
@@ -185,12 +185,13 @@ def FreiaOffspecWorkflow(
     ----------
     incident_beam_from:
         ``'closest'`` assigns the beam whose specular reflection angle is closest
-        to the measured reflection angle. ``'slit_logs'`` instead uses
-        ``SlitStatusLogs[SampleRun]`` for all candidate beams, evaluating all
-        logs at a shared ``time_at_slit`` coordinate. The common approximate
-        position is the mean downstream slit center. Exactly one open slit
-        determines the incident beam. Otherwise the incidence is NaN and the
-        event is masked as ``incident_beam_unassigned``.
+        to the measured reflection angle. ``'shutter_logs'`` instead uses
+        ``ShutterStatusLogs[SampleRun]`` and ``ShutterPositions[SampleRun]`` for
+        all candidate beams. Each log is evaluated at the neutron's crossing
+        time at that shutter, independently of the slit positions. Exactly one
+        open shutter, with all states known, determines the incident beam.
+        Otherwise the incidence is NaN and the event is masked as
+        ``incident_beam_unassigned``.
     wavelength_from:
         Wavelength lookup table mode: 'analytical', 'simulation', or 'file'.
     """
@@ -202,17 +203,17 @@ def FreiaOffspecWorkflow(
     )
     assignment_provider = {
         'closest': conversions.closest_beam_incident_angle_graph,
-        'slit_logs': conversions.slit_log_incident_angle_graph,
+        'shutter_logs': conversions.shutter_log_incident_angle_graph,
     }[incident_beam_from]
     for provider in (
         conversions.offspecular_coordinate_transformation_graph,
         assignment_provider,
-        corrections.add_coords_and_masks,
+        corrections.add_offspecular_coords_and_masks,
     ):
         workflow.insert(provider)
     for name, param in default_parameters().items():
         workflow[name] = param
-    workflow[KeepEventTimeOffset] = incident_beam_from == 'slit_logs'
+    workflow[KeepEventTimeOffset] = incident_beam_from == 'shutter_logs'
     workflow[DetectorRegionOfInterest[SampleRun]] = {}
     return workflow
 

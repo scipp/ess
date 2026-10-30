@@ -6,13 +6,16 @@ import scipp as sc
 from scipp.testing import assert_allclose, assert_identical
 
 from ess.freia.conversions import (
+    _shutter_state_at_time,
     assign_incident_angle,
-    assign_incident_angle_from_slit_logs,
+    assign_incident_angle_from_shutter_logs,
     incident_beam_directions,
     outgoing_direction,
     scattering_angle,
+    shutter_log_incident_angle_graph,
     theta,
-    time_at_slit,
+    time_at_detector,
+    time_at_shutter,
 )
 
 
@@ -144,8 +147,8 @@ def _events(offsets=(30, 40, 50, 60), speeds=(1000.0, 1000.0, 1000.0, 1000.0)):
             / sc.constants.m_n
             / sc.array(dims=['event'], values=speeds, unit='m/s')
         ).to(unit='nm'),
-        'Ltotal': sc.scalar(30.0, unit='m'),
-        'source_position': sc.vector([0.0, 0.0, 0.0], unit='m'),
+        'L2': sc.scalar(5.0, unit='m'),
+        'sample_position': sc.vector([0.0, 0.0, 25.0], unit='m'),
     }
 
 
@@ -158,52 +161,50 @@ def _log(times, states):
     )
 
 
-def test_time_at_slit_includes_emission_delay_and_uses_relative_source_distance():
+def test_time_at_shutter_uses_path_via_sample_and_retains_emission_delay():
     inputs = _events(offsets=[30, 32, 42], speeds=[1000.0] * 3)
-    inputs['source_position'] = sc.vector([0.0, 0.0, -10.0], unit='m')
-    result = time_at_slit(
-        **inputs, slit_position=sc.vector([0.0, 0.0, 1000.0], unit='cm')
+    # The shutter-to-sample segment is 5 m (a 3-4-5 triangle), followed by L2=5 m.
+    inputs['sample_position'] = sc.vector([3.0, 0.0, 14.0], unit='m')
+    result = time_at_shutter(
+        time_at_detector(inputs['event_time_zero'], inputs['event_time_offset']),
+        inputs['wavelength'],
+        inputs['L2'],
+        inputs['sample_position'],
+        shutter_position=sc.vector([0.0, 0.0, 1000.0], unit='cm'),
     )
-    assert_identical(
+    assert_allclose(
         result,
-        sc.datetimes(
-            dims=['event'], values=[20_000_000, 22_000_000, 32_000_000], unit='ns'
-        ),
+        sc.array(dims=['event'], values=[0.020, 0.022, 0.032], unit='s'),
     )
 
 
-def test_time_at_slit_depends_on_wavelength_and_pixel_flight_path():
+def test_time_at_shutter_depends_on_wavelength_and_pixel_flight_path():
     inputs = _events(offsets=[32, 82], speeds=[1000.0, 500.0])
-    inputs['Ltotal'] = sc.array(dims=['event'], values=[30.0, 40.0], unit='m')
-    result = time_at_slit(**inputs, slit_position=sc.vector([0.0, 0.0, 20.0], unit='m'))
-    assert_identical(
-        result, sc.datetimes(dims=['event'], values=[22_000_000, 42_000_000], unit='ns')
+    inputs['L2'] = sc.array(dims=['event'], values=[5.0, 15.0], unit='m')
+    result = time_at_shutter(
+        time_at_detector(inputs['event_time_zero'], inputs['event_time_offset']),
+        inputs['wavelength'],
+        inputs['L2'],
+        inputs['sample_position'],
+        shutter_position=sc.vector([0.0, 0.0, 20.0], unit='m'),
     )
+    assert_allclose(result, sc.array(dims=['event'], values=[0.022, 0.042], unit='s'))
 
 
-def test_time_at_slit_rounds_only_after_subtracting_flight_time():
-    inputs = _events(offsets=[0, 0], speeds=[1000.0, 1000.0])
-    inputs['Ltotal'] = sc.scalar(0.03, unit='m')
-    inputs['event_time_offset'] = sc.array(
-        dims=['event'], values=[30.00025, 30.00075], unit='us'
-    )
-    result = time_at_slit(**inputs, slit_position=sc.vector([0.0, 0.0, 0.02], unit='m'))
-    assert_identical(
-        result, sc.datetimes(dims=['event'], values=[20_000, 20_001], unit='ns')
-    )
-
-
-def test_all_slit_logs_use_the_same_event_times_and_ambiguous_events_are_unassigned():
+def test_shutter_logs_with_shared_crossing_times_leave_ambiguous_events_unassigned():
     angles = {'a': sc.scalar(0.3, unit='deg'), 'b': sc.scalar(1.0, unit='deg')}
     # Reversed key order makes sure beams are paired by name.
     logs = {
         'b': _log([0, 25, 45], [False, True, False]),
         'a': _log([0, 25, 35, 45], [True, False, True, False]),
     }
-    result = assign_incident_angle_from_slit_logs(
-        sc.datetimes(dims=['event'], values=[20, 30, 40, 50], unit='ms'),
+    result = assign_incident_angle_from_shutter_logs(
+        **_events(),
         incident_angles=angles,
-        slit_status_logs=logs,
+        shutter_positions={
+            name: sc.vector([0.0, 0.0, 20.0], unit='m') for name in angles
+        },
+        shutter_status_logs=logs,
     )
     assert_allclose(
         result['event', :2],
@@ -217,30 +218,52 @@ def test_all_slit_logs_use_the_same_event_times_and_ambiguous_events_are_unassig
     assert_allclose(nearest, sc.full(dims=['event'], shape=[4], value=1.0, unit='deg'))
 
 
-def test_slit_assignment_uses_neutron_crossing_time_instead_of_pulse_or_detector_time():
+def test_shutter_assignment_uses_crossing_time_instead_of_pulse_or_detector_time():
     inputs = _events(offsets=[30, 32, 42], speeds=[1000.0] * 3)
     # Crossings at 20, 22, 32 ms. All pulse and detector times are outside
-    # the opening, but the middle neutron crossed while the slit was open.
-    result = assign_incident_angle_from_slit_logs(
-        time_at_slit(**inputs, slit_position=sc.vector([0.0, 0.0, 20.0], unit='m')),
+    # the opening, but the middle neutron crossed while the shutter was open.
+    result = assign_incident_angle_from_shutter_logs(
+        **inputs,
         incident_angles={'a': sc.scalar(1.0, unit='deg')},
-        slit_status_logs={'a': _log([0, 21, 23], [False, True, False])},
+        shutter_positions={'a': sc.vector([0.0, 0.0, 20.0], unit='m')},
+        shutter_status_logs={'a': _log([0, 21, 23], [False, True, False])},
     )
     assert np.isnan(result.values[[0, 2]]).all()
     assert_allclose(result['event', 1], sc.scalar(1.0, unit='deg').to(unit='rad'))
 
 
-def test_status_changes_apply_at_the_slit_crossing_timestamp():
-    result = assign_incident_angle_from_slit_logs(
-        sc.datetimes(dims=['event'], values=[20, 21, 22, 23, 24], unit='ms'),
+def test_status_changes_apply_at_the_shutter_crossing_timestamp():
+    result = _shutter_state_at_time(
+        sc.array(
+            dims=['event'], values=[0.9998, 1.0, 1.0002, 2.9998, 3.0, 3.0002], unit='s'
+        ),
+        _log([0, 1000, 3000], [False, True, False]),
+    )
+    assert_identical(
+        result,
+        sc.array(dims=['event'], values=[0, 1, 1, 1, 0, 0], dtype='float32', unit=None),
+    )
+
+
+def test_shutter_assignment_resolves_hundreds_of_microseconds_at_modern_dates():
+    inputs = _events(offsets=[30.8, 31.2, 32.8, 33.2], speeds=[1000.0] * 4)
+    pulse = sc.datetime('2026-10-30T12:34:56.123456789', unit='ns')
+    inputs['event_time_zero'] = sc.concat([pulse] * 4, dim='event')
+    log = _log([0, 21, 23], [False, True, False])
+    log.coords['time'] = log.coords['time'].to(unit='ns') + (
+        pulse - sc.epoch(unit='ns')
+    )
+    result = assign_incident_angle_from_shutter_logs(
+        **inputs,
         incident_angles={'a': sc.scalar(1.0, unit='deg')},
-        slit_status_logs={'a': _log([0, 21, 23], [False, True, False])},
+        shutter_positions={'a': sc.vector([0.0, 0.0, 20.0], unit='m')},
+        shutter_status_logs={'a': log},
     )
     assert_allclose(
         result,
-        sc.array(
-            dims=['event'], values=[np.nan, 1.0, 1.0, np.nan, np.nan], unit='deg'
-        ).to(unit='rad'),
+        sc.array(dims=['event'], values=[np.nan, 1.0, 1.0, np.nan], unit='deg').to(
+            unit='rad'
+        ),
         equal_nan=True,
     )
 
@@ -248,18 +271,134 @@ def test_status_changes_apply_at_the_slit_crossing_timestamp():
 @pytest.mark.parametrize(
     ('unknown_times', 'unknown_states'), [([], []), ([100], [False])]
 )
-def test_unknown_slit_status_does_not_silently_identify_another_beam(
+def test_unknown_shutter_status_does_not_silently_identify_another_beam(
     unknown_times, unknown_states
 ):
-    result = assign_incident_angle_from_slit_logs(
-        sc.datetimes(dims=['event'], values=[20, 30, 40, 50], unit='ms'),
+    result = assign_incident_angle_from_shutter_logs(
+        **_events(),
         incident_angles={
             'a': sc.scalar(0.3, unit='deg'),
             'b': sc.scalar(1.0, unit='deg'),
         },
-        slit_status_logs={
+        shutter_positions={
+            name: sc.vector([0.0, 0.0, 20.0], unit='m') for name in ('a', 'b')
+        },
+        shutter_status_logs={
             'a': _log([0], [True]),
             'b': _log(unknown_times, unknown_states),
         },
     )
     assert sc.all(sc.isnan(result)).value
+
+
+def test_shutter_logs_are_sampled_at_each_shutters_crossing_time():
+    inputs = _events(offsets=[30, 40, 50], speeds=[1000.0] * 3)
+    positions = {
+        'a': sc.vector([0.0, 0.0, 10.0], unit='m'),
+        'b': sc.vector([0.0, 0.0, 20.0], unit='m'),
+    }
+    # Identical logs, but the neutron reaches a at 10, 20, 30 ms and b at
+    # 20, 30, 40 ms. A shared timestamp would never identify a unique beam.
+    result = assign_incident_angle_from_shutter_logs(
+        **inputs,
+        shutter_positions=positions,
+        incident_angles={
+            'a': sc.scalar(0.3, unit='deg'),
+            'b': sc.scalar(1.0, unit='deg'),
+        },
+        shutter_status_logs={
+            name: _log([0, 15, 25], [False, True, False]) for name in positions
+        },
+    )
+    assert_allclose(
+        result,
+        sc.array(dims=['event'], values=[1.0, 0.3, np.nan], unit='deg').to(unit='rad'),
+        equal_nan=True,
+    )
+
+
+def test_three_open_shutters_are_ambiguous():
+    result = assign_incident_angle_from_shutter_logs(
+        **_events(offsets=[30], speeds=[1000.0]),
+        shutter_positions={
+            name: sc.vector([0.0, 0.0, 20.0], unit='m') for name in ('a', 'b', 'c')
+        },
+        incident_angles={
+            name: sc.scalar(angle, unit='deg')
+            for name, angle in zip(('a', 'b', 'c'), (0.3, 1.0, 2.5), strict=True)
+        },
+        shutter_status_logs={name: _log([0], [True]) for name in ('a', 'b', 'c')},
+    )
+    assert sc.all(sc.isnan(result)).value
+
+
+def test_final_shutter_state_persists():
+    result = assign_incident_angle_from_shutter_logs(
+        **_events(offsets=[30.2, 60], speeds=[1000.0] * 2),
+        incident_angles={'a': sc.scalar(1.0, unit='deg')},
+        shutter_positions={'a': sc.vector([0.0, 0.0, 20.0], unit='m')},
+        shutter_status_logs={'a': _log([0, 20], [False, True])},
+    )
+    assert_allclose(
+        result, sc.array(dims=['event'], values=[1.0, 1.0], unit='deg').to(unit='rad')
+    )
+
+
+@pytest.mark.parametrize('input_name', ['shutter_positions', 'shutter_status_logs'])
+@pytest.mark.parametrize('keys', [(), ('b',), ('a', 'b')])
+def test_shutter_graph_requires_matching_beam_names(input_name, keys):
+    inputs = {
+        'upstream_slit_centers': {'a': sc.vector([0.0, 0.1, -2.0], unit='m')},
+        'downstream_slit_centers': {'a': sc.vector([0.0, 0.0, -1.0], unit='m')},
+        'sample_surface_normal': sc.vector([0.0, 1.0, 0.0]),
+        'shutter_positions': {'a': sc.vector([0.0, 0.0, -3.0], unit='m')},
+        'shutter_status_logs': {'a': _log([0], [True])},
+    }
+    value = inputs[input_name]['a']
+    inputs[input_name] = dict.fromkeys(keys, value)
+    with pytest.raises(ValueError, match='must have the same keys'):
+        shutter_log_incident_angle_graph(**inputs)
+
+
+def test_shutter_graph_requires_at_least_one_beam():
+    with pytest.raises(ValueError, match='At least one incident beam'):
+        shutter_log_incident_angle_graph({}, {}, sc.vector([0.0, 1.0, 0.0]), {}, {})
+
+
+def test_shutter_graph_incident_angle_can_be_replaced():
+    graph = shutter_log_incident_angle_graph(
+        upstream_slit_centers={'a': sc.vector([0.0, 0.1, -2.0], unit='m')},
+        downstream_slit_centers={'a': sc.vector([0.0, 0.0, -1.0], unit='m')},
+        sample_surface_normal=sc.vector([0.0, 1.0, 0.0]),
+        shutter_positions={'a': sc.vector([0.0, 0.0, -3.0], unit='m')},
+        shutter_status_logs={'a': _log([0], [True])},
+    )
+    angle = sc.scalar(0.5, unit='rad')
+    # Replacing incidence also removes the dependency on event timing inputs.
+    result = sc.DataArray(
+        sc.ones(dims=['event'], shape=[2], unit='counts')
+    ).transform_coords(
+        'incident_angle', graph=graph | {'incident_angle': lambda: angle}
+    )
+    assert_identical(result.coords['incident_angle'], angle)
+
+
+def test_shutter_timing_is_accurate_to_100_microseconds_at_modern_dates():
+    inputs = _events(offsets=[30.0, 30.2], speeds=[1000.0] * 2)
+    pulse = sc.datetime('2026-10-29T12:34:56.123456789', unit='ns')
+    inputs['event_time_zero'] = sc.concat([pulse, pulse], dim='event')
+    inputs['L2'] = sc.scalar(500.0, unit='cm')
+    result = time_at_shutter(
+        time_at_detector(inputs['event_time_zero'], inputs['event_time_offset']),
+        inputs['wavelength'],
+        inputs['L2'],
+        inputs['sample_position'],
+        shutter_position=sc.vector([0.0, 0.0, 20.0], unit='m'),
+    )
+    pulse_seconds = (pulse - sc.epoch(unit='ns')).to(unit='s', dtype='float64')
+    assert_allclose(
+        result - pulse_seconds,
+        sc.array(dims=['event'], values=[0.02, 0.0202], unit='s'),
+        rtol=sc.scalar(0.0),
+        atol=sc.scalar(100.0, unit='us').to(unit='s'),
+    )

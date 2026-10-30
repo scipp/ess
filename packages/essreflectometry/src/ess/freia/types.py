@@ -55,16 +55,17 @@ class IncidentAngleGraph(sciline.Scope[RunType, dict], dict):
     """Coordinate graph fragment defining how incident angles are assigned."""
 
 
-class SlitStatusLogs(sciline.Scope[RunType, dict], dict):
-    """Incident beam names mapped to the status logs of their controlling slits.
+class ShutterPositions(sciline.Scope[RunType, dict], dict):
+    """Incident beam names mapped to fixed shutter positions in global coordinates.
 
-    Keys match UpstreamSlitCenters and DownstreamSlitCenters. Each log contains
-    boolean data (True means open) and a datetime ``time`` coordinate.
+    Keys match UpstreamSlitCenters and DownstreamSlitCenters. Each beam has one
+    shutter, whose position is independent of the slit centers used for angles.
+    """
 
-    A logged state applies until the next entry; the final state persists.
-    Status before the first entry is unknown, leaving the event unassigned.
-    All logs are sampled at the same ``time_at_slit`` event coordinate, using
-    the mean downstream slit center as their common approximate position.
-    Exactly one open slit identifies the beam; zero or multiple open slits leave
-    the event unassigned.
+
+class ShutterStatusLogs(sciline.Scope[RunType, dict], dict):
+    """Shutter identifiers mapped to status logs.
+
+    Each log contains boolean data (True means open, False means closed) and a
+    datetime ``time`` coordinate.
     """
