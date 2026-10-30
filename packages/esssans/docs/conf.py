@@ -267,6 +267,8 @@ doctest_default_flags = (
 linkcheck_ignore = [
     # Specific lines in Github blobs cannot be found by linkcheck.
     r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#',
+    # Zenodo citation links work, but reject linkcheck requests from CI with 403.
+    r'https://zenodo\.org/(badge/|doi/)',
     # Linkcheck seems to be denied access by some DOI resolvers.
     # Since DOIs are supposed to be permanent, we don't need to check them.'
     r'https?://doi\.org/',

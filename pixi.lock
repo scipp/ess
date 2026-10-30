@@ -18475,7 +18475,7 @@ packages:
   - graphviz>=0.20
   - plopp>=23.10.0
   - tifffile>=2026.5.2
-  - essreduce>=26.6.2
+  - essreduce>=26.10.1
   - scitiff>=26.6
   - numba>=0.63 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
@@ -18541,7 +18541,7 @@ packages:
   - sciline>=25.11.0
   - scipp>=26.3.1
   - scippneutron>=26.6.0
-  - scippnexus>=25.6.0
+  - scippnexus>=26.1.0
   - scipy>=1.14
   - ipywidgets>=8.1 ; extra == 'test'
   - matplotlib>=3.10.7 ; extra == 'test'
@@ -18617,12 +18617,14 @@ packages:
   - dask>=2022.1.0
   - graphviz>=0.20
   - essreduce>=26.10.1
+  - lazy-loader>=0.4
   - numpy>=1.26.4
   - pandas>=2.1.2
   - plopp>=26.5.0
   - scippneutron>=26.10.0
   - numba>=0.63 ; extra == 'test'
   - ipympl>=0.9.4 ; extra == 'test'
+  - ipywidgets>=8.1 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
   - pooch>=1.5 ; extra == 'test'
   - scipy>=1.15.0 ; extra == 'test'

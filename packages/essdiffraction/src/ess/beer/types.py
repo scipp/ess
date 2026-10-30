@@ -21,6 +21,18 @@ class StreakClusteredData(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data binned by streak"""
 
 
+class BeamlineParameters(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):
+    """BEER wavelength, chopper, and detector geometry parameters.
+
+    See :func:`ess.beer.parameters.beamline_parameters` for the entries and their
+    conventions.
+    """
+
+
+class BeamlineGeometryGraph(sciline.Scope[RunType, dict], dict):
+    """Workflow-specific geometry transformations, independent of events and peaks."""
+
+
 RawDetector = RawDetector
 Filename = Filename
 SampleRun = SampleRun

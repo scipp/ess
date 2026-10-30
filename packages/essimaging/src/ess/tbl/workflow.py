@@ -17,20 +17,21 @@ from ..imaging.types import (
     PulseStrideOffset,
     SampleRun,
 )
+from .beamline import nexus_name
 
 
 def default_parameters() -> dict:
     """Return the default workflow parameters for TBL."""
     return {
-        NeXusMonitorName[BeamMonitor1]: "monitor_1",
+        NeXusMonitorName[BeamMonitor1]: nexus_name("monitor"),
         PulseStrideOffset: None,
         LookupTableRelativeErrorThreshold: {
-            "ngem_detector": float("inf"),
-            "he3_detector_bank0": float("inf"),
-            "he3_detector_bank1": float("inf"),
-            "multiblade_detector": float("inf"),
-            "timepix3_detector": float("inf"),
-            "monitor_1": float("inf"),
+            nexus_name("ngem"): float("inf"),
+            nexus_name("he3_bank_0"): float("inf"),
+            nexus_name("he3_bank_1"): float("inf"),
+            nexus_name("multiblade"): float("inf"),
+            nexus_name("timepix3"): float("inf"),
+            nexus_name("monitor"): float("inf"),
         },
     }
 
