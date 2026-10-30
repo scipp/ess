@@ -170,7 +170,9 @@ jobs:
       - name: Check downloaded cache
         run: ls .ess_release_cache
       - name: Generate release note
-        run: pixi run --script tools/collect-release-notes.py --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LASTVERSION}
+        run: pixi run --script tools/collect-release-notes.py -- --cur-tag ${PACKAGE}/${VERSION} --compare-tag ${PACKAGE}/${LASTVERSION}
+        env:
+            PIXI_NO_INSTALL: false
       - name: Download existing release note
         env:
           GH_TOKEN: ${{ github.token }}
