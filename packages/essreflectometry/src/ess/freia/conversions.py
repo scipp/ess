@@ -282,6 +282,18 @@ def _incident_angles_from_slits(
     }
 
 
+def fixed_slits_incident_angle_graph(
+    upstream_slit_centers: UpstreamSlitCenters[RunType],
+    downstream_slit_centers: DownstreamSlitCenters[RunType],
+    sample_surface_normal: SampleSurfaceNormal[RunType],
+) -> IncidentAngleGraph[RunType]:
+    """Provide a constant incident angle from a single pair of fixed slit openings."""
+    (beam_incident_angle,) = _incident_angles_from_slits(
+        upstream_slit_centers, downstream_slit_centers, sample_surface_normal
+    ).values()
+    return {'incident_angle': lambda: beam_incident_angle}
+
+
 def closest_beam_incident_angle_graph(
     upstream_slit_centers: UpstreamSlitCenters[RunType],
     downstream_slit_centers: DownstreamSlitCenters[RunType],

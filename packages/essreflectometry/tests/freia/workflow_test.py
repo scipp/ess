@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import scipp as sc
 from ess.reduce.nexus.types import GravityVector, Position
+from ess.reduce.unwrap.types import KeepEventTimeOffset
 from scipp.testing import assert_allclose, assert_identical
 from scippnexus import NXsample, NXsource
 
@@ -160,9 +161,11 @@ def test_offspec_workflow_provides_qx_and_qz():
     assert 'incident_direction' not in graph
 
 
-def test_offspec_workflow_supports_scalar_incidence_for_a_single_beam():
+@pytest.mark.parametrize('method', ['closest', 'fixed_slits'])
+def test_offspec_workflow_supports_scalar_incidence_for_a_single_beam(method):
     source = _make_workflow(RunNormalization.none)
-    wf = FreiaOffspecWorkflow()
+    wf = FreiaOffspecWorkflow(incident_beam_from=method)
+    assert wf.compute(KeepEventTimeOffset) is False
     for key in (
         WavelengthDetector[SampleRun],
         Position[NXsample, SampleRun],
@@ -181,8 +184,24 @@ def test_offspec_workflow_supports_scalar_incidence_for_a_single_beam():
     assert_allclose(
         result.coords['incident_angle'], sc.scalar(10.0, unit='deg').to(unit='rad')
     )
-    assert sc.all(sc.isfinite(result.bins.coords['Qx'])).value
-    assert sc.all(sc.isfinite(result.bins.coords['Qz'])).value
+    reflection_angles = np.deg2rad([30.0, 30.0, 60.0])
+    wavenumbers = 2 * np.pi / np.array([2.0, 4.0, 2.0])
+    assert_allclose(
+        result.bins.coords['Qx'].bins.constituents['data'],
+        sc.array(
+            dims=['event'],
+            values=wavenumbers * (np.cos(reflection_angles) - np.cos(np.deg2rad(10.0))),
+            unit='1/angstrom',
+        ),
+    )
+    assert_allclose(
+        result.bins.coords['Qz'].bins.constituents['data'],
+        sc.array(
+            dims=['event'],
+            values=wavenumbers * (np.sin(reflection_angles) + np.sin(np.deg2rad(10.0))),
+            unit='1/angstrom',
+        ),
+    )
     assert_identical(
         result.bins.data, source.compute(WavelengthDetector[SampleRun]).bins.data
     )

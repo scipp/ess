@@ -9,6 +9,7 @@ from ess.freia.conversions import (
     _shutter_state_at_time,
     assign_incident_angle,
     assign_incident_angle_from_shutter_logs,
+    fixed_slits_incident_angle_graph,
     incident_beam_directions,
     outgoing_direction,
     scattering_angle,
@@ -135,6 +136,27 @@ def test_single_incident_beam_returns_scalar():
     )
 
     assert_identical(assigned, angle)
+
+
+def test_fixed_slits_incidence_needs_no_event_coordinates():
+    graph = fixed_slits_incident_angle_graph(
+        upstream_slit_centers={'beam': sc.vector([0.0, 0.0, -2.0], unit='m')},
+        downstream_slit_centers={
+            'beam': sc.vector([0.0, -1.0, -2.0 + np.sqrt(3)], unit='m')
+        },
+        sample_surface_normal=sc.vector(
+            [0.0, np.cos(np.deg2rad(10.0)), -np.sin(np.deg2rad(10.0))]
+        ),
+    )
+    data = sc.DataArray(sc.ones(dims=['event'], shape=[2], unit='counts'))
+
+    result = data.transform_coords('incident_angle', graph=graph)
+
+    # The beam is 30 degrees below horizontal and the sample is tilted by 10 degrees.
+    assert_allclose(
+        result.coords['incident_angle'], sc.scalar(40.0, unit='deg').to(unit='rad')
+    )
+    assert_identical(result.data, data.data)
 
 
 def _events(offsets=(30, 40, 50, 60), speeds=(1000.0, 1000.0, 1000.0, 1000.0)):

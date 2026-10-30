@@ -66,7 +66,7 @@ def add_offspecular_coords_and_masks(
         keep_intermediate=False,
     )
     da = add_roi_masks(da, roi)
-    # Closest-beam assignment with one candidate has scalar incidence.
+    # Fixed slits and closest-beam assignment with one candidate give scalar incidence.
     if 'incident_angle' in da.bins.coords:
         da = da.bins.assign_masks(
             incident_beam_unassigned=~sc.isfinite(da.bins.coords['incident_angle'])

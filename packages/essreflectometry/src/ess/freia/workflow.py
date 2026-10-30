@@ -170,7 +170,7 @@ def FreiaWorkflow(
 @register_workflow
 def FreiaOffspecWorkflow(
     *,
-    incident_beam_from: Literal['closest', 'shutter_logs'] = 'closest',
+    incident_beam_from: Literal['closest', 'fixed_slits', 'shutter_logs'] = 'closest',
     wavelength_from: WavelengthLutMode = "file",
     **kwargs,
 ) -> sciline.Pipeline:
@@ -185,7 +185,10 @@ def FreiaOffspecWorkflow(
     ----------
     incident_beam_from:
         ``'closest'`` assigns the beam whose specular reflection angle is closest
-        to the measured reflection angle. ``'shutter_logs'`` instead uses
+        to the measured reflection angle. ``'fixed_slits'`` uses the single beam
+        defined by one matching pair of slit centers, independently of the
+        reflection angle and without shutter positions or status logs.
+        ``'shutter_logs'`` uses
         ``ShutterStatusLogs[SampleRun]`` and ``ShutterPositions[SampleRun]`` for
         all candidate beams. Each log is evaluated at the neutron's crossing
         time at that shutter, independently of the slit positions. Exactly one
@@ -203,6 +206,7 @@ def FreiaOffspecWorkflow(
     )
     assignment_provider = {
         'closest': conversions.closest_beam_incident_angle_graph,
+        'fixed_slits': conversions.fixed_slits_incident_angle_graph,
         'shutter_logs': conversions.shutter_log_incident_angle_graph,
     }[incident_beam_from]
     for provider in (
