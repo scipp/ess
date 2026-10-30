@@ -185,6 +185,7 @@ function's documentation and deprecation warning.
    :toctree: ../generated/functions
 
    MagicWorkflow
+   MagicMcStasWorkflow
 ```
 
 ### Submodules
@@ -197,6 +198,7 @@ function's documentation and deprecation warning.
 
    beamline
    data
+   mcstas
    types
    workflow
 ```
