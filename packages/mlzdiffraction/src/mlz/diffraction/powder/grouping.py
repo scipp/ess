@@ -5,7 +5,6 @@
 
 from typing import cast
 
-import numpy as np
 import scipp as sc
 
 from ..powtex.types import DspacingDetector, KeepEvents, WavelengthDetector
@@ -15,49 +14,13 @@ from .types import (
     Dspacing2D,
     DspacingBins,
     ExtendedData2D,
+    Intensity2D,
+    IntensityP2D,
+    MaskedData2D,
     NormalisedIntensity2D,
     RunType,
     SpectralDetector,
 )
-
-
-def flatten_to_spectra(data: WavelengthDetector[RunType]) -> SpectralDetector[RunType]:
-    """Flatten detector bank dimensions to a single spectrum dimension."""
-    if data is None:
-        return cast(SpectralDetector[RunType], None)
-    dims = [dim for dim in ("wire", "strip", "segment") if dim in data.dims]
-    out = data.flatten(dims=dims, to="spectrum") if dims else data
-    return SpectralDetector[RunType](out)
-
-
-# TODO: Not used / needed anymore?
-def bin_dspacing_dperp_mlz(
-    data: SpectralDetector[RunType],
-    dspacing_bins: DspacingBins,
-    dperp_bins: DperpBins,
-    keep_events: KeepEvents,
-) -> DspacingDetector[RunType]:
-    """Bin detector data in d-spacing and dperp."""
-    if data is None:
-        return cast(DspacingDetector[RunType], None)
-    args = {dperp_bins.dim: dperp_bins, dspacing_bins.dim: dspacing_bins}
-    if keep_events:
-        out = data.bin(args)
-    else:
-        # Reconstructing the wavelength results in an inconsistency if dspacing was
-        # computed with a calibration table. Another option would be to use, e.g., the
-        # mean wavelength in each bin, but this leads to random wavelength values that
-        # break stream processing.
-        out = data.hist(args)
-        # needs to be worked out
-        # result = data.hist(args).assign_coords(
-        #     wavelength=_reconstruct_wavelength(
-        #         dspacing_bins=dspacing_bins, two_theta_bins=twotheta_bins
-        #     )
-        # )
-    if out.bins is not None and "tof" in out.bins.coords:
-        out.data = out.data.bins.drop_coords("tof")
-    return DspacingDetector[RunType](out)
 
 
 def focus_to_dspacing_dperp(
@@ -127,39 +90,63 @@ def extend_data(data: NormalisedIntensity2D) -> ExtendedData2D:
     return ExtendedData2D(ds)
 
 
-def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None):
-    """Generates logarithmic bins using start, stop, and a relative step."""
-    ratio = 1.0 + relative_step
-    if ratio <= 0.0:
-        raise ValueError("1 + relative_step must be positive")
-    if ratio == 1.0:
-        raise ValueError("relative_step must not be 0")
+def _calculate_combined_mask(ds: sc.Dataset, target_dims: tuple[str, ...]):
+    combined = None
+    for var_name, da in ds.items():
+        for mask_name, mask in da.masks.items():
+            if set(mask.dims) != set(target_dims):
+                raise ValueError(
+                    f"Mask {mask_name!r} from {var_name!r} has dims {mask.dims}, "
+                    f"but target has dims {target_dims}."
+                )
+            if mask.dims != target_dims:
+                mask = mask.transpose(target_dims)
+            combined = mask.copy() if combined is None else combined | mask
+    return combined
 
-    start_var = start if isinstance(start, sc.Variable) else sc.scalar(start, unit=unit)
-    stop_var = stop if isinstance(stop, sc.Variable) else sc.scalar(stop, unit=unit)
 
-    if start_var.value <= 0 or stop_var.value <= 0:
-        raise ValueError("start and stop must be positive")
+def extract_intensity_2d(
+    data: MaskedData2D,
+) -> Intensity2D:
+    """Extract intensity and attach a combined mask."""
+    out = data["intensity"].copy()
+    combined_mask = _calculate_combined_mask(data, out.dims)
+    if combined_mask is not None:
+        # remove intensity masks if any, as they are included in the combined mask
+        out.masks.clear()
+        out.masks["combined_mask"] = combined_mask
+    return Intensity2D(out)
 
-    n = int(np.floor(np.log(stop_var.value / start_var.value) / np.log(ratio))) + 1
-    values = start_var.value * ratio ** np.arange(n)
-    out = sc.array(dims=[dim], values=values, unit=start_var.unit)
 
-    if endpoint and not np.isclose(out.values[-1], stop_var.value):
-        out = sc.concat(
-            [
-                out,
-                sc.array(dims=[dim], values=[stop_var.value], unit=stop_var.unit),
-            ],
-            dim,
-        )
-
-    return out
+def prepare_for_p2d_export(
+    data2d: MaskedData2D,
+) -> IntensityP2D:
+    """Flatten masked 2-D intensity into P2D export rows."""
+    target_dims = data2d["intensity"].dims
+    combined_mask = _calculate_combined_mask(data2d, target_dims)
+    if combined_mask is None:
+        combined_mask = sc.zeros(sizes=data2d["intensity"].sizes, dtype="bool")
+    out = sc.DataArray(
+        data=data2d["intensity"].data,
+        coords={
+            "dperp": data2d["dperp_2d"].data,
+            "dspacing": data2d["dspacing_2d"].data,
+            "lambda": data2d["lambda"].data,
+            "two_theta": data2d["two_theta"].data,
+        },
+        masks={"combined_mask": combined_mask},
+    )
+    out = out.flatten(dims=out.dims, to="d_pixel")
+    valid = ~out.masks["combined_mask"]
+    # apply mask and drop it from the output afterwards
+    out = out[valid]
+    out.masks.clear()
+    return IntensityP2D(out)
 
 
 providers = (
     extend_data,
-    bin_dspacing_dperp_mlz,
-    flatten_to_spectra,
+    extract_intensity_2d,
     focus_to_dspacing_dperp,
+    prepare_for_p2d_export
 )

@@ -15,7 +15,10 @@ from ..powtex.types import (
     TofDetector,
     WavelengthDetector,
 )
-from .types import ElasticCoordTransformGraph
+from .types import (
+    ElasticCoordTransformGraph,
+    SpectralDetector
+)
 
 
 # Copied from ess.powder.correction, which might be modified
@@ -158,7 +161,7 @@ def p2d_coordinate_transformation_graph() -> ElasticCoordTransformGraph:
     )
 
 
-def add_scattering_coordinates_from_positions(
+def transform_to_scattering_coordinates(
     data: TofDetector[RunType],
     graph: ElasticCoordTransformGraph,
     calibration: CalibrationData,
@@ -214,7 +217,17 @@ def lambda_from_d_dperp(
     return sc.sqrt(4.0 * d**2 - lam_k**2 * sc_wright_omega_real(d, dp, lam_k))
 
 
+def flatten_to_spectra(data: WavelengthDetector[RunType]) -> SpectralDetector[RunType]:
+    """Flatten detector bank dimensions to a single spectrum dimension."""
+    if data is None:
+        return cast(SpectralDetector[RunType], None)
+    dims = [dim for dim in ("wire", "strip", "segment") if dim in data.dims]
+    out = data.flatten(dims=dims, to="spectrum") if dims else data
+    return SpectralDetector[RunType](out)
+
+
 providers = (
-    add_scattering_coordinates_from_positions,
+    flatten_to_spectra,
     p2d_coordinate_transformation_graph,
+    transform_to_scattering_coordinates,
 )

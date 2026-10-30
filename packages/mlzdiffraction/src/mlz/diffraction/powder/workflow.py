@@ -14,7 +14,8 @@ from ..powtex.types import (
     VanadiumRun,
 )
 from .conversion import (
-    add_scattering_coordinates_from_positions,
+    flatten_to_spectra,
+    transform_to_scattering_coordinates,
     p2d_coordinate_transformation_graph,
 )
 from .correction import (
@@ -26,15 +27,14 @@ from .correction import (
 )
 from .data import (
     export_to_p2d,
-    extract_intensity_2d,
     load_powgen,
     load_powgen_calibration,
-    prepare_for_p2d_export,
 )
 from .grouping import (
     extend_data,
-    flatten_to_spectra,
+    extract_intensity_2d,
     focus_to_dspacing_dperp,
+    prepare_for_p2d_export,
 )
 from .masking import add_masks_p2d_data
 from .types import (
@@ -60,7 +60,6 @@ def PowderReduceP2D() -> sciline.Pipeline:
     """Workflow with default parameters for POWTEX P2D powder reduction."""
     return sciline.Pipeline(
         providers=(
-            add_scattering_coordinates_from_positions,
             # it might be better to add masks to loaded event data
             # using powtex.masking.add_masks, because masking binned data
             # can bring additional distortion. In other words, we might
@@ -81,6 +80,7 @@ def PowderReduceP2D() -> sciline.Pipeline:
             prepare_for_p2d_export,
             subtract_sample_empty_can,
             subtract_vanadium_empty_can,
+            transform_to_scattering_coordinates,
         ),
         params=default_parameters(),
     )

@@ -3,10 +3,10 @@
 
 """Data handling for POWTEX powder reduction."""
 
-import logging
 from pathlib import Path
 from typing import cast
 
+import numpy as np
 import pandas as pd
 import scipp as sc
 import scippnexus as snx
@@ -28,16 +28,12 @@ from .types import (
     DperpMask,
     DSpacingMask,
     IntensityP2D,
-    Intensity2D,
-    MaskedData2D,
     MaskingData,
     P2DOutputFilename,
     TofMask,
     TwoThetaMask,
     WavelengthMask,
 )
-
-logger = logging.getLogger(__name__)
 
 
 def load_powgen(
@@ -186,60 +182,6 @@ def sample_position(data: TofDetector[RunType]) -> Position[snx.NXsample, RunTyp
     return Position[snx.NXsample, RunType](data.coords["sample_position"])
 
 
-def extract_intensity_2d(
-    data: MaskedData2D,
-) -> Intensity2D:
-    """Extract intensity and attach a combined mask."""
-    out = data["intensity"].copy()
-    combined_mask = _calculate_combined_mask(data, out.dims)
-    if combined_mask is not None:
-        # remove intensity masks if any, as they are included in the combined mask
-        out.masks.clear()
-        out.masks["combined_mask"] = combined_mask
-    return Intensity2D(out)
-
-
-def _calculate_combined_mask(ds: sc.Dataset, target_dims: tuple[str, ...]):
-    combined = None
-    for var_name, da in ds.items():
-        for mask_name, mask in da.masks.items():
-            if set(mask.dims) != set(target_dims):
-                raise ValueError(
-                    f"Mask {mask_name!r} from {var_name!r} has dims {mask.dims}, "
-                    f"but target has dims {target_dims}."
-                )
-            if mask.dims != target_dims:
-                mask = mask.transpose(target_dims)
-            combined = mask.copy() if combined is None else combined | mask
-    return combined
-
-
-def prepare_for_p2d_export(
-    data2d: MaskedData2D,
-) -> IntensityP2D:
-    """Flatten masked 2-D intensity into P2D export rows."""
-    target_dims = data2d["intensity"].dims
-    combined_mask = _calculate_combined_mask(data2d, target_dims)
-    if combined_mask is None:
-        combined_mask = sc.zeros(sizes=data2d["intensity"].sizes, dtype="bool")
-    out = sc.DataArray(
-        data=data2d["intensity"].data,
-        coords={
-            "dperp": data2d["dperp_2d"].data,
-            "dspacing": data2d["dspacing_2d"].data,
-            "lambda": data2d["lambda"].data,
-            "two_theta": data2d["two_theta"].data,
-        },
-        masks={"combined_mask": combined_mask},
-    )
-    out = out.flatten(dims=out.dims, to="d_pixel")
-    valid = ~out.masks["combined_mask"]
-    # apply mask and drop it from the output afterwards
-    out = out[valid]
-    out.masks.clear()
-    return IntensityP2D(out)
-
-
 def export_to_p2d(data: IntensityP2D, filename: P2DOutputFilename) -> DataFrameP2D:
     """Export P2D-ready intensity data to a text file."""
     df = pd.DataFrame(
@@ -268,12 +210,41 @@ def export_to_p2d(data: IntensityP2D, filename: P2DOutputFilename) -> DataFrameP
             formatters=dict.fromkeys(df.columns, formatter),
         )
         f.write(header + table.lstrip())
-    logger.info("The output file has been saved to %s.", filepath)
+    print("The output has been saved to: ", filepath)
     return DataFrameP2D(df)
 
 
+def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None):
+    """Generates logarithmic bins using start, stop, and a relative step."""
+    ratio = 1.0 + relative_step
+    if ratio <= 0.0:
+        raise ValueError("1 + relative_step must be positive")
+    if ratio == 1.0:
+        raise ValueError("relative_step must not be 0")
+
+    start_var = start if isinstance(start, sc.Variable) else sc.scalar(start, unit=unit)
+    stop_var = stop if isinstance(stop, sc.Variable) else sc.scalar(stop, unit=unit)
+
+    if start_var.value <= 0 or stop_var.value <= 0:
+        raise ValueError("start and stop must be positive")
+
+    n = int(np.floor(np.log(stop_var.value / start_var.value) / np.log(ratio))) + 1
+    values = start_var.value * ratio ** np.arange(n)
+    out = sc.array(dims=[dim], values=values, unit=start_var.unit)
+
+    if endpoint and not np.isclose(out.values[-1], stop_var.value):
+        out = sc.concat(
+            [
+                out,
+                sc.array(dims=[dim], values=[stop_var.value], unit=stop_var.unit),
+            ],
+            dim,
+        )
+
+    return out
+
+
 providers = (
-    extract_intensity_2d,
     extract_accumulated_proton_charge,
     extract_raw_data,
     export_to_p2d,
@@ -284,7 +255,6 @@ providers = (
     load_powgen_tof_mask,
     load_powgen_two_theta_mask,
     load_powgen_wavelength_mask,
-    prepare_for_p2d_export,
     sample_position,
     source_position,
 )
