@@ -193,6 +193,8 @@ def extract_intensity_2d(
     out = data["intensity"].copy()
     combined_mask = _calculate_combined_mask(data, out.dims)
     if combined_mask is not None:
+        # remove intensity masks if any, as they are included in the combined mask
+        out.masks.clear()
         out.masks["combined_mask"] = combined_mask
     return Intensity2D(out)
 
@@ -232,7 +234,10 @@ def prepare_for_p2d_export(
     )
     out = out.flatten(dims=out.dims, to="d_pixel")
     valid = ~out.masks["combined_mask"]
-    return IntensityP2D(out[valid])
+    # apply mask and drop it from the output afterwards
+    out = out[valid]
+    out.masks.clear()
+    return IntensityP2D(out)
 
 
 def export_to_p2d(data: IntensityP2D, filename: P2DOutputFilename) -> DataFrameP2D:
@@ -247,7 +252,9 @@ def export_to_p2d(data: IntensityP2D, filename: P2DOutputFilename) -> DataFrameP
         }
     )
 
-    filepath = Path(filename)
+    filepath = Path(filename).expanduser()
+    if not filepath.is_absolute():
+        filepath = Path.home() / filepath
     filepath.parent.mkdir(parents=True, exist_ok=True)
 
     header = "#Title: \n#Inst: POWGEN.prm\n#Binning: ddperp \n#Bank: 1\n"

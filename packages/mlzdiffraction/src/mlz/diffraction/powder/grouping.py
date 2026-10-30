@@ -101,6 +101,10 @@ def extend_data(data: NormalisedIntensity2D) -> ExtendedData2D:
     two_theta_2d = (2.0 * sc.asin(0.5 * lam_2d / dspacing_2d)).to(unit="deg")
 
     ds = sc.Dataset(
+        coords={
+            "dperp": data.coords["dperp"],
+            "dspacing": data.coords["dspacing"],
+        },
         data={
             "lambda": lam_2d.data if isinstance(lam_2d, sc.DataArray) else lam_2d,
             "two_theta": (
@@ -116,16 +120,11 @@ def extend_data(data: NormalisedIntensity2D) -> ExtendedData2D:
             "dperp_2d": (
                 dperp_2d.data if isinstance(dperp_2d, sc.DataArray) else dperp_2d
             ),
-            "intensity": data.data.transpose()
-            if isinstance(data, sc.DataArray)
-            else data,
-        },
-        coords={
-            "dperp": data.coords["dperp"],
-            "dspacing": data.coords["dspacing"],
-        },
+            "intensity": data
+        }
     )
-    return ExtendedIntensity2D(ds)
+
+    return ExtendedData2D(ds)
 
 
 def sc_geomarange(dim, start, stop, relative_step, *, endpoint=False, unit=None):
