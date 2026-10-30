@@ -14,6 +14,7 @@ import scipp as sc
 import scippnexus as snx
 
 from ..logging import get_logger
+from .patch import open_patched_file
 from .types import (
     Beamline,
     FilePath,
@@ -24,6 +25,7 @@ from .types import (
     NeXusGroup,
     NeXusLocationSpec,
     NeXusTransformation,
+    PatchedFilePath,
     RunType,
 )
 
@@ -129,7 +131,7 @@ def load_all_components(
 
 
 def load_metadata(
-    file_path: FilePath | NeXusFile | NeXusGroup,
+    file_path: FilePath | NeXusFile | NeXusGroup | PatchedFilePath,
     model: type[_Model],
     *,
     entry_name: NeXusEntryName | None = None,
@@ -164,7 +166,7 @@ def compute_component_position(dg: sc.DataGroup) -> sc.DataGroup:
 
 
 def open_nexus_file(
-    file_path: FilePath | NeXusFile | NeXusGroup,
+    file_path: FilePath | NeXusFile | NeXusGroup | PatchedFilePath,
     definitions: Mapping | None | NoNewDefinitionsType = NoNewDefinitions,
     *,
     locking: bool | str | None | NoLockingIfNeededType = NoLockingIfNeeded,
@@ -175,6 +177,8 @@ def open_nexus_file(
     ----------
     file_path:
         Path of the file to open or a NeXus file or group handle.
+        If this is a :class:`ess.reduce.nexus.types.PatchedFilePath`,
+        the patch is applied to the file.
     definitions:
         If set, application definitions to use for the file.
         If ``file_path`` is a NeXus file or group, this must be unset or match
@@ -266,26 +270,31 @@ def _attempt_to_open_without_locking(
 
 
 def _open_nexus_file_from_path(
-    file_path: FilePath,
+    file_path: FilePath | NeXusFile | PatchedFilePath,
     definitions: Mapping | None | NoNewDefinitionsType,
     **kwargs: object,
 ) -> AbstractContextManager[snx.Group]:
-    new_kwargs = (
-        kwargs
-        | ({} if definitions is NoNewDefinitions else {'definitions': definitions})
-        # ESS nexus files are always written in swmr mode.
-        # By default, try to open in swmr mode.
-        | ({'swmr': True} if 'swmr' not in kwargs else {})
-    )
+    defs = snx.base_definitions() if definitions is NoNewDefinitions else definitions
+
+    def open_file(**h5_kwargs: object) -> AbstractContextManager[snx.Group]:
+        if isinstance(file_path, PatchedFilePath):
+            return open_patched_file(
+                file_path.path, file_path.patch, definitions=defs, **h5_kwargs
+            )
+        return snx.File(file_path, definitions=defs, **h5_kwargs)
+
+    # ESS nexus files are always written in swmr mode.
+    # By default, try to open in swmr mode.
+    new_kwargs = kwargs | ({'swmr': True} if 'swmr' not in kwargs else {})
     try:
-        return snx.File(file_path, **new_kwargs)
+        return open_file(**new_kwargs)
     except OSError as e:
         # If the file type does not support swmr
         # and the caller did not explicitly request swmr
         # open the file without swmr.
         if 'swmr' not in kwargs:
             new_kwargs.pop('swmr')
-            return snx.File(file_path, **new_kwargs)
+            return open_file(**new_kwargs)
         raise e
 
 
@@ -506,7 +515,7 @@ def compute_detector_position(
 
 
 def load_data(
-    file_path: FilePath | NeXusFile | NeXusGroup,
+    file_path: FilePath | NeXusFile | NeXusGroup | PatchedFilePath,
     selection: snx.typing.ScippIndex | slice = (),
     *,
     entry_name: NeXusEntryName | None = None,
@@ -755,7 +764,9 @@ def _parse_monitor(group: snx.Group) -> NeXusMonitorInfo:
     )
 
 
-def read_nexus_file_info(file_path: FilePath | NeXusFile | NeXusGroup) -> NeXusFileInfo:
+def read_nexus_file_info(
+    file_path: FilePath | NeXusFile | NeXusGroup | PatchedFilePath,
+) -> NeXusFileInfo:
     """Opens and inspects a NeXus file, returning a summary of its contents."""
     with open_nexus_file(file_path) as f:
         entry = _unique_child_group(f, snx.NXentry, None)
