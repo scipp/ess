@@ -13,6 +13,7 @@ from ess.reduce.nexus.merge import MergeRules, Rule, plan_merge
 
 DETECTOR = '/entry/instrument/detector'
 EVENTS = f'{DETECTOR}/data'
+MONITOR = '/entry/instrument/monitor/data'
 TEMPERATURE = '/entry/sample/temperature'
 TARGET = '/entry/instrument/motor/target_value'
 SECOND = 10**9
@@ -34,11 +35,12 @@ def _stream(group: h5py.Group, name: str, data: list, dtype: str) -> h5py.Datase
     the storage layout and filters.
     """
     numeric = np.dtype(dtype).kind in 'iuf'
+    data = np.asarray(data, dtype=dtype)
     return group.create_dataset(
         name,
-        data=np.asarray(data, dtype=dtype),
-        maxshape=(None,),
-        chunks=(4,),
+        data=data,
+        maxshape=(None, *data.shape[1:]),
+        chunks=(4, *data.shape[1:]),
         compression='gzip',
         compression_opts=7,
         shuffle=True,
@@ -77,7 +79,8 @@ def make_run(
     temperature_unit: str = 'K',
 ) -> Path:
     """
-    A NeXus file of run ``index``, with one event per pixel id in ``pulses``.
+    A NeXus file of run ``index``, with one event per pixel id in ``pulses``, and
+    a monitor histogram per pulse.
 
     The run starts at second ``t0 = 10 * index + 1`` and ends 8 s later. Its
     pulses and temperature readings are 1 s apart from ``t0``. The motor log holds
@@ -105,6 +108,14 @@ def make_run(
         _stream(data, 'event_time_zero', pulse_times, 'uint64').attrs['units'] = 'ns'
         _stream(data, 'event_index', np.cumsum([0, *map(len, pulses)])[:-1], 'int64')
         _stream(data, 'cue_index', [len(ids)], 'int64')
+        monitor = _group(instrument, 'monitor', 'NXmonitor')
+        histograms = _group(monitor, 'data', 'NXdata')
+        histograms.attrs['signal'] = 'signal'
+        histograms.attrs['axes'] = ['time', 'frame_time']
+        _stream(histograms, 'time', pulse_times, 'uint64').attrs['units'] = 'ns'
+        _stream(histograms, 'signal', [[len(p), 1] for p in pulses], 'int32')
+        histograms['frame_time'] = np.array([0, 10, 20], dtype='int32')
+        histograms['frame_time'].attrs['units'] = 'ns'
         motor = _group(instrument, 'motor', 'NXpositioner')
         _log(motor, 'target_value', [TARGET_TIME], [target], 'mm')
         transformations = _group(detector, 'transformations', 'NXtransformations')
@@ -175,6 +186,28 @@ def test_write_concatenates_events_in_order_of_start_time(merged: Path) -> None:
     assert sc.identical(
         events.bins.size().data,
         sc.array(dims=['event_time_zero'], values=[1, 0, 2, 3], unit=None),
+    )
+
+
+def test_write_concatenates_monitor_histograms(merged: Path) -> None:
+    with snx.File(merged) as f:
+        monitor = f[MONITOR][()]
+    assert sc.identical(
+        monitor.coords['time'],
+        sc.array(
+            dims=['time'],
+            values=[1 * SECOND, 2 * SECOND, 3 * SECOND, 11 * SECOND],
+            unit='ns',
+        ),
+    )
+    assert sc.identical(
+        monitor.data,
+        sc.array(
+            dims=['time', 'frame_time'],
+            values=[[1, 1], [0, 1], [2, 1], [3, 1]],
+            unit=None,
+            dtype='int32',
+        ),
     )
 
 
@@ -451,11 +484,12 @@ def test_unsorted_pulses_within_a_run_are_fine(runs: list[Path]) -> None:
     assert plan_merge(runs, RULES).issues == ()
 
 
-def test_overlapping_pulses_are_an_error(runs: list[Path]) -> None:
+@pytest.mark.parametrize('times', [f'{EVENTS}/event_time_zero', f'{MONITOR}/time'])
+def test_overlapping_pulses_are_an_error(runs: list[Path], times: str) -> None:
     # Run b (runs[0]) has a pulse at 11 s. Move it before the last pulse of run a.
-    modify(runs[0], lambda f: f[f'{EVENTS}/event_time_zero'].__setitem__(0, 3 * SECOND))
+    modify(runs[0], lambda f: f[times].__setitem__(0, 3 * SECOND))
     (error,) = plan_merge(runs, RULES).errors
-    assert error.path == EVENTS
+    assert error.path == times.rsplit('/', 1)[0]
     assert 'overlap' in error.message
 
 

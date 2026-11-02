@@ -3,7 +3,8 @@
 """Merge the NeXus files of consecutive runs into a file that looks like one run.
 
 A dataset whose first dimension is unlimited holds data streamed during the run,
-such as the fields of NXlog and NXevent_data groups. The merge concatenates it
+such as the fields of NXlog and NXevent_data groups, and of the NXdata groups of
+monitors in histogram mode, with a histogram per row. The merge concatenates it
 along that dimension, in the order of the runs' start times. Every other dataset
 and attribute must be identical in all runs, except
 
@@ -87,6 +88,11 @@ _LOG_STREAMS = {
     'cue_index',
 }
 """The extendable fields of an NXlog that the merge knows how to append."""
+_COUNT_TIMES = {'NXevent_data': 'event_time_zero', 'NXdata': 'time'}
+"""
+The time field of groups of neutron counts, with a row per pulse, or per message
+of histograms such as those of monitors in histogram mode.
+"""
 _BLOCK_BYTES = 64 * 1024**2
 """Most bytes of a dataset held in memory at once when appending a run."""
 _TOLERANCE = re.compile(r'\s*([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*(.*?)\s*')
@@ -589,25 +595,28 @@ def _check_streams(sources: list[h5py.File]) -> Iterator[Issue]:
 
 def _check_pulses(sources: list[h5py.File]) -> Iterator[Issue]:
     """
-    Refuse runs whose pulses overlap, as the merged file could count events twice.
+    Refuse runs whose pulses overlap, as the merged file could count neutrons twice.
 
     Messages from Kafka arrive out of order, so the pulses of a run are not
     sorted. The earliest pulse of a run must be later than the latest pulse of
-    the runs before.
+    the runs before. The same holds for the rows of histograms (``NXdata``).
     """
     for path, node in _layout(sources[0]).items():
-        if _nx_class(node) != 'NXevent_data' or 'event_time_zero' not in node:
+        time_name = _COUNT_TIMES.get(_nx_class(node))
+        if time_name is None or not _is_extendable(node.get(time_name)):
             continue
         latest = None
         for source in sources:
-            if (pulses := source.get(f'{path}/event_time_zero')) is None:
+            if (pulses := source.get(f'{path}/{time_name}')) is None:
                 break  # reported by _check_layout
             times = pulses[()]
             if times.size == 0:
                 continue
             if latest is not None and times.min() <= latest:
                 name = Path(source.filename).name
-                yield Issue('error', path, f'pulses in {name} overlap previous runs')
+                yield Issue(
+                    'error', path, f'{time_name} in {name} overlaps previous runs'
+                )
                 break
             latest = times.max() if latest is None else max(latest, times.max())
 
