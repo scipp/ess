@@ -62,6 +62,7 @@ docs = [
     "sphinxcontrib-bibtex>=2.5.0",
     "pythreejs>=2.4.1",
 ]
+all = ["mlzdiffraction[test,docs]"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/ess/issues"
