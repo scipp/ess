@@ -7,6 +7,8 @@ import dataclasses
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
+from datetime import UTC
+from inspect import signature
 from typing import Any, Never, TypeVar
 
 import numpy as np
@@ -84,9 +86,32 @@ def no_detector_position_offset() -> DetectorPositionOffset[RunType]:
     return DetectorPositionOffset[RunType](no_offset)
 
 
-def full_time_interval() -> TimeInterval[RunType]:
-    """Select all neutron pulses in the data."""
-    return TimeInterval[RunType](slice(None, None))
+def measurement_time_interval(
+    measurement: Measurement[RunType],
+) -> TimeInterval[RunType]:
+    """Use the measurement times as the default time interval.
+
+    Missing timestamps leave the corresponding bounds unspecified. Times are
+    converted to UTC; timestamps without a timezone are treated as UTC.
+
+    Parameters
+    ----------
+    measurement:
+        Measurement metadata containing the recording times.
+
+    Returns
+    -------
+    :
+        Interval from the measurement's start to its end.
+    """
+    bounds = []
+    for timestamp in (measurement.start_time, measurement.end_time):
+        if timestamp is not None:
+            if timestamp.tzinfo is not None:
+                timestamp = timestamp.astimezone(UTC).replace(tzinfo=None)
+            timestamp = sc.scalar(np.datetime64(timestamp, 'ns'))
+        bounds.append(timestamp)
+    return TimeInterval[RunType](slice(*bounds))
 
 
 def gravity_vector_neg_y() -> GravityVector:
@@ -316,12 +341,7 @@ def _apply_time_filter(
 ) -> sc.Variable | sc.DataArray:
     if transform.ndim == 0 or transform.sizes == {'time': 1}:
         return transform.data.squeeze()
-    filtered = user_filter(transform)
-    if isinstance(filtered, sc.DataArray) and (not filtered.dims):
-        # If the filter returns a 0-dim DataArray, we can safely extract the value.
-        # This is a common case when the filter selects a single time point.
-        filtered = filtered.data
-    return filtered
+    return user_filter(transform)
 
 
 def to_transformation(
@@ -339,6 +359,11 @@ def to_transformation(
     ``time_filter`` is applied to the transformation. By default, this will raise an
     exception. Provide a different filter to customize how time-dependence is handled.
 
+    If ``time_filter`` has parameters named ``start`` and ``stop`` that can be passed
+    by keyword, it receives the unsliced log and ``interval.value.start`` and
+    ``interval.value.stop`` as keyword arguments. The function must apply the time
+    interval itself.
+
     Parameters
     ----------
     chain:
@@ -350,13 +375,30 @@ def to_transformation(
         Defaults to raising a :class:`ValueError`.
     """
 
+    try:
+        sig = signature(time_filter)
+        accepts_bounds = {'start', 'stop'} <= sig.parameters.keys()
+        if accepts_bounds:
+            sig.bind(None, start=None, stop=None)
+    except (TypeError, ValueError):
+        accepts_bounds = False
+
     chain = deepcopy(chain)
     for t in chain.transformations.values():
         if t.sizes == {} or not isinstance(t.value, sc.DataArray):
             continue
         start = interval.value.start
         stop = interval.value.stop
-        if isinstance(start, sc.Variable) or isinstance(stop, sc.Variable):
+        if accepts_bounds:
+            if any(
+                bound is not None and not isinstance(bound, sc.Variable)
+                for bound in (start, stop)
+            ):
+                raise ValueError(
+                    'Filters accepting start and stop require time bounds, not indices.'
+                )
+            t.value = time_filter(t.value, start=start, stop=stop)
+        elif isinstance(start, sc.Variable) or isinstance(stop, sc.Variable):
             # NXlog entries are generally interpreted as the previous value being valid
             # until the next entry. We therefore need to select the previous value, and
             # any index after the last entry refers to the last entry, i.e., there is no
@@ -373,6 +415,8 @@ def to_transformation(
             t.value = _apply_time_filter(t.value[idx], time_filter)
         else:
             t.value = _apply_time_filter(t.value['time', interval.value], time_filter)
+        if isinstance(t.value, sc.DataArray) and t.value.ndim == 0:
+            t.value = t.value.data
 
     return NeXusTransformation[Component, RunType].from_chain(chain)
 
@@ -813,7 +857,8 @@ definitions['NXdata'] = _NXdataWithoutAuxSignals
 _common_providers = (
     gravity_vector_neg_y,
     file_path_to_file_spec,
-    full_time_interval,
+    measurement_time_interval,
+    load_measurement_metadata_from_nexus,
     component_spec_by_name,
     unique_component_spec,  # after component_spec_by_name, partially overrides
     all_component_spec,
@@ -851,7 +896,6 @@ _chopper_providers = (parse_raw_choppers, to_disk_choppers)
 
 _metadata_providers = (
     load_beamline_metadata_from_nexus,
-    load_measurement_metadata_from_nexus,
     load_source_metadata_from_nexus,
 )
 

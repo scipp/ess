@@ -3,6 +3,7 @@
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import NewType
+from unittest.mock import patch
 
 import pytest
 import sciline as sl
@@ -11,7 +12,12 @@ import scippnexus as snx
 from scipp.testing import assert_identical
 from scippneutron.metadata import RadiationProbe, SourceType
 
-from ess.reduce.nexus import compute_component_position, load_from_path, workflow
+from ess.reduce.nexus import (
+    compute_component_position,
+    load_from_path,
+    time_weighted_median,
+    workflow,
+)
 from ess.reduce.nexus.types import (
     Beamline,
     DiskChoppers,
@@ -24,6 +30,8 @@ from ess.reduce.nexus.types import (
     NeXusLocationSpec,
     NeXusName,
     NeXusTransformation,
+    NeXusTransformationChain,
+    Position,
     PreopenNeXusFile,
     RawChoppers,
     RawDetector,
@@ -32,6 +40,7 @@ from ess.reduce.nexus.types import (
     SampleRun,
     Source,
     TimeInterval,
+    TransformationTimeFilter,
 )
 from ess.reduce.nexus.workflow import (
     GenericNeXusWorkflow,
@@ -185,13 +194,10 @@ def test_to_transform_raises_if_interval_does_not_yield_unique_value(
         )
 
 
+@pytest.mark.parametrize('time_filter', [lambda log: -log, lambda log, **kwargs: -log])
 def test_to_transform_with_custom_time_filter(
-    time_dependent_depends_on: snx.TransformationChain,
+    time_dependent_depends_on: snx.TransformationChain, time_filter
 ) -> None:
-    def time_filter(transformation: sc.DataArray) -> sc.DataArray:
-        # -1* so we can see that the filter does something
-        return -1 * transformation
-
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(1.9, unit='s'))),
@@ -227,6 +233,135 @@ def test_to_transform_with_time_filter_slice_single_value(
     sc.testing.assert_identical(
         transform * sc.vector([0.0, 0.0, 0.0], unit='m'), expected
     )
+
+
+def test_to_transform_with_time_weighted_median(
+    time_dependent_depends_on: snx.TransformationChain,
+) -> None:
+    start = sc.scalar(0.5, unit='s')
+    stop = sc.scalar(4.0, unit='s')
+    transform = workflow.to_transformation(
+        time_dependent_depends_on,
+        TimeInterval(slice(start, stop)),
+        time_filter=time_weighted_median,
+    ).value
+    position = transform * sc.vector([0.0, 0.0, 0.0], unit='m')
+    # Value 3 is held for 2 of the interval's 3.5 seconds, so it is the median.
+    sc.testing.assert_allclose(position, sc.vector([1.0, 3.0, 0.0], unit='m'))
+
+
+def test_time_filter_receives_full_log_and_interval(time_dependent_depends_on):
+    log = time_dependent_depends_on.transformations[
+        '/entry/instrument/comp1/transformations/trans2'
+    ].value
+    interval = TimeInterval(slice(sc.scalar(0.5, unit='s'), sc.scalar(1.5, unit='s')))
+
+    def time_filter(data, *, start, stop):
+        assert_identical(data, log)
+        assert_identical(start, interval.value.start)
+        assert_identical(stop, interval.value.stop)
+        return data.mean()
+
+    transform = workflow.to_transformation(
+        time_dependent_depends_on, interval, time_filter
+    ).value
+    assert_identical(
+        transform * sc.vector([0.0, 0.0, 0.0], unit='m'),
+        sc.vector([1.0, 2.0, 0.0], unit='m'),
+    )
+
+
+def test_time_filter_without_inspectable_signature_uses_sliced_log(
+    time_dependent_depends_on,
+):
+    with patch('ess.reduce.nexus.workflow.signature', side_effect=ValueError):
+        transform = workflow.to_transformation(
+            time_dependent_depends_on, TimeInterval(slice(0, 2)), lambda log: log.mean()
+        ).value
+    assert_identical(
+        transform * sc.vector([0.0, 0.0, 0.0], unit='m'),
+        sc.vector([1.0, 1.5, 0.0], unit='m'),
+    )
+
+
+def test_time_filter_type_error_is_not_retried(time_dependent_depends_on):
+    calls = 0
+
+    def time_filter(log, *, start, stop):
+        nonlocal calls
+        calls += 1
+        raise TypeError('Error inside the filter')
+
+    with pytest.raises(TypeError, match='Error inside the filter'):
+        workflow.to_transformation(
+            time_dependent_depends_on, TimeInterval(slice(None)), time_filter
+        )
+    assert calls == 1
+
+
+def test_time_filter_requiring_bounds_rejects_indices(time_dependent_depends_on):
+    with pytest.raises(ValueError, match='time bounds, not indices'):
+        workflow.to_transformation(
+            time_dependent_depends_on, TimeInterval(slice(0, 2)), time_weighted_median
+        )
+
+
+def test_pipeline_median_uses_each_runs_time_interval(time_dependent_depends_on):
+    wf = GenericNeXusWorkflow(run_types=[SampleRun, BackgroundRun], monitor_types=[])
+    log = time_dependent_depends_on.transformations[
+        '/entry/instrument/comp1/transformations/trans2'
+    ].value
+    log.coords['time'] = sc.datetime('2026-10-21T00:00:00', unit='ns') + log.coords[
+        'time'
+    ].to(unit='ns', dtype='int64')
+    wf[NeXusTransformationChain[snx.NXdetector, RunType]] = time_dependent_depends_on
+    wf[TransformationTimeFilter[snx.NXdetector, RunType]] = time_weighted_median
+    for run, stop, expected in (
+        (SampleRun, '2026-10-21T00:00:01.5Z', 1.0),
+        (BackgroundRun, '2026-10-21T00:00:10Z', 3.0),
+    ):
+        wf[Measurement[run]] = Measurement(
+            title=None, start_time='2026-10-21T00:00:00Z', end_time=stop
+        )
+        assert_identical(
+            wf.compute(Position[snx.NXdetector, run]),
+            sc.vector([1.0, expected, 0.0], unit='m'),
+        )
+
+
+def test_explicit_time_interval_requires_no_measurement(time_dependent_depends_on):
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[NeXusTransformationChain[snx.NXdetector, SampleRun]] = time_dependent_depends_on
+    wf[TimeInterval[SampleRun]] = TimeInterval(
+        slice(sc.scalar(0, unit='s'), sc.scalar(1.5, unit='s'))
+    )
+    wf[TransformationTimeFilter[snx.NXdetector, SampleRun]] = time_weighted_median
+    assert_identical(
+        wf.compute(Position[snx.NXdetector, SampleRun]),
+        sc.vector([1.0, 1.0, 0.0], unit='m'),
+    )
+
+
+@pytest.mark.parametrize(
+    ('start', 'stop'),
+    [
+        ('2026-10-21T00:00:00', '2026-10-21T00:00:10'),
+        ('2026-10-21T02:00:00+02:00', '2026-10-21T02:00:10+02:00'),
+    ],
+)
+def test_measurement_time_interval_converts_timestamps_to_utc(start, stop):
+    interval = workflow.measurement_time_interval(
+        Measurement(title=None, start_time=start, end_time=stop)
+    )
+    assert_identical(
+        interval.value.start, sc.datetime('2026-10-21T00:00:00', unit='ns')
+    )
+    assert_identical(interval.value.stop, sc.datetime('2026-10-21T00:00:10', unit='ns'))
+
+
+def test_measurement_time_interval_leaves_missing_bounds_open():
+    interval = workflow.measurement_time_interval(Measurement(title=None))
+    assert interval.value == slice(None, None)
 
 
 def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
@@ -853,6 +988,12 @@ def test_generic_nexus_workflow_load_measurement_metadata(
     assert measurement.end_time == datetime(2032, 2, 29, 9, 15, 0, tzinfo=UTC)
     assert measurement.run_number is None
     assert measurement.experiment_doi is None
+
+    interval = wf.compute(TimeInterval[SampleRun])
+    assert_identical(
+        interval.value.start, sc.datetime('2022-02-28T21:15:00', unit='ns')
+    )
+    assert_identical(interval.value.stop, sc.datetime('2032-02-29T09:15:00', unit='ns'))
 
 
 def test_generic_nexus_workflow_includes_only_given_run_and_monitor_types() -> None:
