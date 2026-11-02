@@ -12,12 +12,20 @@ data using Scipp data structures and Sciline pipelines.
 :link-type: doc
 :text-align: center
 
+```{image} ../../_static/thumbnails/powder2d.svg
+:width: 150%
+```
+
 :::
 
 :::{grid-item-card} Texture Reduction
 :link: texture_example
 :link-type: doc
 :text-align: center
+
+```{image} ../../_static/thumbnails/two_theta_ring.svg
+:width: 75%
+```
 
 :::
 
