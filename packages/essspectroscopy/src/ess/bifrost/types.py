@@ -20,3 +20,12 @@ class McStasRawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
 ArcEnergy = NewType('ArcEnergy', sc.Variable)
+
+InstrumentAnglePath = NewType('InstrumentAnglePath', str)
+"""Absolute NeXus path of the detector tank rotation.
+
+This must be a transformation in the depends-on chain of the elastic monitor.
+"""
+
+SampleAnglePath = NewType('SampleAnglePath', str)
+"""Absolute NeXus path of the ``NXlog`` (or ``NXpositioner``) of the sample rotation."""

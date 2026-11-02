@@ -7,7 +7,6 @@ import scipp as sc
 import scippnexus as snx
 from ess.powder import binning as powder_binning
 from ess.powder import providers as powder_providers
-from ess.powder.calibration import detector_two_theta
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
     BunkerMonitor,
@@ -34,10 +33,14 @@ from .clustering import cluster_events_by_streak
 from .conversions import (
     automatic_coordinate_transformation_graph,
     compute_wavelength_in_each_cluster,
+    elastic_coordinate_transformation_graph,
     known_peaks_coordinate_transformation_graph,
+    modulation_beamline_geometry_graph,
+    powder_beamline_geometry_graph,
     wavelength_detector,
 )
 from .mcstas import mcstas_providers
+from .parameters import beamline_parameters
 from .types import DetectorBank, PulseLength
 
 default_parameters = {
@@ -60,8 +63,8 @@ default_parameters = {
 }
 
 
-def _insert_dspacing_range_detection(workflow: sl.Pipeline) -> None:
-    """Add automatic d-spacing range detection to a BEER workflow."""
+def _insert_beamline_parameters_and_binning(workflow: sl.Pipeline) -> None:
+    """Add beamline parameters and d-spacing binning."""
     # Bin edges need chopper frames regardless of how event wavelengths are computed.
     for provider in (
         unwrap_lut.get_active_choppers,
@@ -69,7 +72,7 @@ def _insert_dspacing_range_detection(workflow: sl.Pipeline) -> None:
         unwrap_lut.guess_pulse_stride_from_choppers,
         unwrap_lut.compute_frame_sequence,
         *powder_binning.providers,
-        detector_two_theta,
+        beamline_parameters,
     ):
         workflow.insert(provider)
 
@@ -83,12 +86,17 @@ def _beer_modulation_workflow(
         run_types=[SampleRun],
         monitor_types=[BunkerMonitor, CaveMonitor],
     )
-    for provider in (*powder_providers, graph_provider, *providers):
+    for provider in (
+        *powder_providers,
+        modulation_beamline_geometry_graph,
+        graph_provider,
+        *providers,
+    ):
         workflow.insert(provider)
     insert_run_normalization(workflow, run_norm)
     for key, value in default_parameters.items():
         workflow[key] = value
-    _insert_dspacing_range_detection(workflow)
+    _insert_beamline_parameters_and_binning(workflow)
     return workflow
 
 
@@ -154,9 +162,13 @@ def BeerPowderWorkflow(
         'monitor_cave': float('inf'),
     }
 
-    for provider in powder_providers:
+    for provider in (
+        *powder_providers,
+        powder_beamline_geometry_graph,
+        elastic_coordinate_transformation_graph,
+    ):
         wf.insert(provider)
-    _insert_dspacing_range_detection(wf)
+    _insert_beamline_parameters_and_binning(wf)
 
     insert_run_normalization(wf, run_norm)
     for key, value in default_parameters.items():

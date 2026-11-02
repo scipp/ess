@@ -11,6 +11,7 @@ import scippnexus as snx
 from ess.spectroscopy.types import (
     Analyzer,
     DynamicPosition,
+    ElasticMonitor,
     InstrumentAngle,
     NeXusClass,
     NeXusComponent,
@@ -22,34 +23,20 @@ from ess.spectroscopy.types import (
 )
 
 from ess.reduce.nexus import open_component_group
-from ess.reduce.nexus.types import NeXusLocationSpec, TransformationTimeFilter
+from ess.reduce.nexus.types import (
+    NeXusLocationSpec,
+    NeXusTransformationChain,
+    TransformationTimeFilter,
+)
+
+from ..types import InstrumentAnglePath, SampleAnglePath
 
 
 def load_sample_angle(
-    file_spec: NeXusFileSpec[RunType],
+    file_spec: NeXusFileSpec[RunType], path: SampleAnglePath
 ) -> SampleAngle[RunType]:
     """Load the rotation angle of a sample from a BIFROST NeXus file."""
-    return SampleAngle[RunType](
-        _load_rotation_angle(
-            file_spec,
-            "114_sample_stack/rotation_stage",
-        )
-    )
 
-
-def load_instrument_angle(
-    file_spec: NeXusFileSpec[RunType],
-) -> InstrumentAngle[RunType]:
-    """Load the rotation angle for the BIFROST detector from a NeXus file."""
-    return InstrumentAngle[RunType](
-        _load_rotation_angle(
-            file_spec,
-            "detector_tank_angle/transformations/detector_tank_angle_r0",
-        )
-    )
-
-
-def _load_rotation_angle(file_spec: NeXusFileSpec[RunType], path: str) -> sc.DataArray:
     with open_component_group(
         NeXusLocationSpec(filename=file_spec.value),
         nx_class=snx.NXinstrument,
@@ -64,12 +51,38 @@ def _load_rotation_angle(file_spec: NeXusFileSpec[RunType], path: str) -> sc.Dat
             # `log` is the NXlog we are looking for without further nesting.
             transform: snx.nxtransformations.Transform = log[()]  # type: ignore[assignment]
 
-        if transform.transformation_type != 'rotation':
-            raise ValueError(
-                "Expected the instrument angle at detector_tank_angle to be a rotation,"
-                f" got '{transform.transformation_type}' instead.'"
-            )
-        return transform.value  # type: ignore[return-value]
+    if transform.transformation_type != 'rotation':
+        raise ValueError(
+            f"Expected the sample angle at {path} to be a rotation,"
+            f" got '{transform.transformation_type}' instead.'"
+        )
+    return SampleAngle[RunType](transform.value)  # type: ignore[return-value]
+
+
+def extract_instrument_angle(
+    chain: NeXusTransformationChain[ElasticMonitor, RunType], path: InstrumentAnglePath
+) -> InstrumentAngle[RunType]:
+    """Extract the rotation angle for the BIFROST detector."""
+    # This function extracts the angle from a transformation chain instead of loading it
+    # directly from a file to avoid loading the tank angle multiple times
+    # as that would cause problems in livedata.
+    # We could use any detector or the elastic monitor to get a chain that contains
+    # the angle. Using the monitor is simplest because there is only one, and we
+    # do not have to deal with multiple detectors.
+    try:
+        transformation = chain.transformations[path]
+    except KeyError:
+        raise ValueError(
+            f'The transformation chain of {chain.parent} does not contain the '
+            f'detector tank angle {path}. The chain contains '
+            f'{list(chain.transformations)}'
+        ) from None
+    if transformation.transformation_type != 'rotation':
+        raise ValueError(
+            f"Expected the instrument angle at {path} to be a rotation, "
+            f"got '{transformation.transformation_type}' instead.'"
+        )
+    return InstrumentAngle[RunType](transformation.value)  # type: ignore[return-value]
 
 
 # See https://github.com/scipp/ess/issues/120
@@ -84,7 +97,8 @@ def load_analyzer_for_detector(
     """Load the analyzer component for the given detector.
 
     This function searches for an ``NXcrystal`` in the inputs (via the
-    'input' attribute) of the detector and loads the first NeXus group it finds.
+    ``inputs`` dataset or attribute) of the detector and loads the first NeXus
+    group it finds.
 
     See Also
     --------
@@ -103,7 +117,7 @@ def _find_class_in_inputs(
 ) -> snx.Group:
     """Search for a NeXus class in a group's inputs.
 
-    This function uses a breadth-first search through ``'input'`` attributes.
+    This function uses a breadth-first search through ``'inputs'`` datasets.
     It begins at ``start`` and walks along chains of inputs until a group with the
     given class is found, the chain ends, or the chain leads outside ``group``.
 
@@ -113,6 +127,8 @@ def _find_class_in_inputs(
         The group that contains all possible next named groups
     target:
         The NeXus class to look for.
+    start:
+        The group to start the search from.
 
     Returns
     -------
@@ -135,10 +151,18 @@ def _find_class_in_inputs(
 
 def _get_inputs(group: snx.Group) -> list[str]:
     try:
-        inputs = group.attrs['inputs']
+        inputs = group['inputs'][()]
     except KeyError:
-        return []
-    # Deal with nexusformat (Python module) or kafka-to-nexus (filewriter)
+        try:
+            # Older ESS encoding. The NeXus standard requires 'inputs' to be a dataset
+            # but ESS used an attribute for BIFROST files for a while.
+            inputs = group.attrs['inputs']
+        except KeyError:
+            return []
+    if isinstance(inputs, sc.Variable):  # 1-d dataset
+        inputs = list(inputs.values)
+    # A scalar dataset loads as a str.
+    # Also deal with nexusformat (Python module) or kafka-to-nexus (filewriter)
     # silently converting a len(list[str]) == 1 attribute to a str attribute:
     return [inputs] if isinstance(inputs, str) else inputs
 
@@ -237,11 +261,13 @@ def stepwise_transformation_time_filter(transform: sc.DataArray) -> sc.DataArray
 providers = (
     get_calibrated_analyzer,
     load_analyzer_for_detector,
-    load_instrument_angle,
+    extract_instrument_angle,
     load_sample_angle,
     moderator_class_for_source,
 )
 
 parameters = {
+    InstrumentAnglePath: '/entry/instrument/detector_tank/transformations/tank_angle',
+    SampleAnglePath: '/entry/instrument/sample_stage/transformations/sample_rotation',
     TransformationTimeFilter: stepwise_transformation_time_filter,
 }

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 
+import datetime
 import doctest
 import os
 import sys
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # General information about the project.
 project = 'ESSdiffraction'
-copyright = '2025 Scipp contributors'
+copyright = f'{datetime.datetime.now(datetime.UTC).year} Scipp contributors'
 author = 'Scipp contributors'
 
 html_show_sourcelink = True
@@ -289,6 +290,9 @@ linkcheck_ignore = [
     r"https?://confluence.ess.eu",
     # This returns '403 Forbidden' but the link works in a browser.
     "https://www.sciencedirect.com/science/article/pii/S2773183922000374",
+    # These links work, but their hosts reject linkcheck requests from CI with 403.
+    r'https://zenodo\.org/(badge/|doi/)',
+    r'https://subversion\.xray\.aps\.anl\.gov/EXPGUI/gsas/all/GSAS%20Manual\.pdf$',
     # Linkcheck seems to be denied access by some DOI resolvers.
     # Since DOIs are supposed to be permanent, we don't need to check them.'
     r'https?://doi\.org/',

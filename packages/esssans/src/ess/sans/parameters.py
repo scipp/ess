@@ -15,7 +15,7 @@ from ess.reduce.parameter import (
     MultiFilenameParameter,
     ParamWithOptions,
     StringParameter,
-    Vector2dParameter,
+    Vector3dParameter,
     parameter_registry,
 )
 
@@ -112,7 +112,7 @@ parameter_registry[DirectBeam] = StringParameter.from_type(
 parameter_registry[DirectBeamFilename] = FilenameParameter.from_type(
     DirectBeamFilename, switchable=True
 )
-parameter_registry[BeamCenter] = Vector2dParameter.from_type(
+parameter_registry[BeamCenter] = Vector3dParameter.from_type(
     BeamCenter, default=sc.vector([0, 0, 0], unit='m')
 )
 

@@ -14,12 +14,21 @@ from ..reflectometry.types import (
     DetectorSpatialResolution,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
+    NeXusMonitorName,
     ReferenceRun,
     SampleRun,
 )
 from . import conversions, corrections, mcstas, normalization, orso
 from .corrections import RunNormalization, insert_run_normalization
-from .types import IncidentMonitor
+from .types import (
+    DetectorRegionOfInterest,
+    NormalizationMonitor,
+    PSCMonitor,
+    ShutterMonitor,
+    WBC1Monitor,
+    WBC2Monitor,
+    WBC3Monitor,
+)
 
 providers = (
     *reflectometry_providers,
@@ -49,12 +58,24 @@ def default_parameters() -> dict:
     """Return default parameters for the NeXus Freia workflow."""
     return {
         NeXusDetectorName: "multiblade_detector",
+        NeXusMonitorName[WBC1Monitor]: 'monitor_1',
+        NeXusMonitorName[PSCMonitor]: 'monitor_2',
+        NeXusMonitorName[WBC2Monitor]: 'monitor_3',
+        NeXusMonitorName[WBC3Monitor]: 'monitor_4',
+        NeXusMonitorName[ShutterMonitor]: 'monitor_5',
+        NeXusMonitorName[NormalizationMonitor]: 'monitor_6',
         DetectorBankSizes: {
             "multiblade_detector": {"strip": 64, "blade": 32, "wire": 32},
         },
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         LookupTableRelativeErrorThreshold: {
             "multiblade_detector": float('inf'),
+            "monitor_1": float('inf'),
+            "monitor_2": float('inf'),
+            "monitor_3": float('inf'),
+            "monitor_4": float('inf'),
+            "monitor_5": float('inf'),
+            "monitor_6": float('inf'),
         },
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     }
@@ -111,7 +132,7 @@ def FreiaWorkflow(
     ``workflow[Sample] = workflow[ReducibleData[SampleRun]]``.
 
     Monitor normalization requires an incident monitor selected through
-    ``NeXusName[IncidentMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.
+    ``NeXusName[NormalizationMonitor]``, or supplied as ``WavelengthMonitor[RunType]``.
 
     Parameters
     ----------
@@ -124,7 +145,14 @@ def FreiaWorkflow(
     """
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun, ReferenceRun],
-        monitor_types=[IncidentMonitor],
+        monitor_types=[
+            WBC1Monitor,
+            PSCMonitor,
+            WBC2Monitor,
+            WBC3Monitor,
+            ShutterMonitor,
+            NormalizationMonitor,
+        ],
         wavelength_from=wavelength_from,
         **kwargs,
     )
@@ -133,6 +161,50 @@ def FreiaWorkflow(
     insert_run_normalization(workflow, run_norm)
     for name, param in default_parameters().items():
         workflow[name] = param
+    return workflow
+
+
+@register_workflow
+def FreiaOffspecWorkflow(
+    *,
+    wavelength_from: WavelengthLutMode = "file",
+    **kwargs,
+) -> sciline.Pipeline:
+    """Workflow for unnormalized, coplanar off-specular FREIA data.
+
+    Assign each neutron to the slit beam with the closest expected specular
+    reflection angle. Compute ``Qx`` and ``Qz`` from that beam's incidence angle
+    and the neutron's gravity-corrected reflection angle. With one open beam,
+    the incidence angle is a shared scalar.
+
+    Supply :class:`~ess.freia.types.UpstreamSlitCenters` and
+    :class:`~ess.freia.types.DownstreamSlitCenters` for ``SampleRun`` as
+    dictionaries with matching slit-channel names. Each dictionary must
+    contain the simultaneously open FREIA slit channels. The output is
+    ``CorrectedDetector[SampleRun]``; this workflow has no reference normalization step.
+    By default the detector ROI is empty, so the entire detector is retained.
+
+    Parameters
+    ----------
+    wavelength_from:
+        Mode for creating the wavelength lookup table. Possible values are
+        'analytical', 'simulation', and 'file'. See
+        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    """
+    workflow = GenericUnwrapWorkflow(
+        run_types=[SampleRun],
+        monitor_types=[],
+        wavelength_from=wavelength_from,
+        **kwargs,
+    )
+    for provider in (
+        conversions.offspecular_sample_coordinate_transformation_graph,
+        corrections.add_coords_and_masks,
+    ):
+        workflow.insert(provider)
+    for name, param in default_parameters().items():
+        workflow[name] = param
+    workflow[DetectorRegionOfInterest[SampleRun]] = {}
     return workflow
 
 
@@ -192,6 +264,7 @@ __all__ = [
     'FreiaMcStasWorkflow',
     'FreiaMonitorHistogramWorkflow',
     'FreiaMonitorIntegratedWorkflow',
+    'FreiaOffspecWorkflow',
     'FreiaProtonChargeWorkflow',
     'FreiaUnnormalizedWorkflow',
     'FreiaWorkflow',

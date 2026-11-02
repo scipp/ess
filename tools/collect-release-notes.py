@@ -1,3 +1,16 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["pydantic"]
+#
+# [tool.pixi.workspace]
+# channels = ["conda-forge"]
+# platforms = [
+#    "linux-64",
+#    { platform = "osx-arm64", macos = "14.0" },
+#    "win-64",
+# ]
+# ///
+
 import argparse
 import json
 import pathlib

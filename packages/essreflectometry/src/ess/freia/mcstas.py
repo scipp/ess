@@ -23,7 +23,7 @@ from ess.reduce.nexus.types import (
 from ess.reduce.unwrap import PulsePeriod
 from scippneutron.chopper import DiskChopper
 
-from .types import IncidentMonitor, SampleSurfaceNormal, WavelengthMonitor
+from .types import NormalizationMonitor, SampleSurfaceNormal, WavelengthMonitor
 
 
 class _ChopperParameters(TypedDict):
@@ -363,7 +363,7 @@ def load_mcstas_monitor(filename: str | Path, monitor_name: str) -> sc.DataArray
 
 def mcstas_wavelength_monitor(
     filename: Filename[RunType],
-    monitor_name: NeXusName[IncidentMonitor],
+    monitor_name: NeXusName[NormalizationMonitor],
 ) -> WavelengthMonitor[RunType]:
     """Provide the explicitly selected incident wavelength histogram."""
     return WavelengthMonitor[RunType](load_mcstas_monitor(filename, monitor_name))

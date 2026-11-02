@@ -8,14 +8,14 @@ from ess.reduce.data import make_registry
 
 _registry = make_registry(
     'ess/odin',
-    version="2",
+    version="4",
     files={
-        "iron_simulation_sample_small.nxs": "md5:80c761ae23afac36385d96db186714b5",
-        "iron_simulation_ob_small.nxs": "md5:0510ec416526169cea1c1a2d96e32877",
-        "iron_simulation_sample_large.nxs": "md5:df22835fae4d1e4a3707ce2ee52eaf1d",
-        "iron_simulation_ob_large.nxs": "md5:a3b3d9b75dd2edada0be0d17ee29b905",
+        "iron_simulation_sample_small.nxs": "md5:90ac0c146969da050a3152c703801bd4",
+        "iron_simulation_ob_small.nxs": "md5:e55f7ff0e5e85d17901085d1aabd5d72",
+        "iron_simulation_sample_large.nxs": "md5:d4f0a078e19f268ed89aa43853f44598",
+        "iron_simulation_ob_large.nxs": "md5:6f792c47acdd0fef1cd18b6dff414557",
         "ODIN-wavelength-lookup-table-5m-65m.h5": "md5:44eef2a2e826cec688aeb1b985eb9f9e",  # noqa: E501
-        "ymir_lego_odin.hdf": "md5:8e8708891e2574046b6f372e5e3516a5",
+        "ymir_lego_odin.hdf": "md5:59b56b4ca2a264983df2d5590853c9fa",
     },
 )
 

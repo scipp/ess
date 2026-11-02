@@ -12,7 +12,11 @@ from scipp.testing import assert_allclose, assert_identical
 from ess.freia import FreiaMcStasWorkflow
 from ess.freia.data import freia_mcstas_reference_run, freia_mcstas_sample_run
 from ess.freia.mcstas import mcstas_detector_geometry
-from ess.freia.types import DetectorRegionOfInterest, IncidentMonitor, WavelengthMonitor
+from ess.freia.types import (
+    DetectorRegionOfInterest,
+    NormalizationMonitor,
+    WavelengthMonitor,
+)
 from ess.reflectometry.types import CorrectedDetector, SampleRun, WavelengthBins
 
 
@@ -88,7 +92,7 @@ def test_load_monitor(filename):
     path = filename()
     workflow = FreiaMcStasWorkflow()
     workflow[Filename[SampleRun]] = path
-    workflow[NeXusName[IncidentMonitor]] = 'SampleLambda'
+    workflow[NeXusName[NormalizationMonitor]] = 'SampleLambda'
 
     result = workflow.compute(WavelengthMonitor[SampleRun])
 

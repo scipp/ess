@@ -91,6 +91,18 @@ lint = "pre-commit run --all-files"
 check = "ruff check ."
 format = "ruff format ."
 
+# ==================== Build feature ====================
+
+[feature.build.pypi-dependencies]
+build = ">=1.6.1"
+
+[feature.build.tasks.build]
+cmd = "python -m build packages/{{ package }}"
+args = [
+    { "arg" = "package" }
+]
+description = "Build a Python package (wheel)"
+
 # ==================== Docs feature ====================
 
 [feature.docs.dependencies]
@@ -192,3 +204,6 @@ docs-essspectroscopy = { features = ["docs-essspectroscopy", "docs-essreduce", "
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }
+
+# Build packages
+build = { features = ["build"], solve-group = "build" }

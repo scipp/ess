@@ -20,6 +20,7 @@ Filename = nexus_t.Filename
 Measurement = nexus_t.Measurement
 NeXusComponent = nexus_t.NeXusComponent
 NeXusDetectorName = nexus_t.NeXusDetectorName
+NeXusMonitorName = nexus_t.NeXusName
 Position = nexus_t.Position
 ProtonCharge = nexus_t.ProtonCharge
 

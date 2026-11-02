@@ -4,6 +4,8 @@
 import importlib.metadata
 
 from ..imaging import orca
+from . import beamline
+from .beamline import nexus_name
 from .workflow import OrcaNormalizedImagesWorkflow, TblWorkflow, default_parameters
 
 try:
@@ -16,6 +18,8 @@ del importlib
 __all__ = [
     "OrcaNormalizedImagesWorkflow",
     "TblWorkflow",
+    "beamline",
     "default_parameters",
+    "nexus_name",
     "orca",
 ]

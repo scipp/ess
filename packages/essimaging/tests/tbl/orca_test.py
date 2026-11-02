@@ -40,7 +40,7 @@ def workflow() -> sl.Pipeline:
     wf[Filename[DarkBackgroundRun]] = tbl.data.tbl_lego_dark_run()
     wf[Filename[OpenBeamRun]] = tbl.data.tbl_lego_openbeam_run()
     wf[MaskingRules] = {}
-    wf[NeXusDetectorName] = 'orca_detector'
+    wf[NeXusDetectorName] = tbl.nexus_name('orca')
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     wf[Position[sx.NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
     return wf

@@ -7,8 +7,9 @@ Components for DREAM
 
 import importlib.metadata
 
+from scippneutron import instrument_view
+
 from .beamline import InstrumentConfiguration
-from .instrument_view import instrument_view
 from .io import load_geant4_csv
 from .workflows import (
     DreamGeant4MonitorHistogramWorkflow,

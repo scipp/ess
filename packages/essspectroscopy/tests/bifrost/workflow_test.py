@@ -7,17 +7,22 @@ import scipp as sc
 import scipp.testing
 from ess import bifrost
 from ess.bifrost.data import (
+    coda_test_run_2026_10,
     computed_energy_data_simulated_5x2,
     lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,
 )
 from ess.spectroscopy.types import (
+    DataAtSample,
+    ElasticMonitor,
     EnergyQDetector,
     Filename,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     NormalizationMonitor,
+    OverlapMonitor,
+    PSCMonitor,
     RawDetector,
     RawMonitor,
     SampleRun,
@@ -143,3 +148,42 @@ def test_simulation_workflow_produces_the_same_data_as_before(
         expected.bins.data,
         atol=sc.scalar(1e-15, unit=expected.unit),
     )
+
+
+@pytest.fixture
+def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
+    workflow = bifrost.BifrostWorkflow(detector_names=detector_names)
+    workflow[Filename[SampleRun]] = coda_test_run_2026_10()
+    # The table does not match the choppers of this run but these tests only check
+    # that the file can be loaded.
+    workflow[LookupTableFilename] = lookup_table_simulation()
+    workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
+    return workflow
+
+
+def test_workflow_can_load_detector_with_analyzers_and_angles_from_coda_file(
+    coda_workflow: sciline.Pipeline,
+) -> None:
+    data = coda_workflow.compute(DataAtSample[SampleRun])
+    assert data.sizes == {
+        'arc': 5,
+        'channel': 2,
+        'tube': 3,
+        'length': 100,
+        'a3': 1,
+        'a4': 1,
+    }
+    assert data.bins.size().sum().value > 0
+    # Requires the analyzer of each triplet.
+    assert data.coords['final_energy'].unit == 'meV'
+
+
+@pytest.mark.parametrize(
+    'monitor_type',
+    [ElasticMonitor, NormalizationMonitor, OverlapMonitor, PSCMonitor],
+)
+def test_workflow_can_load_monitors_from_coda_file(
+    coda_workflow: sciline.Pipeline, monitor_type: type
+) -> None:
+    monitor = coda_workflow.compute(RawMonitor[SampleRun, monitor_type])
+    assert 'position' in monitor.coords

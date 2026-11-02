@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
-from ess.dream.diagnostics import unwrap_flat_indices_2d
+from ess.dream.diagnostics.voxel_viewer import unwrap_flat_indices_2d
 
 
 def test_unwrap_flat_indices_2d_single_dim() -> None:

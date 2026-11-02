@@ -104,6 +104,8 @@ filterwarnings = [
     "error",
     # bqscales still passes trait metadata through the deprecated constructor API.
     'ignore:metadata .* was set from the constructor:DeprecationWarning:bqscales.traits',
+    # ipydatagrid uses the inplace argument deprecated by pandas 3.1.
+    'ignore:The inplace keyword in DataFrame.drop is deprecated:DeprecationWarning:ipydatagrid.datagrid',
     'ignore:\n.*Sentinel is not a public part of the traitlets API.*:DeprecationWarning',
     "ignore:.*metadata to be logged in the data array, it is necessary to install the orsopy package.:UserWarning",
     "ignore:.*A transformation needs a vector attribute. Falling back to returning underlying value.:UserWarning",

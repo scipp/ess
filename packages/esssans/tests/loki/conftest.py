@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+from pathlib import Path
+
 import ess.loki.data  # noqa: F401
 import pytest
 import sciline
@@ -92,3 +94,15 @@ def loki_workflow() -> sciline.Pipeline:
         return wf
 
     return make_workflow
+
+
+@pytest.fixture(scope='session')
+def loki_coda_file() -> Path:
+    """Small LoKI CODA file for testing purposes (data from only 5 pulses)."""
+    return loki.data.loki_coda_file()
+
+
+@pytest.fixture(scope='session')
+def loki_broken_file() -> Path:
+    """Small LoKI file with broken transformations and monitor data."""
+    return loki.data.loki_broken_file()

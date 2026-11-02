@@ -33,6 +33,7 @@ from .detector import default_detector_names, merge_triplets
 from .detector import providers as detector_providers
 from .io import mcstas, nexus
 from .normalization import providers as normalisation_providers
+from .types import InstrumentAnglePath
 
 
 def default_parameters() -> dict[type, Any]:
@@ -53,6 +54,11 @@ def simulation_default_parameters() -> dict[type, Any]:
     return {
         **default_parameters(),
         ProtonCharge[SampleRun]: sc.DataArray(sc.scalar(1.0, unit='pC')),
+        # The simulated files use an older layout than the default.
+        InstrumentAnglePath: (
+            '/entry/instrument/detector_tank_angle/transformations/'
+            'detector_tank_angle_r0'
+        ),
     }
 
 
@@ -81,6 +87,7 @@ _SIMULATION_PROVIDERS = (
 def BifrostSimulationWorkflow(
     *,
     detector_names: list[str] | None = None,
+    **kwargs,
 ) -> sciline.Pipeline:
     """Data reduction workflow for simulated BIFROST data.
 
@@ -88,7 +95,9 @@ def BifrostSimulationWorkflow(
     ----------
     detector_names:
         Names of ``NXdetector`` groups in the input NeXus file.
-        If ``Nonw``, all detector will be processed and merged.
+        If ``None``, all detector will be processed and merged.
+    kwargs:
+        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.
 
     Returns
     -------
@@ -103,6 +112,7 @@ def BifrostSimulationWorkflow(
             OverlapMonitor,
             PSCMonitor,
         ),
+        **kwargs,
     )
     for provider in _SIMULATION_PROVIDERS:
         workflow.insert(provider)
@@ -121,6 +131,7 @@ def BifrostSimulationWorkflow(
 def BifrostWorkflow(
     *,
     detector_names: list[str] | None = None,
+    **kwargs,
 ) -> sciline.Pipeline:
     """Data reduction workflow for BIFROST.
 
@@ -128,12 +139,13 @@ def BifrostWorkflow(
     ----------
     detector_names:
         Names of ``NXdetector`` groups in the input NeXus file.
-        If ``Nonw``, all detector will be processed and merged.
-
+        If ``None``, all detector will be processed and merged.
+    kwargs:
+        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.
     Returns
     -------
     :
-        A pipeline for reducing simulated BIFROST data."""
+        A pipeline for reducing BIFROST data."""
     workflow = TofWorkflow(
         run_types=(SampleRun,),
         monitor_types=(
@@ -142,6 +154,7 @@ def BifrostWorkflow(
             OverlapMonitor,
             PSCMonitor,
         ),
+        **kwargs,
     )
     for provider in _PROVIDERS:
         workflow.insert(provider)
