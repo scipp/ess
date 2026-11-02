@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.bifrost.io.nexus.get_calibrated_analyzer" href="ess.bifrost.io.nexus.get_calibrated_analyzer.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -554,6 +554,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.data.html">ess.bifrost.data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.data.coda_test_run_2026_10.html">ess.bifrost.data.coda_test_run_2026_10</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.data.computed_energy_data_simulated_5x2.html">ess.bifrost.data.computed_energy_data_simulated_5x2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.data.get_path.html">ess.bifrost.data.get_path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.data.lookup_table_simulation.html">ess.bifrost.data.lookup_table_simulation</a></li>
@@ -606,6 +607,8 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.types.html">ess.bifrost.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.InstrumentAnglePath.html">ess.bifrost.types.InstrumentAnglePath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.SampleAnglePath.html">ess.bifrost.types.SampleAnglePath</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.ArcNumber.html">ess.bifrost.types.ArcNumber</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.McStasRawDetector.html">ess.bifrost.types.McStasRawDetector</a></li>
 </ul>
@@ -703,7 +706,8 @@
 <span class="sig-prename descclassname"><span class="pre">ess.bifrost.io.nexus.</span></span><span class="sig-name descname"><span class="pre">load_analyzer_for_detector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detector_location</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/bifrost/io/nexus.html#load_analyzer_for_detector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.bifrost.io.nexus.load_analyzer_for_detector" title="Link to this definition">#</a></dt>
 <dd><p>Load the analyzer component for the given detector.</p>
 <p>This function searches for an <code class="docutils literal notranslate"><span class="pre">NXcrystal</span></code> in the inputs (via the
-‘input’ attribute) of the detector and loads the first NeXus group it finds.</p>
+<code class="docutils literal notranslate"><span class="pre">inputs</span></code> dataset or attribute) of the detector and loads the first NeXus
+group it finds.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
@@ -799,7 +803,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

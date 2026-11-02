@@ -5,6 +5,14 @@
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      InstrumentAnglePath
+      SampleAnglePath
+   
    
 
    
