@@ -29,7 +29,11 @@ def time_at_detector(
     event_time_zero: sc.Variable,
     event_time_offset: sc.Variable,
 ) -> sc.Variable:
-    """Detector arrival as float64 seconds since the Unix epoch."""
+    """Detector arrival as float64 seconds since the Unix epoch.
+
+    For timestamps around 2026, float64 spacing is about 0.24 microseconds,
+    well below the hundreds of microseconds needed for shutter timing.
+    """
     pulse_time = event_time_zero.to(unit='ns', copy=False) - sc.epoch(unit='ns')
     return pulse_time.to(unit='s', dtype='float64') + event_time_offset.to(
         unit='s', dtype='float64', copy=False
