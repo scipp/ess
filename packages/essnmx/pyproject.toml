@@ -49,6 +49,7 @@ dynamic = ["version"]
 [project.scripts]
 essnmx_reduce_mcstas = "ess.nmx.mcstas.executables:main"
 essnmx-reduce = "ess.nmx.executables:main"
+essmandi-reduce = "ess.mandi.workflows:main"
 
 [project.optional-dependencies]
 test = [
