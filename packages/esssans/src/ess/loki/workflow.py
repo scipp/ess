@@ -53,6 +53,10 @@ def loki_default_parameters() -> dict:
         # deviation of the table wavelengths. A flat window mu +- sqrt(3) sigma has the
         # mean (mu = 1.76 ms) and standard deviation (sigma = 0.88 ms) of the emission
         # time of the McStas ESS source for 1-10 Angstrom.
+        # This is not a cut: the two moments include the tail of the pulse, and
+        # neutrons emitted outside the window get the table mean and standard
+        # deviation like all others. Only at the tips of a frame, where no neutron
+        # emitted within the window arrives, do they get no wavelength.
         SourceBounds: SourceBounds(
             time=(sc.scalar(0.24, unit='ms'), sc.scalar(3.29, unit='ms')),
             wavelength=(
