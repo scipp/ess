@@ -15,9 +15,11 @@ from ..reflectometry.types import (
     RunType,
     SampleRun,
 )
+from .mirror import DIRECT_BEAM, direct_beam_transform, unfold_path
 from .types import (
     DownstreamSlitCenters,
     IncidentAngleGraph,
+    IncidentBeamTransform,
     SampleSurfaceNormal,
     ShutterPositions,
     ShutterStatusLogs,
@@ -192,12 +194,14 @@ def theta(
 def incident_beam_directions(
     upstream_slit_centers: UpstreamSlitCenters[RunType],
     downstream_slit_centers: DownstreamSlitCenters[RunType],
+    beam_transform: sc.Variable = DIRECT_BEAM,
 ) -> dict[str, sc.Variable]:
     """Compute candidate incident directions from corresponding slit openings.
 
     The two inputs map the names of open channels to their centers in the
     upstream and downstream slit assemblies. Matching keys describe one
-    possible incident beam.
+    possible incident beam. In inversion mode the mirror is between the
+    assemblies, so only the upstream slit is mapped to its virtual position.
     """
     if upstream_slit_centers.keys() != downstream_slit_centers.keys():
         raise ValueError(
@@ -205,7 +209,9 @@ def incident_beam_directions(
         )
     directions = {}
     for key, upstream in upstream_slit_centers.items():
-        beam = downstream_slit_centers[key] - upstream
+        downstream = downstream_slit_centers[key]
+        virtual_upstream = unfold_path(beam_transform, upstream, downstream)
+        beam = downstream - virtual_upstream.to(unit=downstream.unit)
         directions[key] = beam / sc.norm(beam)
     return directions
 
@@ -243,6 +249,7 @@ def coordinate_transformation_graph(
     sample_position: Position[NXsample, RunType],
     sample_surface_normal: SampleSurfaceNormal[RunType],
     gravity: GravityVector,
+    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
 ) -> CoordTransformationGraph[RunType]:
     """Build the scattering coordinates shared by sample and direct-beam runs."""
     length = sc.norm(sample_surface_normal)
@@ -256,7 +263,9 @@ def coordinate_transformation_graph(
         **graph.beamline.L2(),
         'outgoing_direction': outgoing_direction,
         'scattering_angle': scattering_angle,
-        'source_position': lambda: source_position,
+        'source_position': lambda: unfold_path(
+            beam_transform, source_position, sample_position
+        ),
         'sample_position': lambda: sample_position,
         'sample_surface_normal': lambda: sample_surface_normal,
         'gravity': lambda: gravity,
@@ -268,20 +277,24 @@ def sample_coordinate_transformation_graph(
     sample_position: Position[NXsample, SampleRun],
     sample_surface_normal: SampleSurfaceNormal[SampleRun],
     gravity: GravityVector,
+    beam_transform: IncidentBeamTransform[SampleRun] = DIRECT_BEAM,
 ) -> CoordTransformationGraph[SampleRun]:
     """Extend the scattering graph with the sample's reflection angle and Q."""
     return coordinate_transformation_graph(
-        source_position, sample_position, sample_surface_normal, gravity
+        source_position, sample_position, sample_surface_normal, gravity, beam_transform
     ) | {'theta': theta, 'Q': reflectometry_q}
 
 
 def _incident_angles_from_slits(
-    upstream_slit_centers, downstream_slit_centers, sample_surface_normal
+    upstream_slit_centers,
+    downstream_slit_centers,
+    sample_surface_normal,
+    beam_transform,
 ):
     return {
         beam_name: incident_angle(direction, sample_surface_normal)
         for beam_name, direction in incident_beam_directions(
-            upstream_slit_centers, downstream_slit_centers
+            upstream_slit_centers, downstream_slit_centers, beam_transform
         ).items()
     }
 
@@ -290,10 +303,14 @@ def fixed_slits_incident_angle_graph(
     upstream_slit_centers: UpstreamSlitCenters[RunType],
     downstream_slit_centers: DownstreamSlitCenters[RunType],
     sample_surface_normal: SampleSurfaceNormal[RunType],
+    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
 ) -> IncidentAngleGraph[RunType]:
     """Provide a constant incident angle from a single pair of fixed slit openings."""
     (beam_incident_angle,) = _incident_angles_from_slits(
-        upstream_slit_centers, downstream_slit_centers, sample_surface_normal
+        upstream_slit_centers,
+        downstream_slit_centers,
+        sample_surface_normal,
+        beam_transform,
     ).values()
     return {'incident_angle': lambda: beam_incident_angle}
 
@@ -302,10 +319,14 @@ def closest_beam_incident_angle_graph(
     upstream_slit_centers: UpstreamSlitCenters[RunType],
     downstream_slit_centers: DownstreamSlitCenters[RunType],
     sample_surface_normal: SampleSurfaceNormal[RunType],
+    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
 ) -> IncidentAngleGraph[RunType]:
     """Provide incidence assignment using the closest expected reflection angle."""
     beam_incident_angles = _incident_angles_from_slits(
-        upstream_slit_centers, downstream_slit_centers, sample_surface_normal
+        upstream_slit_centers,
+        downstream_slit_centers,
+        sample_surface_normal,
+        beam_transform,
     )
 
     def select_incident_angle(reflection_angle: sc.Variable) -> sc.Variable:
@@ -320,10 +341,14 @@ def shutter_log_incident_angle_graph(
     sample_surface_normal: SampleSurfaceNormal[RunType],
     shutter_positions: ShutterPositions[RunType],
     shutter_status_logs: ShutterStatusLogs[RunType],
+    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
 ) -> IncidentAngleGraph[RunType]:
     """Identify candidate beams using each shutter's position and status log."""
     beam_incident_angles = _incident_angles_from_slits(
-        upstream_slit_centers, downstream_slit_centers, sample_surface_normal
+        upstream_slit_centers,
+        downstream_slit_centers,
+        sample_surface_normal,
+        beam_transform,
     )
 
     if not beam_incident_angles:
@@ -352,7 +377,10 @@ def shutter_log_incident_angle_graph(
             L2,
             sample_position,
             incident_angles=beam_incident_angles,
-            shutter_positions=shutter_positions,
+            shutter_positions={
+                key: unfold_path(beam_transform, position, sample_position)
+                for key, position in shutter_positions.items()
+            },
             shutter_status_logs=shutter_status_logs,
         )
 
@@ -365,11 +393,16 @@ def offspecular_coordinate_transformation_graph(
     sample_surface_normal: SampleSurfaceNormal[RunType],
     gravity: GravityVector,
     incident_angle_graph: IncidentAngleGraph[RunType],
+    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
 ) -> CoordTransformationGraph[RunType]:
     """Combine an incidence assignment with the shared offspecular coordinates."""
     return (
         coordinate_transformation_graph(
-            source_position, sample_position, sample_surface_normal, gravity
+            source_position,
+            sample_position,
+            sample_surface_normal,
+            gravity,
+            beam_transform,
         )
         | incident_angle_graph
         | {
@@ -381,6 +414,7 @@ def offspecular_coordinate_transformation_graph(
 
 
 providers = (
+    direct_beam_transform,
     coordinate_transformation_graph,
     sample_coordinate_transformation_graph,
 )

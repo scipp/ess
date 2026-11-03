@@ -34,12 +34,34 @@ class SampleSurfaceNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Normal pointing out of the reflecting surface, in global coordinates."""
 
 
+class MirrorPosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """A point on the inversion mirror's reflecting plane, in global coordinates."""
+
+
+class MirrorNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Normal to the inversion mirror in global coordinates; either sign is valid."""
+
+
+class IncidentBeamTransform(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Map upstream positions to virtual positions after the inversion mirror.
+
+    Identity in normal operation. In inversion mode this is reflection in the
+    mirror plane. Sample, detector, and gravity remain in the laboratory frame.
+    """
+
+
 class UpstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Upstream beam names mapped to fixed slit centers in global coordinates."""
+    """Beam names mapped to fixed slit centers before the inversion mirror.
+
+    Positions are in global coordinates, also when inversion is disabled.
+    """
 
 
 class DownstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Downstream beam names mapped to fixed slit centers in global coordinates."""
+    """Beam names mapped to fixed slit centers after the inversion mirror.
+
+    Positions are in global coordinates, also when inversion is disabled.
+    """
 
 
 class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
@@ -60,6 +82,7 @@ class ShutterPositions(sciline.Scope[RunType, dict], dict):
 
     Keys match UpstreamSlitCenters and DownstreamSlitCenters. Each beam has one
     shutter, whose position is independent of the slit centers used for angles.
+    In inversion mode, shutters must be upstream of the mirror.
     """
 
 
