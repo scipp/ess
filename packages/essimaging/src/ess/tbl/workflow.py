@@ -62,10 +62,10 @@ def TblWorkflow(
     return workflow
 
 
-def OrcaNormalizedImagesWorkflow(**kwargs) -> sciline.Pipeline:
+def TblOrcaWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Workflow with default parameters for ORCA image normalization.
     """
     wf = _OrcaWorkflow(**kwargs)
-    wf[NeXusDetectorName] = 'orca_detector'
+    wf[NeXusDetectorName] = nexus_name('orca')
     return wf
