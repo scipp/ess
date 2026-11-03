@@ -272,11 +272,7 @@ class Filename(sciline.Scope[RunType, Path], Path): ...
 
 @dataclass
 class TimeInterval(Generic[RunType]):
-    """Range of neutron pulses to load from NXevent_data or NXdata groups.
-
-    The workflow uses the measurement's start and end times by default. Set
-    ``TimeInterval`` in the workflow to choose a different range.
-    """
+    """Range of neutron pulses to load from NXevent_data or NXdata groups."""
 
     value: slice
 
@@ -285,9 +281,11 @@ class TransformationTimeFilter(Generic[Component, RunType]):
     """Filter for time-dependent transformations.
 
     If the function has parameters named ``start`` and ``stop`` that can be passed
-    by keyword, it receives the unsliced log and the start and stop times from
-    :class:`TimeInterval` as keyword arguments. The function must apply the time
-    interval itself. The times are Scipp scalars or ``None`` when unspecified.
+    by keyword, it receives the unsliced log and two keyword arguments. ``start``
+    is the maximum of the start times in :class:`TimeInterval` and
+    :class:`Measurement`; ``stop`` is the minimum of their end times. Missing times
+    are ignored. The function must apply the time interval itself.
+    The times are Scipp scalars or ``None`` when neither source specifies a time.
 
     Other functions receive only the log entries selected by :class:`TimeInterval`.
     If a single reading is selected, it is used directly without calling the function.

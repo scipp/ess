@@ -128,6 +128,7 @@ def test_can_compute_position_of_group(depends_on: snx.TransformationChain) -> N
     trans = workflow.to_transformation(
         chain,
         interval=TimeInterval(slice(None, None)),
+        measurement=Measurement(title=None),
     )
     assert_identical(workflow.compute_position(trans), position)
 
@@ -140,18 +141,21 @@ def test_to_transform_with_positional_time_interval(
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(0, 1)),
+        measurement=Measurement(title=None),
     ).value
     assert sc.identical(transform * origin, sc.vector([1.0, 1.0, 0.0], unit='m'))
 
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(1, 2)),
+        measurement=Measurement(title=None),
     ).value
     assert sc.identical(transform * origin, sc.vector([1.0, 2.0, 0.0], unit='m'))
 
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(2, 3)),
+        measurement=Measurement(title=None),
     ).value
     assert sc.identical(transform * origin, sc.vector([1.0, 3.0, 0.0], unit='m'))
 
@@ -164,18 +168,21 @@ def test_to_transform_with_label_based_time_interval_single_point(
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(0.9, unit='s'))),
+        measurement=Measurement(title=None),
     ).value
     assert sc.identical(transform * origin, sc.vector([1.0, 1.0, 0.0], unit='m'))
 
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(sc.scalar(1.1, unit='s'), sc.scalar(1.9, unit='s'))),
+        measurement=Measurement(title=None),
     ).value
     assert sc.identical(transform * origin, sc.vector([1.0, 2.0, 0.0], unit='m'))
 
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(sc.scalar(2.1, unit='s'), sc.scalar(2.9, unit='s'))),
+        measurement=Measurement(title=None),
     ).value
     assert sc.identical(transform * origin, sc.vector([1.0, 3.0, 0.0], unit='m'))
 
@@ -183,6 +190,7 @@ def test_to_transform_with_label_based_time_interval_single_point(
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(sc.scalar(1000.0, unit='s'), sc.scalar(2000.0, unit='s'))),
+        measurement=Measurement(title=None),
     ).value
     assert sc.identical(transform * origin, sc.vector([1.0, 3.0, 0.0], unit='m'))
 
@@ -194,6 +202,7 @@ def test_to_transform_raises_if_interval_does_not_yield_unique_value(
         workflow.to_transformation(
             time_dependent_depends_on,
             TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(1.9, unit='s'))),
+            measurement=Measurement(title=None),
         )
 
 
@@ -205,6 +214,7 @@ def test_to_transform_with_custom_time_filter(
         time_dependent_depends_on,
         TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(1.9, unit='s'))),
         time_filter=time_filter,
+        measurement=Measurement(title=None),
     ).value
 
     expected = sc.DataArray(
@@ -228,6 +238,7 @@ def test_to_transform_with_time_filter_slice_single_value(
         time_dependent_depends_on,
         TimeInterval(slice(sc.scalar(0.1, unit='s'), sc.scalar(1.9, unit='s'))),
         time_filter=time_filter,
+        measurement=Measurement(title=None),
     ).value
 
     # Note that after slicing a single value, we should just have the Variable, not a
@@ -247,6 +258,7 @@ def test_to_transform_with_time_weighted_median(
         time_dependent_depends_on,
         TimeInterval(slice(start, stop)),
         time_filter=time_weighted_median,
+        measurement=Measurement(title=None),
     ).value
     position = transform * sc.vector([0.0, 0.0, 0.0], unit='m')
     # Value 3 is held for 2 of the interval's 3.5 seconds, so it is the median.
@@ -266,7 +278,10 @@ def test_time_filter_receives_full_log_and_interval(time_dependent_depends_on):
         return data.mean()
 
     transform = workflow.to_transformation(
-        time_dependent_depends_on, interval, time_filter
+        time_dependent_depends_on,
+        interval,
+        time_filter,
+        measurement=Measurement(title=None),
     ).value
     assert_identical(
         transform * sc.vector([0.0, 0.0, 0.0], unit='m'),
@@ -279,7 +294,10 @@ def test_time_filter_without_inspectable_signature_uses_sliced_log(
 ):
     with patch('ess.reduce.nexus.workflow.signature', side_effect=ValueError):
         transform = workflow.to_transformation(
-            time_dependent_depends_on, TimeInterval(slice(0, 2)), lambda log: log.mean()
+            time_dependent_depends_on,
+            TimeInterval(slice(0, 2)),
+            lambda log: log.mean(),
+            measurement=Measurement(title=None),
         ).value
     assert_identical(
         transform * sc.vector([0.0, 0.0, 0.0], unit='m'),
@@ -297,7 +315,10 @@ def test_time_filter_type_error_is_not_retried(time_dependent_depends_on):
 
     with pytest.raises(TypeError, match='Error inside the filter'):
         workflow.to_transformation(
-            time_dependent_depends_on, TimeInterval(slice(None)), time_filter
+            time_dependent_depends_on,
+            TimeInterval(slice(None)),
+            time_filter,
+            measurement=Measurement(title=None),
         )
     assert calls == 1
 
@@ -305,11 +326,14 @@ def test_time_filter_type_error_is_not_retried(time_dependent_depends_on):
 def test_time_filter_requiring_bounds_rejects_indices(time_dependent_depends_on):
     with pytest.raises(ValueError, match='time bounds, not indices'):
         workflow.to_transformation(
-            time_dependent_depends_on, TimeInterval(slice(0, 2)), time_weighted_median
+            time_dependent_depends_on,
+            TimeInterval(slice(0, 2)),
+            time_weighted_median,
+            measurement=Measurement(title=None),
         )
 
 
-def test_pipeline_median_uses_each_runs_time_interval(time_dependent_depends_on):
+def test_pipeline_median_uses_each_runs_measurement_times(time_dependent_depends_on):
     wf = GenericNeXusWorkflow(run_types=[SampleRun, BackgroundRun], monitor_types=[])
     log = time_dependent_depends_on.transformations[
         '/entry/instrument/comp1/transformations/trans2'
@@ -332,8 +356,11 @@ def test_pipeline_median_uses_each_runs_time_interval(time_dependent_depends_on)
         )
 
 
-def test_explicit_time_interval_requires_no_measurement(time_dependent_depends_on):
+def test_pipeline_uses_explicit_interval_when_measurement_times_are_missing(
+    time_dependent_depends_on,
+):
     wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[Measurement[SampleRun]] = Measurement(title=None)
     wf[NeXusTransformationChain[snx.NXdetector, SampleRun]] = time_dependent_depends_on
     wf[TimeInterval[SampleRun]] = TimeInterval(
         slice(sc.scalar(0, unit='s'), sc.scalar(1.5, unit='s'))
@@ -352,19 +379,58 @@ def test_explicit_time_interval_requires_no_measurement(time_dependent_depends_o
         ('2026-10-21T02:00:00+02:00', '2026-10-21T02:00:10+02:00'),
     ],
 )
-def test_measurement_time_interval_converts_timestamps_to_utc(start, stop):
-    interval = workflow.measurement_time_interval(
-        Measurement(title=None, start_time=start, end_time=stop)
+def test_time_filter_bounds_convert_measurement_timestamps_to_utc(start, stop):
+    start, stop = workflow._time_filter_bounds(
+        TimeInterval(slice(None)),
+        Measurement(title=None, start_time=start, end_time=stop),
     )
-    assert_identical(
-        interval.value.start, sc.datetime('2026-10-21T00:00:00', unit='ns')
-    )
-    assert_identical(interval.value.stop, sc.datetime('2026-10-21T00:00:10', unit='ns'))
+    assert_identical(start, sc.datetime('2026-10-21T00:00:00', unit='ns'))
+    assert_identical(stop, sc.datetime('2026-10-21T00:00:10', unit='ns'))
 
 
-def test_measurement_time_interval_leaves_missing_bounds_open():
-    interval = workflow.measurement_time_interval(Measurement(title=None))
-    assert interval.value == slice(None, None)
+@pytest.mark.parametrize(
+    ('interval_seconds', 'measurement_seconds', 'expected_seconds'),
+    [
+        ((0, 10), (2, 8), (2, 8)),
+        ((3, 7), (2, 8), (3, 7)),
+        ((0, 7), (2, 8), (2, 7)),
+        ((3, 10), (2, 8), (3, 8)),
+        ((None, None), (2, 8), (2, 8)),
+        ((3, 7), (None, None), (3, 7)),
+        ((None, 7), (2, None), (2, 7)),
+        ((3, None), (None, 8), (3, 8)),
+        ((None, None), (None, None), (None, None)),
+    ],
+)
+def test_time_filter_bounds_use_later_start_and_earlier_stop(
+    interval_seconds,
+    measurement_seconds,
+    expected_seconds,
+):
+    def timestamp(seconds):
+        return None if seconds is None else f'2026-10-21T00:00:{seconds:02d}'
+
+    interval = TimeInterval(
+        slice(
+            *(
+                None if seconds is None else sc.datetime(timestamp(seconds), unit='ms')
+                for seconds in interval_seconds
+            )
+        )
+    )
+    measurement = Measurement(
+        title=None,
+        start_time=timestamp(measurement_seconds[0]),
+        end_time=timestamp(measurement_seconds[1]),
+    )
+    actual = workflow._time_filter_bounds(interval, measurement)
+    for bound, seconds in zip(actual, expected_seconds, strict=True):
+        if seconds is None:
+            assert bound is None
+        else:
+            assert_identical(
+                bound.to(unit='ns'), sc.datetime(timestamp(seconds), unit='ns')
+            )
 
 
 def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
@@ -381,6 +447,7 @@ def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
     transformation = workflow.to_transformation(
         chain,
         interval=TimeInterval(slice(None, None)),
+        measurement=Measurement(title=None),
     )
     position = workflow.compute_position(transformation)
     assert_identical(position, sc.vector([0.0, 0.0, 0.0], unit='m'))
@@ -558,6 +625,7 @@ def test_get_calibrated_detector_with_time_dependent_transformation(
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(1, 2)),
+        measurement=Measurement(title=None),
     )
 
     # Get the calibrated detector
@@ -747,6 +815,7 @@ def test_get_calibrated_monitor_with_time_dependent_transformation(
     transform = workflow.to_transformation(
         time_dependent_depends_on,
         TimeInterval(slice(1, 2)),
+        measurement=Measurement(title=None),
     )
 
     # Get the calibrated monitor
@@ -1058,10 +1127,7 @@ def test_generic_nexus_workflow_load_measurement_metadata(
     assert measurement.experiment_doi is None
 
     interval = wf.compute(TimeInterval[SampleRun])
-    assert_identical(
-        interval.value.start, sc.datetime('2022-02-28T21:15:00', unit='ns')
-    )
-    assert_identical(interval.value.stop, sc.datetime('2032-02-29T09:15:00', unit='ns'))
+    assert interval.value == slice(None)
 
 
 def test_generic_nexus_workflow_includes_only_given_run_and_monitor_types() -> None:
@@ -1414,7 +1480,6 @@ def test_load_proton_charge(odin_lego_images: Path) -> None:
 def test_load_proton_charge_label_based_time_interval(odin_lego_images: Path) -> None:
     wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
     wf[Filename[SampleRun]] = odin_lego_images
-    wf[TimeInterval[SampleRun]] = TimeInterval(slice(None))
     unfiltered = wf.compute(ProtonCharge[SampleRun])
     assert unfiltered.sizes['time'] > 0
 

@@ -84,32 +84,9 @@ def no_detector_position_offset() -> DetectorPositionOffset[RunType]:
     return DetectorPositionOffset[RunType](no_offset)
 
 
-def measurement_time_interval(
-    measurement: Measurement[RunType],
-) -> TimeInterval[RunType]:
-    """Use the measurement times as the default time interval.
-
-    Missing timestamps leave the corresponding bounds unspecified. Times are
-    converted to UTC; timestamps without a timezone are treated as UTC.
-
-    Parameters
-    ----------
-    measurement:
-        Measurement metadata containing the recording times.
-
-    Returns
-    -------
-    :
-        Interval from the measurement's start to its end.
-    """
-    bounds = []
-    for timestamp in (measurement.start_time, measurement.end_time):
-        if timestamp is not None:
-            if timestamp.tzinfo is not None:
-                timestamp = timestamp.astimezone(UTC).replace(tzinfo=None)
-            timestamp = sc.scalar(np.datetime64(timestamp, 'ns'))
-        bounds.append(timestamp)
-    return TimeInterval[RunType](slice(*bounds))
+def full_time_interval() -> TimeInterval[RunType]:
+    """Select all neutron pulses in the data."""
+    return TimeInterval[RunType](slice(None, None))
 
 
 def gravity_vector_neg_y() -> GravityVector:
@@ -365,12 +342,35 @@ def _apply_time_filter(
     return user_filter(transform)
 
 
+def _time_filter_bounds(
+    interval: TimeInterval[RunType], measurement: Measurement[RunType]
+) -> tuple[sc.Variable | None, sc.Variable | None]:
+    bounds = []
+    for bound, timestamp, select in (
+        (interval.value.start, measurement.start_time, max),
+        (interval.value.stop, measurement.end_time, min),
+    ):
+        if bound is not None and not isinstance(bound, sc.Variable):
+            raise ValueError(
+                'Filters accepting start and stop require time bounds, not indices.'
+            )
+        if timestamp is not None:
+            if timestamp.tzinfo is not None:
+                timestamp = timestamp.astimezone(UTC).replace(tzinfo=None)
+            time = sc.scalar(np.datetime64(timestamp, 'ns'))
+            bound = time if bound is None else select(bound.to(unit=time.unit), time)
+        bounds.append(bound)
+    return bounds[0], bounds[1]
+
+
 def to_transformation(
     chain: NeXusTransformationChain[Component, RunType],
     interval: TimeInterval[RunType],
     time_filter: TransformationTimeFilter[
         Component, RunType
     ] = reject_time_dependent_transform,
+    *,
+    measurement: Measurement[RunType],
 ) -> NeXusTransformation[Component, RunType]:
     """
     Convert a transformation chain into a single transformation matrix.
@@ -381,9 +381,10 @@ def to_transformation(
     exception. Provide a different filter to customize how time-dependence is handled.
 
     If ``time_filter`` has parameters named ``start`` and ``stop`` that can be passed
-    by keyword, it receives the unsliced log and ``interval.value.start`` and
-    ``interval.value.stop`` as keyword arguments. The function must apply the time
-    interval itself.
+    by keyword, it receives the unsliced log and two keyword arguments. ``start``
+    is the maximum of the start times in ``interval`` and ``measurement``; ``stop``
+    is the minimum of their end times. Missing times are ignored. The function must
+    apply the time interval itself.
 
     Parameters
     ----------
@@ -394,6 +395,9 @@ def to_transformation(
     time_filter:
         Callable to apply to time-dependent transformations.
         Defaults to raising a :class:`ValueError`.
+    measurement:
+        Measurement start and end times. Used only for filters taking ``start`` and
+        ``stop``. Timestamps without a timezone are treated as UTC.
     """
 
     try:
@@ -408,16 +412,8 @@ def to_transformation(
     for t in chain.transformations.values():
         if t.sizes == {} or not isinstance(t.value, sc.DataArray):
             continue
-        start = interval.value.start
-        stop = interval.value.stop
         if accepts_bounds:
-            if any(
-                bound is not None and not isinstance(bound, sc.Variable)
-                for bound in (start, stop)
-            ):
-                raise ValueError(
-                    'Filters accepting start and stop require time bounds, not indices.'
-                )
+            start, stop = _time_filter_bounds(interval, measurement)
             t.value = time_filter(t.value, start=start, stop=stop)
         else:
             t.value = _apply_time_filter(
@@ -861,7 +857,7 @@ definitions['NXdata'] = _NXdataWithoutAuxSignals
 _common_providers = (
     gravity_vector_neg_y,
     file_path_to_file_spec,
-    measurement_time_interval,
+    full_time_interval,
     load_measurement_metadata_from_nexus,
     component_spec_by_name,
     unique_component_spec,  # after component_spec_by_name, partially overrides

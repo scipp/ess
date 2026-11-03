@@ -13,6 +13,9 @@ def time_weighted_median(
 ) -> sc.Variable:
     """Return a log's median, weighting each value by how long it was held.
 
+    Use this filter to obtain one representative log value for a reduction while
+    limiting the effect of brief excursions.
+
     Each reading applies until the next reading, and the last reading applies until
     ``stop``. Only time within ``[start, stop)`` counts. Durations for repeated values
     are added together.
@@ -20,9 +23,6 @@ def time_weighted_median(
     Order the values from smallest to largest and add their durations until reaching
     half the interval's duration. Return the value reached. If the accumulated time
     is exactly half, return the time-weighted mean of that value and the next value.
-
-    For example, values 1, 4, and 10 held for 2, 3, and 5 seconds reach half the total
-    time at value 4. The result is ``(4 * 3 + 10 * 5) / (3 + 5) = 7.75``.
 
     If readings share a timestamp, the last reading takes precedence. A NaN held
     for any time inside the interval makes the result NaN.
@@ -45,15 +45,18 @@ def time_weighted_median(
 
     Examples
     --------
-    Apply the filter to sample transformations for each run in an existing workflow:
+    A log value of 2 held for 90 of a measurement's 100 seconds gives a result of
+    2, even if most log entries describe changes during the other 10 seconds.
+    Apply this filter to sample transformation logs in an existing workflow:
 
       >>> workflow[TransformationTimeFilter[snx.NXsample, RunType]] = (
       ...     time_weighted_median
       ... )
 
-    The workflow supplies ``start`` and ``stop`` from
-    :class:`~ess.reduce.nexus.types.TimeInterval`, which defaults to the measurement's
-    start and end times.
+    The workflow sets ``start`` to the maximum of the start times in
+    :class:`~ess.reduce.nexus.types.TimeInterval` and
+    :class:`~ess.reduce.nexus.types.Measurement`, and ``stop`` to the minimum of their
+    end times. Missing times are ignored.
     """
     if log.dims != ('time',):
         raise ValueError("Expected a one-dimensional log with dimension 'time'.")
