@@ -40,7 +40,9 @@ def _make_workflow(
 def _find_data_key(entry: snx.Group, group_name: str, filename: str | Path) -> str:
     keys = list(entry[snx.NXevent_data].keys()) + list(entry[snx.NXdata].keys())
     if not keys:
-        # Allow for a default "data" key if no NXevent_data or NXdata keys are found
+        # Allow for a default "data" key if no NXevent_data or NXdata keys are found.
+        # We search for "data" instead of searching for a NXlog as there is typically
+        # more than one NXlog present.
         if "data" in entry.keys():
             return "data"
         raise (ValueError(f"No data found in '{group_name}' of file '{filename}'"))
