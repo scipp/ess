@@ -43,10 +43,11 @@ class MirrorNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 
 class IncidentBeamTransform(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Map upstream positions to virtual positions after the inversion mirror.
+    """Reflect upstream positions across the inversion mirror's plane.
 
-    Identity in normal operation. In inversion mode this is reflection in the
-    mirror plane. Sample, detector, and gravity remain in the laboratory frame.
+    Identity when inversion is disabled. Reflected positions are used to
+    calculate flight lengths and the beam direction after the mirror.
+    Sample, detector, and gravity remain in the laboratory frame.
     """
 
 
@@ -74,7 +75,7 @@ class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
 
 
 class IncidentAngleGraph(sciline.Scope[RunType, dict], dict):
-    """Coordinate graph fragment defining how incident angles are assigned."""
+    """Coordinate graph for assigning incident angles and correcting for gravity."""
 
 
 class ShutterPositions(sciline.Scope[RunType, dict], dict):

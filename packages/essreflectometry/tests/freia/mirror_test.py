@@ -23,8 +23,8 @@ from ess.freia import conversions
 from ess.freia.mirror import (
     DIRECT_BEAM,
     mirror_reflection_transform,
+    reflected_upstream_position,
     transform_position,
-    unfold_path,
 )
 from ess.freia.types import (
     DetectorRegionOfInterest,
@@ -109,12 +109,12 @@ def test_mirror_normal_magnitude_does_not_affect_reflection(scale):
 
 
 @pytest.mark.parametrize('side', [-1, 1])
-def test_unfold_path_supports_either_mirror_side_and_mixed_units(side):
+def test_reflected_upstream_position_supports_either_mirror_side_and_mixed_units(side):
     transform = mirror_reflection_transform(
         sc.vector([0.0, 0.0, -1.0], unit='m'), sc.vector([0.0, 1.0, 0.0])
     )
     assert_allclose(
-        unfold_path(
+        reflected_upstream_position(
             transform,
             sc.vector([0.0, side * 2000.0, -3000.0], unit='mm'),
             sc.vector([0.0, side * 0.5, -0.5], unit='m'),
@@ -126,7 +126,9 @@ def test_unfold_path_supports_either_mirror_side_and_mixed_units(side):
 def test_ordinary_path_preserves_positions_exactly():
     position = sc.vector([0.0, 1234.56789, -3456.78912], unit='mm')
     assert_identical(
-        unfold_path(DIRECT_BEAM, position, sc.vector([0.0, 0.0, 0.0], unit='m')),
+        reflected_upstream_position(
+            DIRECT_BEAM, position, sc.vector([0.0, 0.0, 0.0], unit='m')
+        ),
         position,
     )
 
@@ -261,7 +263,7 @@ def test_detector_flight_path_includes_mirror_detour(run):
         wf.compute(DetectorLtotal[run]),
         sc.array(dims=['pixel_id'], values=[5 * np.sqrt(2)], unit='m'),
     )
-    # The angular graph must use the same unfolded incident path.
+    # The angular graph must use the same incident path through the mirror.
     graph = wf.compute(CoordTransformationGraph[run])
     result = sc.DataArray(sc.scalar(0.0)).transform_coords('L1', graph=graph)
     assert_allclose(result.coords['L1'], sc.scalar(4 * np.sqrt(2), unit='m'))

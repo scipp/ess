@@ -106,15 +106,27 @@ def test_assigns_each_neutron_to_closest_expected_reflection_angle():
         unit='rad'
     )
 
-    assigned = assign_incident_angle(reflection_angles, incident_angles)
+    assigned = assign_incident_angle(
+        reflection_angles,
+        incident_angles,
+        {
+            'bottom': sc.scalar(3.0, unit='m'),
+            'top': sc.scalar(1.0, unit='m'),
+            'middle': sc.scalar(2.0, unit='m'),
+        },
+    )
+    assert_allclose(
+        assigned['incident_gravity_length'],
+        sc.array(dims=['event'], values=[1.0, 2.0, 3.0], unit='m'),
+    )
 
     assert_allclose(
-        assigned,
+        assigned['nominal_incident_angle'],
         sc.array(dims=['event'], values=[0.3, 1.0, 3.5], unit='deg').to(unit='rad'),
     )
 
 
-def test_fixed_slits_incidence_needs_no_event_coordinates():
+def test_fixed_slits_zero_gravity_returns_nominal_scalar_incidence():
     graph = fixed_slits_incident_angle_graph(
         upstream_slit_centers={'beam': sc.vector([0.0, 0.0, -2.0], unit='m')},
         downstream_slit_centers={
@@ -123,8 +135,16 @@ def test_fixed_slits_incidence_needs_no_event_coordinates():
         sample_surface_normal=sc.vector(
             [0.0, np.cos(np.deg2rad(10.0)), -np.sin(np.deg2rad(10.0))]
         ),
+        sample_position=sc.vector([0.0, 0.0, 0.0], unit='m'),
+        gravity=sc.vector([0.0, 0.0, 0.0], unit='m/s^2'),
     )
-    data = sc.DataArray(sc.ones(dims=['event'], shape=[2], unit='counts'))
+    data = sc.DataArray(
+        sc.ones(dims=['event'], shape=[2], unit='counts'),
+        coords={
+            'wavelength': sc.array(dims=['event'], values=[2.0, 10.0], unit='angstrom'),
+            'gravity': sc.vector([0.0, 0.0, 0.0], unit='m/s^2'),
+        },
+    )
 
     result = data.transform_coords('incident_angle', graph=graph)
 
@@ -202,16 +222,26 @@ def test_shutter_assignment_requires_exactly_one_open_shutter():
     result = assign_incident_angle_from_shutter_logs(
         **_events(),
         incident_angles=angles,
+        incident_gravity_lengths={
+            'a': sc.scalar(1.0, unit='m'),
+            'b': sc.scalar(2.0, unit='m'),
+        },
         shutter_positions={
             name: sc.vector([0.0, 0.0, 20.0], unit='m') for name in angles
         },
         shutter_status_logs=logs,
     )
     assert_allclose(
-        result,
+        result['nominal_incident_angle'],
         sc.array(dims=['event'], values=[0.3, 1.0, np.nan, np.nan], unit='deg').to(
             unit='rad'
         ),
+        equal_nan=True,
+    )
+
+    assert_allclose(
+        result['incident_gravity_length'],
+        sc.array(dims=['event'], values=[1.0, 2.0, np.nan, np.nan], unit='m'),
         equal_nan=True,
     )
 
@@ -223,11 +253,12 @@ def test_shutter_assignment_uses_crossing_time_instead_of_pulse_or_detector_time
     result = assign_incident_angle_from_shutter_logs(
         **inputs,
         incident_angles={'a': sc.scalar(1.0, unit='deg')},
+        incident_gravity_lengths={'a': sc.scalar(1.0, unit='m')},
         shutter_positions={'a': sc.vector([0.0, 0.0, 20.0], unit='m')},
         shutter_status_logs={'a': _log([0, 21, 23], [False, True, False])},
     )
     assert_allclose(
-        result,
+        result['nominal_incident_angle'],
         sc.array(dims=['event'], values=[np.nan, 1.0, np.nan], unit='deg').to(
             unit='rad'
         ),
@@ -256,11 +287,12 @@ def test_shutter_assignment_resolves_hundreds_of_microseconds_at_modern_dates():
     result = assign_incident_angle_from_shutter_logs(
         **inputs,
         incident_angles={'a': sc.scalar(1.0, unit='deg')},
+        incident_gravity_lengths={'a': sc.scalar(1.0, unit='m')},
         shutter_positions={'a': sc.vector([0.0, 0.0, 20.0], unit='m')},
         shutter_status_logs={'a': log},
     )
     assert_allclose(
-        result,
+        result['nominal_incident_angle'],
         sc.array(dims=['event'], values=[np.nan, 1.0, 1.0, np.nan], unit='deg').to(
             unit='rad'
         ),
@@ -282,6 +314,10 @@ def test_unknown_shutter_status_does_not_silently_identify_another_beam(
             'a': sc.scalar(0.3, unit='deg'),
             'b': sc.scalar(1.0, unit='deg'),
         },
+        incident_gravity_lengths={
+            'a': sc.scalar(1.0, unit='m'),
+            'b': sc.scalar(2.0, unit='m'),
+        },
         shutter_positions={
             name: sc.vector([0.0, 0.0, 20.0], unit='m') for name in ('a', 'b')
         },
@@ -290,7 +326,7 @@ def test_unknown_shutter_status_does_not_silently_identify_another_beam(
             'b': _log(unknown_times, unknown_states),
         },
     )
-    assert sc.all(sc.isnan(result)).value
+    assert sc.all(sc.isnan(result['nominal_incident_angle'])).value
 
 
 def test_shutter_logs_are_sampled_at_each_shutters_crossing_time():
@@ -308,12 +344,16 @@ def test_shutter_logs_are_sampled_at_each_shutters_crossing_time():
             'a': sc.scalar(0.3, unit='deg'),
             'b': sc.scalar(1.0, unit='deg'),
         },
+        incident_gravity_lengths={
+            'a': sc.scalar(1.0, unit='m'),
+            'b': sc.scalar(2.0, unit='m'),
+        },
         shutter_status_logs={
             name: _log([0, 15, 25], [False, True, False]) for name in positions
         },
     )
     assert_allclose(
-        result,
+        result['nominal_incident_angle'],
         sc.array(dims=['event'], values=[1.0, 0.3, np.nan], unit='deg').to(unit='rad'),
         equal_nan=True,
     )
@@ -323,11 +363,13 @@ def test_final_shutter_state_persists():
     result = assign_incident_angle_from_shutter_logs(
         **_events(offsets=[30.2, 60]),
         incident_angles={'a': sc.scalar(1.0, unit='deg')},
+        incident_gravity_lengths={'a': sc.scalar(1.0, unit='m')},
         shutter_positions={'a': sc.vector([0.0, 0.0, 20.0], unit='m')},
         shutter_status_logs={'a': _log([0, 20], [False, True])},
     )
     assert_allclose(
-        result, sc.array(dims=['event'], values=[1.0, 1.0], unit='deg').to(unit='rad')
+        result['nominal_incident_angle'],
+        sc.array(dims=['event'], values=[1.0, 1.0], unit='deg').to(unit='rad'),
     )
 
 
@@ -337,6 +379,8 @@ def test_shutter_graph_requires_matching_beam_names(input_name):
         'upstream_slit_centers': {'a': sc.vector([0.0, 0.1, -2.0], unit='m')},
         'downstream_slit_centers': {'a': sc.vector([0.0, 0.0, -1.0], unit='m')},
         'sample_surface_normal': sc.vector([0.0, 1.0, 0.0]),
+        'sample_position': sc.vector([0.0, 0.0, 0.0], unit='m'),
+        'gravity': sc.vector([0.0, 0.0, 0.0], unit='m/s^2'),
         'shutter_positions': {'a': sc.vector([0.0, 0.0, -3.0], unit='m')},
         'shutter_status_logs': {'a': _log([0], [True])},
     }
@@ -347,4 +391,12 @@ def test_shutter_graph_requires_matching_beam_names(input_name):
 
 def test_shutter_graph_requires_at_least_one_beam():
     with pytest.raises(ValueError, match='At least one incident beam'):
-        shutter_log_incident_angle_graph({}, {}, sc.vector([0.0, 1.0, 0.0]), {}, {})
+        shutter_log_incident_angle_graph(
+            {},
+            {},
+            sc.vector([0.0, 1.0, 0.0]),
+            {},
+            {},
+            sc.vector([0.0, 0.0, 0.0], unit='m'),
+            sc.vector([0.0, 0.0, 0.0], unit='m/s^2'),
+        )

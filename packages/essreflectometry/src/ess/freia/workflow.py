@@ -206,16 +206,26 @@ def FreiaOffspecWorkflow(
     The assigned ``incident_angle`` and measured ``reflection_angle`` determine
     ``Qx`` and ``Qz``. The output is ``CorrectedDetector[SampleRun]``.
 
+    All three modes assign a nominal angle and signed effective gravity length.
+    These are computed once per candidate from the slit centres, sample plane,
+    and (in inversion mode) mirror pose. A coordinate kernel then corrects the
+    assigned angle using the event's wavelength. Gravity stays in the lab frame.
+    Setting ``GravityVector`` to zero disables both incident and outgoing
+    gravity corrections. Flight lengths and shutter crossing times retain
+    their straight-segment approximations.
+
     Parameters
     ----------
     incident_beam_from:
-        ``'closest'`` assigns the beam whose specular reflection angle is closest
-        to the measured reflection angle. ``'fixed_slits'`` uses the single beam
-        defined by one matching pair of slit centers, independently of the
-        reflection angle and without shutter positions or status logs.
-        ``'shutter_logs'`` uses
-        ``ShutterStatusLogs[SampleRun]`` and ``ShutterPositions[SampleRun]`` for
-        all candidate beams. Each log is evaluated at the neutron's crossing
+        ``'closest'`` assigns the beam whose nominal specular reflection angle
+        is closest to the geometrical sample-to-pixel angle. This heuristic uses
+        no gravity correction; gravity is applied after the beam is selected.
+        ``'fixed_slits'`` uses the single beam defined by one matching pair of
+        slit centers, independently of the reflection angle and without shutter
+        positions or status logs.
+        ``'shutter_logs'`` uses ``ShutterStatusLogs[SampleRun]`` and
+        ``ShutterPositions[SampleRun]`` for all candidate beams.
+        Each log is evaluated at the neutron's crossing
         time at that shutter, independently of the slit positions. Exactly one
         open shutter, with all states known, determines the incident beam.
         Otherwise the incidence is NaN and the event is masked as

@@ -44,10 +44,10 @@ def load_mirror_transformation(
         snx.NXmirror, RunType
     ] = reject_time_dependent_transform,
 ) -> NeXusTransformation[snx.NXmirror, RunType]:
-    """Load a named NXmirror using the usual ESS transformation/time filtering.
+    """Load the mirror's transformation for the selected time interval.
 
     The component name is a provisional convention, configurable through
-    NeXusName[NXmirror]. No pose is inferred if the component is missing.
+    ``NeXusName[NXmirror]``. No pose is inferred if the component is missing.
     """
     location = NeXusComponentLocationSpec[snx.NXmirror, RunType](
         filename=file_spec.value, component_name=name
@@ -89,7 +89,17 @@ def mirror_reflection_transform(
     position: MirrorPosition[RunType],
     normal: MirrorNormal[RunType],
 ) -> IncidentBeamTransform[RunType]:
-    """Unfold a planar specular reflection using p' = p - 2 n (n dot (p-m))."""
+    r"""Build a transform that reflects positions across the mirror plane.
+
+    For a point :math:`m` on the plane and its unit normal :math:`n`, the
+    transform maps a position :math:`p` to
+
+    .. math::
+
+        p' = p - 2n\,[n \cdot (p-m)].
+
+    The magnitude and sign of ``normal`` do not affect the transform.
+    """
     for name, vector in [('MirrorPosition', position), ('MirrorNormal', normal)]:
         if vector.ndim != 0 or vector.dtype != sc.DType.vector3:
             raise ValueError(f'{name} must be a scalar vector.')
@@ -115,28 +125,35 @@ def transform_position(transform: sc.Variable, position: sc.Variable) -> sc.Vari
     return (transform * position.to(unit=transform.unit)).to(unit=position.unit)
 
 
-def unfold_path(
+def reflected_upstream_position(
     transform: sc.Variable, upstream: sc.Variable, downstream: sc.Variable
 ) -> sc.Variable:
-    """Return the virtual upstream point, checking that reflection is possible.
+    """Return the upstream position reflected across the mirror plane.
 
-    A reflected ray connects points on the same side of the mirror plane.
-    The midpoint of a point and its image lies in that plane; their difference
-    points towards the physical upstream side. For the identity transform the
-    difference is zero, so ordinary paths pass unchanged.
+    The straight segment from this position to ``downstream`` has the same
+    length as the path through the mirror and points along its final segment.
+    The returned point is used for geometry calculations; the physical
+    component remains in place. With ``DIRECT_BEAM``, return ``upstream``
+    unchanged. The result retains the upstream position's length unit.
+
+    Raises
+    ------
+    ValueError
+        If the physical upstream and downstream points are on opposite sides
+        of the mirror plane, so no reflected path connects them.
     """
     if sc.identical(transform, DIRECT_BEAM):
         return upstream
-    virtual = transform_position(transform, upstream)
-    midpoint = (0.5 * (upstream + virtual)).to(unit=downstream.unit)
-    normal = (upstream - virtual).to(unit=downstream.unit)
+    reflected = transform_position(transform, upstream)
+    midpoint = (0.5 * (upstream + reflected)).to(unit=downstream.unit)
+    normal = (upstream - reflected).to(unit=downstream.unit)
     if sc.dot(downstream - midpoint, normal).value < 0:
         raise ValueError(
             'A reflected path requires its upstream and downstream positions '
             'to be on the same side of the mirror plane. Check the mirror pose '
             'and component positions.'
         )
-    return virtual
+    return reflected
 
 
 def detector_ltotal_with_mirror(
@@ -145,17 +162,20 @@ def detector_ltotal_with_mirror(
     sample_position: Position[snx.NXsample, RunType],
     transform: IncidentBeamTransform[RunType],
 ) -> DetectorLtotal[RunType]:
-    """Straight-segment source-mirror-sample-detector path via the virtual source.
+    """Compute the source-to-detector flight length through the mirror and sample.
 
     As in the ordinary workflow, this approximates the upstream guide by a
-    straight ray. It includes the mirror detour without moving the real source
-    used for chopper and upstream-monitor wavelength reconstruction.
+    straight ray. Reflecting the source position across the mirror plane gives
+    the length of the path from source through mirror to sample. Chopper and
+    upstream-monitor wavelength reconstruction use the physical source position.
     """
-    virtual_source = unfold_path(transform, source_position, sample_position)
-    sample = sample_position.to(unit=virtual_source.unit)
-    pixels = detector.coords['position'].to(unit=virtual_source.unit)
+    reflected_source = reflected_upstream_position(
+        transform, source_position, sample_position
+    )
+    sample = sample_position.to(unit=reflected_source.unit)
+    pixels = detector.coords['position'].to(unit=reflected_source.unit)
     return DetectorLtotal[RunType](
-        sc.norm(sample - virtual_source) + sc.norm(pixels - sample)
+        sc.norm(sample - reflected_source) + sc.norm(pixels - sample)
     )
 
 
