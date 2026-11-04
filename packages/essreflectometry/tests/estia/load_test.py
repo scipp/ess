@@ -8,7 +8,6 @@ import scippnexus as snx
 from ess.reduce.nexus.types import (
     NeXusComponent,
     NeXusTransformation,
-    NeXusTransformationChain,
     TimeInterval,
     TransformationTimeFilter,
 )
@@ -35,7 +34,7 @@ def _rotation(parent, name, angles, depends_on='.', vector=(0.0, 1.0, 0.0)):
     return g
 
 
-def _workflow(tmp_path, nx_class, angles, *, entry_name='entry'):
+def _workflow(tmp_path, nx_class, angles, *, additional_rotation, entry_name='entry'):
     """Load a small real NeXus component into the production ESTIA pipeline."""
     path = tmp_path / 'rotations.nxs'
     with h5py.File(path, 'w') as f:
@@ -50,7 +49,7 @@ def _workflow(tmp_path, nx_class, angles, *, entry_name='entry'):
         # Arbitrary names ensure that no individual motor is looked up by name.
         stage = _group(inst, 'stage', 'NXpositioner')
         rotation = _rotation(stage, 'value', angles)
-        tip = _rotation(inst, 'additional_rotation', 0.25, rotation.name)
+        tip = _rotation(inst, 'additional_rotation', additional_rotation, rotation.name)
         translation = inst.create_dataset('translation', data=123.0)
         translation.attrs.update(
             transformation_type='translation',
@@ -73,7 +72,9 @@ def _workflow(tmp_path, nx_class, angles, *, entry_name='entry'):
     [(snx.NXsample, RawSampleRotation), (snx.NXdetector, DetectorRotation)],
 )
 def test_orientation_from_nexus(tmp_path, entry_name, nx_class, result_type):
-    wf = _workflow(tmp_path, nx_class, 3.65, entry_name=entry_name)
+    wf = _workflow(
+        tmp_path, nx_class, 3.65, additional_rotation=0.25, entry_name=entry_name
+    )
     assert_allclose(wf.compute(result_type[SampleRun]), sc.scalar(3.9, unit='deg'))
 
 
@@ -82,7 +83,8 @@ def test_orientation_from_nexus(tmp_path, entry_name, nx_class, result_type):
     [(snx.NXsample, RawSampleRotation), (snx.NXdetector, DetectorRotation)],
 )
 def test_orientation_uses_selected_time_interval(tmp_path, nx_class, result_type):
-    wf = _workflow(tmp_path, nx_class, [1.0, 2.0, 3.0])
+    # The selected value must differ from the detector's default whole-log mean.
+    wf = _workflow(tmp_path, nx_class, [1.0, 2.0, 7.0], additional_rotation=0.25)
     # NXlog values apply until the following entry: 2 degrees applies at t=15 s.
     wf[TimeInterval[SampleRun]] = TimeInterval(
         slice(
@@ -98,13 +100,14 @@ def test_orientation_uses_selected_time_interval(tmp_path, nx_class, result_type
     [(snx.NXsample, RawSampleRotation), (snx.NXdetector, DetectorRotation)],
 )
 def test_orientation_uses_configured_time_filter(tmp_path, nx_class, result_type):
-    wf = _workflow(tmp_path, nx_class, [1.0, 2.0, 3.0])
-    wf[TransformationTimeFilter[nx_class, SampleRun]] = lambda log: log.mean()
-    assert_allclose(wf.compute(result_type[SampleRun]), sc.scalar(2.25, unit='deg'))
+    wf = _workflow(tmp_path, nx_class, [1.0, 2.0, 3.0], additional_rotation=0.25)
+    # Selecting the last value distinguishes the override from the default mean.
+    wf[TransformationTimeFilter[nx_class, SampleRun]] = lambda log: log['time', -1]
+    assert_allclose(wf.compute(result_type[SampleRun]), sc.scalar(3.25, unit='deg'))
 
 
 def test_sample_rejects_unselected_time_dependent_orientation(tmp_path):
-    wf = _workflow(tmp_path, snx.NXsample, [1.0, 2.0])
+    wf = _workflow(tmp_path, snx.NXsample, [1.0, 2.0], additional_rotation=0.25)
     with pytest.raises(ValueError, match='time-dependent'):
         wf.compute(RawSampleRotation[SampleRun])
 
@@ -126,30 +129,18 @@ def test_orientation_rejects_retained_time_dependence(loader):
 
 
 @pytest.mark.parametrize(
-    ('nx_class', 'result_type', 'expected'),
+    ('loader', 'expected'),
     [
-        (snx.NXsample, RawSampleRotation, -25.3150511771),
-        (snx.NXdetector, DetectorRotation, 1.25),
+        (load_sample_rotation, -25.3150511771),
+        (load_detector_rotation, 1.25),
     ],
 )
-def test_orientation_composes_rotations_about_different_axes(
-    tmp_path, nx_class, result_type, expected
-):
-    wf = _workflow(tmp_path, nx_class, 1.0)
-    chain = wf.compute(NeXusTransformationChain[nx_class, SampleRun])
-    tip = chain.absolute_path()
-    for name, axis, angle in [('pitch', [1, 0, 0], 30.0), ('roll', [0, 0, 1], 45.0)]:
-        path = f'/entry/instrument/{name}'
-        chain.transformations[path] = snx.nxtransformations.Transform(
-            name=path,
-            transformation_type='rotation',
-            value=sc.scalar(angle, unit='deg'),
-            vector=sc.vector(axis),
-            depends_on=snx.DependsOn(parent='/entry/instrument', value=tip),
-        )
-        tip = path
-    chain.value = tip
-    wf[NeXusTransformationChain[nx_class, SampleRun]] = chain
+def test_orientation_projects_rotations_about_different_axes(loader, expected):
+    yaw = sc.spatial.rotations_from_rotvecs(sc.vector([0, 1.25, 0], unit='deg'))
+    pitch = sc.spatial.rotations_from_rotvecs(sc.vector([30, 0, 0], unit='deg'))
+    roll = sc.spatial.rotations_from_rotvecs(sc.vector([0, 0, 45], unit='deg'))
+    translation = sc.spatial.translation(value=[123, 0, 0], unit='mm')
+    transform = NeXusTransformation(yaw * translation * pitch * roll)
     # For the sample surface, yaw = 1.25 - atan(sin(30) * tan(45)).
     # The detector +z axis is unchanged by the innermost roll about z.
-    assert_allclose(wf.compute(result_type[SampleRun]), sc.scalar(expected, unit='deg'))
+    assert_allclose(loader(transform), sc.scalar(expected, unit='deg'))
