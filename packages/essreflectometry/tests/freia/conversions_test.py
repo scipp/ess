@@ -9,8 +9,8 @@ from ess.freia.conversions import (
     _shutter_state_at_time,
     assign_incident_angle,
     assign_incident_angle_from_shutter_logs,
+    closest_beam_incident_angle_graph,
     fixed_slits_incident_angle_graph,
-    incident_beam_directions,
     outgoing_direction,
     scattering_angle,
     shutter_log_incident_angle_graph,
@@ -67,33 +67,57 @@ def test_scattering_angle_with_gravity():
     )
 
 
-def test_incident_directions_are_computed_from_corresponding_slit_centers():
+def test_incident_angles_use_corresponding_slit_centers():
+    angles = {'top': 0.3, 'middle': 0.8, 'bottom': 1.5}
     upstream = {
-        'top': sc.vector([0.0, 0.0, -2.0], unit='m'),
-        'middle': sc.vector([0.0, 1.0, -2.0], unit='m'),
-        'bottom': sc.vector([0.0, 2.0, -2.0], unit='m'),
+        name: sc.vector([0.0, 2.5 * np.tan(np.deg2rad(angle)), -2.5], unit='m')
+        for name, angle in angles.items()
     }
     # Deliberately use a different order to ensure channels are paired by name.
     downstream = {
-        'bottom': sc.vector([0.0, 5.0, 2.0], unit='m'),
-        'top': sc.vector([0.0, -3.0, 2.0], unit='m'),
-        'middle': sc.vector([0.0, 1.0, 0.0], unit='m'),
+        name: sc.vector([0.0, 0.5 * np.tan(np.deg2rad(angles[name])), -0.5], unit='m')
+        for name in ['bottom', 'top', 'middle']
     }
+    gravity = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
+    graph = closest_beam_incident_angle_graph(
+        upstream,
+        downstream,
+        sample_surface_normal=sc.vector([0.0, 1.0, 0.0]),
+        sample_position=sc.vector([0.0, 0.0, 0.0], unit='m'),
+        gravity=gravity,
+    )
+    data = sc.DataArray(
+        sc.ones(dims=['pixel'], shape=[3]),
+        coords={
+            'scattered_beam': sc.vectors(
+                dims=['pixel'],
+                values=[[0.0, np.tan(np.deg2rad(a)), 1.0] for a in angles.values()],
+                unit='m',
+            ),
+            'gravity': gravity,
+            'wavelength': sc.scalar(4.0, unit='angstrom'),
+        },
+    )
+    result = data.transform_coords('incident_angle', graph=graph)
+    assert_allclose(
+        result.coords['incident_angle'],
+        sc.array(dims=['pixel'], values=list(angles.values()), unit='deg').to(
+            unit='rad'
+        ),
+    )
 
-    result = incident_beam_directions(upstream, downstream)
 
-    assert result.keys() == upstream.keys()
-    assert_allclose(result['top'], sc.vector([0.0, -0.6, 0.8]))
-    assert_allclose(result['middle'], sc.vector([0.0, 0.0, 1.0]))
-    assert_allclose(result['bottom'], sc.vector([0.0, 0.6, 0.8]))
-
-
-def test_incident_directions_require_matching_slit_names():
+def test_incident_angles_require_matching_slit_names():
     upstream = {'top': sc.vector([0.0, 0.0, -2.0], unit='m')}
     downstream = {'bottom': sc.vector([0.0, 0.0, -1.0], unit='m')}
-
     with pytest.raises(ValueError, match='must have the same keys'):
-        incident_beam_directions(upstream, downstream)
+        closest_beam_incident_angle_graph(
+            upstream,
+            downstream,
+            sample_surface_normal=sc.vector([0.0, 1.0, 0.0]),
+            sample_position=sc.vector([0.0, 0.0, 0.0], unit='m'),
+            gravity=sc.vector([0.0, 0.0, 0.0], unit='m/s^2'),
+        )
 
 
 def test_assigns_each_neutron_to_closest_expected_reflection_angle():

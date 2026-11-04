@@ -252,7 +252,7 @@ def FreiaOffspecWorkflow(
         'shutter_logs': conversions.shutter_log_incident_angle_graph,
     }[incident_beam_from]
     for provider in (
-        mirror.direct_beam_transform,
+        mirror.no_mirror,
         conversions.offspecular_coordinate_transformation_graph,
         assignment_provider,
         corrections.add_offspecular_coords_and_masks,

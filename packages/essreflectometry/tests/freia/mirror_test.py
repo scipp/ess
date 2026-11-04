@@ -21,15 +21,13 @@ from scipp.testing import assert_allclose, assert_identical
 from ess import freia
 from ess.freia import conversions
 from ess.freia.mirror import (
-    DIRECT_BEAM,
-    mirror_reflection_transform,
+    mirror_geometry,
     reflected_upstream_position,
-    transform_position,
 )
 from ess.freia.types import (
     DetectorRegionOfInterest,
     DownstreamSlitCenters,
-    IncidentBeamTransform,
+    MirrorGeometry,
     MirrorNormal,
     MirrorPosition,
     SampleSurfaceNormal,
@@ -63,61 +61,57 @@ def _set_mirror(workflow, run=SampleRun):
 def test_all_workflow_constructors_accept_inversion(factory):
     point = sc.vector([0.0, 2.0, -3.0], unit='m')
     ordinary = factory()
-    assert_identical(
-        transform_position(ordinary.compute(IncidentBeamTransform[SampleRun]), point),
-        point,
-    )
+    assert ordinary.compute(MirrorGeometry[SampleRun] | None) is None
     inverted = factory(inversion=True)
     _set_mirror(inverted)
     assert_identical(
-        transform_position(inverted.compute(IncidentBeamTransform[SampleRun]), point),
+        reflected_upstream_position(
+            point,
+            sc.vector([0.0, 1.0, 0.0], unit='m'),
+            inverted.compute(MirrorGeometry[SampleRun] | None),
+        ),
         sc.vector([0.0, -2.0, -3.0], unit='m'),
     )
 
 
-def test_tilted_translated_mirror_is_an_involution_and_preserves_plane():
-    position = sc.vector([100.0, 200.0, -300.0], unit='mm')
-    normal = sc.vector([1.0, 2.0, 3.0])
-    transform = mirror_reflection_transform(position, normal)
-    point = sc.vector([1.0, 2.0, 3.0], unit='m')
-    reflected = transform_position(transform, point)
-    assert_allclose(transform_position(transform, reflected), point)
-    assert_allclose(transform_position(transform, position), position)
-    assert_allclose(
-        sc.dot(reflected - position.to(unit='m'), normal),
-        -sc.dot(point - position.to(unit='m'), normal),
+@pytest.mark.parametrize('normal_scale', [0.5, -2.0, 3.0])
+def test_reflected_path_through_tilted_translated_mirror(normal_scale):
+    rotation = sc.spatial.rotations_from_rotvecs(
+        sc.vector([0.3, -0.4, 0.1], unit='rad')
     )
-    assert_allclose(transform, mirror_reflection_transform(position, -normal))
+    position = sc.vector([0.1, 0.2, -0.3], unit='m')
+    normal = rotation * sc.vector([0.0, 1.0, 0.0])
+    # A 45-degree ray hits the mirror at position. Rotate the whole setup.
+    upstream = position + rotation * sc.vector([0.0, 2.0, -2.0], unit='m')
+    downstream = position + rotation * sc.vector([0.0, 0.5, 0.5], unit='m')
+    reflected = reflected_upstream_position(
+        upstream,
+        downstream.to(unit='cm'),
+        mirror_geometry(position.to(unit='mm'), normal_scale * normal),
+    )
+    expected = position + rotation * sc.vector([0.0, -2.0, -2.0], unit='m')
+    assert_allclose(reflected, expected)
+    assert_allclose(
+        sc.norm(downstream - reflected), sc.scalar(2.5 * np.sqrt(2), unit='m')
+    )
 
 
 @pytest.mark.parametrize('normal', [[0, 0, 0], [0, np.nan, 0], [0, np.inf, 0]])
 def test_invalid_mirror_normal_is_rejected(normal):
     with pytest.raises(ValueError, match='MirrorNormal'):
-        mirror_reflection_transform(
-            sc.vector([0.0, 0.0, 0.0], unit='m'), sc.vector(normal)
-        )
-
-
-@pytest.mark.parametrize('scale', [1e-200, 1e200])
-def test_mirror_normal_magnitude_does_not_affect_reflection(scale):
-    point = sc.vector([0.0, 0.0, -1.0], unit='m')
-    normal = sc.vector([0.0, 1.0, 0.01])
-    assert_allclose(
-        mirror_reflection_transform(point, scale * normal),
-        mirror_reflection_transform(point, normal),
-    )
+        mirror_geometry(sc.vector([0.0, 0.0, 0.0], unit='m'), sc.vector(normal))
 
 
 @pytest.mark.parametrize('side', [-1, 1])
 def test_reflected_upstream_position_supports_either_mirror_side_and_mixed_units(side):
-    transform = mirror_reflection_transform(
+    mirror = mirror_geometry(
         sc.vector([0.0, 0.0, -1.0], unit='m'), sc.vector([0.0, 1.0, 0.0])
     )
     assert_allclose(
         reflected_upstream_position(
-            transform,
             sc.vector([0.0, side * 2000.0, -3000.0], unit='mm'),
             sc.vector([0.0, side * 0.5, -0.5], unit='m'),
+            mirror,
         ),
         sc.vector([0.0, -side * 2000.0, -3000.0], unit='mm'),
     )
@@ -126,14 +120,12 @@ def test_reflected_upstream_position_supports_either_mirror_side_and_mixed_units
 def test_ordinary_path_preserves_positions_exactly():
     position = sc.vector([0.0, 1234.56789, -3456.78912], unit='mm')
     assert_identical(
-        reflected_upstream_position(
-            DIRECT_BEAM, position, sc.vector([0.0, 0.0, 0.0], unit='m')
-        ),
+        reflected_upstream_position(position, sc.vector([0.0, 0.0, 0.0], unit='m')),
         position,
     )
 
 
-def test_custom_conversion_pipeline_has_default_beam_transform():
+def test_custom_conversion_pipeline_defaults_to_no_mirror():
     wf = sciline.Pipeline(conversions.providers, constraints={RunType: [SampleRun]})
     wf[Position[snx.NXsource, SampleRun]] = sc.vector([0.0, 0.0, -2.0], unit='m')
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
@@ -197,7 +189,7 @@ def test_nexus_mirror_loads_translation_and_local_minus_z_normal(tmp_path, name,
     assert_allclose(
         wf.compute(MirrorNormal[run]), sc.vector([0.0, np.sin(angle), -np.cos(angle)])
     )
-    wf.compute(IncidentBeamTransform[run])
+    wf.compute(MirrorGeometry[run] | None)
 
 
 def test_moving_mirror_requires_a_selected_pose(tmp_path):
@@ -220,9 +212,9 @@ def test_missing_mirror_fails_with_manual_geometry_instructions(tmp_path):
     wf = freia.FreiaWorkflow(inversion=True)
     wf[Filename[SampleRun]] = filename
     with pytest.raises(ValueError, match='supply MirrorPosition and MirrorNormal'):
-        wf.compute(IncidentBeamTransform[SampleRun])
+        wf.compute(MirrorGeometry[SampleRun] | None)
     _set_mirror(wf)
-    wf.compute(IncidentBeamTransform[SampleRun])
+    wf.compute(MirrorGeometry[SampleRun] | None)
 
 
 def _set_run(workflow, run, *, direct=False, supply_wavelength=True):

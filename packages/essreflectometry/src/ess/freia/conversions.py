@@ -16,11 +16,11 @@ from ..reflectometry.types import (
     RunType,
     SampleRun,
 )
-from .mirror import DIRECT_BEAM, direct_beam_transform, reflected_upstream_position
+from .mirror import no_mirror, reflected_upstream_position
 from .types import (
     DownstreamSlitCenters,
     IncidentAngleGraph,
-    IncidentBeamTransform,
+    MirrorGeometry,
     SampleSurfaceNormal,
     ShutterPositions,
     ShutterStatusLogs,
@@ -203,37 +203,6 @@ def theta(
     return sc.asin(sc.dot(outgoing_direction, normal))
 
 
-def incident_beam_directions(
-    upstream_slit_centers: UpstreamSlitCenters[RunType],
-    downstream_slit_centers: DownstreamSlitCenters[RunType],
-    beam_transform: sc.Variable = DIRECT_BEAM,
-) -> dict[str, sc.Variable]:
-    """Compute candidate incident directions from corresponding slit openings.
-
-    The two inputs map the names of open channels to their centers in the
-    upstream and downstream slit assemblies. Matching keys describe one
-    possible incident beam. In inversion mode the mirror is between the
-    assemblies, so the upstream slit position is reflected across the mirror
-    plane before computing the direction towards the downstream slit.
-    """
-    if upstream_slit_centers.keys() != downstream_slit_centers.keys():
-        raise ValueError(
-            'UpstreamSlitCenters and DownstreamSlitCenters must have the same keys.'
-        )
-    directions = {}
-    for key, upstream in upstream_slit_centers.items():
-        downstream = downstream_slit_centers[key]
-        reflected_upstream = reflected_upstream_position(
-            beam_transform, upstream, downstream
-        )
-        beam = downstream - reflected_upstream.to(unit=downstream.unit)
-        length = sc.norm(beam)
-        if not sc.isfinite(length).value or length.value == 0:
-            raise ValueError('Slit centres must define a finite, nonzero flight path.')
-        directions[key] = beam / length
-    return directions
-
-
 def assign_incident_angle(
     reflection_angle: sc.Variable,
     expected_reflection_angles: dict[str, sc.Variable],
@@ -263,29 +232,19 @@ def assign_incident_angle(
     return {'nominal_incident_angle': closest, 'incident_gravity_length': length}
 
 
-def incident_angle(
-    incident_direction: sc.Variable,
-    sample_surface_normal: sc.Variable,
-) -> sc.Variable:
-    """Angle at which the assigned incident beam approaches the sample."""
-    normal = sample_surface_normal / sc.norm(sample_surface_normal)
-    return sc.asin(-sc.dot(incident_direction, normal))
-
-
 def _incident_angle_and_gravity_length(
     upstream: sc.Variable,
     downstream: sc.Variable,
     normal: sc.Variable,
-    transform: sc.Variable,
+    mirror: MirrorGeometry | None,
     sample_position: sc.Variable,
     gravity: sc.Variable,
 ) -> tuple[sc.Variable, sc.Variable]:
     r"""Compute the nominal incident angle and signed effective gravity length.
 
     Assumes FREIA's layout: distinct slits, the inversion mirror strictly
-    between them, and the sample downstream. The transform comes from the
-    direct-beam or mirror provider. Sample normal and gravity have arbitrary
-    orientations. Geometry is evaluated once per candidate.
+    between them, and the sample downstream. Sample normal and gravity have
+    arbitrary orientations. Geometry is evaluated once per candidate.
 
     Returns
     -------
@@ -296,14 +255,14 @@ def _incident_angle_and_gravity_length(
     -----
     Let :math:`L` be the flight length between the slits, :math:`a` the length
     from upstream slit to mirror, and :math:`c` from downstream slit to sample.
-    With mirror reflection matrix :math:`R`, gravity :math:`g`, nominal unit
+    With unit mirror normal :math:`n_m`, gravity :math:`g`, nominal unit
     direction :math:`u`, incident angle :math:`\alpha_0`, and unit sample normal
-    :math:`n`, the effective length is
+    :math:`n_s`, the effective length is
 
     .. math::
 
-        K = g(c+L/2) + (Rg-g)\frac{a^2}{2L}, \qquad
-        D = -\frac{n \cdot [K-u(u \cdot K)]}{|g|\cos\alpha_0}.
+        K = g(c+L/2) - n_m(n_m \cdot g)\frac{a^2}{L}, \qquad
+        D = -\frac{n_s \cdot [K-u(u \cdot K)]}{|g|\cos\alpha_0}.
 
     Without the mirror, the second term in :math:`K` is zero. The correction
     using :math:`D` is applied by :func:`gravity_corrected_incident_angle`.
@@ -311,28 +270,25 @@ def _incident_angle_and_gravity_length(
     upstream, downstream, sample_position = (
         position.to(unit='m') for position in (upstream, downstream, sample_position)
     )
-    transform = transform.to(unit='m')
-    reflected_upstream = reflected_upstream_position(transform, upstream, downstream)
+    reflected_upstream = reflected_upstream_position(upstream, downstream, mirror)
     beam = downstream - reflected_upstream
     length, g = sc.norm(beam), sc.norm(gravity)
     direction, normal = beam / length, normal / sc.norm(normal)
-    angle = incident_angle(direction, normal)
+    normal_component = sc.dot(direction, normal)
+    angle = sc.asin(-normal_component)
     if g.value == 0:
         return angle, sc.scalar(0.0, unit='m')
 
-    normal_component = sc.dot(direction, normal)
     transverse_normal = normal - direction * normal_component
     cosine = sc.norm(sc.cross(normal, direction))
     c = sc.dot(sample_position - downstream, normal) / normal_component
     gravity_direction = gravity / g
     k = gravity_direction * (c + length / 2)
-    if not sc.identical(transform, DIRECT_BEAM):
-        # The mirror bisects the slit and its image. Rg-g = -2 n (n dot g).
-        displacement = upstream - reflected_upstream
-        separation = sc.norm(displacement)
-        mirror_normal = displacement / separation
-        a = separation / (2 * sc.dot(direction, mirror_normal))
-        k -= mirror_normal * sc.dot(gravity_direction, mirror_normal) * a**2 / length
+    if mirror is not None:
+        a = sc.dot(
+            mirror.position.to(unit='m') - reflected_upstream, mirror.normal
+        ) / sc.dot(direction, mirror.normal)
+        k -= mirror.normal * sc.dot(gravity_direction, mirror.normal) * a**2 / length
     return angle, -sc.dot(k, transverse_normal) / cosine
 
 
@@ -389,7 +345,7 @@ def coordinate_transformation_graph(
     sample_position: Position[NXsample, RunType],
     sample_surface_normal: SampleSurfaceNormal[RunType],
     gravity: GravityVector,
-    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
+    mirror: MirrorGeometry[RunType] | None = None,
 ) -> CoordTransformationGraph[RunType]:
     """Build the scattering coordinates shared by sample and direct-beam runs."""
     length = sc.norm(sample_surface_normal)
@@ -404,7 +360,7 @@ def coordinate_transformation_graph(
         'outgoing_direction': outgoing_direction,
         'scattering_angle': scattering_angle,
         'source_position': lambda: reflected_upstream_position(
-            beam_transform, source_position, sample_position
+            source_position, sample_position, mirror
         ),
         'sample_position': lambda: sample_position,
         'sample_surface_normal': lambda: sample_surface_normal,
@@ -417,11 +373,11 @@ def sample_coordinate_transformation_graph(
     sample_position: Position[NXsample, SampleRun],
     sample_surface_normal: SampleSurfaceNormal[SampleRun],
     gravity: GravityVector,
-    beam_transform: IncidentBeamTransform[SampleRun] = DIRECT_BEAM,
+    mirror: MirrorGeometry[SampleRun] | None = None,
 ) -> CoordTransformationGraph[SampleRun]:
     """Extend the scattering graph with the sample's reflection angle and Q."""
     return coordinate_transformation_graph(
-        source_position, sample_position, sample_surface_normal, gravity, beam_transform
+        source_position, sample_position, sample_surface_normal, gravity, mirror
     ) | {'theta': theta, 'Q': reflectometry_q}
 
 
@@ -429,7 +385,7 @@ def _incident_angle_parameters(
     upstream_slit_centers: dict[str, sc.Variable],
     downstream_slit_centers: dict[str, sc.Variable],
     sample_surface_normal: sc.Variable,
-    beam_transform: sc.Variable,
+    mirror: MirrorGeometry | None,
     sample_position: sc.Variable,
     gravity: sc.Variable,
 ) -> tuple[dict[str, sc.Variable], dict[str, sc.Variable]]:
@@ -446,7 +402,7 @@ def _incident_angle_parameters(
             upstream,
             downstream_slit_centers[name],
             sample_surface_normal,
-            beam_transform,
+            mirror,
             sample_position,
             gravity,
         )
@@ -459,14 +415,14 @@ def fixed_slits_incident_angle_graph(
     sample_surface_normal: SampleSurfaceNormal[RunType],
     sample_position: Position[NXsample, RunType],
     gravity: GravityVector,
-    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
+    mirror: MirrorGeometry[RunType] | None = None,
 ) -> IncidentAngleGraph[RunType]:
     """Use one slit pair's nominal angle and effective length, then apply gravity."""
     angles, lengths = _incident_angle_parameters(
         upstream_slit_centers,
         downstream_slit_centers,
         sample_surface_normal,
-        beam_transform,
+        mirror,
         sample_position,
         gravity,
     )
@@ -484,7 +440,7 @@ def closest_beam_incident_angle_graph(
     sample_surface_normal: SampleSurfaceNormal[RunType],
     sample_position: Position[NXsample, RunType],
     gravity: GravityVector,
-    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
+    mirror: MirrorGeometry[RunType] | None = None,
 ) -> IncidentAngleGraph[RunType]:
     """Select the closest nominal angle using detector geometry, then apply gravity.
 
@@ -499,13 +455,13 @@ def closest_beam_incident_angle_graph(
             sample_surface_normal,
             sample_position,
             gravity,
-            beam_transform,
+            mirror,
         )
     angles, lengths = _incident_angle_parameters(
         upstream_slit_centers,
         downstream_slit_centers,
         sample_surface_normal,
-        beam_transform,
+        mirror,
         sample_position,
         gravity,
     )
@@ -530,14 +486,14 @@ def shutter_log_incident_angle_graph(
     shutter_status_logs: ShutterStatusLogs[RunType],
     sample_position: Position[NXsample, RunType],
     gravity: GravityVector,
-    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
+    mirror: MirrorGeometry[RunType] | None = None,
 ) -> IncidentAngleGraph[RunType]:
     """Assign nominal angle and length from shutter logs, then apply gravity."""
     angles, lengths = _incident_angle_parameters(
         upstream_slit_centers,
         downstream_slit_centers,
         sample_surface_normal,
-        beam_transform,
+        mirror,
         sample_position,
         gravity,
     )
@@ -547,7 +503,7 @@ def shutter_log_incident_angle_graph(
             'must have the same keys.'
         )
     reflected_shutter_positions = {
-        key: reflected_upstream_position(beam_transform, position, sample_position)
+        key: reflected_upstream_position(position, sample_position, mirror)
         for key, position in shutter_positions.items()
     }
 
@@ -582,7 +538,7 @@ def offspecular_coordinate_transformation_graph(
     sample_surface_normal: SampleSurfaceNormal[RunType],
     gravity: GravityVector,
     incident_angle_graph: IncidentAngleGraph[RunType],
-    beam_transform: IncidentBeamTransform[RunType] = DIRECT_BEAM,
+    mirror: MirrorGeometry[RunType] | None = None,
 ) -> CoordTransformationGraph[RunType]:
     """Combine an incidence assignment with the shared offspecular coordinates."""
     return (
@@ -591,7 +547,7 @@ def offspecular_coordinate_transformation_graph(
             sample_position,
             sample_surface_normal,
             gravity,
-            beam_transform,
+            mirror,
         )
         | incident_angle_graph
         | {
@@ -603,7 +559,7 @@ def offspecular_coordinate_transformation_graph(
 
 
 providers = (
-    direct_beam_transform,
+    no_mirror,
     coordinate_transformation_graph,
     sample_coordinate_transformation_graph,
 )

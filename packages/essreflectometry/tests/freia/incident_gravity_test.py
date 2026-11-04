@@ -16,10 +16,11 @@ from ess.freia.conversions import (
     fixed_slits_incident_angle_graph,
     shutter_log_incident_angle_graph,
 )
-from ess.freia.mirror import DIRECT_BEAM, mirror_reflection_transform
+from ess.freia.mirror import mirror_geometry
 from ess.freia.types import (
     DownstreamSlitCenters,
-    IncidentBeamTransform,
+    MirrorNormal,
+    MirrorPosition,
     SampleSurfaceNormal,
     ShutterPositions,
     ShutterStatusLogs,
@@ -43,9 +44,9 @@ def _geometry(mirror_tilt=0.0, *, a=1.0, b=1.0, c=0.375):
             [0.0, 1.0 if mirror_tilt is None else -1.0, 0.0]
         ),
         'gravity': sc.vector([0.0, -9.80665, 0.0], unit='m/s^2'),
-        'beam_transform': DIRECT_BEAM
+        'mirror': None
         if mirror_tilt is None
-        else mirror_reflection_transform(
+        else mirror_geometry(
             sc.vector([0.0, 0.0, 0.0], unit='m'),
             sc.vector(
                 [0.0, np.cos(np.deg2rad(mirror_tilt)), -np.sin(np.deg2rad(mirror_tilt))]
@@ -163,7 +164,7 @@ def test_coefficient_is_invariant_under_rotation_translation_and_length_units():
     geometry['sample_surface_normal'] = rotation * geometry['sample_surface_normal']
     geometry['gravity'] = rotation * geometry['gravity']
     tilt = np.deg2rad(-1.0)
-    geometry['beam_transform'] = mirror_reflection_transform(
+    geometry['mirror'] = mirror_geometry(
         shift, rotation * sc.vector([0.0, np.cos(tilt), -np.sin(tilt)])
     )
     assert_allclose(_angles(geometry, wavelengths), expected)
@@ -230,7 +231,9 @@ def test_workflow_corrects_binned_incidence_and_preserves_counts(method, inversi
     geometry = _geometry(0.0 if inversion else None)
     wf = FreiaOffspecWorkflow(incident_beam_from=method, inversion=inversion)
     wf[GravityVector] = geometry['gravity']
-    wf[IncidentBeamTransform[SampleRun]] = geometry['beam_transform']
+    if inversion:
+        wf[MirrorPosition[SampleRun]] = geometry['mirror'].position
+        wf[MirrorNormal[SampleRun]] = geometry['mirror'].normal
     wf[Position[NXsample, SampleRun]] = geometry['sample_position']
     wf[Position[NXsource, SampleRun]] = 5 * geometry['upstream_slit_centers']['beam']
     wf[SampleSurfaceNormal[SampleRun]] = geometry['sample_surface_normal']

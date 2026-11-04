@@ -2,7 +2,6 @@
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 """Geometry for FREIA's planar inversion mirror."""
 
-import numpy as np
 import scipp as sc
 import scippnexus as snx
 from ess.reduce import nexus
@@ -20,15 +19,12 @@ from ess.reduce.nexus.workflow import reject_time_dependent_transform, to_transf
 from ess.reduce.unwrap.types import DetectorLtotal
 
 from ..reflectometry.types import RunType
-from .types import IncidentBeamTransform, MirrorNormal, MirrorPosition
-
-# Default for direct calls to coordinate-graph providers; never modified in place.
-DIRECT_BEAM = sc.spatial.translation(value=[0.0, 0.0, 0.0], unit='m')
+from .types import MirrorGeometry, MirrorNormal, MirrorPosition
 
 
-def direct_beam_transform() -> IncidentBeamTransform[RunType]:
-    """Leave upstream coordinates unchanged when inversion is disabled."""
-    return IncidentBeamTransform[RunType](DIRECT_BEAM.copy())
+def no_mirror() -> MirrorGeometry[RunType] | None:
+    """Use the ordinary geometry when inversion is disabled."""
+    return None
 
 
 def mirror_time_filter() -> TransformationTimeFilter[snx.NXmirror, RunType]:
@@ -85,56 +81,40 @@ def mirror_normal(
     return MirrorNormal[RunType](normal / sc.norm(normal))
 
 
-def mirror_reflection_transform(
+def mirror_geometry(
     position: MirrorPosition[RunType],
     normal: MirrorNormal[RunType],
-) -> IncidentBeamTransform[RunType]:
-    r"""Build a transform that reflects positions across the mirror plane.
-
-    For a point :math:`m` on the plane and its unit normal :math:`n`, the
-    transform maps a position :math:`p` to
-
-    .. math::
-
-        p' = p - 2n\,[n \cdot (p-m)].
-
-    The magnitude and sign of ``normal`` do not affect the transform.
-    """
+) -> MirrorGeometry[RunType] | None:
+    """Validate the mirror position and normalize its surface normal."""
     for name, vector in [('MirrorPosition', position), ('MirrorNormal', normal)]:
         if vector.ndim != 0 or vector.dtype != sc.DType.vector3:
             raise ValueError(f'{name} must be a scalar vector.')
-        if not np.isfinite(vector.value).all():
+        if not sc.isfinite(vector).value:
             raise ValueError(f'{name} must be finite.')
-    n = normal.value
-    scale = np.max(np.abs(n))
-    if scale == 0:
-        raise ValueError('MirrorNormal must be nonzero.')
-    n = n / scale
-    n = n / np.linalg.norm(n)
-    matrix = np.eye(4)
-    matrix[:3, :3] -= 2 * np.outer(n, n)
-    p = position.to(unit='m').value
-    matrix[:3, 3] = p - matrix[:3, :3] @ p
-    return IncidentBeamTransform[RunType](
-        sc.spatial.affine_transform(value=matrix, unit='m')
-    )
-
-
-def transform_position(transform: sc.Variable, position: sc.Variable) -> sc.Variable:
-    """Apply the beam-path transform, preserving the input length unit."""
-    return (transform * position.to(unit=transform.unit)).to(unit=position.unit)
+    length = sc.norm(normal)
+    if not sc.isfinite(length).value or length.value == 0:
+        raise ValueError('MirrorNormal must have a finite, nonzero norm.')
+    return MirrorGeometry(position=position, normal=normal / length)
 
 
 def reflected_upstream_position(
-    transform: sc.Variable, upstream: sc.Variable, downstream: sc.Variable
+    upstream: sc.Variable,
+    downstream: sc.Variable,
+    mirror: MirrorGeometry | None = None,
 ) -> sc.Variable:
-    """Return the upstream position reflected across the mirror plane.
+    r"""Return the upstream position reflected across the mirror plane.
 
     The straight segment from this position to ``downstream`` has the same
     length as the path through the mirror and points along its final segment.
     The returned point is used for geometry calculations; the physical
-    component remains in place. With ``DIRECT_BEAM``, return ``upstream``
+    component remains in place. With no mirror, return ``upstream``
     unchanged. The result retains the upstream position's length unit.
+
+    For a point :math:`m` on the plane and its unit normal :math:`n`,
+
+    .. math::
+
+        p' = p - 2n\,[n \cdot (p-m)].
 
     Raises
     ------
@@ -142,25 +122,27 @@ def reflected_upstream_position(
         If the physical upstream and downstream points are on opposite sides
         of the mirror plane, so no reflected path connects them.
     """
-    if sc.identical(transform, DIRECT_BEAM):
+    if mirror is None:
         return upstream
-    reflected = transform_position(transform, upstream)
-    midpoint = (0.5 * (upstream + reflected)).to(unit=downstream.unit)
-    normal = (upstream - reflected).to(unit=downstream.unit)
-    if sc.dot(downstream - midpoint, normal).value < 0:
+    position = mirror.position.to(unit=upstream.unit)
+    upstream_distance = sc.dot(upstream - position, mirror.normal)
+    downstream_distance = sc.dot(
+        downstream.to(unit=upstream.unit) - position, mirror.normal
+    )
+    if (upstream_distance * downstream_distance).value < 0:
         raise ValueError(
             'A reflected path requires its upstream and downstream positions '
             'to be on the same side of the mirror plane. Check the mirror pose '
             'and component positions.'
         )
-    return reflected
+    return upstream - 2 * mirror.normal * upstream_distance
 
 
 def detector_ltotal_with_mirror(
     detector: EmptyDetector[RunType],
     source_position: Position[snx.NXsource, RunType],
     sample_position: Position[snx.NXsample, RunType],
-    transform: IncidentBeamTransform[RunType],
+    mirror: MirrorGeometry[RunType] | None,
 ) -> DetectorLtotal[RunType]:
     """Compute the source-to-detector flight length through the mirror and sample.
 
@@ -170,7 +152,7 @@ def detector_ltotal_with_mirror(
     upstream-monitor wavelength reconstruction use the physical source position.
     """
     reflected_source = reflected_upstream_position(
-        transform, source_position, sample_position
+        source_position, sample_position, mirror
     )
     sample = sample_position.to(unit=reflected_source.unit)
     pixels = detector.coords['position'].to(unit=reflected_source.unit)
@@ -184,6 +166,6 @@ providers = (
     load_mirror_transformation,
     mirror_position,
     mirror_normal,
-    mirror_reflection_transform,
+    mirror_geometry,
     detector_ltotal_with_mirror,
 )

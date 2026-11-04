@@ -1,4 +1,5 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from dataclasses import dataclass
 from typing import NewType
 
 import sciline
@@ -42,13 +43,12 @@ class MirrorNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Normal to the inversion mirror in global coordinates; either sign is valid."""
 
 
-class IncidentBeamTransform(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Reflect upstream positions across the inversion mirror's plane.
+@dataclass(frozen=True)
+class MirrorGeometry[RunType]:
+    """A point on the mirror plane and its unit normal, in laboratory coordinates."""
 
-    Identity when inversion is disabled. Reflected positions are used to
-    calculate flight lengths and the beam direction after the mirror.
-    Sample, detector, and gravity remain in the laboratory frame.
-    """
+    position: sc.Variable
+    normal: sc.Variable
 
 
 class UpstreamSlitCenters(sciline.Scope[RunType, dict], dict):
