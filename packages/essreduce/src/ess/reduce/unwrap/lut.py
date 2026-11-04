@@ -681,8 +681,8 @@ def _polygon_intersections(polygons: list[np.ndarray], x: np.ndarray) -> np.ndar
     y_min = np.fmin.reduce(y, axis=0)
     y_max = np.fmax.reduce(y, axis=0)
 
-    # Median value and spread estimate
-    return 0.5 * (y_min + y_max), 0.5 * (y_max - y_min)
+    # Mean and standard deviation of a uniform distribution between the bounds
+    return 0.5 * (y_min + y_max), (y_max - y_min) / np.sqrt(12.0)
 
 
 def _estimate_wavelength_by_polygon_centers(
@@ -702,6 +702,8 @@ def _estimate_wavelength_by_polygon_centers(
     We then take the mean of the minimum and maximum intersection points as an estimate
     of the mean wavelength in each bin. This handles the case where there are multiple
     subframes overlapping in a single time bin.
+    The variance is that of a uniform distribution between the minimum and maximum,
+    i.e., the source pulse is treated as flat in time over ``SourceBounds.time``.
 
     Parameters
     ----------
