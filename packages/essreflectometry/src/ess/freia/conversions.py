@@ -240,39 +240,44 @@ def _incident_angle_and_gravity_length(
     sample_position: sc.Variable,
     gravity: sc.Variable,
 ) -> tuple[sc.Variable, sc.Variable]:
-    r"""Compute the nominal incident angle and signed effective gravity length.
+    r"""Compute the nominal incident angle and D, which determines the size and
+    sign of its gravity correction at a given neutron wavelength.
 
-    Assumes FREIA's layout: distinct slits, the inversion mirror strictly
-    between them, and the sample downstream. Sample normal and gravity have
-    arbitrary orientations. Geometry is evaluated once per candidate.
-
-    Returns
-    -------
-    :
-        Nominal incident angle in radians and the geometric coefficient of the
-        angular gravity correction, in metres. Both are scalars. The coefficient
-        combines flight lengths and orientations; positive values mean gravity
-        increases the incident angle.
-
-    Notes
-    -----
-    All lengths follow the ray calculated without gravity: :math:`L` is the
-    path between slit centres, :math:`a` the upstream-slit-to-mirror path, and
-    :math:`c` the downstream-slit-to-sample-plane path.
-    Let :math:`u` be the unit incident direction at the sample, :math:`\alpha_0`
-    its angle to the surface, :math:`n_s` the outward unit sample normal,
-    :math:`n_m` the unit mirror normal, and :math:`g` gravitational acceleration.
-
-    The vector :math:`K` weights gravity by these flight lengths. Projecting
-    its effect onto the sample angle gives the returned coefficient :math:`D`:
+    Return the angle :math:`\alpha_0` between the nominal incident ray and the
+    sample surface (in radians), and the gravity correction factor :math:`D`
+    (in metres).
+    For neutron speed :math:`v` and gravitational acceleration :math:`g`, with
+    magnitude :math:`|g|`, the incident angle at the sample is, to first order:
 
     .. math::
 
-        K = g(c+L/2) - n_m(n_m \cdot g)\frac{a^2}{L}, \qquad
+        \alpha(v) \simeq \alpha_0 + \frac{|g|D}{v^2}.
+
+    The starting point is motion under constant gravitational acceleration,
+    constrained to pass through both slit centres, with specular reflection at
+    the mirror between them when present. Use flight times from the nominal
+    path without gravity. Along this path, :math:`L` is the distance between
+    slits, :math:`a` the upstream-slit-to-mirror distance, and :math:`c` the
+    distance from the downstream slit to the intersection with the sample plane.
+
+    Integrating this motion with the slit positions fixed gives a direction at
+    the sample proportional to :math:`u+K/v^2`, where :math:`u` is the nominal unit
+    incident direction and
+
+    .. math::
+
+        K = g(c+L/2) - n_m(n_m \cdot g)\frac{a^2}{L}.
+
+    Here :math:`n_m` is the unit mirror normal. Normalizing the direction and
+    expanding the angle to the surface with outward unit normal :math:`n_s`
+    gives the returned coefficient:
+
+    .. math::
+
         D = -\frac{K \cdot [n_s-u(u \cdot n_s)]}{|g|\cos\alpha_0}.
 
-    Here :math:`|g|` is the acceleration magnitude. Without the mirror, omit the
-    second term in :math:`K`. For zero gravity, return zero for the coefficient.
+    Without a mirror, omit the second term in :math:`K`. For zero gravity,
+    return :math:`D=0`.
     """
     upstream, downstream, sample_position = (
         position.to(unit='m') for position in (upstream, downstream, sample_position)
