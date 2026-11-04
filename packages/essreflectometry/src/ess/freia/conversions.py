@@ -249,23 +249,30 @@ def _incident_angle_and_gravity_length(
     Returns
     -------
     :
-        Scalar nominal angle in radians and signed effective length in metres.
+        Nominal incident angle in radians and the geometric coefficient of the
+        angular gravity correction, in metres. Both are scalars. The coefficient
+        combines flight lengths and orientations; positive values mean gravity
+        increases the incident angle.
 
     Notes
     -----
-    Let :math:`L` be the flight length between the slits, :math:`a` the length
-    from upstream slit to mirror, and :math:`c` from downstream slit to sample.
-    With unit mirror normal :math:`n_m`, gravity :math:`g`, nominal unit
-    direction :math:`u`, incident angle :math:`\alpha_0`, and unit sample normal
-    :math:`n_s`, the effective length is
+    All lengths follow the ray calculated without gravity: :math:`L` is the
+    path between slit centres, :math:`a` the upstream-slit-to-mirror path, and
+    :math:`c` the downstream-slit-to-sample-plane path.
+    Let :math:`u` be the unit incident direction at the sample, :math:`\alpha_0`
+    its angle to the surface, :math:`n_s` the outward unit sample normal,
+    :math:`n_m` the unit mirror normal, and :math:`g` gravitational acceleration.
+
+    The vector :math:`K` weights gravity by these flight lengths. Projecting
+    its effect onto the sample angle gives the returned coefficient :math:`D`:
 
     .. math::
 
         K = g(c+L/2) - n_m(n_m \cdot g)\frac{a^2}{L}, \qquad
-        D = -\frac{n_s \cdot [K-u(u \cdot K)]}{|g|\cos\alpha_0}.
+        D = -\frac{K \cdot [n_s-u(u \cdot n_s)]}{|g|\cos\alpha_0}.
 
-    Without the mirror, the second term in :math:`K` is zero. The correction
-    using :math:`D` is applied by :func:`gravity_corrected_incident_angle`.
+    Here :math:`|g|` is the acceleration magnitude. Without the mirror, omit the
+    second term in :math:`K`. For zero gravity, return zero for the coefficient.
     """
     upstream, downstream, sample_position = (
         position.to(unit='m') for position in (upstream, downstream, sample_position)
@@ -305,8 +312,9 @@ def gravity_corrected_incident_angle(
     nominal_incident_angle:
         Incident angle determined from slit geometry, before gravity correction.
     incident_gravity_length:
-        Signed effective length for the selected beam, accounting for slit
-        positions, the sample plane, and the mirror when present.
+        Signed geometric coefficient, in metres, combining the selected beam's
+        flight lengths and mirror, sample, and gravity orientations. Positive
+        values increase the incident angle.
     wavelength:
         Reconstructed neutron wavelengths.
     gravity:
@@ -320,12 +328,17 @@ def gravity_corrected_incident_angle(
 
     Notes
     -----
-    With nominal angle :math:`\alpha_0` and effective length :math:`D`, the
-    first-order correction is
+    The first-order correction is
 
     .. math::
 
         \alpha(\lambda) = \alpha_0 + |g|D\left(\frac{m_n\lambda}{h}\right)^2.
+
+    Here :math:`\alpha_0` is ``nominal_incident_angle``, :math:`D` is
+    ``incident_gravity_length``, :math:`\lambda` is ``wavelength``, and
+    :math:`|g|` is the magnitude of ``gravity``. The constants :math:`m_n` and
+    :math:`h` are the neutron mass and Planck's constant. The result
+    :math:`\alpha(\lambda)` is the corrected angle in radians.
     """
     g = sc.norm(gravity)
     if g.value == 0:

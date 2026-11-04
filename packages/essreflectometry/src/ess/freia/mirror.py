@@ -104,17 +104,19 @@ def reflected_upstream_position(
 ) -> sc.Variable:
     r"""Return the upstream position reflected across the mirror plane.
 
-    The straight segment from this position to ``downstream`` has the same
-    length as the path through the mirror and points along its final segment.
-    The returned point is used for geometry calculations; the physical
-    component remains in place. With no mirror, return ``upstream``
-    unchanged. The result retains the upstream position's length unit.
-
-    For a point :math:`m` on the plane and its unit normal :math:`n`,
+    Let :math:`p` be ``upstream``, :math:`m` be ``mirror.position``, and :math:`n`
+    be the unit normal ``mirror.normal``.
+    The returned position :math:`p'` is
 
     .. math::
 
         p' = p - 2n\,[n \cdot (p-m)].
+
+    The straight segment from :math:`p'` to ``downstream`` has the same
+    length as the path through the mirror and points along its final segment.
+    The returned point is used for geometry calculations; the physical
+    component remains in place. With no mirror, return ``upstream``
+    unchanged. The result retains the upstream position's length unit.
 
     Raises
     ------
