@@ -7,7 +7,6 @@ import sciline as sl
 import scipp as sc
 import scippnexus as sx
 from ess import tbl
-from ess.tbl import orca
 from scipp.testing import assert_identical
 
 from ess.imaging.types import (
@@ -18,7 +17,6 @@ from ess.imaging.types import (
     FluxNormalizedDetector,
     MaskingRules,
     MeanDarkFrame,
-    NeXusDetectorName,
     NormalizedImage,
     OpenBeamRun,
     Position,
@@ -35,12 +33,11 @@ def workflow() -> sl.Pipeline:
     Workflow for normalizing TBL Orca images.
     """
 
-    wf = orca.OrcaNormalizedImagesWorkflow()
+    wf = tbl.TblOrcaWorkflow()
     wf[Filename[SampleRun]] = tbl.data.tbl_lego_sample_run()
     wf[Filename[DarkBackgroundRun]] = tbl.data.tbl_lego_dark_run()
     wf[Filename[OpenBeamRun]] = tbl.data.tbl_lego_openbeam_run()
     wf[MaskingRules] = {}
-    wf[NeXusDetectorName] = tbl.nexus_name('orca')
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.upper_bound
     wf[Position[sx.NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
     return wf
