@@ -52,7 +52,7 @@ def mcstas_default_parameters() -> dict:
     return default_parameters() | {
         NeXusDetectorName: "Multiblade",
         LookupTableRelativeErrorThreshold: {
-            "Multiblade": 0.06,
+            "Multiblade": 0.035,
         },
     }
 
