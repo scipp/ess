@@ -4,7 +4,6 @@
 """NeXus loaders."""
 
 import errno
-import warnings
 from collections.abc import Generator, Iterable, Mapping
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from dataclasses import dataclass
@@ -858,10 +857,8 @@ def _iter_children(
             child = group[name]
             found = snx.Field if isinstance(child, snx.Field) else child.nx_class
             if found != nx_class:
-                warnings.warn(
+                raise ValueError(
                     f"{child.name} was selected by name but has incorrect NX_class. "
                     f"Got {found}, expected {nx_class}",
-                    UserWarning,
-                    stacklevel=2,
                 )
             yield name, child
