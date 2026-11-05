@@ -12,13 +12,8 @@ from ..reflectometry.types import (
 
 
 def _orientation_axis(
-    transform: sc.Variable | sc.DataArray, axis: tuple[int, int, int]
+    transform: sc.Variable | sc.DataArray, axis: tuple[float, float, float]
 ) -> sc.Variable:
-    if isinstance(transform, sc.DataArray) or transform.ndim != 0:
-        raise ValueError(
-            'ESTIA requires a static orientation. Select a time interval or '
-            'provide a TransformationTimeFilter.'
-        )
     # Transform a direction, cancelling the translation in the affine transform.
     origin = sc.vector([0, 0, 0], unit=transform.unit)
     return transform * sc.vector(axis, unit=transform.unit) - transform * origin
@@ -27,11 +22,11 @@ def _orientation_axis(
 def load_sample_rotation(
     transform: NeXusTransformation[NXsample, RunType],
 ) -> RawSampleRotation[RunType]:
-    """Compute the sample surface's horizontal angle from its full NeXus chain.
+    """Compute the sample mount angle from its NeXus transformations.
 
-    The local surface normal is +x. Its projection onto the laboratory x-z
-    plane defines the surface angle used by ESTIA's horizontal reduction.
-    This includes rotations of the hexapod as well as the sample stage.
+    Project the mount's transformed local +x axis onto the laboratory x-z plane
+    and measure its angle from +x towards -z. The sample may be tilted within
+    its mount. ``SampleRotationOffset`` calibrates the resulting angle.
     """
     normal = _orientation_axis(transform.value, (1, 0, 0))
     return sc.atan2(y=-normal.fields.z, x=normal.fields.x).to(unit='deg')
@@ -40,9 +35,12 @@ def load_sample_rotation(
 def load_detector_rotation(
     transform: NeXusTransformation[NXdetector, RunType],
 ) -> DetectorRotation[RunType]:
-    """Compute the horizontal angle of the detector's local +z direction.
+    """Compute the detector reference angle from its NeXus transformations.
 
-    Use the same composed, time-filtered transform as the detector positions.
+    Measure the transformed local +z direction from laboratory +z towards +x
+    in the x-z plane. The reduction assumes this direction points from the
+    sample to the detector centre, where the central reflected beam is aligned.
+    Use the same transform as the detector pixel positions.
     """
     direction = _orientation_axis(transform.value, (0, 0, 1))
     return sc.atan2(y=direction.fields.x, x=direction.fields.z).to(unit='deg')

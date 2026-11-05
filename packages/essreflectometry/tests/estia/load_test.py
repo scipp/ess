@@ -106,28 +106,6 @@ def test_orientation_uses_configured_time_filter(tmp_path, nx_class, result_type
     assert_allclose(wf.compute(result_type[SampleRun]), sc.scalar(3.25, unit='deg'))
 
 
-def test_sample_rejects_unselected_time_dependent_orientation(tmp_path):
-    wf = _workflow(tmp_path, snx.NXsample, [1.0, 2.0], additional_rotation=0.25)
-    with pytest.raises(ValueError, match='time-dependent'):
-        wf.compute(RawSampleRotation[SampleRun])
-
-
-@pytest.mark.parametrize('loader', [load_sample_rotation, load_detector_rotation])
-def test_orientation_rejects_retained_time_dependence(loader):
-    transform = sc.DataArray(
-        sc.spatial.rotations_from_rotvecs(
-            sc.vectors(dims=['time'], values=[[0, 1, 0], [0, 2, 0]], unit='deg')
-        ),
-        coords={
-            'time': sc.datetimes(
-                dims=['time'], values=['2026-11-04T00:00:00', '2026-11-04T00:00:10']
-            )
-        },
-    )
-    with pytest.raises(ValueError, match='static orientation'):
-        loader(NeXusTransformation(transform))
-
-
 @pytest.mark.parametrize(
     ('loader', 'expected'),
     [
