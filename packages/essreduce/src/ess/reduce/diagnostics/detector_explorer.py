@@ -440,6 +440,14 @@ class DetectorExplorer(ipw.VBox):
             for key in self.data.keys()
         }
 
+        self.to_plot_nodes = {
+            key: pp.Node(
+                lambda da: da.transpose(self._visible_dims),
+                da=self.slice_data_nodes[key],
+            )
+            for key in self.data.keys()
+        }
+
         # # Before displaying on the figures, a reduction operation is sometimes applied.
         # # If we apply the masks early in the node tree (e.g. just after the input data),
         # # the masked data will be zeroed during the reduction and will no longer be
@@ -490,6 +498,14 @@ class DetectorExplorer(ipw.VBox):
             )
             for key in self.data.keys()
         }
+        self.all_to_plot_nodes = {
+            key: pp.Node(
+                lambda da: da.transpose(self._visible_dims),
+                da=self.all_slice_data_nodes[key],
+            )
+            for key in self.data.keys()
+        }
+
         # self.all_mask_selection_nodes = {
         #     key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
         #     for key in self.data.keys()
@@ -530,7 +546,7 @@ class DetectorExplorer(ipw.VBox):
         _kwargs = {**{"hide_log_buttons": True, "autoscale": False}, **kwargs}
         for i, bank in enumerate(self.data.keys()):
             self.subplots[bank] = pp.imagefigure(
-                self.all_slice_data_nodes[bank],
+                self.all_to_plot_nodes[bank],
                 ax=axs[i],
                 title=bank,
                 cbar=True,
@@ -538,7 +554,7 @@ class DetectorExplorer(ipw.VBox):
             )
             axs[i]._bank_explorer_subplot_index = i
             self.tab_figs[bank] = pp.imagefigure(
-                self.slice_data_nodes[bank],
+                self.to_plot_nodes[bank],
                 title=bank,
                 cbar=True,
                 # Need to make some horizontal space for the toolbar
@@ -853,8 +869,17 @@ class DetectorExplorer(ipw.VBox):
             )
         # else:
         #     m = self.masks[key][mask_name]
-        sliced_mask = _slice_mask(self.masks[key][mask_name], slices)
-        sliced_mask.values[...] = False if sliced_mask.values.all() else True
+
+        # def _slice_mask(mask: sc.Variable, slices: list[tuple[str, slice]]) -> sc.Variable:
+        #     out = mask
+        #     for s in [sli for sli in slices if sli[1] is not None]:
+        #         out = out[s]
+        #     return out
+
+        m = self.masks[key][mask_name]
+        for s in slices:
+            m = m[s]
+        m.values[...] = False if m.values.all() else True
 
         if not self.masks[key][mask_name].values.max():
             del self.masks[key][mask_name]
@@ -888,10 +913,19 @@ class DetectorExplorer(ipw.VBox):
         # dims = tuple(sl[0] for sl in slices)
         # mask_name = str(dims)
 
+        #  out = mask
+        #     for s in slices:
+        #         if (s[0] in out.dims) and (s[1] < out.sizes[s[0]]):
+        #             out = out[s]
+        #     return out
+
         for key in keys:
             mask_names = list(self.masks[key].keys())
             for name in mask_names:
-                m = _maybe_slice_mask(self.masks[key][name], slices)
+                m = self.masks[key][name]
+                for s in slices:
+                    if (s[0] in m.dims) and (s[1] < m.sizes[s[0]]):
+                        m = m[s]
                 m.values[...] = False
                 if not self.masks[key][name].values.max():
                     del self.masks[key][name]

@@ -771,6 +771,41 @@ def test_masks_refresh_in_both_views_after_switching_tabs():
         assert not nodes['bank_0']().masks['mask'].values.any()
 
 
+def test_adding_a_mask_then_clicking_same_place_again_deletes_it():
+    explorer = DetectorExplorer(make_banks(count=1))
+    select(explorer, 'bank_0')
+    explorer.mask_control.mode = 'horizontal'
+    press(explorer, 'bank_0', 0, 1)
+    assert explorer.masks['bank_0']  # Ensure the mask was added
+    press(explorer, 'bank_0', 0, 1)
+    assert not explorer.masks['bank_0']  # Ensure the mask was deleted (not zeroed)
+
+
+def test_deleting_mask_by_click_does_not_remove_from_dict_if_other_parts_are_masked():
+    explorer = DetectorExplorer(make_banks(count=1))
+    select(explorer, 'bank_0')
+    explorer.mask_control.mode = 'horizontal'
+    press(explorer, 'bank_0', 1, 1)
+    assert len(explorer.masks['bank_0']) == 1  # Ensure the mask was added
+    (key,) = explorer.masks['bank_0'].keys()
+    n = explorer.masks['bank_0'][key].sum().value
+    sliders_of(explorer, 'bank_0')['layer'].slider.value = 1
+    press(explorer, 'bank_0', 0, 0)
+    # We should still have just one mask, as the dimensions of the mask should be the
+    # same, there should just be more values masked
+    assert len(explorer.masks['bank_0']) == 1
+    assert explorer.masks['bank_0'][key].sum().value > n
+    # Go back to first layer
+    sliders_of(explorer, 'bank_0')['layer'].slider.value = 0
+    # Click to remove mask
+    press(explorer, 'bank_0', 1, 1)
+    assert key in explorer.masks['bank_0']  # Ensure the mask still exists
+    # Ensure there are still masked values
+    assert explorer.masks['bank_0'][key].sum().value > 0
+    # Ensure the first layer has no masked values
+    assert not explorer.masks['bank_0'][key]['layer', 0].values.max()
+
+
 # ---------------------------------------------------------------------------
 # 6. Continuous masking
 # ---------------------------------------------------------------------------
@@ -961,6 +996,16 @@ def test_saved_hdf5_round_trips_all_banks_regardless_of_selection(tmp_path):
     assert list(loaded) == list(explorer.masks)
     for bank, mask in explorer.masks.items():
         assert_identical(loaded[bank], mask)
+
+
+def test_clear_masks_removes_from_dict_if_all_false():
+    explorer = DetectorExplorer(make_banks(count=1))
+    select(explorer, 'bank_0')
+    explorer.mask_control.mode = 'horizontal'
+    press(explorer, 'bank_0', 0, 1)
+    assert explorer.masks['bank_0']  # Ensure the mask was added
+    explorer.mask_control.clear_button.click()
+    assert not explorer.masks['bank_0']  # Ensure the mask was removed from the dict
 
 
 # ---------------------------------------------------------------------------
