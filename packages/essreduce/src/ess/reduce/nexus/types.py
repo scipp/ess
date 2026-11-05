@@ -1,8 +1,9 @@
 """Domain types for use with Sciline, parametrized by run- and monitor-type."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO, Generic, NewType, TypeVar
+from typing import Any, BinaryIO, Generic, NewType, Self, TypeVar
 
 import sciline
 import scipp as sc
@@ -152,6 +153,16 @@ class NeXusName(sciline.Scope[Component, str], str):
     """Name of a component in a NeXus file."""
 
 
+class NeXusMultiNames(sciline.Scope[Component, tuple[str, ...]], tuple[str, ...]):
+    """Names of multiple components of the same class in a NeXus file."""
+
+    def __new__(cls, x: Iterable[str] | None) -> Self:
+        return tuple.__new__(cls, () if x is None else tuple(x))
+
+    def __init__(self, x: Iterable[str] | None) -> None:
+        self.has_data = x is not None
+
+
 class NeXusClass(sciline.Scope[Component, type], type):
     """NX_class of a component in a NeXus file."""
 
@@ -164,8 +175,10 @@ class NeXusComponent(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGro
     """Raw data from a NeXus component."""
 
 
-class AllNeXusComponents(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup):
-    """Raw data from all NeXus components of one class."""
+class NeXusMultiComponent(
+    sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup
+):
+    """Raw data from multiple NeXus components of one class."""
 
 
 class NeXusData(sciline.Scope[Component, RunType, sc.DataArray], sc.DataArray):
@@ -174,6 +187,10 @@ class NeXusData(sciline.Scope[Component, RunType, sc.DataArray], sc.DataArray):
 
     This must be contained in an NXmonitor or NXdetector group.
     """
+
+
+class NeXusMultiData(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup):
+    """Data group of data arrays loaded from a NXevent_data or NXdata groups."""
 
 
 class Position(sciline.Scope[Component, RunType, sc.Variable], sc.Variable):
@@ -311,31 +328,49 @@ class NeXusComponentLocationSpec(NeXusLocationSpec, Generic[Component, RunType])
 
 
 @dataclass
-class NeXusAllLocationSpec:
+class NeXusDataLocationSpec(NeXusLocationSpec, Generic[Component, RunType]):
+    """NeXus filename and parameters to identify (parts of) data to load."""
+
+
+@dataclass
+class NeXusMultiLocationSpec:
     """
-    NeXus parameters to identify all components of a class to load.
+    NeXus parameters to identify multiple locations of a class to load.
+
+    If ``location_names is None`` corresponds to all locations of the class.
     """
 
     filename: FilePath | NeXusFile | NeXusGroup
     entry_name: NeXusEntryName | None = None
     selection: snx.typing.ScippIndex | slice = ()
+    location_names: tuple[str, ...] | None = None
 
 
 @dataclass
-class NeXusAllComponentLocationSpec(NeXusAllLocationSpec, Generic[Component, RunType]):
+class NeXusMultiComponentLocationSpec(
+    NeXusMultiLocationSpec, Generic[Component, RunType]
+):
     """
-    NeXus parameters to identify all components of a class to load.
+    NeXus parameters to identify multiple components of a class to load.
     """
 
 
 @dataclass
-class NeXusDataLocationSpec(NeXusLocationSpec, Generic[Component, RunType]):
-    """NeXus filename and parameters to identify (parts of) detector data to load."""
+class NeXusMultiDataLocationSpec(NeXusMultiLocationSpec, Generic[Component, RunType]):
+    """
+    NeXus parameters to identify (parts of) multiple data instances of a class to load.
+    """
 
 
 class NeXusTransformationChain(
     sciline.Scope[Component, RunType, snx.TransformationChain],
     snx.TransformationChain,
+): ...
+
+
+class NeXusMultiTransformationChain(
+    sciline.Scope[Component, RunType, sc.DataGroup[snx.TransformationChain]],
+    sc.DataGroup[snx.TransformationChain],
 ): ...
 
 
@@ -356,6 +391,27 @@ class NeXusTransformation(Generic[Component, RunType]):
     ) -> 'NeXusTransformation[Component, RunType]':
         """Convert a transformation chain to a single transformation."""
         return NeXusTransformation(value=chain.compute())
+
+
+@dataclass
+class NeXusMultiTransformation(Generic[Component, RunType]):
+    """Multiple NeXus transformations computed from transformation chains.
+
+    If the transformations are time-dependent, they are stored as data arrays
+    with a 'time' coordinate.
+    Otherwise, the transformations are stored as variables.
+    """
+
+    value: sc.DataGroup[sc.Variable | sc.DataArray]
+
+    @staticmethod
+    def from_chains(
+        chains: NeXusMultiTransformationChain[Component, RunType],
+    ) -> 'NeXusMultiTransformation[Component, RunType]':
+        """Convert transformation chains to single transformations."""
+        return NeXusMultiTransformation(
+            value=chains.apply(lambda chain: chain.compute())
+        )
 
 
 class RawChoppers(

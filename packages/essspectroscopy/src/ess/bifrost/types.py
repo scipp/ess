@@ -10,7 +10,8 @@ from typing import NewType
 
 import sciline
 import scipp as sc
-from ess.spectroscopy.types import RunType
+import scippnexus as snx
+from ess.spectroscopy.types import NeXusMultiNames, RunType
 
 
 class ArcNumber(sciline.Scope[RunType, sc.Variable], sc.Variable): ...
@@ -20,6 +21,10 @@ class McStasRawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 
 
 ArcEnergy = NewType('ArcEnergy', sc.Variable)
+
+
+NeXusDetectorNames = NeXusMultiNames[snx.NXdetector]
+
 
 InstrumentAnglePath = NewType('InstrumentAnglePath', str)
 """Absolute NeXus path of the detector tank rotation.
