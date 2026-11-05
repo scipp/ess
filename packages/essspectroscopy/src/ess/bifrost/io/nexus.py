@@ -284,7 +284,7 @@ def get_calibrated_analyzer(
 def concat_detector_events(
     events: NeXusMultiData[snx.NXdetector, RunType],
 ) -> NeXusData[snx.NXdetector, RunType]:
-    """Concatenate events form multiple detectors into a single data array."""
+    """Concatenate events from multiple detectors into a single data array."""
     return NeXusData[snx.NXdetector, RunType](
         sc.concat(list(events.values()), dim='event_time_zero')
     )
