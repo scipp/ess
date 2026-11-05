@@ -15,7 +15,7 @@ from ess.spectroscopy.types import (
     RunType,
 )
 
-from ..detector import _assign_detector_position, get_base_calibrated_detector_bifrost
+from ..detector import _assign_detector_position, get_single_calibrated_detector_bifrost
 
 
 def get_calibrated_bragg_peak_monitor(
@@ -106,7 +106,7 @@ def get_calibrated_bragg_peak_detector(
     :
         Detector with geometry coordinates.
     """
-    return get_base_calibrated_detector_bifrost(detector, transform=transform)
+    return get_single_calibrated_detector_bifrost(detector, transform=transform)
 
 
 providers = (get_calibrated_bragg_peak_monitor, assemble_bragg_peak_monitor_data)

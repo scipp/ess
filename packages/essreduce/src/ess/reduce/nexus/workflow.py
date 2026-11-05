@@ -40,11 +40,13 @@ from .types import (
     NeXusData,
     NeXusDataLocationSpec,
     NeXusFileSpec,
+    NeXusMultiComponent,
     NeXusMultiComponentLocationSpec,
-    NeXusMultiComponents,
     NeXusMultiData,
     NeXusMultiDataLocationSpec,
     NeXusMultiNames,
+    NeXusMultiTransformation,
+    NeXusMultiTransformationChain,
     NeXusName,
     NeXusTransformation,
     NeXusTransformationChain,
@@ -262,7 +264,7 @@ def load_nexus_component(
 def load_multi_nexus_components(
     location: NeXusMultiComponentLocationSpec[Component, RunType],
     nx_class: NeXusClass[Component],
-) -> NeXusMultiComponents[Component, RunType]:
+) -> NeXusMultiComponent[Component, RunType]:
     """
     Load all NeXus components of one class from one entry a file.
 
@@ -275,7 +277,7 @@ def load_multi_nexus_components(
     nx_class:
         NX_class to identify the components.
     """
-    return NeXusMultiComponents[Component, RunType](
+    return NeXusMultiComponent[Component, RunType](
         nexus.load_multi_components(
             location, nx_class=nx_class, definitions=definitions
         )
@@ -334,6 +336,21 @@ def get_transformation_chain(
     """
     chain = component['depends_on']
     return NeXusTransformationChain[Component, RunType](chain)
+
+
+def get_multi_transformation_chain(
+    components: NeXusMultiComponent[Component, RunType],
+) -> NeXusMultiTransformationChain[Component, RunType]:
+    """
+    Extract the transformation chain from a NeXus component group.
+
+    Parameters
+    ----------
+    components:
+        Loaded NeXus components.
+    """
+    chains = components.apply(lambda component: component['depends_on'])
+    return NeXusMultiTransformationChain[Component, RunType](chains)
 
 
 def reject_time_dependent_transform(
@@ -421,6 +438,35 @@ def to_transformation(
         )
 
     return NeXusTransformation[Component, RunType].from_chain(chain)
+
+
+def to_multi_transformation(
+    chains: NeXusMultiTransformationChain[Component, RunType],
+    interval: TimeInterval[RunType],
+    time_filter: TransformationTimeFilter[
+        Component, RunType
+    ] = reject_time_dependent_transform,
+) -> NeXusMultiTransformation[Component, RunType]:
+    """Convert each transformation chain into a single transformation matrix.
+
+    If one or more transformations in the chain are time-dependent, the time interval
+    is used to select a specific time point. If the interval is not a single time point,
+    ``time_filter`` is applied to the transformation. By default, this will raise an
+    exception. Provide a different filter to customize how time-dependence is handled.
+
+    Parameters
+    ----------
+    chains:
+        Transformation chains.
+    interval:
+        Time interval to select from the transformation chain.
+    time_filter:
+        Callable to apply to time-dependent transformations.
+        Defaults to raising a :class:`ValueError`.
+    """
+    return NeXusMultiTransformation[Component, RunType](
+        chains.apply(lambda chain: to_transformation(chain, interval, time_filter))
+    )
 
 
 def compute_position(
@@ -592,7 +638,7 @@ def assemble_monitor_data(
 
 
 def parse_raw_choppers(
-    choppers: NeXusMultiComponents[snx.NXdisk_chopper, RunType],
+    choppers: NeXusMultiComponent[snx.NXdisk_chopper, RunType],
 ) -> RawChoppers[RunType]:
     """Convert the NeXus representation of a chopper to ours.
 
@@ -860,7 +906,9 @@ _common_providers = (
     multi_component_spec,
     multi_data_spec,
     get_transformation_chain,
+    get_multi_transformation_chain,
     to_transformation,
+    to_multi_transformation,
     compute_position,
     compute_dynamic_position,
     load_nexus_data,

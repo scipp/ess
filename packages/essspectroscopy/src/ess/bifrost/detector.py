@@ -12,15 +12,15 @@ from ess.spectroscopy.indirect.conversion import add_spectrometer_coords
 from ess.spectroscopy.types import (
     Analyzer,
     Analyzers,
+    DetectorPositionOffset,
     EmptyDetector,
     NeXusComponent,
-    NeXusMultiComponents,
+    NeXusMultiComponent,
+    NeXusMultiTransformation,
     NeXusTransformation,
     PrimarySpecCoordTransformGraph,
     RunType,
     SecondarySpecCoordTransformGraph,
-    TimeInterval,
-    TransformationTimeFilter,
 )
 
 from ess.reduce.nexus.types import Position
@@ -85,13 +85,13 @@ def single_arc_and_channel_from_detector_number(
 
 
 def get_calibrated_detector_bifrost(
-    detector_components: NeXusMultiComponents[snx.NXdetector, RunType],
+    detector_components: NeXusMultiComponent[snx.NXdetector, RunType],
     analyzers: Analyzers[RunType],
     *,
     primary_graph: PrimarySpecCoordTransformGraph[RunType],
     secondary_graph: SecondarySpecCoordTransformGraph[RunType],
-    time_interval: TimeInterval[RunType],
-    time_filter: TransformationTimeFilter[snx.NXdetector, RunType],
+    transforms: NeXusMultiTransformation[snx.NXdetector, RunType],
+    offset: DetectorPositionOffset[RunType],
 ) -> EmptyDetector[RunType]:
     """Extract the data array corresponding to a detector's signal field.
 
@@ -114,27 +114,24 @@ def get_calibrated_detector_bifrost(
         Coordinate transformation graph for the secondary spectrometer.
         Must be a closure over analyzer parameters.
         And those parameters must have a compatible shape with ``data``.
-    time_interval:
-        Specifies the time range to extract.
-    time_filter:
-        Applied to time-dependent transformations.
+    transforms:
+        NeXus transformations for the detectors.
+    offset:
+        Offset to add to the detector position.
 
     Returns
     -------
     :
         Detector geometry and spectrometer coordinates.
     """
-    from ess.reduce.nexus.workflow import to_transformation
-
     entries = []
     for analyzer in analyzers.values():
-        detector = detector_components[analyzer['detector_name']]
-        transform = to_transformation(
-            chain=detector['depends_on'],
-            interval=time_interval,
-            time_filter=time_filter,
+        detector_name = analyzer['detector_name']
+        da = get_single_calibrated_detector_bifrost(
+            detector_components[detector_name],
+            transform=transforms.value[detector_name],
+            offset=offset,
         )
-        da = get_base_calibrated_detector_bifrost(detector, transform=transform)
         da = da.rename(dim_0='tube', dim_1='length')
 
         arc, channel = single_arc_and_channel_from_detector_number(
@@ -205,10 +202,11 @@ def _fold_detector_to_arc_and_channel(
         return detector
 
 
-def get_base_calibrated_detector_bifrost(
+def get_single_calibrated_detector_bifrost(
     detector: NeXusComponent[snx.NXdetector, RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
+    offset: DetectorPositionOffset[RunType],
 ) -> sc.DataArray:
     """Extract the data array corresponding to a detector's signal field.
 
@@ -222,6 +220,8 @@ def get_base_calibrated_detector_bifrost(
         Loaded NeXus detector.
     transform:
         Transformation that determines the detector position.
+    offset:
+        Offset to add to the detector position.
 
     Returns
     -------
@@ -230,14 +230,13 @@ def get_base_calibrated_detector_bifrost(
     """
 
     from ess.reduce.nexus import compute_detector_position, extract_signal_data_array
-    from ess.reduce.nexus.workflow import no_offset
 
     da = extract_signal_data_array(detector)
     # BIFROST's detectors ride the rotating tank, so a lab-frame offset added after
     # the transform cannot express any correction one would actually want; the
     # transformation chain is the handle. compute_detector_position requires the
     # argument, so pin it to zero here.
-    position = compute_detector_position(da, transform=transform, offset=no_offset)
+    position = compute_detector_position(da, transform=transform, offset=offset)
     return _assign_detector_position(da, position)
 
 

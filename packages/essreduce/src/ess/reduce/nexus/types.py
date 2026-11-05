@@ -175,7 +175,7 @@ class NeXusComponent(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGro
     """Raw data from a NeXus component."""
 
 
-class NeXusMultiComponents(
+class NeXusMultiComponent(
     sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup
 ):
     """Raw data from multiple NeXus components of one class."""
@@ -368,6 +368,12 @@ class NeXusTransformationChain(
 ): ...
 
 
+class NeXusMultiTransformationChain(
+    sciline.Scope[Component, RunType, sc.DataGroup[snx.TransformationChain]],
+    sc.DataGroup[snx.TransformationChain],
+): ...
+
+
 @dataclass
 class NeXusTransformation(Generic[Component, RunType]):
     """A NeXus transformation computed from a transformation chain.
@@ -385,6 +391,27 @@ class NeXusTransformation(Generic[Component, RunType]):
     ) -> 'NeXusTransformation[Component, RunType]':
         """Convert a transformation chain to a single transformation."""
         return NeXusTransformation(value=chain.compute())
+
+
+@dataclass
+class NeXusMultiTransformation(Generic[Component, RunType]):
+    """Multiple NeXus transformations computed from transformation chains.
+
+    If the transformations are time-dependent, they are stored as data arrays
+    with a 'time' coordinate.
+    Otherwise, the transformations are stored as variables.
+    """
+
+    value: sc.DataGroup[sc.Variable | sc.DataArray]
+
+    @staticmethod
+    def from_chains(
+        chains: NeXusMultiTransformationChain[Component, RunType],
+    ) -> 'NeXusMultiTransformation[Component, RunType]':
+        """Convert transformation chains to single transformations."""
+        return NeXusMultiTransformation(
+            value=chains.apply(lambda chain: chain.compute())
+        )
 
 
 class RawChoppers(
