@@ -6,6 +6,7 @@
 import scipp as sc
 import scippnexus as snx
 from ess.spectroscopy.types import (
+    DetectorPositionOffset,
     ElasticMonitor,
     EmptyDetector,
     NeXusComponent,
@@ -87,6 +88,7 @@ def get_calibrated_bragg_peak_detector(
     detector: NeXusComponent[snx.NXdetector, RunType],
     *,
     transform: NeXusTransformation[snx.NXdetector, RunType],
+    offset: DetectorPositionOffset[RunType],
 ) -> EmptyDetector[RunType]:
     """Extract the data array corresponding to a detector's signal field.
 
@@ -100,13 +102,17 @@ def get_calibrated_bragg_peak_detector(
         Loaded NeXus detector.
     transform:
         Transformation that determines the detector position.
+    offset:
+        Offset to add to the detector position.
 
     Returns
     -------
     :
         Detector with geometry coordinates.
     """
-    return get_single_calibrated_detector_bifrost(detector, transform=transform)
+    return get_single_calibrated_detector_bifrost(
+        detector, transform=transform, offset=offset
+    )
 
 
 providers = (get_calibrated_bragg_peak_monitor, assemble_bragg_peak_monitor_data)
