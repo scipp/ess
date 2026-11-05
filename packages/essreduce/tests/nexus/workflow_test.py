@@ -236,7 +236,7 @@ def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
     loki_tutorial_sample_run_60250: Path,
 ) -> None:
     filespec = workflow.file_path_to_file_spec(
-        loki_tutorial_sample_run_60250, preopen=True
+        loki_tutorial_sample_run_60250, preopen=True, patch=[]
     )
     spec = workflow.unique_component_spec(filespec)
     assert spec.filename['/entry'][snx.NXsample] == {}
