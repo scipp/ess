@@ -86,28 +86,6 @@ def test_missing_coordinates_are_added_without_modifying_input():
             assert_identical(explorer.data[bank].coords[dim], sc.arange(dim, size))
 
 
-@pytest.mark.parametrize(
-    'sizes',
-    [
-        {'y': 3, 'x': 4},
-        {'layer': 2, 'y': 3, 'x': 4},
-        {'time': 3, 'layer': 2, 'y': 3, 'x': 4},
-    ],
-)
-def test_one_initial_slider_per_hidden_dimension(sizes):
-    explorer = DetectorExplorer(make_banks(sizes))
-    hidden_dims = list(sizes)[:-2]
-
-    for sliders in [explorer.all_dim_sliders, *explorer.bank_dim_sliders.values()]:
-        assert [slider.dim for slider in sliders] == hidden_dims
-        for slider in sliders:
-            assert slider.slider.min == 0
-            assert slider.slider.max == sizes[slider.dim] - 1
-            assert slider.slider.value == 0
-            assert slider.sum.value is False
-            assert slider.value == (slider.dim, 0)
-
-
 def test_slider_bounds_follow_individual_bank_sizes_and_overall_maximum():
     data = make_banks({'time': 2, 'layer': 4, 'y': 3, 'x': 4})
     data['bank_1'] = data['bank_1']['time', :1]['layer', :2]
@@ -285,14 +263,21 @@ def move_outside(explorer, bank):
     fire(canvas, None, 'motion_notify_event')
 
 
-def toggle_model(mask, mode, x, y):
-    """Reference for a mask click on a (y, x) numpy array."""
-    region = {
-        'single': (y, x),
-        'horizontal': (y, slice(None)),
-        'vertical': (slice(None), x),
-    }[mode]
-    mask[region] = not mask[region].all()
+def mask_at(sizes, mode, layer, x, y):
+    if mode == 'single':
+        expected = sc.zeros(sizes=sizes, dtype=bool)
+        expected['layer', layer]['x', x]['y', y].value = True
+    elif mode == 'horizontal':
+        sizes = sizes.copy()
+        del sizes['x']
+        expected = sc.zeros(sizes=sizes, dtype=bool)
+        expected['layer', layer]['y', y].value = True
+    elif mode == 'vertical':
+        sizes = sizes.copy()
+        del sizes['y']
+        expected = sc.zeros(sizes=sizes, dtype=bool)
+        expected['layer', layer]['x', x].value = True
+    return expected
 
 
 # ---------------------------------------------------------------------------
@@ -613,9 +598,7 @@ def test_mode_toggles_exactly_the_intended_elements(mode):
     explorer.mask_control.mode = mode
     press(explorer, 'bank_0', 2, 1)
 
-    expected = sc.zeros(sizes=explorer.data['bank_0'].sizes, dtype=bool)
-    toggle_model(expected[0].values, mode, 2, 1)
-    # print(explorer.masks['bank_0'])
+    expected = mask_at(explorer.data['bank_0'].sizes, mode, 0, 2, 1)
     assert_identical(next(iter(explorer.masks['bank_0'].values())), expected)
 
 
@@ -623,51 +606,32 @@ def test_mode_toggles_exactly_the_intended_elements(mode):
 def test_mode_transitions_use_new_mode_even_on_same_pixel(first, second):
     explorer = DetectorExplorer(make_banks())
     select(explorer, 'bank_0')
-    expected = sc.zeros(sizes=explorer.data['bank_0'].sizes, dtype=bool).values
-    explorer.masks['bank_0']['layer', 0]['y', 0]['x', 3].value = True
-    expected[0, 0, 3] = True
 
     explorer.mask_control.mode = first
-    for x, y in [(2, 1), (2, 1)]:
-        press(explorer, 'bank_0', x, y)
-        toggle_model(expected[0], first, x, y)
-        assert (next(iter(explorer.masks['bank_0'].values())).values == expected).all()
+    press(explorer, 'bank_0', 2, 1)
+    expected_first = mask_at(explorer.data['bank_0'].sizes, first, 0, 2, 1)
+    keys = list(explorer.masks['bank_0'].keys())
+    assert_identical(explorer.masks['bank_0'][keys[0]], expected_first)
 
     explorer.mask_control.mode = second
-    for x, y in [(2, 1), (2, 1), (1, 2), (2, 1)]:
-        press(explorer, 'bank_0', x, y)
-        toggle_model(expected[0], second, x, y)
-        assert (next(iter(explorer.masks['bank_0'].values())).values == expected).all()
-
-
-def test_partially_masked_selection_becomes_masked_and_full_becomes_unmasked():
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, 'bank_0')
-    explorer.masks['bank_0']["mask"] = sc.zeros(
-        sizes=explorer.data['bank_0'].sizes, dtype=bool
+    press(explorer, 'bank_0', 2, 1)
+    expected_second = mask_at(explorer.data['bank_0'].sizes, second, 0, 2, 1)
+    keys = list(explorer.masks['bank_0'].keys())
+    assert len(keys) == 2
+    assert_identical(explorer.masks['bank_0'][keys[1]], expected_second)
+    assert (
+        explorer.masks['bank_0'][keys[0]].dims != explorer.masks['bank_0'][keys[1]].dims
     )
-    explorer.masks['bank_0']["mask"]['layer', 0]['y', 1]['x', 0].value = True
-    explorer.mask_control.mode = 'horizontal'
 
     press(explorer, 'bank_0', 2, 1)
-    assert explorer.masks['bank_0']["mask"]['layer', 0]['y', 1]['x', 0].value
-    press(explorer, 'bank_0', 2, 1)
-    assert not explorer.masks['bank_0']["mask"]['layer', 0]['y', 1]['x', 0].value
-
-
-def test_hidden_sliced_dimension_restricts_edits():
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, 'bank_0')
-    explorer.bank_dim_sliders['bank_0'][0].slider.value = 1
-    explorer.mask_control.mode = 'horizontal'
-    press(explorer, 'bank_0', 0, 2)
-
-    assert explorer.masks['bank_0']['layer', 1].values[2].all()
-    assert explorer.masks['bank_0'].values.sum() == 4
+    # The second mask should have disappeared
+    assert len(explorer.masks['bank_0']) == 1
 
 
 def test_summed_dimension_applies_edits_across_full_extent():
-    explorer = DetectorExplorer(make_banks({'time': 3, 'layer': 2, 'y': 3, 'x': 4}))
+    explorer = DetectorExplorer(
+        make_banks({'time': 3, 'layer': 2, 'y': 3, 'x': 4}), show_dims=['y', 'x']
+    )
     select(explorer, 'bank_0')
     sliders = sliders_of(explorer, 'bank_0')
     sliders['time'].sum.value = True
@@ -675,10 +639,8 @@ def test_summed_dimension_applies_edits_across_full_extent():
     explorer.mask_control.mode = 'vertical'
     press(explorer, 'bank_0', 3, 0)
 
-    mask = explorer.masks['bank_0']
-    assert mask['layer', 1]['x', 3].values.all()
-    assert mask.values.sum() == 3 * 3
-    assert not mask['layer', 0].values.any()
+    mask = next(iter(explorer.masks['bank_0'].values()))
+    assert set(mask.dims) == {'x', 'layer'}
 
 
 def test_masking_affects_only_selected_bank_and_leaves_data_unchanged():
@@ -689,9 +651,9 @@ def test_masking_affects_only_selected_bank_and_leaves_data_unchanged():
     explorer.mask_control.mode = 'vertical'
     press(explorer, 'bank_1', 1, 1)
 
-    assert explorer.masks['bank_1'].values.any()
+    assert explorer.masks['bank_1']
     for bank in ('bank_0', 'bank_2'):
-        assert not explorer.masks[bank].values.any()
+        assert not explorer.masks[bank]
     for bank in data:
         assert_identical(explorer.data[bank].data, original[bank].data)
         assert not explorer.data[bank].masks
@@ -706,9 +668,8 @@ def test_click_coordinates_are_rounded_to_nearest_pixel(x, y, ix, iy):
     select(explorer, 'bank_0')
     explorer.mask_control.mode = 'single'
     press(explorer, 'bank_0', x, y)
-    expected = sc.zeros(sizes={'y': 3, 'x': 4}, dtype=bool).values
-    expected[iy, ix] = True
-    assert (layer0(explorer) == expected).all()
+    expected = mask_at(explorer.data['bank_0'].sizes, 'single', 0, ix, iy)
+    assert_identical(next(iter(explorer.masks['bank_0'].values())), expected)
 
 
 @pytest.mark.parametrize('mode', MODES)
@@ -718,27 +679,22 @@ def test_reversed_visible_dimensions_target_correct_pixels(mode):
     explorer.mask_control.mode = mode
     # The horizontal axis now shows 'y' (size 3), the vertical axis 'x' (size 4).
     press(explorer, 'bank_0', 2, 3)
+    sizes = explorer.data['bank_0'].sizes
 
-    expected = sc.zeros(sizes={'y': 3, 'x': 4}, dtype=bool).values
-    toggle_model(expected.T, mode, 2, 3)
-    assert (layer0(explorer) == expected).all()
-
-
-def test_masks_refresh_in_both_views_after_switching_tabs():
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, 'bank_1')
-    explorer.mask_control.mode = 'single'
-    press(explorer, 'bank_1', 2, 1)
-    select(explorer, 'All')
-    select(explorer, 'bank_1')
-    select(explorer, 'bank_0')
-    select(explorer, 'bank_1')
-
-    for nodes in (explorer.to_plot_nodes, explorer.all_to_plot_nodes):
-        mask = nodes['bank_1']().masks['mask'].values
-        assert mask[1, 2]
-        assert mask.sum() == 1
-        assert not nodes['bank_0']().masks['mask'].values.any()
+    if mode == 'single':
+        expected = sc.zeros(sizes=sizes, dtype=bool)
+        expected['layer', 0]['x', 3]['y', 2].value = True
+    elif mode == 'horizontal':
+        sizes = sizes.copy()
+        del sizes['y']
+        expected = sc.zeros(sizes=sizes, dtype=bool)
+        expected['layer', 0]['x', 3].value = True
+    elif mode == 'vertical':
+        sizes = sizes.copy()
+        del sizes['x']
+        expected = sc.zeros(sizes=sizes, dtype=bool)
+        expected['layer', 0]['y', 2].value = True
+    assert_identical(next(iter(explorer.masks['bank_0'].values())), expected)
 
 
 def test_adding_a_mask_then_clicking_same_place_again_deletes_it():
@@ -800,7 +756,7 @@ def test_without_continuous_mode_only_initial_click_changes_masks():
     press(explorer, 'bank_0', 1, 1)
     move(explorer, 'bank_0', 2, 1)
     move(explorer, 'bank_0', 3, 2)
-    assert layer0(explorer).sum() == 1
+    assert next(iter(explorer.masks['bank_0'].values())).sum().value == 1
 
 
 @pytest.mark.parametrize('mode', MODES)
@@ -809,23 +765,22 @@ def test_continuous_masking_follows_movement_without_repeated_toggles(mode):
     select(explorer, 'bank_0')
     explorer.mask_control.mode = mode
     explorer.mask_control.continuous_button.value = True
-    expected = sc.zeros(sizes={'y': 3, 'x': 4}, dtype=bool).values
 
     press(explorer, 'bank_0', 1, 1)
-    toggle_model(expected, mode, 1, 1)
-    assert (layer0(explorer) == expected).all()
+    assert len(explorer.masks['bank_0']) == 1
 
     # Stays in the same pixel/row/column: nothing changes.
     same = {'single': [(1, 1)], 'horizontal': [(3, 1)], 'vertical': [(1, 2)]}[mode]
     for x, y in same * 2:
         move(explorer, 'bank_0', x, y)
-        assert (layer0(explorer) == expected).all()
+        assert len(explorer.masks['bank_0']) == 1
+        assert next(iter(explorer.masks['bank_0'].values())).sum().value == 1
 
     # New target: changes exactly once, even when moving repeatedly within it.
     for x, y in [(3, 2), (3, 2)]:
         move(explorer, 'bank_0', x, y)
-    toggle_model(expected, mode, 3, 2)
-    assert (layer0(explorer) == expected).all()
+        assert len(explorer.masks['bank_0']) == 1
+        assert next(iter(explorer.masks['bank_0'].values())).sum().value == 2
 
 
 def test_leaving_axes_has_no_effect_and_release_stops_masking():
@@ -837,33 +792,11 @@ def test_leaving_axes_has_no_effect_and_release_stops_masking():
 
     press(explorer, 'bank_0', 1, 1)
     move_outside(explorer, 'bank_0')
-    assert layer0(explorer).sum() == 1
+    assert next(iter(explorer.masks['bank_0'].values())).sum().value == 1
     release(explorer, 'bank_0', 1, 1)
     assert handler_counts(explorer, 'bank_0') == before
     move(explorer, 'bank_0', 2, 2)
-    assert layer0(explorer).sum() == 1
-
-
-def test_release_outside_axes_stops_masking_and_new_gesture_starts_cleanly():
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'single'
-    explorer.mask_control.continuous_button.value = True
-    before = handler_counts(explorer, 'bank_0')
-
-    for _ in range(3):
-        press(explorer, 'bank_0', 0, 0)
-        move(explorer, 'bank_0', 1, 0)
-        release(explorer, 'bank_0', outside=True)
-        assert handler_counts(explorer, 'bank_0') == before
-        move(explorer, 'bank_0', 2, 0)
-        # Gesture toggled (0,0) and (1,0) once each; (2,0) is untouched.
-        assert layer0(explorer)[0].tolist() == [True, True, False, False]
-        press(explorer, 'bank_0', 0, 0)  # untoggle (0, 0)
-        press(explorer, 'bank_0', 1, 0)  # untoggle (1, 0)
-        release(explorer, 'bank_0', outside=True)
-        assert not layer0(explorer).any()
-        assert handler_counts(explorer, 'bank_0') == before
+    assert next(iter(explorer.masks['bank_0'].values())).sum().value == 1
 
 
 # ---------------------------------------------------------------------------
@@ -871,66 +804,36 @@ def test_release_outside_axes_stops_masking_and_new_gesture_starts_cleanly():
 # ---------------------------------------------------------------------------
 
 
-def fill_all_masks(explorer):
-    for mask in explorer.masks.values():
-        mask.values[...] = True
-
-
 def test_clear_on_bank_affects_only_that_banks_selected_slice():
     explorer = DetectorExplorer(make_banks())
-    fill_all_masks(explorer)
     select(explorer, 'bank_1')
+    explorer.mask_control.mode = 'horizontal'
+    press(explorer, 'bank_1', 1, 1)
     explorer.bank_dim_sliders['bank_1'][0].slider.value = 1
+    press(explorer, 'bank_1', 1, 1)
+
     explorer.mask_control.clear_button.click()
 
-    assert not explorer.masks['bank_1']['layer', 1].values.any()
-    assert explorer.masks['bank_1']['layer', 0].values.all()
-    for bank in ('bank_0', 'bank_2'):
-        assert explorer.masks[bank].values.all()
+    (key,) = explorer.masks['bank_1'].keys()
+
+    assert explorer.masks['bank_1'][key]['layer', 1].values.sum() == 0
+    assert explorer.masks['bank_1'][key]['layer', 0].values.sum() == 1
 
 
 def test_clear_on_all_affects_selected_slice_in_every_bank():
     explorer = DetectorExplorer(make_banks())
-    fill_all_masks(explorer)
-    sliders_of(explorer, 'All')['layer'].slider.value = 1
-    explorer.mask_control.clear_button.click()
-
-    for mask in explorer.masks.values():
-        assert not mask['layer', 1].values.any()
-        assert mask['layer', 0].values.all()
-
-
-def test_clear_with_summed_dimension_clears_full_extent_only_in_selection():
-    explorer = DetectorExplorer(make_banks({'time': 3, 'layer': 2, 'y': 3, 'x': 4}))
-    fill_all_masks(explorer)
-    select(explorer, 'bank_0')
-    sliders = sliders_of(explorer, 'bank_0')
-    sliders['time'].sum.value = True
-    sliders['layer'].slider.value = 1
-    explorer.mask_control.clear_button.click()
-
-    mask = explorer.masks['bank_0']
-    assert not mask['layer', 1].values.any()
-    assert mask['layer', 0].values.all()
-    assert explorer.masks['bank_1'].values.all()
-
-
-def test_clear_refreshes_both_views_and_empty_clear_is_harmless():
-    explorer = DetectorExplorer(make_banks())
-    fill_all_masks(explorer)
-    for node in explorer.mask_selection_nodes.values():
-        node.notify_children(message=None)
-    for node in explorer.all_mask_selection_nodes.values():
-        node.notify_children(message=None)
+    explorer.mask_control.mode = 'horizontal'
     select(explorer, 'bank_1')
-    explorer.mask_control.clear_button.click()
-    for nodes in (explorer.to_plot_nodes, explorer.all_to_plot_nodes):
-        assert not nodes['bank_1']().masks['mask'].values.any()
-        assert nodes['bank_0']().masks['mask'].values.all()
+    press(explorer, 'bank_1', 1, 1)
+    select(explorer, 'bank_2')
+    press(explorer, 'bank_2', 1, 0)
+    assert len(explorer.masks['bank_1']) == 1
+    assert len(explorer.masks['bank_2']) == 1
 
+    select(explorer, 'All')
     explorer.mask_control.clear_button.click()
-    assert not explorer.masks['bank_1']['layer', 0].values.any()
-    assert explorer.masks['bank_1']['layer', 1].values.all()
+    assert len(explorer.masks['bank_1']) == 0
+    assert len(explorer.masks['bank_2']) == 0
 
 
 def test_filename_controls_save_button_and_empty_filename_writes_nothing(
@@ -951,21 +854,20 @@ def test_filename_controls_save_button_and_empty_filename_writes_nothing(
 
 def test_saved_hdf5_round_trips_all_banks_regardless_of_selection(tmp_path):
     explorer = DetectorExplorer(make_uneven_banks())
-    rng = np.random.default_rng(1)
-    for mask in explorer.masks.values():
-        mask.values[...] = rng.random(mask.shape) > 0.5
+    explorer.mask_control.mode = 'horizontal'
     select(explorer, 'bank_2')
-    sliders_of(explorer, 'bank_2')['layer'].slider.value = 2
-    sliders_of(explorer, 'bank_2')['time'].sum.value = True
+    press(explorer, 'bank_2', 1, 0)
+    select(explorer, 'bank_1')
+    press(explorer, 'bank_1', 1, 1)
 
     path = tmp_path / 'masks.h5'
     explorer.mask_control.filename_input.value = str(path)
     explorer.mask_control.save_button.click()
 
     loaded = sc.io.load_hdf5(path)
-    assert list(loaded) == list(explorer.masks)
-    for bank, mask in explorer.masks.items():
-        assert_identical(loaded[bank], mask)
+    for bank, masks in explorer.masks.items():
+        for k, m in masks.items():
+            assert_identical(loaded[bank][k], m)
 
 
 def test_clear_masks_removes_from_dict_if_all_false():

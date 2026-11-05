@@ -358,7 +358,7 @@ class DetectorExplorer(ipw.VBox):
         self.data = sc.DataGroup(
             {k: _add_missing_coordinates(da) for k, da in data.items()}
         )
-        self.masks = {k: {} for k in self.data.keys()}
+        self.masks = sc.DataGroup({k: sc.DataGroup() for k in self.data.keys()})
         self.max_sizes = {
             dim: max(da.sizes.get(dim, 0) for da in self.data.values())
             for dim in self.data.dims
@@ -778,11 +778,15 @@ class DetectorExplorer(ipw.VBox):
         slices.extend(
             [sl.value for sl in self.bank_dim_sliders[key] if sl.value[1] is not None]
         )
-        dims = tuple(sl[0] for sl in slices)
+        # Preserve the dim order as in the original data
+        dims = tuple(
+            dim for dim in self.data[key].dims if dim in tuple(sl[0] for sl in slices)
+        )
         mask_name = str(dims)
         if mask_name not in self.masks[key]:
             self.masks[key][mask_name] = sc.zeros(
-                sizes={dim: self.data[key].sizes[dim] for dim in dims}, dtype=bool
+                sizes={dim: self.data[key].sizes[dim] for dim in dims},
+                dtype=bool,
             )
         m = self.masks[key][mask_name]
         for s in slices:
@@ -836,4 +840,4 @@ class DetectorExplorer(ipw.VBox):
         filename = self.mask_control.filename_input.value
         if not filename:
             return
-        sc.DataGroup(self.masks).save_hdf5(filename)
+        self.masks.save_hdf5(filename)
