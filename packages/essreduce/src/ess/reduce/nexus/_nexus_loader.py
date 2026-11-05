@@ -23,7 +23,7 @@ from .types import (
     NeXusFile,
     NeXusGroup,
     NeXusLocationSpec,
-    NeXusManyLocationSpec,
+    NeXusMultiLocationSpec,
     NeXusTransformation,
     RunType,
 )
@@ -108,8 +108,8 @@ def load_component(
     return loaded
 
 
-def load_many_components(
-    location: NeXusManyLocationSpec,
+def load_multi_components(
+    location: NeXusMultiLocationSpec,
     *,
     nx_class: type[snx.NXobject],
     parent_class: type[snx.NXobject] | None = None,
@@ -330,7 +330,7 @@ def open_component_group(
 
 @contextmanager
 def _open_component_parent(
-    location: NeXusLocationSpec | NeXusManyLocationSpec,
+    location: NeXusLocationSpec | NeXusMultiLocationSpec,
     *,
     parent_class: type[snx.NXobject],
     definitions: Mapping | None | NoNewDefinitionsType = NoNewDefinitions,
@@ -566,7 +566,7 @@ def load_data(
         return _load_data_from_group(instrument[component_name], selection)
 
 
-def load_many_data(
+def load_multi_data(
     file_path: FilePath | NeXusFile | NeXusGroup,
     selection: snx.typing.ScippIndex | slice = (),
     *,

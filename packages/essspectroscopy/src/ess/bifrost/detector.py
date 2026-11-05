@@ -14,7 +14,7 @@ from ess.spectroscopy.types import (
     Analyzers,
     EmptyDetector,
     NeXusComponent,
-    NeXusManyComponents,
+    NeXusMultiComponents,
     NeXusTransformation,
     PrimarySpecCoordTransformGraph,
     RunType,
@@ -85,7 +85,7 @@ def single_arc_and_channel_from_detector_number(
 
 
 def get_calibrated_detector_bifrost(
-    detector_components: NeXusManyComponents[snx.NXdetector, RunType],
+    detector_components: NeXusMultiComponents[snx.NXdetector, RunType],
     analyzers: Analyzers[RunType],
     *,
     primary_graph: PrimarySpecCoordTransformGraph[RunType],

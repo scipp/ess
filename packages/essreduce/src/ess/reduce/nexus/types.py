@@ -153,7 +153,7 @@ class NeXusName(sciline.Scope[Component, str], str):
     """Name of a component in a NeXus file."""
 
 
-class NeXusManyNames(sciline.Scope[Component, tuple[str, ...]], tuple[str, ...]):
+class NeXusMultiNames(sciline.Scope[Component, tuple[str, ...]], tuple[str, ...]):
     """Names of multiple components of the same class in a NeXus file."""
 
     def __new__(cls, x: Iterable[str] | None) -> Self:
@@ -175,7 +175,7 @@ class NeXusComponent(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGro
     """Raw data from a NeXus component."""
 
 
-class NeXusManyComponents(
+class NeXusMultiComponents(
     sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup
 ):
     """Raw data from multiple NeXus components of one class."""
@@ -189,7 +189,7 @@ class NeXusData(sciline.Scope[Component, RunType, sc.DataArray], sc.DataArray):
     """
 
 
-class NeXusManyData(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup):
+class NeXusMultiData(sciline.Scope[Component, RunType, sc.DataGroup], sc.DataGroup):
     """Data group of data arrays loaded from a NXevent_data or NXdata groups."""
 
 
@@ -333,9 +333,9 @@ class NeXusDataLocationSpec(NeXusLocationSpec, Generic[Component, RunType]):
 
 
 @dataclass
-class NeXusManyLocationSpec:
+class NeXusMultiLocationSpec:
     """
-    NeXus parameters to identify many locations of a class to load.
+    NeXus parameters to identify multiple locations of a class to load.
 
     If ``location_names is None`` corresponds to all locations of the class.
     """
@@ -347,8 +347,8 @@ class NeXusManyLocationSpec:
 
 
 @dataclass
-class NeXusManyComponentLocationSpec(
-    NeXusManyLocationSpec, Generic[Component, RunType]
+class NeXusMultiComponentLocationSpec(
+    NeXusMultiLocationSpec, Generic[Component, RunType]
 ):
     """
     NeXus parameters to identify multiple components of a class to load.
@@ -356,7 +356,7 @@ class NeXusManyComponentLocationSpec(
 
 
 @dataclass
-class NeXusManyDataLocationSpec(NeXusManyLocationSpec, Generic[Component, RunType]):
+class NeXusMultiDataLocationSpec(NeXusMultiLocationSpec, Generic[Component, RunType]):
     """
     NeXus parameters to identify (parts of) multiple data instances of a class to load.
     """

@@ -19,9 +19,9 @@ from ess.spectroscopy.types import (
     NeXusData,
     NeXusFileSpec,
     NeXusLocationSpec,
-    NeXusManyComponentLocationSpec,
-    NeXusManyComponents,
-    NeXusManyData,
+    NeXusMultiComponentLocationSpec,
+    NeXusMultiComponents,
+    NeXusMultiData,
     NeXusTransformation,
     NeXusTransformationChain,
     RunType,
@@ -95,9 +95,9 @@ def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
 
 
 def load_bifrost_analyzers(
-    detector_locations: NeXusManyComponentLocationSpec[snx.NXdetector, RunType],
-    detector_components: NeXusManyComponents[snx.NXdetector, RunType],
-) -> NeXusManyComponents[snx.NXcrystal, RunType]:
+    detector_locations: NeXusMultiComponentLocationSpec[snx.NXdetector, RunType],
+    detector_components: NeXusMultiComponents[snx.NXdetector, RunType],
+) -> NeXusMultiComponents[snx.NXcrystal, RunType]:
     """Load analyzer components for the given detectors.
 
     This function searches for an ``NXcrystal`` in the inputs (via the
@@ -139,7 +139,7 @@ def load_bifrost_analyzers(
             )[()]
             analyzer['detector_name'] = detector_name
             out[detector_name] = analyzer
-    return NeXusManyComponents[snx.NXcrystal, RunType](sc.DataGroup(out))
+    return NeXusMultiComponents[snx.NXcrystal, RunType](sc.DataGroup(out))
 
 
 # This function is useful in the Bragg Peak monitor workflow.
@@ -223,7 +223,7 @@ def _get_inputs(group: snx.Group) -> list[str]:
 
 
 def get_calibrated_analyzers(
-    analyzer_components: NeXusManyComponents[snx.NXcrystal, RunType],
+    analyzer_components: NeXusMultiComponents[snx.NXcrystal, RunType],
     time_interval: TimeInterval[RunType],
     time_filter: TransformationTimeFilter[snx.NXcrystal, RunType],
 ) -> Analyzers[RunType]:
@@ -290,7 +290,7 @@ def get_calibrated_analyzer(
 
 
 def concat_detector_events(
-    events: NeXusManyData[snx.NXdetector, RunType],
+    events: NeXusMultiData[snx.NXdetector, RunType],
 ) -> NeXusData[snx.NXdetector, RunType]:
     """Concatenate events form multiple detectors into a single data array."""
     return NeXusData[snx.NXdetector, RunType](

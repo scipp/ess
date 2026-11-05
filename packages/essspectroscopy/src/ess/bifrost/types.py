@@ -11,7 +11,7 @@ from typing import NewType
 import sciline
 import scipp as sc
 import scippnexus as snx
-from ess.spectroscopy.types import NeXusManyNames, RunType
+from ess.spectroscopy.types import NeXusMultiNames, RunType
 
 
 class ArcNumber(sciline.Scope[RunType, sc.Variable], sc.Variable): ...
@@ -23,7 +23,7 @@ class McStasRawDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
 ArcEnergy = NewType('ArcEnergy', sc.Variable)
 
 
-NeXusDetectorNames = NeXusManyNames[snx.NXdetector]
+NeXusDetectorNames = NeXusMultiNames[snx.NXdetector]
 
 
 InstrumentAnglePath = NewType('InstrumentAnglePath', str)
