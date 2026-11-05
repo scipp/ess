@@ -15,10 +15,8 @@ from ess.spectroscopy.types import (
     EmptyDetector,
     NeXusComponent,
     NeXusManyComponents,
-    NeXusManyData,
     NeXusTransformation,
     PrimarySpecCoordTransformGraph,
-    RawDetector,
     RunType,
     SecondarySpecCoordTransformGraph,
     TimeInterval,
@@ -313,25 +311,7 @@ def _extract_analyzer_parameters(
     }
 
 
-def assemble_bifrost_detector_data(
-    detector: EmptyDetector[RunType],
-    neutron_data: NeXusManyData[snx.NXdetector, RunType],
-) -> RawDetector[RunType]:
-    """Custom assemble function that combines all detector banks."""
-    from ess.reduce.nexus.workflow import assemble_detector_data as reduce_assemble
-
-    out = None
-    for events in neutron_data.values():
-        assembled = reduce_assemble(detector, events)
-        if out is None:
-            out = assembled
-        else:
-            out.bins.concatenate(assembled, out=out)
-    return RawDetector[RunType](out)
-
-
 providers = (
     arc_number,
-    assemble_bifrost_detector_data,
     get_calibrated_detector_bifrost,
 )

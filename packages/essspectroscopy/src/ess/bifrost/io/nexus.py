@@ -16,10 +16,12 @@ from ess.spectroscopy.types import (
     NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
+    NeXusData,
     NeXusFileSpec,
     NeXusLocationSpec,
     NeXusManyComponentLocationSpec,
     NeXusManyComponents,
+    NeXusManyData,
     NeXusTransformation,
     NeXusTransformationChain,
     RunType,
@@ -287,6 +289,15 @@ def get_calibrated_analyzer(
     )
 
 
+def concat_detector_events(
+    events: NeXusManyData[snx.NXdetector, RunType],
+) -> NeXusData[snx.NXdetector, RunType]:
+    """Concatenate events form multiple detectors into a single data array."""
+    return NeXusData[snx.NXdetector, RunType](
+        sc.concat(list(events.values()), dim='event_time_zero')
+    )
+
+
 def _collapse_runs(transform: sc.DataArray, dim: str) -> sc.DataArray:
     """Collapse runs of equal values into a single value."""
     # Find indices where the data changes
@@ -340,6 +351,7 @@ def stepwise_transformation_time_filter(transform: sc.DataArray) -> sc.DataArray
 
 
 providers = (
+    concat_detector_events,
     get_calibrated_analyzer,
     get_calibrated_analyzers,
     extract_instrument_angle,

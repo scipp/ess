@@ -7,8 +7,8 @@ import scipp as sc
 import scippnexus as snx
 from ess.spectroscopy.types import (
     EmptyDetector,
+    NeXusData,
     NeXusFileSpec,
-    NeXusManyData,
     PulsePeriod,
     RawDetector,
     RunType,
@@ -41,14 +41,12 @@ def _load_experiment_parameter(
 
 def assemble_bifrost_mcstas_detector_data(
     detector: EmptyDetector[RunType],
-    neutron_data: NeXusManyData[snx.NXdetector, RunType],
+    neutron_data: NeXusData[snx.NXdetector, RunType],
 ) -> McStasRawDetector[RunType]:
     """Custom assemble function that returns McStasDetectorData."""
-    from ..detector import assemble_bifrost_detector_data
+    from ess.reduce.nexus.workflow import assemble_detector_data
 
-    return McStasRawDetector[RunType](
-        assemble_bifrost_detector_data(detector, neutron_data)
-    )
+    return McStasRawDetector[RunType](assemble_detector_data(detector, neutron_data))
 
 
 def convert_simulated_time_to_event_time_offset(
