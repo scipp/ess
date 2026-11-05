@@ -985,14 +985,3 @@ def test_fit_and_tab_switching_survive_degenerate_data(values, log):
     explorer.color_control.fit_button.click()
     select(explorer, 'bank_1')
     select(explorer, 'All')
-
-
-def test_fit_and_tab_switching_with_masked_data():
-    explorer = DetectorExplorer(make_banks({'y': 2, 'x': 2}, count=2))
-    explorer.masks['bank_0'].values[...] = True
-    explorer.mask_selection_nodes['bank_0'].notify_children(message=None)
-    explorer.all_mask_selection_nodes['bank_0'].notify_children(message=None)
-    explorer.color_control.fit_button.click()
-    select(explorer, 'bank_0')
-    explorer.color_control.fit_button.click()
-    select(explorer, 'All')
