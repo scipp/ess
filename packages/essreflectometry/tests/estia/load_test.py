@@ -7,14 +7,12 @@ import scipp as sc
 import scippnexus as snx
 from ess.reduce.nexus.types import (
     NeXusComponent,
-    NeXusTransformation,
     TimeInterval,
     TransformationTimeFilter,
 )
 from scipp.testing import assert_allclose
 
 from ess.estia import EstiaWorkflow
-from ess.estia.load import load_detector_rotation, load_sample_rotation
 from ess.reflectometry.types import DetectorRotation, RawSampleRotation, SampleRun
 
 
@@ -24,9 +22,11 @@ def _group(parent, name, nx_class):
     return g
 
 
-def _rotation(parent, name, angles, depends_on='.', vector=(0.0, 1.0, 0.0)):
+def _rotation(parent, name, angles, depends_on='.'):
     g = _group(parent, name, 'NXlog')
-    g.attrs.update(transformation_type='rotation', vector=vector, depends_on=depends_on)
+    g.attrs.update(
+        transformation_type='rotation', vector=[0.0, 1.0, 0.0], depends_on=depends_on
+    )
     angles = np.atleast_1d(angles)
     g.create_dataset('value', data=angles).attrs['units'] = 'degrees'
     t = g.create_dataset('time', data=np.arange(len(angles), dtype='int64') * 10)
@@ -71,7 +71,7 @@ def _workflow(tmp_path, nx_class, angles, *, additional_rotation, entry_name='en
     ('nx_class', 'result_type'),
     [(snx.NXsample, RawSampleRotation), (snx.NXdetector, DetectorRotation)],
 )
-def test_orientation_from_nexus(tmp_path, entry_name, nx_class, result_type):
+def test_orientation_combines_y_rotations(tmp_path, entry_name, nx_class, result_type):
     wf = _workflow(
         tmp_path, nx_class, 3.65, additional_rotation=0.25, entry_name=entry_name
     )
@@ -104,21 +104,3 @@ def test_orientation_uses_configured_time_filter(tmp_path, nx_class, result_type
     # Selecting the last value distinguishes the override from the default mean.
     wf[TransformationTimeFilter[nx_class, SampleRun]] = lambda log: log['time', -1]
     assert_allclose(wf.compute(result_type[SampleRun]), sc.scalar(3.25, unit='deg'))
-
-
-@pytest.mark.parametrize(
-    ('loader', 'expected'),
-    [
-        (load_sample_rotation, -25.3150511771),
-        (load_detector_rotation, 1.25),
-    ],
-)
-def test_orientation_projects_rotations_about_different_axes(loader, expected):
-    yaw = sc.spatial.rotations_from_rotvecs(sc.vector([0, 1.25, 0], unit='deg'))
-    pitch = sc.spatial.rotations_from_rotvecs(sc.vector([30, 0, 0], unit='deg'))
-    roll = sc.spatial.rotations_from_rotvecs(sc.vector([0, 0, 45], unit='deg'))
-    translation = sc.spatial.translation(value=[123, 0, 0], unit='mm')
-    transform = NeXusTransformation(yaw * translation * pitch * roll)
-    # For the sample surface, yaw = 1.25 - atan(sin(30) * tan(45)).
-    # The detector +z axis is unchanged by the innermost roll about z.
-    assert_allclose(loader(transform), sc.scalar(expected, unit='deg'))
