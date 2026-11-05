@@ -3,7 +3,6 @@
 
 import math
 from collections.abc import Callable
-from typing import Literal
 
 import ipywidgets as ipw
 import matplotlib.pyplot as plt

@@ -4,7 +4,6 @@
 import math
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pytest
 import scipp as sc
 from scipp.testing import assert_identical
