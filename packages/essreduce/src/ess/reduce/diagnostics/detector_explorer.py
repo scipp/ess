@@ -326,10 +326,24 @@ def _apply_masks_and_transpose(
     return da.assign_masks({"mask": mask}).transpose(dims)
 
 
+def _apply_masks(da: sc.DataArray, masks: dict[str, sc.Variable]) -> sc.DataArray:
+    return da.assign_masks(masks)
+
+
 def _slice_mask(mask: sc.Variable, slices: list[tuple[str, slice]]) -> sc.Variable:
     out = mask
     for s in [sli for sli in slices if sli[1] is not None]:
         out = out[s]
+    return out
+
+
+def _maybe_slice_mask(
+    mask: sc.Variable, slices: list[tuple[str, slice]]
+) -> sc.Variable:
+    out = mask
+    for s in slices:
+        if (s[0] in out.dims) and (s[1] < out.sizes[s[0]]):
+            out = out[s]
     return out
 
 
@@ -372,9 +386,7 @@ class DetectorExplorer(ipw.VBox):
         self.data = sc.DataGroup(
             {k: _add_missing_coordinates(da) for k, da in data.items()}
         )
-        self.masks = {
-            k: sc.zeros(sizes=da.sizes, dtype=bool) for k, da in self.data.items()
-        }
+        self.masks = {k: {} for k in self.data.keys()}
         self.max_sizes = {
             dim: max(da.sizes.get(dim, 0) for da in self.data.values())
             for dim in self.data.dims
@@ -410,43 +422,51 @@ class DetectorExplorer(ipw.VBox):
             key: pp.Node(lambda dg, key: dg[key], dg=self.data, key=key)
             for key in self.data.keys()
         }
+
+        self.apply_masks_nodes = {
+            key: pp.Node(
+                _apply_masks, da=self.bank_selection_nodes[key], masks=self.masks[key]
+            )
+            for key in self.data.keys()
+        }
+
         self.slice_data_nodes = {
             key: pp.Node(
                 _slice_or_reduce,
-                da=self.bank_selection_nodes[key],
+                da=self.apply_masks_nodes[key],
                 slices=self.collect_nodes[key],
                 op="sum",
             )
             for key in self.data.keys()
         }
 
-        # Before displaying on the figures, a reduction operation is sometimes applied.
-        # If we apply the masks early in the node tree (e.g. just after the input data),
-        # the masked data will be zeroed during the reduction and will no longer be
-        # easily visible on the figures. Instead, we slice the masks as well and only
-        # apply them just before displaying the data on the figures.
-        self.mask_selection_nodes = {
-            key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
-            for key in self.data.keys()
-        }
-        self.slice_masks_nodes = {
-            key: pp.Node(
-                _slice_or_reduce,
-                da=self.mask_selection_nodes[key],
-                slices=self.collect_nodes[key],
-                op="all",
-            )
-            for key in self.data.keys()
-        }
-        self.apply_masks_nodes = {
-            key: pp.Node(
-                _apply_masks_and_transpose,
-                da=self.slice_data_nodes[key],
-                mask=self.slice_masks_nodes[key],
-                dims=self._visible_dims,
-            )
-            for key in self.data.keys()
-        }
+        # # Before displaying on the figures, a reduction operation is sometimes applied.
+        # # If we apply the masks early in the node tree (e.g. just after the input data),
+        # # the masked data will be zeroed during the reduction and will no longer be
+        # # easily visible on the figures. Instead, we slice the masks as well and only
+        # # apply them just before displaying the data on the figures.
+        # self.mask_selection_nodes = {
+        #     key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
+        #     for key in self.data.keys()
+        # }
+        # self.slice_masks_nodes = {
+        #     key: pp.Node(
+        #         _slice_or_reduce,
+        #         da=self.mask_selection_nodes[key],
+        #         slices=self.collect_nodes[key],
+        #         op="all",
+        #     )
+        #     for key in self.data.keys()
+        # }
+        # self.apply_masks_nodes = {
+        #     key: pp.Node(
+        #         _apply_masks_and_transpose,
+        #         da=self.slice_data_nodes[key],
+        #         mask=self.slice_masks_nodes[key],
+        #         dims=self._visible_dims,
+        #     )
+        #     for key in self.data.keys()
+        # }
 
         # There is a significant performance penalty in Matplotlib if we display the
         # data from the same node on both the 'All detectors' subplots and the
@@ -464,34 +484,34 @@ class DetectorExplorer(ipw.VBox):
         self.all_slice_data_nodes = {
             key: pp.Node(
                 _slice_or_reduce,
-                da=self.bank_selection_nodes[key],
+                da=self.apply_masks_nodes[key],
                 slices=self.all_collect_node,
                 op="sum",
             )
             for key in self.data.keys()
         }
-        self.all_mask_selection_nodes = {
-            key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
-            for key in self.data.keys()
-        }
-        self.all_slice_masks_nodes = {
-            key: pp.Node(
-                _slice_or_reduce,
-                da=self.all_mask_selection_nodes[key],
-                slices=self.all_collect_node,
-                op="all",
-            )
-            for key in self.data.keys()
-        }
-        self.all_apply_masks_nodes = {
-            key: pp.Node(
-                _apply_masks_and_transpose,
-                da=self.all_slice_data_nodes[key],
-                mask=self.all_slice_masks_nodes[key],
-                dims=self._visible_dims,
-            )
-            for key in self.data.keys()
-        }
+        # self.all_mask_selection_nodes = {
+        #     key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
+        #     for key in self.data.keys()
+        # }
+        # self.all_slice_masks_nodes = {
+        #     key: pp.Node(
+        #         _slice_or_reduce,
+        #         da=self.all_mask_selection_nodes[key],
+        #         slices=self.all_collect_node,
+        #         op="all",
+        #     )
+        #     for key in self.data.keys()
+        # }
+        # self.all_apply_masks_nodes = {
+        #     key: pp.Node(
+        #         _apply_masks_and_transpose,
+        #         da=self.all_slice_data_nodes[key],
+        #         mask=self.all_slice_masks_nodes[key],
+        #         dims=self._visible_dims,
+        #     )
+        #     for key in self.data.keys()
+        # }
 
         nkeys = len(self.data)
         ncols = min(3, nkeys)
@@ -510,7 +530,7 @@ class DetectorExplorer(ipw.VBox):
         _kwargs = {**{"hide_log_buttons": True, "autoscale": False}, **kwargs}
         for i, bank in enumerate(self.data.keys()):
             self.subplots[bank] = pp.imagefigure(
-                self.all_apply_masks_nodes[bank],
+                self.all_slice_data_nodes[bank],
                 ax=axs[i],
                 title=bank,
                 cbar=True,
@@ -518,7 +538,7 @@ class DetectorExplorer(ipw.VBox):
             )
             axs[i]._bank_explorer_subplot_index = i
             self.tab_figs[bank] = pp.imagefigure(
-                self.apply_masks_nodes[bank],
+                self.slice_data_nodes[bank],
                 title=bank,
                 cbar=True,
                 # Need to make some horizontal space for the toolbar
@@ -822,12 +842,28 @@ class DetectorExplorer(ipw.VBox):
             slices.append((ydim, y))
         if masking_mode in ("vertical", "single"):
             slices.append((xdim, x))
-        slices.extend([sl.value for sl in self.bank_dim_sliders[key]])
+        slices.extend(
+            [sl.value for sl in self.bank_dim_sliders[key] if sl.value[1] is not None]
+        )
+        dims = tuple(sl[0] for sl in slices)
+        mask_name = str(dims)
+        if mask_name not in self.masks[key]:
+            self.masks[key][mask_name] = sc.zeros(
+                sizes={dim: self.data[key].sizes[dim] for dim in dims}, dtype=bool
+            )
+        # else:
+        #     m = self.masks[key][mask_name]
+        sliced_mask = _slice_mask(self.masks[key][mask_name], slices)
+        sliced_mask.values[...] = False if sliced_mask.values.all() else True
 
-        m = _slice_mask(self.masks[key], slices)
-        m.values[...] = False if m.values.all() else True
-        self.all_mask_selection_nodes[key].notify_children(message=None)
-        self.mask_selection_nodes[key].notify_children(message=None)
+        if not self.masks[key][mask_name].values.max():
+            del self.masks[key][mask_name]
+
+        # m = _slice_mask(self.masks[key], slices)
+        # m.values[...] = False if m.values.all() else True
+        # self.all_mask_selection_nodes[key].notify_children(message=None)
+        # self.mask_selection_nodes[key].notify_children(message=None)
+        self.apply_masks_nodes[key].notify_children(message=None)
 
         self._previous_pixel = (x, y)
 
@@ -835,18 +871,40 @@ class DetectorExplorer(ipw.VBox):
         """
         Clear currently visible masks for the current tab or the entire dataset.
         """
+        print("Clearing masks for key:", self.current_key)
         if self.current_key == "All":
             keys = self.masks.keys()
-            slices = [sl.value for sl in self.all_dim_sliders]
+            slices = [
+                sl.value for sl in self.all_dim_sliders if sl.value[1] is not None
+            ]
         else:
             keys = [self.current_key]
-            slices = [sl.value for sl in self.bank_dim_sliders[keys[0]]]
+            slices = [
+                sl.value
+                for sl in self.bank_dim_sliders[keys[0]]
+                if sl.value[1] is not None
+            ]
+
+        # dims = tuple(sl[0] for sl in slices)
+        # mask_name = str(dims)
 
         for key in keys:
-            m = _slice_mask(self.masks[key], slices)
-            m.values[...] = False
-            self.all_mask_selection_nodes[key].notify_children(message=None)
-            self.mask_selection_nodes[key].notify_children(message=None)
+            mask_names = list(self.masks[key].keys())
+            for name in mask_names:
+                m = _maybe_slice_mask(self.masks[key][name], slices)
+                m.values[...] = False
+                if not self.masks[key][name].values.max():
+                    del self.masks[key][name]
+
+            # print("Clearing masks for individual key:", key)
+            # if mask_name not in self.masks[key]:
+            #     print("Mask not found for key:", key, "mask_name:", mask_name)
+            #     continue
+            # m = _slice_mask(self.masks[key][mask_name], slices)
+            # m.values[...] = False
+            self.apply_masks_nodes[key].notify_children(message=None)
+            # self.all_mask_selection_nodes[key].notify_children(message=None)
+            # self.mask_selection_nodes[key].notify_children(message=None)
 
     def save_masks(self, _) -> None:
         """
