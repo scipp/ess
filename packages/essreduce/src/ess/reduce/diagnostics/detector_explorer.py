@@ -282,12 +282,12 @@ def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
     )
 
 
-def _slice_or_reduce(
-    da: sc.DataArray, slices: list[tuple[str, int | None]], op: Literal["sum", "all"]
+def _slice_or_sum(
+    da: sc.DataArray, slices: list[tuple[str, int | None]]
 ) -> sc.DataArray:
     """
-    Slice or reduce a DataArray based on the provided slices and operation.
-    If the index for a dimension is ``None``, the specified operation is applied along
+    Slice or sum a DataArray based on the provided slices and operation.
+    If the index for a dimension is ``None``, a sum is applied along
     that dimension. Otherwise, the DataArray is sliced at the given index.
     If an index is out of bounds for a dimension, a blank DataArray is created to avoid
     indexing errors.
@@ -298,9 +298,6 @@ def _slice_or_reduce(
         The DataArray to process.
     slices:
         A list of tuples, each containing a dimension name and an index or ``None``.
-    op:
-        The reduction operation to apply when the index is ``None``. Supported values
-        are ``"sum"`` and ``"all"``.
     """
     out = da
     for sl in slices:
@@ -308,43 +305,18 @@ def _slice_or_reduce(
         if dim not in out.sizes:
             continue
         if ind is None:
-            out = getattr(sc, op)(out, dim)
+            out = sc.sum(out, dim)
         else:
             if ind >= out.sizes[dim]:
                 # Make a blank data array to avoid indexing errors
-                out = sc.full_like(
-                    out[dim, 0], value={"sum": float("nan"), "all": False}[op]
-                )
+                out = sc.full_like(out[dim, 0], value=float("nan"))
             else:
                 out = out[dim, ind]
     return out
 
 
-def _apply_masks_and_transpose(
-    da: sc.DataArray, mask: sc.Variable, dims: list[str] | tuple[str, ...]
-) -> sc.DataArray:
-    return da.assign_masks({"mask": mask}).transpose(dims)
-
-
 def _apply_masks(da: sc.DataArray, masks: dict[str, sc.Variable]) -> sc.DataArray:
     return da.assign_masks(masks)
-
-
-def _slice_mask(mask: sc.Variable, slices: list[tuple[str, slice]]) -> sc.Variable:
-    out = mask
-    for s in [sli for sli in slices if sli[1] is not None]:
-        out = out[s]
-    return out
-
-
-def _maybe_slice_mask(
-    mask: sc.Variable, slices: list[tuple[str, slice]]
-) -> sc.Variable:
-    out = mask
-    for s in slices:
-        if (s[0] in out.dims) and (s[1] < out.sizes[s[0]]):
-            out = out[s]
-    return out
 
 
 def _box_of_sliders(sliders: list[DimSlider]) -> ipw.HBox:
@@ -429,17 +401,14 @@ class DetectorExplorer(ipw.VBox):
             )
             for key in self.data.keys()
         }
-
         self.slice_data_nodes = {
             key: pp.Node(
-                _slice_or_reduce,
+                _slice_or_sum,
                 da=self.apply_masks_nodes[key],
                 slices=self.collect_nodes[key],
-                op="sum",
             )
             for key in self.data.keys()
         }
-
         self.to_plot_nodes = {
             key: pp.Node(
                 lambda da: da.transpose(self._visible_dims),
@@ -447,34 +416,6 @@ class DetectorExplorer(ipw.VBox):
             )
             for key in self.data.keys()
         }
-
-        # # Before displaying on the figures, a reduction operation is sometimes applied.
-        # # If we apply the masks early in the node tree (e.g. just after the input data),
-        # # the masked data will be zeroed during the reduction and will no longer be
-        # # easily visible on the figures. Instead, we slice the masks as well and only
-        # # apply them just before displaying the data on the figures.
-        # self.mask_selection_nodes = {
-        #     key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
-        #     for key in self.data.keys()
-        # }
-        # self.slice_masks_nodes = {
-        #     key: pp.Node(
-        #         _slice_or_reduce,
-        #         da=self.mask_selection_nodes[key],
-        #         slices=self.collect_nodes[key],
-        #         op="all",
-        #     )
-        #     for key in self.data.keys()
-        # }
-        # self.apply_masks_nodes = {
-        #     key: pp.Node(
-        #         _apply_masks_and_transpose,
-        #         da=self.slice_data_nodes[key],
-        #         mask=self.slice_masks_nodes[key],
-        #         dims=self._visible_dims,
-        #     )
-        #     for key in self.data.keys()
-        # }
 
         # There is a significant performance penalty in Matplotlib if we display the
         # data from the same node on both the 'All detectors' subplots and the
@@ -491,10 +432,9 @@ class DetectorExplorer(ipw.VBox):
         )
         self.all_slice_data_nodes = {
             key: pp.Node(
-                _slice_or_reduce,
+                _slice_or_sum,
                 da=self.apply_masks_nodes[key],
                 slices=self.all_collect_node,
-                op="sum",
             )
             for key in self.data.keys()
         }
@@ -505,29 +445,6 @@ class DetectorExplorer(ipw.VBox):
             )
             for key in self.data.keys()
         }
-
-        # self.all_mask_selection_nodes = {
-        #     key: pp.Node(lambda masks, key: masks[key], masks=self.masks, key=key)
-        #     for key in self.data.keys()
-        # }
-        # self.all_slice_masks_nodes = {
-        #     key: pp.Node(
-        #         _slice_or_reduce,
-        #         da=self.all_mask_selection_nodes[key],
-        #         slices=self.all_collect_node,
-        #         op="all",
-        #     )
-        #     for key in self.data.keys()
-        # }
-        # self.all_apply_masks_nodes = {
-        #     key: pp.Node(
-        #         _apply_masks_and_transpose,
-        #         da=self.all_slice_data_nodes[key],
-        #         mask=self.all_slice_masks_nodes[key],
-        #         dims=self._visible_dims,
-        #     )
-        #     for key in self.data.keys()
-        # }
 
         nkeys = len(self.data)
         ncols = min(3, nkeys)
@@ -867,15 +784,6 @@ class DetectorExplorer(ipw.VBox):
             self.masks[key][mask_name] = sc.zeros(
                 sizes={dim: self.data[key].sizes[dim] for dim in dims}, dtype=bool
             )
-        # else:
-        #     m = self.masks[key][mask_name]
-
-        # def _slice_mask(mask: sc.Variable, slices: list[tuple[str, slice]]) -> sc.Variable:
-        #     out = mask
-        #     for s in [sli for sli in slices if sli[1] is not None]:
-        #         out = out[s]
-        #     return out
-
         m = self.masks[key][mask_name]
         for s in slices:
             m = m[s]
@@ -884,10 +792,6 @@ class DetectorExplorer(ipw.VBox):
         if not self.masks[key][mask_name].values.max():
             del self.masks[key][mask_name]
 
-        # m = _slice_mask(self.masks[key], slices)
-        # m.values[...] = False if m.values.all() else True
-        # self.all_mask_selection_nodes[key].notify_children(message=None)
-        # self.mask_selection_nodes[key].notify_children(message=None)
         self.apply_masks_nodes[key].notify_children(message=None)
 
         self._previous_pixel = (x, y)
@@ -896,7 +800,6 @@ class DetectorExplorer(ipw.VBox):
         """
         Clear currently visible masks for the current tab or the entire dataset.
         """
-        print("Clearing masks for key:", self.current_key)
         if self.current_key == "All":
             keys = self.masks.keys()
             slices = [
@@ -910,15 +813,6 @@ class DetectorExplorer(ipw.VBox):
                 if sl.value[1] is not None
             ]
 
-        # dims = tuple(sl[0] for sl in slices)
-        # mask_name = str(dims)
-
-        #  out = mask
-        #     for s in slices:
-        #         if (s[0] in out.dims) and (s[1] < out.sizes[s[0]]):
-        #             out = out[s]
-        #     return out
-
         for key in keys:
             mask_names = list(self.masks[key].keys())
             for name in mask_names:
@@ -930,15 +824,7 @@ class DetectorExplorer(ipw.VBox):
                 if not self.masks[key][name].values.max():
                     del self.masks[key][name]
 
-            # print("Clearing masks for individual key:", key)
-            # if mask_name not in self.masks[key]:
-            #     print("Mask not found for key:", key, "mask_name:", mask_name)
-            #     continue
-            # m = _slice_mask(self.masks[key][mask_name], slices)
-            # m.values[...] = False
             self.apply_masks_nodes[key].notify_children(message=None)
-            # self.all_mask_selection_nodes[key].notify_children(message=None)
-            # self.mask_selection_nodes[key].notify_children(message=None)
 
     def save_masks(self, _) -> None:
         """
