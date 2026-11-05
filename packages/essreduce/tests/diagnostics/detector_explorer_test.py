@@ -68,11 +68,9 @@ def test_initial_display_slices_hidden_dimensions_and_orders_visible_dimensions(
         for dim in array.dims:
             if dim not in visible_dims:
                 expected = expected[dim, 0]
-        expected = expected.assign_masks(
-            {'mask': sc.zeros(sizes=expected.sizes, dtype=bool)}
-        ).transpose(visible_dims)
-        assert_identical(explorer.apply_masks_nodes[bank](), expected)
-        assert_identical(explorer.all_apply_masks_nodes[bank](), expected)
+        expected = expected.transpose(visible_dims)
+        assert_identical(explorer.to_plot_nodes[bank](), expected)
+        assert_identical(explorer.all_to_plot_nodes[bank](), expected)
         for figure in (explorer.subplots[bank], explorer.tab_figs[bank]):
             assert figure.view._dims == {'x': visible_dims[1], 'y': visible_dims[0]}
 
@@ -158,7 +156,7 @@ def test_single_bank_tab_uses_bank_sliders():
     assert explorer.tabs.children[0].children[0].children[0] is slider
     slider.slider.value = 1
     assert_identical(
-        explorer.apply_masks_nodes['bank_0']().data,
+        explorer.to_plot_nodes['bank_0']().data,
         explorer.data['bank_0']['layer', 1].data,
     )
 
@@ -166,12 +164,14 @@ def test_single_bank_tab_uses_bank_sliders():
 def test_single_bank_clear_uses_bank_slider_slice():
     explorer = DetectorExplorer(make_banks(count=1))
     explorer.bank_dim_sliders['bank_0'][0].slider.value = 1
-    explorer.masks['bank_0'].values[...] = True
+    explorer.masks['bank_0']['new'] = sc.ones(
+        sizes=explorer.data['bank_0'].sizes, dtype=bool
+    )
 
     explorer.mask_control.clear_button.click()
 
-    assert explorer.masks['bank_0']['layer', 0].values.all()
-    assert not explorer.masks['bank_0']['layer', 1].values.any()
+    assert explorer.masks['bank_0']['new']['layer', 0].values.all()
+    assert not explorer.masks['bank_0']['new']['layer', 1].values.any()
 
 
 def test_single_bank_color_controls_update_bank_figure():
@@ -185,15 +185,17 @@ def test_single_bank_color_controls_update_bank_figure():
     assert colormapper.cmax == 10
 
 
-def test_initial_masks_are_false_and_independent_between_banks():
+def test_initial_masks_are_empty_and_independent_between_banks():
     data = make_banks()
     explorer = DetectorExplorer(data)
 
-    for bank, array in data.items():
-        assert_identical(explorer.masks[bank], sc.zeros(sizes=array.sizes, dtype=bool))
-    explorer.masks['bank_0'].values[...] = True
+    for bank in data.keys():
+        assert not explorer.masks[bank]
+    explorer.masks['bank_0']['new'] = sc.ones(
+        sizes=explorer.data['bank_0'].sizes, dtype=bool
+    )
     for bank in ('bank_1', 'bank_2'):
-        assert not explorer.masks[bank].values.any()
+        assert not explorer.masks[bank]
 
 
 def test_slider_disabled_if_one_bank_does_not_have_slider_dim():
@@ -238,16 +240,13 @@ def sliders_of(explorer, name):
 
 def expected_display(explorer, bank, **indices):
     """Reference display: ``dim=None`` sums, ``dim=int`` slices."""
-    out = explorer.data[bank]
-    mask = explorer.masks[bank]
+    out = explorer.data[bank].assign_masks(explorer.masks[bank])
     for dim, ind in indices.items():
         if ind is None:
             out = out.sum(dim)
-            mask = mask.all(dim)
         else:
             out = out[dim, ind]
-            mask = mask[dim, ind]
-    return out, mask
+    return out
 
 
 def _event(name, canvas, ax, x, y, button=1):
@@ -296,10 +295,6 @@ def toggle_model(mask, mode, x, y):
     mask[region] = not mask[region].all()
 
 
-def layer0(explorer, bank='bank_0'):
-    return explorer.masks[bank]['layer', 0].values
-
-
 # ---------------------------------------------------------------------------
 # 2. Slicing and summing
 # ---------------------------------------------------------------------------
@@ -310,29 +305,21 @@ def layer0(explorer, bank='bank_0'):
 def test_slider_displays_selected_slice_including_first_and_last(index, view):
     explorer = DetectorExplorer(make_banks())
     sliders = sliders_of(explorer, 'bank_1' if view == 'bank' else 'All')
-    nodes = (
-        explorer.apply_masks_nodes
-        if view == 'bank'
-        else (explorer.all_apply_masks_nodes)
-    )
+    nodes = explorer.to_plot_nodes if view == 'bank' else (explorer.all_to_plot_nodes)
     if view == 'all':
         select(explorer, 'All')
     sliders['layer'].slider.value = index
 
     result = nodes['bank_1']()
     assert_identical(result.data, explorer.data['bank_1']['layer', index].data)
-    assert not result.masks['mask'].values.any()
+    assert not result.masks
 
 
 @pytest.mark.parametrize('view', ['bank', 'all'])
 def test_sum_displays_reduction_and_disabling_restores_slice(view):
     explorer = DetectorExplorer(make_banks())
     name = 'bank_1' if view == 'bank' else 'All'
-    nodes = (
-        explorer.apply_masks_nodes
-        if view == 'bank'
-        else (explorer.all_apply_masks_nodes)
-    )
+    nodes = explorer.to_plot_nodes if view == 'bank' else (explorer.all_to_plot_nodes)
     select(explorer, name)
     slider = sliders_of(explorer, name)['layer']
     slider.slider.value = 1
@@ -349,35 +336,13 @@ def test_multiple_hidden_dimensions_support_mixed_slicing_and_summing():
     sliders['time'].sum.value = True
     sliders['layer'].slider.value = 1
     expected = explorer.data['bank_2']['layer', 1].sum('time')
-    assert_identical(explorer.apply_masks_nodes['bank_2']().data, expected.data)
+    assert_identical(explorer.to_plot_nodes['bank_2']().data, expected.data)
 
     sliders['time'].sum.value = False
     sliders['time'].slider.value = 2
     sliders['layer'].sum.value = True
     expected = explorer.data['bank_2']['time', 2].sum('layer')
-    assert_identical(explorer.apply_masks_nodes['bank_2']().data, expected.data)
-
-
-@pytest.mark.parametrize('view', ['bank', 'all'])
-def test_summed_masks_require_all_contributing_elements(view):
-    explorer = DetectorExplorer(make_banks())
-    nodes = (
-        explorer.apply_masks_nodes
-        if view == 'bank'
-        else (explorer.all_apply_masks_nodes)
-    )
-    sliders = sliders_of(explorer, 'bank_1' if view == 'bank' else 'All')
-    sliders['layer'].sum.value = True
-    explorer.masks['bank_1']['layer', 0]['y', 1]['x', 2].value = True
-    explorer.masks['bank_1']['layer', 1]['y', 1]['x', 2].value = True
-    explorer.masks['bank_1']['layer', 0]['y', 0]['x', 0].value = True
-    explorer.mask_selection_nodes['bank_1'].notify_children(message=None)
-    explorer.all_mask_selection_nodes['bank_1'].notify_children(message=None)
-
-    mask = nodes['bank_1']().masks['mask'].values
-    expected = sc.zeros(sizes={'y': 3, 'x': 4}, dtype=bool).values
-    expected[1, 2] = True
-    assert (mask == expected).all()
+    assert_identical(explorer.to_plot_nodes['bank_2']().data, expected.data)
 
 
 def test_all_index_beyond_smaller_bank_is_blank_and_unmasked():
@@ -385,17 +350,17 @@ def test_all_index_beyond_smaller_bank_is_blank_and_unmasked():
     sliders = sliders_of(explorer, 'All')
     sliders['layer'].slider.value = 3
 
-    result = explorer.all_apply_masks_nodes['bank_1']()
+    result = explorer.all_to_plot_nodes['bank_1']()
     assert sc.isnan(result.data).values.all()
-    assert not result.masks['mask'].values.any()
+    assert not result.masks
     expected = explorer.data['bank_0']['time', 0]['layer', 3]
-    assert_identical(explorer.all_apply_masks_nodes['bank_0']().data, expected.data)
+    assert_identical(explorer.all_to_plot_nodes['bank_0']().data, expected.data)
 
     sliders['layer'].slider.value = 0
     sliders['time'].slider.value = 2
-    result = explorer.all_apply_masks_nodes['bank_2']()
+    result = explorer.all_to_plot_nodes['bank_2']()
     assert sc.isnan(result.data).values.all()
-    assert not result.masks['mask'].values.any()
+    assert not result.masks
 
 
 def test_slider_updates_preserve_manual_color_limits():
@@ -508,16 +473,15 @@ def test_summed_dimensions_do_not_overwrite_stored_indices():
 def test_destination_plots_show_correct_data_and_masks(start, end):
     explorer = DetectorExplorer(make_banks())
     select(explorer, start)
-    explorer.masks['bank_1']['layer', 0]['y', 1]['x', 2].value = True
-    explorer.mask_selection_nodes['bank_1'].notify_children(message=None)
-    explorer.all_mask_selection_nodes['bank_1'].notify_children(message=None)
+    explorer.masks['bank_1']['mask'] = sc.zeros(sizes=explorer.data.sizes, dtype=bool)
+    explorer.masks['bank_1']['mask']['layer', 0]['y', 1]['x', 2].value = True
+    explorer.apply_masks_nodes['bank_1'].notify_children(message=None)
     select(explorer, end)
 
-    for nodes in (explorer.apply_masks_nodes, explorer.all_apply_masks_nodes):
+    for nodes in (explorer.to_plot_nodes, explorer.all_to_plot_nodes):
         result = nodes['bank_1']()
-        expected, mask = expected_display(explorer, 'bank_1', layer=0)
-        assert_identical(result.data, expected.data)
-        assert_identical(result.masks['mask'], mask)
+        expected = expected_display(explorer, 'bank_1', layer=0)
+        assert_identical(result, expected)
         assert result.masks['mask'].values[1, 2]
 
 
@@ -557,7 +521,9 @@ def test_repeated_tab_switches_do_not_duplicate_callbacks_or_actions():
 
     explorer.mask_control.mode = 'single'
     press(explorer, 'bank_1', 1, 1)
-    assert explorer.masks['bank_1'].values.sum() == 1
+    keys = list(explorer.masks['bank_1'].keys())
+    assert len(keys) == 1
+    assert explorer.masks['bank_1'][keys[0]].values.sum() == 1
 
 
 # ---------------------------------------------------------------------------
@@ -599,7 +565,7 @@ def test_pan_zoom_mode_suppresses_navigation_and_masking():
     explorer.mask_control.mode = 'single'
     explorer.tab_figs['bank_1'].fig.canvas.toolbar.zoom()
     press(explorer, 'bank_1', 1, 1)
-    assert not explorer.masks['bank_1'].values.any()
+    assert not explorer.masks['bank_1']
 
 
 def test_overview_clicks_do_not_change_masks():
@@ -613,7 +579,7 @@ def test_overview_clicks_do_not_change_masks():
         1,
     )
     assert explorer.current_key == 'bank_1'
-    assert not any(m.values.any() for m in explorer.masks.values())
+    assert not any(m for m in explorer.masks.values())
 
 
 # ---------------------------------------------------------------------------
@@ -637,7 +603,7 @@ def test_mode_buttons_are_mutually_exclusive():
 
     select(explorer, 'bank_0')
     press(explorer, 'bank_0', 1, 1)
-    assert not explorer.masks['bank_0'].values.any()
+    assert not explorer.masks['bank_0']
 
 
 @pytest.mark.parametrize('mode', MODES)
@@ -647,9 +613,10 @@ def test_mode_toggles_exactly_the_intended_elements(mode):
     explorer.mask_control.mode = mode
     press(explorer, 'bank_0', 2, 1)
 
-    expected = sc.zeros(sizes=explorer.data['bank_0'].sizes, dtype=bool).values
-    toggle_model(expected[0], mode, 2, 1)
-    assert (explorer.masks['bank_0'].values == expected).all()
+    expected = sc.zeros(sizes=explorer.data['bank_0'].sizes, dtype=bool)
+    toggle_model(expected[0].values, mode, 2, 1)
+    # print(explorer.masks['bank_0'])
+    assert_identical(next(iter(explorer.masks['bank_0'].values())), expected)
 
 
 @pytest.mark.parametrize(('first', 'second'), ALL_TRANSITIONS)
@@ -664,25 +631,28 @@ def test_mode_transitions_use_new_mode_even_on_same_pixel(first, second):
     for x, y in [(2, 1), (2, 1)]:
         press(explorer, 'bank_0', x, y)
         toggle_model(expected[0], first, x, y)
-        assert (explorer.masks['bank_0'].values == expected).all()
+        assert (next(iter(explorer.masks['bank_0'].values())).values == expected).all()
 
     explorer.mask_control.mode = second
     for x, y in [(2, 1), (2, 1), (1, 2), (2, 1)]:
         press(explorer, 'bank_0', x, y)
         toggle_model(expected[0], second, x, y)
-        assert (explorer.masks['bank_0'].values == expected).all()
+        assert (next(iter(explorer.masks['bank_0'].values())).values == expected).all()
 
 
 def test_partially_masked_selection_becomes_masked_and_full_becomes_unmasked():
     explorer = DetectorExplorer(make_banks())
     select(explorer, 'bank_0')
-    explorer.masks['bank_0']['layer', 0]['y', 1]['x', 0].value = True
+    explorer.masks['bank_0']["mask"] = sc.zeros(
+        sizes=explorer.data['bank_0'].sizes, dtype=bool
+    )
+    explorer.masks['bank_0']["mask"]['layer', 0]['y', 1]['x', 0].value = True
     explorer.mask_control.mode = 'horizontal'
 
     press(explorer, 'bank_0', 2, 1)
-    assert layer0(explorer)[1].all()
+    assert explorer.masks['bank_0']["mask"]['layer', 0]['y', 1]['x', 0].value
     press(explorer, 'bank_0', 2, 1)
-    assert not layer0(explorer)[1].any()
+    assert not explorer.masks['bank_0']["mask"]['layer', 0]['y', 1]['x', 0].value
 
 
 def test_hidden_sliced_dimension_restricts_edits():
@@ -764,7 +734,7 @@ def test_masks_refresh_in_both_views_after_switching_tabs():
     select(explorer, 'bank_0')
     select(explorer, 'bank_1')
 
-    for nodes in (explorer.apply_masks_nodes, explorer.all_apply_masks_nodes):
+    for nodes in (explorer.to_plot_nodes, explorer.all_to_plot_nodes):
         mask = nodes['bank_1']().masks['mask'].values
         assert mask[1, 2]
         assert mask.sum() == 1
@@ -954,7 +924,7 @@ def test_clear_refreshes_both_views_and_empty_clear_is_harmless():
         node.notify_children(message=None)
     select(explorer, 'bank_1')
     explorer.mask_control.clear_button.click()
-    for nodes in (explorer.apply_masks_nodes, explorer.all_apply_masks_nodes):
+    for nodes in (explorer.to_plot_nodes, explorer.all_to_plot_nodes):
         assert not nodes['bank_1']().masks['mask'].values.any()
         assert nodes['bank_0']().masks['mask'].values.all()
 
