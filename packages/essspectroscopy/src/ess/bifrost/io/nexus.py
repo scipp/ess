@@ -227,7 +227,7 @@ def get_calibrated_analyzers(
     time_interval: TimeInterval[RunType],
     time_filter: TransformationTimeFilter[snx.NXcrystal, RunType],
 ) -> Analyzers[RunType]:
-    """Collect the data for a single analyzer.
+    """Collect the data for all given analyzer.
 
     Parameters
     ----------

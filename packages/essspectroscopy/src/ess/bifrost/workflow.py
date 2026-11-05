@@ -84,7 +84,7 @@ def BifrostSimulationWorkflow(
     """Data reduction workflow for simulated BIFROST data.
 
     Parameters
-    ----------=
+    ----------
     kwargs:
         Additional keyword arguments passed to the underlying :func:`TofWorkflow`.
 
