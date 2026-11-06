@@ -35,6 +35,7 @@ from ess.reduce.nexus.types import (
     SampleRun,
     Source,
     TimeInterval,
+    TransformationOverrides,
 )
 from ess.reduce.nexus.workflow import (
     GenericNeXusWorkflow,
@@ -115,7 +116,7 @@ def test_can_compute_position_of_group(depends_on: snx.TransformationChain) -> N
     group = workflow.NeXusComponent[snx.NXsource, SampleRun](
         sc.DataGroup(depends_on=depends_on)
     )
-    chain = workflow.get_transformation_chain(group)
+    chain = workflow.get_transformation_chain(group, {})
     trans = workflow.to_transformation(
         chain,
         interval=TimeInterval(slice(None, None)),
@@ -242,7 +243,7 @@ def test_given_no_sample_load_nexus_sample_returns_group_with_origin_depends_on(
     assert spec.filename['/entry'][snx.NXsample] == {}
     sample = workflow.load_nexus_sample(spec)
     assert list(sample) == ['depends_on']
-    chain = workflow.get_transformation_chain(sample)
+    chain = workflow.get_transformation_chain(sample, {})
     transformation = workflow.to_transformation(
         chain,
         interval=TimeInterval(slice(None, None)),
@@ -255,7 +256,7 @@ def test_get_transformation_chain_raises_exception_if_position_not_found(
     group_with_no_position,
 ) -> None:
     with pytest.raises(KeyError, match='depends_on'):
-        workflow.get_transformation_chain(group_with_no_position)
+        workflow.get_transformation_chain(group_with_no_position, {})
 
 
 @pytest.fixture
@@ -555,7 +556,7 @@ def test_get_calibrated_monitor_extracts_data_field_from_nexus_monitor(
         nexus_monitor,
         offset=workflow.no_offset,
         transform=NeXusTransformation.from_chain(
-            workflow.get_transformation_chain(nexus_monitor),
+            workflow.get_transformation_chain(nexus_monitor, {}),
         ),
     )
     assert_identical(
@@ -572,7 +573,7 @@ def test_get_calibrated_monitor_subtracts_offset_from_position(
         nexus_monitor,
         offset=offset,
         transform=NeXusTransformation.from_chain(
-            workflow.get_transformation_chain(nexus_monitor),
+            workflow.get_transformation_chain(nexus_monitor, {}),
         ),
     )
     assert_identical(monitor.coords['position'], sc.vector([1.1, 2.2, 3.3], unit='m'))
@@ -1293,3 +1294,176 @@ def test_load_proton_charge_index_based_time_interval(odin_lego_images: Path) ->
     wf[TimeInterval[SampleRun]] = TimeInterval(slice(1, 3))
     filtered = wf.compute(ProtonCharge[SampleRun])
     assert filtered.sizes['time'] == 2
+
+
+TRANS1 = '/entry/instrument/comp1/transformations/trans1'
+TRANS2 = '/entry/instrument/comp1/transformations/trans2'
+
+
+@pytest.fixture
+def source_group(
+    time_dependent_depends_on: snx.TransformationChain,
+) -> workflow.NeXusComponent[snx.NXsource, SampleRun]:
+    return workflow.NeXusComponent[snx.NXsource, SampleRun](
+        sc.DataGroup(depends_on=time_dependent_depends_on)
+    )
+
+
+def test_transformation_override_replaces_value_in_chain(source_group) -> None:
+    chain = workflow.get_transformation_chain(
+        source_group, {TRANS2: sc.scalar(5.0, unit='m')}
+    )
+    assert_identical(chain.transformations[TRANS2].value, sc.scalar(5.0, unit='m'))
+    assert_identical(chain.transformations[TRANS1].value, sc.scalar(1.0, unit='m'))
+
+
+def test_transformation_override_resolves_time_dependence(source_group) -> None:
+    chain = workflow.get_transformation_chain(
+        source_group, {TRANS2: sc.scalar(5.0, unit='m')}
+    )
+    transform = workflow.to_transformation(chain, TimeInterval(slice(None, None)))
+    assert_identical(
+        workflow.compute_position(transform), sc.vector([1.0, 5.0, 0.0], unit='m')
+    )
+
+
+def test_transformation_override_does_not_modify_component(source_group) -> None:
+    workflow.get_transformation_chain(source_group, {TRANS1: sc.scalar(5.0, unit='m')})
+    assert_identical(
+        source_group['depends_on'].transformations[TRANS1].value,
+        sc.scalar(1.0, unit='m'),
+    )
+
+
+def test_transformation_override_raises_if_path_not_in_chain(source_group) -> None:
+    with pytest.raises(KeyError, match='/not/in/chain'):
+        workflow.get_transformation_chain(
+            source_group, {'/not/in/chain': sc.scalar(5.0, unit='m')}
+        )
+
+
+@pytest.fixture
+def multi_source_group(
+    depends_on: snx.TransformationChain,
+    time_dependent_depends_on: snx.TransformationChain,
+) -> workflow.NeXusMultiComponent[snx.NXsource, SampleRun]:
+    # Only 'b' has TRANS2, both have TRANS1.
+    return workflow.NeXusMultiComponent[snx.NXsource, SampleRun](
+        sc.DataGroup(
+            a=sc.DataGroup(depends_on=depends_on),
+            b=sc.DataGroup(depends_on=time_dependent_depends_on),
+        )
+    )
+
+
+def test_multi_transformation_override_applies_to_all_chains_containing_path(
+    multi_source_group,
+) -> None:
+    chains = workflow.get_multi_transformation_chain(
+        multi_source_group, {TRANS1: sc.scalar(5.0, unit='m')}
+    )
+    for chain in chains.values():
+        assert_identical(chain.transformations[TRANS1].value, sc.scalar(5.0, unit='m'))
+
+
+def test_multi_transformation_override_allows_path_missing_from_some_chains(
+    multi_source_group,
+) -> None:
+    chains = workflow.get_multi_transformation_chain(
+        multi_source_group, {TRANS2: sc.scalar(5.0, unit='m')}
+    )
+    assert TRANS2 not in chains['a'].transformations
+    assert_identical(
+        chains['b'].transformations[TRANS2].value, sc.scalar(5.0, unit='m')
+    )
+
+
+def test_multi_transformation_override_raises_if_path_not_in_any_chain(
+    multi_source_group,
+) -> None:
+    with pytest.raises(KeyError, match='/not/in/chain'):
+        workflow.get_multi_transformation_chain(
+            multi_source_group, {'/not/in/chain': sc.scalar(5.0, unit='m')}
+        )
+
+
+def test_multi_transformation_override_does_not_modify_components(
+    multi_source_group,
+) -> None:
+    workflow.get_multi_transformation_chain(
+        multi_source_group, {TRANS1: sc.scalar(5.0, unit='m')}
+    )
+    for component in multi_source_group.values():
+        assert_identical(
+            component['depends_on'].transformations[TRANS1].value,
+            sc.scalar(1.0, unit='m'),
+        )
+
+
+@pytest.mark.parametrize(
+    'make_workflow',
+    [
+        lambda: LoadMonitorWorkflow(run_types=[SampleRun], monitor_types=[Monitor1]),
+        lambda: LoadDetectorWorkflow(run_types=[SampleRun]),
+        lambda: GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[Monitor1]),
+    ],
+)
+def test_workflows_default_to_no_transformation_overrides(
+    make_workflow, source_group, time_dependent_depends_on
+) -> None:
+    wf = make_workflow()
+    wf[workflow.NeXusComponent[snx.NXsource, SampleRun]] = source_group
+    chain = wf.compute(workflow.NeXusTransformationChain[snx.NXsource, SampleRun])
+    assert_identical(
+        chain.transformations[TRANS2].value,
+        time_dependent_depends_on.transformations[TRANS2].value,
+    )
+
+
+def test_transformation_overrides_only_apply_to_their_component_type(
+    time_dependent_depends_on,
+) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    group = sc.DataGroup(depends_on=time_dependent_depends_on)
+    wf[workflow.NeXusComponent[snx.NXsource, SampleRun]] = group
+    wf[workflow.NeXusComponent[snx.NXsample, SampleRun]] = group
+    wf[TransformationOverrides[snx.NXsource, SampleRun]] = {
+        TRANS1: sc.scalar(5.0, unit='m')
+    }
+
+    source, sample = wf.compute(
+        (
+            workflow.NeXusTransformationChain[snx.NXsource, SampleRun],
+            workflow.NeXusTransformationChain[snx.NXsample, SampleRun],
+        )
+    ).values()
+
+    assert_identical(source.transformations[TRANS1].value, sc.scalar(5.0, unit='m'))
+    assert_identical(sample.transformations[TRANS1].value, sc.scalar(1.0, unit='m'))
+
+
+def test_provider_of_transformation_overrides_reaches_single_and_multi_chains(
+    multi_source_group, source_group
+) -> None:
+    def overrides(
+        value: sc.Variable,
+    ) -> TransformationOverrides[snx.NXsource, SampleRun]:
+        return TransformationOverrides[snx.NXsource, SampleRun]({TRANS1: value})
+
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf.insert(overrides)
+    wf[sc.Variable] = sc.scalar(5.0, unit='m')
+    wf[workflow.NeXusComponent[snx.NXsource, SampleRun]] = source_group
+    wf[workflow.NeXusMultiComponent[snx.NXsource, SampleRun]] = multi_source_group
+
+    single, multi = wf.compute(
+        (
+            workflow.NeXusTransformationChain[snx.NXsource, SampleRun],
+            workflow.NeXusMultiTransformationChain[snx.NXsource, SampleRun],
+        )
+    ).values()
+
+    expected = sc.scalar(5.0, unit='m')
+    assert_identical(single.transformations[TRANS1].value, expected)
+    assert_identical(multi['a'].transformations[TRANS1].value, expected)
+    assert_identical(multi['b'].transformations[TRANS1].value, expected)

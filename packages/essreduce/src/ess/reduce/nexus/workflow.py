@@ -59,6 +59,7 @@ from .types import (
     RunType,
     Source,
     TimeInterval,
+    TransformationOverrides,
     TransformationTimeFilter,
     UniqueComponent,
 )
@@ -323,8 +324,34 @@ def load_multi_nexus_data(
     )
 
 
+def _check_overrides_in_chains(
+    overrides: TransformationOverrides[Component, RunType],
+    chains: Iterable[snx.TransformationChain],
+) -> None:
+    """Raise if an override does not apply to any of the chains, e.g., due to a typo."""
+    available = {path for chain in chains for path in chain.transformations}
+    if missing := overrides.keys() - available:
+        raise KeyError(
+            f"Transformation overrides {sorted(missing)} not found in any chain. "
+            f"Available entries: {sorted(available)}"
+        )
+
+
+def _apply_overrides(
+    chain: snx.TransformationChain,
+    overrides: TransformationOverrides[Component, RunType],
+) -> snx.TransformationChain:
+    # The chain belongs to a component, which may be a cached node of the pipeline.
+    chain = deepcopy(chain)
+    for path, transformation in chain.transformations.items():
+        if path in overrides:
+            transformation.value = overrides[path]
+    return chain
+
+
 def get_transformation_chain(
     component: NeXusComponent[Component, RunType],
+    overrides: TransformationOverrides[Component, RunType],
 ) -> NeXusTransformationChain[Component, RunType]:
     """
     Extract the transformation chain from a NeXus component group.
@@ -333,13 +360,20 @@ def get_transformation_chain(
     ----------
     component:
         NeXus component group.
+    overrides:
+        Values to use in place of entries of the chain.
+        Raises :class:`KeyError` if the chain does not contain one of the entries.
     """
     chain = component['depends_on']
-    return NeXusTransformationChain[Component, RunType](chain)
+    _check_overrides_in_chains(overrides, [chain])
+    return NeXusTransformationChain[Component, RunType](
+        _apply_overrides(chain, overrides)
+    )
 
 
 def get_multi_transformation_chain(
     components: NeXusMultiComponent[Component, RunType],
+    overrides: TransformationOverrides[Component, RunType],
 ) -> NeXusMultiTransformationChain[Component, RunType]:
     """
     Extract the transformation chain from a NeXus component group.
@@ -348,9 +382,16 @@ def get_multi_transformation_chain(
     ----------
     components:
         Loaded NeXus components.
+    overrides:
+        Values to use in place of entries of the chains.
+        Each entry only applies to the chains that contain it.
+        Raises :class:`KeyError` if none of the chains contain one of the entries.
     """
     chains = components.apply(lambda component: component['depends_on'])
-    return NeXusMultiTransformationChain[Component, RunType](chains)
+    _check_overrides_in_chains(overrides, chains.values())
+    return NeXusMultiTransformationChain[Component, RunType](
+        chains.apply(lambda chain: _apply_overrides(chain, overrides))
+    )
 
 
 def reject_time_dependent_transform(
@@ -958,6 +999,7 @@ def LoadMonitorWorkflow(
         params={
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
+            TransformationOverrides: {},
         },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types
@@ -976,6 +1018,7 @@ def LoadDetectorWorkflow(
             DetectorBankSizes: DetectorBankSizes({}),
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
+            TransformationOverrides: {},
         },
         constraints=_gather_constraints(run_types=run_types, monitor_types=[]),
     )
@@ -1029,6 +1072,7 @@ def GenericNeXusWorkflow(
             NeXusMultiNames: NeXusMultiNames(None),
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
+            TransformationOverrides: {},
         },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types
