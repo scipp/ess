@@ -25,6 +25,7 @@ PACKAGES = ('ess.reduce',)
 WIDGET_MODULES = (
     'ess.reduce.ui',
     'ess.reduce.widgets',
+    'ess.reduce.diagnostics.detector_explorer',
 )
 
 
