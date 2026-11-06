@@ -224,28 +224,34 @@ def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
     return workflow
 
 
-def test_tank_angle_override_moves_detectors_and_analyzers_and_sets_a4(
+def test_tank_angle_override_rotates_detectors_and_analyzers_and_sets_a4(
     coda_workflow: sciline.Pipeline,
 ) -> None:
     tank_angle = '/entry/instrument/detector_tank/transformations/tank_angle'
-    original = coda_workflow.compute(RawDetector[SampleRun]).coords['position']
+    # The angle in the file is 0, so the overridden positions are the original ones
+    # rotated by the override, around the vertical axis through the sample.
+    original_detector = coda_workflow.compute(RawDetector[SampleRun])
     original_analyzers = coda_workflow.compute(Analyzers[SampleRun])
 
     angle = sc.scalar(30.0, unit='deg')
+    rotation = sc.spatial.rotations_from_rotvecs(angle * sc.vector([0.0, 1.0, 0.0]))
     # The tank carries all of these, so each needs the override.
     for component in (snx.NXdetector, snx.NXcrystal, ElasticMonitor):
         coda_workflow[TransformationOverrides[component, SampleRun]] = {
             tank_angle: angle
         }
 
-    moved = coda_workflow.compute(RawDetector[SampleRun]).coords['position']
-    assert not sc.allclose(moved, original, atol=sc.scalar(1e-3, unit='m'))
-    moved_analyzers = coda_workflow.compute(Analyzers[SampleRun])
-    for name, analyzer in moved_analyzers.items():
-        assert not sc.allclose(
+    atol = sc.scalar(1e-9, unit='m')
+    sc.testing.assert_allclose(
+        coda_workflow.compute(RawDetector[SampleRun]).coords['position'],
+        rotation * original_detector.coords['position'],
+        atol=atol,
+    )
+    for name, analyzer in coda_workflow.compute(Analyzers[SampleRun]).items():
+        sc.testing.assert_allclose(
             analyzer['position'].position,
-            original_analyzers[name]['position'].position,
-            atol=sc.scalar(1e-3, unit='m'),
+            rotation * original_analyzers[name]['position'].position,
+            atol=atol,
         )
     data = coda_workflow.compute(DataAtSample[SampleRun])
     sc.testing.assert_identical(data.coords['a4'], sc.concat([angle], 'a4'))
