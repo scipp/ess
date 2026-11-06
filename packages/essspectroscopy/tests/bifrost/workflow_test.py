@@ -7,6 +7,7 @@ import pytest
 import sciline
 import scipp as sc
 import scipp.testing
+import scippnexus as snx
 from ess import bifrost
 from ess.bifrost.data import (
     coda_test_run_2026_10,
@@ -16,6 +17,7 @@ from ess.bifrost.data import (
 )
 from ess.bifrost.types import NeXusDetectorNames
 from ess.spectroscopy.types import (
+    Analyzers,
     DataAtSample,
     ElasticMonitor,
     EnergyQDetector,
@@ -29,6 +31,7 @@ from ess.spectroscopy.types import (
     RawDetector,
     RawMonitor,
     SampleRun,
+    TransformationOverrides,
     UncertaintyBroadcastMode,
     WavelengthMonitor,
 )
@@ -219,6 +222,33 @@ def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     return workflow
+
+
+def test_tank_angle_override_moves_detectors_and_analyzers_and_sets_a4(
+    coda_workflow: sciline.Pipeline,
+) -> None:
+    tank_angle = '/entry/instrument/detector_tank/transformations/tank_angle'
+    original = coda_workflow.compute(RawDetector[SampleRun]).coords['position']
+    original_analyzers = coda_workflow.compute(Analyzers[SampleRun])
+
+    angle = sc.scalar(30.0, unit='deg')
+    # The tank carries all of these, so each needs the override.
+    for component in (snx.NXdetector, snx.NXcrystal, ElasticMonitor):
+        coda_workflow[TransformationOverrides[component, SampleRun]] = {
+            tank_angle: angle
+        }
+
+    moved = coda_workflow.compute(RawDetector[SampleRun]).coords['position']
+    assert not sc.allclose(moved, original, atol=sc.scalar(1e-3, unit='m'))
+    moved_analyzers = coda_workflow.compute(Analyzers[SampleRun])
+    for name, analyzer in moved_analyzers.items():
+        assert not sc.allclose(
+            analyzer['position'].position,
+            original_analyzers[name]['position'].position,
+            atol=sc.scalar(1e-3, unit='m'),
+        )
+    data = coda_workflow.compute(DataAtSample[SampleRun])
+    sc.testing.assert_identical(data.coords['a4'], sc.concat([angle], 'a4'))
 
 
 def test_workflow_can_load_detector_with_analyzers_and_angles_from_coda_file(
