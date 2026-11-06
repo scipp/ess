@@ -43,6 +43,7 @@ PreopenNeXusFile = reduce_t.PreopenNeXusFile
 RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 TimeInterval = reduce_t.TimeInterval
+TransformationOverrides = reduce_t.TransformationOverrides
 TransformationTimeFilter = reduce_t.TransformationTimeFilter
 
 SampleRun = reduce_t.SampleRun
