@@ -313,6 +313,14 @@ class TransformationOverrides(
 
     Components load their own copies of shared chain entries, so a motor that moves
     several component types must be set once per type.
+
+    A pipeline that maps over components of one type, e.g., detector banks, must map
+    the overrides as well if the motor does not move all of those components.
+
+    Overrides only reach providers that use :class:`NeXusTransformationChain` or
+    :class:`NeXusMultiTransformationChain`. Providers that read from a component or
+    file directly keep using the stored value, e.g., for chopper positions, the
+    BIFROST sample angle, or the ESTIA detector rotation.
     """
 
 
