@@ -6,6 +6,8 @@
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
+from datetime import UTC
+from inspect import signature
 from typing import Any, Never, TypeVar
 
 import numpy as np
@@ -395,12 +397,28 @@ def _apply_time_filter(
 ) -> sc.Variable | sc.DataArray:
     if transform.ndim == 0 or transform.sizes == {'time': 1}:
         return transform.data.squeeze()
-    filtered = user_filter(transform)
-    if isinstance(filtered, sc.DataArray) and (not filtered.dims):
-        # If the filter returns a 0-dim DataArray, we can safely extract the value.
-        # This is a common case when the filter selects a single time point.
-        filtered = filtered.data
-    return filtered
+    return user_filter(transform)
+
+
+def _time_filter_bounds(
+    interval: TimeInterval[RunType], measurement: Measurement[RunType]
+) -> tuple[sc.Variable | None, sc.Variable | None]:
+    bounds = []
+    for bound, timestamp, select in (
+        (interval.value.start, measurement.start_time, max),
+        (interval.value.stop, measurement.end_time, min),
+    ):
+        if bound is not None and not isinstance(bound, sc.Variable):
+            raise ValueError(
+                'Filters accepting start and stop require time bounds, not indices.'
+            )
+        if timestamp is not None:
+            if timestamp.tzinfo is not None:
+                timestamp = timestamp.astimezone(UTC).replace(tzinfo=None)
+            time = sc.scalar(np.datetime64(timestamp, 'ns'))
+            bound = time if bound is None else select(bound.to(unit=time.unit), time)
+        bounds.append(bound)
+    return bounds[0], bounds[1]
 
 
 def to_transformation(
@@ -409,6 +427,8 @@ def to_transformation(
     time_filter: TransformationTimeFilter[
         Component, RunType
     ] = reject_time_dependent_transform,
+    *,
+    measurement: Measurement[RunType],
 ) -> NeXusTransformation[Component, RunType]:
     """
     Convert a transformation chain into a single transformation matrix.
@@ -417,6 +437,12 @@ def to_transformation(
     is used to select a specific time point. If the interval is not a single time point,
     ``time_filter`` is applied to the transformation. By default, this will raise an
     exception. Provide a different filter to customize how time-dependence is handled.
+
+    If ``time_filter`` has parameters named ``start`` and ``stop`` that can be passed
+    by keyword, it receives the unsliced log and two keyword arguments. ``start``
+    is the maximum of the start times in ``interval`` and ``measurement``; ``stop``
+    is the minimum of their end times. Missing times are ignored. The function must
+    apply the time interval itself.
 
     Parameters
     ----------
@@ -427,15 +453,33 @@ def to_transformation(
     time_filter:
         Callable to apply to time-dependent transformations.
         Defaults to raising a :class:`ValueError`.
+    measurement:
+        Measurement start and end times. Used only for filters taking ``start`` and
+        ``stop``. Timestamps without a timezone are treated as UTC.
     """
+
+    try:
+        sig = signature(time_filter)
+        accepts_bounds = {'start', 'stop'} <= sig.parameters.keys()
+        if accepts_bounds:
+            sig.bind(None, start=None, stop=None)
+    except (TypeError, ValueError):
+        accepts_bounds = False
 
     chain = deepcopy(chain)
     for t in chain.transformations.values():
         if t.sizes == {} or not isinstance(t.value, sc.DataArray):
             continue
-        t.value = _apply_time_filter(
-            _extract_interval_from_time_dependent_log(t.value, interval), time_filter
-        )
+        if accepts_bounds:
+            start, stop = _time_filter_bounds(interval, measurement)
+            t.value = time_filter(t.value, start=start, stop=stop)
+        else:
+            t.value = _apply_time_filter(
+                _extract_interval_from_time_dependent_log(t.value, interval),
+                time_filter,
+            )
+        if isinstance(t.value, sc.DataArray) and t.value.ndim == 0:
+            t.value = t.value.data
 
     return NeXusTransformation[Component, RunType].from_chain(chain)
 
@@ -901,6 +945,7 @@ _common_providers = (
     gravity_vector_neg_y,
     file_path_to_file_spec,
     full_time_interval,
+    load_measurement_metadata_from_nexus,
     component_spec_by_name,
     unique_component_spec,  # after component_spec_by_name, partially overrides
     multi_component_spec,
@@ -942,7 +987,6 @@ _chopper_providers = (parse_raw_choppers, to_disk_choppers)
 
 _metadata_providers = (
     load_beamline_metadata_from_nexus,
-    load_measurement_metadata_from_nexus,
     load_source_metadata_from_nexus,
 )
 

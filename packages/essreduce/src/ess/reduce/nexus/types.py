@@ -295,12 +295,29 @@ class TimeInterval(Generic[RunType]):
 
 
 class TransformationTimeFilter(Generic[Component, RunType]):
-    """Filter for time-dependent transformations."""
+    """Filter for time-dependent transformations.
+
+    If the function has parameters named ``start`` and ``stop`` that can be passed
+    by keyword, it receives the unsliced log and two keyword arguments. ``start``
+    is the maximum of the start times in :class:`TimeInterval` and
+    :class:`Measurement`; ``stop`` is the minimum of their end times. Missing times
+    are ignored. The function must apply the time interval itself.
+    The times are Scipp scalars or ``None`` when neither source specifies a time.
+
+    Other functions receive only the log entries selected by :class:`TimeInterval`.
+    If a single reading is selected, it is used directly without calling the function.
+    """
 
     def __new__(cls, x: Any) -> Any:
         return x
 
-    def __call__(self, transform: sc.DataArray) -> sc.Variable | sc.DataArray: ...
+    def __call__(
+        self,
+        transform: sc.DataArray,
+        *,
+        start: sc.Variable | None,
+        stop: sc.Variable | None = None,
+    ) -> sc.Variable | sc.DataArray: ...
 
 
 @dataclass

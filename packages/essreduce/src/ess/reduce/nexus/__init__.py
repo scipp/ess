@@ -26,6 +26,7 @@ from ._nexus_loader import (
     open_component_group,
     open_nexus_file,
 )
+from .filtering import time_weighted_median
 from .workflow import GenericNeXusWorkflow
 
 __all__ = [
@@ -41,5 +42,6 @@ __all__ = [
     'load_multi_data',
     'open_component_group',
     'open_nexus_file',
+    'time_weighted_median',
     'types',
 ]
