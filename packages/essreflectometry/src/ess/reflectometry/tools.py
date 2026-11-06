@@ -15,12 +15,10 @@ import scipy.optimize as opt
 
 from ess.reflectometry import orso
 from ess.reflectometry.types import (
-    Filename,
     ReducibleData,
     ReflectivityOverQ,
     SampleRun,
 )
-from ess.reflectometry.workflow import with_filenames
 
 _STD_TO_FWHM = sc.scalar(2.0) * sc.sqrt(sc.scalar(2.0) * sc.log(sc.scalar(2.0)))
 
@@ -283,17 +281,24 @@ class BatchProcessor:
         for t in targets:
             out[t] = sc.DataGroup()
             for name, wf in self.workflows.items():
-                try:
-                    out[t][name] = wf.compute(t, **kwargs)
-                except sl.UnsatisfiedRequirement as e:
-                    try:
-                        out[t][name] = sl.compute_mapped(
-                            wf, t, **kwargs
-                        ).values.tolist()
-                    except (sl.UnsatisfiedRequirement, ValueError):
-                        # ValueError is raised when the requested type is not mapped
-                        raise e from e
+                out[t][name] = self._compute_workflow(wf, t, **kwargs)
         return next(iter(out.values())) if len(out) == 1 else out
+
+    @staticmethod
+    def _compute_workflow(wf: sl.Pipeline, target: type, **kwargs) -> Any:
+        if target in wf.underlying_graph:
+            for key, node in wf[target].underlying_graph.nodes(data=True):
+                value = node.get('value')
+                if isinstance(value, MultiParam):
+                    results = sc.DataGroup()
+                    for item in value:
+                        branch = wf.copy()
+                        branch[key] = item
+                        results[str(item)] = BatchProcessor._compute_workflow(
+                            branch, target, **kwargs
+                        )
+                    return results
+        return wf.compute(target, **kwargs)
 
     def copy(self) -> BatchProcessor:
         """
@@ -562,6 +567,10 @@ def combine_curves(
     return out
 
 
+class MultiParam(list):
+    pass
+
+
 def batch_processor(
     workflow: sl.Pipeline, runs: Mapping[Any, Mapping[type, Any]]
 ) -> BatchProcessor:
@@ -628,23 +637,14 @@ def batch_processor(
         The sciline parameters to be used for each run.
         Should be a mapping where the keys are the names of the runs
         and the values are mappings of type to value pairs.
-        In addition, if one of the values for ``Filename[SampleRun]``
-        is a list or a tuple, then the events from the files
-        will be concatenated into a single event list.
+        Values wrapped in ``MultiParam`` are computed separately for each item
+        when the target depends on that parameter.
     """
     workflows = {}
     for name, parameters in runs.items():
         wf = workflow.copy()
         for tp, value in parameters.items():
-            if tp is Filename[SampleRun]:
-                continue
             wf[tp] = value
-
-        if Filename[SampleRun] in parameters:
-            if isinstance(parameters[Filename[SampleRun]], list | tuple):
-                wf = with_filenames(wf, SampleRun, parameters[Filename[SampleRun]])
-            else:
-                wf[Filename[SampleRun]] = parameters[Filename[SampleRun]]
         workflows[name] = wf
     return BatchProcessor(workflows)
 
