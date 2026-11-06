@@ -5,6 +5,8 @@
 
 import importlib.metadata
 
+import lazy_loader as lazy
+
 from .io import nexus
 from .workflow import BifrostSimulationWorkflow, BifrostWorkflow
 
@@ -13,7 +15,15 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-del importlib
+# The diagnostics subpackage needs ipywidgets, which is optional. Import it only on
+# first access so that the workflows can be used without ipywidgets.
+__getattr__, _, _ = lazy.attach(
+    __name__,
+    submodules=['diagnostics'],
+    submod_attrs={'diagnostics': ['InstrumentView', 'instrument_view']},
+)
+
+del _, importlib, lazy
 
 __all__ = [
     'BifrostSimulationWorkflow',

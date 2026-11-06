@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 
+"""Instrument diagnostics tools for LoKI."""
+
 from .bank_viewer import LokiBankViewer
 from .instrument_view import InstrumentView, instrument_view
 from .load_nexus import load_detectors, load_monitors
