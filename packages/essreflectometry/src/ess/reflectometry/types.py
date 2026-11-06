@@ -87,20 +87,33 @@ class ThetaBins(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 
 class RawSampleRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """The rotation of the sample registered in the NeXus file."""
+    """Sample rotation before applying ``SampleRotationOffset``.
+
+    For ESTIA, this is the sample mount angle: the transformed local +x axis
+    projected onto the laboratory x-z plane, measured from +x towards -z.
+    For AMOR, this is the ``mu`` angle read from the data.
+    """
 
 
 class SampleRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """The rotation of the sample relative to the center of the incoming beam."""
+    """Sample angle after applying ``SampleRotationOffset``.
+
+    For ESTIA, this is the angle between the central reflected beam and the surface.
+    For AMOR, this is the sample surface angle relative to the horizontal plane.
+    """
 
 
 class SampleRotationOffset(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """The difference between the true slope of the sample surface
-    and the sample rotation value in the file."""
+    """Angle added to ``RawSampleRotation`` to obtain calibrated ``SampleRotation``."""
 
 
 class DetectorRotation(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """The rotation of the detector relative to the horizon"""
+    """Detector reference angle.
+
+    For ESTIA, this is the angle of the transformed detector +z axis from
+    laboratory +z towards +x in the x-z plane. For AMOR, it is the direction
+    from the sample to the detector centre relative to the horizontal plane.
+    """
 
 
 class BeamSize(sciline.Scope[RunType, sc.Variable], sc.Variable):
