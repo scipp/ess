@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=5c0e2681"></script>
+    <script src="../../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -486,13 +486,13 @@ window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/reduce/nexus/types';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.1" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -972,9 +972,10 @@ window.runMermaid = runMermaid;</script>
   <h1>Source code for ess.reduce.nexus.types</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Domain types for use with Sciline, parametrized by run- and monitor-type.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">NewType</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">NewType</span><span class="p">,</span> <span class="n">Self</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
@@ -1130,6 +1131,22 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<div class="viewcode-block" id="NeXusMultiNames">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiNames.html#ess.reduce.nexus.types.NeXusMultiNames">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeXusMultiNames</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Names of multiple components of the same class in a NeXus file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<div class="viewcode-block" id="NeXusMultiNames.__init__">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiNames.html#ess.reduce.nexus.types.NeXusMultiNames.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_data</span> <span class="o">=</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+</div>
+
+
+
 <div class="viewcode-block" id="NeXusClass">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusClass.html#ess.reduce.nexus.types.NeXusClass">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NeXusClass</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="nb">type</span><span class="p">],</span> <span class="nb">type</span><span class="p">):</span>
@@ -1148,10 +1165,12 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<div class="viewcode-block" id="AllNeXusComponents">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.AllNeXusComponents.html#ess.reduce.nexus.types.AllNeXusComponents">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">AllNeXusComponents</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raw data from all NeXus components of one class.&quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="NeXusMultiComponent">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiComponent.html#ess.reduce.nexus.types.NeXusMultiComponent">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeXusMultiComponent</span><span class="p">(</span>
+    <span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raw data from multiple NeXus components of one class.&quot;&quot;&quot;</span></div>
 
 
 
@@ -1163,6 +1182,13 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    This must be contained in an NXmonitor or NXdetector group.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NeXusMultiData">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiData.html#ess.reduce.nexus.types.NeXusMultiData">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeXusMultiData</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data group of data arrays loaded from a NXevent_data or NXdata groups.&quot;&quot;&quot;</span></div>
 
 
 
@@ -1315,6 +1341,30 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<div class="viewcode-block" id="TransformationOverrides">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.TransformationOverrides.html#ess.reduce.nexus.types.TransformationOverrides">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformationOverrides</span><span class="p">(</span>
+    <span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Values replacing entries of the transformation chains of a component type.</span>
+
+<span class="sd">    Maps the absolute NeXus path of a chain entry to the value to use for it, e.g.,</span>
+<span class="sd">    ``{&#39;/entry/instrument/detector_carriage/value&#39;: sc.scalar(1.5, unit=&#39;m&#39;)}``.</span>
+
+<span class="sd">    Components load their own copies of shared chain entries, so a motor that moves</span>
+<span class="sd">    several component types must be set once per type.</span>
+
+<span class="sd">    A pipeline that maps over components of one type, e.g., detector banks, must map</span>
+<span class="sd">    the overrides as well if the motor does not move all of those components.</span>
+
+<span class="sd">    Overrides only reach providers that use :class:`NeXusTransformationChain` or</span>
+<span class="sd">    :class:`NeXusMultiTransformationChain`. Providers that read from a component or</span>
+<span class="sd">    file directly keep using the stored value, e.g., for chopper positions, the</span>
+<span class="sd">    BIFROST sample angle, or the ESTIA detector rotation.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
 <div class="viewcode-block" id="NeXusFileSpec">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusFileSpec.html#ess.reduce.nexus.types.NeXusFileSpec">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -1348,35 +1398,50 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<div class="viewcode-block" id="NeXusAllLocationSpec">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusAllLocationSpec.html#ess.reduce.nexus.types.NeXusAllLocationSpec">[docs]</a>
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">NeXusAllLocationSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NeXus parameters to identify all components of a class to load.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">filename</span><span class="p">:</span> <span class="n">FilePath</span> <span class="o">|</span> <span class="n">NeXusFile</span> <span class="o">|</span> <span class="n">NeXusGroup</span>
-    <span class="n">entry_name</span><span class="p">:</span> <span class="n">NeXusEntryName</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">selection</span><span class="p">:</span> <span class="n">snx</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ScippIndex</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="p">()</span></div>
-
-
-
-<div class="viewcode-block" id="NeXusAllComponentLocationSpec">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusAllComponentLocationSpec.html#ess.reduce.nexus.types.NeXusAllComponentLocationSpec">[docs]</a>
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">NeXusAllComponentLocationSpec</span><span class="p">(</span><span class="n">NeXusAllLocationSpec</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NeXus parameters to identify all components of a class to load.</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-
-
-
 <div class="viewcode-block" id="NeXusDataLocationSpec">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusDataLocationSpec.html#ess.reduce.nexus.types.NeXusDataLocationSpec">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NeXusDataLocationSpec</span><span class="p">(</span><span class="n">NeXusLocationSpec</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;NeXus filename and parameters to identify (parts of) detector data to load.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NeXus filename and parameters to identify (parts of) data to load.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NeXusMultiLocationSpec">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiLocationSpec.html#ess.reduce.nexus.types.NeXusMultiLocationSpec">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeXusMultiLocationSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    NeXus parameters to identify multiple locations of a class to load.</span>
+
+<span class="sd">    If ``location_names is None`` corresponds to all locations of the class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">filename</span><span class="p">:</span> <span class="n">FilePath</span> <span class="o">|</span> <span class="n">NeXusFile</span> <span class="o">|</span> <span class="n">NeXusGroup</span>
+    <span class="n">entry_name</span><span class="p">:</span> <span class="n">NeXusEntryName</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">selection</span><span class="p">:</span> <span class="n">snx</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ScippIndex</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">location_names</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="NeXusMultiComponentLocationSpec">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiComponentLocationSpec.html#ess.reduce.nexus.types.NeXusMultiComponentLocationSpec">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeXusMultiComponentLocationSpec</span><span class="p">(</span>
+    <span class="n">NeXusMultiLocationSpec</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    NeXus parameters to identify multiple components of a class to load.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NeXusMultiDataLocationSpec">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiDataLocationSpec.html#ess.reduce.nexus.types.NeXusMultiDataLocationSpec">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeXusMultiDataLocationSpec</span><span class="p">(</span><span class="n">NeXusMultiLocationSpec</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    NeXus parameters to identify (parts of) multiple data instances of a class to load.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 
 
@@ -1386,6 +1451,15 @@ window.runMermaid = runMermaid;</script>
 
     <span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">TransformationChain</span><span class="p">],</span>
     <span class="n">snx</span><span class="o">.</span><span class="n">TransformationChain</span><span class="p">,</span>
+<span class="p">):</span> <span class="o">...</span>
+
+
+<div class="viewcode-block" id="NeXusMultiTransformationChain">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiTransformationChain.html#ess.reduce.nexus.types.NeXusMultiTransformationChain">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeXusMultiTransformationChain</span><span class="p">(</span></div>
+
+    <span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">TransformationChain</span><span class="p">]],</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">TransformationChain</span><span class="p">],</span>
 <span class="p">):</span> <span class="o">...</span>
 
 
@@ -1410,6 +1484,33 @@ window.runMermaid = runMermaid;</script>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NeXusTransformation[Component, RunType]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a transformation chain to a single transformation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">NeXusTransformation</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">chain</span><span class="o">.</span><span class="n">compute</span><span class="p">())</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NeXusMultiTransformation">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiTransformation.html#ess.reduce.nexus.types.NeXusMultiTransformation">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeXusMultiTransformation</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multiple NeXus transformations computed from transformation chains.</span>
+
+<span class="sd">    If the transformations are time-dependent, they are stored as data arrays</span>
+<span class="sd">    with a &#39;time&#39; coordinate.</span>
+<span class="sd">    Otherwise, the transformations are stored as variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span>
+
+<div class="viewcode-block" id="NeXusMultiTransformation.from_chains">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeXusMultiTransformation.html#ess.reduce.nexus.types.NeXusMultiTransformation.from_chains">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_chains</span><span class="p">(</span>
+        <span class="n">chains</span><span class="p">:</span> <span class="n">NeXusMultiTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NeXusMultiTransformation[Component, RunType]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert transformation chains to single transformations.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">NeXusMultiTransformation</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">chains</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">chain</span><span class="p">:</span> <span class="n">chain</span><span class="o">.</span><span class="n">compute</span><span class="p">())</span>
+        <span class="p">)</span></div>
 </div>
 
 
@@ -1494,7 +1595,7 @@ window.runMermaid = runMermaid;</script>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.10.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

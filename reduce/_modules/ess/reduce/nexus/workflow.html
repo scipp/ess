@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=5c0e2681"></script>
+    <script src="../../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -486,13 +486,13 @@ window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/reduce/nexus/workflow';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.1" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -993,7 +993,6 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_nexus_loader</span> <span class="k">as</span> <span class="n">nexus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">COMPONENT_CONSTRAINTS</span><span class="p">,</span>
-    <span class="n">AllNeXusComponents</span><span class="p">,</span>
     <span class="n">Beamline</span><span class="p">,</span>
     <span class="n">Component</span><span class="p">,</span>
     <span class="n">DetectorBankSizes</span><span class="p">,</span>
@@ -1007,13 +1006,19 @@ window.runMermaid = runMermaid;</script>
     <span class="n">Measurement</span><span class="p">,</span>
     <span class="n">MonitorPositionOffset</span><span class="p">,</span>
     <span class="n">MonitorType</span><span class="p">,</span>
-    <span class="n">NeXusAllComponentLocationSpec</span><span class="p">,</span>
     <span class="n">NeXusClass</span><span class="p">,</span>
     <span class="n">NeXusComponent</span><span class="p">,</span>
     <span class="n">NeXusComponentLocationSpec</span><span class="p">,</span>
     <span class="n">NeXusData</span><span class="p">,</span>
     <span class="n">NeXusDataLocationSpec</span><span class="p">,</span>
     <span class="n">NeXusFileSpec</span><span class="p">,</span>
+    <span class="n">NeXusMultiComponent</span><span class="p">,</span>
+    <span class="n">NeXusMultiComponentLocationSpec</span><span class="p">,</span>
+    <span class="n">NeXusMultiData</span><span class="p">,</span>
+    <span class="n">NeXusMultiDataLocationSpec</span><span class="p">,</span>
+    <span class="n">NeXusMultiNames</span><span class="p">,</span>
+    <span class="n">NeXusMultiTransformation</span><span class="p">,</span>
+    <span class="n">NeXusMultiTransformationChain</span><span class="p">,</span>
     <span class="n">NeXusName</span><span class="p">,</span>
     <span class="n">NeXusTransformation</span><span class="p">,</span>
     <span class="n">NeXusTransformationChain</span><span class="p">,</span>
@@ -1026,6 +1031,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">RunType</span><span class="p">,</span>
     <span class="n">Source</span><span class="p">,</span>
     <span class="n">TimeInterval</span><span class="p">,</span>
+    <span class="n">TransformationOverrides</span><span class="p">,</span>
     <span class="n">TransformationTimeFilter</span><span class="p">,</span>
     <span class="n">UniqueComponent</span><span class="p">,</span>
 <span class="p">)</span>
@@ -1102,13 +1108,19 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<div class="viewcode-block" id="all_component_spec">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.all_component_spec.html#ess.reduce.nexus.workflow.all_component_spec">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">all_component_spec</span><span class="p">(</span>
+<div class="viewcode-block" id="multi_component_spec">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.multi_component_spec.html#ess.reduce.nexus.workflow.multi_component_spec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">multi_component_spec</span><span class="p">(</span>
     <span class="n">filename</span><span class="p">:</span> <span class="n">NeXusFileSpec</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusAllComponentLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a location spec for all components of a class in a NeXus file.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">NeXusAllComponentLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+    <span class="n">names</span><span class="p">:</span> <span class="n">NeXusMultiNames</span><span class="p">[</span><span class="n">Component</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusMultiComponentLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a location spec for multiple components of a class in a NeXus file.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">NeXusMultiNames</span><span class="p">):</span>
+        <span class="c1"># E.g., when the user sets {NeXusMultiNames[Component]: [&#39;a&#39;, &#39;b&#39;]}</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">NeXusMultiNames</span><span class="p">[</span><span class="n">Component</span><span class="p">](</span><span class="n">names</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">NeXusMultiComponentLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
+        <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">location_names</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">has_data</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="p">)</span></div>
 
 
 
@@ -1150,6 +1162,22 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">NeXusDataLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
         <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">component_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="o">.</span><span class="n">value</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="multi_data_spec">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.multi_data_spec.html#ess.reduce.nexus.workflow.multi_data_spec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">multi_data_spec</span><span class="p">(</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="n">NeXusFileSpec</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">names</span><span class="p">:</span> <span class="n">NeXusMultiNames</span><span class="p">[</span><span class="n">Component</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusMultiDataLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a location spec for data of multiple class instances in a NeXus file.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">NeXusMultiNames</span><span class="p">):</span>
+        <span class="c1"># E.g., when the user sets {NeXusMultiNames[Component]: [&#39;a&#39;, &#39;b&#39;]}</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">NeXusMultiNames</span><span class="p">[</span><span class="n">Component</span><span class="p">](</span><span class="n">names</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">NeXusMultiDataLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
+        <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">location_names</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">has_data</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="p">)</span></div>
 
 
@@ -1260,12 +1288,12 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<div class="viewcode-block" id="load_all_nexus_components">
-<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.load_all_nexus_components.html#ess.reduce.nexus.workflow.load_all_nexus_components">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_all_nexus_components</span><span class="p">(</span>
-    <span class="n">location</span><span class="p">:</span> <span class="n">NeXusAllComponentLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<div class="viewcode-block" id="load_multi_nexus_components">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.load_multi_nexus_components.html#ess.reduce.nexus.workflow.load_multi_nexus_components">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_multi_nexus_components</span><span class="p">(</span>
+    <span class="n">location</span><span class="p">:</span> <span class="n">NeXusMultiComponentLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="n">nx_class</span><span class="p">:</span> <span class="n">NeXusClass</span><span class="p">[</span><span class="n">Component</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AllNeXusComponents</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusMultiComponent</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load all NeXus components of one class from one entry a file.</span>
 
@@ -1278,8 +1306,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    nx_class:</span>
 <span class="sd">        NX_class to identify the components.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">AllNeXusComponents</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
-        <span class="n">nexus</span><span class="o">.</span><span class="n">load_all_components</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">nx_class</span><span class="o">=</span><span class="n">nx_class</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="n">definitions</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">NeXusMultiComponent</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
+        <span class="n">nexus</span><span class="o">.</span><span class="n">load_multi_components</span><span class="p">(</span>
+            <span class="n">location</span><span class="p">,</span> <span class="n">nx_class</span><span class="o">=</span><span class="n">nx_class</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="n">definitions</span>
+        <span class="p">)</span>
     <span class="p">)</span></div>
 
 
@@ -1309,10 +1339,56 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<div class="viewcode-block" id="load_multi_nexus_data">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.load_multi_nexus_data.html#ess.reduce.nexus.workflow.load_multi_nexus_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_multi_nexus_data</span><span class="p">(</span>
+    <span class="n">location</span><span class="p">:</span> <span class="n">NeXusMultiDataLocationSpec</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">nx_class</span><span class="p">:</span> <span class="n">NeXusClass</span><span class="p">[</span><span class="n">Component</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusMultiData</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load data from multiple components of a given class.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">NeXusMultiData</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
+        <span class="n">nexus</span><span class="o">.</span><span class="n">load_multi_data</span><span class="p">(</span>
+            <span class="n">file_path</span><span class="o">=</span><span class="n">location</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">selection</span><span class="o">=</span><span class="n">location</span><span class="o">.</span><span class="n">selection</span><span class="p">,</span>
+            <span class="n">nx_class</span><span class="o">=</span><span class="n">nx_class</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="n">location</span><span class="o">.</span><span class="n">location_names</span><span class="p">,</span>
+            <span class="n">entry_name</span><span class="o">=</span><span class="n">location</span><span class="o">.</span><span class="n">entry_name</span><span class="p">,</span>
+            <span class="n">definitions</span><span class="o">=</span><span class="n">definitions</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_overrides_in_chains</span><span class="p">(</span>
+    <span class="n">overrides</span><span class="p">:</span> <span class="n">TransformationOverrides</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">chains</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">TransformationChain</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raise if an override does not apply to any of the chains, e.g., due to a typo.&quot;&quot;&quot;</span>
+    <span class="n">available</span> <span class="o">=</span> <span class="p">{</span><span class="n">path</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">chains</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">missing</span> <span class="o">:=</span> <span class="n">overrides</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">available</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Transformation overrides </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2"> not found in any chain. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Available entries: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">available</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply_overrides</span><span class="p">(</span>
+    <span class="n">chain</span><span class="p">:</span> <span class="n">snx</span><span class="o">.</span><span class="n">TransformationChain</span><span class="p">,</span>
+    <span class="n">overrides</span><span class="p">:</span> <span class="n">TransformationOverrides</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">snx</span><span class="o">.</span><span class="n">TransformationChain</span><span class="p">:</span>
+    <span class="c1"># The chain belongs to a component, which may be a cached node of the pipeline.</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">transformation</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">overrides</span><span class="p">:</span>
+            <span class="n">transformation</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">overrides</span><span class="p">[</span><span class="n">path</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">chain</span>
+
+
 <div class="viewcode-block" id="get_transformation_chain">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.get_transformation_chain.html#ess.reduce.nexus.workflow.get_transformation_chain">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_transformation_chain</span><span class="p">(</span>
     <span class="n">component</span><span class="p">:</span> <span class="n">NeXusComponent</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">overrides</span><span class="p">:</span> <span class="n">TransformationOverrides</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract the transformation chain from a NeXus component group.</span>
@@ -1321,9 +1397,41 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ----------</span>
 <span class="sd">    component:</span>
 <span class="sd">        NeXus component group.</span>
+<span class="sd">    overrides:</span>
+<span class="sd">        Values to use in place of entries of the chain.</span>
+<span class="sd">        Raises :class:`KeyError` if the chain does not contain one of the entries.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">chain</span> <span class="o">=</span> <span class="n">component</span><span class="p">[</span><span class="s1">&#39;depends_on&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">NeXusTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span><span class="n">chain</span><span class="p">)</span></div>
+    <span class="n">_check_overrides_in_chains</span><span class="p">(</span><span class="n">overrides</span><span class="p">,</span> <span class="p">[</span><span class="n">chain</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">NeXusTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
+        <span class="n">_apply_overrides</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">overrides</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_multi_transformation_chain">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.get_multi_transformation_chain.html#ess.reduce.nexus.workflow.get_multi_transformation_chain">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_multi_transformation_chain</span><span class="p">(</span>
+    <span class="n">components</span><span class="p">:</span> <span class="n">NeXusMultiComponent</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">overrides</span><span class="p">:</span> <span class="n">TransformationOverrides</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusMultiTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract the transformation chain from a NeXus component group.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    components:</span>
+<span class="sd">        Loaded NeXus components.</span>
+<span class="sd">    overrides:</span>
+<span class="sd">        Values to use in place of entries of the chains.</span>
+<span class="sd">        Each entry only applies to the chains that contain it.</span>
+<span class="sd">        Raises :class:`KeyError` if none of the chains contain one of the entries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chains</span> <span class="o">=</span> <span class="n">components</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="p">[</span><span class="s1">&#39;depends_on&#39;</span><span class="p">])</span>
+    <span class="n">_check_overrides_in_chains</span><span class="p">(</span><span class="n">overrides</span><span class="p">,</span> <span class="n">chains</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">NeXusMultiTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
+        <span class="n">chains</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">chain</span><span class="p">:</span> <span class="n">_apply_overrides</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">overrides</span><span class="p">))</span>
+    <span class="p">)</span></div>
 
 
 
@@ -1417,6 +1525,38 @@ window.runMermaid = runMermaid;</script>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">NeXusTransformation</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]</span><span class="o">.</span><span class="n">from_chain</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="to_multi_transformation">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.to_multi_transformation.html#ess.reduce.nexus.workflow.to_multi_transformation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_multi_transformation</span><span class="p">(</span>
+    <span class="n">chains</span><span class="p">:</span> <span class="n">NeXusMultiTransformationChain</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="n">TimeInterval</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">time_filter</span><span class="p">:</span> <span class="n">TransformationTimeFilter</span><span class="p">[</span>
+        <span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeXusMultiTransformation</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert each transformation chain into a single transformation matrix.</span>
+
+<span class="sd">    If one or more transformations in the chain are time-dependent, the time interval</span>
+<span class="sd">    is used to select a specific time point. If the interval is not a single time point,</span>
+<span class="sd">    ``time_filter`` is applied to the transformation. By default, this will raise an</span>
+<span class="sd">    exception. Provide a different filter to customize how time-dependence is handled.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    chains:</span>
+<span class="sd">        Transformation chains.</span>
+<span class="sd">    interval:</span>
+<span class="sd">        Time interval to select from the transformation chain.</span>
+<span class="sd">    time_filter:</span>
+<span class="sd">        Callable to apply to time-dependent transformations.</span>
+<span class="sd">        Defaults to raising a :class:`ValueError`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">NeXusMultiTransformation</span><span class="p">[</span><span class="n">Component</span><span class="p">,</span> <span class="n">RunType</span><span class="p">](</span>
+        <span class="n">chains</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">chain</span><span class="p">:</span> <span class="n">to_transformation</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">time_filter</span><span class="p">))</span>
+    <span class="p">)</span></div>
 
 
 
@@ -1609,7 +1749,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="parse_raw_choppers">
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.workflow.parse_raw_choppers.html#ess.reduce.nexus.workflow.parse_raw_choppers">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_raw_choppers</span><span class="p">(</span>
-    <span class="n">choppers</span><span class="p">:</span> <span class="n">AllNeXusComponents</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdisk_chopper</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">choppers</span><span class="p">:</span> <span class="n">NeXusMultiComponent</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdisk_chopper</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RawChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the NeXus representation of a chopper to ours.</span>
 
@@ -1890,16 +2030,21 @@ window.runMermaid = runMermaid;</script>
     <span class="n">full_time_interval</span><span class="p">,</span>
     <span class="n">component_spec_by_name</span><span class="p">,</span>
     <span class="n">unique_component_spec</span><span class="p">,</span>  <span class="c1"># after component_spec_by_name, partially overrides</span>
-    <span class="n">all_component_spec</span><span class="p">,</span>
+    <span class="n">multi_component_spec</span><span class="p">,</span>
+    <span class="n">multi_data_spec</span><span class="p">,</span>
     <span class="n">get_transformation_chain</span><span class="p">,</span>
+    <span class="n">get_multi_transformation_chain</span><span class="p">,</span>
     <span class="n">to_transformation</span><span class="p">,</span>
+    <span class="n">to_multi_transformation</span><span class="p">,</span>
     <span class="n">compute_position</span><span class="p">,</span>
     <span class="n">compute_dynamic_position</span><span class="p">,</span>
     <span class="n">load_nexus_data</span><span class="p">,</span>
     <span class="n">load_nexus_component</span><span class="p">,</span>
     <span class="n">load_proton_charge</span><span class="p">,</span>
-    <span class="n">load_all_nexus_components</span><span class="p">,</span>
+    <span class="n">load_multi_nexus_components</span><span class="p">,</span>
+    <span class="n">load_multi_nexus_data</span><span class="p">,</span>
     <span class="n">data_by_name</span><span class="p">,</span>
+    <span class="n">nx_class_for_crystal</span><span class="p">,</span>
     <span class="n">nx_class_for_detector</span><span class="p">,</span>
     <span class="n">nx_class_for_monitor</span><span class="p">,</span>
     <span class="n">nx_class_for_source</span><span class="p">,</span>
@@ -1942,6 +2087,7 @@ window.runMermaid = runMermaid;</script>
         <span class="n">params</span><span class="o">=</span><span class="p">{</span>
             <span class="n">PreopenNeXusFile</span><span class="p">:</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
             <span class="n">TransformationTimeFilter</span><span class="p">:</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
+            <span class="n">TransformationOverrides</span><span class="p">:</span> <span class="p">{},</span>
         <span class="p">},</span>
         <span class="n">constraints</span><span class="o">=</span><span class="n">_gather_constraints</span><span class="p">(</span>
             <span class="n">run_types</span><span class="o">=</span><span class="n">run_types</span><span class="p">,</span> <span class="n">monitor_types</span><span class="o">=</span><span class="n">monitor_types</span>
@@ -1963,6 +2109,7 @@ window.runMermaid = runMermaid;</script>
             <span class="n">DetectorBankSizes</span><span class="p">:</span> <span class="n">DetectorBankSizes</span><span class="p">({}),</span>
             <span class="n">PreopenNeXusFile</span><span class="p">:</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
             <span class="n">TransformationTimeFilter</span><span class="p">:</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
+            <span class="n">TransformationOverrides</span><span class="p">:</span> <span class="p">{},</span>
         <span class="p">},</span>
         <span class="n">constraints</span><span class="o">=</span><span class="n">_gather_constraints</span><span class="p">(</span><span class="n">run_types</span><span class="o">=</span><span class="n">run_types</span><span class="p">,</span> <span class="n">monitor_types</span><span class="o">=</span><span class="p">[]),</span>
     <span class="p">)</span>
@@ -2016,8 +2163,10 @@ window.runMermaid = runMermaid;</script>
         <span class="p">),</span>
         <span class="n">params</span><span class="o">=</span><span class="p">{</span>
             <span class="n">DetectorBankSizes</span><span class="p">:</span> <span class="n">DetectorBankSizes</span><span class="p">({}),</span>
+            <span class="n">NeXusMultiNames</span><span class="p">:</span> <span class="n">NeXusMultiNames</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
             <span class="n">PreopenNeXusFile</span><span class="p">:</span> <span class="n">PreopenNeXusFile</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
             <span class="n">TransformationTimeFilter</span><span class="p">:</span> <span class="n">reject_time_dependent_transform</span><span class="p">,</span>
+            <span class="n">TransformationOverrides</span><span class="p">:</span> <span class="p">{},</span>
         <span class="p">},</span>
         <span class="n">constraints</span><span class="o">=</span><span class="n">_gather_constraints</span><span class="p">(</span>
             <span class="n">run_types</span><span class="o">=</span><span class="n">run_types</span><span class="p">,</span> <span class="n">monitor_types</span><span class="o">=</span><span class="n">monitor_types</span>
@@ -2103,7 +2252,7 @@ window.runMermaid = runMermaid;</script>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.10.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

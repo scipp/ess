@@ -45,7 +45,6 @@ ess.reduce.nexus.types
       :toctree:
       :template: class-template.rst
    
-      AllNeXusComponents
       DetectorPositionOffset
       DiskChoppers
       DynamicPosition
@@ -53,8 +52,6 @@ ess.reduce.nexus.types
       EmptyMonitor
       Filename
       MonitorPositionOffset
-      NeXusAllComponentLocationSpec
-      NeXusAllLocationSpec
       NeXusClass
       NeXusComponent
       NeXusComponentLocationSpec
@@ -62,6 +59,14 @@ ess.reduce.nexus.types
       NeXusDataLocationSpec
       NeXusFileSpec
       NeXusLocationSpec
+      NeXusMultiComponent
+      NeXusMultiComponentLocationSpec
+      NeXusMultiData
+      NeXusMultiDataLocationSpec
+      NeXusMultiLocationSpec
+      NeXusMultiNames
+      NeXusMultiTransformation
+      NeXusMultiTransformationChain
       NeXusName
       NeXusTransformation
       NeXusTransformationChain
@@ -71,6 +76,7 @@ ess.reduce.nexus.types
       RawDetector
       RawMonitor
       TimeInterval
+      TransformationOverrides
       TransformationTimeFilter
       TransmissionRun
    

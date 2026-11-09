@@ -30,6 +30,7 @@
 
    json_generator
    json_nexus
+   merge
    types
    workflow
 
