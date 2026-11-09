@@ -61,8 +61,8 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
         ``pixel_mask`` has no mask from this file. Following NeXus, a pixel is masked
         if any bit in ``pixel_mask & 0xFFFF`` is set. The dimensions of ``pixel_mask``
         are given by HDF5 dimension labels. They are named after the logical dimensions
-        of the bank, and may be a subset of them. Other entries of the file, such as a
-        validity date, are ignored.
+        of the bank, and may be a subset of them, in any order. Other entries of the
+        file, such as a validity date, are ignored.
       - A file written by :py:func:`scipp.io.save_hdf5` with a variable of masked
         detector IDs.
 
@@ -98,7 +98,8 @@ def to_detector_masks(
     """Create boolean masks for the pixels of a detector bank.
 
     Masks given as detector IDs apply to any bank, since IDs identify a pixel. They
-    have the dimensions of ``ids``. Masks given per bank are selected by ``bank``.
+    have the dimensions of ``ids``. Masks given per bank are selected by ``bank``,
+    and follow the dimension order of ``ids``.
 
     Parameters
     ----------
@@ -125,7 +126,7 @@ def to_detector_masks(
         if known_banks is not None and (unknown := set(content) - set(known_banks)):
             raise ValueError(f"Mask '{name}' has unknown banks: {sorted(unknown)}.")
         if bank in content:
-            masks[name] = _validate_bank_mask(content[bank], ids, name)
+            masks[name] = _align_bank_mask(content[bank], ids, name)
     return masks
 
 
@@ -144,7 +145,7 @@ def write_pixel_masks(
         Path of the file to write.
     masks:
         Boolean mask of each detector bank. Dimensions are named after the logical
-        dimensions of the bank, and may be a subset of them.
+        dimensions of the bank, and may be a subset of them, in any order.
     name:
         Name of the mask. Without it, the mask is named after the file when it is read.
     """
@@ -264,7 +265,7 @@ def _validate_masked_ids(masked_ids: sc.Variable, name: str) -> sc.Variable:
     return masked_ids
 
 
-def _validate_bank_mask(mask: sc.Variable, ids: sc.Variable, name: str) -> sc.Variable:
+def _align_bank_mask(mask: sc.Variable, ids: sc.Variable, name: str) -> sc.Variable:
     if mask.dtype != 'bool':
         raise sc.DTypeError(f"Mask '{name}' must be boolean, not {mask.dtype}.")
     # Masks with a dimension that the data lacks would be ignored without an error.
@@ -273,4 +274,5 @@ def _validate_bank_mask(mask: sc.Variable, ids: sc.Variable, name: str) -> sc.Va
             f"Mask '{name}' has sizes {mask.sizes}, which are not part of the sizes "
             f"of the detector, {ids.sizes}."
         )
-    return mask
+    # A mask file may use any order. DetectorMasks then has one layout for all of them.
+    return mask.transpose([dim for dim in ids.dims if dim in mask.dims])

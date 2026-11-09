@@ -184,6 +184,49 @@ def test_loki_workflow_raises_if_mask_file_has_unknown_bank(tmp_path):
         wf.compute(DetectorMasks)
 
 
+@pytest.mark.parametrize(
+    'dims',
+    [
+        ('pixel', 'straw', 'tube', 'layer'),
+        ('layer', 'straw'),
+        ('straw', 'layer'),
+    ],
+    ids=['full-reversed', 'skips-dims', 'skips-dims-transposed'],
+)
+def test_bank_mask_gives_same_iofq_as_equivalent_id_file(
+    larmor_workflow, tmp_path, dims
+):
+    wf = larmor_workflow(no_masks=False)
+    wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    # For simplicity, insert a fake beam center instead of computing it.
+    wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    ids = wf.compute(DetectorIDs)
+
+    shape = [ids.sizes[dim] for dim in dims]
+    mask = sc.array(
+        dims=list(dims), values=np.arange(np.prod(shape)).reshape(shape) % 5 == 0
+    )
+    expanded = sc.broadcast(mask, sizes=ids.sizes).transpose(ids.dims)
+    masked_ids = sc.array(
+        dims=['detector_id'],
+        values=ids.values[expanded.values],
+        unit=None,
+        dtype='int32',
+    )
+    assert 0 < masked_ids.size < ids.size
+
+    bank_file = tmp_path / 'bank.nxs'
+    write_pixel_masks(bank_file, {'larmor_detector': mask})
+    id_file = tmp_path / 'ids.h5'
+    sc.io.save_hdf5(masked_ids, id_file)
+
+    wf[PixelMaskFilenames] = [bank_file]
+    from_bank_mask = wf.compute(BackgroundSubtractedIofQ)
+    wf[PixelMaskFilenames] = [id_file]
+    from_ids = wf.compute(BackgroundSubtractedIofQ)
+    assert sc.identical(from_bank_mask, from_ids)
+
+
 def test_bool_mask_file_gives_same_masks_as_id_file(larmor_workflow, tmp_path):
     wf = larmor_workflow(no_masks=False)
     wf[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()

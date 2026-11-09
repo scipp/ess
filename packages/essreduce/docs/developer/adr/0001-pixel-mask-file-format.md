@@ -46,7 +46,7 @@ with h5py.File(path) as f:
   The other bits are tags, which do not mask a pixel.
   `ess.reduce.masking.write_pixel_masks` sets bit 8, "user defined mask".
 - Dimensions of `pixel_mask` are named with HDF5 dimension labels.
-  They are a subset of the logical dimensions of the bank, with matching sizes.
+  They are a subset of the logical dimensions of the bank, in any order, with matching sizes.
   This is checked when masks are applied, because scipp ignores a mask with a dimension that the data lacks, without an error.
 - Each file gives one mask per bank.
   Tube and straw masks combine into one `(layer, tube, straw)` array.

@@ -35,13 +35,15 @@ def _read(*paths: Path) -> PixelMasks:
     return read_pixel_masks(PixelMaskFilenames(paths))
 
 
-def _write_raw_pixel_mask(path: Path, field: str, values: np.ndarray) -> Path:
+def _write_raw_pixel_mask(
+    path: Path, field: str, values: np.ndarray, label: str = 'tube'
+) -> Path:
     with snx.File(path, 'w') as file:
         entry = file.create_class('entry', snx.NXentry)
         instrument = entry.create_class('instrument', snx.NXinstrument)
         detector = instrument.create_class('bank_0', snx.NXdetector)
         dataset = detector.create_field(field, values)
-        dataset.dims[0].label = 'tube'
+        dataset.dims[0].label = label
     return path
 
 
@@ -254,11 +256,63 @@ def test_to_detector_masks_raises_if_bank_mask_is_not_boolean(
     [
         sc.array(dims=['straw'], values=[True, False, False]),
         sc.array(dims=['tube'], values=[True, False]),
+        sc.array(dims=['pixel', 'tube'], values=[[True, False]] * 3),
+        sc.array(dims=['tube', 'straw'], values=[[True], [False], [False]]),
     ],
-    ids=['unknown-dim', 'wrong-size'],
+    ids=['unknown-dim', 'wrong-size', 'sizes-of-other-dim', 'extra-dim'],
 )
 def test_to_detector_masks_raises_if_mask_does_not_fit_detector(
     bank_ids: sc.Variable, mask: sc.Variable
 ) -> None:
     with pytest.raises(sc.DimensionError):
         to_detector_masks(_per_bank(a=mask), bank_ids, bank='a')
+
+
+def test_to_detector_masks_raises_if_file_has_no_dimension_labels(
+    bank_ids: sc.Variable, tmp_path: Path
+) -> None:
+    values = np.array([0, 1, 0])
+    path = _write_raw_pixel_mask(tmp_path / 'a.nxs', 'pixel_mask', values, label='')
+    with pytest.raises(sc.DimensionError):
+        to_detector_masks(_read(path), bank_ids, bank='bank_0')
+
+
+@pytest.mark.parametrize(
+    ('mask_dims', 'expected_dims'),
+    [
+        (('layer', 'tube', 'straw'), ('layer', 'tube', 'straw')),
+        (('straw', 'tube', 'layer'), ('layer', 'tube', 'straw')),
+        (('tube', 'straw', 'layer'), ('layer', 'tube', 'straw')),
+        (('tube',), ('tube',)),
+        (('layer', 'straw'), ('layer', 'straw')),
+        (('straw', 'layer'), ('layer', 'straw')),
+        (('straw', 'tube'), ('tube', 'straw')),
+    ],
+    ids=[
+        'full',
+        'full-reversed',
+        'full-reordered',
+        'one-dim',
+        'skips-dim',
+        'skips-dim-transposed',
+        'subset-transposed',
+    ],
+)
+def test_to_detector_masks_follows_dimension_order_of_detector(
+    mask_dims: tuple[str, ...], expected_dims: tuple[str, ...]
+) -> None:
+    sizes = {'layer': 2, 'tube': 3, 'straw': 4}
+    ids = sc.array(dims=list(sizes), values=np.arange(24).reshape(2, 3, 4), unit=None)
+    shape = [sizes[dim] for dim in mask_dims]
+    values = np.arange(np.prod(shape)).reshape(shape) % 3 == 0
+    mask = sc.array(dims=list(mask_dims), values=values)
+    result = to_detector_masks(_per_bank(a=mask), ids, bank='a')['m']
+    assert result.dims == expected_dims
+    assert sc.identical(result, mask.transpose(list(expected_dims)))
+
+
+def test_to_detector_masks_accepts_scalar_for_whole_bank(
+    bank_ids: sc.Variable,
+) -> None:
+    result = to_detector_masks(_per_bank(a=sc.scalar(True)), bank_ids, bank='a')['m']
+    assert sc.identical(result, sc.scalar(True))
