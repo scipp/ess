@@ -74,8 +74,17 @@ New files should not use scipp HDF5.
   It cannot express a mask of a tube or a straw except by listing every pixel.
 - **Workflows check the validity date.**
   This would require each workflow to know the time of a run and how to handle expired masks, while a list of filenames is enough for it to do its job.
+- **The NeXus fields `start_time` and `end_time` for the validity period.**
+  NeXus defines them as the start and end of a measurement, which can differ from the validity of a mask.
+  For example, a mask derived from a run in November can be valid from the day in October when a tube broke.
+  A reader of an archived file would also take them for measurement times.
+  `end_time` is usually unknown when a file is archived, since a static mask stops being valid when the hardware changes, and the file cannot be edited then.
 
 ## Consequences
+
+- `valid_from` is provisional.
+  Nothing reads it yet.
+  The software that selects mask files for a run may need a different field, or may keep the date in catalog metadata.
 
 - The format goes beyond the NeXus definition in three places.
   NeXus describes `pixel_mask` with rank 2, while masks here have the rank of the logical dimensions they use.
