@@ -8,10 +8,12 @@ from ess.reduce.masking import read_pixel_masks, to_pixel_masks
 
 from .types import (
     CorrectedDetector,
+    DetectorBankSizes,
     DetectorIDs,
     DetectorMasks,
     EmptyDetector,
     LoadedPixelMasks,
+    NeXusDetectorName,
     Numerator,
     RunType,
     SampleRun,
@@ -28,8 +30,13 @@ def get_detector_ids_from_detector(data: EmptyDetector[SampleRun]) -> DetectorID
     )
 
 
-def to_detector_mask(ids: DetectorIDs, masks: LoadedPixelMasks) -> DetectorMasks:
-    """Create detector masks from the masks read from files.
+def to_detector_mask(
+    ids: DetectorIDs,
+    masks: LoadedPixelMasks,
+    bank: NeXusDetectorName,
+    bank_sizes: DetectorBankSizes,
+) -> DetectorMasks:
+    """Create detector masks for a bank from the masks read from files.
 
     Parameters
     ----------
@@ -37,8 +44,12 @@ def to_detector_mask(ids: DetectorIDs, masks: LoadedPixelMasks) -> DetectorMasks
         Array of detector IDs
     masks:
         Masks read from files.
+    bank:
+        Name of the detector bank.
+    bank_sizes:
+        Sizes of the banks of the instrument, which define the valid bank names.
     """
-    return DetectorMasks(to_pixel_masks(masks, ids))
+    return DetectorMasks(to_pixel_masks(masks, ids, bank=bank, known_banks=bank_sizes))
 
 
 def apply_pixel_masks(

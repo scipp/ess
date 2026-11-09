@@ -13,6 +13,8 @@ from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    DetectorIDs,
+    DetectorMasks,
     EmptyDetector,
     Filename,
     IntensityQ,
@@ -29,6 +31,7 @@ from ess.sans.types import (
 from sciline import UnsatisfiedRequirement
 
 from ess.reduce import workflow
+from ess.reduce.masking import write_pixel_masks
 from ess.reduce.nexus.types import DiskChoppers, Position
 from ess.reduce.unwrap import LookupTable, LtotalRange, SourceBounds
 
@@ -154,3 +157,40 @@ def test_loki_analytical_lookup_table_matches_simulated_source_pulse():
         value = row['event_time_offset', np.argmin(np.abs(toa - t))].data
         assert abs(value.value - mean) < 0.01
         assert abs(sc.stddevs(value).value / stddev - 1) < 0.05
+
+
+def test_loki_workflow_reads_bool_masks_per_bank(tmp_path):
+    path = tmp_path / 'masks.h5'
+    mask = sc.array(dims=['tube'], values=[True, False])
+    write_pixel_masks(path, {'loki_detector_1': mask}, name='broken')
+    wf = loki.LokiWorkflow()
+    wf[NeXusDetectorName] = 'loki_detector_1'
+    wf[DetectorIDs] = sc.array(dims=['tube'], values=[1, 2], unit=None)
+    wf[PixelMaskFilenames] = [path]
+
+    assert sc.identical(wf.compute(DetectorMasks)['broken'], mask)
+
+
+def test_loki_workflow_raises_if_mask_file_has_unknown_bank(tmp_path):
+    path = tmp_path / 'masks.h5'
+    mask = sc.array(dims=['tube'], values=[True, False])
+    write_pixel_masks(path, {'loki_detector_99': mask})
+    wf = loki.LokiWorkflow()
+    wf[NeXusDetectorName] = 'loki_detector_1'
+    wf[DetectorIDs] = sc.array(dims=['tube'], values=[1, 2], unit=None)
+    wf[PixelMaskFilenames] = [path]
+
+    with pytest.raises(ValueError, match='loki_detector_99'):
+        wf.compute(DetectorMasks)
+
+
+def test_bool_mask_file_gives_same_masks_as_id_file(larmor_workflow, tmp_path):
+    wf = larmor_workflow(no_masks=False)
+    wf[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()
+    from_ids = next(iter(wf.compute(DetectorMasks).values()))
+
+    path = tmp_path / 'masks.h5'
+    write_pixel_masks(path, {'larmor_detector': from_ids})
+    wf[PixelMaskFilenames] = [path]
+
+    assert sc.identical(wf.compute(DetectorMasks)['masks.h5'], from_ids)

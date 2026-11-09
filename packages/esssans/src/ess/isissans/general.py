@@ -13,11 +13,13 @@ import scippneutron as scn
 import scippnexus as snx
 from ess.sans.types import (
     DetectorIDs,
+    DetectorMasks,
     DetectorPixelShape,
     DetectorPositionOffset,
     EmptyDetector,
     EmptyMonitor,
     Incident,
+    LoadedPixelMasks,
     Measurement,
     MonitorPositionOffset,
     MonitorType,
@@ -33,6 +35,7 @@ from ess.sans.types import (
     WavelengthMonitor,
 )
 
+from ess.reduce.masking import to_pixel_masks
 from ess.reduce.nexus.types import NeXusTransformation, Position
 
 from .io import LoadedFileContents
@@ -301,6 +304,17 @@ def get_detector_ids_from_sample_run(data: RawDetector[SampleRun]) -> DetectorID
     )
 
 
+def to_detector_mask_without_bank(
+    ids: DetectorIDs, masks: LoadedPixelMasks
+) -> DetectorMasks:
+    """Create detector masks from masks read from files.
+
+    This overrides the function in the masking module, since files loaded using Mantid
+    have no NeXus detector name. So mask files that give masks per bank are not usable.
+    """
+    return DetectorMasks(to_pixel_masks(masks, ids))
+
+
 providers = (
     dummy_assemble_detector_data,
     dummy_assemble_monitor_data,
@@ -313,6 +327,7 @@ providers = (
     get_calibrated_isis_detector,
     get_calibrated_isis_monitor,
     get_detector_ids_from_sample_run,
+    to_detector_mask_without_bank,
     get_monitor_data,
     data_to_wavelength,
     monitor_to_wavelength,
