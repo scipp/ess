@@ -115,8 +115,9 @@ def to_detector_masks(
     masks = {}
     for name, content in pixel_masks.items():
         if isinstance(content, sc.Variable):
+            masked_ids = _validate_masked_ids(content, name)
             masks[name] = sc.array(
-                dims=ids.dims, values=np.isin(ids.values, content.values)
+                dims=ids.dims, values=np.isin(ids.values, masked_ids.values)
             )
             continue
         if bank is None:
@@ -252,7 +253,17 @@ def _read_bank_mask(detector: snx.Group, filename: Path) -> sc.Variable:
     return sc.array(dims=field.dims, values=masked)
 
 
+def _validate_masked_ids(masked_ids: sc.Variable, name: str) -> sc.Variable:
+    if masked_ids.dtype not in ('int32', 'int64'):
+        raise sc.DTypeError(
+            f"Mask '{name}' must hold integer detector IDs, not {masked_ids.dtype}."
+        )
+    return masked_ids
+
+
 def _validate_bank_mask(mask: sc.Variable, ids: sc.Variable, name: str) -> sc.Variable:
+    if mask.dtype != 'bool':
+        raise sc.DTypeError(f"Mask '{name}' must be boolean, not {mask.dtype}.")
     # Masks with a dimension that the data lacks would be ignored without an error.
     if not mask.sizes.items() <= ids.sizes.items():
         raise sc.DimensionError(

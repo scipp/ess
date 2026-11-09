@@ -224,6 +224,22 @@ def test_to_pixel_masks_raises_on_unknown_bank(bank_ids: sc.Variable) -> None:
         )
 
 
+def test_to_detector_masks_raises_if_masked_ids_are_not_integer(
+    bank_ids: sc.Variable,
+) -> None:
+    masked = sc.array(dims=['x'], values=[True])
+    with pytest.raises(sc.DTypeError, match='integer detector IDs'):
+        to_detector_masks(PixelMasks({'m': masked}), bank_ids)
+
+
+def test_to_detector_masks_raises_if_bank_mask_is_not_boolean(
+    bank_ids: sc.Variable,
+) -> None:
+    mask = sc.array(dims=['tube'], values=[0, 1, 2], unit=None)
+    with pytest.raises(sc.DTypeError, match='boolean'):
+        to_detector_masks(_per_bank(a=mask), bank_ids, bank='a')
+
+
 @pytest.mark.parametrize(
     'mask',
     [
