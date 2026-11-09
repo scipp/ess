@@ -203,7 +203,7 @@ class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
 
 
 PixelMaskFilenames = masking_t.PixelMaskFilenames
-LoadedPixelMasks = masking_t.LoadedPixelMasks
+PixelMasks = masking_t.PixelMasks
 
 
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):

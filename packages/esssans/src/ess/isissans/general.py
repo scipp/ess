@@ -19,13 +19,13 @@ from ess.sans.types import (
     EmptyDetector,
     EmptyMonitor,
     Incident,
-    LoadedPixelMasks,
     Measurement,
     MonitorPositionOffset,
     MonitorType,
     NeXusComponent,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
+    PixelMasks,
     RawDetector,
     RawMonitor,
     RunType,
@@ -35,7 +35,7 @@ from ess.sans.types import (
     WavelengthMonitor,
 )
 
-from ess.reduce.masking import to_pixel_masks
+from ess.reduce.masking import to_detector_masks
 from ess.reduce.nexus.types import NeXusTransformation, Position
 
 from .io import LoadedFileContents
@@ -304,15 +304,13 @@ def get_detector_ids_from_sample_run(data: RawDetector[SampleRun]) -> DetectorID
     )
 
 
-def to_detector_mask_without_bank(
-    ids: DetectorIDs, masks: LoadedPixelMasks
-) -> DetectorMasks:
-    """Create detector masks from masks read from files.
+def to_detector_mask_without_bank(ids: DetectorIDs, masks: PixelMasks) -> DetectorMasks:
+    """Create detector masks from the pixel masks of the instrument.
 
     This overrides the function in the masking module, since files loaded using Mantid
     have no NeXus detector name. So mask files that give masks per bank are not usable.
     """
-    return DetectorMasks(to_pixel_masks(masks, ids))
+    return DetectorMasks(to_detector_masks(masks, ids))
 
 
 providers = (

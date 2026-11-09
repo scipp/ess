@@ -3,7 +3,7 @@ from .masking import apply_masks
 from .types import (
     CorrectedDetector,
     DspacingDetector,
-    LoadedPixelMasks,
+    PixelMasks,
     RunType,
     TofMask,
     TwoThetaMask,
@@ -13,7 +13,7 @@ from .types import (
 
 def add_masks_and_corrections(
     da: DspacingDetector[RunType],
-    pixel_masks: LoadedPixelMasks,
+    pixel_masks: PixelMasks,
     tof_mask_func: TofMask,
     wavelength_mask_func: WavelengthMask,
     two_theta_mask_func: TwoThetaMask,

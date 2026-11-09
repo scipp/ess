@@ -18,11 +18,12 @@ import scippnexus as snx
 PixelMaskFilenames = NewType('PixelMaskFilenames', Sequence[str | Path])
 """Files with pixel masks to apply. Use an empty sequence to apply none."""
 
-LoadedPixelMasks = NewType('LoadedPixelMasks', dict[str, sc.Variable | sc.DataGroup])
-"""Content of each mask file, by mask name.
+PixelMasks = NewType('PixelMasks', dict[str, sc.Variable | sc.DataGroup])
+"""Pixel masks of the whole instrument, by mask name.
 
-Either a variable of masked detector IDs, or a data group of boolean masks by detector
-bank.
+Each value is either a variable of masked detector IDs, or a data group of boolean masks
+by detector bank. :py:func:`read_pixel_masks` provides them from files, and they can
+also be set directly. :py:func:`to_detector_masks` selects the masks for one detector.
 """
 
 _HDF5_SUFFIXES = ('.h5', '.hdf', '.hdf5', '.nxs')
@@ -37,7 +38,7 @@ Other bits are tags, which do not exclude a pixel on their own.
 """
 
 
-def read_pixel_masks(filenames: PixelMaskFilenames) -> LoadedPixelMasks:
+def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
     """Read pixel masks from files.
 
     The following formats are supported, selected by file suffix and content:
@@ -85,11 +86,11 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> LoadedPixelMasks:
         if name in masks:
             raise ValueError(f"Several mask files give the mask name '{name}'.")
         masks[name] = content
-    return LoadedPixelMasks(masks)
+    return PixelMasks(masks)
 
 
-def to_pixel_masks(
-    loaded: LoadedPixelMasks,
+def to_detector_masks(
+    pixel_masks: PixelMasks,
     ids: sc.Variable,
     bank: str | None = None,
     known_banks: Collection[str] | None = None,
@@ -101,8 +102,8 @@ def to_pixel_masks(
 
     Parameters
     ----------
-    loaded:
-        Masks read from files.
+    pixel_masks:
+        Pixel masks of the instrument.
     ids:
         Detector IDs of the pixels.
     bank:
@@ -112,7 +113,7 @@ def to_pixel_masks(
         bank raises an error. A misspelled name would otherwise mask nothing.
     """
     masks = {}
-    for name, content in loaded.items():
+    for name, content in pixel_masks.items():
         if isinstance(content, sc.Variable):
             masks[name] = sc.array(
                 dims=ids.dims, values=np.isin(ids.values, content.values)

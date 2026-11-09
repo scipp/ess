@@ -6,10 +6,10 @@ Masking functions for the powder workflow.
 
 import scipp as sc
 
-from ess.reduce.masking import read_pixel_masks, to_pixel_masks
+from ess.reduce.masking import read_pixel_masks, to_detector_masks
 
 from .types import (
-    LoadedPixelMasks,
+    PixelMasks,
     RunType,
     TofMask,
     TwoThetaMask,
@@ -20,7 +20,7 @@ from .types import (
 
 def apply_masks(
     data: WavelengthDetector[RunType],
-    pixel_masks: LoadedPixelMasks,
+    pixel_masks: PixelMasks,
     tof_mask_func: TofMask,
     wavelength_mask_func: WavelengthMask,
     two_theta_mask_func: TwoThetaMask,
@@ -31,7 +31,7 @@ def apply_masks(
         key = (
             set(out.coords.keys()) & {"detector_number", "detector_id", "spectrum"}
         ).pop()
-        out = out.assign_masks(to_pixel_masks(pixel_masks, out.coords[key]))
+        out = out.assign_masks(to_detector_masks(pixel_masks, out.coords[key]))
 
     for dim, mask in {
         "tof": tof_mask_func,

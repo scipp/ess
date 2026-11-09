@@ -182,7 +182,7 @@ OutFilename = NewType('OutFilename', str)
 
 
 PixelMaskFilenames = masking_t.PixelMaskFilenames
-LoadedPixelMasks = masking_t.LoadedPixelMasks
+PixelMasks = masking_t.PixelMasks
 
 DetectorIDs = NewType('DetectorIDs', sc.Variable)
 """1-D variable listing all detector IDs."""

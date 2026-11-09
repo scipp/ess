@@ -8,10 +8,10 @@ import scipp as sc
 import scippnexus as snx
 
 from ess.reduce.masking import (
-    LoadedPixelMasks,
     PixelMaskFilenames,
+    PixelMasks,
     read_pixel_masks,
-    to_pixel_masks,
+    to_detector_masks,
     write_pixel_masks,
 )
 
@@ -31,7 +31,7 @@ def _write_ids(path: Path, values: list[int]) -> Path:
     return path
 
 
-def _read(*paths: Path) -> LoadedPixelMasks:
+def _read(*paths: Path) -> PixelMasks:
     return read_pixel_masks(PixelMaskFilenames(paths))
 
 
@@ -174,7 +174,7 @@ def test_read_raises_if_file_has_no_pixel_mask(tmp_path: Path) -> None:
 def test_to_pixel_masks_keeps_shape_of_ids() -> None:
     ids = sc.array(dims=['tube', 'pixel'], values=[[1, 2], [3, 4]], unit=None)
     masked = sc.array(dims=['detector_id'], values=[2, 3, 99], unit=None)
-    masks = to_pixel_masks(LoadedPixelMasks({'m': masked}), ids)
+    masks = to_detector_masks(PixelMasks({'m': masked}), ids)
     expected = sc.array(dims=['tube', 'pixel'], values=[[False, True], [True, False]])
     assert sc.identical(masks['m'], expected)
 
@@ -184,8 +184,8 @@ def bank_ids() -> sc.Variable:
     return sc.array(dims=['tube', 'pixel'], values=[[1, 2], [3, 4], [5, 6]], unit=None)
 
 
-def _per_bank(**banks: sc.Variable) -> LoadedPixelMasks:
-    return LoadedPixelMasks({'m': sc.DataGroup(banks)})
+def _per_bank(**banks: sc.Variable) -> PixelMasks:
+    return PixelMasks({'m': sc.DataGroup(banks)})
 
 
 def test_to_pixel_masks_selects_bank_and_allows_fewer_dims(
@@ -193,18 +193,18 @@ def test_to_pixel_masks_selects_bank_and_allows_fewer_dims(
 ) -> None:
     mask = sc.array(dims=['tube'], values=[True, False, False])
     other = sc.array(dims=['tube'], values=[False, True, False])
-    masks = to_pixel_masks(_per_bank(a=mask, b=other), bank_ids, bank='a')
+    masks = to_detector_masks(_per_bank(a=mask, b=other), bank_ids, bank='a')
     assert sc.identical(masks['m'], mask)
 
 
 def test_to_pixel_masks_skips_file_without_this_bank(bank_ids: sc.Variable) -> None:
     mask = sc.array(dims=['tube'], values=[True, False, False])
-    assert to_pixel_masks(_per_bank(b=mask), bank_ids, bank='a') == {}
+    assert to_detector_masks(_per_bank(b=mask), bank_ids, bank='a') == {}
 
 
 def test_to_pixel_masks_applies_ids_to_any_bank(bank_ids: sc.Variable) -> None:
     masked = sc.array(dims=['detector_id'], values=[1], unit=None)
-    masks = to_pixel_masks(LoadedPixelMasks({'m': masked}), bank_ids, bank='a')
+    masks = to_detector_masks(PixelMasks({'m': masked}), bank_ids, bank='a')
     assert masks['m'].values.sum() == 1
 
 
@@ -213,13 +213,13 @@ def test_to_pixel_masks_raises_without_bank_for_masks_per_bank(
 ) -> None:
     mask = sc.array(dims=['tube'], values=[True, False, False])
     with pytest.raises(ValueError, match='no bank is known'):
-        to_pixel_masks(_per_bank(a=mask), bank_ids)
+        to_detector_masks(_per_bank(a=mask), bank_ids)
 
 
 def test_to_pixel_masks_raises_on_unknown_bank(bank_ids: sc.Variable) -> None:
     mask = sc.array(dims=['tube'], values=[True, False, False])
     with pytest.raises(ValueError, match='typo'):
-        to_pixel_masks(
+        to_detector_masks(
             _per_bank(a=mask, typo=mask), bank_ids, bank='a', known_banks={'a', 'b'}
         )
 
@@ -236,4 +236,4 @@ def test_to_pixel_masks_raises_if_mask_does_not_fit_detector(
     bank_ids: sc.Variable, mask: sc.Variable
 ) -> None:
     with pytest.raises(sc.DimensionError):
-        to_pixel_masks(_per_bank(a=mask), bank_ids, bank='a')
+        to_detector_masks(_per_bank(a=mask), bank_ids, bank='a')
