@@ -51,6 +51,7 @@ with h5py.File(path) as f:
 - Each file gives one mask per bank.
   Tube and straw masks combine into one `(layer, tube, straw)` array.
   The `pixel_mask_N` fields of NeXus are an error, so that they are not ignored.
+  A file with several `NXentry` groups is an error for the same reason.
 - `title` becomes the name of the mask in the reduced data.
   Without it, the name of the file is used.
   Two masks with the same name are an error.
@@ -95,3 +96,26 @@ New files should not use scipp HDF5.
   Mask files must be recreated when the layout of a bank changes.
 - Mask files have no format version.
   A later incompatible change needs a different location than `/entry/instrument/<bank>/pixel_mask`.
+
+## Possible extension: several masks in one file
+
+A file could hold several masks as several `NXentry` groups, which NeXus allows:
+
+```text
+/broken_tubes                  NXentry
+    title                      "broken-tubes"
+    instrument/loki_detector_0/pixel_mask     dims ("tube")
+/beamstop                      NXentry
+    title                      "beamstop"
+    instrument/loki_detector_0/pixel_mask     dims ("layer", "tube", "straw")
+```
+
+Each entry would be one named mask, with its own `title` and `valid_from`, and with its own dimensions.
+Tube and straw masks would then not have to be combined into one array.
+Only the reader would change, and files with one entry would stay valid.
+
+This is not implemented, because a list of several files already gives several named masks.
+Files with several entries are rejected today, so that a version of the reader without this extension raises an error instead of leaving pixels unmasked.
+
+The `pixel_mask_N` fields are not suitable for this extension.
+NeXus defines them as parts of one mask, combined with a bitwise OR, and they have no names.

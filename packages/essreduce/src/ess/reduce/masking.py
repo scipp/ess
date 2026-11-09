@@ -214,6 +214,9 @@ def _read_mask_file(filename: Path) -> tuple[str, sc.Variable | sc.DataGroup]:
 
 def _read_hdf5(filename: Path) -> tuple[str, sc.Variable | sc.DataGroup]:
     with snx.File(filename) as file:
+        # Reading only one of several entries would leave pixels unmasked.
+        if len(file[snx.NXentry]) > 1:
+            raise ValueError(f"Mask file '{filename}' has several NXentry groups.")
         if 'entry' in file:
             return _read_nexus_masks(file['entry'], filename)
     ids = sc.io.load_hdf5(filename)

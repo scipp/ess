@@ -165,6 +165,15 @@ def test_read_raises_on_numbered_pixel_masks(tmp_path: Path) -> None:
         _read(path)
 
 
+def test_read_raises_on_several_entries(tmp_path: Path) -> None:
+    path = tmp_path / 'a.nxs'
+    write_pixel_masks(path, {'bank_0': sc.array(dims=['tube'], values=[True])})
+    with snx.File(path, 'r+') as file:
+        file.create_class('other', snx.NXentry)
+    with pytest.raises(ValueError, match='several NXentry'):
+        _read(path)
+
+
 def test_read_raises_if_file_has_no_pixel_mask(tmp_path: Path) -> None:
     path = _write_raw_pixel_mask(tmp_path / 'a.nxs', 'detector_number', np.array([1]))
     with pytest.raises(ValueError, match='no detector with a pixel_mask'):
