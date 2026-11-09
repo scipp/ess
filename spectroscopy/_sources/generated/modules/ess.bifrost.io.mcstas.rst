@@ -14,7 +14,7 @@ ess.bifrost.io.mcstas
    .. autosummary::
       :toctree:
    
-      assemble_detector_data
+      assemble_bifrost_mcstas_detector_data
       convert_simulated_time_to_event_time_offset
       load_sample_angle
    

@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/bifrost/workflow';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -533,23 +533,17 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.spectroscopy.indirect.time_of_flight</span><span class="w"> </span><span class="kn">import</span> <span class="n">TofWorkflow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.spectroscopy.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ElasticMonitor</span><span class="p">,</span>
-    <span class="n">EmptyDetector</span><span class="p">,</span>
-    <span class="n">NeXusData</span><span class="p">,</span>
-    <span class="n">NeXusDetectorName</span><span class="p">,</span>
     <span class="n">NeXusMonitorName</span><span class="p">,</span>
     <span class="n">NormalizationMonitor</span><span class="p">,</span>
     <span class="n">OverlapMonitor</span><span class="p">,</span>
     <span class="n">ProtonCharge</span><span class="p">,</span>
     <span class="n">PSCMonitor</span><span class="p">,</span>
     <span class="n">PulsePeriod</span><span class="p">,</span>
-    <span class="n">RawDetector</span><span class="p">,</span>
     <span class="n">SampleRun</span><span class="p">,</span>
     <span class="n">UncertaintyBroadcastMode</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXdetector</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.cutting</span><span class="w"> </span><span class="kn">import</span> <span class="n">providers</span> <span class="k">as</span> <span class="n">cutting_providers</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_detector_names</span><span class="p">,</span> <span class="n">merge_triplets</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">providers</span> <span class="k">as</span> <span class="n">detector_providers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">mcstas</span><span class="p">,</span> <span class="n">nexus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.normalization</span><span class="w"> </span><span class="kn">import</span> <span class="n">providers</span> <span class="k">as</span> <span class="n">normalisation_providers</span>
@@ -613,17 +607,12 @@
 <div class="viewcode-block" id="BifrostSimulationWorkflow">
 <a class="viewcode-back" href="../../../generated/modules/ess.bifrost.workflow.BifrostSimulationWorkflow.html#ess.bifrost.BifrostSimulationWorkflow">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">BifrostSimulationWorkflow</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">detector_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data reduction workflow for simulated BIFROST data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    detector_names:</span>
-<span class="sd">        Names of ``NXdetector`` groups in the input NeXus file.</span>
-<span class="sd">        If ``None``, all detector will be processed and merged.</span>
 <span class="sd">    kwargs:</span>
 <span class="sd">        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.</span>
 
@@ -646,13 +635,6 @@
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">simulation_default_parameters</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
-
-    <span class="n">workflow</span><span class="p">[</span><span class="n">RawDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">workflow</span><span class="p">[</span><span class="n">RawDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
-        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_make_detector_name_mapping</span><span class="p">(</span><span class="n">detector_names</span><span class="p">))</span>
-        <span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">merge_triplets</span><span class="p">)</span>
-    <span class="p">)</span>
-
     <span class="k">return</span> <span class="n">workflow</span></div>
 
 
@@ -660,17 +642,12 @@
 <div class="viewcode-block" id="BifrostWorkflow">
 <a class="viewcode-back" href="../../../generated/modules/ess.bifrost.workflow.BifrostWorkflow.html#ess.bifrost.BifrostWorkflow">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">BifrostWorkflow</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">detector_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data reduction workflow for BIFROST.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    detector_names:</span>
-<span class="sd">        Names of ``NXdetector`` groups in the input NeXus file.</span>
-<span class="sd">        If ``None``, all detector will be processed and merged.</span>
 <span class="sd">    kwargs:</span>
 <span class="sd">        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.</span>
 <span class="sd">    Returns</span>
@@ -691,63 +668,8 @@
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">default_parameters</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">workflow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
-
-    <span class="n">workflow</span><span class="p">[</span><span class="n">EmptyDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">workflow</span><span class="p">[</span><span class="n">EmptyDetector</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span>
-        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_make_detector_name_mapping</span><span class="p">(</span><span class="n">detector_names</span><span class="p">))</span>
-        <span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">merge_triplets</span><span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="n">workflow</span><span class="p">[</span><span class="n">NeXusData</span><span class="p">[</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">workflow</span><span class="p">[</span><span class="n">NeXusData</span><span class="p">[</span><span class="n">NXdetector</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">]]</span>
-        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_make_detector_name_mapping</span><span class="p">(</span><span class="n">detector_names</span><span class="p">))</span>
-        <span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">concat_event_lists</span><span class="p">)</span>
-    <span class="p">)</span>
-
     <span class="k">return</span> <span class="n">workflow</span></div>
 
-
-
-<span class="c1"># TODO remove or move</span>
-<div class="viewcode-block" id="concat_event_lists">
-<a class="viewcode-back" href="../../../generated/modules/ess.bifrost.workflow.concat_event_lists.html#ess.bifrost.concat_event_lists">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">concat_event_lists</span><span class="p">(</span>
-    <span class="o">*</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concatenate binned event lists into a single data array in &#39;event_time_zero&#39;.</span>
-
-<span class="sd">    Note that the output will likely have repeated values for &#39;event_time_zero&#39;.</span>
-<span class="sd">    E.g., if input 1 has times `[0, 1, 2]` and input 2 has times `[0, 2, 3]`,</span>
-<span class="sd">    the output will have times `[0, 1, 2, 0, 2, 3]`.</span>
-<span class="sd">    Note that this sawtooth pattern will disappear again after grouping into pixels.</span>
-<span class="sd">    Preserving it will likely actually lead to more efficient memory</span>
-<span class="sd">    access patterns when grouping.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    data:</span>
-<span class="sd">        Data arrays to concatenate.</span>
-<span class="sd">        Must be binned in &#39;event_time_zero&#39;.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    :</span>
-<span class="sd">        Concatenated data array.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;event_time_zero&quot;</span><span class="p">)</span></div>
-
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_make_detector_name_mapping</span><span class="p">(</span><span class="n">detector_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">detector_names</span> <span class="k">if</span> <span class="n">detector_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default_detector_names</span><span class="p">()</span>
-
-    <span class="c1"># Use Pandas if possible to label the index.</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span>
-
-        <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">NeXusDetectorName</span><span class="p">:</span> <span class="n">names</span><span class="p">})</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;triplet&#39;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">NeXusDetectorName</span><span class="p">:</span> <span class="n">names</span><span class="p">}</span>
 </pre></div>
 
                 </article>
@@ -810,7 +732,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

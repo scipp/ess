@@ -20,6 +20,7 @@
       :template: class-template.rst
    
       Analyzer
+      Analyzers
       DataAtSample
       DataGroupedByRotation
       ElasticCoordTransformGraph

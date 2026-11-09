@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -51,15 +51,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/modules/ess.bifrost.io.nexus.get_calibrated_analyzer';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ess.bifrost.io.nexus.load_analyzer_for_detector" href="ess.bifrost.io.nexus.load_analyzer_for_detector.html" />
+    <link rel="next" title="ess.bifrost.io.nexus.get_calibrated_analyzers" href="ess.bifrost.io.nexus.get_calibrated_analyzers.html" />
     <link rel="prev" title="ess.bifrost.io.nexus.extract_instrument_angle" href="ess.bifrost.io.nexus.extract_instrument_angle.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -531,6 +531,7 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.spectroscopy.types.html">ess.spectroscopy.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.Analyzer.html">ess.spectroscopy.types.Analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.Analyzers.html">ess.spectroscopy.types.Analyzers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.DataAtSample.html">ess.spectroscopy.types.DataAtSample</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.DataGroupedByRotation.html">ess.spectroscopy.types.DataGroupedByRotation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.ElasticCoordTransformGraph.html">ess.spectroscopy.types.ElasticCoordTransformGraph</a></li>
@@ -562,25 +563,26 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.detector.html">ess.bifrost.detector</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.arc_and_channel_from_detector_number.html">ess.bifrost.detector.arc_and_channel_from_detector_number</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.arc_number.html">ess.bifrost.detector.arc_number</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.default_detector_names.html">ess.bifrost.detector.default_detector_names</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.get_base_calibrated_detector_bifrost.html">ess.bifrost.detector.get_base_calibrated_detector_bifrost</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.get_calibrated_detector_bifrost.html">ess.bifrost.detector.get_calibrated_detector_bifrost</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.merge_triplets.html">ess.bifrost.detector.merge_triplets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.get_single_calibrated_detector_bifrost.html">ess.bifrost.detector.get_single_calibrated_detector_bifrost</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.detector.single_arc_and_channel_from_detector_number.html">ess.bifrost.detector.single_arc_and_channel_from_detector_number</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="ess.bifrost.io.html">ess.bifrost.io</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.bifrost.io.mcstas.html">ess.bifrost.io.mcstas</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.assemble_detector_data.html">ess.bifrost.io.mcstas.assemble_detector_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.assemble_bifrost_mcstas_detector_data.html">ess.bifrost.io.mcstas.assemble_bifrost_mcstas_detector_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset.html">ess.bifrost.io.mcstas.convert_simulated_time_to_event_time_offset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.mcstas.load_sample_angle.html">ess.bifrost.io.mcstas.load_sample_angle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="ess.bifrost.io.nexus.html">ess.bifrost.io.nexus</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.concat_detector_events.html">ess.bifrost.io.nexus.concat_detector_events</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.extract_instrument_angle.html">ess.bifrost.io.nexus.extract_instrument_angle</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">ess.bifrost.io.nexus.get_calibrated_analyzer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_analyzer_for_detector.html">ess.bifrost.io.nexus.load_analyzer_for_detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.get_calibrated_analyzers.html">ess.bifrost.io.nexus.get_calibrated_analyzers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_bifrost_analyzer_for_detector.html">ess.bifrost.io.nexus.load_bifrost_analyzer_for_detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_bifrost_analyzers.html">ess.bifrost.io.nexus.load_bifrost_analyzers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.load_sample_angle.html">ess.bifrost.io.nexus.load_sample_angle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.moderator_class_for_source.html">ess.bifrost.io.nexus.moderator_class_for_source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ess.bifrost.io.nexus.stepwise_transformation_time_filter.html">ess.bifrost.io.nexus.stepwise_transformation_time_filter</a></li>
@@ -616,7 +618,6 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.workflow.html">ess.bifrost.workflow</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.BifrostSimulationWorkflow.html">ess.bifrost.workflow.BifrostSimulationWorkflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.BifrostWorkflow.html">ess.bifrost.workflow.BifrostWorkflow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.concat_event_lists.html">ess.bifrost.workflow.concat_event_lists</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.default_parameters.html">ess.bifrost.workflow.default_parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.workflow.simulation_default_parameters.html">ess.bifrost.workflow.simulation_default_parameters</a></li>
 </ul>
@@ -703,20 +704,13 @@
 <h1>ess.bifrost.io.nexus.get_calibrated_analyzer<a class="headerlink" href="#ess-bifrost-io-nexus-get-calibrated-analyzer" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="ess.bifrost.io.nexus.get_calibrated_analyzer">
-<span class="sig-prename descclassname"><span class="pre">ess.bifrost.io.nexus.</span></span><span class="sig-name descname"><span class="pre">get_calibrated_analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyzer_component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer_transform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer_position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/bifrost/io/nexus.html#get_calibrated_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.bifrost.io.nexus.get_calibrated_analyzer" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ess.bifrost.io.nexus.</span></span><span class="sig-name descname"><span class="pre">get_calibrated_analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyzer_component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer_transform</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/bifrost/io/nexus.html#get_calibrated_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.bifrost.io.nexus.get_calibrated_analyzer" title="Link to this definition">#</a></dt>
 <dd><p>Collect the data for a single analyzer.</p>
-<p>This provider works together with <a class="reference internal" href="ess.bifrost.io.nexus.load_analyzer_for_detector.html#ess.bifrost.io.nexus.load_analyzer_for_detector" title="ess.bifrost.io.nexus.load_analyzer_for_detector"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_analyzer_for_detector()</span></code></a> and the
-generic NeXus workflow from ESSreduce.
-<code class="docutils literal notranslate"><span class="pre">load_analyzer_for_detector</span></code> loads a raw analyzer component.
-Then the default providers from ESSreduce extract a transform and position like
-for any other component.
-Finally, this provider combines the data into a single Analyzer object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>analyzer_component</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.NeXusComponent.html#ess.reduce.nexus.types.NeXusComponent" title="(in ESSreduce v26.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusComponent</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Data group of loaded analyzers.</p></li>
+<li><p><strong>analyzer_component</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.NeXusComponent.html#ess.reduce.nexus.types.NeXusComponent" title="(in ESSreduce v26.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusComponent</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Data group of loaded analyzer.</p></li>
 <li><p><strong>analyzer_transform</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.NeXusTransformation.html#ess.reduce.nexus.types.NeXusTransformation" title="(in ESSreduce v26.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeXusTransformation</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – Transformation matrix of the analyzer.</p></li>
-<li><p><strong>analyzer_position</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/ess/reduce/generated/modules/ess.reduce.nexus.types.DynamicPosition.html#ess.reduce.nexus.types.DynamicPosition" title="(in ESSreduce v26.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicPosition</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">NXcrystal</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">RunType</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ess.reduce.nexus.types.SampleRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>), <code class="xref py py-class docutils literal notranslate"><span class="pre">types.VanadiumRun</span></code> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>))]</span>) – The computed position vector of the analyzer.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -748,11 +742,11 @@ Only a subset of fields is returned.</p>
       </div>
     </a>
     <a class="right-next"
-       href="ess.bifrost.io.nexus.load_analyzer_for_detector.html"
+       href="ess.bifrost.io.nexus.get_calibrated_analyzers.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ess.bifrost.io.nexus.load_analyzer_for_detector</p>
+        <p class="prev-next-title">ess.bifrost.io.nexus.get_calibrated_analyzers</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -807,7 +801,7 @@ Only a subset of fields is returned.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

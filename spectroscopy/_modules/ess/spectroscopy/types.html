@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/spectroscopy/types';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -547,12 +547,23 @@
 <span class="n">NeXusData</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusData</span>
 <span class="n">NeXusDetectorName</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusDetectorName</span>
 <span class="n">NeXusFileSpec</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusFileSpec</span>
+<span class="n">NeXusLocationSpec</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusLocationSpec</span>
+<span class="n">NeXusMultiComponent</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusMultiComponent</span>
+<span class="n">NeXusMultiComponentLocationSpec</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusMultiComponentLocationSpec</span>
+<span class="n">NeXusMultiData</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusMultiData</span>
+<span class="n">NeXusMultiDataLocationSpec</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusMultiDataLocationSpec</span>
+<span class="n">NeXusMultiNames</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusMultiNames</span>
+<span class="n">NeXusMultiTransformation</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusMultiTransformation</span>
+<span class="n">NeXusMultiTransformationChain</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusMultiTransformationChain</span>
 <span class="n">NeXusMonitorName</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusName</span>
 <span class="n">NeXusTransformation</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusTransformation</span>
+<span class="n">NeXusTransformationChain</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusTransformationChain</span>
 <span class="n">Position</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">Position</span>
 <span class="n">PreopenNeXusFile</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">PreopenNeXusFile</span>
 <span class="n">RawDetector</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">RawDetector</span>
 <span class="n">RawMonitor</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">RawMonitor</span>
+<span class="n">TimeInterval</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">TimeInterval</span>
+<span class="n">TransformationTimeFilter</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">TransformationTimeFilter</span>
 
 <span class="n">SampleRun</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">SampleRun</span>
 <span class="n">VanadiumRun</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;VanadiumRun&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
@@ -590,10 +601,14 @@
 <div class="viewcode-block" id="Analyzer">
 <a class="viewcode-back" href="../../../generated/modules/ess.spectroscopy.types.Analyzer.html#ess.spectroscopy.types.Analyzer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Analyzer</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A single wavelength analyzer loaded from an NXcrystal.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A single wavelength analyzer loaded from an NXcrystal.&quot;&quot;&quot;</span></div>
 
-<span class="sd">    Can be obtained from ``Analyzers``.</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Analyzers">
+<a class="viewcode-back" href="../../../generated/modules/ess.spectroscopy.types.Analyzers.html#ess.spectroscopy.types.Analyzers">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Analyzers</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;All wavelength analyzers loaded from a NXcrystals.&quot;&quot;&quot;</span></div>
 
 
 
@@ -703,7 +718,6 @@
 
 <span class="n">SQWBinSizes</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;SQWBinSizes&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span>
 
-
 <span class="n">UncertaintyBroadcastMode</span> <span class="o">=</span> <span class="n">_UncertaintyBroadcastMode</span>
 
 
@@ -774,7 +788,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
