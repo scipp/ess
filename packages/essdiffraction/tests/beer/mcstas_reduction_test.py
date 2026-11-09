@@ -49,7 +49,7 @@ from ess.powder.types import (
     ElasticCoordTransformGraph,
     EmptyDetector,
     KeepEvents,
-    MaskedDetectorIDs,
+    LoadedPixelMasks,
     NormalizedDspacing,
     QDetector,
     SampleRun,
@@ -155,7 +155,7 @@ def test_modulation_workflows_can_normalize(factory):
     wf[DetectorBank] = DetectorBank.north
     wf[DHKLList] = silicon_peaks_array()
     wf[DspacingBins] = sc.linspace('dspacing', 0.8, 2.2, 31, unit='angstrom')
-    wf[MaskedDetectorIDs] = MaskedDetectorIDs({})
+    wf[LoadedPixelMasks] = LoadedPixelMasks({})
     wf[KeepEvents[SampleRun]] = KeepEvents[SampleRun](True)
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     wf[TofMask] = None

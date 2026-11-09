@@ -12,6 +12,7 @@ from typing import Generic, NewType, TypeVar
 import sciline
 import scipp as sc
 
+from ess.reduce import masking as masking_t
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 from ess.reduce.unwrap import types as unwrap_t
@@ -180,13 +181,11 @@ OutFilename = NewType('OutFilename', str)
 """Filename of the output"""
 
 
-PixelMaskFilename = NewType('PixelMaskFilename', str)
+PixelMaskFilenames = masking_t.PixelMaskFilenames
+LoadedPixelMasks = masking_t.LoadedPixelMasks
 
 DetectorIDs = NewType('DetectorIDs', sc.Variable)
 """1-D variable listing all detector IDs."""
-
-MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
-"""1-D variable listing all masked detector IDs."""
 
 
 DetectorMasks = NewType('DetectorMasks', dict[str, sc.Variable])

@@ -54,9 +54,8 @@ def to_detector_masks(
 ) -> DetectorMasks:
     """Gather detector masks.
 
-    Unlike :py:func:`ess.sans.masking.to_detector_mask`, this function does not rely on
-    mapping using a table of mask filenames. Instead it directly returns a dictionary
-    if multiple masks.
+    Unlike :py:func:`ess.sans.masking.to_detector_mask`, this function does not use
+    mask files. Instead it directly returns a dictionary of multiple masks.
 
     Parameters
     ----------

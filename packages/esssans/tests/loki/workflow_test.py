@@ -18,7 +18,7 @@ from ess.sans.types import (
     IntensityQ,
     LookupTableFilename,
     NeXusDetectorName,
-    PixelMaskFilename,
+    PixelMaskFilenames,
     QBins,
     ReturnEvents,
     SampleRun,
@@ -84,7 +84,7 @@ def test_solid_angle_is_independent_of_beam_center(larmor_workflow):
 def test_loki_larmor_workflow_compute_with_single_pixel_mask(larmor_workflow):
     wf = larmor_workflow(no_masks=False)
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    wf[PixelMaskFilename] = loki.data.loki_tutorial_mask_filenames()[0]
+    wf[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
 

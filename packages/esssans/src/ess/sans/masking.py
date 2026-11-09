@@ -4,17 +4,15 @@
 Masking functions for the loki workflow.
 """
 
-import numpy as np
-import scipp as sc
+from ess.reduce.masking import read_pixel_masks, to_pixel_masks
 
 from .types import (
     CorrectedDetector,
     DetectorIDs,
     DetectorMasks,
     EmptyDetector,
-    MaskedDetectorIDs,
+    LoadedPixelMasks,
     Numerator,
-    PixelMaskFilename,
     RunType,
     SampleRun,
     WavelengthDetector,
@@ -30,26 +28,17 @@ def get_detector_ids_from_detector(data: EmptyDetector[SampleRun]) -> DetectorID
     )
 
 
-def to_detector_mask(
-    ids: DetectorIDs,
-    path: PixelMaskFilename,
-    masked_ids: MaskedDetectorIDs,
-) -> DetectorMasks:
-    """Create a detector mask from a list of masked detector IDs.
-    The masks are based on detector IDs stored in XML files.
+def to_detector_mask(ids: DetectorIDs, masks: LoadedPixelMasks) -> DetectorMasks:
+    """Create detector masks from the masks read from files.
 
     Parameters
     ----------
     ids:
         Array of detector IDs
-    path:
-        Path to the mask file.
-    masked_ids:
-        Array of detector IDs which are masked.
+    masks:
+        Masks read from files.
     """
-    mask = sc.zeros(sizes=ids.sizes, dtype='bool')
-    mask.values[np.isin(ids.values, masked_ids.values)] = True
-    return DetectorMasks({str(path): mask})
+    return DetectorMasks(to_pixel_masks(masks, ids))
 
 
 def apply_pixel_masks(
@@ -70,6 +59,7 @@ def apply_pixel_masks(
 
 providers = (
     get_detector_ids_from_detector,
+    read_pixel_masks,
     to_detector_mask,
     apply_pixel_masks,
 )

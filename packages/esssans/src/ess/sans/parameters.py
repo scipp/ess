@@ -36,7 +36,7 @@ from ..sans.types import (
     NeXusDetectorName,
     NeXusMonitorName,
     Numerator,
-    PixelMaskFilename,
+    PixelMaskFilenames,
     PixelShapePath,
     QBins,
     QxBins,
@@ -65,8 +65,8 @@ parameter_registry[NeXusMonitorName[Transmission]] = StringParameter.from_type(
 parameter_registry[TransformationPath] = StringParameter.from_type(
     TransformationPath, default=''
 )
-parameter_registry[PixelMaskFilename] = MultiFilenameParameter.from_type(
-    PixelMaskFilename
+parameter_registry[PixelMaskFilenames] = MultiFilenameParameter.from_type(
+    PixelMaskFilenames
 )
 parameter_registry[PixelShapePath] = StringParameter.from_type(
     PixelShapePath, default=''

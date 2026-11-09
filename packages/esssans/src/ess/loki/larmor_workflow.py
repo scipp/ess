@@ -8,7 +8,6 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess import sans
-from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 from scippneutron.conversion.graph import beamline, tof
 
@@ -28,7 +27,7 @@ from ..sans.types import (
     NeXusDetectorName,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
-    PixelMaskFilename,
+    PixelMaskFilenames,
     PixelShapePath,
     Position,
     RawDetector,
@@ -141,7 +140,6 @@ loki_at_larmor_providers = (
     larmor_monitor_to_wavelength,
     larmor_detector_coord_transform_graph,
     larmor_monitor_coord_transform_graph,
-    read_xml_detector_masking,
 )
 
 
@@ -178,7 +176,7 @@ def LokiAtLarmorTutorialWorkflow() -> sciline.Pipeline:
 
     workflow = LokiAtLarmorWorkflow()
 
-    workflow[PixelMaskFilename] = list(map(str, data.loki_tutorial_mask_filenames()))
+    workflow[PixelMaskFilenames] = data.loki_tutorial_mask_filenames()
     workflow[Filename[SampleRun]] = str(data.loki_tutorial_sample_run_60339())
     workflow[Filename[BackgroundRun]] = str(data.loki_tutorial_background_run_60393())
     workflow[Filename[TransmissionRun[SampleRun]]] = str(
