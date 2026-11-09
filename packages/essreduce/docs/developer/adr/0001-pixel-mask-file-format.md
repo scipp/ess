@@ -70,6 +70,10 @@ New files should not use scipp HDF5.
 - **HDF5 with our own group names and a boolean dataset.**
   It would need its own specification of what NeXus already defines.
   HDF5 also has no boolean type: h5py stores booleans as an enumeration, which is a convention of h5py.
+- **The NeXus attribute `axes` for the names of dimensions, instead of or in addition to HDF5 dimension labels.**
+  NeXus defines `axes` on `NXdata`, as the names of the coordinate fields along each dimension of the signal.
+  `NXdetector` does not define it, and a mask has no coordinates, so a correct value would be `"."` for each dimension, which holds no names.
+  The names decide how a mask of lower rank applies to the pixels, so they should be stored in one place only.
 - **Lists of detector IDs, for new files too.**
   `detector_number` is unique across the banks of LoKI, so such a file needs no bank level, and it stays correct if the layout of a bank changes.
   It cannot express a mask of a tube or a straw except by listing every pixel.
