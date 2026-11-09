@@ -85,7 +85,11 @@ def extract_instrument_angle(
             f"Expected the instrument angle at {path} to be a rotation, "
             f"got '{transformation.transformation_type}' instead.'"
         )
-    return InstrumentAngle[RunType](transformation.value)  # type: ignore[return-value]
+    angle = transformation.value
+    if isinstance(angle, sc.Variable):
+        # A fixed angle or a value from TransformationOverrides, not an NXlog.
+        angle = sc.DataArray(angle)
+    return InstrumentAngle[RunType](angle)  # type: ignore[return-value]
 
 
 # See https://github.com/scipp/ess/issues/120

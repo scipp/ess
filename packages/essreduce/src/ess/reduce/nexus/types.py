@@ -303,6 +303,27 @@ class TransformationTimeFilter(Generic[Component, RunType]):
     def __call__(self, transform: sc.DataArray) -> sc.Variable | sc.DataArray: ...
 
 
+class TransformationOverrides(
+    sciline.Scope[Component, RunType, dict[str, sc.Variable]], dict[str, sc.Variable]
+):
+    """Values replacing entries of the transformation chains of a component type.
+
+    Maps the absolute NeXus path of a chain entry to the value to use for it, e.g.,
+    ``{'/entry/instrument/detector_carriage/value': sc.scalar(1.5, unit='m')}``.
+
+    Components load their own copies of shared chain entries, so a motor that moves
+    several component types must be set once per type.
+
+    A pipeline that maps over components of one type, e.g., detector banks, must map
+    the overrides as well if the motor does not move all of those components.
+
+    Overrides only reach providers that use :class:`NeXusTransformationChain` or
+    :class:`NeXusMultiTransformationChain`. Providers that read from a component or
+    file directly keep using the stored value, e.g., for chopper positions, the
+    BIFROST sample angle, or the ESTIA detector rotation.
+    """
+
+
 @dataclass
 class NeXusFileSpec(Generic[RunType]):
     value: FilePath | NeXusFile | NeXusGroup
