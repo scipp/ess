@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=4b7aa6e7"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/freia/workflow';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.2" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -509,11 +509,14 @@
 <span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
 <span class="c1"># Copyright (c) 2025 Scipp contributors (https://github.com/scipp)</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">sciline</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorBankSizes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.uncertainty</span><span class="w"> </span><span class="kn">import</span> <span class="n">UncertaintyBroadcastMode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">WavelengthLutMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">KeepEventTimeOffset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericUnwrapWorkflow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_workflow</span>
 
@@ -559,7 +562,7 @@
     <span class="k">return</span> <span class="n">default_parameters</span><span class="p">()</span> <span class="o">|</span> <span class="p">{</span>
         <span class="n">NeXusDetectorName</span><span class="p">:</span> <span class="s2">&quot;Multiblade&quot;</span><span class="p">,</span>
         <span class="n">LookupTableRelativeErrorThreshold</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;Multiblade&quot;</span><span class="p">:</span> <span class="mf">0.06</span><span class="p">,</span>
+            <span class="s2">&quot;Multiblade&quot;</span><span class="p">:</span> <span class="mf">0.035</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">}</span></div>
 
@@ -689,29 +692,33 @@
 <span class="nd">@register_workflow</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">FreiaOffspecWorkflow</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
+    <span class="n">incident_beam_from</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;closest&#39;</span><span class="p">,</span> <span class="s1">&#39;fixed_slits&#39;</span><span class="p">,</span> <span class="s1">&#39;shutter_logs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;closest&#39;</span><span class="p">,</span>
     <span class="n">wavelength_from</span><span class="p">:</span> <span class="n">WavelengthLutMode</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sciline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Workflow for unnormalized, coplanar off-specular FREIA data.</span>
 
-<span class="sd">    Assign each neutron to the slit beam with the closest expected specular</span>
-<span class="sd">    reflection angle. Compute ``Qx`` and ``Qz`` from that beam&#39;s incidence angle</span>
-<span class="sd">    and the neutron&#39;s gravity-corrected reflection angle. With one open beam,</span>
-<span class="sd">    the incidence angle is a shared scalar.</span>
-
-<span class="sd">    Supply :class:`~ess.freia.types.UpstreamSlitCenters` and</span>
-<span class="sd">    :class:`~ess.freia.types.DownstreamSlitCenters` for ``SampleRun`` as</span>
-<span class="sd">    dictionaries with matching slit-channel names. Each dictionary must</span>
-<span class="sd">    contain the simultaneously open FREIA slit channels. The output is</span>
-<span class="sd">    ``CorrectedDetector[SampleRun]``; this workflow has no reference normalization step.</span>
-<span class="sd">    By default the detector ROI is empty, so the entire detector is retained.</span>
+<span class="sd">    Supply UpstreamSlitCenters and DownstreamSlitCenters for SampleRun as</span>
+<span class="sd">    dictionaries pairing the fixed openings of each candidate incident beam.</span>
+<span class="sd">    The assigned ``incident_angle`` and measured ``reflection_angle`` determine</span>
+<span class="sd">    ``Qx`` and ``Qz``. The output is ``CorrectedDetector[SampleRun]``.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    incident_beam_from:</span>
+<span class="sd">        ``&#39;closest&#39;`` assigns the beam whose specular reflection angle is closest</span>
+<span class="sd">        to the measured reflection angle. ``&#39;fixed_slits&#39;`` uses the single beam</span>
+<span class="sd">        defined by one matching pair of slit centers, independently of the</span>
+<span class="sd">        reflection angle and without shutter positions or status logs.</span>
+<span class="sd">        ``&#39;shutter_logs&#39;`` uses</span>
+<span class="sd">        ``ShutterStatusLogs[SampleRun]`` and ``ShutterPositions[SampleRun]`` for</span>
+<span class="sd">        all candidate beams. Each log is evaluated at the neutron&#39;s crossing</span>
+<span class="sd">        time at that shutter, independently of the slit positions. Exactly one</span>
+<span class="sd">        open shutter, with all states known, determines the incident beam.</span>
+<span class="sd">        Otherwise the incidence is NaN and the event is masked as</span>
+<span class="sd">        ``incident_beam_unassigned``.</span>
 <span class="sd">    wavelength_from:</span>
-<span class="sd">        Mode for creating the wavelength lookup table. Possible values are</span>
-<span class="sd">        &#39;analytical&#39;, &#39;simulation&#39;, and &#39;file&#39;. See</span>
-<span class="sd">        https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html</span>
+<span class="sd">        Wavelength lookup table mode: &#39;analytical&#39;, &#39;simulation&#39;, or &#39;file&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">GenericUnwrapWorkflow</span><span class="p">(</span>
         <span class="n">run_types</span><span class="o">=</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
@@ -719,13 +726,20 @@
         <span class="n">wavelength_from</span><span class="o">=</span><span class="n">wavelength_from</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">assignment_provider</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;closest&#39;</span><span class="p">:</span> <span class="n">conversions</span><span class="o">.</span><span class="n">closest_beam_incident_angle_graph</span><span class="p">,</span>
+        <span class="s1">&#39;fixed_slits&#39;</span><span class="p">:</span> <span class="n">conversions</span><span class="o">.</span><span class="n">fixed_slits_incident_angle_graph</span><span class="p">,</span>
+        <span class="s1">&#39;shutter_logs&#39;</span><span class="p">:</span> <span class="n">conversions</span><span class="o">.</span><span class="n">shutter_log_incident_angle_graph</span><span class="p">,</span>
+    <span class="p">}[</span><span class="n">incident_beam_from</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="p">(</span>
-        <span class="n">conversions</span><span class="o">.</span><span class="n">offspecular_sample_coordinate_transformation_graph</span><span class="p">,</span>
-        <span class="n">corrections</span><span class="o">.</span><span class="n">add_coords_and_masks</span><span class="p">,</span>
+        <span class="n">conversions</span><span class="o">.</span><span class="n">offspecular_coordinate_transformation_graph</span><span class="p">,</span>
+        <span class="n">assignment_provider</span><span class="p">,</span>
+        <span class="n">corrections</span><span class="o">.</span><span class="n">add_offspecular_coords_and_masks</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">default_parameters</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">workflow</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="n">KeepEventTimeOffset</span><span class="p">]</span> <span class="o">=</span> <span class="n">incident_beam_from</span> <span class="o">==</span> <span class="s1">&#39;shutter_logs&#39;</span>
     <span class="n">workflow</span><span class="p">[</span><span class="n">DetectorRegionOfInterest</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">return</span> <span class="n">workflow</span></div>
 
@@ -881,7 +895,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.10.2 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=4b7aa6e7"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/freia/conversions';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.2" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -525,9 +525,148 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DownstreamSlitCenters</span><span class="p">,</span>
+    <span class="n">IncidentAngleGraph</span><span class="p">,</span>
     <span class="n">SampleSurfaceNormal</span><span class="p">,</span>
+    <span class="n">ShutterPositions</span><span class="p">,</span>
+    <span class="n">ShutterStatusLogs</span><span class="p">,</span>
     <span class="n">UpstreamSlitCenters</span><span class="p">,</span>
 <span class="p">)</span>
+
+
+<div class="viewcode-block" id="time_at_detector">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.time_at_detector.html#ess.freia.conversions.time_at_detector">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">time_at_detector</span><span class="p">(</span>
+    <span class="n">event_time_zero</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">event_time_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detector arrival as float64 seconds since the Unix epoch.</span>
+
+<span class="sd">    For timestamps around 2026, float64 spacing is about 0.24 microseconds,</span>
+<span class="sd">    well below the hundreds of microseconds needed for shutter timing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pulse_time</span> <span class="o">=</span> <span class="n">event_time_zero</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ns&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">epoch</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ns&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pulse_time</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">event_time_offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="time_at_shutter">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.time_at_shutter.html#ess.freia.conversions.time_at_shutter">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">time_at_shutter</span><span class="p">(</span>
+    <span class="n">time_at_detector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">L2</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">shutter_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate the time the event passed the shutter position.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    time_at_detector:</span>
+<span class="sd">        Detector arrival as float64 seconds since the Unix epoch.</span>
+<span class="sd">    wavelength:</span>
+<span class="sd">        Reconstructed neutron wavelengths.</span>
+<span class="sd">    L2:</span>
+<span class="sd">        Sample-to-detector flight paths.</span>
+<span class="sd">    sample_position:</span>
+<span class="sd">        Sample position in global coordinates.</span>
+<span class="sd">    shutter_position:</span>
+<span class="sd">        Fixed shutter position in the same global frame as the sample.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Time the neutron passed the shutter, as float64 seconds since the Unix epoch.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Approximate the path by straight segments from shutter to sample to detector.</span>
+    <span class="n">shutter_to_sample_distance</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+        <span class="n">shutter_position</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">sample_position</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-</span> <span class="n">sample_position</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">L2</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="n">shutter_to_detector_flight_time</span> <span class="o">=</span> <span class="n">tof</span><span class="o">.</span><span class="n">tof_from_wavelength</span><span class="p">(</span>
+        <span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">Ltotal</span><span class="o">=</span><span class="n">shutter_to_sample_distance</span> <span class="o">+</span> <span class="n">L2</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">time_at_detector</span> <span class="o">-</span> <span class="n">shutter_to_detector_flight_time</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_shutter_state_at_time</span><span class="p">(</span>
+    <span class="n">crossing_time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">shutter_log</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Look up one shutter&#39;s state: NaN unknown, 0 closed, 1 open.&quot;&quot;&quot;</span>
+    <span class="n">log_time</span> <span class="o">=</span> <span class="n">shutter_log</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ns&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-</span> <span class="n">sc</span><span class="o">.</span><span class="n">epoch</span><span class="p">(</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ns&#39;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span>
+        <span class="n">shutter_log</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
+            <span class="n">time</span><span class="o">=</span><span class="n">log_time</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;previous&#39;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">crossing_time</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="assign_incident_angle_from_shutter_logs">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.assign_incident_angle_from_shutter_logs.html#ess.freia.conversions.assign_incident_angle_from_shutter_logs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">assign_incident_angle_from_shutter_logs</span><span class="p">(</span>
+    <span class="n">event_time_zero</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">event_time_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">L2</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">incident_angles</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span>
+    <span class="n">shutter_positions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span>
+    <span class="n">shutter_status_logs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign incidence when all shutter states are known and exactly one is open.</span>
+
+<span class="sd">    Each beam&#39;s log is evaluated at the neutron&#39;s crossing time at that beam&#39;s</span>
+<span class="sd">    shutter. Process shutters sequentially, discarding each crossing-time array</span>
+<span class="sd">    after looking up its status. Keys in all three dictionaries must match.</span>
+<span class="sd">    An unknown state, no open shutter, or multiple open shutters yields NaN.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="n">shutter_positions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="n">incident_angles</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="n">shutter_status_logs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Shutter positions, incident angles and logs must have the same keys.&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">detector_time</span> <span class="o">=</span> <span class="n">time_at_detector</span><span class="p">(</span><span class="n">event_time_zero</span><span class="p">,</span> <span class="n">event_time_offset</span><span class="p">)</span>
+    <span class="n">unassigned_incident_angle</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
+    <span class="n">assigned_incident_angle</span> <span class="o">=</span> <span class="n">unassigned_incident_angle</span>
+    <span class="n">open_shutter_count</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">beam_name</span><span class="p">,</span> <span class="n">beam_incident_angle</span> <span class="ow">in</span> <span class="n">incident_angles</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">shutter_log</span> <span class="o">=</span> <span class="n">shutter_status_logs</span><span class="p">[</span><span class="n">beam_name</span><span class="p">]</span>
+        <span class="n">shutter_state</span> <span class="o">=</span> <span class="n">_shutter_state_at_time</span><span class="p">(</span>
+            <span class="n">time_at_shutter</span><span class="p">(</span>
+                <span class="n">detector_time</span><span class="p">,</span>
+                <span class="n">wavelength</span><span class="p">,</span>
+                <span class="n">L2</span><span class="p">,</span>
+                <span class="n">sample_position</span><span class="p">,</span>
+                <span class="n">shutter_positions</span><span class="p">[</span><span class="n">beam_name</span><span class="p">],</span>
+            <span class="p">),</span>
+            <span class="n">shutter_log</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">shutter_is_open</span> <span class="o">=</span> <span class="n">shutter_state</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">shutter_log</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="n">assigned_incident_angle</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">shutter_is_open</span><span class="p">,</span>
+            <span class="n">beam_incident_angle</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+            <span class="n">assigned_incident_angle</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Unknown states propagate NaN, so they cannot yield exactly one open shutter.</span>
+        <span class="n">open_shutter_count</span> <span class="o">=</span> <span class="n">open_shutter_count</span> <span class="o">+</span> <span class="n">shutter_state</span>
+        <span class="c1"># Release per-shutter temporaries before calculating the next crossing time.</span>
+        <span class="k">del</span> <span class="n">shutter_state</span><span class="p">,</span> <span class="n">shutter_is_open</span>
+
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="n">open_shutter_count</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
+        <span class="n">assigned_incident_angle</span><span class="p">,</span>
+        <span class="n">unassigned_incident_angle</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="outgoing_direction">
@@ -569,7 +708,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Specular reflection angle between the outgoing ray and the sample surface.</span>
 
 <span class="sd">    Use the full three-dimensional direction. Under specular reflection this</span>
-<span class="sd">    also determines the incidence angle, without requiring the incoming ray.</span>
+<span class="sd">    also determines the incidence angle.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">normal</span> <span class="o">=</span> <span class="n">sample_surface_normal</span> <span class="o">/</span> <span class="n">sc</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sample_surface_normal</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">outgoing_direction</span><span class="p">,</span> <span class="n">normal</span><span class="p">))</span></div>
@@ -677,50 +816,120 @@
 
 
 
-<div class="viewcode-block" id="offspecular_sample_coordinate_transformation_graph">
-<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.offspecular_sample_coordinate_transformation_graph.html#ess.freia.conversions.offspecular_sample_coordinate_transformation_graph">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">offspecular_sample_coordinate_transformation_graph</span><span class="p">(</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">],</span>
-    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">SampleRun</span><span class="p">],</span>
-    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">SampleSurfaceNormal</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
-    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
-    <span class="n">upstream_slit_centers</span><span class="p">:</span> <span class="n">UpstreamSlitCenters</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
-    <span class="n">downstream_slit_centers</span><span class="p">:</span> <span class="n">DownstreamSlitCenters</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordTransformationGraph</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign incidence by comparing measured and expected reflection angles.&quot;&quot;&quot;</span>
-    <span class="n">transformation_graph</span> <span class="o">=</span> <span class="n">coordinate_transformation_graph</span><span class="p">(</span>
-        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">sample_surface_normal</span><span class="p">,</span> <span class="n">gravity</span>
-    <span class="p">)</span>
-    <span class="n">directions</span> <span class="o">=</span> <span class="n">incident_beam_directions</span><span class="p">(</span>
-        <span class="n">upstream_slit_centers</span><span class="p">,</span> <span class="n">downstream_slit_centers</span>
-    <span class="p">)</span>
-    <span class="n">expected_reflection_angles</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">key</span><span class="p">:</span> <span class="n">incident_angle</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="n">sample_surface_normal</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="n">directions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_incident_angles_from_slits</span><span class="p">(</span>
+    <span class="n">upstream_slit_centers</span><span class="p">,</span> <span class="n">downstream_slit_centers</span><span class="p">,</span> <span class="n">sample_surface_normal</span>
+<span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">beam_name</span><span class="p">:</span> <span class="n">incident_angle</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="n">sample_surface_normal</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">beam_name</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="n">incident_beam_directions</span><span class="p">(</span>
+            <span class="n">upstream_slit_centers</span><span class="p">,</span> <span class="n">downstream_slit_centers</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
 
+
+<div class="viewcode-block" id="fixed_slits_incident_angle_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.fixed_slits_incident_angle_graph.html#ess.freia.conversions.fixed_slits_incident_angle_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fixed_slits_incident_angle_graph</span><span class="p">(</span>
+    <span class="n">upstream_slit_centers</span><span class="p">:</span> <span class="n">UpstreamSlitCenters</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">downstream_slit_centers</span><span class="p">:</span> <span class="n">DownstreamSlitCenters</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">SampleSurfaceNormal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IncidentAngleGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide a constant incident angle from a single pair of fixed slit openings.&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">beam_incident_angle</span><span class="p">,)</span> <span class="o">=</span> <span class="n">_incident_angles_from_slits</span><span class="p">(</span>
+        <span class="n">upstream_slit_centers</span><span class="p">,</span> <span class="n">downstream_slit_centers</span><span class="p">,</span> <span class="n">sample_surface_normal</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;incident_angle&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">beam_incident_angle</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="closest_beam_incident_angle_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.closest_beam_incident_angle_graph.html#ess.freia.conversions.closest_beam_incident_angle_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">closest_beam_incident_angle_graph</span><span class="p">(</span>
+    <span class="n">upstream_slit_centers</span><span class="p">:</span> <span class="n">UpstreamSlitCenters</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">downstream_slit_centers</span><span class="p">:</span> <span class="n">DownstreamSlitCenters</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">SampleSurfaceNormal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IncidentAngleGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide incidence assignment using the closest expected reflection angle.&quot;&quot;&quot;</span>
+    <span class="n">beam_incident_angles</span> <span class="o">=</span> <span class="n">_incident_angles_from_slits</span><span class="p">(</span>
+        <span class="n">upstream_slit_centers</span><span class="p">,</span> <span class="n">downstream_slit_centers</span><span class="p">,</span> <span class="n">sample_surface_normal</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_incident_angle</span><span class="p">(</span><span class="n">reflection_angle</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">assign_incident_angle</span><span class="p">(</span><span class="n">reflection_angle</span><span class="p">,</span> <span class="n">beam_incident_angles</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;incident_angle&#39;</span><span class="p">:</span> <span class="n">select_incident_angle</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="shutter_log_incident_angle_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.shutter_log_incident_angle_graph.html#ess.freia.conversions.shutter_log_incident_angle_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">shutter_log_incident_angle_graph</span><span class="p">(</span>
+    <span class="n">upstream_slit_centers</span><span class="p">:</span> <span class="n">UpstreamSlitCenters</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">downstream_slit_centers</span><span class="p">:</span> <span class="n">DownstreamSlitCenters</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">SampleSurfaceNormal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">shutter_positions</span><span class="p">:</span> <span class="n">ShutterPositions</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">shutter_status_logs</span><span class="p">:</span> <span class="n">ShutterStatusLogs</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IncidentAngleGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Identify candidate beams using each shutter&#39;s position and status log.&quot;&quot;&quot;</span>
+    <span class="n">beam_incident_angles</span> <span class="o">=</span> <span class="n">_incident_angles_from_slits</span><span class="p">(</span>
+        <span class="n">upstream_slit_centers</span><span class="p">,</span> <span class="n">downstream_slit_centers</span><span class="p">,</span> <span class="n">sample_surface_normal</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">beam_incident_angles</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;At least one incident beam is required.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="n">beam_incident_angles</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="o">==</span> <span class="n">shutter_positions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="o">==</span> <span class="n">shutter_status_logs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Slit centers, ShutterPositions and ShutterStatusLogs &#39;</span>
+            <span class="s1">&#39;must have the same keys.&#39;</span>
+        <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">select_incident_angle</span><span class="p">(</span>
-        <span class="n">reflection_angle</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">event_time_zero</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">event_time_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">wavelength</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">L2</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
+        <span class="n">sample_position</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">assign_incident_angle</span><span class="p">(</span><span class="n">reflection_angle</span><span class="p">,</span> <span class="n">expected_reflection_angles</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">assign_incident_angle_from_shutter_logs</span><span class="p">(</span>
+            <span class="n">event_time_zero</span><span class="p">,</span>
+            <span class="n">event_time_offset</span><span class="p">,</span>
+            <span class="n">wavelength</span><span class="p">,</span>
+            <span class="n">L2</span><span class="p">,</span>
+            <span class="n">sample_position</span><span class="p">,</span>
+            <span class="n">incident_angles</span><span class="o">=</span><span class="n">beam_incident_angles</span><span class="p">,</span>
+            <span class="n">shutter_positions</span><span class="o">=</span><span class="n">shutter_positions</span><span class="p">,</span>
+            <span class="n">shutter_status_logs</span><span class="o">=</span><span class="n">shutter_status_logs</span><span class="p">,</span>
+        <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">transformation_graph</span> <span class="o">|</span> <span class="p">{</span>
-        <span class="s1">&#39;incident_angle&#39;</span><span class="p">:</span> <span class="n">select_incident_angle</span><span class="p">,</span>
-        <span class="s1">&#39;reflection_angle&#39;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span>
-        <span class="s1">&#39;Qx&#39;</span><span class="p">:</span> <span class="n">reflectometry_q_x</span><span class="p">,</span>
-        <span class="s1">&#39;Qz&#39;</span><span class="p">:</span> <span class="n">reflectometry_q_z</span><span class="p">,</span>
-    <span class="p">}</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;incident_angle&#39;</span><span class="p">:</span> <span class="n">select_incident_angle</span><span class="p">}</span></div>
 
 
 
-<div class="viewcode-block" id="add_coords">
-<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.add_coords.html#ess.freia.conversions.add_coords">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_coords</span><span class="p">(</span>
-    <span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the scattering coordinates provided by the run&#39;s transformation graph.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span><span class="n">rename_dims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">graph</span><span class="p">)</span></div>
+<div class="viewcode-block" id="offspecular_coordinate_transformation_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.freia.conversions.offspecular_coordinate_transformation_graph.html#ess.freia.conversions.offspecular_coordinate_transformation_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">offspecular_coordinate_transformation_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_surface_normal</span><span class="p">:</span> <span class="n">SampleSurfaceNormal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">incident_angle_graph</span><span class="p">:</span> <span class="n">IncidentAngleGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordTransformationGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine an incidence assignment with the shared offspecular coordinates.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">coordinate_transformation_graph</span><span class="p">(</span>
+            <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">sample_surface_normal</span><span class="p">,</span> <span class="n">gravity</span>
+        <span class="p">)</span>
+        <span class="o">|</span> <span class="n">incident_angle_graph</span>
+        <span class="o">|</span> <span class="p">{</span>
+            <span class="s1">&#39;reflection_angle&#39;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span>
+            <span class="s1">&#39;Qx&#39;</span><span class="p">:</span> <span class="n">reflectometry_q_x</span><span class="p">,</span>
+            <span class="s1">&#39;Qz&#39;</span><span class="p">:</span> <span class="n">reflectometry_q_z</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
 
 
 
@@ -791,7 +1000,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.10.2 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

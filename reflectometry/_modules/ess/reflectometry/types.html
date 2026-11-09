@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=4b7aa6e7"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/reflectometry/types';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.2" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -612,29 +612,42 @@
 <div class="viewcode-block" id="RawSampleRotation">
 <a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.types.RawSampleRotation.html#ess.reflectometry.types.RawSampleRotation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RawSampleRotation</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The rotation of the sample registered in the NeXus file.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sample rotation before applying ``SampleRotationOffset``.</span>
+
+<span class="sd">    For ESTIA, this is the sample mount angle: the transformed local +x axis</span>
+<span class="sd">    projected onto the laboratory x-z plane, measured from +x towards -z.</span>
+<span class="sd">    For AMOR, this is the ``mu`` angle read from the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 
 
 <div class="viewcode-block" id="SampleRotation">
 <a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.types.SampleRotation.html#ess.reflectometry.types.SampleRotation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SampleRotation</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The rotation of the sample relative to the center of the incoming beam.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sample angle after applying ``SampleRotationOffset``.</span>
+
+<span class="sd">    For ESTIA, this is the angle between the central reflected beam and the surface.</span>
+<span class="sd">    For AMOR, this is the sample surface angle relative to the horizontal plane.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 
 
 <div class="viewcode-block" id="SampleRotationOffset">
 <a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.types.SampleRotationOffset.html#ess.reflectometry.types.SampleRotationOffset">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SampleRotationOffset</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The difference between the true slope of the sample surface</span>
-<span class="sd">    and the sample rotation value in the file.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Angle added to ``RawSampleRotation`` to obtain calibrated ``SampleRotation``.&quot;&quot;&quot;</span></div>
 
 
 
 <div class="viewcode-block" id="DetectorRotation">
 <a class="viewcode-back" href="../../../generated/modules/ess.reflectometry.types.DetectorRotation.html#ess.reflectometry.types.DetectorRotation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DetectorRotation</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The rotation of the detector relative to the horizon&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detector reference angle.</span>
+
+<span class="sd">    For ESTIA, this is the angle of the transformed detector +z axis from</span>
+<span class="sd">    laboratory +z towards +x in the x-z plane. For AMOR, it is the direction</span>
+<span class="sd">    from the sample to the detector centre relative to the horizontal plane.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 
 
@@ -739,7 +752,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.10.2 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

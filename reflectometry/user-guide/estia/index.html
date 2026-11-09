@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=4b7aa6e7"></script>
+    <script src="../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -51,7 +51,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/estia/index';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -59,7 +59,7 @@
     <link rel="prev" title="Workflow widget" href="../amor/workflow-widget.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.2" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -502,6 +502,7 @@
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reduction-workflows">Reduction Workflows</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#angles-and-alignment">Angles and alignment</a></li>
 </ul>
   </nav></div>
     </div>
@@ -596,6 +597,25 @@ Advanced reduction of McStas Data</div>
 </div>
 </div>
 </div>
+</section>
+<section id="angles-and-alignment">
+<h2>Angles and alignment<a class="headerlink" href="#angles-and-alignment" title="Link to this heading">#</a></h2>
+<p>ESTIA computes angles in the laboratory x-z plane, with y vertical.
+The sample is aligned so that the central reflected beam hits the detector
+centre. After alignment, each sample rotation about y is accompanied by twice
+that rotation of the detector. Other alignment rotations stay fixed.</p>
+<p>The sample mount angle (<code class="docutils literal notranslate"><span class="pre">RawSampleRotation</span></code>) is measured from laboratory +x
+towards -z using the mount’s transformed local +x axis projected onto the x-z
+plane. The sample may be tilted within its mount. Supply
+<code class="docutils literal notranslate"><span class="pre">SampleRotationOffset</span></code> to calibrate the angle, for example from a fit to a known
+critical edge. The corrected <code class="docutils literal notranslate"><span class="pre">SampleRotation</span></code> is the angle between the central
+reflected beam and the sample surface. Sample and reference runs can have
+separate offsets.</p>
+<p>The detector reference is its transformed local +z direction. It must point
+from the sample to the detector centre. <code class="docutils literal notranslate"><span class="pre">divergence_angle</span></code> measures each
+outgoing ray’s angle from this direction, positive from laboratory +z towards
++x. The reflection angle is
+<code class="docutils literal notranslate"><span class="pre">theta</span> <span class="pre">=</span> <span class="pre">divergence_angle</span> <span class="pre">+</span> <span class="pre">sample_rotation</span></code>.</p>
 <div class="toctree-wrapper compound">
 </div>
 </section>
@@ -681,7 +701,7 @@ Advanced reduction of McStas Data</div>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.10.2 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

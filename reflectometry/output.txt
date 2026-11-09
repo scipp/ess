@@ -1,4 +1,4 @@
-Results of doctest builder run on 2026-10-29 11:23:55
+Results of doctest builder run on 2026-11-09 12:28:07
 =====================================================
 
 Document: generated/modules/ess.amor.types.ChopperDistance

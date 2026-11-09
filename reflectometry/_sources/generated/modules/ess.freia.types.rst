@@ -33,7 +33,10 @@
    
       DetectorRegionOfInterest
       DownstreamSlitCenters
+      IncidentAngleGraph
       SampleSurfaceNormal
+      ShutterPositions
+      ShutterStatusLogs
       UpstreamSlitCenters
    
    
