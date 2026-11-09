@@ -171,7 +171,7 @@ def test_read_raises_if_file_has_no_pixel_mask(tmp_path: Path) -> None:
         _read(path)
 
 
-def test_to_pixel_masks_keeps_shape_of_ids() -> None:
+def test_to_detector_masks_keeps_shape_of_ids() -> None:
     ids = sc.array(dims=['tube', 'pixel'], values=[[1, 2], [3, 4]], unit=None)
     masked = sc.array(dims=['detector_id'], values=[2, 3, 99], unit=None)
     masks = to_detector_masks(PixelMasks({'m': masked}), ids)
@@ -188,7 +188,7 @@ def _per_bank(**banks: sc.Variable) -> PixelMasks:
     return PixelMasks({'m': sc.DataGroup(banks)})
 
 
-def test_to_pixel_masks_selects_bank_and_allows_fewer_dims(
+def test_to_detector_masks_selects_bank_and_allows_fewer_dims(
     bank_ids: sc.Variable,
 ) -> None:
     mask = sc.array(dims=['tube'], values=[True, False, False])
@@ -197,18 +197,18 @@ def test_to_pixel_masks_selects_bank_and_allows_fewer_dims(
     assert sc.identical(masks['m'], mask)
 
 
-def test_to_pixel_masks_skips_file_without_this_bank(bank_ids: sc.Variable) -> None:
+def test_to_detector_masks_skips_file_without_this_bank(bank_ids: sc.Variable) -> None:
     mask = sc.array(dims=['tube'], values=[True, False, False])
     assert to_detector_masks(_per_bank(b=mask), bank_ids, bank='a') == {}
 
 
-def test_to_pixel_masks_applies_ids_to_any_bank(bank_ids: sc.Variable) -> None:
+def test_to_detector_masks_applies_ids_to_any_bank(bank_ids: sc.Variable) -> None:
     masked = sc.array(dims=['detector_id'], values=[1], unit=None)
     masks = to_detector_masks(PixelMasks({'m': masked}), bank_ids, bank='a')
     assert masks['m'].values.sum() == 1
 
 
-def test_to_pixel_masks_raises_without_bank_for_masks_per_bank(
+def test_to_detector_masks_raises_without_bank_for_masks_per_bank(
     bank_ids: sc.Variable,
 ) -> None:
     mask = sc.array(dims=['tube'], values=[True, False, False])
@@ -216,7 +216,7 @@ def test_to_pixel_masks_raises_without_bank_for_masks_per_bank(
         to_detector_masks(_per_bank(a=mask), bank_ids)
 
 
-def test_to_pixel_masks_raises_on_unknown_bank(bank_ids: sc.Variable) -> None:
+def test_to_detector_masks_raises_on_unknown_bank(bank_ids: sc.Variable) -> None:
     mask = sc.array(dims=['tube'], values=[True, False, False])
     with pytest.raises(ValueError, match='typo'):
         to_detector_masks(
@@ -248,7 +248,7 @@ def test_to_detector_masks_raises_if_bank_mask_is_not_boolean(
     ],
     ids=['unknown-dim', 'wrong-size'],
 )
-def test_to_pixel_masks_raises_if_mask_does_not_fit_detector(
+def test_to_detector_masks_raises_if_mask_does_not_fit_detector(
     bank_ids: sc.Variable, mask: sc.Variable
 ) -> None:
     with pytest.raises(sc.DimensionError):
