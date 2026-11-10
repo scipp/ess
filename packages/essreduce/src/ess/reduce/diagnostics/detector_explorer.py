@@ -331,8 +331,8 @@ def _find_closest(a, x) -> int:
 class DetectorExplorer(ipw.VBox):
     def __init__(
         self,
-        data: sc.DataGroup,
-        figsize=(11, 8),
+        data: sc.DataGroup | sc.DataArray,
+        figsize: tuple[int, int] = (11, 8),
         show_dims: list[str] | None = None,
         **kwargs,
     ):
@@ -341,7 +341,7 @@ class DetectorExplorer(ipw.VBox):
         Parameters
         ----------
         data:
-            DataGroup containing detector banks.
+            DataGroup or DataArray containing detector banks.
         figsize:
             Size of the figures in inches (width, height).
         show_dims:
@@ -366,6 +366,9 @@ class DetectorExplorer(ipw.VBox):
         self._visible_dims = show_dims
         if self._visible_dims is None:
             self._visible_dims = list(self.data.dims)[-2:]
+
+        if len(self._visible_dims) != 2:
+            raise ValueError("Exactly two visible dimensions must be specified.")
 
         other_dims = [dim for dim in self.data.dims if dim not in self._visible_dims]
 

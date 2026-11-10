@@ -193,6 +193,12 @@ def test_slider_disabled_if_one_bank_does_not_have_slider_dim():
     explorer.all_dim_sliders[0].slider.value += 1
 
 
+def test_error_if_not_two_visible_dims():
+    data = make_banks()
+    with pytest.raises(ValueError, match="Exactly two visible dimensions"):
+        DetectorExplorer(data, show_dims=['time'])
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
