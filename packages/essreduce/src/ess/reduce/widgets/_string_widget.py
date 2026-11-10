@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+from collections.abc import Sequence
+from os import PathLike
+
 from ipywidgets import HBox, Text, ValueWidget
 
 from ._config import default_layout
@@ -28,11 +31,14 @@ class StringWidget(HBox, ValueWidget):
 
 class MultiStringWidget(StringWidget):
     def __init__(
-        self, description: str, value: tuple[str, ...] | None = None, **kwargs
+        self,
+        description: str,
+        value: Sequence[str | PathLike] | str | None = None,
+        **kwargs,
     ):
         # Special case handling to allow initialising with a single string
         if not isinstance(value, str) and value is not None:
-            value = ', '.join(value)
+            value = ', '.join(map(str, value))
 
         super().__init__(description, value, **kwargs)
 
@@ -44,5 +50,6 @@ class MultiStringWidget(StringWidget):
         return tuple(s.strip() for s in v.split(','))
 
     @value.setter
-    def value(self, value: tuple[str, ...]):
-        self.text_widget.value = ', '.join(value)
+    def value(self, value: Sequence[str | PathLike]):
+        # Filenames may be given as paths, such as default values of workflows.
+        self.text_widget.value = ', '.join(map(str, value))

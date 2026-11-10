@@ -2,6 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, NewType
 
 import pytest
@@ -18,7 +19,12 @@ from ess.reduce.parameter import (
     parameter_registry,
 )
 from ess.reduce.ui import ResultBox, WorkflowWidget, workflow_widget
-from ess.reduce.widgets import OptionalWidget, SwitchWidget, create_parameter_widget
+from ess.reduce.widgets import (
+    MultiFilenameWidget,
+    OptionalWidget,
+    SwitchWidget,
+    create_parameter_widget,
+)
 from ess.reduce.widgets._base import WidgetWithFieldsProtocol, get_fields, set_fields
 from ess.reduce.workflow import register_workflow, workflow_registry
 
@@ -581,6 +587,15 @@ def test_filename_widget_multiple() -> None:
     )
     param_widget = _get_param_widget(widget, MultiFilenameSampleRun)
     assert param_widget.value == ("file1.hdf", "file2.hdf")
+
+
+def test_multi_filename_widget_accepts_paths() -> None:
+    widget = MultiFilenameWidget(
+        description='files', value=[Path('a.xml'), Path('dir/b.nxs')]
+    )
+    assert widget.value == ('a.xml', str(Path('dir/b.nxs')))
+    widget.value = [Path('c.h5')]
+    assert widget.value == ('c.h5',)
 
 
 def test_filename_widget_multiple_initialized_with_single_string() -> None:
