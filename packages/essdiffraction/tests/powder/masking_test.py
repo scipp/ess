@@ -7,7 +7,7 @@ from ess.powder.masking import apply_masks, read_pixel_masks
 from ess.powder.types import PixelMaskFilenames
 
 
-def test_apply_masks_masks_pixels_listed_in_file(tmp_path: Path) -> None:
+def test_apply_masks_sets_mask_of_pixels_listed_in_file(tmp_path: Path) -> None:
     path = tmp_path / 'broken.h5'
     masked = sc.array(dims=['id'], values=[2], unit=None, dtype='int32')
     sc.io.save_hdf5(masked, path)

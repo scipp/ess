@@ -7,6 +7,7 @@
 
 Instrument scientists will create pixel masks, which are stored as files and used by reduction workflows for years.
 Some are static, such as broken tubes, and are replaced when the hardware changes (see [#767](https://github.com/scipp/ess/issues/767)).
+Others depend on the experiment, such as the shadow of a beamstop.
 A file that exists in a data catalog cannot be changed by a software release, so this format is harder to change than the code that reads it.
 The files must remain readable without ESS software or a particular version of it.
 
@@ -16,60 +17,75 @@ The planned masking tool for LoKI works on tubes and straws of a bank, after the
 
 ## Decision
 
-A mask file is a NeXus file, which is an HDF5 file with a defined structure:
+A mask file is an HDF5 file with the group structure of NeXus:
 
 ```text
 /entry                             NXentry
-    title                          "broken-tubes", optional
     valid_from                     "2026-11-01T00:00:00Z", not read by workflows
     instrument                     NXinstrument
         loki_detector_0            NXdetector
-            pixel_mask             int32, HDF5 dimension labels ("layer", "tube")
+            masks                  NXcollection
+                broken_tubes       uint8, HDF5 dimension labels ("tube",)
+                beamstop           uint8, HDF5 dimension labels ("layer", "tube", "straw")
         loki_detector_1            NXdetector
-            pixel_mask             ...
+            masks                  NXcollection
+                broken_tubes       ...
 ```
 
 The content can be read with any HDF5 library:
 
 ```python
 with h5py.File(path) as f:
-    dataset = f['entry/instrument/loki_detector_0/pixel_mask']
-    masked = (dataset[()] & 0xFFFF) != 0
+    dataset = f['entry/instrument/loki_detector_0/masks/broken_tubes']
+    masked = dataset[()] != 0
     dims = [dim.label for dim in dataset.dims]
 ```
 
 - Names of `NXdetector` groups are the names of the groups in the NeXus files of the runs.
-  A bank without `pixel_mask` has no mask from this file.
   A name that is not a bank of the instrument is an error, since a misspelled name would otherwise mask nothing.
-- `pixel_mask` is the integer bit field defined by NeXus for [`NXdetector`](https://manual.nexusformat.org/classes/base_classes/NXdetector.html).
-  A pixel is masked if any bit in `pixel_mask & 0xFFFF` is set, as NeXus specifies.
-  The other bits are tags, which do not mask a pixel.
-  `ess.reduce.masking.write_pixel_masks` sets bit 8, "user defined mask".
-- Dimensions of `pixel_mask` are named with HDF5 dimension labels.
+- The name of a dataset in `masks` is the name of the mask in the reduced data.
+  Datasets with the same name in several banks are one mask.
+  A bank without a dataset of that name has no pixels masked by it.
+- A pixel is masked if its value is not zero.
+  `ess.reduce.masking.write_pixel_masks` writes `uint8`.
+  Readers accept any integer type, and the boolean enumeration that h5py writes for numpy booleans.
+- Dimensions of a mask are named with HDF5 dimension labels.
   They are a subset of the logical dimensions of the bank, in any order, with matching sizes.
-  This is checked when masks are applied, because scipp ignores a mask with a dimension that the data lacks, without an error.
-- Each file gives one mask per bank.
-  Tube and straw masks combine into one `(layer, tube, straw)` array.
-  The `pixel_mask_N` fields of NeXus are an error, so that they are not ignored.
-  A file with several `NXentry` groups is an error for the same reason.
-- `title` becomes the name of the mask in the reduced data.
-  Without it, the name of the file is used.
-  Two masks with the same name are an error.
+  Each mask has its own dimensions, so a tube mask and a straw mask need not be combined into one array.
+  The sizes are checked when masks are applied, because scipp ignores a mask with a dimension that the data lacks, without an error.
+- A file with several `NXentry` groups is an error, since the reader would use only one of them and leave pixels unmasked.
 
-Workflows take a list of filenames and read all `pixel_mask` fields.
-They do not check validity dates.
+Workflows take a list of filenames and use the masks of all files.
+Two files with a mask of the same name are an error.
+A file can hold all masks of an instrument, or masks can be split into files, for example by validity period: one file for broken tubes and one for the beamstop of an experiment.
+Workflows do not check validity dates.
 Selecting the files that are valid for a run is left to the caller of the workflow, which sets the list of filenames.
 
 The readers for the existing formats stay, since they carry a list of detector IDs that works without a bank name.
+Such a mask is named after its file.
 New files should not use scipp HDF5.
 
 ## Alternatives considered
 
+- **The NeXus field `pixel_mask` of `NXdetector`.**
+  This is the field NeXus defines for masks: a bit field where a pixel is masked if any bit in `pixel_mask & 0xFFFF` is set.
+  It allows one mask per bank, with no name.
+  The additional fields `pixel_mask_N` have no names either, and NeXus defines them as parts of one mask, combined with a bitwise OR.
+  A file could therefore hold only one named mask, and a tube mask and a straw mask of the same bank would have to be combined into one array.
+  Naming masks by file or by `NXentry` title would work around this, at the cost of many files per instrument.
+  NeXus also describes `pixel_mask` with rank 2, while our masks have the rank of the logical dimensions they use, so we would deviate from the definition anyway.
+  No tool outside ESS is expected to read these files, so following the definition gains little.
+  The name `pixel_mask` is also confusing for LoKI, which has a dimension `pixel`.
+- **Masks as datasets directly in `NXdetector`, without the `masks` group.**
+  NeXus defines many fields of `NXdetector`, such as `data`, `detector_number`, `depends_on` and `pixel_mask`.
+  Mask names would have to avoid all of them, and a reader could not tell a mask from another field.
+  NeXus describes `NXcollection` as the place for terms that it does not define, and the group keeps masks apart if a file ever holds other fields of a detector, such as geometry.
 - **A scipp HDF5 file holding a `DataGroup`.**
   This needs no writer, but the layout is defined by the code of scipp and not by a specification, so an archived file would depend on that code.
-- **HDF5 with our own group names and a boolean dataset.**
-  It would need its own specification of what NeXus already defines.
-  HDF5 also has no boolean type: h5py stores booleans as an enumeration, which is a convention of h5py.
+- **Boolean datasets.**
+  HDF5 has no boolean type.
+  h5py stores numpy booleans as an enumeration, which is a convention of h5py.
+  `uint8` is a standard HDF5 type that every HDF5 library reads, and it has the same size.
 - **The NeXus attribute `axes` for the names of dimensions, instead of or in addition to HDF5 dimension labels.**
   NeXus defines `axes` on `NXdata`, as the names of the coordinate fields along each dimension of the signal.
   `NXdetector` does not define it, and a mask has no coordinates, so a correct value would be `"."` for each dimension, which holds no names.
@@ -87,39 +103,13 @@ New files should not use scipp HDF5.
 
 ## Consequences
 
-- `valid_from` is provisional.
-  Nothing reads it yet.
-  The software that selects mask files for a run may need a different field, or may keep the date in catalog metadata.
-
-- The format goes beyond the NeXus definition in three places.
-  NeXus describes `pixel_mask` with rank 2, while masks here have the rank of the logical dimensions they use.
-  Dimension labels are an HDF5 feature, not defined by NeXus.
-  `valid_from` is not a field that NeXus defines for `NXentry`.
+- The file uses the group classes of NeXus, but the masks are not fields that NeXus defines.
+  A generic NeXus tool shows them as datasets of an `NXcollection`, without knowing that they are masks.
+- `valid_from` applies to all masks in a file.
+  Masks with different validity periods go into different files.
+  `valid_from` is provisional: nothing reads it yet, and the software that selects mask files for a run may need a different field, or may keep the date in catalog metadata.
 - Boolean masks are positional.
   A change of a bank's layout that keeps its shape would apply old masks to the wrong pixels without an error.
   Mask files must be recreated when the layout of a bank changes.
 - Mask files have no format version.
-  A later incompatible change needs a different location than `/entry/instrument/<bank>/pixel_mask`.
-
-## Possible extension: several masks in one file
-
-A file could hold several masks as several `NXentry` groups, which NeXus allows:
-
-```text
-/broken_tubes                  NXentry
-    title                      "broken-tubes"
-    instrument/loki_detector_0/pixel_mask     dims ("tube")
-/beamstop                      NXentry
-    title                      "beamstop"
-    instrument/loki_detector_0/pixel_mask     dims ("layer", "tube", "straw")
-```
-
-Each entry would be one named mask, with its own `title` and `valid_from`, and with its own dimensions.
-Tube and straw masks would then not have to be combined into one array.
-Only the reader would change, and files with one entry would stay valid.
-
-This is not implemented, because a list of several files already gives several named masks.
-Files with several entries are rejected today, so that a version of the reader without this extension raises an error instead of leaving pixels unmasked.
-
-The `pixel_mask_N` fields are not suitable for this extension.
-NeXus defines them as parts of one mask, combined with a bitwise OR, and they have no names.
+  A later incompatible change needs a different location than `/entry/instrument/<bank>/masks`.

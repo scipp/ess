@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
 
+import h5py
 import numpy as np
 import pytest
 import scipp as sc
@@ -35,14 +36,13 @@ def _read(*paths: Path) -> PixelMasks:
     return read_pixel_masks(PixelMaskFilenames(paths))
 
 
-def _write_raw_pixel_mask(
-    path: Path, field: str, values: np.ndarray, label: str = 'tube'
-) -> Path:
+def _write_raw_mask(path: Path, values: np.ndarray, label: str = 'tube') -> Path:
     with snx.File(path, 'w') as file:
         entry = file.create_class('entry', snx.NXentry)
         instrument = entry.create_class('instrument', snx.NXinstrument)
         detector = instrument.create_class('bank_0', snx.NXdetector)
-        dataset = detector.create_field(field, values)
+        collection = detector.create_class('masks', snx.NXcollection)
+        dataset = collection.create_field('m', values)
         dataset.dims[0].label = label
     return path
 
@@ -91,17 +91,16 @@ def test_read_raises_if_hdf5_does_not_hold_integers(tmp_path: Path) -> None:
         _read(path)
 
 
-def test_read_bank_masks_names_mask_after_file_by_default(tmp_path: Path) -> None:
-    mask = sc.array(dims=['tube'], values=[True, False])
-    write_pixel_masks(tmp_path / 'a.nxs', {'bank_0': mask})
+def test_read_bank_masks_names_masks_after_datasets(tmp_path: Path) -> None:
+    broken = sc.array(dims=['tube'], values=[True, False])
+    beamstop = sc.array(dims=['straw'], values=[False, True, True])
+    write_pixel_masks(
+        tmp_path / 'a.nxs',
+        {'broken': {'bank_0': broken}, 'beamstop': {'bank_0': beamstop}},
+    )
     masks = _read(tmp_path / 'a.nxs')
-    assert sc.identical(masks['a.nxs']['bank_0'], mask)
-
-
-def test_read_bank_masks_uses_name_stored_in_file(tmp_path: Path) -> None:
-    mask = sc.array(dims=['tube'], values=[True, False])
-    write_pixel_masks(tmp_path / 'a.nxs', {'bank_0': mask}, name='broken')
-    assert list(_read(tmp_path / 'a.nxs')) == ['broken']
+    assert sc.identical(masks['broken'], sc.DataGroup(bank_0=broken))
+    assert sc.identical(masks['beamstop'], sc.DataGroup(bank_0=beamstop))
 
 
 def test_read_bank_masks_keeps_dimensions_of_all_banks(tmp_path: Path) -> None:
@@ -109,76 +108,106 @@ def test_read_bank_masks_keeps_dimensions_of_all_banks(tmp_path: Path) -> None:
         'bank_0': sc.array(dims=['layer', 'tube'], values=[[True, False]]),
         'bank_1': sc.array(dims=['straw'], values=[False, True, False]),
     }
-    write_pixel_masks(tmp_path / 'a.nxs', banks)
-    loaded = _read(tmp_path / 'a.nxs')['a.nxs']
-    assert sc.identical(loaded, sc.DataGroup(banks))
+    write_pixel_masks(tmp_path / 'a.nxs', {'m': banks})
+    assert sc.identical(_read(tmp_path / 'a.nxs')['m'], sc.DataGroup(banks))
+
+
+def test_read_bank_masks_omits_banks_without_dataset_of_mask(tmp_path: Path) -> None:
+    mask = sc.array(dims=['tube'], values=[True])
+    write_pixel_masks(
+        tmp_path / 'a.nxs', {'broken': {'bank_0': mask}, 'beamstop': {'bank_1': mask}}
+    )
+    masks = _read(tmp_path / 'a.nxs')
+    assert list(masks['broken']) == ['bank_0']
+    assert list(masks['beamstop']) == ['bank_1']
 
 
 def test_read_ignores_other_entries_of_the_file(tmp_path: Path) -> None:
     path = tmp_path / 'a.nxs'
-    write_pixel_masks(path, {'bank_0': sc.array(dims=['tube'], values=[True])})
+    write_pixel_masks(path, {'m': {'bank_0': sc.array(dims=['tube'], values=[True])}})
     with snx.File(path, 'r+') as file:
         file['entry'].create_field('valid_from', '2026-11-01T00:00:00Z')
-    assert list(_read(path)['a.nxs']) == ['bank_0']
+        file['entry/instrument/bank_0'].create_field('pixel_mask', np.array([1]))
+    assert list(_read(path)) == ['m']
 
 
-def test_read_skips_detector_without_pixel_mask(tmp_path: Path) -> None:
+def test_read_skips_detector_without_masks(tmp_path: Path) -> None:
     path = tmp_path / 'a.nxs'
-    write_pixel_masks(path, {'bank_0': sc.array(dims=['tube'], values=[True])})
+    write_pixel_masks(path, {'m': {'bank_0': sc.array(dims=['tube'], values=[True])}})
     with snx.File(path, 'r+') as file:
         file['entry/instrument'].create_class('bank_1', snx.NXdetector)
-    assert list(_read(path)['a.nxs']) == ['bank_0']
+    assert list(_read(path)['m']) == ['bank_0']
 
 
-def test_read_raises_if_stored_names_are_equal(tmp_path: Path) -> None:
+def test_read_combines_masks_of_several_files(tmp_path: Path) -> None:
     mask = sc.array(dims=['tube'], values=[True])
-    write_pixel_masks(tmp_path / 'a.nxs', {'bank_0': mask}, name='broken')
-    write_pixel_masks(tmp_path / 'b.nxs', {'bank_0': mask}, name='broken')
+    write_pixel_masks(tmp_path / 'a.nxs', {'broken': {'bank_0': mask}})
+    write_pixel_masks(tmp_path / 'b.nxs', {'beamstop': {'bank_0': mask}})
+    masks = _read(tmp_path / 'a.nxs', tmp_path / 'b.nxs')
+    assert list(masks) == ['broken', 'beamstop']
+
+
+def test_read_raises_if_files_have_mask_with_same_name(tmp_path: Path) -> None:
+    mask = sc.array(dims=['tube'], values=[True])
+    write_pixel_masks(tmp_path / 'a.nxs', {'broken': {'bank_0': mask}})
+    write_pixel_masks(tmp_path / 'b.nxs', {'broken': {'bank_1': mask}})
     with pytest.raises(ValueError, match='broken'):
         _read(tmp_path / 'a.nxs', tmp_path / 'b.nxs')
 
 
-@pytest.mark.parametrize('dtype', ['uint8', 'int32', 'int64'])
-def test_read_masks_pixels_with_any_rejecting_bit(tmp_path: Path, dtype: str) -> None:
-    values = np.array([0, 1, 2], dtype=dtype)
-    path = _write_raw_pixel_mask(tmp_path / 'a.nxs', 'pixel_mask', values)
-    loaded = _read(path)['a.nxs']['bank_0']
+def test_write_stores_masks_as_uint8(tmp_path: Path) -> None:
+    path = tmp_path / 'a.nxs'
+    write_pixel_masks(path, {'m': {'bank_0': sc.array(dims=['tube'], values=[True])}})
+    with h5py.File(path) as file:
+        assert file['entry/instrument/bank_0/masks/m'].dtype == 'uint8'
+
+
+@pytest.mark.parametrize('dtype', ['bool', 'uint8', 'int32', 'uint32', 'int64'])
+def test_read_masks_pixels_with_nonzero_value(tmp_path: Path, dtype: str) -> None:
+    values = np.array([0, 1, 1], dtype=dtype)
+    if dtype != 'bool':
+        values[2] = 2
+    loaded = _read(_write_raw_mask(tmp_path / 'a.nxs', values))['m']['bank_0']
     assert loaded.dims == ('tube',)
     assert loaded.values.tolist() == [False, True, True]
 
 
-def test_read_does_not_mask_pixels_with_tag_bits_only(tmp_path: Path) -> None:
-    values = np.array([1 << 8, 1 << 31], dtype='uint32')
-    path = _write_raw_pixel_mask(tmp_path / 'a.nxs', 'pixel_mask', values)
-    assert _read(path)['a.nxs']['bank_0'].values.tolist() == [True, False]
-
-
-def test_read_raises_if_pixel_mask_is_not_integer(tmp_path: Path) -> None:
-    path = _write_raw_pixel_mask(tmp_path / 'a.nxs', 'pixel_mask', np.array([1.5]))
-    with pytest.raises(ValueError, match='non-integer'):
+def test_read_raises_if_mask_is_not_integer(tmp_path: Path) -> None:
+    path = _write_raw_mask(tmp_path / 'a.nxs', np.array([1.5]))
+    with pytest.raises(ValueError, match='not integer'):
         _read(path)
 
 
-def test_read_raises_on_numbered_pixel_masks(tmp_path: Path) -> None:
-    path = _write_raw_pixel_mask(tmp_path / 'a.nxs', 'pixel_mask', np.array([1]))
+def test_read_raises_if_mask_has_no_dimension_labels(tmp_path: Path) -> None:
+    path = _write_raw_mask(tmp_path / 'a.nxs', np.array([0, 1, 0]), label='')
+    with pytest.raises(ValueError, match='dimension labels'):
+        _read(path)
+
+
+def test_read_raises_on_group_in_masks(tmp_path: Path) -> None:
+    path = _write_raw_mask(tmp_path / 'a.nxs', np.array([1]))
     with snx.File(path, 'r+') as file:
-        file['entry/instrument/bank_0'].create_field('pixel_mask_2', np.array([1]))
-    with pytest.raises(ValueError, match='pixel_mask_2'):
+        file['entry/instrument/bank_0/masks'].create_class('sub', snx.NXcollection)
+    with pytest.raises(ValueError, match='group'):
         _read(path)
 
 
 def test_read_raises_on_several_entries(tmp_path: Path) -> None:
     path = tmp_path / 'a.nxs'
-    write_pixel_masks(path, {'bank_0': sc.array(dims=['tube'], values=[True])})
+    write_pixel_masks(path, {'m': {'bank_0': sc.array(dims=['tube'], values=[True])}})
     with snx.File(path, 'r+') as file:
         file.create_class('other', snx.NXentry)
     with pytest.raises(ValueError, match='several NXentry'):
         _read(path)
 
 
-def test_read_raises_if_file_has_no_pixel_mask(tmp_path: Path) -> None:
-    path = _write_raw_pixel_mask(tmp_path / 'a.nxs', 'detector_number', np.array([1]))
-    with pytest.raises(ValueError, match='no detector with a pixel_mask'):
+def test_read_raises_if_file_has_no_masks(tmp_path: Path) -> None:
+    path = tmp_path / 'a.nxs'
+    with snx.File(path, 'w') as file:
+        entry = file.create_class('entry', snx.NXentry)
+        instrument = entry.create_class('instrument', snx.NXinstrument)
+        instrument.create_class('bank_0', snx.NXdetector)
+    with pytest.raises(ValueError, match='no detector with masks'):
         _read(path)
 
 
@@ -266,15 +295,6 @@ def test_to_detector_masks_raises_if_mask_does_not_fit_detector(
 ) -> None:
     with pytest.raises(sc.DimensionError):
         to_detector_masks(_per_bank(a=mask), bank_ids, bank='a')
-
-
-def test_to_detector_masks_raises_if_file_has_no_dimension_labels(
-    bank_ids: sc.Variable, tmp_path: Path
-) -> None:
-    values = np.array([0, 1, 0])
-    path = _write_raw_pixel_mask(tmp_path / 'a.nxs', 'pixel_mask', values, label='')
-    with pytest.raises(sc.DimensionError):
-        to_detector_masks(_read(path), bank_ids, bank='bank_0')
 
 
 @pytest.mark.parametrize(
