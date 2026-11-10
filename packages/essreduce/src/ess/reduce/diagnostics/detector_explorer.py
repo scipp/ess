@@ -223,7 +223,7 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
         )
 
         self._link = ipw.jslink((self.sum, 'value'), (self.slider, 'disabled'))
-        self.value = (self.dim, self.slider.value)
+        self.value = (self.dim, None if disabled else self.slider.value)
 
         self.slider.observe(self._on_subwidget_change, names='value')
         self.sum.observe(self._on_subwidget_change, names='value')
