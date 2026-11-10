@@ -40,6 +40,7 @@ NeXusTransformation = reduce_t.NeXusTransformation
 NeXusTransformationChain = reduce_t.NeXusTransformationChain
 Position = reduce_t.Position
 PreopenNeXusFile = reduce_t.PreopenNeXusFile
+ProtonCharge = reduce_t.ProtonCharge
 RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 TimeInterval = reduce_t.TimeInterval
@@ -155,7 +156,3 @@ class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 SQWBinSizes = NewType('SQWBinSizes', dict[str, int])
 
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
-
-
-class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Accumulated proton charge for a measurement."""
