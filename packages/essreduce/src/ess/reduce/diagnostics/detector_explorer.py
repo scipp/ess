@@ -115,8 +115,6 @@ class ColorControl(ipw.HBox):
         log:
             Whether to enable logarithmic scaling initially, by default ``False``.
         """
-        self._lock = False
-
         self.vmin = ipw.Text(
             description='Min:',
             layout={'width': '130px'},
@@ -169,7 +167,7 @@ class ColorControl(ipw.HBox):
 
 
 class DimSlider(ipw.HBox, ipw.ValueWidget):
-    def __init__(self, sizes: dict[str, int], dim: str, visible_dims: list[str]):
+    def __init__(self, sizes: dict[str, int], dim: str):
         """
         The DimSlider widget is used to control at which index to slice a particular
         dimension of a data array. In addition, it provides an option to sum over the
@@ -181,12 +179,8 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
             A dictionary mapping dimension names to their sizes.
         dim:
             The dimension this slider controls.
-        visible_dims:
-            A list of currently visible dimensions.
         """
-        self._lock = False
         self._sizes = sizes
-        self._visible_dims = visible_dims
         self._dim = dim
 
         if dim not in self._sizes:
@@ -376,12 +370,7 @@ class DetectorExplorer(ipw.VBox):
         other_dims = [dim for dim in self.data.dims if dim not in self._visible_dims]
 
         self.bank_dim_sliders = {
-            key: [
-                DimSlider(
-                    sizes=self.data[key].sizes, dim=dim, visible_dims=self._visible_dims
-                )
-                for dim in other_dims
-            ]
+            key: [DimSlider(sizes=self.data[key].sizes, dim=dim) for dim in other_dims]
             for key in self.data.keys()
         }
 
@@ -428,8 +417,7 @@ class DetectorExplorer(ipw.VBox):
         # sliders for the 'All detectors' view. In turn, we need separate nodes in the
         # node tree below.
         self.all_dim_sliders = [
-            DimSlider(sizes=self.max_sizes, dim=dim, visible_dims=self._visible_dims)
-            for dim in other_dims
+            DimSlider(sizes=self.max_sizes, dim=dim) for dim in other_dims
         ]
         self.all_collect_node = pp.Node(
             lambda *args: args,
@@ -727,8 +715,7 @@ class DetectorExplorer(ipw.VBox):
             return
 
         key = self.current_key
-        xdim = self.tab_figs[key].view._dims['x']
-        ydim = self.tab_figs[key].view._dims['y']
+        ydim, xdim = self._visible_dims
 
         # Find the closest coordinate index to the x, y event coords
         xcoord = self.data[key].coords[xdim]
