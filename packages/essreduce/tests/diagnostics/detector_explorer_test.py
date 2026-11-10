@@ -731,71 +731,70 @@ def test_deleting_mask_by_click_does_not_remove_from_dict_if_other_parts_are_mas
     assert not explorer.masks['bank_0'][key]['layer', 0].values.max()
 
 
-# ---------------------------------------------------------------------------
-# 6. Continuous masking
-# ---------------------------------------------------------------------------
-
-
-def handler_counts(explorer, bank):
-    canvas, _ = bank_canvas(explorer, bank)
-    return {
-        name: len(canvas.callbacks.callbacks.get(name, {}))
-        for name in (
-            'button_press_event',
-            'motion_notify_event',
-            'button_release_event',
-        )
-    }
-
-
-def test_without_continuous_mode_only_initial_click_changes_masks():
-    explorer = DetectorExplorer(make_banks())
+def test_add_mask_with_small_coord():
+    dg = make_banks()
+    dg['bank_0'].coords['x'] = sc.arange('x', 4) * 0.1
+    explorer = DetectorExplorer(dg)
     select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'single'
-    press(explorer, 'bank_0', 1, 1)
-    move(explorer, 'bank_0', 2, 1)
-    move(explorer, 'bank_0', 3, 2)
-    assert next(iter(explorer.masks['bank_0'].values())).sum().value == 1
+    explorer.mask_control.mode = 'vertical'
+    press(explorer, 'bank_0', 0.3, 1)
+    mask = next(iter(explorer.masks['bank_0'].values()))
+    assert sc.identical(
+        mask['layer', 0],
+        sc.array(dims=['x'], values=[False, False, False, True], dtype=bool),
+    )
 
 
-@pytest.mark.parametrize('mode', MODES)
-def test_continuous_masking_follows_movement_without_repeated_toggles(mode):
-    explorer = DetectorExplorer(make_banks())
+def test_add_mask_with_small_coord_and_bin_edges():
+    dg = make_banks()
+    dg['bank_0'].coords['x'] = sc.arange('x', 5) * 0.1
+    explorer = DetectorExplorer(dg)
     select(explorer, 'bank_0')
-    explorer.mask_control.mode = mode
-    explorer.mask_control.continuous_button.value = True
-
-    press(explorer, 'bank_0', 1, 1)
-    assert len(explorer.masks['bank_0']) == 1
-
-    # Stays in the same pixel/row/column: nothing changes.
-    same = {'single': [(1, 1)], 'horizontal': [(3, 1)], 'vertical': [(1, 2)]}[mode]
-    for x, y in same * 2:
-        move(explorer, 'bank_0', x, y)
-        assert len(explorer.masks['bank_0']) == 1
-        assert next(iter(explorer.masks['bank_0'].values())).sum().value == 1
-
-    # New target: changes exactly once, even when moving repeatedly within it.
-    for x, y in [(3, 2), (3, 2)]:
-        move(explorer, 'bank_0', x, y)
-        assert len(explorer.masks['bank_0']) == 1
-        assert next(iter(explorer.masks['bank_0'].values())).sum().value == 2
+    explorer.mask_control.mode = 'vertical'
+    press(explorer, 'bank_0', 0.201, 1)  # Just above the 3rd bin edge
+    mask = next(iter(explorer.masks['bank_0'].values()))
+    assert sc.identical(
+        mask['layer', 0],
+        sc.array(dims=['x'], values=[False, False, True, False], dtype=bool),
+    )
+    press(explorer, 'bank_0', 0.198, 1)  # Just below the 3rd bin edge
+    assert sc.identical(
+        mask['layer', 0],
+        sc.array(dims=['x'], values=[False, True, True, False], dtype=bool),
+    )
 
 
-def test_leaving_axes_has_no_effect_and_release_stops_masking():
-    explorer = DetectorExplorer(make_banks())
+def test_add_mask_with_large_coord():
+    dg = make_banks()
+    dg['bank_0'].coords['x'] = sc.arange('x', 1000, 1004)
+    explorer = DetectorExplorer(dg)
     select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'single'
-    explorer.mask_control.continuous_button.value = True
-    before = handler_counts(explorer, 'bank_0')
+    explorer.mask_control.mode = 'vertical'
+    press(explorer, 'bank_0', 1001, 1)
+    mask = next(iter(explorer.masks['bank_0'].values()))
+    assert sc.identical(
+        mask['layer', 0],
+        sc.array(dims=['x'], values=[False, True, False, False], dtype=bool),
+    )
 
-    press(explorer, 'bank_0', 1, 1)
-    move_outside(explorer, 'bank_0')
-    assert next(iter(explorer.masks['bank_0'].values())).sum().value == 1
-    release(explorer, 'bank_0', 1, 1)
-    assert handler_counts(explorer, 'bank_0') == before
-    move(explorer, 'bank_0', 2, 2)
-    assert next(iter(explorer.masks['bank_0'].values())).sum().value == 1
+
+def test_add_mask_with_large_coord_and_bin_edges():
+    dg = make_banks()
+    dg['bank_0'].coords['x'] = sc.arange('x', 1000, 1005)
+    explorer = DetectorExplorer(dg)
+    select(explorer, 'bank_0')
+    explorer.mask_control.mode = 'vertical'
+    press(explorer, 'bank_0', 1001.1, 1)
+    mask = next(iter(explorer.masks['bank_0'].values()))
+    assert sc.identical(
+        mask['layer', 0],
+        sc.array(dims=['x'], values=[False, True, False, False], dtype=bool),
+    )
+    press(explorer, 'bank_0', 1000.9, 1)  # Just below the 2nd bin edge
+    assert sc.identical(
+        mask['layer', 0],
+        sc.array(dims=['x'], values=[True, True, False, False], dtype=bool),
+    )
 
 
 # ---------------------------------------------------------------------------
