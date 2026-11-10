@@ -36,12 +36,6 @@ class MaskControl(ipw.HBox):
         self.clear_button = ipw.Button(
             icon='trash', tooltip='Clear masks', layout=BUTTON_STYLE
         )
-        # self.continuous_button = ipw.ToggleButton(
-        #     icon='paint-brush',
-        #     value=False,
-        #     tooltip='Mask while dragging',
-        #     layout=BUTTON_STYLE,
-        # )
         self.filename_input = ipw.Text(value='', layout={"width": "150px"})
         self.save_button = ipw.Button(
             icon='save', tooltip='Save masks', layout=BUTTON_STYLE, disabled=True
@@ -62,7 +56,6 @@ class MaskControl(ipw.HBox):
                 ipw.HTML(value="Masking: &nbsp;&nbsp;&nbsp;"),
                 *self.mode_buttons.values(),
                 self.clear_button,
-                # self.continuous_button,
                 ipw.HTML(value="&nbsp;&nbsp; Save to file: &nbsp;"),
                 self.filename_input,
                 self.save_button,
@@ -326,17 +319,6 @@ def _box_of_sliders(sliders: list[DimSlider]) -> ipw.HBox:
             for widget in (dslider, ipw.HTML('<div style="width: 20px;"></div>'))
         ]
     )
-
-
-# def _find_closest(a, x) -> float | int:
-#     i = np.searchsorted(a, x)
-
-#     if i == 0:
-#         return a[0]
-#     if i == len(a):
-#         return a[-1]
-
-#     return a[i - 1] if abs(a[i - 1] - x) <= abs(a[i] - x) else a[i]
 
 
 def _find_closest(a, x) -> int:
@@ -723,48 +705,6 @@ class DetectorExplorer(ipw.VBox):
             f.view.colormapper.autoscale()
         figs[0].canvas.draw()
 
-    # def handle_mask_click(self, event: MouseEvent) -> None:
-    #     """
-    #     If the mouse button is clicked within an axes and a masking mode is selected,
-    #     initiate the masking process:
-    #     - We add a mask at the current position.
-    #     - If continuous masking is enabled, we connect mouse move and release events to
-    #       allow continuous masking.
-    #     """
-    #     # # Ignore the event if no masking mode is selected
-    #     # if self.mask_control.mode is None:
-    #     #     return
-    #     # # Ignore the event if it occurred outside any axes
-    #     # if event.inaxes is None:
-    #     #     return
-    #     # # Ignore the event if the pan/zoom tool is active
-    #     # if event.inaxes.get_navigate_mode() is not None:
-    #     #     return
-    #     # # Ignore the event if it occurred outside the current tab's axes (e.g. colorbar)
-    #     # if event.inaxes is not self.tab_figs[self.current_key].ax:
-    #     #     return
-
-    #     self._previous_pixel = None
-    #     self.add_mask(event)
-
-    #     if self.mask_control.continuous_button.value:
-    #         self._mouse_move_connection = event.canvas.mpl_connect(
-    #             'motion_notify_event', self.add_mask
-    #         )
-    #         self._mouse_release_connection = event.canvas.mpl_connect(
-    #             'button_release_event', self.stop_continuous_mask
-    #         )
-
-    # def stop_continuous_mask(self, event: MouseEvent) -> None:
-    #     """
-    #     Stop the continuous masking process by disconnecting the mouse move and release
-    #     events.
-    #     """
-    #     event.canvas.mpl_disconnect(self._mouse_move_connection)
-    #     event.canvas.mpl_disconnect(self._mouse_release_connection)
-    #     self._mouse_move_connection = None
-    #     self._mouse_release_connection = None
-
     def add_mask(self, event: MouseEvent) -> None:
         """
         Add a mask at the current mouse position based on the selected masking mode.
@@ -782,44 +722,26 @@ class DetectorExplorer(ipw.VBox):
         if event.inaxes is not self.tab_figs[self.current_key].ax:
             return
 
-        # # Still need to protect against outside of axes events as it may come from
-        # # other events like mouse move during continuous masking.
-        # if event.inaxes is None:
-        #     return
-
-        # x = event.xdata
-        # y = event.ydata
-        masking_mode = self.mask_control.mode
-        # if self._previous_pixel is None:
-        #     self._previous_pixel = (x, y)
-        # else:
-        #     if (masking_mode == "single") and ((x, y) == self._previous_pixel):
-        #         return
-        #     if (masking_mode == "horizontal") and (y == self._previous_pixel[1]):
-        #         return
-        #     if (masking_mode == "vertical") and (x == self._previous_pixel[0]):
-        #         return
-
         key = self.current_key
         xdim = self.tab_figs[key].view._dims['x']
         ydim = self.tab_figs[key].view._dims['y']
 
-        # Find the closest coordinate to the x, y event coords
+        # Find the closest coordinate index to the x, y event coords
         xcoord = self.data[key].coords[xdim]
         if self.data[key].coords.is_edges(xdim):
             xcoord = sc.midpoints(xcoord, dim=xdim)
         ycoord = self.data[key].coords[ydim]
         if self.data[key].coords.is_edges(ydim):
             ycoord = sc.midpoints(ycoord, dim=ydim)
-        x = _find_closest(xcoord.values, event.xdata)
-        y = _find_closest(ycoord.values, event.ydata)
+        ix = _find_closest(xcoord.values, event.xdata)
+        iy = _find_closest(ycoord.values, event.ydata)
 
         # Find slider dims and indices
         slices = []
-        if masking_mode in ("horizontal", "single"):
-            slices.append((ydim, y))
-        if masking_mode in ("vertical", "single"):
-            slices.append((xdim, x))
+        if self.mask_control.mode in ("horizontal", "single"):
+            slices.append((ydim, iy))
+        if self.mask_control.mode in ("vertical", "single"):
+            slices.append((xdim, ix))
         slices.extend(
             [sl.value for sl in self.bank_dim_sliders[key] if sl.value[1] is not None]
         )
@@ -842,8 +764,6 @@ class DetectorExplorer(ipw.VBox):
             del self.masks[key][mask_name]
 
         self.apply_masks_nodes[key].notify_children(message=None)
-
-        # self._previous_pixel = (x, y)
 
     def clear_masks(self, _) -> None:
         """
