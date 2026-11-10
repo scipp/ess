@@ -121,11 +121,13 @@ class ColorControl(ipw.HBox):
             description='Min:',
             layout={'width': '130px'},
             style={"description_width": 'initial'},
+            continuous_update=False,
         )
         self.vmax = ipw.Text(
             description='Max:',
             layout={'width': '130px'},
             style={"description_width": 'initial'},
+            continuous_update=False,
         )
         self.log_button = ipw.ToggleButton(
             description="log", layout=BUTTON_STYLE, value=log
@@ -301,7 +303,7 @@ def _slice_or_sum(
         else:
             if ind >= out.sizes[dim]:
                 # Make a blank data array to avoid indexing errors
-                out = sc.full_like(out[dim, 0], value=float("nan"))
+                out = sc.full_like(out[dim, 0], value=float("nan"), dtype='float64')
             else:
                 out = out[dim, ind]
     return out
@@ -658,13 +660,15 @@ class DetectorExplorer(ipw.VBox):
         Update the color range (vmin and vmax) for all current figures based on the
         values in the color control widgets.
         """
-        bounds = {
-            key: float(item.value) if len(item.value) > 0 else None
-            for key, item in [
-                ("cmin", self.color_control.vmin),
-                ("cmax", self.color_control.vmax),
-            ]
-        }
+        bounds = {}
+        for key, item in [
+            ("cmin", self.color_control.vmin),
+            ("cmax", self.color_control.vmax),
+        ]:
+            try:
+                bounds[key] = float(item.value)
+            except ValueError:  # noqa: PERF203
+                bounds[key] = None
 
         if self.color_control.log_button.value:
             for bound in bounds.values():
@@ -786,8 +790,10 @@ class DetectorExplorer(ipw.VBox):
             mask_names = list(self.masks[key].keys())
             for name in mask_names:
                 m = self.masks[key][name]
+                if any(s[0] in m.dims and s[1] >= m.sizes[s[0]] for s in slices):
+                    continue
                 for s in slices:
-                    if (s[0] in m.dims) and (s[1] < m.sizes[s[0]]):
+                    if s[0] in m.dims:
                         m = m[s]
                 m.values[...] = False
                 if not self.masks[key][name].values.max():
