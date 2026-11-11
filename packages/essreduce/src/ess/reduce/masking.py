@@ -50,12 +50,13 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
                             beamstop       integer array
 
         Bank names are the names of the NeXus detector groups, and mask names are the
-        names of the datasets. A mask with the same name in several banks is one mask.
-        A bank without a dataset of that name has no pixels masked by it. A pixel is
-        masked if its value is not zero. The dimensions of a dataset are given by HDF5
-        dimension labels. They are named after the logical dimensions of the bank, and
-        may be a subset of them, in any order. Other entries of the file, such as a
-        validity date, are ignored.
+        names of the datasets. Datasets with the same name in several banks form one
+        mask. The data of each bank gets a mask of that name, made from the dataset of
+        that bank. A bank without a dataset of that name has no pixels masked by it. A
+        pixel is masked if its value is not zero. The dimensions of a dataset are given
+        by HDF5 dimension labels. They are named after the logical dimensions of the
+        bank, and may be a subset of them, in any order. Other entries of the file, such
+        as a validity date, are ignored.
       - A file written by :py:func:`scipp.io.save_hdf5` with a variable of masked
         detector IDs. The mask is named after the file, without the directory, since
         directories differ between hosts. The same applies to ``.xml`` files.

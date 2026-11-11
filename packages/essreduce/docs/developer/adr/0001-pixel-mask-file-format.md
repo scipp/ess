@@ -44,10 +44,13 @@ with h5py.File(path) as f:
 - Names of `NXdetector` groups are the names of the groups in the NeXus files of the runs.
   A name that is not a bank of the instrument is an error, since a misspelled name would otherwise mask nothing.
 - The name of a dataset in `masks` is the name of the mask in the reduced data.
-  Datasets with the same name in several banks are one mask.
+  Datasets with the same name in several banks form one mask.
+  The data of each bank gets a mask of that name, made from the dataset of that bank.
   A bank without a dataset of that name has no pixels masked by it.
 - A pixel is masked if its value is not zero.
-  `ess.reduce.masking.write_pixel_masks` writes `uint8`.
+  HDF5 has no boolean type.
+  h5py stores numpy booleans as an enumeration based on `int8`, which other HDF5 libraries may not read as booleans.
+  `ess.reduce.masking.write_pixel_masks` therefore writes `uint8`, the smallest plain integer type.
   Readers accept any integer type, and the boolean enumeration that h5py writes for numpy booleans.
 - Dimensions of a mask are named with HDF5 dimension labels.
   They are a subset of the logical dimensions of the bank, in any order, with matching sizes.
