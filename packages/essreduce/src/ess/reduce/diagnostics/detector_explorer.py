@@ -3,6 +3,7 @@
 
 import math
 from collections.abc import Callable
+from types import MappingProxyType
 
 import ipywidgets as ipw
 import matplotlib.pyplot as plt
@@ -16,23 +17,26 @@ THIN_BUTTON_STYLE = {'width': '1.23em', 'padding': '0px'}
 
 
 class MaskControl(ipw.HBox):
-    def __init__(self):
+    def __init__(
+        self,
+        mask_dims: MappingProxyType[str, MappingProxyType[str, tuple[str, ...]]],
+    ):
         """
         Widget for controlling masking options.
-        The widget includes buttons for selecting masking modes (horizontal, vertical,
-        single pixel), and options for clearing and saving masks.
-        """
 
-        self.mode_buttons = {
-            key: ipw.ToggleButton(
-                icon=icon, value=False, tooltip=tip, layout=BUTTON_STYLE
-            )
-            for key, icon, tip in (
-                ("horizontal", "grip-lines", "Mask horizontally"),
-                ("vertical", "grip-lines-vertical", "Mask vertically"),
-                ("single", "crosshairs", "Mask single pixel"),
-            )
-        }
+        Parameters
+        ----------
+        mask_dims:
+            Mapping of mask names to mask dimensions.
+        """
+        self.mask_dims = mask_dims
+
+        self.mask_selector = ipw.Dropdown(
+            options=["", *self.mask_dims.keys()],
+            value="",
+            description='Edit mask:',
+            layout={'width': '200px'},
+        )
         self.clear_button = ipw.Button(
             icon='trash', tooltip='Clear masks', layout=BUTTON_STYLE
         )
@@ -47,14 +51,9 @@ class MaskControl(ipw.HBox):
             names='value',
         )
 
-        self._lock = False
-        for button in self.mode_buttons.values():
-            button.observe(self._sync_modes, names='value')
-
         super().__init__(
             [
-                ipw.HTML(value="Masking: &nbsp;&nbsp;&nbsp;"),
-                *self.mode_buttons.values(),
+                self.mask_selector,
                 self.clear_button,
                 ipw.HTML(value="&nbsp;&nbsp; Save to file: &nbsp;"),
                 self.filename_input,
@@ -63,33 +62,12 @@ class MaskControl(ipw.HBox):
             layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
 
-    def _sync_modes(self, change: dict) -> None:
-        if self._lock:
-            return
-        if not change['new']:
-            return
-        self._lock = True
-        for button in self.mode_buttons.values():
-            if button.value and (button is not change['owner']):
-                button.value = False
-        self._lock = False
-
     @property
-    def mode(self) -> str | None:
-        for mode, button in self.mode_buttons.items():
-            if button.value:
-                return mode
-        return None
+    def selected(self) -> str:
+        return self.mask_selector.value
 
-    @mode.setter
-    def mode(self, value: str | None) -> None:
-        if value is None:
-            for button in self.mode_buttons.values():
-                button.value = False
-        else:
-            if value not in self.mode_buttons:
-                raise ValueError(f"Invalid mode: {value}")
-            self.mode_buttons[value].value = True
+    def select(self, mask: str) -> None:
+        self.mask_selector.value = mask
 
     def on_clear(self, callback: callable) -> None:
         """
@@ -210,19 +188,19 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
             layout=THIN_BUTTON_STYLE,
             disabled=disabled,
         )
-        self.sum = ipw.Checkbox(
-            description="sum",
-            value=disabled,
-            indent=False,
-            layout={"width": "initial"},
-            disabled=disabled,
-        )
+        # self.sum = ipw.Checkbox(
+        #     description="sum",
+        #     value=disabled,
+        #     indent=False,
+        #     layout={"width": "initial"},
+        #     disabled=disabled,
+        # )
 
-        self._link = ipw.jslink((self.sum, 'value'), (self.slider, 'disabled'))
+        # self._link = ipw.jslink((self.sum, 'value'), (self.slider, 'disabled'))
         self.value = (self.dim, None if disabled else self.slider.value)
 
         self.slider.observe(self._on_subwidget_change, names='value')
-        self.sum.observe(self._on_subwidget_change, names='value')
+        # self.sum.observe(self._on_subwidget_change, names='value')
         self.slider.observe(self._update_navigation_status, names='value')
         self.prev.on_click(
             lambda _: setattr(self.slider, 'value', self.slider.value - 1)
@@ -232,7 +210,7 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
         )
 
         super().__init__(
-            [self.slider, self.prev, self.next, self.sum],
+            [self.slider, self.prev, self.next],
             layout={'border': '1px solid black', 'padding': '0px 10px 0px 10px'},
         )
 
@@ -241,10 +219,10 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
         return self._dim
 
     def _on_subwidget_change(self, _=None):
-        if self.sum.value:
-            self.value = (self.dim, None)
-        else:
-            self.value = (self.dim, self.slider.value)
+        # if self.sum.value:
+        #     self.value = (self.dim, None)
+        # else:
+        self.value = (self.dim, self.slider.value)
 
     def _update_navigation_status(self, _=None):
         self.prev.disabled = self.slider.value <= self.slider.min
@@ -292,14 +270,14 @@ def _slice_or_sum(
         dim, ind = sl
         if dim not in out.sizes:
             continue
-        if ind is None:
-            out = sc.sum(out, dim)
+        # if ind is None:
+        #     out = sc.sum(out, dim)
+        # else:
+        if ind >= out.sizes[dim]:
+            # Make a blank data array to avoid indexing errors
+            out = sc.full_like(out[dim, 0], value=float("nan"), dtype='float64')
         else:
-            if ind >= out.sizes[dim]:
-                # Make a blank data array to avoid indexing errors
-                out = sc.full_like(out[dim, 0], value=float("nan"), dtype='float64')
-            else:
-                out = out[dim, ind]
+            out = out[dim, ind]
     return out
 
 
@@ -332,6 +310,9 @@ class DetectorExplorer(ipw.VBox):
     def __init__(
         self,
         data: sc.DataGroup | sc.DataArray,
+        masks: MappingProxyType[str, sc.Variable]
+        | MappingProxyType[str, MappingProxyType[str, sc.Variable]]
+        | None = None,
         figsize: tuple[int, int] = (11, 8),
         show_dims: list[str] | None = None,
         **kwargs,
@@ -342,6 +323,12 @@ class DetectorExplorer(ipw.VBox):
         ----------
         data:
             DataGroup or DataArray containing detector banks.
+        masks:
+            Dictionary of masks to apply to the data.
+            Keys should match the detector bank names, and inside each bank,
+            the keys should be the mask names.
+            In the case of a single detector bank, the keys should just be the mask
+            names themselves.
         figsize:
             Size of the figures in inches (width, height).
         show_dims:
@@ -353,16 +340,35 @@ class DetectorExplorer(ipw.VBox):
         self._lock = False
 
         if not hasattr(data, 'items'):
-            data = sc.DataGroup({data.name or 'detector_0': data})
+            key = data.name or 'detector_0'
+            data = sc.DataGroup({key: data})
+            if masks is not None and isinstance(
+                next(iter(masks.values())), sc.Variable
+            ):
+                masks = {key: masks}
+
         self.data = sc.DataGroup(
             {k: _add_missing_coordinates(da) for k, da in data.items()}
         )
+
         self.masks = sc.DataGroup({k: sc.DataGroup() for k in self.data.keys()})
+        if masks is not None:
+            mask_dims = {}
+            for key, group in masks.items():
+                for name, mask in group.items():
+                    if name not in mask_dims:
+                        mask_dims[name] = mask.dims
+                    elif mask.dims != mask_dims[name]:
+                        raise ValueError(
+                            f"Mask '{name}' has inconsistent dimensions: {mask.dims}, "
+                            f"expected: {mask_dims[name]}"
+                        )
+                    self.masks[key][name] = mask.copy(deep=True)
+
         self.max_sizes = {
             dim: max(da.sizes.get(dim, 0) for da in self.data.values())
             for dim in self.data.dims
         }
-
         self._visible_dims = show_dims
         if self._visible_dims is None:
             self._visible_dims = list(self.data.dims)[-2:]
@@ -500,21 +506,26 @@ class DetectorExplorer(ipw.VBox):
         self.tabs.titles = titles
         self.tabs.observe(self.selected_tab_changed, names='selected_index')
 
-        self.mask_control = MaskControl()
-        self.mask_control.on_clear(self.clear_masks)
-        self.mask_control.on_save(self.save_masks)
-        for f in self.tab_figs.values():
-            f.fig.canvas.mpl_connect('button_press_event', self.add_mask)
+        if masks is not None:
+            self.mask_control = MaskControl(mask_dims=mask_dims)
+            self.mask_control.on_clear(self.clear_masks)
+            self.mask_control.on_save(self.save_masks)
+            for f in self.tab_figs.values():
+                f.fig.canvas.mpl_connect('button_press_event', self.add_mask)
 
         self.color_control = ColorControl()
         self.color_control.on_limit_change(self.update_color_range)
         self.color_control.on_log_toggle(self.toggle_log)
         self.color_control.on_fit_click(self.fit_cmap_range)
 
+        top_controls = [self.color_control]
+        if masks is not None:
+            top_controls.insert(0, self.mask_control)
+
         super().__init__(
             [
                 ipw.HBox(
-                    [self.mask_control, self.color_control],
+                    top_controls,
                     layout={
                         'width': self.tabs.layout.width,
                         'justify_content': 'space-between',
@@ -582,23 +593,21 @@ class DetectorExplorer(ipw.VBox):
         )
         return old_sliders, new_sliders
 
-    def update_slider_sums(self, old_tab: int, new_tab: int) -> None:
-        old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
-        old_slider_sums = {sl.dim: sl.sum for sl in old_sliders}
-        for sl in new_sliders:
-            if (
-                (not sl.sum.disabled)
-                and (not old_slider_sums[sl.dim].disabled)
-                and (sl.sum.value != old_slider_sums[sl.dim].value)
-            ):
-                sl.sum.value = old_slider_sums[sl.dim].value
+    # def update_slider_sums(self, old_tab: int, new_tab: int) -> None:
+    #     old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
+    #     old_slider_sums = {sl.dim: sl.sum for sl in old_sliders}
+    #     for sl in new_sliders:
+    #         if (
+    #             (not sl.sum.disabled)
+    #             and (not old_slider_sums[sl.dim].disabled)
+    #             and (sl.sum.value != old_slider_sums[sl.dim].value)
+    #         ):
+    #             sl.sum.value = old_slider_sums[sl.dim].value
 
     def update_slider_inds(self, old_tab: int, new_tab: int) -> None:
         old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
         old_slider_sliders = {sl.dim: sl.slider for sl in old_sliders}
         for sl in new_sliders:
-            if sl.sum.value:
-                continue
             new_value = min(old_slider_sliders[sl.dim].value, sl.slider.max)
             if (
                 (not sl.slider.disabled)
@@ -625,7 +634,7 @@ class DetectorExplorer(ipw.VBox):
         self.update_color_range()
 
         new_tab, old_tab = change["new"], change["old"]
-        self.update_slider_sums(old_tab, new_tab)
+        # self.update_slider_sums(old_tab, new_tab)
         if 0 in (old_tab, new_tab):
             self.update_slider_inds(old_tab, new_tab)
 
@@ -705,7 +714,7 @@ class DetectorExplorer(ipw.VBox):
         Add a mask at the current mouse position based on the selected masking mode.
         """
         # Ignore the event if no masking mode is selected
-        if self.mask_control.mode is None:
+        if not self.mask_control.selected:
             return
         # Ignore the event if it occurred outside any axes
         if event.inaxes is None:
@@ -732,18 +741,29 @@ class DetectorExplorer(ipw.VBox):
 
         # Find slider dims and indices
         slices = []
-        if self.mask_control.mode in ("horizontal", "single"):
-            slices.append((ydim, iy))
-        if self.mask_control.mode in ("vertical", "single"):
+        mask_name = self.mask_control.selected
+        mask_dims = self.mask_control.mask_dims[mask_name]
+        print("mask_dims:", mask_dims)
+        if xdim in mask_dims:
             slices.append((xdim, ix))
+        if ydim in mask_dims:
+            slices.append((ydim, iy))
         slices.extend(
-            [sl.value for sl in self.bank_dim_sliders[key] if sl.value[1] is not None]
+            [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
         )
+        print("slices:", slices)
+
+        # if self.mask_control.mode in ("horizontal", "single"):
+        #     slices.append((ydim, iy))
+        # if self.mask_control.mode in ("vertical", "single"):
+        #     slices.append((xdim, ix))
+        # slices.extend(
+        #     [sl.value for sl in self.bank_dim_sliders[key] if sl.value[1] is not None]
+        # )
         # Preserve the dim order as in the original data
         dims = tuple(
             dim for dim in self.data[key].dims if dim in tuple(sl[0] for sl in slices)
         )
-        mask_name = str(dims)
         if mask_name not in self.masks[key]:
             self.masks[key][mask_name] = sc.zeros(
                 sizes={dim: self.data[key].sizes[dim] for dim in dims},
