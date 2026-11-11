@@ -7,12 +7,16 @@ once. Converting the file content to masks for a detector is a separate step.
 """
 
 from collections.abc import Collection, Mapping, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import NewType
 
+import h5py
 import numpy as np
 import scipp as sc
 import scippnexus as snx
+
+from . import __version__
 
 PixelMaskFilenames = NewType('PixelMaskFilenames', Sequence[str | Path])
 """Files with pixel masks to apply. Use an empty sequence to apply none."""
@@ -44,6 +48,7 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
 
             /entry                         (NXentry)
                 instrument                 (NXinstrument)
+                    name                   "LOKI"
                     loki_detector_0        (NXdetector)
                         masks              (NXcollection)
                             broken_tubes   integer array
@@ -56,7 +61,7 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
         pixel is masked if its value is not zero. The dimensions of a dataset are given
         by HDF5 dimension labels. They are named after the logical dimensions of the
         bank, and may be a subset of them, in any order. Other entries of the file, such
-        as a validity date, are ignored.
+        as the instrument name or a validity date, are ignored.
       - A file written by :py:func:`scipp.io.save_hdf5` with a variable of masked
         detector IDs. The mask is named after the file, without the directory, since
         directories differ between hosts. The same applies to ``.xml`` files.
@@ -130,12 +135,19 @@ def to_detector_masks(
 
 
 def write_pixel_masks(
-    filename: str | Path, masks: Mapping[str, Mapping[str, sc.Variable]]
+    filename: str | Path,
+    masks: Mapping[str, Mapping[str, sc.Variable]],
+    *,
+    instrument: str,
 ) -> None:
     """Write named boolean masks by detector bank to a NeXus file.
 
     See :py:func:`read_pixel_masks` for the layout of the file. Masks are stored as
     unsigned 8-bit integers, since HDF5 has no boolean type.
+
+    As in raw data files, the file records the instrument name in
+    ``/entry/instrument/name``, and the time and software that wrote it in the root
+    attributes ``file_time`` and ``creator``. Workflows do not read them.
 
     Parameters
     ----------
@@ -144,15 +156,21 @@ def write_pixel_masks(
     masks:
         Boolean masks by mask name and detector bank. Dimensions are named after the
         logical dimensions of the bank, and may be a subset of them, in any order.
+    instrument:
+        Name of the instrument, as in ``/entry/instrument/name`` of its raw data
+        files, for example ``'LOKI'``.
     """
-    with snx.File(filename, 'w') as file:
-        entry = file.create_class('entry', snx.NXentry)
-        instrument = entry.create_class('instrument', snx.NXinstrument)
+    with h5py.File(filename, 'w') as h5file:
+        h5file.attrs['file_time'] = datetime.now(UTC).isoformat(timespec='seconds')
+        h5file.attrs['creator'] = f'essreduce {__version__}'
+        entry = snx.File(h5file).create_class('entry', snx.NXentry)
+        nx_instrument = entry.create_class('instrument', snx.NXinstrument)
+        nx_instrument.create_field('name', instrument)
         collections = {}
         for name, banks in masks.items():
             for bank, mask in banks.items():
                 if bank not in collections:
-                    detector = instrument.create_class(bank, snx.NXdetector)
+                    detector = nx_instrument.create_class(bank, snx.NXdetector)
                     collections[bank] = detector.create_class('masks', snx.NXcollection)
                 dataset = collections[bank].create_field(
                     name, mask.values.astype('uint8')

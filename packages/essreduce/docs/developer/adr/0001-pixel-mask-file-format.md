@@ -20,9 +20,11 @@ The planned masking tool for LoKI works on tubes and straws of a bank, after the
 A mask file is an HDF5 file with the group structure of NeXus:
 
 ```text
+/                                  attributes file_time and creator
 /entry                             NXentry
     valid_from                     "2026-11-01T00:00:00Z", not read by workflows
     instrument                     NXinstrument
+        name                       "LOKI"
         loki_detector_0            NXdetector
             masks                  NXcollection
                 broken_tubes       uint8, HDF5 dimension labels ("tube",)
@@ -57,6 +59,10 @@ with h5py.File(path) as f:
   Each mask has its own dimensions, so a tube mask and a straw mask need not be combined into one array.
   The sizes are checked when masks are applied, because scipp ignores a mask with a dimension that the data lacks, without an error.
 - A file with several `NXentry` groups is an error, since the reader would use only one of them and leave pixels unmasked.
+- As in raw data files, `/entry/instrument/name` holds the name of the instrument, and the NeXus root attributes `file_time` and `creator` hold the time and the software that wrote the file.
+  Bank names alone do not always make the instrument obvious.
+  `file_time` gives a rough idea of whether a file may still be valid, also when it has no `valid_from`.
+  `write_pixel_masks` writes all three, and workflows do not read them.
 
 Workflows take a list of filenames and use the masks of all files.
 Two files with a mask of the same name are an error.

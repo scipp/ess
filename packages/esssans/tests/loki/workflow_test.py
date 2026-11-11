@@ -161,7 +161,7 @@ def test_loki_analytical_lookup_table_matches_simulated_source_pulse():
 def test_loki_workflow_reads_bool_masks_per_bank(tmp_path):
     path = tmp_path / 'masks.h5'
     mask = sc.array(dims=['tube'], values=[True, False])
-    write_pixel_masks(path, {'broken': {'loki_detector_1': mask}})
+    write_pixel_masks(path, {'broken': {'loki_detector_1': mask}}, instrument='LOKI')
     wf = loki.LokiWorkflow()
     wf[NeXusDetectorName] = 'loki_detector_1'
     wf[EmptyDetector[SampleRun]] = sc.DataArray(sc.zeros(sizes={'tube': 2}))
@@ -173,7 +173,7 @@ def test_loki_workflow_reads_bool_masks_per_bank(tmp_path):
 def test_loki_workflow_raises_if_mask_file_has_unknown_bank(tmp_path):
     path = tmp_path / 'masks.h5'
     mask = sc.array(dims=['tube'], values=[True, False])
-    write_pixel_masks(path, {'broken': {'loki_detector_99': mask}})
+    write_pixel_masks(path, {'broken': {'loki_detector_99': mask}}, instrument='LOKI')
     wf = loki.LokiWorkflow()
     wf[NeXusDetectorName] = 'loki_detector_1'
     wf[EmptyDetector[SampleRun]] = sc.DataArray(sc.zeros(sizes={'tube': 2}))
@@ -215,7 +215,7 @@ def test_bank_mask_gives_same_iofq_as_equivalent_id_file(
     assert 0 < masked_ids.size < ids.size
 
     bank_file = tmp_path / 'bank.nxs'
-    write_pixel_masks(bank_file, {'m': {'larmor_detector': mask}})
+    write_pixel_masks(bank_file, {'m': {'larmor_detector': mask}}, instrument='LARMOR')
     id_file = tmp_path / 'ids.h5'
     sc.io.save_hdf5(masked_ids, id_file)
 
@@ -232,7 +232,7 @@ def test_bool_mask_file_gives_same_masks_as_id_file(larmor_workflow, tmp_path):
     from_ids = next(iter(wf.compute(DetectorMasks).values()))
 
     path = tmp_path / 'masks.h5'
-    write_pixel_masks(path, {'m': {'larmor_detector': from_ids}})
+    write_pixel_masks(path, {'m': {'larmor_detector': from_ids}}, instrument='LARMOR')
     wf[PixelMaskFilenames] = [path]
 
     assert sc.identical(wf.compute(DetectorMasks)['m'], from_ids)
