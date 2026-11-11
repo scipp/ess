@@ -12,7 +12,6 @@ import scipp as sc
 import scippneutron as scn
 import scippnexus as snx
 from ess.sans.types import (
-    DetectorIDs,
     DetectorMasks,
     DetectorPixelShape,
     DetectorPositionOffset,
@@ -290,27 +289,15 @@ def lab_frame_transform() -> NeXusTransformation[snx.NXdetector, RunType]:
     )
 
 
-def get_detector_ids_from_sample_run(data: RawDetector[SampleRun]) -> DetectorIDs:
-    """Extract detector IDs from sample run.
-
-    This overrides the function in the masking module which gets the detector IDs from
-    the detector before loading event data. In this ISIS case files are loaded using
-    Mantid which does not load event separately, so we get IDs from the data.
-    """
-    return DetectorIDs(
-        data.coords[
-            'detector_number' if 'detector_number' in data.coords else 'detector_id'
-        ]
-    )
-
-
-def to_detector_mask_without_bank(ids: DetectorIDs, masks: PixelMasks) -> DetectorMasks:
+def to_detector_mask_without_bank(
+    detector: EmptyDetector[SampleRun], masks: PixelMasks
+) -> DetectorMasks:
     """Create detector masks from the pixel masks of the instrument.
 
     This overrides the function in the masking module, since files loaded using Mantid
     have no NeXus detector name. So mask files that give masks per bank are not usable.
     """
-    return DetectorMasks(to_detector_masks(masks, ids))
+    return DetectorMasks(to_detector_masks(masks, detector, id_coord='detector_id'))
 
 
 providers = (
@@ -324,7 +311,6 @@ providers = (
     get_detector_data,
     get_calibrated_isis_detector,
     get_calibrated_isis_monitor,
-    get_detector_ids_from_sample_run,
     to_detector_mask_without_bank,
     get_monitor_data,
     data_to_wavelength,

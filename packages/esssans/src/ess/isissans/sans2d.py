@@ -7,7 +7,6 @@ import scipp as sc
 from ess.sans import SansWorkflow
 from ess.sans.parameters import typical_outputs
 from ess.sans.types import (
-    DetectorIDs,
     DetectorMasks,
     EmptyDetector,
     PixelMaskFilenames,
@@ -57,7 +56,7 @@ def sample_holder_mask(
 
 
 def to_detector_masks(
-    ids: DetectorIDs,
+    detector: EmptyDetector[SampleRun],
     pixel_masks: PixelMasks,
     edge_mask: DetectorEdgeMask,
     holder_mask: SampleHolderMask,
@@ -66,8 +65,8 @@ def to_detector_masks(
 
     Parameters
     ----------
-    ids:
-        Array of detector IDs.
+    detector:
+        Detector of the sample run.
     pixel_masks:
         Pixel masks of the instrument.
     edge_mask:
@@ -80,7 +79,7 @@ def to_detector_masks(
     ValueError
         If a pixel mask has the name of a computed mask, which would replace it.
     """
-    masks = to_detector_mask_without_bank(ids, pixel_masks)
+    masks = to_detector_mask_without_bank(detector, pixel_masks)
     computed = {'edges': edge_mask, 'holder_mask': holder_mask}
     computed = {name: mask for name, mask in computed.items() if mask is not None}
     if clashes := masks.keys() & computed.keys():

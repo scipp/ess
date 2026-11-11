@@ -15,7 +15,6 @@ from ess.sans.types import (
     BeamCenter,
     CorrectedDetector,
     CorrectForGravity,
-    DetectorIDs,
     DetectorMasks,
     DimsToKeep,
     DirectBeam,
@@ -181,7 +180,8 @@ def test_detector_masks_default_to_computed_masks_only(pipeline):
 
 
 def test_mask_files_are_combined_with_computed_masks(pipeline, tmp_path):
-    detector_id = pipeline.compute(DetectorIDs).values[0]
+    detector = pipeline.compute(EmptyDetector[SampleRun])
+    detector_id = detector.coords['detector_id'].values[0]
     path = tmp_path / 'broken.xml'
     path.write_text(
         '<?xml version="1.0"?>\n<detector-masking><group>'
@@ -194,12 +194,15 @@ def test_mask_files_are_combined_with_computed_masks(pipeline, tmp_path):
 
 
 def test_pixel_mask_with_name_of_computed_mask_raises():
-    ids = sc.array(dims=['spectrum'], values=[1, 2], unit=None)
+    detector = sc.DataArray(
+        sc.zeros(sizes={'spectrum': 2}),
+        coords={'detector_id': sc.array(dims=['spectrum'], values=[1, 2], unit=None)},
+    )
     edge_mask = sc.array(dims=['spectrum'], values=[True, False])
     masked = sc.array(dims=['detector_id'], values=[1], unit=None)
     with pytest.raises(ValueError, match='edges'):
         sans2d.to_detector_masks(
-            DetectorIDs(ids),
+            EmptyDetector[SampleRun](detector),
             PixelMasks({'edges': masked}),
             sans2d.DetectorEdgeMask(edge_mask),
             sans2d.SampleHolderMask(None),

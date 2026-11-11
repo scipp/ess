@@ -184,10 +184,6 @@ OutFilename = NewType('OutFilename', str)
 PixelMaskFilenames = masking_t.PixelMaskFilenames
 PixelMasks = masking_t.PixelMasks
 
-DetectorIDs = NewType('DetectorIDs', sc.Variable)
-"""1-D variable listing all detector IDs."""
-
-
 DetectorMasks = NewType('DetectorMasks', dict[str, sc.Variable])
 """Masks for detector pixels"""
 

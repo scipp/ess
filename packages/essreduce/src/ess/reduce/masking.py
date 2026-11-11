@@ -82,47 +82,49 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
 
 def to_detector_masks(
     pixel_masks: PixelMasks,
-    ids: sc.Variable,
+    detector: sc.DataArray,
     bank: str | None = None,
     known_banks: Collection[str] | None = None,
+    id_coord: str = 'detector_number',
 ) -> dict[str, sc.Variable]:
     """Create boolean masks for the pixels of a detector bank.
 
     The masks use the logical dimensions of the bank, which are the dimensions of
-    ``ids``:
+    ``detector``:
 
     - Masks given per bank are selected by ``bank``. They keep their dimensions, which
-      may be a subset of those of ``ids``, and are transposed to the order of ``ids``.
+      may be a subset of those of ``detector``, and are transposed to the order of
+      ``detector``. Detector IDs are not used.
     - Masks given as a list of detector IDs, such as ISIS XML files, apply to any bank,
       since IDs identify a pixel. They are converted to a mask with the dimensions of
-      ``ids`` by looking up each pixel's ID in the list.
+      the ID coordinate of ``detector`` by looking up each pixel's ID in the list.
 
     Parameters
     ----------
     pixel_masks:
         Pixel masks of the instrument.
-    ids:
-        Detector IDs of the pixels.
+    detector:
+        Data of the detector bank, with its logical dimensions.
     bank:
         Name of the detector bank. Without it, masks given per bank raise an error.
     known_banks:
         Names of all banks of the instrument. If given, a file with masks for any other
         bank raises an error. A misspelled name would otherwise mask nothing.
+    id_coord:
+        Name of the coordinate of ``detector`` that holds the detector IDs. Only masks
+        given as a list of detector IDs use it.
     """
     masks = {}
     for name, content in pixel_masks.items():
         if isinstance(content, sc.Variable):
-            masked_ids = _validate_masked_ids(content, name)
-            masks[name] = sc.array(
-                dims=ids.dims, values=np.isin(ids.values, masked_ids.values)
-            )
+            masks[name] = _mask_from_ids(content, detector.coords[id_coord], name)
             continue
         if bank is None:
             raise ValueError(f"Mask '{name}' is given per bank, but no bank is known.")
         if known_banks is not None and (unknown := set(content) - set(known_banks)):
             raise ValueError(f"Mask '{name}' has unknown banks: {sorted(unknown)}.")
         if bank in content:
-            masks[name] = _align_bank_mask(content[bank], ids, name)
+            masks[name] = _align_bank_mask(content[bank], detector.sizes, name)
     return masks
 
 
@@ -250,22 +252,24 @@ def _read_bank_mask(field: snx.Field | snx.Group, filename: Path) -> sc.Variable
     return sc.array(dims=dims, values=values != 0)
 
 
-def _validate_masked_ids(masked_ids: sc.Variable, name: str) -> sc.Variable:
+def _mask_from_ids(masked_ids: sc.Variable, ids: sc.Variable, name: str) -> sc.Variable:
     if masked_ids.dtype not in ('int32', 'int64'):
         raise sc.DTypeError(
             f"Mask '{name}' must hold integer detector IDs, not {masked_ids.dtype}."
         )
-    return masked_ids
+    return sc.array(dims=ids.dims, values=np.isin(ids.values, masked_ids.values))
 
 
-def _align_bank_mask(mask: sc.Variable, ids: sc.Variable, name: str) -> sc.Variable:
+def _align_bank_mask(
+    mask: sc.Variable, sizes: Mapping[str, int], name: str
+) -> sc.Variable:
     if mask.dtype != 'bool':
         raise sc.DTypeError(f"Mask '{name}' must be boolean, not {mask.dtype}.")
     # Masks with a dimension that the data lacks would be ignored without an error.
-    if not mask.sizes.items() <= ids.sizes.items():
+    if not mask.sizes.items() <= sizes.items():
         raise sc.DimensionError(
             f"Mask '{name}' has sizes {mask.sizes}, which are not part of the sizes "
-            f"of the detector, {ids.sizes}."
+            f"of the detector, {sizes}."
         )
     # A mask file may use any order. DetectorMasks then has one layout for all of them.
-    return mask.transpose([dim for dim in ids.dims if dim in mask.dims])
+    return mask.transpose([dim for dim in sizes if dim in mask.dims])

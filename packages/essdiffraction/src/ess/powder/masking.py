@@ -31,7 +31,7 @@ def apply_masks(
         key = (
             set(out.coords.keys()) & {"detector_number", "detector_id", "spectrum"}
         ).pop()
-        out = out.assign_masks(to_detector_masks(pixel_masks, out.coords[key]))
+        out = out.assign_masks(to_detector_masks(pixel_masks, out, id_coord=key))
 
     for dim, mask in {
         "tof": tof_mask_func,

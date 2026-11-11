@@ -13,7 +13,6 @@ from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
-    DetectorIDs,
     DetectorMasks,
     EmptyDetector,
     Filename,
@@ -165,7 +164,7 @@ def test_loki_workflow_reads_bool_masks_per_bank(tmp_path):
     write_pixel_masks(path, {'broken': {'loki_detector_1': mask}})
     wf = loki.LokiWorkflow()
     wf[NeXusDetectorName] = 'loki_detector_1'
-    wf[DetectorIDs] = sc.array(dims=['tube'], values=[1, 2], unit=None)
+    wf[EmptyDetector[SampleRun]] = sc.DataArray(sc.zeros(sizes={'tube': 2}))
     wf[PixelMaskFilenames] = [path]
 
     assert sc.identical(wf.compute(DetectorMasks)['broken'], mask)
@@ -177,7 +176,7 @@ def test_loki_workflow_raises_if_mask_file_has_unknown_bank(tmp_path):
     write_pixel_masks(path, {'broken': {'loki_detector_99': mask}})
     wf = loki.LokiWorkflow()
     wf[NeXusDetectorName] = 'loki_detector_1'
-    wf[DetectorIDs] = sc.array(dims=['tube'], values=[1, 2], unit=None)
+    wf[EmptyDetector[SampleRun]] = sc.DataArray(sc.zeros(sizes={'tube': 2}))
     wf[PixelMaskFilenames] = [path]
 
     with pytest.raises(ValueError, match='loki_detector_99'):
@@ -200,7 +199,7 @@ def test_bank_mask_gives_same_iofq_as_equivalent_id_file(
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
-    ids = wf.compute(DetectorIDs)
+    ids = wf.compute(EmptyDetector[SampleRun]).coords['detector_number']
 
     shape = [ids.sizes[dim] for dim in dims]
     mask = sc.array(
