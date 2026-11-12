@@ -208,26 +208,16 @@ def test_StreamProcessor_with_bypass() -> None:
 
 
 def test_StreamProcessor_without_bypass_raises() -> None:
-    def _make_static_a() -> StaticA:
-        _make_static_a.call_count += 1
-        return StaticA(2.0)
-
-    _make_static_a.call_count = 0
-
     base_workflow = sciline.Pipeline(
-        (_make_static_a, make_accum_a, make_accum_b, make_target)
+        (make_static_a, make_accum_a, make_accum_b, make_target)
     )
-
-    streaming_wf = streaming.StreamProcessor(
-        base_workflow=base_workflow,
-        dynamic_keys=(DynamicA, DynamicB),
-        target_keys=(Target,),
-        accumulators=(AccumA,),  # Note: No AccumB
-    )
-    streaming_wf.accumulate({DynamicA: 1, DynamicB: 4})
-    # Sciline passes `None` to the provider that needs AccumB.
-    with pytest.raises(TypeError, match='unsupported operand type'):
-        _ = streaming_wf.finalize()
+    with pytest.raises(ValueError, match=r'dynamic keys .*DynamicB.* allow_bypass'):
+        streaming.StreamProcessor(
+            base_workflow=base_workflow,
+            dynamic_keys=(DynamicA, DynamicB),
+            target_keys=(Target,),
+            accumulators=(AccumA,),  # Note: No AccumB
+        )
 
 
 def test_StreamProcessor_calls_providers_after_accumulators_only_when_finalizing() -> (
@@ -539,7 +529,9 @@ def test_StreamProcessor_raises_when_invalid_context_key_provided() -> None:
         streaming_wf.set_context({NonContext: sc.scalar(5)})
 
 
-def test_StreamProcessor_context_only_recomputes_descendants() -> None:
+def test_StreamProcessor_context_update_recomputes_all_context_dependent_nodes() -> (
+    None
+):
     Streamed = NewType('Streamed', int)
     ContextInputA = NewType('ContextInputA', int)
     ContextInputB = NewType('ContextInputB', int)
@@ -579,15 +571,14 @@ def test_StreamProcessor_context_only_recomputes_descendants() -> None:
     assert process_a.call_count == 1
     assert process_b.call_count == 1
 
-    # Update only ContextInputA
+    # Everything derived from the context is computed together, so updating one
+    # context key recomputes nodes depending only on the other.
     streaming_wf.set_context({ContextInputA: sc.scalar(3)})
     assert process_a.call_count == 2
-    assert process_b.call_count == 1  # Not called again
-
-    # Update only ContextInputB
-    streaming_wf.set_context({ContextInputB: sc.scalar(4)})
-    assert process_a.call_count == 2  # Not called again
     assert process_b.call_count == 2
+
+    streaming_wf.accumulate({Streamed: sc.scalar(1)})
+    assert sc.identical(streaming_wf.finalize()[Output], sc.scalar(1 + 3 * 2 + 2 * 3))
 
 
 def test_StreamProcessor_context_retained_after_clear() -> None:
@@ -1171,3 +1162,32 @@ def test_StreamProcessor_with_bypass_releases_chunks_not_read_at_finalize() -> N
     assert ref_bypassed() is not None
     result = streaming_wf.finalize()
     assert sc.identical(result[Target], sc.scalar(2 * 1.0 / 4.0))
+
+
+def test_StreamProcessor_names_context_keys_not_set_yet() -> None:
+    Streamed = NewType('Streamed', int)
+    ContextInputA = NewType('ContextInputA', int)
+    ContextInputB = NewType('ContextInputB', int)
+    Combined = NewType('Combined', int)
+    Output = NewType('Output', int)
+
+    def combine(a: ContextInputA, b: ContextInputB) -> Combined:
+        return Combined(a + b)
+
+    def process(streamed: Streamed, combined: Combined) -> Output:
+        return Output(streamed + combined)
+
+    wf = sciline.Pipeline((combine, process))
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=wf,
+        dynamic_keys=(Streamed,),
+        context_keys=(ContextInputA, ContextInputB),
+        target_keys=(Output,),
+        accumulators=(Output,),
+    )
+    streaming_wf.set_context({ContextInputA: 1})
+    with pytest.raises(ValueError, match=r'Context keys \[.*ContextInputB\] have not'):
+        streaming_wf.accumulate({Streamed: 2})
+    streaming_wf.set_context({ContextInputB: 3})
+    streaming_wf.accumulate({Streamed: 2})
+    assert streaming_wf.finalize()[Output] == 6

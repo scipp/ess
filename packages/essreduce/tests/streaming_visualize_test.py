@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
-from typing import Generic, NewType, TypeVar
+from typing import NewType
 
 import graphviz
 import sciline
@@ -49,10 +49,30 @@ def make_context_dependent(ctx: Context1) -> StaticB:
     return StaticB(ctx * 2)
 
 
-class TestClassifyNodes:
-    """Tests for the _classify_nodes method."""
+def node_style(source: str, key: type) -> str:
+    """The last statement for the node of ``key``, which sets its style."""
+    return next(
+        line
+        for line in reversed(source.splitlines())
+        if line.lstrip('\t').startswith(f'{key.__name__} [')
+    )
 
-    def test_static_nodes_have_no_dynamic_or_context_ancestors(self) -> None:
+
+STATIC = 'fillcolor="#e8e8e8"'
+CACHED = 'penwidth=2.5'
+DYNAMIC_KEY = 'fillcolor="#90ee90"'
+DYNAMIC = 'fillcolor="#d4f4d4"'
+CONTEXT_KEY = 'fillcolor="#87CEEB"'
+CONTEXT_DEPENDENT = 'fillcolor="#d4e8f4"'
+ACCUMULATOR = 'shape=cylinder'
+FINALIZE = 'fillcolor="#DDA0DD"'
+TARGET = 'peripheries=2'
+
+
+class TestNodeStyles:
+    """Tests that nodes are styled by when they are computed."""
+
+    def test_static_nodes_and_cached_nodes(self) -> None:
         workflow = sciline.Pipeline(
             (make_static_a, make_static_b, make_intermediate, make_accum_a, make_target)
         )
@@ -65,14 +85,15 @@ class TestClassifyNodes:
             target_keys=(Target,),
             accumulators=(AccumA,),
         )
+        source = processor.visualize().source
 
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
+        # StaticB is cached since the per-chunk part reads it, StaticA is not.
+        assert STATIC in node_style(source, StaticA)
+        assert CACHED not in node_style(source, StaticA)
+        assert STATIC in node_style(source, StaticB)
+        assert CACHED in node_style(source, StaticB)
 
-        assert StaticA in classifications['static']
-        assert StaticB in classifications['static']
-
-    def test_dynamic_keys_are_classified(self) -> None:
+    def test_dynamic_keys_and_nodes(self) -> None:
         workflow = sciline.Pipeline(
             (
                 make_static_a,
@@ -92,17 +113,13 @@ class TestClassifyNodes:
             target_keys=(Target,),
             accumulators=(AccumA, AccumB),
         )
+        source = processor.visualize().source
 
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
+        assert DYNAMIC_KEY in node_style(source, DynamicA)
+        assert DYNAMIC_KEY in node_style(source, DynamicB)
+        assert DYNAMIC in node_style(source, Intermediate)
 
-        assert DynamicA in classifications['dynamic_keys']
-        assert DynamicB in classifications['dynamic_keys']
-        # Dynamic keys should not be in dynamic_nodes
-        assert DynamicA not in classifications['dynamic_nodes']
-        assert DynamicB not in classifications['dynamic_nodes']
-
-    def test_dynamic_nodes_are_descendants_of_dynamic_keys(self) -> None:
+    def test_accumulator_finalize_and_target_nodes(self) -> None:
         workflow = sciline.Pipeline(
             (make_static_a, make_static_b, make_intermediate, make_accum_a, make_target)
         )
@@ -115,98 +132,14 @@ class TestClassifyNodes:
             target_keys=(Target,),
             accumulators=(AccumA,),
         )
+        source = processor.visualize().source
 
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
+        assert ACCUMULATOR in node_style(source, AccumA)
+        assert DYNAMIC not in node_style(source, AccumA)
+        assert FINALIZE in node_style(source, Target)
+        assert TARGET in node_style(source, Target)
 
-        # Intermediate depends on DynamicA, so it's a dynamic node
-        assert Intermediate in classifications['dynamic_nodes']
-
-    def test_accumulator_keys_are_classified(self) -> None:
-        workflow = sciline.Pipeline(
-            (make_static_a, make_static_b, make_intermediate, make_accum_a, make_target)
-        )
-        workflow[DynamicA] = None
-        workflow[AccumB] = None
-
-        processor = streaming.StreamProcessor(
-            base_workflow=workflow,
-            dynamic_keys=(DynamicA,),
-            target_keys=(Target,),
-            accumulators=(AccumA,),
-        )
-
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
-
-        assert AccumA in classifications['accumulator_keys']
-        # Accumulators should not be in dynamic_nodes
-        assert AccumA not in classifications['dynamic_nodes']
-
-    def test_finalize_nodes_are_downstream_of_accumulators(self) -> None:
-        workflow = sciline.Pipeline(
-            (make_static_a, make_static_b, make_intermediate, make_accum_a, make_target)
-        )
-        workflow[DynamicA] = None
-        workflow[AccumB] = None
-
-        processor = streaming.StreamProcessor(
-            base_workflow=workflow,
-            dynamic_keys=(DynamicA,),
-            target_keys=(Target,),
-            accumulators=(AccumA,),
-        )
-
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
-
-        # Target depends on AccumA, so it's computed in finalize
-        assert Target in classifications['finalize_nodes']
-        # Target is also a target key
-        assert Target in classifications['target_keys']
-
-    def test_target_keys_are_classified(self) -> None:
-        workflow = sciline.Pipeline(
-            (make_static_a, make_static_b, make_intermediate, make_accum_a, make_target)
-        )
-        workflow[DynamicA] = None
-        workflow[AccumB] = None
-
-        processor = streaming.StreamProcessor(
-            base_workflow=workflow,
-            dynamic_keys=(DynamicA,),
-            target_keys=(Target,),
-            accumulators=(AccumA,),
-        )
-
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
-
-        assert Target in classifications['target_keys']
-
-    def test_context_keys_are_classified(self) -> None:
-        workflow = sciline.Pipeline((make_context_dependent, make_intermediate))
-        workflow[DynamicA] = None
-        workflow[Context1] = None
-
-        processor = streaming.StreamProcessor(
-            base_workflow=workflow,
-            dynamic_keys=(DynamicA,),
-            context_keys=(Context1,),
-            target_keys=(Intermediate,),
-            accumulators=(Intermediate,),
-        )
-
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
-
-        assert Context1 in classifications['context_keys']
-        assert Context1 not in classifications['context_dependent']
-
-    def test_context_dependent_nodes_are_downstream_of_context_not_dynamic(
-        self,
-    ) -> None:
-        # Build a workflow where StaticB depends on Context1 but not on dynamic keys
+    def test_context_keys_and_context_dependent_nodes(self) -> None:
         def from_context(ctx: Context1) -> StaticB:
             return StaticB(ctx)
 
@@ -214,8 +147,6 @@ class TestClassifyNodes:
             return AccumA(s + d)
 
         workflow = sciline.Pipeline((from_context, from_static_and_dynamic))
-        workflow[DynamicA] = None
-        workflow[Context1] = None
 
         processor = streaming.StreamProcessor(
             base_workflow=workflow,
@@ -224,175 +155,25 @@ class TestClassifyNodes:
             target_keys=(AccumA,),
             accumulators=(AccumA,),
         )
+        source = processor.visualize().source
 
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
+        assert CONTEXT_KEY in node_style(source, Context1)
+        assert CONTEXT_DEPENDENT in node_style(source, StaticB)
+        # AccumA depends on both context and dynamic, so it is computed per chunk
+        assert CONTEXT_DEPENDENT not in node_style(source, AccumA)
+        assert ACCUMULATOR in node_style(source, AccumA)
 
-        # StaticB depends on Context1 but not on DynamicA
-        assert StaticB in classifications['context_dependent']
-        # AccumA depends on both context and dynamic, so it's dynamic
-        assert AccumA not in classifications['context_dependent']
-
-    def test_nodes_not_in_graph_are_excluded(self) -> None:
+    def test_unused_dynamic_key_is_not_drawn(self) -> None:
         workflow = sciline.Pipeline((make_static_a,))
 
         processor = streaming.StreamProcessor(
             base_workflow=workflow,
-            dynamic_keys=(DynamicA,),  # Not in graph
+            dynamic_keys=(DynamicA,),
             target_keys=(StaticA,),
             accumulators=(),
         )
 
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
-
-        # DynamicA is not in the graph, so it shouldn't appear
-        assert DynamicA not in classifications['dynamic_keys']
-
-    def test_cached_keys_are_subset_of_static_at_dynamic_boundary(self) -> None:
-        """Cached keys are the static nodes directly feeding into dynamic nodes."""
-        workflow = sciline.Pipeline(
-            (make_static_a, make_static_b, make_intermediate, make_accum_a, make_target)
-        )
-        workflow[DynamicA] = None
-        workflow[AccumB] = None
-
-        processor = streaming.StreamProcessor(
-            base_workflow=workflow,
-            dynamic_keys=(DynamicA,),
-            target_keys=(Target,),
-            accumulators=(AccumA,),
-        )
-
-        graph = workflow.underlying_graph
-        classifications = processor._classify_nodes(graph)
-
-        # StaticB is cached because it's directly upstream of the dynamic node
-        assert StaticB in classifications['cached_keys']
-        # StaticA is NOT cached - it's a dependency of StaticB but not at the boundary
-        assert StaticA not in classifications['cached_keys']
-        # Both are still static
-        assert StaticA in classifications['static']
-        assert StaticB in classifications['static']
-
-
-class TestFormatKeyForGraphviz:
-    """Tests for the _format_key_for_graphviz helper."""
-
-    def test_simple_newtype(self) -> None:
-        result = streaming._format_key_for_graphviz(DynamicA)
-        assert result == 'DynamicA'
-
-    def test_generic_type(self) -> None:
-        T = TypeVar('T')
-
-        class Container(Generic[T]):
-            pass
-
-        result = streaming._format_key_for_graphviz(Container[int])
-        assert result == 'Container[int]'
-
-    def test_nested_generic(self) -> None:
-        T = TypeVar('T')
-
-        class Outer(Generic[T]):
-            pass
-
-        class Inner(Generic[T]):
-            pass
-
-        result = streaming._format_key_for_graphviz(Outer[Inner[int]])
-        assert result == 'Outer[Inner[int]]'
-
-
-class TestGetNodeStyle:
-    """Tests for the _get_node_style helper."""
-
-    def test_returns_empty_for_unclassified_node(self) -> None:
-        classifications = {
-            'static': set(),
-            'cached_keys': set(),
-            'dynamic_keys': set(),
-            'dynamic_nodes': set(),
-            'context_keys': set(),
-            'context_dependent': set(),
-            'accumulator_keys': set(),
-            'target_keys': set(),
-            'finalize_nodes': set(),
-        }
-        result = streaming._get_node_style('unknown', classifications)
-        assert result == {}
-
-    def test_returns_style_for_static_node(self) -> None:
-        classifications = {
-            'static': {StaticA},
-            'cached_keys': set(),
-            'dynamic_keys': set(),
-            'dynamic_nodes': set(),
-            'context_keys': set(),
-            'context_dependent': set(),
-            'accumulator_keys': set(),
-            'target_keys': set(),
-            'finalize_nodes': set(),
-        }
-        result = streaming._get_node_style(StaticA, classifications)
-        assert result['fillcolor'] == '#e8e8e8'
-        assert result['style'] == 'filled'
-
-    def test_merges_styles_for_multiple_categories(self) -> None:
-        # A node that is both an accumulator and a target
-        classifications = {
-            'static': set(),
-            'cached_keys': set(),
-            'dynamic_keys': set(),
-            'dynamic_nodes': set(),
-            'context_keys': set(),
-            'context_dependent': set(),
-            'accumulator_keys': {AccumA},
-            'target_keys': {AccumA},
-            'finalize_nodes': set(),
-        }
-        result = streaming._get_node_style(AccumA, classifications)
-        # Should have accumulator style (orange, cylinder)
-        assert result['fillcolor'] == '#FFB347'
-        assert result['shape'] == 'cylinder'
-        # Should also have target style (double border)
-        assert result['peripheries'] == '2'
-
-    def test_higher_priority_overrides_lower(self) -> None:
-        # Dynamic key takes precedence over static for fill color
-        classifications = {
-            'static': {DynamicA},  # Lower priority
-            'cached_keys': set(),
-            'dynamic_keys': {DynamicA},  # Higher priority
-            'dynamic_nodes': set(),
-            'context_keys': set(),
-            'context_dependent': set(),
-            'accumulator_keys': set(),
-            'target_keys': set(),
-            'finalize_nodes': set(),
-        }
-        result = streaming._get_node_style(DynamicA, classifications)
-        # Dynamic key color should win
-        assert result['fillcolor'] == '#90EE90'
-
-    def test_cached_keys_have_thick_border(self) -> None:
-        classifications = {
-            'static': {StaticB},
-            'cached_keys': {StaticB},  # StaticB is cached
-            'dynamic_keys': set(),
-            'dynamic_nodes': set(),
-            'context_keys': set(),
-            'context_dependent': set(),
-            'accumulator_keys': set(),
-            'target_keys': set(),
-            'finalize_nodes': set(),
-        }
-        result = streaming._get_node_style(StaticB, classifications)
-        # Should have gray fill (from static/cached)
-        assert result['fillcolor'] == '#e8e8e8'
-        # Should have thick border (from cached_keys)
-        assert result['penwidth'] == '2.5'
+        assert 'DynamicA' not in processor.visualize().source
 
 
 class TestVisualize:
@@ -599,6 +380,5 @@ class TestVisualize:
         source = result.source
 
         # Should have 'Static (cached)' but not standalone 'Static'
-        assert 'Static (cached)' in source
-        # The legend_static node should not be present
-        assert 'legend_static' not in source
+        assert 'label="Static (cached)"' in source
+        assert 'label=Static ' not in source
