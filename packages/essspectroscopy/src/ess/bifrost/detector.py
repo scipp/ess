@@ -199,7 +199,12 @@ def _fold_detector_to_arc_and_channel(
             *(d for d in folded.dims if d not in detector_dims),
             *detector_dims,
         ]
-        return folded.transpose(target_dims).copy()
+        folded = folded.transpose(target_dims).copy()
+        for name, coord in folded.coords.items():
+            folded.coords[name] = coord.transpose(
+                [d for d in target_dims if d in coord.dims]
+            ).copy()
+        return folded
     else:
         # Not a rectangular subset, cannot fold.
         detector.coords['arc'] = sc.array(dims=['triplet'], values=arcs, unit=None)
