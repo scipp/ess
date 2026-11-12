@@ -20,6 +20,7 @@ from ess.spectroscopy.types import (
     Analyzers,
     DataAtSample,
     ElasticMonitor,
+    EmptyDetector,
     EnergyQDetector,
     Filename,
     LookupTableFilename,
@@ -210,6 +211,21 @@ def test_simulation_workflow_produces_the_same_data_as_before(
         expected.bins.data,
         atol=sc.scalar(1e-15, unit=expected.unit),
     )
+
+
+def test_calibrated_detector_has_contiguous_detector_number() -> None:
+    # This test requires all detector pixels.
+    # (the `workflow` fixture only uses the first 10.)
+    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+
+    detector = workflow.compute(EmptyDetector[SampleRun])
+    detector_number = detector.coords['detector_number']
+    # Both the memory layout and the actual values should be contiguous
+    assert detector_number.values.flags['C_CONTIGUOUS']
+
+    flat = detector_number.flatten(to='x')
+    sc.testing.assert_identical(flat, sc.arange('x', 1, 1 + len(flat), unit=None))
 
 
 @pytest.fixture
