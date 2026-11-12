@@ -146,8 +146,9 @@ def write_pixel_masks(
     unsigned 8-bit integers, since HDF5 has no boolean type.
 
     As in raw data files, the file records the instrument name in
-    ``/entry/instrument/name``, and the time and software that wrote it in the root
-    attributes ``file_time`` and ``creator``. Workflows do not read them.
+    ``/entry/instrument/name``, and the time, software and software version that wrote
+    it in the root attributes ``file_time``, ``creator`` and ``creator_version``.
+    Workflows do not read them.
 
     Parameters
     ----------
@@ -162,7 +163,8 @@ def write_pixel_masks(
     """
     with h5py.File(filename, 'w') as h5file:
         h5file.attrs['file_time'] = datetime.now(UTC).isoformat(timespec='seconds')
-        h5file.attrs['creator'] = f'essreduce {__version__}'
+        h5file.attrs['creator'] = 'essreduce'
+        h5file.attrs['creator_version'] = __version__
         entry = snx.File(h5file).create_class('entry', snx.NXentry)
         nx_instrument = entry.create_class('instrument', snx.NXinstrument)
         nx_instrument.create_field('name', instrument)

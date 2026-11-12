@@ -9,6 +9,7 @@ import pytest
 import scipp as sc
 import scippnexus as snx
 
+from ess.reduce import __version__
 from ess.reduce.masking import (
     PixelMaskFilenames,
     PixelMasks,
@@ -193,7 +194,8 @@ def test_write_records_instrument_creator_and_time(tmp_path: Path) -> None:
     write_pixel_masks(path, {'m': {'bank_0': mask}}, instrument='LOKI')
     with h5py.File(path) as file:
         assert file['entry/instrument/name'][()] == b'LOKI'
-        assert file.attrs['creator'].startswith('essreduce ')
+        assert file.attrs['creator'] == 'essreduce'
+        assert file.attrs['creator_version'] == __version__
         assert before <= datetime.fromisoformat(file.attrs['file_time'])
 
 
