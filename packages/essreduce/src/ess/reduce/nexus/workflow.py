@@ -21,7 +21,6 @@ from scippneutron.metadata import RadiationProbe, SourceType
 from . import _nexus_loader as nexus
 from .types import (
     COMPONENT_CONSTRAINTS,
-    AllNeXusComponents,
     Beamline,
     Component,
     DetectorBankSizes,
@@ -35,13 +34,19 @@ from .types import (
     Measurement,
     MonitorPositionOffset,
     MonitorType,
-    NeXusAllComponentLocationSpec,
     NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
     NeXusData,
     NeXusDataLocationSpec,
     NeXusFileSpec,
+    NeXusMultiComponent,
+    NeXusMultiComponentLocationSpec,
+    NeXusMultiData,
+    NeXusMultiDataLocationSpec,
+    NeXusMultiNames,
+    NeXusMultiTransformation,
+    NeXusMultiTransformationChain,
     NeXusName,
     NeXusTransformation,
     NeXusTransformationChain,
@@ -54,6 +59,7 @@ from .types import (
     RunType,
     Source,
     TimeInterval,
+    TransformationOverrides,
     TransformationTimeFilter,
     UniqueComponent,
 )
@@ -112,11 +118,17 @@ def component_spec_by_name(
     )
 
 
-def all_component_spec(
+def multi_component_spec(
     filename: NeXusFileSpec[RunType],
-) -> NeXusAllComponentLocationSpec[Component, RunType]:
-    """Create a location spec for all components of a class in a NeXus file."""
-    return NeXusAllComponentLocationSpec[Component, RunType](filename=filename.value)
+    names: NeXusMultiNames[Component],
+) -> NeXusMultiComponentLocationSpec[Component, RunType]:
+    """Create a location spec for multiple components of a class in a NeXus file."""
+    if not isinstance(names, NeXusMultiNames):
+        # E.g., when the user sets {NeXusMultiNames[Component]: ['a', 'b']}
+        names = NeXusMultiNames[Component](names)
+    return NeXusMultiComponentLocationSpec[Component, RunType](
+        filename=filename.value, location_names=tuple(names) if names.has_data else None
+    )
 
 
 def unique_component_spec(
@@ -152,6 +164,19 @@ def data_by_name(
     """
     return NeXusDataLocationSpec[Component, RunType](
         filename=filename.value, component_name=name, selection=selection.value
+    )
+
+
+def multi_data_spec(
+    filename: NeXusFileSpec[RunType],
+    names: NeXusMultiNames[Component],
+) -> NeXusMultiDataLocationSpec[Component, RunType]:
+    """Create a location spec for data of multiple class instances in a NeXus file."""
+    if not isinstance(names, NeXusMultiNames):
+        # E.g., when the user sets {NeXusMultiNames[Component]: ['a', 'b']}
+        names = NeXusMultiNames[Component](names)
+    return NeXusMultiDataLocationSpec[Component, RunType](
+        filename=filename.value, location_names=tuple(names) if names.has_data else None
     )
 
 
@@ -237,10 +262,10 @@ def load_nexus_component(
     )
 
 
-def load_all_nexus_components(
-    location: NeXusAllComponentLocationSpec[Component, RunType],
+def load_multi_nexus_components(
+    location: NeXusMultiComponentLocationSpec[Component, RunType],
     nx_class: NeXusClass[Component],
-) -> AllNeXusComponents[Component, RunType]:
+) -> NeXusMultiComponent[Component, RunType]:
     """
     Load all NeXus components of one class from one entry a file.
 
@@ -253,8 +278,10 @@ def load_all_nexus_components(
     nx_class:
         NX_class to identify the components.
     """
-    return AllNeXusComponents[Component, RunType](
-        nexus.load_all_components(location, nx_class=nx_class, definitions=definitions)
+    return NeXusMultiComponent[Component, RunType](
+        nexus.load_multi_components(
+            location, nx_class=nx_class, definitions=definitions
+        )
     )
 
 
@@ -280,8 +307,51 @@ def load_nexus_data(
     )
 
 
+def load_multi_nexus_data(
+    location: NeXusMultiDataLocationSpec[Component, RunType],
+    nx_class: NeXusClass[Component],
+) -> NeXusMultiData[Component, RunType]:
+    """Load data from multiple components of a given class."""
+    return NeXusMultiData[Component, RunType](
+        nexus.load_multi_data(
+            file_path=location.filename,
+            selection=location.selection,
+            nx_class=nx_class,
+            names=location.location_names,
+            entry_name=location.entry_name,
+            definitions=definitions,
+        )
+    )
+
+
+def _check_overrides_in_chains(
+    overrides: TransformationOverrides[Component, RunType],
+    chains: Iterable[snx.TransformationChain],
+) -> None:
+    """Raise if an override does not apply to any of the chains, e.g., due to a typo."""
+    available = {path for chain in chains for path in chain.transformations}
+    if missing := overrides.keys() - available:
+        raise KeyError(
+            f"Transformation overrides {sorted(missing)} not found in any chain. "
+            f"Available entries: {sorted(available)}"
+        )
+
+
+def _apply_overrides(
+    chain: snx.TransformationChain,
+    overrides: TransformationOverrides[Component, RunType],
+) -> snx.TransformationChain:
+    # The chain belongs to a component, which may be a cached node of the pipeline.
+    chain = deepcopy(chain)
+    for path, transformation in chain.transformations.items():
+        if path in overrides:
+            transformation.value = overrides[path]
+    return chain
+
+
 def get_transformation_chain(
     component: NeXusComponent[Component, RunType],
+    overrides: TransformationOverrides[Component, RunType],
 ) -> NeXusTransformationChain[Component, RunType]:
     """
     Extract the transformation chain from a NeXus component group.
@@ -290,9 +360,38 @@ def get_transformation_chain(
     ----------
     component:
         NeXus component group.
+    overrides:
+        Values to use in place of entries of the chain.
+        Raises :class:`KeyError` if the chain does not contain one of the entries.
     """
     chain = component['depends_on']
-    return NeXusTransformationChain[Component, RunType](chain)
+    _check_overrides_in_chains(overrides, [chain])
+    return NeXusTransformationChain[Component, RunType](
+        _apply_overrides(chain, overrides)
+    )
+
+
+def get_multi_transformation_chain(
+    components: NeXusMultiComponent[Component, RunType],
+    overrides: TransformationOverrides[Component, RunType],
+) -> NeXusMultiTransformationChain[Component, RunType]:
+    """
+    Extract the transformation chain from a NeXus component group.
+
+    Parameters
+    ----------
+    components:
+        Loaded NeXus components.
+    overrides:
+        Values to use in place of entries of the chains.
+        Each entry only applies to the chains that contain it.
+        Raises :class:`KeyError` if none of the chains contain one of the entries.
+    """
+    chains = components.apply(lambda component: component['depends_on'])
+    _check_overrides_in_chains(overrides, chains.values())
+    return NeXusMultiTransformationChain[Component, RunType](
+        chains.apply(lambda chain: _apply_overrides(chain, overrides))
+    )
 
 
 def reject_time_dependent_transform(
@@ -380,6 +479,35 @@ def to_transformation(
         )
 
     return NeXusTransformation[Component, RunType].from_chain(chain)
+
+
+def to_multi_transformation(
+    chains: NeXusMultiTransformationChain[Component, RunType],
+    interval: TimeInterval[RunType],
+    time_filter: TransformationTimeFilter[
+        Component, RunType
+    ] = reject_time_dependent_transform,
+) -> NeXusMultiTransformation[Component, RunType]:
+    """Convert each transformation chain into a single transformation matrix.
+
+    If one or more transformations in the chain are time-dependent, the time interval
+    is used to select a specific time point. If the interval is not a single time point,
+    ``time_filter`` is applied to the transformation. By default, this will raise an
+    exception. Provide a different filter to customize how time-dependence is handled.
+
+    Parameters
+    ----------
+    chains:
+        Transformation chains.
+    interval:
+        Time interval to select from the transformation chain.
+    time_filter:
+        Callable to apply to time-dependent transformations.
+        Defaults to raising a :class:`ValueError`.
+    """
+    return NeXusMultiTransformation[Component, RunType](
+        chains.apply(lambda chain: to_transformation(chain, interval, time_filter))
+    )
 
 
 def compute_position(
@@ -551,7 +679,7 @@ def assemble_monitor_data(
 
 
 def parse_raw_choppers(
-    choppers: AllNeXusComponents[snx.NXdisk_chopper, RunType],
+    choppers: NeXusMultiComponent[snx.NXdisk_chopper, RunType],
 ) -> RawChoppers[RunType]:
     """Convert the NeXus representation of a chopper to ours.
 
@@ -816,16 +944,21 @@ _common_providers = (
     full_time_interval,
     component_spec_by_name,
     unique_component_spec,  # after component_spec_by_name, partially overrides
-    all_component_spec,
+    multi_component_spec,
+    multi_data_spec,
     get_transformation_chain,
+    get_multi_transformation_chain,
     to_transformation,
+    to_multi_transformation,
     compute_position,
     compute_dynamic_position,
     load_nexus_data,
     load_nexus_component,
     load_proton_charge,
-    load_all_nexus_components,
+    load_multi_nexus_components,
+    load_multi_nexus_data,
     data_by_name,
+    nx_class_for_crystal,
     nx_class_for_detector,
     nx_class_for_monitor,
     nx_class_for_source,
@@ -866,6 +999,7 @@ def LoadMonitorWorkflow(
         params={
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
+            TransformationOverrides: {},
         },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types
@@ -884,6 +1018,7 @@ def LoadDetectorWorkflow(
             DetectorBankSizes: DetectorBankSizes({}),
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
+            TransformationOverrides: {},
         },
         constraints=_gather_constraints(run_types=run_types, monitor_types=[]),
     )
@@ -934,8 +1069,10 @@ def GenericNeXusWorkflow(
         ),
         params={
             DetectorBankSizes: DetectorBankSizes({}),
+            NeXusMultiNames: NeXusMultiNames(None),
             PreopenNeXusFile: PreopenNeXusFile(False),
             TransformationTimeFilter: reject_time_dependent_transform,
+            TransformationOverrides: {},
         },
         constraints=_gather_constraints(
             run_types=run_types, monitor_types=monitor_types

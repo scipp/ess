@@ -7,7 +7,6 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess.powder import providers as powder_providers
-from ess.powder import with_pixel_mask_filenames
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
     AccumulatedProtonCharge,
@@ -19,7 +18,6 @@ from ess.powder.types import (
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     Measurement,
-    PixelMaskFilename,
     Position,
     ReducerSoftware,
     SampleRun,
@@ -32,7 +30,6 @@ from ess.powder.types import (
 from scippneutron.metadata import Software
 
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
-from ess.reduce.parameter import parameter_mappers
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
@@ -148,8 +145,6 @@ _cif_providers = (
     prepare_reduced_tof_cif,
     prepare_reduced_empty_can_subtracted_tof_cif,
 )
-
-parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
 
 
 def default_parameters() -> dict:

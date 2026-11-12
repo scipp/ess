@@ -35,11 +35,11 @@ class SampleSurfaceNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
 
 
 class UpstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Open upstream slit-channel names mapped to centers in global coordinates."""
+    """Upstream beam names mapped to fixed slit centers in global coordinates."""
 
 
 class DownstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Open downstream slit-channel names mapped to centers in global coordinates."""
+    """Downstream beam names mapped to fixed slit centers in global coordinates."""
 
 
 class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
@@ -48,4 +48,24 @@ class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
     Select corresponding reflected and direct peaks separately for SampleRun and
     ReferenceRun, for example using ``scattering_angle`` and ``height``.
     An empty dictionary explicitly selects the entire detector.
+    """
+
+
+class IncidentAngleGraph(sciline.Scope[RunType, dict], dict):
+    """Coordinate graph fragment defining how incident angles are assigned."""
+
+
+class ShutterPositions(sciline.Scope[RunType, dict], dict):
+    """Incident beam names mapped to fixed shutter positions in global coordinates.
+
+    Keys match UpstreamSlitCenters and DownstreamSlitCenters. Each beam has one
+    shutter, whose position is independent of the slit centers used for angles.
+    """
+
+
+class ShutterStatusLogs(sciline.Scope[RunType, dict], dict):
+    """Shutter identifiers mapped to status logs.
+
+    Each log contains boolean data (True means open, False means closed) and a
+    datetime ``time`` coordinate.
     """
