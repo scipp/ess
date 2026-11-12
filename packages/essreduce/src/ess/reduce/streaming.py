@@ -297,16 +297,17 @@ class StreamProcessor:
     that everything depending on neither context nor chunks is computed once, at
     construction:
 
-    - The context stage computes, from the context keys, what the other stages read
-      that depends on the context. It runs when the context changes, and its results
-      are held until the next change.
+    - Context stages compute, from the context keys, what the other stages read that
+      depends on the context. There is one per group of values that depend on the
+      same context keys, so that updating a context key recomputes only what depends
+      on it. Their results are held until the next change.
     - One chunk stage per group of accumulators that depend on the same dynamic keys.
       It runs for each chunk with these keys, and its results are pushed to the
       accumulators.
     - The finalize stage computes the targets from the accumulated values.
 
     Targets that are accumulation keys, or that depend on the context only, are taken
-    from the accumulators and from the results of the context stage.
+    from the accumulators and from the results of the context stages.
     """
 
     def __init__(
@@ -360,7 +361,7 @@ class StreamProcessor:
         self._target_keys = target_keys
         _validate_streaming_keys(base_workflow, self._dynamic_keys, self._context_keys)
         (
-            self._context_stage,
+            self._context_stages,
             self._chunk_stages,
             self._finalize_stage,
         ) = _prepare_stages(
@@ -382,7 +383,7 @@ class StreamProcessor:
         self._bypassed_keys = self._dynamic_keys.intersection(
             self._finalize_stage.inputs
         )
-        # Values kept between calls: the context, what the context stage computed from
+        # Values kept between calls: the context, what the context stages computed from
         # it, and the latest chunk of each bypassed dynamic key.
         self._held: dict[sciline.typing.Key, Any] = {}
 
@@ -390,8 +391,8 @@ class StreamProcessor:
         """
         Set the context for processing chunks.
 
-        Context keys not given keep their value. Everything derived from the context
-        is recomputed, unless the given keys are only read directly.
+        Context keys not given keep their value. Only what is derived from the given
+        keys is recomputed.
 
         Parameters
         ----------
@@ -402,13 +403,19 @@ class StreamProcessor:
             if key not in self._context_keys:
                 raise ValueError(f"Key '{key}' is not a context key")
         self._held.update(context)
-        stage = self._context_stage
-        # Until every context key the stage needs has been set, it cannot run.
-        # Stages reading its results then fail, naming the keys that are not set.
-        if not context.keys().isdisjoint(stage.inputs) and self._held.keys() >= set(
-            stage.inputs
-        ):
-            self._held.update(stage.run(self._values_for(stage.inputs, self._held)))
+        # A stage runs if it reads an updated key or a value recomputed by an earlier
+        # stage; the stages are ordered so that those come first. Until every context
+        # key a stage needs has been set, it cannot run. Stages reading its results
+        # then fail, naming the keys that are not set.
+        updated = set(context)
+        for stage in self._context_stages:
+            if updated.isdisjoint(stage.inputs) or not self._held.keys() >= set(
+                stage.inputs
+            ):
+                continue
+            results = stage.run(self._values_for(stage.inputs, self._held))
+            self._held.update(results)
+            updated.update(results)
 
     def add_chunk(
         self, chunks: dict[sciline.typing.Key, Any]
@@ -508,7 +515,12 @@ class StreamProcessor:
         values: Mapping[sciline.typing.Key, Any],
     ) -> dict[sciline.typing.Key, Any]:
         if missing := [key for key in keys if key not in values]:
-            unset = [k for k in self._context_stage.inputs if k not in self._held]
+            unset = [
+                k
+                for stage in self._context_stages
+                for k in stage.inputs
+                if k in self._context_keys and k not in self._held
+            ]
             hint = f' Context keys {unset} have not been set.' if unset else ''
             raise ValueError(f'No value was fed for {missing}.{hint}')
         return {key: values[key] for key in keys}
@@ -567,7 +579,7 @@ class StreamProcessor:
             PER_CALL_STYLE,
         )
 
-        stages = (self._context_stage, *self._chunk_stages, self._finalize_stage)
+        stages = (*self._context_stages, *self._chunk_stages, self._finalize_stage)
         cached = {k for s in stages for k in s.cached}
         # Where a key is in several groups, later groups take precedence.
         groups = {
@@ -578,7 +590,7 @@ class StreamProcessor:
             'Static (cached)': (CACHED_STYLE, cached),
             'Context-dependent': (
                 {'style': 'filled', 'fillcolor': '#d4e8f4'},
-                _computed_per_call(self._context_stage),
+                _computed_per_call(*self._context_stages),
             ),
             'Context key (input)': (
                 {**INPUT_STYLE, 'fillcolor': '#87CEEB'},
@@ -641,13 +653,13 @@ def _prepare_stages(
     target_keys: tuple[sciline.typing.Key, ...],
     accumulator_keys: tuple[sciline.typing.Key, ...],
     allow_bypass: bool,
-) -> tuple[sciline.Stage, tuple[sciline.Stage, ...], sciline.Stage]:
+) -> tuple[tuple[sciline.Stage, ...], tuple[sciline.Stage, ...], sciline.Stage]:
     """
-    Build the context stage, the chunk stages, and the finalize stage.
+    Build the context stages, the chunk stages, and the finalize stage.
 
     The chunk and finalize stages are first built on their own, cut only at the
     dynamic and accumulation keys, to find what they cache that depends on the
-    context: this is what the context stage computes. These stages are only
+    context: this is what the context stages compute. These stages are only
     inspected, so nothing is computed until all stages are built together.
     """
     special_keys = dynamic_keys | context_keys
@@ -684,21 +696,30 @@ def _prepare_stages(
     )
     derived = sciline.Stage(workflow, outputs=cached, inputs=context_keys)
     # Context keys that the stages read directly come from the held context, so the
-    # context stage only computes what is derived from them.
+    # context stages only compute what is derived from them.
     forwarded = tuple(k for k in derived.per_call_outputs if k not in context_keys)
+    # Values depending on the same context keys share a context stage. A stage that
+    # reads the result of another depends on a strict superset of its context keys,
+    # so ordering by the number of context keys runs every stage after those it reads.
+    by_context: dict[frozenset[sciline.typing.Key], list[sciline.typing.Key]] = {}
+    for key in forwarded:
+        reads = sciline.Stage(workflow, outputs=(key,), inputs=context_keys).inputs
+        by_context.setdefault(frozenset(reads), []).append(key)
+    context_groups = [by_context[k] for k in sorted(by_context, key=len)]
     # The chunk stages are cut only at the accumulation keys that finalize reads, so
     # an accumulator feeding another one is computed per chunk, not read from its
     # accumulator.
-    context_stage, *chunk_stages, finalize_stage = sciline.prepare_stages(
+    *stages, finalize_stage = sciline.prepare_stages(
         workflow,
         inputs=(*context_keys, *forwarded, *dynamic_keys, *finalize_probe.inputs),
         outputs=[
-            forwarded,
+            *context_groups,
             *groups.values(),
             tuple(k for k in finalized if k not in forwarded),
         ],
     )
-    return context_stage, tuple(chunk_stages), finalize_stage
+    n_context = len(context_groups)
+    return tuple(stages[:n_context]), tuple(stages[n_context:]), finalize_stage
 
 
 def _make_accumulators(

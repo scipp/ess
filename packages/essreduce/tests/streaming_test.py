@@ -529,9 +529,7 @@ def test_StreamProcessor_raises_when_invalid_context_key_provided() -> None:
         streaming_wf.set_context({NonContext: sc.scalar(5)})
 
 
-def test_StreamProcessor_context_update_recomputes_all_context_dependent_nodes() -> (
-    None
-):
+def test_StreamProcessor_context_only_recomputes_descendants() -> None:
     Streamed = NewType('Streamed', int)
     ContextInputA = NewType('ContextInputA', int)
     ContextInputB = NewType('ContextInputB', int)
@@ -571,14 +569,15 @@ def test_StreamProcessor_context_update_recomputes_all_context_dependent_nodes()
     assert process_a.call_count == 1
     assert process_b.call_count == 1
 
-    # Everything derived from the context is computed together, so updating one
-    # context key recomputes nodes depending only on the other.
+    # Update only ContextInputA
     streaming_wf.set_context({ContextInputA: sc.scalar(3)})
     assert process_a.call_count == 2
-    assert process_b.call_count == 2
+    assert process_b.call_count == 1  # Not called again
 
-    streaming_wf.accumulate({Streamed: sc.scalar(1)})
-    assert sc.identical(streaming_wf.finalize()[Output], sc.scalar(1 + 3 * 2 + 2 * 3))
+    # Update only ContextInputB
+    streaming_wf.set_context({ContextInputB: sc.scalar(4)})
+    assert process_a.call_count == 2  # Not called again
+    assert process_b.call_count == 2
 
 
 def test_StreamProcessor_context_retained_after_clear() -> None:
@@ -1214,3 +1213,41 @@ def test_StreamProcessor_with_accumulator_feeding_another_accumulator() -> None:
     streaming_wf.accumulate({Streamed: 2})
     # Summary is computed from the Histogram of each chunk, then accumulated.
     assert streaming_wf.finalize()[Summary] == (2 + 1) + (4 + 1)
+
+
+def test_StreamProcessor_context_update_recomputes_dependent_context_values() -> None:
+    Streamed = NewType('Streamed', int)
+    Position = NewType('Position', int)
+    Region = NewType('Region', int)
+    Projection = NewType('Projection', int)
+    RegionMask = NewType('RegionMask', int)
+    Output = NewType('Output', int)
+    calls = {'projection': 0, 'mask': 0}
+
+    def project(position: Position) -> Projection:
+        calls['projection'] += 1
+        return Projection(10 * position)
+
+    def mask(projection: Projection, region: Region) -> RegionMask:
+        calls['mask'] += 1
+        return RegionMask(projection + region)
+
+    def process(streamed: Streamed, projection: Projection, mask: RegionMask) -> Output:
+        return Output(streamed + projection + mask)
+
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=sciline.Pipeline((project, mask, process)),
+        dynamic_keys=(Streamed,),
+        context_keys=(Position, Region),
+        target_keys=(Output,),
+        accumulators=(Output,),
+    )
+    streaming_wf.set_context({Position: 1, Region: 2})
+    assert calls == {'projection': 1, 'mask': 1}
+    streaming_wf.set_context({Region: 3})
+    assert calls == {'projection': 1, 'mask': 2}
+    # The mask is recomputed from the new projection.
+    streaming_wf.set_context({Position: 2})
+    assert calls == {'projection': 2, 'mask': 3}
+    streaming_wf.accumulate({Streamed: 1})
+    assert streaming_wf.finalize()[Output] == 1 + 20 + (20 + 3)
