@@ -195,7 +195,10 @@ def _fold_detector_to_arc_and_channel(
 
         # Transpose to make `detector_number` contiguous:
         detector_dims = ['arc', 'tube', 'channel', 'length']
-        target_dims = [*(set(folded.dims) - set(detector_dims)), *detector_dims]
+        target_dims = [
+            *(d for d in folded.dims if d not in detector_dims),
+            *detector_dims,
+        ]
         return folded.transpose(target_dims).copy()
     else:
         # Not a rectangular subset, cannot fold.
