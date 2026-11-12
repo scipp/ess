@@ -351,9 +351,21 @@ class DetectorExplorer(ipw.VBox):
             {k: _add_missing_coordinates(da) for k, da in data.items()}
         )
 
+        self.original_masks = masks
         self.masks = sc.DataGroup({k: sc.DataGroup() for k in self.data.keys()})
         if masks is not None:
             mask_dims = {}
+            # Make a set of all mask names to check for consistency across banks.
+            all_mask_names = {
+                n: m.dims for group in masks.values() for n, m in group.items()
+            }
+            # Make empty masks everywhere to begin with
+            for k, da in self.data.items():
+                for name, dims in all_mask_names.items():
+                    self.masks[k][name] = sc.zeros(
+                        sizes={dim: da.sizes[dim] for dim in dims}, dtype=bool
+                    )
+
             for key, group in masks.items():
                 for name, mask in group.items():
                     if name not in mask_dims:
@@ -511,7 +523,7 @@ class DetectorExplorer(ipw.VBox):
             self.mask_control.on_clear(self.clear_masks)
             self.mask_control.on_save(self.save_masks)
             for f in self.tab_figs.values():
-                f.fig.canvas.mpl_connect('button_press_event', self.add_mask)
+                f.fig.canvas.mpl_connect('button_press_event', self.toggle_mask)
 
         self.color_control = ColorControl()
         self.color_control.on_limit_change(self.update_color_range)
@@ -709,9 +721,24 @@ class DetectorExplorer(ipw.VBox):
             f.view.colormapper.autoscale()
         figs[0].canvas.draw()
 
-    def add_mask(self, event: MouseEvent) -> None:
+    def _get_mask_slices(
+        self, key: str, xdim: str, ydim: str, ix: int, iy: int, mask_name: str
+    ):
+        slices = []
+        mask_dims = self.mask_control.mask_dims[mask_name]
+        # print("mask_dims:", mask_dims)
+        if xdim in mask_dims:
+            slices.append((xdim, ix))
+        if ydim in mask_dims:
+            slices.append((ydim, iy))
+        slices.extend(
+            [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
+        )
+        return slices
+
+    def toggle_mask(self, event: MouseEvent) -> None:
         """
-        Add a mask at the current mouse position based on the selected masking mode.
+        Toggle a mask at the current mouse position based on the selected masking mode.
         """
         # Ignore the event if no masking mode is selected
         if not self.mask_control.selected:
@@ -739,18 +766,65 @@ class DetectorExplorer(ipw.VBox):
         ix = _find_closest(xcoord.values, event.xdata)
         iy = _find_closest(ycoord.values, event.ydata)
 
+        # # Find slider dims and indices
+        # slices = []
+        # mask_name = self.mask_control.selected
+        # mask_dims = self.mask_control.mask_dims[mask_name]
+        # print("mask_dims:", mask_dims)
+        # if xdim in mask_dims:
+        #     slices.append((xdim, ix))
+        # if ydim in mask_dims:
+        #     slices.append((ydim, iy))
+        # slices.extend(
+        #     [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
+        # )
+        # print("slices:", slices)
+
+        # # if self.mask_control.mode in ("horizontal", "single"):
+        # #     slices.append((ydim, iy))
+        # # if self.mask_control.mode in ("vertical", "single"):
+        # #     slices.append((xdim, ix))
+        # # slices.extend(
+        # #     [sl.value for sl in self.bank_dim_sliders[key] if sl.value[1] is not None]
+        # # )
+        # # Preserve the dim order as in the original data
+        # dims = tuple(
+        #     dim for dim in self.data[key].dims if dim in tuple(sl[0] for sl in slices)
+        # )
+
+        # Check if click touched any visible masks
+        mask_removed = False
+        for name, mask in self.masks[key].items():
+            # slices = []
+            # mask_dims = mask.dims
+            # if xdim in mask_dims:
+            #     slices.append((xdim, ix))
+            # if ydim in mask_dims:
+            #     slices.append((ydim, iy))
+            # slices.extend(
+            #     [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
+            # )
+            m = mask
+            for s in self._get_mask_slices(key, xdim, ydim, ix, iy, name):
+                m = m[s]
+            if m.values.any():
+                mask_removed = True
+                m.values[...] = False
+
         # Find slider dims and indices
-        slices = []
+        # slices = []
+        # mask_name = self.mask_control.selected
+        # mask_dims = self.mask_control.mask_dims[mask_name]
+        # print("mask_dims:", mask_dims)
+        # if xdim in mask_dims:
+        #     slices.append((xdim, ix))
+        # if ydim in mask_dims:
+        #     slices.append((ydim, iy))
+        # slices.extend(
+        #     [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
+        # )
         mask_name = self.mask_control.selected
-        mask_dims = self.mask_control.mask_dims[mask_name]
-        print("mask_dims:", mask_dims)
-        if xdim in mask_dims:
-            slices.append((xdim, ix))
-        if ydim in mask_dims:
-            slices.append((ydim, iy))
-        slices.extend(
-            [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
-        )
+        slices = self._get_mask_slices(key, xdim, ydim, ix, iy, mask_name)
         print("slices:", slices)
 
         # if self.mask_control.mode in ("horizontal", "single"):
@@ -764,18 +838,20 @@ class DetectorExplorer(ipw.VBox):
         dims = tuple(
             dim for dim in self.data[key].dims if dim in tuple(sl[0] for sl in slices)
         )
-        if mask_name not in self.masks[key]:
-            self.masks[key][mask_name] = sc.zeros(
-                sizes={dim: self.data[key].sizes[dim] for dim in dims},
-                dtype=bool,
-            )
-        m = self.masks[key][mask_name]
-        for s in slices:
-            m = m[s]
-        m.values[...] = False if m.values.all() else True
 
-        if not self.masks[key][mask_name].values.max():
-            del self.masks[key][mask_name]
+        if not mask_removed:
+            if mask_name not in self.masks[key]:
+                self.masks[key][mask_name] = sc.zeros(
+                    sizes={dim: self.data[key].sizes[dim] for dim in dims},
+                    dtype=bool,
+                )
+            m = self.masks[key][mask_name]
+            for s in slices:
+                m = m[s]
+            m.values[...] = False if m.values.all() else True
+
+        # if not self.masks[key][mask_name].values.max():
+        #     del self.masks[key][mask_name]
 
         self.apply_masks_nodes[key].notify_children(message=None)
 
@@ -806,8 +882,8 @@ class DetectorExplorer(ipw.VBox):
                     if s[0] in m.dims:
                         m = m[s]
                 m.values[...] = False
-                if not self.masks[key][name].values.max():
-                    del self.masks[key][name]
+                # if not self.masks[key][name].values.max():
+                #     del self.masks[key][name]
 
             self.apply_masks_nodes[key].notify_children(message=None)
 
@@ -818,6 +894,10 @@ class DetectorExplorer(ipw.VBox):
         in principle never happen because the save button should be disabled when no
         filename is provided.
         """
+
+        # TODO: when we save, compare with original masks and remove any masks that are
+        # all false that were not in the originals.
+
         filename = self.mask_control.filename_input.value
         if not filename:
             return
