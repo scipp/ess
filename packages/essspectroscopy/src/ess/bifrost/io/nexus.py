@@ -17,7 +17,6 @@ from ess.spectroscopy.types import (
     NeXusComponent,
     NeXusComponentLocationSpec,
     NeXusData,
-    NeXusFileSpec,
     NeXusLocationSpec,
     NeXusMultiComponent,
     NeXusMultiComponentLocationSpec,
@@ -32,34 +31,33 @@ from ess.spectroscopy.types import (
 
 from ess.reduce import nexus
 
-from ..types import InstrumentAnglePath, SampleAnglePath
+from ..types import InstrumentAnglePath, SampleAngleNeXusName
 
 
 def load_sample_angle(
-    file_spec: NeXusFileSpec[RunType], path: SampleAnglePath
+    chain: NeXusTransformationChain[snx.NXsample, RunType], name: SampleAngleNeXusName
 ) -> SampleAngle[RunType]:
     """Load the rotation angle of a sample from a BIFROST NeXus file."""
-
-    with nexus.open_component_group(
-        NeXusLocationSpec(filename=file_spec.value),
-        nx_class=snx.NXinstrument,
-        parent_class=snx.NXentry,
-    ) as instrument:
-        log: snx.Group = instrument[path]  # type: ignore[assignment]
-        if isinstance(log['value'], snx.Group):
-            # The NXlog is nested in this group, e.g., the group can be an NXpositioner
-            # with children 'value', 'target_value', etc.
-            transform: snx.nxtransformations.Transform = log['value'][()]  # type: ignore[assignment]
-        else:
-            # `log` is the NXlog we are looking for without further nesting.
-            transform: snx.nxtransformations.Transform = log[()]  # type: ignore[assignment]
-
-    if transform.transformation_type != 'rotation':
+    path, transform = _find_sample_rotation_in_chain(chain.transformations, name)
+    if transform.transformation_type != "rotation":
         raise ValueError(
             f"Expected the sample angle at {path} to be a rotation,"
             f" got '{transform.transformation_type}' instead.'"
         )
     return SampleAngle[RunType](transform.value)  # type: ignore[return-value]
+
+
+def _find_sample_rotation_in_chain(
+    transformations: sc.DataGroup[snx.nxtransformations.Transform],
+    name: SampleAngleNeXusName,
+) -> tuple[str, snx.nxtransformations.Transform]:
+    for path, transform in transformations.items():
+        if name in path:
+            return path, transform
+    raise ValueError(
+        "No sample rotation found in the NXtransformation chain of the sample. "
+        f"Got entries {list(transformations.keys())}"
+    )
 
 
 def extract_instrument_angle(
@@ -359,6 +357,6 @@ providers = (
 
 parameters = {
     InstrumentAnglePath: '/entry/instrument/detector_tank/transformations/tank_angle',
-    SampleAnglePath: '/entry/instrument/sample_stage/transformations/sample_rotation',
+    SampleAngleNeXusName: 'sample_rotation',
     TransformationTimeFilter: stepwise_transformation_time_filter,
 }

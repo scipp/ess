@@ -32,5 +32,10 @@ InstrumentAnglePath = NewType('InstrumentAnglePath', str)
 This must be a transformation in the depends-on chain of the elastic monitor.
 """
 
-SampleAnglePath = NewType('SampleAnglePath', str)
-"""Absolute NeXus path of the ``NXlog`` (or ``NXpositioner``) of the sample rotation."""
+SampleAngleNeXusName = NewType('SampleAngleNeXusName', str)
+"""(Part of) the NeXus path of the sample angle.
+
+This is used to find the NXtransformation in the sample's transformation chain
+that corresponds to the sample rotation.
+Can be a complete nexus path, or just part of the path.
+"""
