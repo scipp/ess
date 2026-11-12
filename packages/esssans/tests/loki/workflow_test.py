@@ -13,12 +13,13 @@ from ess.sans.types import (
     BackgroundRun,
     BackgroundSubtractedIofQ,
     BeamCenter,
+    DetectorMasks,
     EmptyDetector,
     Filename,
     IntensityQ,
     LookupTableFilename,
     NeXusDetectorName,
-    PixelMaskFilename,
+    PixelMaskFilenames,
     QBins,
     ReturnEvents,
     SampleRun,
@@ -29,6 +30,7 @@ from ess.sans.types import (
 from sciline import UnsatisfiedRequirement
 
 from ess.reduce import workflow
+from ess.reduce.masking import write_pixel_masks
 from ess.reduce.nexus.types import DiskChoppers, Position
 from ess.reduce.unwrap import LookupTable, LtotalRange, SourceBounds
 
@@ -84,7 +86,7 @@ def test_solid_angle_is_independent_of_beam_center(larmor_workflow):
 def test_loki_larmor_workflow_compute_with_single_pixel_mask(larmor_workflow):
     wf = larmor_workflow(no_masks=False)
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    wf[PixelMaskFilename] = loki.data.loki_tutorial_mask_filenames()[0]
+    wf[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
 
@@ -154,3 +156,83 @@ def test_loki_analytical_lookup_table_matches_simulated_source_pulse():
         value = row['event_time_offset', np.argmin(np.abs(toa - t))].data
         assert abs(value.value - mean) < 0.01
         assert abs(sc.stddevs(value).value / stddev - 1) < 0.05
+
+
+def test_loki_workflow_reads_bool_masks_per_bank(tmp_path):
+    path = tmp_path / 'masks.h5'
+    mask = sc.array(dims=['tube'], values=[True, False])
+    write_pixel_masks(path, {'broken': {'loki_detector_1': mask}}, instrument='LOKI')
+    wf = loki.LokiWorkflow()
+    wf[NeXusDetectorName] = 'loki_detector_1'
+    wf[EmptyDetector[SampleRun]] = sc.DataArray(sc.zeros(sizes={'tube': 2}))
+    wf[PixelMaskFilenames] = [path]
+
+    assert sc.identical(wf.compute(DetectorMasks)['broken'], mask)
+
+
+def test_loki_workflow_raises_if_mask_file_has_unknown_bank(tmp_path):
+    path = tmp_path / 'masks.h5'
+    mask = sc.array(dims=['tube'], values=[True, False])
+    write_pixel_masks(path, {'broken': {'loki_detector_99': mask}}, instrument='LOKI')
+    wf = loki.LokiWorkflow()
+    wf[NeXusDetectorName] = 'loki_detector_1'
+    wf[EmptyDetector[SampleRun]] = sc.DataArray(sc.zeros(sizes={'tube': 2}))
+    wf[PixelMaskFilenames] = [path]
+
+    with pytest.raises(ValueError, match='loki_detector_99'):
+        wf.compute(DetectorMasks)
+
+
+@pytest.mark.parametrize(
+    'dims',
+    [
+        ('pixel', 'straw', 'tube', 'layer'),
+        ('layer', 'straw'),
+        ('straw', 'layer'),
+    ],
+    ids=['full-reversed', 'skips-dims', 'skips-dims-transposed'],
+)
+def test_bank_mask_gives_same_iofq_as_equivalent_id_file(
+    larmor_workflow, tmp_path, dims
+):
+    wf = larmor_workflow(no_masks=False)
+    wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+    # For simplicity, insert a fake beam center instead of computing it.
+    wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
+    ids = wf.compute(EmptyDetector[SampleRun]).coords['detector_number']
+
+    shape = [ids.sizes[dim] for dim in dims]
+    mask = sc.array(
+        dims=list(dims), values=np.arange(np.prod(shape)).reshape(shape) % 5 == 0
+    )
+    expanded = sc.broadcast(mask, sizes=ids.sizes).transpose(ids.dims)
+    masked_ids = sc.array(
+        dims=['detector_id'],
+        values=ids.values[expanded.values],
+        unit=None,
+        dtype='int32',
+    )
+    assert 0 < masked_ids.size < ids.size
+
+    bank_file = tmp_path / 'bank.nxs'
+    write_pixel_masks(bank_file, {'m': {'larmor_detector': mask}}, instrument='LARMOR')
+    id_file = tmp_path / 'ids.h5'
+    sc.io.save_hdf5(masked_ids, id_file)
+
+    wf[PixelMaskFilenames] = [bank_file]
+    from_bank_mask = wf.compute(BackgroundSubtractedIofQ)
+    wf[PixelMaskFilenames] = [id_file]
+    from_ids = wf.compute(BackgroundSubtractedIofQ)
+    assert sc.identical(from_bank_mask, from_ids)
+
+
+def test_bool_mask_file_gives_same_masks_as_id_file(larmor_workflow, tmp_path):
+    wf = larmor_workflow(no_masks=False)
+    wf[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()
+    from_ids = next(iter(wf.compute(DetectorMasks).values()))
+
+    path = tmp_path / 'masks.h5'
+    write_pixel_masks(path, {'m': {'larmor_detector': from_ids}}, instrument='LARMOR')
+    wf[PixelMaskFilenames] = [path]
+
+    assert sc.identical(wf.compute(DetectorMasks)['m'], from_ids)

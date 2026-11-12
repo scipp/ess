@@ -7,7 +7,7 @@ from ess.sans.types import (
     DirectBeamFilename,
     EmptyBeamRun,
     Filename,
-    PixelMaskFilename,
+    PixelMaskFilenames,
     SampleRun,
 )
 
@@ -106,13 +106,15 @@ def zoom_tutorial_empty_beam_run() -> Filename[EmptyBeamRun]:
     return Filename[EmptyBeamRun](_zoom_registry.get_path('ZOOM00034787.nxs.h5'))
 
 
-def zoom_tutorial_mask_filenames() -> list[PixelMaskFilename]:
-    return [
-        PixelMaskFilename(_zoom_registry.get_path('andru_test.xml')),
-        PixelMaskFilename(_zoom_registry.get_path('left_beg_18_2.xml')),
-        PixelMaskFilename(_zoom_registry.get_path('right_beg_18_2.xml')),
-        PixelMaskFilename(_zoom_registry.get_path('small_bs_232.xml')),
-        PixelMaskFilename(_zoom_registry.get_path('small_BS_31032023.xml')),
-        PixelMaskFilename(_zoom_registry.get_path('tube_1120_bottom.xml')),
-        PixelMaskFilename(_zoom_registry.get_path('tubes_beg_18_2.xml')),
-    ]
+def zoom_tutorial_mask_filenames() -> PixelMaskFilenames:
+    return PixelMaskFilenames(
+        [
+            _zoom_registry.get_path('andru_test.xml'),
+            _zoom_registry.get_path('left_beg_18_2.xml'),
+            _zoom_registry.get_path('right_beg_18_2.xml'),
+            _zoom_registry.get_path('small_bs_232.xml'),
+            _zoom_registry.get_path('small_BS_31032023.xml'),
+            _zoom_registry.get_path('tube_1120_bottom.xml'),
+            _zoom_registry.get_path('tubes_beg_18_2.xml'),
+        ]
+    )
