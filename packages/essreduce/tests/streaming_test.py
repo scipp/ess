@@ -1191,3 +1191,26 @@ def test_StreamProcessor_names_context_keys_not_set_yet() -> None:
     streaming_wf.set_context({ContextInputB: 3})
     streaming_wf.accumulate({Streamed: 2})
     assert streaming_wf.finalize()[Output] == 6
+
+
+def test_StreamProcessor_with_accumulator_feeding_another_accumulator() -> None:
+    Streamed = NewType('Streamed', int)
+    Histogram = NewType('Histogram', int)
+    Summary = NewType('Summary', int)
+
+    def histogram(streamed: Streamed) -> Histogram:
+        return Histogram(2 * streamed)
+
+    def summarize(hist: Histogram) -> Summary:
+        return Summary(hist + 1)
+
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=sciline.Pipeline((histogram, summarize)),
+        dynamic_keys=(Streamed,),
+        target_keys=(Summary,),
+        accumulators=(Histogram, Summary),
+    )
+    streaming_wf.accumulate({Streamed: 1})
+    streaming_wf.accumulate({Streamed: 2})
+    # Summary is computed from the Histogram of each chunk, then accumulated.
+    assert streaming_wf.finalize()[Summary] == (2 + 1) + (4 + 1)

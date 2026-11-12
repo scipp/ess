@@ -359,14 +359,6 @@ class StreamProcessor:
         self._context_keys = set(context_keys)
         self._target_keys = target_keys
         _validate_streaming_keys(base_workflow, self._dynamic_keys, self._context_keys)
-        special_keys = self._dynamic_keys | self._context_keys
-        self._accumulators = _make_accumulators(
-            base_workflow,
-            accumulators,
-            _used_keys(
-                base_workflow, [k for k in target_keys if k not in special_keys]
-            ),
-        )
         (
             self._context_stage,
             self._chunk_stages,
@@ -376,8 +368,16 @@ class StreamProcessor:
             dynamic_keys=self._dynamic_keys,
             context_keys=self._context_keys,
             target_keys=target_keys,
-            accumulator_keys=tuple(self._accumulators),
+            accumulator_keys=tuple(accumulators),
             allow_bypass=allow_bypass,
+        )
+        self._accumulators = _make_accumulators(
+            base_workflow,
+            accumulators,
+            {
+                *(k for stage in self._chunk_stages for k in stage.outputs),
+                *self._finalize_stage.inputs,
+            },
         )
         self._bypassed_keys = self._dynamic_keys.intersection(
             self._finalize_stage.inputs
@@ -633,16 +633,6 @@ def _validate_streaming_keys(
             )
 
 
-def _used_keys(
-    workflow: sciline.Pipeline, keys: Iterable[sciline.typing.Key]
-) -> frozenset[sciline.typing.Key]:
-    """Keys that computing ``keys`` uses, with the workflow cut nowhere.
-
-    This builds a stage only to inspect it, so nothing is computed.
-    """
-    return sciline.Stage(workflow, outputs=keys, inputs=()).keys
-
-
 def _prepare_stages(
     workflow: sciline.Pipeline,
     *,
@@ -660,55 +650,48 @@ def _prepare_stages(
     context: this is what the context stage computes. These stages are only
     inspected, so nothing is computed until all stages are built together.
     """
-    # Accumulators reading the same dynamic keys share a chunk stage. An accumulator
-    # that reads none is never pushed to.
-    groups: dict[frozenset[sciline.typing.Key], list[sciline.typing.Key]] = {}
-    for key in accumulator_keys:
-        if dynamic := _used_keys(workflow, (key,)) & dynamic_keys:
-            groups.setdefault(dynamic, []).append(key)
-    chunk_probes = [
-        sciline.Stage(workflow, outputs=keys, inputs=dynamic)
-        for dynamic, keys in groups.items()
-    ]
-
     special_keys = dynamic_keys | context_keys
     finalized = tuple(
         k for k in target_keys if k not in accumulator_keys and k not in special_keys
     )
-    used = _used_keys(workflow, finalized)
-    accumulated = tuple(k for k in accumulator_keys if k in used)
-    finalize_probe = sciline.Stage(workflow, outputs=finalized, inputs=accumulated)
-    if bypassed := tuple(k for k in dynamic_keys if k in finalize_probe.keys):
+    finalize_probe = sciline.Stage(
+        workflow, outputs=finalized, inputs=(*accumulator_keys, *dynamic_keys)
+    )
+    if bypassed := dynamic_keys.intersection(finalize_probe.inputs):
         if not allow_bypass:
             raise ValueError(
                 f"Targets depend on dynamic keys {bypassed} other than through an "
                 "accumulator. Pass allow_bypass=True to compute them from the "
                 "latest chunk."
             )
-        finalize_probe = sciline.Stage(
-            workflow, outputs=finalized, inputs=(*accumulated, *bypassed)
-        )
 
-    probes = (*chunk_probes, finalize_probe)
-    context = tuple(k for k in context_keys if any(k in p.keys for p in probes))
-    cached = tuple(dict.fromkeys(k for p in probes for k in p.cached))
-    forwarded: tuple[sciline.typing.Key, ...] = ()
-    if context:
-        derived = sciline.Stage(workflow, outputs=cached, inputs=context)
-        # Context keys that the stages read directly come from the held context, so
-        # the context stage only computes what is derived from them.
-        forwarded = tuple(k for k in derived.per_call_outputs if k not in context_keys)
+    # Accumulators reading the same dynamic keys share a chunk stage. An accumulator
+    # that reads none is never pushed to.
+    groups: dict[frozenset[sciline.typing.Key], list[sciline.typing.Key]] = {}
+    for key in accumulator_keys:
+        if key not in finalize_probe.inputs and key not in target_keys:
+            continue
+        reads = sciline.Stage(workflow, outputs=(key,), inputs=dynamic_keys).inputs
+        if reads:
+            groups.setdefault(frozenset(reads), []).append(key)
+    chunk_probes = [
+        sciline.Stage(workflow, outputs=keys, inputs=dynamic)
+        for dynamic, keys in groups.items()
+    ]
+
+    cached = tuple(
+        dict.fromkeys(k for p in (*chunk_probes, finalize_probe) for k in p.cached)
+    )
+    derived = sciline.Stage(workflow, outputs=cached, inputs=context_keys)
+    # Context keys that the stages read directly come from the held context, so the
+    # context stage only computes what is derived from them.
+    forwarded = tuple(k for k in derived.per_call_outputs if k not in context_keys)
+    # The chunk stages are cut only at the accumulation keys that finalize reads, so
+    # an accumulator feeding another one is computed per chunk, not read from its
+    # accumulator.
     context_stage, *chunk_stages, finalize_stage = sciline.prepare_stages(
         workflow,
-        inputs=dict.fromkeys(
-            (
-                *context,
-                *forwarded,
-                *(k for dynamic in groups for k in dynamic),
-                *bypassed,
-                *accumulated,
-            )
-        ),
+        inputs=(*context_keys, *forwarded, *dynamic_keys, *finalize_probe.inputs),
         outputs=[
             forwarded,
             *groups.values(),
@@ -722,12 +705,12 @@ def _make_accumulators(
     base_workflow: sciline.Pipeline,
     accumulators: dict[sciline.typing.Key, Accumulator | Callable[..., Accumulator]]
     | tuple[sciline.typing.Key, ...],
-    used: frozenset[sciline.typing.Key],
+    used: set[sciline.typing.Key],
 ) -> dict[sciline.typing.Key, Accumulator]:
     """
-    Instantiate the accumulators that the target keys actually depend on.
+    Instantiate the accumulators that the stages use.
 
-    Accumulators that are not used given the target keys are dropped. Callables are
+    Accumulators that the stages do not use are dropped. Callables are
     bound and called on the workflow, which allows for initializing an accumulator
     with arguments that depend on the workflow, such as bin edges, which would
     otherwise be hard to obtain.
