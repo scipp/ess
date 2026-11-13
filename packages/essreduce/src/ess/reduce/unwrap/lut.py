@@ -15,7 +15,13 @@ import scippnexus as snx
 from scippneutron.chopper import DiskChopper
 from scippneutron.tof import chopper_cascade
 
-from ..nexus.types import Component, DiskChoppers, MonitorType, Position, RunType
+from ..nexus.types import (
+    Component,
+    DiskChoppers,
+    MonitorType,
+    NeutronSourcePosition,
+    RunType,
+)
 from .types import (
     DetectorLtotal,
     KeepEventTimeOffset,
@@ -579,7 +585,7 @@ def close_non_synced_disk_choppers(
 
 def simulate_chopper_cascade_using_tof(
     choppers: FrameCompatibleDiskChoppers[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     neutrons: NumberOfSimulatedNeutrons,
     pulse_stride: PulseStride[RunType],
     seed: SimulationSeed,
@@ -774,7 +780,7 @@ def _estimate_wavelength_by_polygon_centers(
 def compute_frame_sequence(
     pulse_period: PulsePeriod,
     disk_choppers: FrameCompatibleDiskChoppers[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     source_bounds: SourceBounds,
     pulse_stride: PulseStride[RunType],
 ) -> ChopperFrameSequence[RunType]:

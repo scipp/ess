@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import scipp as sc
 from ess.reduce.nexus.types import Position
-from scippnexus import NXsample, NXsource
+from scippnexus import NXsample
 
 from ..reflectometry.load import load_h5
 from ..reflectometry.types import (
@@ -17,6 +17,7 @@ from ..reflectometry.types import (
     DetectorLtotal,
     DetectorRotation,
     Filename,
+    NeutronSourcePosition,
     RawDetector,
     RunType,
     SampleRotation,
@@ -264,7 +265,7 @@ def load_detector_rotation(
 
 def load_source_position(
     da: RawDetector[RunType],
-) -> Position[NXsource, RunType]:
+) -> NeutronSourcePosition[RunType]:
     """Extract source position from McStas-derived raw detector data."""
     return da.coords['source_position']
 

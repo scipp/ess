@@ -10,6 +10,7 @@ from ess.spectroscopy.indirect.conversion import (
 from ess.spectroscopy.types import (
     ElasticCoordTransformGraph,
     GravityVector,
+    NeutronSourcePosition,
     Position,
     QDetector,
     RunType,
@@ -20,7 +21,7 @@ from scippneutron.conversion.graph import tof as tof_graphs
 
 
 def single_crystal_coordinate_transformation_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:

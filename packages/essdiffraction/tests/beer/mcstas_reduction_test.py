@@ -49,6 +49,7 @@ from ess.powder.types import (
     ElasticCoordTransformGraph,
     EmptyDetector,
     KeepEvents,
+    NeutronSourcePosition,
     NormalizedDspacing,
     PixelMasks,
     QDetector,
@@ -229,7 +230,7 @@ def test_beer_workflows_compute_dspacing_bins(make_workflow, mode, pulse_skippin
 
     if pulse_skipping:
         # Use pulse-skipping choppers with the existing detector geometry.
-        source_position = wf.compute(Position[snx.NXsource, SampleRun])
+        source_position = wf.compute(NeutronSourcePosition[SampleRun])
         chopper_mode = ModulationMode.ds0 if mode == 7 else PulseShapingMode.ds1
         wf[DiskChoppers[SampleRun]] = simulation_choppers(chopper_mode, source_position)
 

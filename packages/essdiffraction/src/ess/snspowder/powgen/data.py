@@ -19,6 +19,7 @@ from ess.powder.types import (
     GravityVector,
     MonitorCoordTransformGraph,
     MonitorType,
+    NeutronSourcePosition,
     Position,
     ProtonCharge,
     RawDataAndMetadata,
@@ -242,9 +243,9 @@ def extract_accumulated_proton_charge(
     return AccumulatedProtonCharge[RunType](data.coords["gd_prtn_chrg"])
 
 
-def source_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsource, RunType]:
+def source_position(dg: RawDataAndMetadata[RunType]) -> NeutronSourcePosition[RunType]:
     """Return the source position from a loaded data group."""
-    return Position[snx.NXsource, RunType](dg["data"].coords["source_position"])
+    return NeutronSourcePosition[RunType](dg["data"].coords["source_position"])
 
 
 def sample_position(dg: RawDataAndMetadata[RunType]) -> Position[snx.NXsample, RunType]:
@@ -268,7 +269,7 @@ def _coordinate_transformation_graph(
 
 
 def detector_coordinate_transformation_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:
@@ -296,7 +297,7 @@ def detector_coordinate_transformation_graph(
 
 
 def monitor_coordinate_transformation_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> MonitorCoordTransformGraph[RunType]:

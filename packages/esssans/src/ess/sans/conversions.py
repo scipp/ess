@@ -24,6 +24,7 @@ from .types import (
     GravityVector,
     IofQPart,
     MonitorTerm,
+    NeutronSourcePosition,
     NormalizedQ,
     NormalizedQxQy,
     Numerator,
@@ -132,7 +133,7 @@ def sans_elastic(
     correct_for_gravity: CorrectForGravity,
     *,
     sample_position: Position[snx.NXsample, RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     beam_center: BeamCenter,
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:

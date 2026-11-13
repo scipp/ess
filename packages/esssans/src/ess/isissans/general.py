@@ -21,6 +21,7 @@ from ess.sans.types import (
     Measurement,
     MonitorPositionOffset,
     MonitorType,
+    NeutronSourcePosition,
     NeXusComponent,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
@@ -95,9 +96,9 @@ def to_monitor_position_offset(
 
 def get_source_position(
     dg: LoadedFileContents[RunType],
-) -> Position[snx.NXsource, RunType]:
+) -> NeutronSourcePosition[RunType]:
     """Get source position from raw data."""
-    return Position[snx.NXsource, RunType](dg['data'].coords['source_position'])
+    return NeutronSourcePosition[RunType](dg['data'].coords['source_position'])
 
 
 def get_sample_position(

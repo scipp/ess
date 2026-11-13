@@ -5,10 +5,14 @@ import numpy as np
 import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
-from scippnexus import NXsource
 
 from ess.reduce import unwrap
-from ess.reduce.nexus.types import NeXusDetectorName, Position, RawDetector, SampleRun
+from ess.reduce.nexus.types import (
+    NeutronSourcePosition,
+    NeXusDetectorName,
+    RawDetector,
+    SampleRun,
+)
 from ess.reduce.unwrap import (
     GenericUnwrapWorkflow,
     fakes,
@@ -150,7 +154,7 @@ def setup_workflow(
     wf[NeXusDetectorName] = "detector"
     wf[unwrap.LookupTableRelativeErrorThreshold] = {"detector": error_threshold}
     wf[unwrap.DiskChoppers[SampleRun]] = choppers
-    wf[Position[NXsource, SampleRun]] = source_position
+    wf[NeutronSourcePosition[SampleRun]] = source_position
     return wf
 
 

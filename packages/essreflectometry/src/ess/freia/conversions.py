@@ -3,7 +3,7 @@
 import scipp as sc
 from ess.reduce.nexus.types import GravityVector, Position
 from scippneutron.conversion import graph, tof
-from scippnexus import NXsample, NXsource
+from scippnexus import NXsample
 
 from ..reflectometry.conversions import (
     reflectometry_q,
@@ -12,6 +12,7 @@ from ..reflectometry.conversions import (
 )
 from ..reflectometry.types import (
     CoordTransformationGraph,
+    NeutronSourcePosition,
     RunType,
     SampleRun,
 )
@@ -239,7 +240,7 @@ def incident_angle(
 
 
 def coordinate_transformation_graph(
-    source_position: Position[NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[NXsample, RunType],
     sample_surface_normal: SampleSurfaceNormal[RunType],
     gravity: GravityVector,
@@ -264,7 +265,7 @@ def coordinate_transformation_graph(
 
 
 def sample_coordinate_transformation_graph(
-    source_position: Position[NXsource, SampleRun],
+    source_position: NeutronSourcePosition[SampleRun],
     sample_position: Position[NXsample, SampleRun],
     sample_surface_normal: SampleSurfaceNormal[SampleRun],
     gravity: GravityVector,
@@ -360,7 +361,7 @@ def shutter_log_incident_angle_graph(
 
 
 def offspecular_coordinate_transformation_graph(
-    source_position: Position[NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[NXsample, RunType],
     sample_surface_normal: SampleSurfaceNormal[RunType],
     gravity: GravityVector,

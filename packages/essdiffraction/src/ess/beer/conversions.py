@@ -8,7 +8,7 @@ from ess.powder.types import ElasticCoordTransformGraph, GravityVector, RunType
 from scippneutron.chopper import DiskChopper
 from scippneutron.conversion.tof import wavelength_from_tof
 
-from ess.reduce.nexus.types import DiskChoppers, Position
+from ess.reduce.nexus.types import DiskChoppers, NeutronSourcePosition, Position
 from ess.reduce.unwrap.lut import ActiveDiskChoppers, chopper_distance_along_beam
 from ess.reduce.unwrap.types import DetectorLtotal
 
@@ -97,7 +97,7 @@ def _modulation_period(choppers: DiskChoppers[RunType]) -> sc.Variable:
 
 
 def powder_beamline_geometry_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> BeamlineGeometryGraph[RunType]:
@@ -113,7 +113,7 @@ def powder_beamline_geometry_graph(
 
 
 def modulation_beamline_geometry_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
     choppers: ActiveDiskChoppers[RunType],

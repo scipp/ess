@@ -25,6 +25,7 @@ Filename = reduce_t.Filename
 GravityVector = reduce_t.GravityVector
 RawMonitor = reduce_t.RawMonitor
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
+NeutronSourcePosition = reduce_t.NeutronSourcePosition
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
 NeXusTransformation = reduce_t.NeXusTransformation

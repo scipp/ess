@@ -16,6 +16,7 @@ from ess.powder.types import (
     Filename,
     MonitorFilename,
     MonitorType,
+    NeutronSourcePosition,
     NeXusComponent,
     NeXusDetectorName,
     Position,
@@ -319,8 +320,8 @@ def assemble_monitor_data(
     return RawMonitor[RunType, MonitorType](monitor)
 
 
-def dummy_source_position() -> Position[snx.NXsource, RunType]:
-    return Position[snx.NXsource, RunType](
+def dummy_source_position() -> NeutronSourcePosition[RunType]:
+    return NeutronSourcePosition[RunType](
         sc.vector([np.nan, np.nan, np.nan], unit="mm")
     )
 
