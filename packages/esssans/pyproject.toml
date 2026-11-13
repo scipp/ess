@@ -36,7 +36,7 @@ dependencies = [
   "lazy_loader>=0.4",
   "numpy>=1.26.4",
   "pandas>=2.1.2",
-  "plopp>=26.5.0",
+  "plopp>=26.10.0",
   "scippneutron>=26.10.0",
 ]
 
