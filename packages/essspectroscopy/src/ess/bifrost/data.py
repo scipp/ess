@@ -11,13 +11,13 @@ _registry = make_registry(
     'ess/bifrost',
     files={
         "bifrost_260526T151446.repack.h5": "md5:0f60f5938b0dce87542dd525a2f9a5c4",
-        "computed_energy_data_simulated_5x2.h5": "md5:6fee639c3c05523dfa18262cf2b03958",
+        "computed_energy_data_simulated_5x2.h5": "md5:eca18246329f8e6c05154323f7af677a",
         "BIFROST-simulation-lookup-table.h5": "md5:0a4df8039b9610df80fb7bd567736eeb",
         "coda_bifrost_999999_00026862.stripped.hdf": (
             "md5:bab18faa48de3b4617332a24dacd58a2"
         ),
     },
-    version="10",
+    version="11",
 )
 
 
