@@ -24,6 +24,7 @@ from ..sans.types import (
     GravityVector,
     Incident,
     MonitorType,
+    NeutronSourcePosition,
     NeXusDetectorName,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
@@ -106,7 +107,7 @@ def larmor_detector_coord_transform_graph(
     correct_for_gravity: CorrectForGravity,
     *,
     sample_position: Position[snx.NXsample, RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     beam_center: BeamCenter,
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:
@@ -121,7 +122,7 @@ def larmor_detector_coord_transform_graph(
 
 
 def larmor_monitor_coord_transform_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
 ) -> MonitorCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for SANS monitor (no scattering).

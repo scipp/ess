@@ -5,13 +5,12 @@ import scipp as sc
 from ess.reduce.nexus.types import (
     DiskChoppers,
     EmptyMonitor,
+    NeutronSourcePosition,
     NeXusName,
-    Position,
     RawMonitor,
 )
 from ess.reduce.unwrap import fakes
 from ess.reduce.unwrap.types import LookupTableRelativeErrorThreshold, WavelengthMonitor
-from scippnexus import NXsource
 
 from ess import estia, freia
 from ess.estia.types import BeamMonitor
@@ -55,7 +54,7 @@ def test_instrument_workflow_computes_monitor_wavelength(
         sc.scalar(0.0),
         coords={'position': sc.vector([0.0, 0.0, 75.0], unit='m')},
     )
-    wf[Position[NXsource, SampleRun]] = fakes.source_position()
+    wf[NeutronSourcePosition[SampleRun]] = fakes.source_position()
     wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
 
     result = wf.compute(WavelengthMonitor[SampleRun, monitor_type])

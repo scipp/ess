@@ -21,6 +21,7 @@ from .types import (
     IntensityDspacing,
     IntensityTof,
     MonitorCoordTransformGraph,
+    NeutronSourcePosition,
     Position,
     QDetector,
     RunType,
@@ -145,7 +146,7 @@ def to_dspacing_with_calibration(
 
 
 def powder_coordinate_transformation_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:
@@ -256,7 +257,7 @@ def convert_reduced_to_empty_can_subtracted_tof(
 
 
 def powder_monitor_coordinate_transformation_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> MonitorCoordTransformGraph[RunType]:

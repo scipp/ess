@@ -8,6 +8,7 @@ from __future__ import annotations
 import scippnexus as snx
 from ess.spectroscopy.types import (
     GravityVector,
+    NeutronSourcePosition,
     Position,
     PrimarySpecCoordTransformGraph,
     RunType,
@@ -15,7 +16,7 @@ from ess.spectroscopy.types import (
 
 
 def primary_spectrometer_coordinate_transformation_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> PrimarySpecCoordTransformGraph[RunType]:

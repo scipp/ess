@@ -31,6 +31,7 @@ from ess.powder.types import (
     KeepEvents,
     LookupTableFilename,
     MonitorFilename,
+    NeutronSourcePosition,
     NeXusDetectorName,
     OutFilename,
     PixelMaskFilenames,
@@ -44,11 +45,10 @@ from ess.powder.types import (
     WavelengthMask,
 )
 from scippneutron import metadata
-from scippnexus import NXsource
 
 from ess.reduce import unwrap
 from ess.reduce import workflow as reduce_workflow
-from ess.reduce.nexus.types import AnyRun, Position
+from ess.reduce.nexus.types import AnyRun
 
 PARAMETRIZATION = ("detector_name", ["mantle", "endcap_backward", "endcap_forward"])
 
@@ -62,7 +62,7 @@ params = {
     MonitorFilename[VanadiumRun]: dream.data.simulated_monitor_vanadium_sample(),
     MonitorFilename[EmptyCanRun]: dream.data.simulated_monitor_empty_can(),
     dream.InstrumentConfiguration: dream.beamline.InstrumentConfiguration.high_flux_BC215,  # noqa: E501
-    Position[NXsource, AnyRun]: sc.vector(value=[0, 0, -76.55], unit="m"),
+    NeutronSourcePosition[AnyRun]: sc.vector(value=[0, 0, -76.55], unit="m"),
     CalibrationFilename: None,
     UncertaintyBroadcastMode: UncertaintyBroadcastMode.drop,
     DspacingBins: sc.linspace('dspacing', 0.0, 2.3434, 201, unit='angstrom'),

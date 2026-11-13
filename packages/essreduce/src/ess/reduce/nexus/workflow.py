@@ -34,6 +34,7 @@ from .types import (
     Measurement,
     MonitorPositionOffset,
     MonitorType,
+    NeutronSourcePosition,
     NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
@@ -211,6 +212,10 @@ def nx_class_for_monitor() -> NeXusClass[MonitorType]:
 
 def nx_class_for_detector() -> NeXusClass[snx.NXdetector]:
     return NeXusClass[snx.NXdetector](snx.NXdetector)
+
+
+def nx_class_for_moderator() -> NeXusClass[snx.NXmoderator]:
+    return NeXusClass[snx.NXmoderator](snx.NXmoderator)
 
 
 def nx_class_for_source() -> NeXusClass[snx.NXsource]:
@@ -528,6 +533,31 @@ def compute_dynamic_position(
 ) -> DynamicPosition[Component, RunType]:
     """Compute the position of a component from a transformation matrix."""
     return DynamicPosition[Component, RunType](transformation.value * origin)
+
+
+def compute_neutron_source_position(
+    transformation: NeXusTransformation[snx.NXmoderator, RunType],
+) -> NeutronSourcePosition[RunType]:
+    """Compute the neutron source position from the NXmoderator."""
+    return compute_position(transformation)
+
+
+def deny_source_position() -> Position[snx.NXsource, RunType]:
+    """Refuse to provide a source position.
+
+    This is a safety mechanism because it is easy to accidentally request
+    Position[NXsource] and get correct looking, but possibly slightly incorrect data.
+    """
+    raise RuntimeError(
+        "Denied access to Position[NXsource]\n"
+        "The workflow requested Position[scippnexus.NXsource, ...] which is almost "
+        "certainly an error. The source position in ESS NeXus files does not reliably "
+        "represent the place that neutron originate from. Instead, NXsource describes "
+        "neutron production (accelerator, target, etc.).\n\n"
+        "Use NeutronSourcePosition[RunType] or equivalently "
+        "Position[scippnexus.NXmoderator, RunType]. If this does not work for you, "
+        "insert your providder to overridethe one that produced this error."
+    )
 
 
 def get_calibrated_detector(
@@ -952,6 +982,8 @@ _common_providers = (
     to_multi_transformation,
     compute_position,
     compute_dynamic_position,
+    compute_neutron_source_position,
+    deny_source_position,
     load_nexus_data,
     load_nexus_component,
     load_proton_charge,
@@ -961,6 +993,7 @@ _common_providers = (
     nx_class_for_crystal,
     nx_class_for_detector,
     nx_class_for_monitor,
+    nx_class_for_moderator,
     nx_class_for_source,
     nx_class_for_sample,
     nx_class_for_disk_chopper,

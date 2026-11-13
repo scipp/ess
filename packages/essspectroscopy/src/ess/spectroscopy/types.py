@@ -21,6 +21,7 @@ EmptyDetector = reduce_t.EmptyDetector
 Filename = reduce_t.Filename
 GravityVector = reduce_t.GravityVector
 Measurement = reduce_t.Measurement
+NeutronSourcePosition = reduce_t.NeutronSourcePosition
 NeXusClass = reduce_t.NeXusClass
 NeXusComponentLocationSpec = reduce_t.NeXusComponentLocationSpec
 NeXusComponent = reduce_t.NeXusComponent

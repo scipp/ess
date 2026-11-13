@@ -10,7 +10,7 @@ import scippnexus as snx
 from scippneutron.chopper import DiskChopper
 
 from ess.reduce import unwrap
-from ess.reduce.nexus.types import AnyRun, Position
+from ess.reduce.nexus.types import AnyRun, NeutronSourcePosition
 from ess.reduce.unwrap import (
     GenericUnwrapWorkflow,
     LookupTableWorkflow,
@@ -37,7 +37,7 @@ def _make_workflow(wavelength_from: str = "analytical") -> sl.Pipeline:
 def test_lut_workflow_computes_table(detector_or_monitor, wavelength_from):
     wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
 
     if wavelength_from == "simulation":
@@ -72,7 +72,7 @@ def test_lut_workflow_computes_table(detector_or_monitor, wavelength_from):
 def test_lut_workflow_pulse_skipping(detector_or_monitor, wavelength_from):
     wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 62
@@ -99,7 +99,7 @@ def test_lut_workflow_pulse_skipping(detector_or_monitor, wavelength_from):
 def test_lut_workflow_non_exact_distance_range(wavelength_from):
     wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 63
@@ -209,7 +209,7 @@ def test_chopper_cascade_orders_offset_axle_by_beam_projection():
     # distance, otherwise the upstream chopper is wrongly applied last (or, for a
     # narrow distance range, never at all).
     wf = _make_workflow("analytical")
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
     wf[unwrap.DiskChoppers[AnyRun]] = {
         'near': _single_slit_chopper(sc.vector([0, 0.7, 6.145], unit='m')),
@@ -229,7 +229,7 @@ def test_lut_workflow_computes_table_with_choppers(
 ):
     wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 64
@@ -267,7 +267,7 @@ def test_lut_workflow_computes_table_with_choppers(
 def test_lut_workflow_computes_table_with_choppers_full_beamline_range(wavelength_from):
     wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = _make_choppers()
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 64
@@ -319,7 +319,7 @@ def test_lut_workflow_computes_table_with_choppers_full_beamline_range(wavelengt
 def test_lut_workflow_raises_for_distance_before_source(wavelength_from):
     wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 10], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 10], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 65
@@ -346,7 +346,7 @@ def test_lut_workflow_computes_table_using_alias(detector_or_monitor, wavelength
         use_simulation=(wavelength_from == "simulation"), monitor_types=[Monitor0]
     )
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
 
     if wavelength_from == "simulation":
@@ -433,7 +433,7 @@ def test_lut_does_not_raise_if_no_neutrons_make_it_through(wavelength_from):
             radius=sc.scalar(0.35, unit='m'),
         )
     }
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
     # Need to force the pulse stride so that it doesn't get set to a large value due to
     # the slow chopper.
     wf[unwrap.PulseStride[AnyRun]] = 1
@@ -481,7 +481,7 @@ def test_analytical_lut_does_not_raise_with_degenerate_polygon():
             sc.scalar(15.0, unit='angstrom'),
         ),
     )
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, -25.0], unit='m')
     wf[unwrap.PulseStride[AnyRun]] = 1
     wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
         sc.scalar(15.0, unit='m'),
@@ -504,7 +504,7 @@ def test_analytical_lut_stores_mean_and_stddev_of_flat_source_pulse():
     pulse_length = sc.scalar(3.0, unit='ms')
     wf = _make_workflow("analytical")
     wf[unwrap.DiskChoppers[AnyRun]] = {}
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     wf[SourceBounds] = SourceBounds(
         time=(sc.scalar(0.0, unit='ms'), pulse_length),
         wavelength=(sc.scalar(1.0, unit='angstrom'), sc.scalar(5.0, unit='angstrom')),
@@ -590,7 +590,7 @@ def test_choppers_rotate_enough_times_to_catch_slow_neutrons():
     }
     wf = _make_workflow("analytical")
     wf[unwrap.DiskChoppers[AnyRun]] = choppers
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
 
     frames = wf.compute(unwrap.ChopperFrameSequence[AnyRun])
 
@@ -645,7 +645,7 @@ def test_choppers_rotate_enough_times_with_slow_neutrons_to_pollute_lut():
     }
     wf = _make_workflow("analytical")
     wf[unwrap.DiskChoppers[AnyRun]] = choppers
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     dist = sc.scalar(157.5, unit='m')
     wf[LtotalRange[AnyRun, snx.NXdetector]] = dist, dist
 
@@ -771,7 +771,7 @@ def test_lut_workflow_drops_choppers_with_zero_frequency(wavelength_from):
         choppers['FOC_1'], frequency=sc.scalar(0.0, unit='Hz')
     )
     wf[unwrap.DiskChoppers[AnyRun]] = choppers
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 77
@@ -799,7 +799,7 @@ def test_lut_workflow_treats_choppers_with_bad_frequency_as_closed(wavelength_fr
         choppers['FOC_1'], frequency=sc.scalar(5.0, unit='Hz')
     )
     wf[unwrap.DiskChoppers[AnyRun]] = choppers
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 78
@@ -878,7 +878,7 @@ def test_lut_workflow_chopper_frequency_multiple_of_frame_period(wavelength_from
 
     wf = _make_workflow(wavelength_from)
     wf[unwrap.DiskChoppers[AnyRun]] = choppers
-    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
     if wavelength_from == "simulation":
         wf[unwrap.NumberOfSimulatedNeutrons] = 100_000
         wf[unwrap.SimulationSeed] = 79

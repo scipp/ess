@@ -16,6 +16,7 @@ from .types import (
     DetectorTwoTheta,
     EmptyDetector,
     GravityVector,
+    NeutronSourcePosition,
     Position,
     RunType,
     SampleRun,
@@ -105,7 +106,7 @@ class OutputCalibrationData(Mapping[int, sc.Variable]):
 
 def detector_two_theta(
     detector: EmptyDetector[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> DetectorTwoTheta[RunType]:

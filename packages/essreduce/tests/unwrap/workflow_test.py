@@ -14,6 +14,7 @@ from ess.reduce.nexus.types import (
     DiskChoppers,
     EmptyDetector,
     EmptyMonitor,
+    NeutronSourcePosition,
     NeXusData,
     NeXusDetectorName,
     NeXusName,
@@ -110,7 +111,7 @@ def _make_workflow(
     wf[EmptyMonitor[SampleRun, Monitor0]] = monitor_geometry
     wf[NeXusData[Monitor0, SampleRun]] = monitor_data
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0, 0, 77], unit='m')
-    wf[Position[snx.NXsource, SampleRun]] = fakes.source_position()
+    wf[NeutronSourcePosition[SampleRun]] = fakes.source_position()
     wf[DiskChoppers[SampleRun]] = fakes.psc_choppers()
     wf[KeepEventTimeOffset] = keep_event_time_offset
 

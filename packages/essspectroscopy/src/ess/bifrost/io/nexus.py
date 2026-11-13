@@ -13,7 +13,6 @@ from ess.spectroscopy.types import (
     Analyzers,
     ElasticMonitor,
     InstrumentAngle,
-    NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
     NeXusData,
@@ -88,12 +87,6 @@ def extract_instrument_angle(
         # A fixed angle or a value from TransformationOverrides, not an NXlog.
         angle = sc.DataArray(angle)
     return InstrumentAngle[RunType](angle)  # type: ignore[return-value]
-
-
-# See https://github.com/scipp/ess/issues/120
-def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
-    """Select NXmoderator as the source."""
-    return NeXusClass[snx.NXsource](snx.NXmoderator)
 
 
 def load_bifrost_analyzers(
@@ -352,7 +345,6 @@ providers = (
     load_bifrost_analyzers,
     load_bifrost_analyzer_for_detector,
     load_sample_angle,
-    moderator_class_for_source,
 )
 
 parameters = {

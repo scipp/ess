@@ -7,7 +7,13 @@ from pathlib import Path
 import mcstastox
 import scipp as sc
 import scippnexus as snx
-from ess.powder.types import CaveMonitor, EmptyDetector, RunType, WavelengthMonitor
+from ess.powder.types import (
+    CaveMonitor,
+    EmptyDetector,
+    NeutronSourcePosition,
+    RunType,
+    WavelengthMonitor,
+)
 
 from ess.reduce.nexus.types import DiskChoppers, Position
 from ess.reduce.unwrap.types import DetectorLtotal
@@ -273,7 +279,7 @@ def chopper_mode_from_mcstas_mode(mode: str) -> PulseShapingMode | ModulationMod
 
 def mcstas_source_position(
     fname: Filename[RunType], sample_position: Position[snx.NXsample, RunType]
-) -> Position[snx.NXsource, RunType]:
+) -> NeutronSourcePosition[RunType]:
     """Return the effective source position for the McStas geometry.
 
     ``sourceMantid`` is close to the choppers and its direction towards the sample
@@ -314,7 +320,7 @@ def mcstas_sample_position(
 
 def mcstas_choppers(
     da: RawDetector[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
 ) -> DiskChoppers[RunType]:
     """Return BEER choppers for the McStas mode in the data."""
     mode = chopper_mode_from_mcstas_mode(da.coords['mode'].value)
@@ -323,7 +329,7 @@ def mcstas_choppers(
 
 def _mcstas_choppers_from_file(
     fname: Filename[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
 ) -> DiskChoppers[RunType]:
     """Return BEER choppers without loading detector events."""
     fname = Path(fname)
@@ -334,7 +340,7 @@ def _mcstas_choppers_from_file(
 
 def mcstas_detector_ltotal(
     detector: EmptyDetector[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
 ) -> DetectorLtotal[RunType]:
     """Return moderator-to-detector flight path lengths for BEER McStas data."""
