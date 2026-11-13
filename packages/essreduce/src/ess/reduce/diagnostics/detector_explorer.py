@@ -12,6 +12,8 @@ import plopp as pp
 import scipp as sc
 from matplotlib.backend_bases import MouseEvent
 
+from ..masking import write_pixel_masks
+
 BUTTON_STYLE = {"width": "3.0em"}
 THIN_BUTTON_STYLE = {'width': '1.23em', 'padding': '0px'}
 
@@ -510,15 +512,15 @@ class DetectorExplorer(ipw.VBox):
             self.mask_control.on_save(self.save_masks)
             for f in self.tab_figs.values():
                 f.fig.canvas.mpl_connect('button_press_event', self.toggle_mask)
+        else:
+            self.mask_control = None
 
         self.color_control = ColorControl()
         self.color_control.on_limit_change(self.update_color_range)
         self.color_control.on_log_toggle(self.toggle_log)
         self.color_control.on_fit_click(self.fit_cmap_range)
 
-        top_controls = [self.color_control]
-        if masks is not None:
-            top_controls.insert(0, self.mask_control)
+        top_controls = [self.mask_control or ipw.Label(value=""), self.color_control]
 
         super().__init__(
             [
@@ -783,4 +785,5 @@ class DetectorExplorer(ipw.VBox):
         filename = self.mask_control.filename_input.value
         if not filename:
             return
-        self.masks.save_hdf5(filename)
+
+        write_pixel_masks(filename, self.masks, instrument="loki")
