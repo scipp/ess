@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=a0d4136d"></script>
+    <script src="../../../_static/documentation_options.js?v=b7a0930b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.1" />
+  <meta name="docsearch:version" content="26.11.2" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -560,9 +560,11 @@
 <span class="n">NeXusTransformationChain</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">NeXusTransformationChain</span>
 <span class="n">Position</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">Position</span>
 <span class="n">PreopenNeXusFile</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">PreopenNeXusFile</span>
+<span class="n">ProtonCharge</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">ProtonCharge</span>
 <span class="n">RawDetector</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">RawDetector</span>
 <span class="n">RawMonitor</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">RawMonitor</span>
 <span class="n">TimeInterval</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">TimeInterval</span>
+<span class="n">TransformationOverrides</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">TransformationOverrides</span>
 <span class="n">TransformationTimeFilter</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">TransformationTimeFilter</span>
 
 <span class="n">SampleRun</span> <span class="o">=</span> <span class="n">reduce_t</span><span class="o">.</span><span class="n">SampleRun</span>
@@ -719,13 +721,6 @@
 <span class="n">SQWBinSizes</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;SQWBinSizes&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span>
 
 <span class="n">UncertaintyBroadcastMode</span> <span class="o">=</span> <span class="n">_UncertaintyBroadcastMode</span>
-
-
-<div class="viewcode-block" id="ProtonCharge">
-<a class="viewcode-back" href="../../../generated/modules/ess.spectroscopy.types.ProtonCharge.html#ess.spectroscopy.types.ProtonCharge">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ProtonCharge</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Accumulated proton charge for a measurement.&quot;&quot;&quot;</span></div>
-
 </pre></div>
 
                 </article>
@@ -788,7 +783,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.11.2 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

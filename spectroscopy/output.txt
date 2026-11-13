@@ -1,4 +1,4 @@
-Results of doctest builder run on 2026-11-09 12:20:31
+Results of doctest builder run on 2026-11-13 11:04:06
 =====================================================
 
 Document: generated/modules/ess.bifrost.live.CutAxis
@@ -89,14 +89,6 @@ Document: generated/modules/ess.spectroscopy.types.NormalizedIncidentEnergyDetec
 4 passed and 0 failed.
 Test passed.
 
-Document: generated/modules/ess.spectroscopy.types.ProtonCharge
----------------------------------------------------------------
-1 items passed all tests:
-   4 tests in default
-4 tests in 1 items.
-4 passed and 0 failed.
-Test passed.
-
 Document: generated/modules/ess.spectroscopy.types.QDetector
 ------------------------------------------------------------
 1 items passed all tests:
@@ -115,7 +107,7 @@ Test passed.
 
 Doctest summary
 ===============
-   55 tests
+   51 tests
     0 failures in tests
     0 failures in setup code
     0 failures in cleanup code

@@ -31,7 +31,6 @@
       MonitorCoordTransformGraph
       NormalizedIncidentEnergyDetector
       PrimarySpecCoordTransformGraph
-      ProtonCharge
       QDetector
       SampleAngle
       SecondarySpecCoordTransformGraph

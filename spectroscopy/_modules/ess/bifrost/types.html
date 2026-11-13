@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=a0d4136d"></script>
+    <script src="../../../_static/documentation_options.js?v=b7a0930b"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.1" />
+  <meta name="docsearch:version" content="26.11.2" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -558,8 +558,13 @@
 <span class="sd">This must be a transformation in the depends-on chain of the elastic monitor.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">SampleAnglePath</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;SampleAnglePath&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Absolute NeXus path of the ``NXlog`` (or ``NXpositioner``) of the sample rotation.&quot;&quot;&quot;</span>
+<span class="n">SampleAngleNeXusName</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;SampleAngleNeXusName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;(Part of) the NeXus path of the sample angle.</span>
+
+<span class="sd">This is used to find the NXtransformation in the sample&#39;s transformation chain</span>
+<span class="sd">that corresponds to the sample rotation.</span>
+<span class="sd">Can be a complete nexus path, or just part of the path.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 </pre></div>
 
                 </article>
@@ -622,7 +627,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.11.2 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

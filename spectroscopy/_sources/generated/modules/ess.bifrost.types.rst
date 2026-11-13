@@ -11,7 +11,7 @@
       :toctree:
    
       InstrumentAnglePath
-      SampleAnglePath
+      SampleAngleNeXusName
    
    
 

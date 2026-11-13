@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ess.spectroscopy.types.ProtonCharge &#8212; ESSspectroscopy</title>
+    <title>ess.bifrost.types.SampleAngleNeXusName &#8212; ESSspectroscopy</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=a0d4136d"></script>
+    <script src="../../_static/documentation_options.js?v=b7a0930b"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,17 +49,17 @@
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/modules/ess.spectroscopy.types.ProtonCharge';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/modules/ess.bifrost.types.SampleAngleNeXusName';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script defer="defer" src="../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ess.spectroscopy.types.QDetector" href="ess.spectroscopy.types.QDetector.html" />
-    <link rel="prev" title="ess.spectroscopy.types.PrimarySpecCoordTransformGraph" href="ess.spectroscopy.types.PrimarySpecCoordTransformGraph.html" />
+    <link rel="next" title="ess.bifrost.types.ArcNumber" href="ess.bifrost.types.ArcNumber.html" />
+    <link rel="prev" title="ess.bifrost.types.InstrumentAnglePath" href="ess.bifrost.types.InstrumentAnglePath.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.1" />
+  <meta name="docsearch:version" content="26.11.2" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -480,7 +480,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.bifrost.BifrostWorkflow.html">ess.bifrost.BifrostWorkflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../functions/ess.bifrost.BifrostSimulationWorkflow.html">ess.bifrost.BifrostSimulationWorkflow</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="ess.spectroscopy.direct.html">ess.spectroscopy.direct</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.html">ess.spectroscopy.indirect</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="ess.spectroscopy.indirect.conversion.html">ess.spectroscopy.indirect.conversion</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -529,7 +529,7 @@
 </details></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="ess.spectroscopy.types.html">ess.spectroscopy.types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ess.spectroscopy.types.html">ess.spectroscopy.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.Analyzer.html">ess.spectroscopy.types.Analyzer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.Analyzers.html">ess.spectroscopy.types.Analyzers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.DataAtSample.html">ess.spectroscopy.types.DataAtSample</a></li>
@@ -542,14 +542,13 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.MonitorCoordTransformGraph.html">ess.spectroscopy.types.MonitorCoordTransformGraph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.NormalizedIncidentEnergyDetector.html">ess.spectroscopy.types.NormalizedIncidentEnergyDetector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.PrimarySpecCoordTransformGraph.html">ess.spectroscopy.types.PrimarySpecCoordTransformGraph</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">ess.spectroscopy.types.ProtonCharge</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.QDetector.html">ess.spectroscopy.types.QDetector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.SampleAngle.html">ess.spectroscopy.types.SampleAngle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.spectroscopy.types.SecondarySpecCoordTransformGraph.html">ess.spectroscopy.types.SecondarySpecCoordTransformGraph</a></li>
 </ul>
 </details></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.cutting.html">ess.bifrost.cutting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.cutting.group_by_rotation.html">ess.bifrost.cutting.group_by_rotation</a></li>
 </ul>
@@ -608,9 +607,9 @@
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.normalization.normalize_by_monitor_and_proton_charge.html">ess.bifrost.normalization.normalize_by_monitor_and_proton_charge</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="ess.bifrost.types.html">ess.bifrost.types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="ess.bifrost.types.html">ess.bifrost.types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.InstrumentAnglePath.html">ess.bifrost.types.InstrumentAnglePath</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.SampleAnglePath.html">ess.bifrost.types.SampleAnglePath</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ess.bifrost.types.SampleAngleNeXusName</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.ArcNumber.html">ess.bifrost.types.ArcNumber</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ess.bifrost.types.McStasRawDetector.html">ess.bifrost.types.McStasRawDetector</a></li>
 </ul>
@@ -633,10 +632,7 @@
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ess.spectroscopy.types.ProtonCharge"><code class="docutils literal notranslate"><span class="pre">ProtonCharge</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ess.spectroscopy.types.ProtonCharge.__init__"><code class="docutils literal notranslate"><span class="pre">ProtonCharge.__init__()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ess.bifrost.types.SampleAngleNeXusName"><code class="docutils literal notranslate"><span class="pre">SampleAngleNeXusName</span></code></a></li>
 </ul>
   </nav></div>
     </div>
@@ -646,7 +642,7 @@
       <div class="sidebar-primary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../../_sources/generated/modules/ess.spectroscopy.types.ProtonCharge.rst">
+    <a href="../../_sources/generated/modules/ess.bifrost.types.SampleAngleNeXusName.rst">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
@@ -681,9 +677,9 @@
     <li class="breadcrumb-item"><a href="../../api-reference/index.html" class="nav-link">API Reference</a></li>
     
     
-    <li class="breadcrumb-item"><a href="ess.spectroscopy.types.html" class="nav-link">ess.spectroscopy.types</a></li>
+    <li class="breadcrumb-item"><a href="ess.bifrost.types.html" class="nav-link">ess.bifrost.types</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.spectroscopy.types.ProtonCharge</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ess.bifrost.types.SampleAngleNeXusName</span></li>
   </ul>
 </nav>
 </div>
@@ -700,242 +696,15 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="ess-spectroscopy-types-protoncharge">
-<h1>ess.spectroscopy.types.ProtonCharge<a class="headerlink" href="#ess-spectroscopy-types-protoncharge" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="ess.spectroscopy.types.ProtonCharge">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ess.spectroscopy.types.</span></span><span class="sig-name descname"><span class="pre">ProtonCharge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SUPER</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/spectroscopy/types.html#ProtonCharge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.spectroscopy.types.ProtonCharge" title="Link to this definition">#</a></dt>
-<dd><p>Accumulated proton charge for a measurement.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ess.spectroscopy.types.ProtonCharge.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Variable</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Variable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Variable</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Variable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#ess.spectroscopy.types.ProtonCharge.__init__" title="Link to this definition">#</a></dt>
-<dd><p>DataArray initializer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – Data and optionally variances.</p></li>
-<li><p><strong>coords</strong> – Coordinates referenced by dimension.</p></li>
-<li><p><strong>masks</strong> – Masks referenced by name.</p></li>
-<li><p><strong>name</strong> – Name of the data array.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<p>Create a DataArray with data and a coordinate:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">data</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)},</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">((&#39;x&#39;,), (3,))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">)</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ess.spectroscopy.types.ProtonCharge.__init__" title="ess.spectroscopy.types.ProtonCharge.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(self, data[, coords, masks, name])</p></td>
-<td><p>DataArray initializer.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span></code>([dim])</p></td>
-<td><p>Logical AND over input values.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">any</span></code>([dim])</p></td>
-<td><p>Logical OR over input values.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assign</span></code>(data)</p></td>
-<td><p>Return new data array with updated data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assign_coords</span></code>([coords])</p></td>
-<td><p>Return new object with updated or inserted coordinate.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assign_masks</span></code>([masks])</p></td>
-<td><p>Return new object with updated or inserted masks.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">astype</span></code>(self, type, *[, copy])</p></td>
-<td><p>Converts a Variable or DataArray to a different dtype.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bin</span></code>([arg_dict, dim])</p></td>
-<td><p>Create binned data by binning input along all dimensions given by edges.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">broadcast</span></code>(*[, dims, shape, sizes])</p></td>
-<td><p>Broadcast a Variable or a DataArray.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ceil</span></code>(*[, out])</p></td>
-<td><p>Round up to the nearest integer of all values passed in x.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>(self[, deep])</p></td>
-<td><p>Return a (by default deep) copy.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop_coords</span></code>(*args, **kwargs)</p></td>
-<td><p>Overloaded function.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop_masks</span></code>(*args, **kwargs)</p></td>
-<td><p>Overloaded function.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">flatten</span></code>([dims, to])</p></td>
-<td><p>Flatten multiple dimensions into a single dimension.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">floor</span></code>(*[, out])</p></td>
-<td><p>Round down to the nearest integer of all values passed in x.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fold</span></code>(dim, *[, dims, shape, sizes])</p></td>
-<td><p>Fold a single dimension of a variable or data array into multiple dims.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group</span></code>(*args[, dim])</p></td>
-<td><p>Create binned data by grouping input by one or more coordinates.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">groupby</span></code>(group, *[, bins])</p></td>
-<td><p>Group dataset or data array based on values of specified labels.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist</span></code>([arg_dict, dim])</p></td>
-<td><p>Compute a histogram.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>([dim])</p></td>
-<td><p>Maximum of elements in the input.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>([dim])</p></td>
-<td><p>Arithmetic mean of elements in the input.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">median</span></code>([dim])</p></td>
-<td><p>Compute the median of the input values.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>([dim])</p></td>
-<td><p>Minimum of elements in the input.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanhist</span></code>([arg_dict, dim])</p></td>
-<td><p>Compute a histogram, skipping NaN values.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmax</span></code>([dim])</p></td>
-<td><p>Maximum of elements in the input ignoring NaN's.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmean</span></code>([dim])</p></td>
-<td><p>Arithmetic mean of elements in the input ignoring NaN's.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmedian</span></code>([dim])</p></td>
-<td><p>Compute the median of the input values ignoring NaN's.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmin</span></code>([dim])</p></td>
-<td><p>Minimum of elements in the input ignoring NaN's.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanstd</span></code>([dim])</p></td>
-<td><p>Compute the standard deviation of the input values ignoring NaN's.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nansum</span></code>([dim])</p></td>
-<td><p>Sum of elements in the input ignoring NaN's.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanvar</span></code>([dim])</p></td>
-<td><p>Compute the variance of the input values ignoring NaN's.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>(**kwargs)</p></td>
-<td><p>Wrapper function to plot data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rebin</span></code>([arg_dict])</p></td>
-<td><p>Rebin a data array or dataset.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename</span></code>([dims_dict])</p></td>
-<td><p>Rename the dimensions, coordinates, and attributes.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename_dims</span></code>([dims_dict])</p></td>
-<td><p>Rename dimensions.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">round</span></code>(*[, decimals, out])</p></td>
-<td><p>Round to the given number of decimals.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_hdf5</span></code>(filename)</p></td>
-<td><p>Write an object out to file in HDF5 format.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">squeeze</span></code>([dim])</p></td>
-<td><p>Remove dimensions of length 1.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>([dim])</p></td>
-<td><p>Compute the standard deviation of the input values.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code>([dim])</p></td>
-<td><p>Sum of elements in the input.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to</span></code>(*[, unit, dtype, copy])</p></td>
-<td><p>Converts a Variable or DataArray to a different dtype and/or a different unit.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_coords</span></code>([targets, graph, ...])</p></td>
-<td><p>Compute new coords based on transformations of input coords.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transpose</span></code>([dims])</p></td>
-<td><p>Transpose dimensions of the input.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">underlying_size</span></code>(self)</p></td>
-<td><p>Return the size of the object in bytes.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code>([dim])</p></td>
-<td><p>Compute the variance of the input values.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p class="rubric">Attributes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bins</span></code></p></td>
-<td><p>Returns helper <a class="reference external" href="https://scipp.github.io/generated/classes/scipp.Bins.html#scipp.Bins" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipp.Bins</span></code></a> for bin-wise operations.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">coords</span></code></p></td>
-<td><p>Dict of coordinates.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
-<td><p>Underlying data Variable.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim</span></code></p></td>
-<td><p>The only dimension label for 1-dimensional data, raising an exception if the data is not 1-dimensional.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dims</span></code></p></td>
-<td><p>Dimension labels of the data (read-only).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dtype</span></code></p></td>
-<td><p>Data type contained in the variable.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_binned</span></code></p></td>
-<td><p>Return True if the object is binned.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">masks</span></code></p></td>
-<td><p>Dict of masks.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></p></td>
-<td><p>The name of the held data.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim</span></code></p></td>
-<td><p>Number of dimensions of the data (read-only).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
-<td><p>Shape of the data (read-only).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></p></td>
-<td><p>Number of elements in the data (read-only).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sizes</span></code></p></td>
-<td><p>dict mapping dimension labels to dimension sizes (read-only).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unit</span></code></p></td>
-<td><p>Physical unit of the data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value</span></code></p></td>
-<td><p>The only value for 0-dimensional data, raising an exception if the data is not 0-dimensional.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></p></td>
-<td><p>Array of values of the data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">variance</span></code></p></td>
-<td><p>The only variance for 0-dimensional data, raising an exception if the data is not 0-dimensional.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">variances</span></code></p></td>
-<td><p>Array of variances of the data.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+  <section id="ess-bifrost-types-sampleanglenexusname">
+<h1>ess.bifrost.types.SampleAngleNeXusName<a class="headerlink" href="#ess-bifrost-types-sampleanglenexusname" title="Link to this heading">#</a></h1>
+<dl class="py data">
+<dt class="sig sig-object py" id="ess.bifrost.types.SampleAngleNeXusName">
+<span class="sig-prename descclassname"><span class="pre">ess.bifrost.types.</span></span><span class="sig-name descname"><span class="pre">SampleAngleNeXusName</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">ess.bifrost.types.SampleAngleNeXusName</span></em><a class="headerlink" href="#ess.bifrost.types.SampleAngleNeXusName" title="Link to this definition">#</a></dt>
+<dd><p>(Part of) the NeXus path of the sample angle.</p>
+<p>This is used to find the NXtransformation in the sample’s transformation chain
+that corresponds to the sample rotation.
+Can be a complete nexus path, or just part of the path.</p>
 </dd></dl>
 
 </section>
@@ -951,20 +720,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="ess.spectroscopy.types.PrimarySpecCoordTransformGraph.html"
+       href="ess.bifrost.types.InstrumentAnglePath.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ess.spectroscopy.types.PrimarySpecCoordTransformGraph</p>
+        <p class="prev-next-title">ess.bifrost.types.InstrumentAnglePath</p>
       </div>
     </a>
     <a class="right-next"
-       href="ess.spectroscopy.types.QDetector.html"
+       href="ess.bifrost.types.ArcNumber.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ess.spectroscopy.types.QDetector</p>
+        <p class="prev-next-title">ess.bifrost.types.ArcNumber</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1019,7 +788,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.11.2 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
