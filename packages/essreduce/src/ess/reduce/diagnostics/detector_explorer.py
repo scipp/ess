@@ -38,7 +38,7 @@ class MaskControl(ipw.HBox):
             layout={'width': '200px'},
         )
         self.clear_button = ipw.Button(
-            icon='trash', tooltip='Clear masks', layout=BUTTON_STYLE
+            icon='trash', tooltip='Clear masks', layout=BUTTON_STYLE, disabled=True
         )
         self.filename_input = ipw.Text(value='', layout={"width": "150px"})
         self.save_button = ipw.Button(
@@ -188,19 +188,9 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
             layout=THIN_BUTTON_STYLE,
             disabled=disabled,
         )
-        # self.sum = ipw.Checkbox(
-        #     description="sum",
-        #     value=disabled,
-        #     indent=False,
-        #     layout={"width": "initial"},
-        #     disabled=disabled,
-        # )
-
-        # self._link = ipw.jslink((self.sum, 'value'), (self.slider, 'disabled'))
         self.value = (self.dim, None if disabled else self.slider.value)
 
         self.slider.observe(self._on_subwidget_change, names='value')
-        # self.sum.observe(self._on_subwidget_change, names='value')
         self.slider.observe(self._update_navigation_status, names='value')
         self.prev.on_click(
             lambda _: setattr(self.slider, 'value', self.slider.value - 1)
@@ -219,9 +209,6 @@ class DimSlider(ipw.HBox, ipw.ValueWidget):
         return self._dim
 
     def _on_subwidget_change(self, _=None):
-        # if self.sum.value:
-        #     self.value = (self.dim, None)
-        # else:
         self.value = (self.dim, self.slider.value)
 
     def _update_navigation_status(self, _=None):
@@ -248,13 +235,9 @@ def _add_missing_coordinates(da: sc.DataArray) -> sc.DataArray:
     )
 
 
-def _slice_or_sum(
-    da: sc.DataArray, slices: list[tuple[str, int | None]]
-) -> sc.DataArray:
+def _slice_data(da: sc.DataArray, slices: list[tuple[str, int | None]]) -> sc.DataArray:
     """
-    Slice or sum a DataArray based on the provided slices and operation.
-    If the index for a dimension is ``None``, a sum is applied along
-    that dimension. Otherwise, the DataArray is sliced at the given index.
+    Slice a DataArray based on the provided slices and operation.
     If an index is out of bounds for a dimension, a blank DataArray is created to avoid
     indexing errors.
 
@@ -270,9 +253,6 @@ def _slice_or_sum(
         dim, ind = sl
         if dim not in out.sizes:
             continue
-        # if ind is None:
-        #     out = sc.sum(out, dim)
-        # else:
         if ind >= out.sizes[dim]:
             # Make a blank data array to avoid indexing errors
             out = sc.full_like(out[dim, 0], value=float("nan"), dtype='float64')
@@ -295,15 +275,21 @@ def _box_of_sliders(sliders: list[DimSlider]) -> ipw.HBox:
     )
 
 
-def _find_closest(a, x) -> int:
+def _find_closest(a: np.ndarray, x: float) -> int:
     i = np.searchsorted(a, x)
-
     if i == 0:
         return 0
     if i == len(a):
         return len(a) - 1
-
     return i - 1 if abs(a[i - 1] - x) <= abs(a[i] - x) else i
+
+
+def _slice_mask(mask: sc.Variable, slices: list[tuple[str, int]]) -> sc.Variable:
+    out = mask
+    for s in slices:
+        if s[0] in out.dims:
+            out = out[s]
+    return out
 
 
 class DetectorExplorer(ipw.VBox):
@@ -418,7 +404,7 @@ class DetectorExplorer(ipw.VBox):
         }
         self.slice_data_nodes = {
             key: pp.Node(
-                _slice_or_sum,
+                _slice_data,
                 da=self.apply_masks_nodes[key],
                 slices=self.collect_nodes[key],
             )
@@ -446,7 +432,7 @@ class DetectorExplorer(ipw.VBox):
         )
         self.all_slice_data_nodes = {
             key: pp.Node(
-                _slice_or_sum,
+                _slice_data,
                 da=self.apply_masks_nodes[key],
                 slices=self.all_collect_node,
             )
@@ -605,17 +591,6 @@ class DetectorExplorer(ipw.VBox):
         )
         return old_sliders, new_sliders
 
-    # def update_slider_sums(self, old_tab: int, new_tab: int) -> None:
-    #     old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
-    #     old_slider_sums = {sl.dim: sl.sum for sl in old_sliders}
-    #     for sl in new_sliders:
-    #         if (
-    #             (not sl.sum.disabled)
-    #             and (not old_slider_sums[sl.dim].disabled)
-    #             and (sl.sum.value != old_slider_sums[sl.dim].value)
-    #         ):
-    #             sl.sum.value = old_slider_sums[sl.dim].value
-
     def update_slider_inds(self, old_tab: int, new_tab: int) -> None:
         old_sliders, new_sliders = self._get_old_and_new_sliders(old_tab, new_tab)
         old_slider_sliders = {sl.dim: sl.slider for sl in old_sliders}
@@ -646,9 +621,9 @@ class DetectorExplorer(ipw.VBox):
         self.update_color_range()
 
         new_tab, old_tab = change["new"], change["old"]
-        # self.update_slider_sums(old_tab, new_tab)
         if 0 in (old_tab, new_tab):
             self.update_slider_inds(old_tab, new_tab)
+        self.mask_control.clear_button.disabled = True if new_tab == 0 else False
 
     def update_colormapper_norm(self) -> None:
         """
@@ -721,21 +696,6 @@ class DetectorExplorer(ipw.VBox):
             f.view.colormapper.autoscale()
         figs[0].canvas.draw()
 
-    def _get_mask_slices(
-        self, key: str, xdim: str, ydim: str, ix: int, iy: int, mask_name: str
-    ):
-        slices = []
-        mask_dims = self.mask_control.mask_dims[mask_name]
-        # print("mask_dims:", mask_dims)
-        if xdim in mask_dims:
-            slices.append((xdim, ix))
-        if ydim in mask_dims:
-            slices.append((ydim, iy))
-        slices.extend(
-            [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
-        )
-        return slices
-
     def toggle_mask(self, event: MouseEvent) -> None:
         """
         Toggle a mask at the current mouse position based on the selected masking mode.
@@ -766,126 +726,48 @@ class DetectorExplorer(ipw.VBox):
         ix = _find_closest(xcoord.values, event.xdata)
         iy = _find_closest(ycoord.values, event.ydata)
 
-        # # Find slider dims and indices
-        # slices = []
-        # mask_name = self.mask_control.selected
-        # mask_dims = self.mask_control.mask_dims[mask_name]
-        # print("mask_dims:", mask_dims)
-        # if xdim in mask_dims:
-        #     slices.append((xdim, ix))
-        # if ydim in mask_dims:
-        #     slices.append((ydim, iy))
-        # slices.extend(
-        #     [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
-        # )
-        # print("slices:", slices)
-
-        # # if self.mask_control.mode in ("horizontal", "single"):
-        # #     slices.append((ydim, iy))
-        # # if self.mask_control.mode in ("vertical", "single"):
-        # #     slices.append((xdim, ix))
-        # # slices.extend(
-        # #     [sl.value for sl in self.bank_dim_sliders[key] if sl.value[1] is not None]
-        # # )
-        # # Preserve the dim order as in the original data
-        # dims = tuple(
-        #     dim for dim in self.data[key].dims if dim in tuple(sl[0] for sl in slices)
-        # )
-
         # Check if click touched any visible masks
         mask_removed = False
+
+        sliced_masks = {}
+
         for name, mask in self.masks[key].items():
-            # slices = []
-            # mask_dims = mask.dims
-            # if xdim in mask_dims:
-            #     slices.append((xdim, ix))
-            # if ydim in mask_dims:
-            #     slices.append((ydim, iy))
-            # slices.extend(
-            #     [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
-            # )
-            m = mask
-            for s in self._get_mask_slices(key, xdim, ydim, ix, iy, name):
-                m = m[s]
+            slices = []
+            mask_dims = self.mask_control.mask_dims[name]
+            if xdim in mask_dims:
+                slices.append((xdim, ix))
+            if ydim in mask_dims:
+                slices.append((ydim, iy))
+            slices.extend(
+                [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
+            )
+
+            m = _slice_mask(mask, slices)
             if m.values.any():
                 mask_removed = True
                 m.values[...] = False
 
-        # Find slider dims and indices
-        # slices = []
-        # mask_name = self.mask_control.selected
-        # mask_dims = self.mask_control.mask_dims[mask_name]
-        # print("mask_dims:", mask_dims)
-        # if xdim in mask_dims:
-        #     slices.append((xdim, ix))
-        # if ydim in mask_dims:
-        #     slices.append((ydim, iy))
-        # slices.extend(
-        #     [sl.value for sl in self.bank_dim_sliders[key] if sl.dim in mask_dims]
-        # )
-        mask_name = self.mask_control.selected
-        slices = self._get_mask_slices(key, xdim, ydim, ix, iy, mask_name)
-        print("slices:", slices)
-
-        # if self.mask_control.mode in ("horizontal", "single"):
-        #     slices.append((ydim, iy))
-        # if self.mask_control.mode in ("vertical", "single"):
-        #     slices.append((xdim, ix))
-        # slices.extend(
-        #     [sl.value for sl in self.bank_dim_sliders[key] if sl.value[1] is not None]
-        # )
-        # Preserve the dim order as in the original data
-        dims = tuple(
-            dim for dim in self.data[key].dims if dim in tuple(sl[0] for sl in slices)
-        )
+            sliced_masks[name] = m
 
         if not mask_removed:
-            if mask_name not in self.masks[key]:
-                self.masks[key][mask_name] = sc.zeros(
-                    sizes={dim: self.data[key].sizes[dim] for dim in dims},
-                    dtype=bool,
-                )
-            m = self.masks[key][mask_name]
-            for s in slices:
-                m = m[s]
+            mask_name = self.mask_control.selected
+            m = sliced_masks[mask_name]
             m.values[...] = False if m.values.all() else True
-
-        # if not self.masks[key][mask_name].values.max():
-        #     del self.masks[key][mask_name]
 
         self.apply_masks_nodes[key].notify_children(message=None)
 
     def clear_masks(self, _) -> None:
         """
-        Clear currently visible masks for the current tab or the entire dataset.
+        Clear all currently visible masks for the current tab/bank.
         """
-        if self.current_key == "All":
-            keys = self.masks.keys()
-            slices = [
-                sl.value for sl in self.all_dim_sliders if sl.value[1] is not None
-            ]
-        else:
-            keys = [self.current_key]
-            slices = [
-                sl.value
-                for sl in self.bank_dim_sliders[keys[0]]
-                if sl.value[1] is not None
-            ]
+        key = self.current_key
+        slices = [sl.value for sl in self.bank_dim_sliders[key]]
 
-        for key in keys:
-            mask_names = list(self.masks[key].keys())
-            for name in mask_names:
-                m = self.masks[key][name]
-                if any(s[0] in m.dims and s[1] >= m.sizes[s[0]] for s in slices):
-                    continue
-                for s in slices:
-                    if s[0] in m.dims:
-                        m = m[s]
-                m.values[...] = False
-                # if not self.masks[key][name].values.max():
-                #     del self.masks[key][name]
+        for mask in self.masks[key].values():
+            m = _slice_mask(mask, slices)
+            m.values[...] = False
 
-            self.apply_masks_nodes[key].notify_children(message=None)
+        self.apply_masks_nodes[key].notify_children(message=None)
 
     def save_masks(self, _) -> None:
         """
