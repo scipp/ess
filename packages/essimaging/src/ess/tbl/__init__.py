@@ -6,7 +6,12 @@ import importlib.metadata
 from ..imaging import orca
 from . import beamline
 from .beamline import nexus_name
-from .workflow import OrcaNormalizedImagesWorkflow, TblWorkflow, default_parameters
+from .workflow import (
+    OrcaNormalizedImagesWorkflow,
+    TblOrcaWorkflow,
+    TblWorkflow,
+    default_parameters,
+)
 
 try:
     __version__ = importlib.metadata.version("esstbl")
@@ -17,6 +22,7 @@ del importlib
 
 __all__ = [
     "OrcaNormalizedImagesWorkflow",
+    "TblOrcaWorkflow",
     "TblWorkflow",
     "beamline",
     "default_parameters",

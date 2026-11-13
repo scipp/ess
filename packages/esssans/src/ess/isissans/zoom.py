@@ -5,7 +5,6 @@ from collections.abc import Sequence
 import sciline
 import scipp as sc
 from ess.sans import SansWorkflow
-from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 from ess.sans.types import (
     Filename,
@@ -56,7 +55,6 @@ def ZoomWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param
-    workflow.insert(read_xml_detector_masking)
     workflow.typical_outputs = typical_outputs
     return workflow
 

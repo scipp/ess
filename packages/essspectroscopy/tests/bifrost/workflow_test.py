@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+import random
+
 import numpy as np
 import pytest
 import sciline
 import scipp as sc
 import scipp.testing
+import scippnexus as snx
 from ess import bifrost
 from ess.bifrost.data import (
     coda_test_run_2026_10,
@@ -12,9 +15,12 @@ from ess.bifrost.data import (
     lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,
 )
+from ess.bifrost.types import NeXusDetectorNames
 from ess.spectroscopy.types import (
+    Analyzers,
     DataAtSample,
     ElasticMonitor,
+    EmptyDetector,
     EnergyQDetector,
     Filename,
     LookupTableFilename,
@@ -26,6 +32,7 @@ from ess.spectroscopy.types import (
     RawDetector,
     RawMonitor,
     SampleRun,
+    TransformationOverrides,
     UncertaintyBroadcastMode,
     WavelengthMonitor,
 )
@@ -33,13 +40,19 @@ from ess.spectroscopy.types import (
 
 @pytest.fixture(scope='module')
 def detector_names() -> list[str]:
+    # Limit the number of detectors to speed up tests.
     # First 10 detectors form a 5x2 grid (arc=5, channel=2)
-    return bifrost.default_detector_names()[:10]
+    return [
+        f'channel_{channel}_{arc}_triplet'
+        for arc in range(1, 6)
+        for channel in range(1, 3)
+    ]
 
 
 @pytest.fixture
 def workflow(detector_names: list[str]) -> sciline.Pipeline:
-    workflow = bifrost.BifrostSimulationWorkflow(detector_names=detector_names)
+    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {
@@ -50,16 +63,66 @@ def workflow(detector_names: list[str]) -> sciline.Pipeline:
     return workflow
 
 
-def test_simulation_workflow_can_load_detector() -> None:
-    workflow = bifrost.BifrostSimulationWorkflow(
-        detector_names=[NeXusDetectorName("channel_3_1_triplet")]
-    )
+def test_simulation_workflow_can_load_single_detector() -> None:
+    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow[NeXusDetectorNames] = [NeXusDetectorName("channel_3_1_triplet")]
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
-    results = sciline.compute_mapped(workflow, RawDetector[SampleRun])
-    result = results.iloc[0]
+    result = workflow.compute(RawDetector[SampleRun])
 
     assert result.bins is not None
-    assert set(result.dims) == {'tube', 'length', 'time'}
+    assert set(result.dims) == {'arc', 'channel', 'tube', 'length', 'time'}
+    assert result.sizes['tube'] == 3
+    assert 'position' in result.coords
+
+
+@pytest.mark.parametrize('shuffle', [False, True])
+def test_simulation_workflow_can_load_multiple_detectors_rectangular(
+    shuffle: bool,
+) -> None:
+    # Load a subset of detectors that form a rectangular region in the arc-channel space
+    # These detectors can be folded to (arc, channel) dims.
+    detector_names = [
+        f'channel_{channel}_{arc}_triplet'
+        for arc in range(2, 5)
+        for channel in range(4, 10)
+    ]
+    if shuffle:
+        # The order does not matter.
+        random.shuffle(detector_names)
+
+    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow[NeXusDetectorNames] = detector_names
+    workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+    result = workflow.compute(RawDetector[SampleRun])
+
+    assert result.bins is not None
+    assert set(result.dims) == {'arc', 'channel', 'tube', 'length', 'time'}
+    assert result.sizes['arc'] == 3
+    assert result.sizes['channel'] == 6
+    assert result.sizes['tube'] == 3
+    assert 'position' in result.coords
+
+
+def test_simulation_workflow_can_load_multiple_detectors_non_rectangular() -> None:
+    # Load a subset of detectors that do not form a rectangular region in the
+    # arc-channel space. These detectors can *not* be folded to (arc, channel) dims.
+    detector_names = [
+        'channel_3_1_triplet',
+        'channel_3_2_triplet',
+        'channel_4_1_triplet',
+        'channel_4_2_triplet',
+        'channel_5_2_triplet',
+        'channel_6_3_triplet',
+    ]
+
+    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow[NeXusDetectorNames] = detector_names
+    workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+    result = workflow.compute(RawDetector[SampleRun])
+
+    assert result.bins is not None
+    assert set(result.dims) == {'triplet', 'tube', 'length', 'time'}
+    assert result.sizes['triplet'] == len(detector_names)
     assert result.sizes['tube'] == 3
     assert 'position' in result.coords
 
@@ -150,15 +213,64 @@ def test_simulation_workflow_produces_the_same_data_as_before(
     )
 
 
+def test_calibrated_detector_has_contiguous_detector_number() -> None:
+    # This test requires all detector pixels.
+    # (the `workflow` fixture only uses the first 10.)
+    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
+
+    detector = workflow.compute(EmptyDetector[SampleRun])
+    detector_number = detector.coords['detector_number']
+    # Both the memory layout and the actual values should be contiguous
+    assert detector_number.values.flags['C_CONTIGUOUS']
+
+    flat = detector_number.flatten(to='x')
+    sc.testing.assert_identical(flat, sc.arange('x', 1, 1 + len(flat), unit=None))
+
+
 @pytest.fixture
 def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
-    workflow = bifrost.BifrostWorkflow(detector_names=detector_names)
+    workflow = bifrost.BifrostWorkflow()
+    workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = coda_test_run_2026_10()
     # The table does not match the choppers of this run but these tests only check
     # that the file can be loaded.
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     return workflow
+
+
+def test_tank_angle_override_rotates_detectors_and_analyzers_and_sets_a4(
+    coda_workflow: sciline.Pipeline,
+) -> None:
+    tank_angle = '/entry/instrument/detector_tank/transformations/tank_angle'
+    # The angle in the file is 0, so the overridden positions are the original ones
+    # rotated by the override, around the vertical axis through the sample.
+    original_detector = coda_workflow.compute(RawDetector[SampleRun])
+    original_analyzers = coda_workflow.compute(Analyzers[SampleRun])
+
+    angle = sc.scalar(30.0, unit='deg')
+    rotation = sc.spatial.rotations_from_rotvecs(angle * sc.vector([0.0, 1.0, 0.0]))
+    # The tank carries all of these, so each needs the override.
+    for component in (snx.NXdetector, snx.NXcrystal, ElasticMonitor):
+        coda_workflow[TransformationOverrides[component, SampleRun]] = {
+            tank_angle: angle
+        }
+
+    atol = sc.scalar(1e-9, unit='m')
+    sc.testing.assert_allclose(
+        coda_workflow.compute(RawDetector[SampleRun]).coords['position'],
+        rotation * original_detector.coords['position'],
+        atol=atol,
+    )
+    for name, analyzer in coda_workflow.compute(Analyzers[SampleRun]).items():
+        sc.testing.assert_allclose(
+            analyzer['position'].position,
+            rotation * original_analyzers[name]['position'].position,
+            atol=atol,
+        )
+    data = coda_workflow.compute(DataAtSample[SampleRun])
+    sc.testing.assert_identical(data.coords['a4'], sc.concat([angle], 'a4'))
 
 
 def test_workflow_can_load_detector_with_analyzers_and_angles_from_coda_file(

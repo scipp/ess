@@ -27,12 +27,25 @@ NeXusComponent = reduce_t.NeXusComponent
 NeXusData = reduce_t.NeXusData
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusFileSpec = reduce_t.NeXusFileSpec
+NeXusLocationSpec = reduce_t.NeXusLocationSpec
+NeXusMultiComponent = reduce_t.NeXusMultiComponent
+NeXusMultiComponentLocationSpec = reduce_t.NeXusMultiComponentLocationSpec
+NeXusMultiData = reduce_t.NeXusMultiData
+NeXusMultiDataLocationSpec = reduce_t.NeXusMultiDataLocationSpec
+NeXusMultiNames = reduce_t.NeXusMultiNames
+NeXusMultiTransformation = reduce_t.NeXusMultiTransformation
+NeXusMultiTransformationChain = reduce_t.NeXusMultiTransformationChain
 NeXusMonitorName = reduce_t.NeXusName
 NeXusTransformation = reduce_t.NeXusTransformation
+NeXusTransformationChain = reduce_t.NeXusTransformationChain
 Position = reduce_t.Position
 PreopenNeXusFile = reduce_t.PreopenNeXusFile
+ProtonCharge = reduce_t.ProtonCharge
 RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
+TimeInterval = reduce_t.TimeInterval
+TransformationOverrides = reduce_t.TransformationOverrides
+TransformationTimeFilter = reduce_t.TransformationTimeFilter
 
 SampleRun = reduce_t.SampleRun
 VanadiumRun = NewType("VanadiumRun", int)
@@ -68,10 +81,11 @@ LookupTableFilename = unwrap.LookupTableFilename
 
 
 class Analyzer(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]):
-    """A single wavelength analyzer loaded from an NXcrystal.
+    """A single wavelength analyzer loaded from an NXcrystal."""
 
-    Can be obtained from ``Analyzers``.
-    """
+
+class Analyzers(sciline.Scope[RunType, sc.DataGroup[Any]], sc.DataGroup[Any]):
+    """All wavelength analyzers loaded from a NXcrystals."""
 
 
 class DataAtSample(sciline.Scope[RunType, sc.DataArray], sc.DataArray): ...
@@ -141,9 +155,4 @@ class MonitorCoordTransformGraph(sciline.Scope[RunType, dict], dict): ...
 
 SQWBinSizes = NewType('SQWBinSizes', dict[str, int])
 
-
 UncertaintyBroadcastMode = _UncertaintyBroadcastMode
-
-
-class ProtonCharge(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Accumulated proton charge for a measurement."""

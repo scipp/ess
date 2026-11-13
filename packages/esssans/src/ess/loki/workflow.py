@@ -10,7 +10,7 @@ import scippnexus as snx
 from ess import sans
 from ess.sans.parameters import typical_outputs
 
-from ess.reduce.unwrap import WavelengthLutMode
+from ess.reduce.unwrap import SourceBounds, WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
 from ..sans.types import (
@@ -48,6 +48,22 @@ def loki_default_parameters() -> dict:
         NeXusMonitorName[Transmission]: 'beam_monitor_m3',
         PixelShapePath: 'pixel_shape',
         NonBackgroundWavelengthRange: None,
+        # Used by analytical lookup tables, which treat the pulse as flat in time.
+        # LoKI has no pulse-shaping choppers, so the window sets the mean and standard
+        # deviation of the table wavelengths. A flat window mu +- sqrt(3) sigma has the
+        # mean (mu = 1.76 ms) and standard deviation (sigma = 0.88 ms) of the emission
+        # time of the McStas ESS source for 1-10 Angstrom.
+        # This is not a cut: the two moments include the tail of the pulse, and
+        # neutrons emitted outside the window get the table mean and standard
+        # deviation like all others. Only at the tips of a frame, where no neutron
+        # emitted within the window arrives, do they get no wavelength.
+        SourceBounds: SourceBounds(
+            time=(sc.scalar(0.24, unit='ms'), sc.scalar(3.29, unit='ms')),
+            wavelength=(
+                sc.scalar(0.001, unit='angstrom'),
+                sc.scalar(15.0, unit='angstrom'),
+            ),
+        ),
         LookupTableRelativeErrorThreshold: {
             **{f'loki_detector_{i}': float('inf') for i in range(9)},
             # Monitors where renamed, beam_monitor_i is the old name

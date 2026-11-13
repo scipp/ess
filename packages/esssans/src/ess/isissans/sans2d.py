@@ -6,11 +6,17 @@ import sciline
 import scipp as sc
 from ess.sans import SansWorkflow
 from ess.sans.parameters import typical_outputs
-from ess.sans.types import DetectorMasks, EmptyDetector, SampleRun
+from ess.sans.types import (
+    DetectorMasks,
+    EmptyDetector,
+    PixelMaskFilenames,
+    PixelMasks,
+    SampleRun,
+)
 
 from ess.reduce.workflow import register_workflow
 
-from .general import default_parameters
+from .general import default_parameters, to_detector_mask_without_bank
 from .io import load_tutorial_direct_beam, load_tutorial_run
 from .mantidio import providers as mantid_providers
 
@@ -50,27 +56,35 @@ def sample_holder_mask(
 
 
 def to_detector_masks(
-    edge_mask: DetectorEdgeMask, holder_mask: SampleHolderMask
+    detector: EmptyDetector[SampleRun],
+    pixel_masks: PixelMasks,
+    edge_mask: DetectorEdgeMask,
+    holder_mask: SampleHolderMask,
 ) -> DetectorMasks:
-    """Gather detector masks.
-
-    Unlike :py:func:`ess.sans.masking.to_detector_mask`, this function does not rely on
-    mapping using a table of mask filenames. Instead it directly returns a dictionary
-    if multiple masks.
+    """Combine the pixel masks of the instrument with masks computed from the detector.
 
     Parameters
     ----------
+    detector:
+        Detector of the sample run.
+    pixel_masks:
+        Pixel masks of the instrument.
     edge_mask:
         Mask for detector edges.
     holder_mask:
         Mask for sample holder.
+
+    Raises
+    ------
+    ValueError
+        If a pixel mask has the name of a computed mask, which would replace it.
     """
-    masks = {}
-    if edge_mask is not None:
-        masks['edges'] = edge_mask
-    if holder_mask is not None:
-        masks['holder_mask'] = holder_mask
-    return DetectorMasks(masks)
+    masks = to_detector_mask_without_bank(detector, pixel_masks)
+    computed = {'edges': edge_mask, 'holder_mask': holder_mask}
+    computed = {name: mask for name, mask in computed.items() if mask is not None}
+    if clashes := masks.keys() & computed.keys():
+        raise ValueError(f"Pixel masks use names of computed masks: {sorted(clashes)}.")
+    return DetectorMasks({**masks, **computed})
 
 
 providers = (detector_edge_mask, sample_holder_mask, to_detector_masks)
@@ -88,6 +102,7 @@ def Sans2dWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param
+    workflow[PixelMaskFilenames] = PixelMaskFilenames([])
     workflow.typical_outputs = typical_outputs
     return workflow
 

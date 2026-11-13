@@ -6,6 +6,11 @@
 #
 # [tool.pixi.workspace]
 # channels = ["conda-forge"]
+# platforms = [
+#    "linux-64",
+#    { platform = "osx-arm64", macos = "14.0" },
+#    "win-64",
+# ]
 # ///
 """Sync requires-python with pixi.toml.
 

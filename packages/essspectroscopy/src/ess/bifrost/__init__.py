@@ -5,7 +5,6 @@
 
 import importlib.metadata
 
-from .detector import default_detector_names
 from .io import nexus
 from .workflow import BifrostSimulationWorkflow, BifrostWorkflow
 
@@ -19,6 +18,5 @@ del importlib
 __all__ = [
     'BifrostSimulationWorkflow',
     'BifrostWorkflow',
-    'default_detector_names',
     'nexus',
 ]

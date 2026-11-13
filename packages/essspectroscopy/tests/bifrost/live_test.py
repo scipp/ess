@@ -12,7 +12,7 @@ from ess.bifrost.data import (
 )
 from ess.bifrost.io.mcstas import load_sample_angle
 from ess.bifrost.live import BifrostQCutWorkflow, CutAxis, CutAxis1, CutAxis2, CutData
-from ess.bifrost.types import InstrumentAnglePath
+from ess.bifrost.types import InstrumentAnglePath, NeXusDetectorNames
 from ess.bifrost.workflow import simulation_default_parameters
 from ess.spectroscopy.types import (
     Filename,
@@ -37,7 +37,8 @@ class TestBifrostQCutWorkflow:
     def qcut_workflow(
         self, simulation_detector_names: list[NeXusDetectorName]
     ) -> sciline.Pipeline:
-        workflow = BifrostQCutWorkflow(simulation_detector_names)
+        workflow = BifrostQCutWorkflow()
+        workflow[NeXusDetectorNames] = simulation_detector_names
         # The test file is from a simulation and
         # looks slightly different from production files.
         workflow.insert(load_sample_angle)
