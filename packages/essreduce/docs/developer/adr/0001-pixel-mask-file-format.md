@@ -46,9 +46,8 @@ with h5py.File(path) as f:
 - Names of `NXdetector` groups are the names of the groups in the NeXus files of the runs.
   A name that is not a bank of the instrument is an error, since a misspelled name would otherwise mask nothing.
 - The name of a dataset in `masks` is the name of the mask in the reduced data.
-  Datasets with the same name in several banks form one mask.
-  The data of each bank gets a mask of that name, made from the dataset of that bank.
-  A bank without a dataset of that name has no pixels masked by it.
+  Masks are associated with their detector group; a detector without a dataset does
+  not get that mask.
 - A pixel is masked if its value is not zero.
   HDF5 has no boolean type.
   h5py stores numpy booleans as an enumeration based on `int8`, which other HDF5 libraries may not read as booleans.
@@ -56,6 +55,7 @@ with h5py.File(path) as f:
   Readers accept any integer type, and the boolean enumeration that h5py writes for numpy booleans.
 - Dimensions of a mask are named with HDF5 dimension labels.
   They are a subset of the logical dimensions of the bank, in any order, with matching sizes.
+  Masks with the same name in different banks use the same dimension labels, though their sizes may differ.
   Each mask has its own dimensions, so a tube mask and a straw mask need not be combined into one array.
   The sizes are checked when masks are applied, because scipp ignores a mask with a dimension that the data lacks, without an error.
 - A file with several `NXentry` groups is an error, since the reader would use only one of them and leave pixels unmasked.
@@ -65,7 +65,7 @@ with h5py.File(path) as f:
   `write_pixel_masks` writes all three, and workflows do not read them.
 
 Workflows take a list of filenames and use the masks of all files.
-Two files with a mask of the same name are an error.
+Two files with a mask of the same name for the same detector are an error.
 A file can hold all masks of an instrument, or masks can be split into files, for example by validity period: one file for broken tubes and one for the beamstop of an experiment.
 Workflows do not check validity dates.
 Selecting the files that are valid for a run is left to the caller of the workflow, which sets the list of filenames.
