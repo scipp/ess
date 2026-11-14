@@ -60,6 +60,8 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
         ``masks`` collection. A pixel is masked if its value is not zero. The dimensions
         of a dataset are given by HDF5 dimension labels. They are named after the
         logical dimensions of the detector, and may be a subset of them, in any order.
+        Masks with the same name in different detectors must have the same dimension
+        labels, but their sizes may differ.
         Other entries of the file, such as the instrument name or a validity date, are
         ignored.
       - A file written by :py:func:`scipp.io.save_hdf5` with a variable of masked
@@ -75,12 +77,15 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
     ------
     ValueError
         If a file has an unsupported suffix or content, or two files define the same
-        mask for a detector. One mask would replace the other otherwise.
+        mask for a detector, or same-named masks in different detectors have different
+        dimension labels. One mask would replace the other otherwise.
     """
     masks = {}
     for filename in map(Path, filenames):
         for name, content in _read_mask_file(filename).items():
             if name not in masks:
+                if isinstance(content, sc.DataGroup):
+                    _validate_mask_dimension_labels(name, content, masks)
                 masks[name] = content
             elif isinstance(content, sc.DataGroup) and isinstance(
                 previous := masks[name], sc.DataGroup
@@ -91,6 +96,7 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
                         f"Several mask files give detector masks {sorted(duplicates)} "
                         f"for detector '{name}'."
                     )
+                _validate_mask_dimension_labels(name, content, masks)
                 masks[name] = sc.DataGroup({**dict(previous), **dict(content)})
             else:
                 raise ValueError(f"Several mask files give the mask name '{name}'.")
@@ -269,6 +275,28 @@ def _read_nexus_masks(entry: snx.Group, filename: Path) -> dict[str, sc.DataGrou
     if not masks:
         raise ValueError(f"Mask file '{filename}' has no detector with masks.")
     return masks
+
+
+def _validate_mask_dimension_labels(
+    detector_name: str,
+    detector_masks: sc.DataGroup,
+    masks: Mapping[str, sc.Variable | sc.DataGroup],
+) -> None:
+    for mask_name, mask in detector_masks.items():
+        for other_detector, other_masks in masks.items():
+            if other_detector == detector_name or not isinstance(
+                other_masks, sc.DataGroup
+            ):
+                continue
+            if mask_name not in other_masks:
+                continue
+            other_mask = other_masks[mask_name]
+            if set(mask.dims) != set(other_mask.dims):
+                raise ValueError(
+                    f"Mask '{mask_name}' has different dimension labels in detectors "
+                    f"'{other_detector}' ({sorted(other_mask.dims)}) and "
+                    f"'{detector_name}' ({sorted(mask.dims)})."
+                )
 
 
 def _read_bank_mask(field: snx.Field | snx.Group, filename: Path) -> sc.Variable:

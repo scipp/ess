@@ -55,6 +55,7 @@ with h5py.File(path) as f:
   Readers accept any integer type, and the boolean enumeration that h5py writes for numpy booleans.
 - Dimensions of a mask are named with HDF5 dimension labels.
   They are a subset of the logical dimensions of the bank, in any order, with matching sizes.
+  Masks with the same name in different banks use the same dimension labels, though their sizes may differ.
   Each mask has its own dimensions, so a tube mask and a straw mask need not be combined into one array.
   The sizes are checked when masks are applied, because scipp ignores a mask with a dimension that the data lacks, without an error.
 - A file with several `NXentry` groups is an error, since the reader would use only one of them and leave pixels unmasked.
