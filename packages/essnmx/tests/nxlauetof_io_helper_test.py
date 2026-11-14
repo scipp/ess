@@ -50,8 +50,6 @@ def test_loaded_data_same_as_in_memory_result(
         result = reduction(config=reduction_config)
     original_result_dg = result.to_datagroup()
 
-    # Adjust original result to be same as expected loaded data group.
-    original_result_dg.pop('lookup_table')
     original_positions = {}
     detectors = original_result_dg['instrument']['detectors']
     for det_name, det in detectors.items():
