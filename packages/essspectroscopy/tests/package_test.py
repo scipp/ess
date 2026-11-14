@@ -32,7 +32,7 @@ PACKAGES = (
 )
 # Notebook-only modules that import widget packages at module level.
 # Their submodules are skipped as well.
-WIDGET_MODULES = ()
+WIDGET_MODULES = ('ess.bifrost.diagnostics',)
 
 
 def test_import_works_without_optional_widget_packages():
