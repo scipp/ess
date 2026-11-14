@@ -334,6 +334,13 @@ def mcstas_sample_surface_normal(
     return SampleSurfaceNormal[RunType](sc.vector(rotation[1], unit='dimensionless'))
 
 
+def mcstas_inverted_sample_surface_normal(
+    filename: Filename[RunType],
+) -> SampleSurfaceNormal[RunType]:
+    """Load the normal pointing out of the sample's underside in inversion mode."""
+    return SampleSurfaceNormal[RunType](-mcstas_sample_surface_normal(filename))
+
+
 def load_mcstas_monitor(filename: str | Path, monitor_name: str) -> sc.DataArray:
     """Read a selected one-dimensional McStas L_monitor histogram.
 

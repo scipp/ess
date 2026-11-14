@@ -204,10 +204,13 @@ def test_offspec_workflow_supports_scalar_incidence_for_a_single_beam(method):
     ('method', 'expected'),
     [('closest', [1.0, 1.0, 1.0, 1.0]), ('shutter_logs', [0.3, 1.0, np.nan, np.nan])],
 )
-def test_offspec_workflow_assigns_incidence_with_independent_methods(method, expected):
+@pytest.mark.parametrize('gravity', [0.0, 9.80665])
+def test_offspec_workflow_assigns_incidence_with_independent_methods(
+    method, expected, gravity
+):
     wf = FreiaOffspecWorkflow(incident_beam_from=method)
     assert wf.compute(KeepEventTimeOffset) is (method == 'shutter_logs')
-    wf[GravityVector] = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
+    wf[GravityVector] = sc.vector([0.0, -gravity, 0.0], unit='m/s^2')
     wf[Position[NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[Position[NXsource, SampleRun]] = sc.vector([0.0, 0.0, -29.0], unit='m')
     wf[SampleSurfaceNormal[SampleRun]] = sc.vector([0.0, 1.0, 0.0])
@@ -271,10 +274,18 @@ def test_offspec_workflow_assigns_incidence_with_independent_methods(method, exp
         }
 
     result = wf.compute(CorrectedDetector[SampleRun])
-    assigned = result.bins.coords['incident_angle'].bins.constituents['data']
+    assigned = (
+        result.bins.coords['incident_angle']
+        if 'incident_angle' in result.bins.coords
+        else sc.bins_like(data, result.coords['incident_angle'])
+    ).bins.constituents['data']
+    # All events travel at 1000 m/s. The horizontal slit separation is 1 m
+    # and the last slit is 1 m before the sample: effective distance 1.5 m.
+    correction = sc.scalar(gravity * 1.5 / 1000.0**2, unit='rad')
     assert_allclose(
         assigned,
-        sc.array(dims=['event'], values=expected, unit='deg').to(unit='rad'),
+        sc.array(dims=['event'], values=expected, unit='deg').to(unit='rad')
+        + correction,
         equal_nan=True,
     )
     input_coords = set(data.coords) | set(data.bins.coords)
@@ -287,8 +298,11 @@ def test_offspec_workflow_assigns_incidence_with_independent_methods(method, exp
     }
     assert_identical(result.bins.data, data.bins.data)
     unassigned = np.isnan(expected)
-    assert_identical(
-        result.bins.masks['incident_beam_unassigned'].bins.constituents['data'],
-        sc.array(dims=['event'], values=unassigned),
-    )
+    if 'incident_beam_unassigned' in result.bins.masks:
+        assert_identical(
+            result.bins.masks['incident_beam_unassigned'].bins.constituents['data'],
+            sc.array(dims=['event'], values=unassigned),
+        )
+    else:
+        assert not np.any(unassigned)
     assert result.sum().value == np.count_nonzero(~unassigned)
