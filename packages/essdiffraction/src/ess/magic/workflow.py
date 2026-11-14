@@ -5,7 +5,9 @@ import sciline as sl
 
 from ess.reduce.nexus.types import DetectorBankSizes
 
+from . import mcstas
 from .beamline import DETECTOR_BANK_SIZES
+from .types import DetectorBank, RunType, SampleRun
 
 default_parameters = {
     DetectorBankSizes: DETECTOR_BANK_SIZES,
@@ -21,3 +23,16 @@ def MagicWorkflow() -> sl.Pipeline:
     pipeline is developed.
     """
     return sl.Pipeline(providers=(), params=default_parameters)
+
+
+def MagicMcStasWorkflow() -> sl.Pipeline:
+    """Workflow for MAGIC McStas events and geometry, with detector bank A by default.
+
+    Provides ``RawMcStasEvents[RunType]`` and ``EmptyDetector[RunType]`` independently.
+    Event assignment and reduction providers are not yet included.
+    """
+    return sl.Pipeline(
+        providers=(mcstas.load_mcstas_events, mcstas.mcstas_detector_geometry),
+        constraints={RunType: [SampleRun]},
+        params={DetectorBank: DetectorBank.detector_a},
+    )
