@@ -556,7 +556,7 @@ def deny_source_position() -> Position[snx.NXsource, RunType]:
         "neutron production (accelerator, target, etc.).\n\n"
         "Use NeutronSourcePosition[RunType] or equivalently "
         "Position[scippnexus.NXmoderator, RunType]. If this does not work for you, "
-        "insert your providder to overridethe one that produced this error."
+        "insert your providd er to override the one that produced this error."
     )
 
 
