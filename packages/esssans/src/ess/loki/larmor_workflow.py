@@ -27,6 +27,7 @@ from ..sans.types import (
     NeutronSourcePosition,
     NeXusDetectorName,
     NeXusMonitorName,
+    NeXusTransformation,
     NonBackgroundWavelengthRange,
     PixelMaskFilenames,
     PixelShapePath,
@@ -136,11 +137,21 @@ def larmor_monitor_coord_transform_graph(
     )
 
 
+def larmor_compute_neutron_source_position(
+    transformation: NeXusTransformation[snx.NXsource, RunType],
+) -> NeutronSourcePosition[RunType]:
+    """Compute the neutron source position from the NXmoderator."""
+    from ess.reduce.nexus.workflow import compute_position
+
+    return compute_position(transformation)
+
+
 loki_at_larmor_providers = (
     larmor_data_to_wavelength,
     larmor_monitor_to_wavelength,
     larmor_detector_coord_transform_graph,
     larmor_monitor_coord_transform_graph,
+    larmor_compute_neutron_source_position,
 )
 
 
