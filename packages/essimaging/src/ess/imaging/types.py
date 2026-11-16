@@ -25,6 +25,7 @@ RawDetector = reduce_t.RawDetector
 RawMonitor = reduce_t.RawMonitor
 NXdetector = snx.NXdetector
 NXsource = snx.NXsource
+NeutronSourcePosition = reduce_t.NeutronSourcePosition
 
 DetectorLtotal = unwrap_t.DetectorLtotal
 TofDetector = unwrap_t.TofDetector
