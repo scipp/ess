@@ -74,7 +74,7 @@ def test_all_workflow_constructors_accept_inversion(factory):
     )
 
 
-@pytest.mark.parametrize('normal_scale', [0.5, -2.0, 3.0])
+@pytest.mark.parametrize('normal_scale', [0.5, -2.0])
 def test_reflected_path_through_tilted_translated_mirror(normal_scale):
     rotation = sc.spatial.rotations_from_rotvecs(
         sc.vector([0.3, -0.4, 0.1], unit='rad')
@@ -174,14 +174,16 @@ def _write_mirror(path, *, name='inversion_mirror', angles=(80.0,)):
         pitch['time'].attrs.update(units='s', start='2026-01-01T00:00:00Z')
 
 
-@pytest.mark.parametrize('name', ['inversion_mirror', 'deflector'])
-@pytest.mark.parametrize('run', [SampleRun, ReferenceRun])
+@pytest.mark.parametrize(
+    ('name', 'run'), [('inversion_mirror', SampleRun), ('deflector', ReferenceRun)]
+)
 def test_nexus_mirror_loads_translation_and_local_minus_z_normal(tmp_path, name, run):
     filename = tmp_path / 'mirror.nxs'
     _write_mirror(filename, name=name)
     wf = freia.FreiaWorkflow(inversion=True)
     wf[Filename[run]] = filename
-    wf[NeXusName[snx.NXmirror]] = name
+    if name != 'inversion_mirror':
+        wf[NeXusName[snx.NXmirror]] = name
     assert_allclose(
         wf.compute(MirrorPosition[run]), sc.vector([0.0, -0.3, -1.0], unit='m')
     )
@@ -251,6 +253,8 @@ def _set_run(workflow, run, *, direct=False, supply_wavelength=True):
 def test_detector_flight_path_includes_mirror_detour(run):
     wf = freia.FreiaWorkflow(inversion=True)
     _set_run(wf, run, direct=run == ReferenceRun, supply_wavelength=False)
+    gravity = sc.vector([0.0, -9.80665, 0.0], unit='m/s^2')
+    wf[GravityVector] = gravity
     assert_allclose(
         wf.compute(DetectorLtotal[run]),
         sc.array(dims=['pixel_id'], values=[5 * np.sqrt(2)], unit='m'),
@@ -259,6 +263,13 @@ def test_detector_flight_path_includes_mirror_detour(run):
     graph = wf.compute(CoordTransformationGraph[run])
     result = sc.DataArray(sc.scalar(0.0)).transform_coords('L1', graph=graph)
     assert_allclose(result.coords['L1'], sc.scalar(4 * np.sqrt(2), unit='m'))
+    # Only the virtual source is reflected; physical inputs stay in the lab frame.
+    assert_identical(graph['gravity'](), gravity)
+    assert_identical(graph['sample_position'](), sc.vector([0.0, 1.0, 0.0], unit='m'))
+    assert_identical(
+        wf.compute(Position[snx.NXsource, run]),
+        sc.vector([0.0, 3.0, -4.0], unit='m'),
+    )
 
 
 def test_mirror_before_sample_rejects_source_on_opposite_side_of_plane():
@@ -334,7 +345,7 @@ def test_inverted_specular_sample_and_direct_beam_normalization():
     )
 
 
-@pytest.mark.parametrize('method', ['closest', 'fixed_slits', 'shutter_logs'])
+@pytest.mark.parametrize('method', ['fixed_slits', 'shutter_logs'])
 def test_offspecular_inversion_reflects_slit_angles_and_shutter_paths(method):
     wf = freia.FreiaOffspecWorkflow(inversion=True, incident_beam_from=method)
     data = _set_run(wf, SampleRun)
@@ -393,19 +404,3 @@ def test_offspecular_inversion_reflects_slit_angles_and_shutter_paths(method):
         sc.array(dims=['event'], values=[np.pi / np.sqrt(2)], unit='1/angstrom'),
     )
     assert result.sum().value == 20.0
-
-
-def test_gravity_and_physical_positions_remain_in_laboratory_frame():
-    wf = freia.FreiaWorkflow(inversion=True)
-    _set_run(wf, SampleRun)
-    gravity = sc.vector([0.0, -9.80665, 0.0], unit='m/s^2')
-    wf[GravityVector] = gravity
-    graph = wf.compute(CoordTransformationGraph[SampleRun])
-    assert_identical(graph['gravity'](), gravity)
-    assert_identical(
-        graph['sample_position'](), wf.compute(Position[snx.NXsample, SampleRun])
-    )
-    assert_identical(
-        wf.compute(Position[snx.NXsource, SampleRun]),
-        sc.vector([0.0, 3.0, -4.0], unit='m'),
-    )

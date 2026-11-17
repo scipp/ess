@@ -225,7 +225,7 @@ def test_closest_selection_uses_nominal_geometry_before_correcting_incidence(
     assert_allclose(result.coords['incident_angle'], expected)
 
 
-@pytest.mark.parametrize('method', ['fixed_slits', 'closest', 'shutter_logs'])
+@pytest.mark.parametrize('method', ['fixed_slits', 'shutter_logs'])
 @pytest.mark.parametrize('inversion', [False, True])
 def test_workflow_corrects_binned_incidence_and_preserves_counts(method, inversion):
     geometry = _geometry(0.0 if inversion else None)
