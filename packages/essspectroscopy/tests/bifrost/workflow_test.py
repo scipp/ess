@@ -187,3 +187,31 @@ def test_workflow_can_load_monitors_from_coda_file(
 ) -> None:
     monitor = coda_workflow.compute(RawMonitor[SampleRun, monitor_type])
     assert 'position' in monitor.coords
+
+
+@pytest.mark.parametrize('monitor_type', [ElasticMonitor, NormalizationMonitor])
+def test_workflow_can_compute_event_wavelength_monitor_from_coda_file(
+    coda_workflow: sciline.Pipeline, monitor_type: type
+) -> None:
+    coda_workflow[LookupTableRelativeErrorThreshold] = {
+        'elastic_monitor': np.inf,
+        'normalization_monitor': np.inf,
+    }
+    results = coda_workflow.compute(
+        (
+            RawMonitor[SampleRun, monitor_type],
+            WavelengthMonitor[SampleRun, monitor_type],
+        )
+    )
+    raw = results[RawMonitor[SampleRun, monitor_type]]
+    monitor = results[WavelengthMonitor[SampleRun, monitor_type]]
+
+    assert monitor.bins is not None
+    assert 'incident_wavelength' in monitor.bins.coords
+    assert 'wavelength' not in monitor.bins.coords
+    assert monitor.bins.coords['incident_wavelength'].unit == 'angstrom'
+    assert 'event_time_offset' not in monitor.bins.coords
+    assert 'position' in monitor.coords
+    sc.testing.assert_identical(
+        monitor.bins.sum().sum().data, raw.bins.sum().sum().data
+    )

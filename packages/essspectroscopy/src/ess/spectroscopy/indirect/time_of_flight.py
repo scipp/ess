@@ -99,7 +99,10 @@ def monitor_wavelength_data(
         pulse_stride_offset=pulse_stride_offset,
         keep_event_time_offset=False,
     )
-    result = result.rename(wavelength='incident_wavelength')
+    if result.bins is None:
+        result = result.rename(wavelength='incident_wavelength')
+    else:
+        result.bins.coords['incident_wavelength'] = result.bins.coords.pop('wavelength')
     return result
 
 
