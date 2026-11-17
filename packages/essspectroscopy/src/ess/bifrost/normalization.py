@@ -23,7 +23,7 @@ def normalize_by_monitor_and_proton_charge(
     monitor: WavelengthMonitor[RunType, NormalizationMonitor],
     proton_charge: ProtonCharge[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
-    monitor_wavelength_bins: NormalizationMonitorWavelengthBins = None,
+    monitor_wavelength_bins: NormalizationMonitorWavelengthBins,
 ) -> NormalizedIncidentEnergyDetector[RunType]:
     """Normalize detector data by a monitor and proton charge.
 
