@@ -389,6 +389,17 @@ def _compute_wavelength_events(
     backend: FrameUnwrapBackend,
     keep_event_time_offset: bool,
 ) -> sc.DataArray:
+    # NXevent_data monitors store pulse timestamps on the outer bins. Pulse
+    # skipping needs them on each event before computing the pulse index.
+    if (
+        "event_time_zero" in da.dims
+        and "event_time_zero" in da.coords
+        and "event_time_zero" not in da.bins.coords
+    ):
+        da = da.bins.assign_coords(
+            event_time_zero=sc.bins_like(da, da.coords["event_time_zero"])
+        )
+
     inputs = _prepare_wavelength_interpolation_inputs(
         da=da,
         lookup=lookup,
@@ -414,12 +425,6 @@ def _compute_wavelength_events(
     # The result may still have an 'event_time_zero' dimension (in the case of an
     # event monitor where events were not grouped by pixel).
     if "event_time_zero" in out.dims:
-        if ("event_time_zero" in out.coords) and (
-            "event_time_zero" not in out.bins.coords
-        ):
-            out.bins.coords["event_time_zero"] = sc.bins_like(
-                out, out.coords["event_time_zero"]
-            )
         out = out.bins.concat("event_time_zero")
     return out
 

@@ -106,7 +106,9 @@ def _make_workflow_event_wavelength_from(
     if detector_or_monitor == "detector":
         wf[RawDetector[SampleRun]] = mon
     else:
-        wf[RawMonitor[SampleRun, Monitor0]] = mon
+        # Event monitors retain pulse bins, unlike detectors grouped by pixel.
+        # Grouping moves event_time_zero from the events onto the pulse bins.
+        wf[RawMonitor[SampleRun, Monitor0]] = mon.squeeze().group('event_time_zero')
 
     wf[unwrap.PulseStrideOffset] = pulse_stride_offset
 
@@ -150,6 +152,9 @@ def _validate_result_events(wavs, ref, percentile, diff_threshold, rtol):
     assert "tof" not in wavs.coords
 
     wavs = wavs.bins.concat().value
+    # Grouping monitor events by arrival pulse can change their order.
+    wavs = sc.sort(wavs, key='id')
+    ref = sc.sort(ref, key='id')
 
     diff = abs(
         (wavs.coords["wavelength"] - ref.coords["wavelength"])
