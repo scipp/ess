@@ -13,8 +13,8 @@ _registry = make_registry(
         "bifrost_260526T151446.repack.h5": "md5:0f60f5938b0dce87542dd525a2f9a5c4",
         "computed_energy_data_simulated_5x2.h5": "md5:eca18246329f8e6c05154323f7af677a",
         "BIFROST-simulation-lookup-table.h5": "md5:0a4df8039b9610df80fb7bd567736eeb",
-        "coda_bifrost_999999_00026862.stripped.hdf": (
-            "md5:bab18faa48de3b4617332a24dacd58a2"
+        "coda_bifrost_999999_00029874.stripped.hdf": (
+            "md5:6006413a7ee69e219c0e25d4d7345666"
         ),
     },
     version="11",
@@ -36,14 +36,16 @@ def simulated_elastic_incoherent_with_phonon() -> Path:
     return get_path("bifrost_260526T151446.repack.h5")
 
 
-def coda_test_run_2026_10() -> Path:
-    """A CODA test run in the file layout of October 2026.
+def coda_test_run_2026_11() -> Path:
+    """A CODA test run in the file layout of November 2026.
 
     The detector and monitor events are reduced to the first 100 pulses
     of each ``NXevent_data`` group.
     All motors are static, including the sample rotation and the detector tank angle.
+
+    See tools/strip_nexus_file.py
     """
-    return get_path("coda_bifrost_999999_00026862.stripped.hdf")
+    return get_path("coda_bifrost_999999_00029874.stripped.hdf")
 
 
 def lookup_table_simulation() -> Path:
@@ -67,7 +69,7 @@ def computed_energy_data_simulated_5x2() -> Path:
 
 
 __all__ = [
-    "coda_test_run_2026_10",
+    "coda_test_run_2026_11",
     "computed_energy_data_simulated_5x2",
     "get_path",
     "lookup_table_simulation",
