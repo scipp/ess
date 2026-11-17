@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
+import sys
 from collections.abc import Callable
 from pathlib import Path
 
@@ -309,6 +310,9 @@ def test_write_merges_three_runs(tmp_path: Path) -> None:
         assert list(f[f'{TEMPERATURE}/cue_index']) == [0, 1, 2]
 
 
+@pytest.mark.skipif(
+    sys.platform == 'win32', reason='chmod cannot disable reads on Windows'
+)
 def test_write_leaves_no_file_if_writing_fails(
     runs: list[Path], tmp_path: Path
 ) -> None:
