@@ -7,6 +7,8 @@ Components for BEER
 
 import importlib.metadata
 
+import lazy_loader as lazy
+
 from .mcstas import load_beer_mcstas
 from .peakfinding import dhkl_peaks_from_cif
 from .workflow import (
@@ -26,7 +28,14 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-del importlib
+# The diagnostics subpackage needs ipywidgets, which is optional. Import it only on
+# first access so that the workflows can be used without ipywidgets.
+__getattr__, _, _ = lazy.attach(
+    __name__,
+    submodules=['diagnostics'],
+)
+
+del _, importlib, lazy
 
 __all__ = [
     'BeerMcStasWorkflowPulseShaping',
