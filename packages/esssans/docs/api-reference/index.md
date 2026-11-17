@@ -21,7 +21,6 @@
    providers
    with_background_runs
    with_banks
-   with_pixel_mask_filenames
    with_sample_runs
 ```
 

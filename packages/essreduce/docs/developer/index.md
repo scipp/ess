@@ -14,4 +14,5 @@ getting-started
 coding-conventions
 dependency-management
 gui
+architecture-decision-records
 ```

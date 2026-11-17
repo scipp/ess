@@ -15,6 +15,7 @@ from ess.sans.types import (
     BeamCenter,
     CorrectedDetector,
     CorrectForGravity,
+    DetectorMasks,
     DimsToKeep,
     DirectBeam,
     DirectBeamFilename,
@@ -26,6 +27,8 @@ from ess.sans.types import (
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
     Numerator,
+    PixelMaskFilenames,
+    PixelMasks,
     QBins,
     RawDetector,
     ReturnEvents,
@@ -170,6 +173,40 @@ def test_uncertainty_broadcast_mode_drop_yields_smaller_variances(pipeline):
 
 def test_pipeline_can_visualize_background_subtracted_IofQ(pipeline):
     pipeline.visualize(BackgroundSubtractedIofQ)
+
+
+def test_detector_masks_default_to_computed_masks_only(pipeline):
+    assert set(pipeline.compute(DetectorMasks)) == {'edges', 'holder_mask'}
+
+
+def test_mask_files_are_combined_with_computed_masks(pipeline, tmp_path):
+    detector = pipeline.compute(EmptyDetector[SampleRun])
+    detector_id = detector.coords['detector_id'].values[0]
+    path = tmp_path / 'broken.xml'
+    path.write_text(
+        '<?xml version="1.0"?>\n<detector-masking><group>'
+        f'<detids>{detector_id}</detids></group></detector-masking>'
+    )
+    pipeline[PixelMaskFilenames] = [path]
+    masks = pipeline.compute(DetectorMasks)
+    assert set(masks) == {'broken.xml', 'edges', 'holder_mask'}
+    assert masks['broken.xml'].values.sum() == 1
+
+
+def test_pixel_mask_with_name_of_computed_mask_raises():
+    detector = sc.DataArray(
+        sc.zeros(sizes={'spectrum': 2}),
+        coords={'detector_id': sc.array(dims=['spectrum'], values=[1, 2], unit=None)},
+    )
+    edge_mask = sc.array(dims=['spectrum'], values=[True, False])
+    masked = sc.array(dims=['detector_id'], values=[1], unit=None)
+    with pytest.raises(ValueError, match='edges'):
+        sans2d.to_detector_masks(
+            EmptyDetector[SampleRun](detector),
+            PixelMasks({'edges': masked}),
+            sans2d.DetectorEdgeMask(edge_mask),
+            sans2d.SampleHolderMask(None),
+        )
 
 
 def test_pipeline_can_compute_intermediate_results(pipeline):

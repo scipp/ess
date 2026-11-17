@@ -30,6 +30,7 @@
    diagnostics
    live
    logging
+   masking
    nexus
    normalization
    polarization

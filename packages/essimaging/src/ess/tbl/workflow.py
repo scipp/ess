@@ -4,6 +4,8 @@
 Default parameters, providers and utility functions for the TBL workflow.
 """
 
+import warnings
+
 import sciline
 
 from ess.reduce.nexus.types import NeXusDetectorName
@@ -62,10 +64,24 @@ def TblWorkflow(
     return workflow
 
 
-def OrcaNormalizedImagesWorkflow(**kwargs) -> sciline.Pipeline:
+def TblOrcaWorkflow(**kwargs) -> sciline.Pipeline:
     """
     Workflow with default parameters for ORCA image normalization.
     """
     wf = _OrcaWorkflow(**kwargs)
-    wf[NeXusDetectorName] = 'orca_detector'
+    wf[NeXusDetectorName] = nexus_name('orca')
     return wf
+
+
+def OrcaNormalizedImagesWorkflow(**kwargs) -> sciline.Pipeline:
+    """
+    Workflow with default parameters for ORCA image normalization.
+
+    .. deprecated:: 26.11.0
+    """
+    warnings.warn(
+        "OrcaNormalizedImagesWorkflow is deprecated, use TblOrcaWorkflow instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return TblOrcaWorkflow(**kwargs)

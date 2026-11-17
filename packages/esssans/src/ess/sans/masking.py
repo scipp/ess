@@ -4,52 +4,45 @@
 Masking functions for the loki workflow.
 """
 
-import numpy as np
-import scipp as sc
+from ess.reduce.masking import read_pixel_masks, to_detector_masks
 
 from .types import (
     CorrectedDetector,
-    DetectorIDs,
+    DetectorBankSizes,
     DetectorMasks,
     EmptyDetector,
-    MaskedDetectorIDs,
+    NeXusDetectorName,
     Numerator,
-    PixelMaskFilename,
+    PixelMasks,
     RunType,
     SampleRun,
     WavelengthDetector,
 )
 
 
-def get_detector_ids_from_detector(data: EmptyDetector[SampleRun]) -> DetectorIDs:
-    """Extract detector IDs from a detector."""
-    return DetectorIDs(
-        data.coords[
-            'detector_number' if 'detector_number' in data.coords else 'detector_id'
-        ]
-    )
-
-
 def to_detector_mask(
-    ids: DetectorIDs,
-    path: PixelMaskFilename,
-    masked_ids: MaskedDetectorIDs,
+    detector: EmptyDetector[SampleRun],
+    masks: PixelMasks,
+    bank: NeXusDetectorName,
+    bank_sizes: DetectorBankSizes,
 ) -> DetectorMasks:
-    """Create a detector mask from a list of masked detector IDs.
-    The masks are based on detector IDs stored in XML files.
+    """Create detector masks for a bank from the pixel masks of the instrument.
 
     Parameters
     ----------
-    ids:
-        Array of detector IDs
-    path:
-        Path to the mask file.
-    masked_ids:
-        Array of detector IDs which are masked.
+    detector:
+        Detector of the sample run, which gives the logical dimensions and detector IDs
+        of the bank.
+    masks:
+        Pixel masks of the instrument.
+    bank:
+        Name of the detector bank.
+    bank_sizes:
+        Sizes of the banks of the instrument, which define the valid bank names.
     """
-    mask = sc.zeros(sizes=ids.sizes, dtype='bool')
-    mask.values[np.isin(ids.values, masked_ids.values)] = True
-    return DetectorMasks({str(path): mask})
+    return DetectorMasks(
+        to_detector_masks(masks, detector, bank=bank, known_banks=bank_sizes)
+    )
 
 
 def apply_pixel_masks(
@@ -69,7 +62,7 @@ def apply_pixel_masks(
 
 
 providers = (
-    get_detector_ids_from_detector,
+    read_pixel_masks,
     to_detector_mask,
     apply_pixel_masks,
 )

@@ -166,9 +166,9 @@ def cut(
     )
 
 
-def BifrostQCutWorkflow(detector_names: list[str] | None = None) -> sciline.Pipeline:
+def BifrostQCutWorkflow() -> sciline.Pipeline:
     """Workflow for BIFROST to compute cuts in Q-E-space."""
-    workflow = BifrostWorkflow(detector_names=detector_names)
+    workflow = BifrostWorkflow()
     workflow.insert(arc_energy)
     workflow.insert(cut)
     return workflow

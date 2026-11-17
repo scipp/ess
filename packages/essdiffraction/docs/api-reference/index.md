@@ -36,7 +36,6 @@
 .. autosummary::
    :toctree: ../generated/functions
 
-   with_pixel_mask_filenames
 ```
 
 ### Submodules
