@@ -72,10 +72,11 @@ def evaluate_reference(
     detector_spatial_resolution: DetectorSpatialResolution,
 ) -> Reference:
     """
-    Adds a :math:`Q` and :math:`Q`-resolution coordinate to each bin of the ideal
-    intensity distribution. The coordinates are computed as if the data came from
-    the sample measurement, that is, they use the ``sample_rotation``
-    and ``detector_rotation`` parameters from the sample measurement.
+    Compute reference Q and Q resolution using the sample's calibrated angle.
+
+    Keep the reference's divergence angles. This assumes that
+    corresponding detector bins represent the same part of the incoming beam
+    in the aligned sample and reference measurements.
     """
     ref = reference.copy()
     ref.coords["sample_rotation"] = sample.coords['sample_rotation']
@@ -83,9 +84,7 @@ def evaluate_reference(
     ref.coords["detector_spatial_resolution"] = detector_spatial_resolution
     ref.coords["wavelength"] = sc.midpoints(ref.coords["wavelength"])
 
-    # If the input already has a theta or Q coord
-    # we must remove them before computing theta and Q
-    # using the new sample- and detector rotation parameters.
+    # Recompute theta and Q using the sample's calibrated angle.
     if "theta" in ref.coords:
         ref.coords.pop("theta")
     if "Q" in ref.coords:

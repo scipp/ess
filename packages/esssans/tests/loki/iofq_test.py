@@ -24,6 +24,7 @@ from ess.sans.types import (
     IntensityQxQy,
     NormalizedQ,
     Numerator,
+    PixelMaskFilenames,
     QBins,
     QxBins,
     QyBins,
@@ -44,9 +45,7 @@ def test_can_create_pipeline(larmor_workflow):
 
 def test_can_create_pipeline_with_pixel_masks(larmor_workflow):
     pipeline = larmor_workflow(no_masks=False)
-    pipeline = sans.with_pixel_mask_filenames(
-        pipeline, loki.data.loki_tutorial_mask_filenames()
-    )
+    pipeline[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
     pipeline.get(BackgroundSubtractedIofQ)
 
@@ -59,9 +58,7 @@ def test_can_create_pipeline_with_pixel_masks(larmor_workflow):
 def test_pipeline_can_compute_IofQ(larmor_workflow, uncertainties, qxy: bool):
     pipeline = larmor_workflow(no_masks=False)
     pipeline[UncertaintyBroadcastMode] = uncertainties
-    pipeline = sans.with_pixel_mask_filenames(
-        pipeline, loki.data.loki_tutorial_mask_filenames()
-    )
+    pipeline[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()
     pipeline[BeamCenter] = sans.beam_center_from_center_of_mass(pipeline)
     if qxy:
         result = pipeline.compute(BackgroundSubtractedIofQxy)
@@ -278,9 +275,7 @@ def test_pipeline_IofQ_merging_events_yields_consistent_results(larmor_workflow)
 
 def test_beam_center_from_center_of_mass_is_close_to_verified_result(larmor_workflow):
     pipeline = larmor_workflow(no_masks=False)
-    pipeline = sans.with_pixel_mask_filenames(
-        pipeline, loki.data.loki_tutorial_mask_filenames()
-    )
+    pipeline[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()
     center = sans.beam_center_from_center_of_mass(pipeline)
     reference = sc.vector([-0.0291487, -0.0181614, 4.1161], unit='m')
     assert sc.allclose(center, reference)
@@ -290,9 +285,7 @@ def test_beam_center_from_center_of_mass_alternative_is_close_to_verified_result
     larmor_workflow,
 ):
     pipeline = larmor_workflow(no_masks=False)
-    pipeline = sans.with_pixel_mask_filenames(
-        pipeline, loki.data.loki_tutorial_mask_filenames()
-    )
+    pipeline[PixelMaskFilenames] = loki.data.loki_tutorial_mask_filenames()
     center = sans.beam_center_finder.beam_center_from_center_of_mass_alternative(
         pipeline
     )

@@ -17,6 +17,7 @@ import scipp as sc
 from scippneutron.io import cif
 from scippneutron.metadata import Person, Software
 
+from ess.reduce import masking as masking_t
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 from ess.reduce.unwrap import types as unwrap_t
@@ -177,9 +178,6 @@ class CorrectedDetector(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """
 
 
-MaskedDetectorIDs = NewType("MaskedDetectorIDs", dict[str, sc.Variable])
-"""1-D variable listing all masked detector IDs."""
-
 CaveMonitorPosition = NewType("CaveMonitorPosition", sc.Variable)
 """Position of DREAM's cave monitor."""
 
@@ -204,8 +202,8 @@ class NormalizedDspacing(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Detector data in d-spacing - 2theta space normalized by monitor/proton charge."""
 
 
-PixelMaskFilename = NewType("PixelMaskFilename", str)
-"""Filename of a pixel mask."""
+PixelMaskFilenames = masking_t.PixelMaskFilenames
+PixelMasks = masking_t.PixelMasks
 
 
 class RawDataAndMetadata(sciline.Scope[RunType, sc.DataGroup], sc.DataGroup):

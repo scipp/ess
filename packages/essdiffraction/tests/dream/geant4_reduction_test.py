@@ -33,6 +33,7 @@ from ess.powder.types import (
     MonitorFilename,
     NeXusDetectorName,
     OutFilename,
+    PixelMaskFilenames,
     ReducedTofCIF,
     SampleRun,
     TofMask,
@@ -53,6 +54,7 @@ PARAMETRIZATION = ("detector_name", ["mantle", "endcap_backward", "endcap_forwar
 
 
 params = {
+    PixelMaskFilenames: [],
     Filename[SampleRun]: dream.data.simulated_diamond_sample(small=True),
     Filename[VanadiumRun]: dream.data.simulated_vanadium_sample(small=True),
     Filename[EmptyCanRun]: dream.data.simulated_empty_can(small=True),
@@ -95,9 +97,7 @@ def _make_workflow(
 
 @pytest.mark.parametrize(*PARAMETRIZATION)
 def test_pipeline_can_compute_dspacing_result(detector_name):
-    workflow = powder.with_pixel_mask_filenames(
-        _make_workflow(detector_name=detector_name), []
-    )
+    workflow = _make_workflow(detector_name=detector_name)
     result = workflow.compute(EmptyCanSubtractedIofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
@@ -108,7 +108,6 @@ def test_pipeline_can_compute_dspacing_result_without_empty_can(detector_name):
     workflow = _make_workflow(detector_name=detector_name)
     workflow[Filename[EmptyCanRun]] = None
     workflow[MonitorFilename[EmptyCanRun]] = None
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
@@ -134,7 +133,6 @@ def test_pipeline_can_compute_dspacing_result_different_lookup_tables(
             workflow[unwrap.NumberOfSimulatedNeutrons] = 200_000
             workflow[unwrap.SimulationSeed] = 555
 
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(EmptyCanSubtractedIofDspacing)
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
@@ -149,7 +147,6 @@ def test_pipeline_can_compute_dspacing_result_with_different_norm(
     workflow = _make_workflow(detector_name=detector_name, run_norm=norm)
     workflow[KeepEvents[SampleRun]] = KeepEvents[SampleRun](keep_events)
     workflow[KeepEvents[VanadiumRun]] = KeepEvents[VanadiumRun](keep_events)
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IntensityDspacing[SampleRun])
     assert result.sizes == {'dspacing': len(params[DspacingBins]) - 1}
     assert sc.identical(result.coords['dspacing'], params[DspacingBins])
@@ -166,7 +163,6 @@ def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(detector_name) 
     workflow[FocussedDataDspacing[VanadiumRun]] = vanadium
     workflow[FocussedDataDspacing[EmptyCanRun]] = empty_can
     workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(EmptyCanSubtractedIofDspacing)
 
     subtracted = sample.bins.concatenate(-empty_can)
@@ -180,9 +176,7 @@ def test_pipeline_normalizes_and_subtracts_empty_can_as_expected(detector_name) 
 
 @pytest.mark.parametrize(*PARAMETRIZATION)
 def test_workflow_is_deterministic(detector_name):
-    workflow = powder.with_pixel_mask_filenames(
-        _make_workflow(detector_name=detector_name), []
-    )
+    workflow = _make_workflow(detector_name=detector_name)
     # This is Sciline's default scheduler, but we want to be explicit here
     scheduler = sciline.scheduler.DaskScheduler()
     graph = workflow.get(IntensityTof, scheduler=scheduler)
@@ -193,9 +187,7 @@ def test_workflow_is_deterministic(detector_name):
 
 @pytest.mark.parametrize(*PARAMETRIZATION)
 def test_pipeline_can_compute_intermediate_results(detector_name):
-    workflow = powder.with_pixel_mask_filenames(
-        _make_workflow(detector_name=detector_name), []
-    )
+    workflow = _make_workflow(detector_name=detector_name)
     results = workflow.compute((CorrectedDetector[SampleRun], NeXusDetectorName))
     result = results[CorrectedDetector[SampleRun]]
 
@@ -214,7 +206,6 @@ def test_pipeline_group_by_two_theta(detector_name):
     )
     workflow = _make_workflow(detector_name=detector_name)
     workflow[TwoThetaBins] = two_theta_bins
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
     result = workflow.compute(IntensityDspacingTwoTheta[SampleRun])
     assert result.sizes['two_theta'] == 16
     assert result.sizes['dspacing'] == len(params[DspacingBins]) - 1
@@ -228,7 +219,6 @@ def test_pipeline_wavelength_masking(detector_name):
     wmin = sc.scalar(0.18, unit="angstrom")
     wmax = sc.scalar(0.21, unit="angstrom")
     workflow[WavelengthMask] = lambda x: (x > wmin) & (x < wmax)
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
     masked_sample = workflow.compute(CorrectedDetector[SampleRun])
     assert 'wavelength' in masked_sample.bins.masks
     sum_in_masked_region = (
@@ -248,7 +238,6 @@ def test_pipeline_two_theta_masking(detector_name):
     tmin = sc.scalar(1.0, unit="rad")
     tmax = sc.scalar(1.2, unit="rad")
     workflow[TwoThetaMask] = lambda x: (x > tmin) & (x < tmax)
-    workflow = powder.with_pixel_mask_filenames(workflow, [])
     masked_sample = workflow.compute(CorrectedDetector[SampleRun])
     assert 'two_theta' in masked_sample.masks
     sum_in_masked_region = (
@@ -262,9 +251,7 @@ def test_pipeline_two_theta_masking(detector_name):
 
 @pytest.mark.parametrize(*PARAMETRIZATION)
 def test_pipeline_can_save_data(detector_name):
-    workflow = powder.with_pixel_mask_filenames(
-        _make_workflow(detector_name=detector_name), []
-    )
+    workflow = _make_workflow(detector_name=detector_name)
     result = workflow.compute(ReducedTofCIF)
 
     buffer = io.StringIO()
@@ -296,7 +283,6 @@ def test_pipeline_save_data_to_disk(output_folder: Path):
     wf[Filename[VanadiumRun]] = dream.data.simulated_vanadium_sample(small=False)
     wf[Filename[EmptyCanRun]] = dream.data.simulated_empty_can(small=False)
     wf[DspacingBins] = sc.linspace('dspacing', 0.3, 2.3434, 2001, unit='angstrom')
-    wf = powder.with_pixel_mask_filenames(wf, [])
 
     result = wf.compute(ReducedTofCIF)
     result.comment = """This file was generated with the DREAM data reduction user guide
