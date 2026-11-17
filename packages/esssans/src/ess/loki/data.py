@@ -6,7 +6,7 @@ from ess.sans.types import (
     BackgroundRun,
     DirectBeamFilename,
     Filename,
-    PixelMaskFilename,
+    PixelMaskFilenames,
     SampleRun,
     TransmissionRun,
 )
@@ -154,11 +154,9 @@ def loki_tutorial_deut_sds_transmission_run() -> Filename[TransmissionRun[Sample
     )
 
 
-def loki_tutorial_mask_filenames() -> list[PixelMaskFilename]:
+def loki_tutorial_mask_filenames() -> PixelMaskFilenames:
     """List of pixel mask filenames for the LoKI@Larmor detector test experiment."""
-    return [
-        PixelMaskFilename(_registry.get_path('mask_new_July2022.xml')),
-    ]
+    return PixelMaskFilenames([_registry.get_path('mask_new_July2022.xml')])
 
 
 def loki_tutorial_poly_gauss_I0() -> Path:

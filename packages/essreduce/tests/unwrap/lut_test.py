@@ -497,6 +497,46 @@ def test_analytical_lut_does_not_raise_with_degenerate_polygon():
     assert sc.all(sc.isnan(table.array.data))
 
 
+def test_analytical_lut_stores_mean_and_stddev_of_flat_source_pulse():
+    # Without choppers, neutrons arriving at (distance, toa) were emitted uniformly in
+    # [0, pulse_length], so their wavelength is uniform over a range of width
+    # (h/m) * pulse_length / distance.
+    pulse_length = sc.scalar(3.0, unit='ms')
+    wf = _make_workflow("analytical")
+    wf[unwrap.DiskChoppers[AnyRun]] = {}
+    wf[Position[snx.NXsource, AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[SourceBounds] = SourceBounds(
+        time=(sc.scalar(0.0, unit='ms'), pulse_length),
+        wavelength=(sc.scalar(1.0, unit='angstrom'), sc.scalar(5.0, unit='angstrom')),
+    )
+    wf[unwrap.LtotalRange[AnyRun, snx.NXdetector]] = (
+        sc.scalar(19.0, unit='m'),
+        sc.scalar(21.0, unit='m'),
+    )
+    table = wf.compute(unwrap.LookupTable[AnyRun, snx.NXdetector]).array
+
+    row = table['distance', np.argmin(np.abs(table.coords['distance'].values - 20.0))]
+    toa = row.coords['event_time_offset'].to(unit='ms')
+    # Arrival times reached by neutrons from the whole pulse, for 1 to 5 Angstrom
+    in_range = (toa > sc.scalar(10.0, unit='ms')) & (toa < sc.scalar(20.0, unit='ms'))
+    row, toa = row[in_range], toa[in_range]
+    distance = row.coords['distance']
+    h_over_m = sc.constants.h / sc.constants.m_n
+    expected_mean = (h_over_m * (toa - 0.5 * pulse_length) / distance).to(
+        unit='angstrom'
+    )
+    expected_stddev = (h_over_m * pulse_length / distance).to(
+        unit='angstrom'
+    ) / np.sqrt(12.0)
+
+    assert sc.allclose(sc.values(row.data), expected_mean, rtol=sc.scalar(1e-6))
+    assert sc.allclose(
+        sc.stddevs(row.data),
+        sc.broadcast(expected_stddev, sizes=row.sizes),
+        rtol=sc.scalar(1e-6),
+    )
+
+
 @pytest.mark.filterwarnings("error::RuntimeWarning")
 def test_polygon_intersections_handles_uncovered_columns_without_warning():
     # Vertical lines that miss the polygon yield an all-NaN column. Reducing it
@@ -631,7 +671,7 @@ def test_choppers_rotate_enough_times_with_slow_neutrons_to_pollute_lut():
         sc.variances(
             at_detector['event_time_offset', slice(eto_range[0], eto_range[1])]
         ).max()
-        > sc.scalar(10.0, unit='angstrom^2')
+        > sc.scalar(3.0, unit='angstrom^2')
     ).value
 
     # Using a narrower wavelength range for the source pulse, the secondary frame

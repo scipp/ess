@@ -9,7 +9,7 @@ from ..reflectometry.types import Filename, ReferenceRun, SampleRun
 
 _registry = make_registry(
     "ess/estia",
-    version="2",
+    version="3",
     files={
         "218610_tof_detector_list.p.x.y.t.L.sx.sy": "md5:65145a26c36d12954a97d27d6e7f4ed9",  # noqa: E501
         "218611_tof_detector_list.p.x.y.t.L.sx.sy": "md5:4599e938568f3b73a72d6d48fe5160e7",  # noqa: E501
@@ -35,11 +35,11 @@ _registry = make_registry(
         "examples/Si-SiO2.ref": "md5:436e2312e137b63bf31cc39064d28864",
         "examples/Si-Ni.ref": "md5:76fcfc655635086060387163c9175ab4",
         # McStas runs converted to NeXus files using event sampling
-        "examples/220573.nx": "md5:8d40da6f860e63784cb2ea11690b52f6",
-        "examples/220574.nx": "md5:146cbc92c8a749e584be2a9acc8de54f",
-        "examples/220575.nx": "md5:ce6532c329b739916c3aaa269694ac7b",
-        "examples/220576.nx": "md5:5299660f41e331987f6ed2a88f1cf243",
-        "examples/220577.nx": "md5:1205ad3335e709dd44979090cb85944e",
+        "examples/220573.nx": "md5:2f94e096513b8889541223ad4908ba1d",
+        "examples/220574.nx": "md5:ceb2073ec93b6f4800c15d5abe78ca54",
+        "examples/220575.nx": "md5:bb624971d556a2e78aa737c28fa65877",
+        "examples/220576.nx": "md5:184f14c58a1fece2eabdd695e1338f12",
+        "examples/220577.nx": "md5:3811b3899864a28e33c406f23bec1611",
         # Spin flip example from McStas simulation.
         # All runs have the same sample rotation angle but different samples.
         # Each sample is measured using all four flipper setting.

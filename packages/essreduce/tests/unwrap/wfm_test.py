@@ -140,7 +140,7 @@ def setup_workflow(
     ltotal: sc.Variable,
     choppers: dict[str, DiskChopper],
     source_position: sc.Variable,
-    error_threshold: float = 0.1,
+    error_threshold: float = 0.06,
 ) -> sl.Pipeline:
     wf = GenericUnwrapWorkflow(
         run_types=[SampleRun], monitor_types=[], wavelength_from=wavelength_from

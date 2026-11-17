@@ -15,7 +15,6 @@ from .types import (
     CorrectForGravity,
     Denominator,
     DetectorBankSizes,
-    DetectorMasks,
     DimsToKeep,
     EmptyBeamRun,
     Filename,
@@ -24,7 +23,6 @@ from .types import (
     NormalizedQ,
     NormalizedQxQy,
     Numerator,
-    PixelMaskFilename,
     SampleRun,
     TransformationPath,
     Transmission,
@@ -34,37 +32,11 @@ from .types import (
 )
 
 
-def _merge(*dicts: dict) -> dict:
-    return {key: value for d in dicts for key, value in d.items()}
-
-
 def merge_contributions(*data: sc.DataArray) -> sc.DataArray:
     if len(data) == 1:
         return data[0]
     reducer = sc.reduce(data)
     return reducer.bins.concat() if data[0].bins is not None else reducer.sum()
-
-
-def with_pixel_mask_filenames(
-    workflow: sciline.Pipeline, masks: Iterable[str]
-) -> sciline.Pipeline:
-    """
-    Return modified workflow with pixel mask filenames set.
-
-    Parameters
-    ----------
-    workflow:
-        Workflow to modify.
-    masks:
-        List or tuple of pixel mask filenames to set.
-    """
-    workflow = workflow.copy()
-    workflow[DetectorMasks] = (
-        workflow[DetectorMasks]
-        .map(pd.DataFrame({PixelMaskFilename: masks}).rename_axis('mask'))
-        .reduce(index='mask', func=_merge)
-    )
-    return workflow
 
 
 def with_banks(
@@ -141,7 +113,6 @@ def with_background_runs(
     return _set_runs(workflow, runs, BackgroundRun, 'background_run')
 
 
-parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
 # TODO: for now, we leave the mapping over detector banks out, because we do not have a
 # method to merge the I(Q) of different banks, and we thus cannot compute a single
 # result from the workflow. So only a single detector bank can be processed at a time.
