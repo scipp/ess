@@ -21,7 +21,9 @@ from ess.spectroscopy.types import (
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     NormalizationMonitor,
+    NormalizationMonitorWavelengthBins,
     OverlapMonitor,
+    ProtonCharge,
     PSCMonitor,
     RawDetector,
     RawMonitor,
@@ -154,8 +156,8 @@ def test_simulation_workflow_produces_the_same_data_as_before(
 def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
     workflow = bifrost.BifrostWorkflow(detector_names=detector_names)
     workflow[Filename[SampleRun]] = coda_test_run_2026_10()
-    # The table does not match the choppers of this run but these tests only check
-    # that the file can be loaded.
+    # The table does not match the choppers of this run, so these tests check
+    # workflow execution, not the accuracy of the wavelength conversion.
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     return workflow
@@ -215,3 +217,23 @@ def test_workflow_can_compute_event_wavelength_monitor_from_coda_file(
     sc.testing.assert_identical(
         monitor.bins.sum().sum().data, raw.bins.sum().sum().data
     )
+
+
+def test_workflow_can_compute_energy_data_from_coda_file(
+    coda_workflow: sciline.Pipeline,
+) -> None:
+    coda_workflow[LookupTableRelativeErrorThreshold] = {
+        'detector': np.inf,
+        'normalization_monitor': np.inf,
+    }
+    coda_workflow[NormalizationMonitorWavelengthBins] = sc.linspace(
+        'incident_wavelength', 0.0, 20.0, 101, unit='angstrom'
+    )
+    coda_workflow[ProtonCharge[SampleRun]] = sc.DataArray(sc.scalar(1.0, unit='pC'))
+    coda_workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+
+    result = coda_workflow.compute(EnergyQDetector[SampleRun])
+
+    assert result.bins.size().sum().value > 0
+    assert 'energy_transfer' in result.bins.coords
+    assert 'sample_table_momentum_transfer' in result.bins.coords

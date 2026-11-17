@@ -18,6 +18,7 @@ from ess.spectroscopy.types import (
     NeXusDetectorName,
     NeXusMonitorName,
     NormalizationMonitor,
+    NormalizationMonitorWavelengthBins,
     OverlapMonitor,
     ProtonCharge,
     PSCMonitor,
@@ -45,6 +46,7 @@ def default_parameters() -> dict[type, Any]:
         NeXusMonitorName[PSCMonitor]: "psc_monitor",
         PulsePeriod: 1.0 / sc.scalar(14.0, unit="Hz"),
         UncertaintyBroadcastMode: UncertaintyBroadcastMode.fail,
+        NormalizationMonitorWavelengthBins: None,
         **nexus.parameters,
     }
 

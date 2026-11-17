@@ -7,6 +7,7 @@ import scipp as sc
 from ess.spectroscopy.types import (
     IncidentEnergyDetector,
     NormalizationMonitor,
+    NormalizationMonitorWavelengthBins,
     NormalizedIncidentEnergyDetector,
     ProtonCharge,
     RunType,
@@ -22,6 +23,7 @@ def normalize_by_monitor_and_proton_charge(
     monitor: WavelengthMonitor[RunType, NormalizationMonitor],
     proton_charge: ProtonCharge[RunType],
     uncertainty_broadcast_mode: UncertaintyBroadcastMode,
+    monitor_wavelength_bins: NormalizationMonitorWavelengthBins = None,
 ) -> NormalizedIncidentEnergyDetector[RunType]:
     """Normalize detector data by a monitor and proton charge.
 
@@ -47,13 +49,17 @@ def normalize_by_monitor_and_proton_charge(
     detector:
         Detector events to normalize.
     monitor:
-        Monitor histogram.
+        Monitor events or histogram in incident wavelength.
     proton_charge:
         Accumulated proton charge.
         Scalar or per setting (a3 / a4).
     uncertainty_broadcast_mode:
         Choose how uncertainties of the monitor and proton charge
         are broadcast to the sample data.
+    monitor_wavelength_bins:
+        One-dimensional edges for histogramming events or rebinning a monitor
+        histogram. The dimension name is arbitrary.
+        If None, keep the existing histogram bins. Required for event monitors.
 
     Returns
     -------
@@ -62,6 +68,21 @@ def normalize_by_monitor_and_proton_charge(
     """
     # We should make this function public or move the normalization to ESSreduce.
     from ess.reduce.normalization import _mask_detector_for_norm
+
+    if monitor_wavelength_bins is not None:
+        monitor_wavelength_bins = monitor_wavelength_bins.rename_dims(
+            {monitor_wavelength_bins.dim: 'incident_wavelength'}
+        )
+
+    if monitor.bins is not None:
+        if monitor_wavelength_bins is None:
+            raise ValueError(
+                'Set NormalizationMonitorWavelengthBins to histogram the event '
+                'monitor before normalization.'
+            )
+        monitor = monitor.hist(incident_wavelength=monitor_wavelength_bins)
+    elif monitor_wavelength_bins is not None:
+        monitor = monitor.rebin(incident_wavelength=monitor_wavelength_bins)
 
     if 'time' in monitor.dims:
         # Use a combined monitor distribution for all instrument settings.

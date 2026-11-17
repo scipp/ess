@@ -104,6 +104,16 @@ class NormalizedIncidentEnergyDetector(
     """Normalized detector counts with an incident energy coordinate."""
 
 
+NormalizationMonitorWavelengthBins = NewType(
+    'NormalizationMonitorWavelengthBins', sc.Variable | None
+)
+"""Incident-wavelength bin edges for the normalization monitor.
+
+The edges must be one-dimensional; the dimension name is arbitrary. If ``None``,
+retain an existing histogram's bins. Explicit edges are required for event monitors.
+"""
+
+
 class SampleAngle(sciline.Scope[RunType, sc.DataArray], sc.DataArray):
     """Rotation angle of the sample, possibly as a function of time.
 
