@@ -26,7 +26,8 @@ def reflectometry_q_x(
     Where :math:`\\theta_o` is the reflection angle (:func:`theta`)
     and :math:`\\theta_i` is the incident angle on the sample surface.
 
-    Note that here we assume the incident angle is equal to ``sample_rotation``.
+    This calculation uses the central beam's calibrated incidence angle,
+    ``sample_rotation``, as the incidence angle for every event.
 
     Source:
     `Frédéric Ott, "Off-specular data representations in neutron reflectivity" <https://doi.org/10.1107/S0021889811002858>`_
@@ -38,7 +39,7 @@ def reflectometry_q_x(
     theta:
         Angle of reflection for the events.
     sample_rotation:
-        Angle of incidence.
+        Calibrated incidence angle of the central beam.
 
     Returns
     -------
@@ -56,22 +57,23 @@ def theta(
     divergence_angle: sc.Variable,
     sample_rotation: sc.Variable,
 ):
-    '''
-    Angle of reflection.
+    '''Compute the reflection angle in the laboratory x-z plane.
 
-    Computes the angle between the scattering direction of
-    the neutron and the sample surface.
+    The central reflected beam must be aligned with the detector reference
+    direction. After alignment, the detector rotates by twice each change in
+    sample rotation, with the other alignment rotations held fixed.
 
     Parameters
-    ------------
-        divergence_angle:
-            Divergence angle of the scattered beam.
-        sample_rotation:
-            Rotation of the sample from to its zero position.
+    ----------
+    divergence_angle:
+        Signed angle of the outgoing ray from the detector reference direction.
+    sample_rotation:
+        Calibrated angle between the central reflected beam and the sample surface.
 
     Returns
-    -----------
-    The reflection angle of the neutron.
+    -------
+    :
+        Angle between the outgoing ray and the sample surface.
     '''
     return divergence_angle + sample_rotation.to(
         unit=divergence_angle.unit, dtype='float64'
@@ -83,22 +85,24 @@ def divergence_angle(
     sample_position: sc.Variable,
     detector_rotation: sc.Variable,
 ):
-    """
-    Angle between the scattering ray and
-    the ray that travels parallel to the sample surface
-    when the sample rotation is zero.
+    """Compute the outgoing ray's signed angle from the detector reference direction.
+
+    Use the laboratory x-z plane, with positive angles turning from +z towards +x.
+    For an aligned detector, zero corresponds to the central reflected beam.
 
     Parameters
-    ------------
-        position:
-            Detector position where the neutron was detected.
-        sample_position:
-            Position of the sample.
-        detector_rotation:
-            Rotation of the detector from its zero position.
-    Returns
     ----------
-    The divergence angle of the scattered beam.
+    position:
+        Detector pixel position in laboratory coordinates.
+    sample_position:
+        Sample position in laboratory coordinates.
+    detector_rotation:
+        Detector reference angle measured from laboratory +z towards +x.
+
+    Returns
+    -------
+    :
+        Signed angular displacement from the detector reference direction.
     """
     p = position - sample_position.to(unit=position.unit)
     return sc.atan2(y=p.fields.x, x=p.fields.z) - detector_rotation.to(

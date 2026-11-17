@@ -10,6 +10,7 @@ from ess.bifrost.data import (
     simulated_elastic_incoherent_with_phonon,
 )
 from ess.bifrost.live import CutAxis, CutAxis1, CutAxis2, arc_energy, cut
+from ess.bifrost.types import NeXusDetectorNames
 from ess.spectroscopy.types import (
     EnergyQDetector,
     Filename,
@@ -22,9 +23,12 @@ from ess.spectroscopy.types import (
 
 @pytest.fixture
 def energy_data() -> EnergyQDetector[SampleRun]:
-    workflow = bifrost.BifrostSimulationWorkflow(
-        detector_names=bifrost.default_detector_names()[:10]
-    )
+    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow[NeXusDetectorNames] = [
+        f'channel_{channel}_{arc}_triplet'
+        for arc in range(1, 6)
+        for channel in range(1, 3)
+    ]
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {
