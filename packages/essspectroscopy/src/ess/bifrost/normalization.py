@@ -63,7 +63,7 @@ def normalize_by_monitor_and_proton_charge(
     # We should make this function public or move the normalization to ESSreduce.
     from ess.reduce.normalization import _mask_detector_for_norm
 
-    if monitor.bins is not None:
+    if monitor.is_binned:
         raise ValueError(
             'Set MonitorWavelengthBins[NormalizationMonitor] to histogram the event '
             'monitor before normalization.'

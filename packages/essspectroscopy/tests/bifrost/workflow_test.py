@@ -320,7 +320,7 @@ def test_workflow_can_compute_event_wavelength_monitor_from_coda_file(
     raw = results[RawMonitor[SampleRun, monitor_type]]
     monitor = results[WavelengthMonitor[SampleRun, monitor_type]]
 
-    assert monitor.bins is not None
+    assert monitor.is_binned
     assert 'incident_wavelength' in monitor.bins.coords
     assert 'wavelength' not in monitor.bins.coords
     assert monitor.bins.coords['incident_wavelength'].unit == 'angstrom'
@@ -353,4 +353,4 @@ def test_workflow_can_compute_energy_data_from_coda_file(
     assert result.bins.size().sum().value > 0
     assert 'energy_transfer' in result.bins.coords
     assert 'sample_table_momentum_transfer' in result.bins.coords
-    assert results[WavelengthMonitor[SampleRun, ElasticMonitor]].bins is not None
+    assert results[WavelengthMonitor[SampleRun, ElasticMonitor]].is_binned

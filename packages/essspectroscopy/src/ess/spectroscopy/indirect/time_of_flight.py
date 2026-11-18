@@ -102,7 +102,7 @@ def monitor_wavelength_data(
         keep_event_time_offset=False,
         wavelength_bins=wavelength_bins,
     )
-    if result.bins is None:
+    if not result.is_binned:
         result = result.rename(wavelength='incident_wavelength')
     else:
         result.bins.coords['incident_wavelength'] = result.bins.coords.pop('wavelength')

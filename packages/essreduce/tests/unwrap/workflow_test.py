@@ -98,7 +98,7 @@ def test_monitor_wavelength_bins_histogram_events(bin_dim):
     )
     target = unwrap.WavelengthMonitor[SampleRun, Monitor0]
     original = wf.compute(target)
-    assert original.bins is not None
+    assert original.is_binned
     wavelengths = original.bins.constituents['data'].coords['wavelength']
     edges = sc.concat(
         [
@@ -113,7 +113,7 @@ def test_monitor_wavelength_bins_histogram_events(bin_dim):
 
     result = wf.compute(target)
 
-    assert result.bins is None
+    assert not result.is_binned
     assert_identical(
         result.data,
         sc.array(

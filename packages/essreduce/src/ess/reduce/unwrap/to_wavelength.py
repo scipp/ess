@@ -632,7 +632,7 @@ def monitor_wavelength_data(
     )
     if wavelength_bins is not None:
         edges = wavelength_bins.rename_dims({wavelength_bins.dim: 'wavelength'})
-        if out.bins is None:
+        if not out.is_binned:
             out = out.rebin(wavelength=edges)
         else:
             out = out.hist(wavelength=edges)
