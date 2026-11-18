@@ -5,6 +5,7 @@ import pytest
 import sciline
 import scipp as sc
 from ess import dream
+from ess.dream.workflows import DETECTOR_BANK_SIZES
 from ess.powder.types import (
     CaveMonitor,
     DetectorBankSizes,
@@ -38,11 +39,8 @@ TEST_DETECTOR_BANK_SIZES = {
         "counter": 2,
     },
     "mantle_detector": {
+        **DETECTOR_BANK_SIZES["mantle_detector"],
         "wire": 2,
-        "module": 5,
-        "segment": 6,
-        "strip": 256,
-        "counter": 2,
     },
     "high_resolution_detector": {"strip": 2, "other": -1},
     "sans_detector": {"strip": 32, "other": -1},
@@ -89,6 +87,27 @@ def test_can_load_nexus_detector_data(generic_workflow, params):
     )
 
     assert sc.identical(result.data, result.coords['detector_number'])
+
+
+def test_mantle_pixel_number_mapping(generic_workflow):
+    generic_workflow[Filename[SampleRun]] = dream.data.get_path(
+        'TEST_DREAM_nexus_sorted-2023-12-07.nxs'
+    )
+    generic_workflow[NeXusDetectorName] = 'mantle_detector'
+    generic_workflow[DetectorBankSizes] = TEST_DETECTOR_BANK_SIZES
+    result = generic_workflow.compute(EmptyDetector[SampleRun])
+    pixels = result.coords['detector_number']
+
+    for dim, stride in (
+        ('wire', 15360),
+        ('module', 3072),
+        ('segment', 512),
+        ('counter', 256),
+        ('strip', 1),
+    ):
+        assert sc.all(
+            pixels[dim, 1:] - pixels[dim, :-1] == sc.scalar(stride, unit=None)
+        ), dim
 
 
 def test_can_load_nexus_monitor_data(generic_workflow):
