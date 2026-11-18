@@ -115,7 +115,7 @@ class WavelengthMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArr
     """Monitor data with wavelength coordinate."""
 
 
-class WavelengthBins(sl.Scope[MonitorType, sc.Variable], sc.Variable):
+class MonitorWavelengthBins(sl.Scope[MonitorType, sc.Variable], sc.Variable):
     """Optional wavelength bin edges for a monitor, shared across run types.
 
     If None, preserve the converted monitor's events or histogram bins. Otherwise,
