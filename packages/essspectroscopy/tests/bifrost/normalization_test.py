@@ -42,35 +42,23 @@ def event_monitor(request: pytest.FixtureRequest) -> sc.DataArray:
     )
 
 
-@pytest.mark.parametrize('bin_dim', ['incident_wavelength', 'wavelength', 'wavelenght'])
 @pytest.mark.parametrize(
-    ('histogram', 'edges', 'expected_weights'),
+    ('edges', 'expected_weights'),
     [
-        (False, [1.0, 3.0, 4.0], [4 / 3, 4 / 3, 2.0]),
-        (True, [1.0, 3.0, 4.0], [4 / 3, 4 / 3, 2.0]),
-        (True, None, [1.0, 2.0, 2.0]),
+        ([1.0, 3.0, 4.0], [4 / 3, 4 / 3, 2.0]),
+        ([1.0, 2.0, 3.0, 4.0], [1.0, 2.0, 2.0]),
     ],
-    ids=['histogram-events', 'rebin-histogram', 'keep-histogram'],
 )
 def test_normalize_monitor(
     detector: sc.DataArray,
     event_monitor: sc.DataArray,
-    bin_dim: str,
-    histogram: bool,
-    edges: list[float] | None,
+    edges: list[float],
     expected_weights: list[float],
 ) -> None:
-    monitor = event_monitor
-    if histogram:
-        monitor = monitor.hist(
-            incident_wavelength=sc.linspace(
-                'incident_wavelength', 1, 4, 4, unit='angstrom'
-            )
+    monitor = event_monitor.hist(
+        incident_wavelength=sc.array(
+            dims=['incident_wavelength'], values=edges, unit='angstrom'
         )
-    bins = (
-        None
-        if edges is None
-        else sc.array(dims=[bin_dim], values=edges, unit='angstrom')
     )
 
     result = normalize_by_monitor_and_proton_charge(
@@ -78,11 +66,7 @@ def test_normalize_monitor(
         monitor=monitor,
         proton_charge=sc.DataArray(sc.scalar(2.0, unit='pC')),
         uncertainty_broadcast_mode=UncertaintyBroadcastMode.drop,
-        monitor_wavelength_bins=bins,
     )
-
-    if bins is not None:
-        assert bins.dim == bin_dim
 
     sc.testing.assert_allclose(
         result.bins.constituents['data'].data,
@@ -98,11 +82,10 @@ def test_normalize_monitor(
 def test_event_monitor_requires_bins(
     detector: sc.DataArray, event_monitor: sc.DataArray
 ) -> None:
-    with pytest.raises(ValueError, match='NormalizationMonitorWavelengthBins'):
+    with pytest.raises(ValueError, match=r'WavelengthBins\[NormalizationMonitor\]'):
         normalize_by_monitor_and_proton_charge(
             detector=detector,
             monitor=event_monitor,
             proton_charge=sc.DataArray(sc.scalar(2.0, unit='pC')),
             uncertainty_broadcast_mode=UncertaintyBroadcastMode.drop,
-            monitor_wavelength_bins=None,
         )

@@ -27,7 +27,6 @@ from ess.spectroscopy.types import (
     LookupTableRelativeErrorThreshold,
     NeXusDetectorName,
     NormalizationMonitor,
-    NormalizationMonitorWavelengthBins,
     OverlapMonitor,
     ProtonCharge,
     PSCMonitor,
@@ -36,6 +35,7 @@ from ess.spectroscopy.types import (
     SampleRun,
     TransformationOverrides,
     UncertaintyBroadcastMode,
+    WavelengthBins,
     WavelengthMonitor,
 )
 
@@ -337,15 +337,20 @@ def test_workflow_can_compute_energy_data_from_coda_file(
     coda_workflow[LookupTableRelativeErrorThreshold] = {
         'detector': np.inf,
         'normalization_monitor': np.inf,
+        'elastic_monitor': np.inf,
     }
-    coda_workflow[NormalizationMonitorWavelengthBins] = sc.linspace(
+    coda_workflow[WavelengthBins[NormalizationMonitor]] = sc.linspace(
         'incident_wavelength', 0.0, 20.0, 101, unit='angstrom'
     )
     coda_workflow[ProtonCharge[SampleRun]] = sc.DataArray(sc.scalar(1.0, unit='pC'))
     coda_workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
 
-    result = coda_workflow.compute(EnergyQDetector[SampleRun])
+    results = coda_workflow.compute(
+        (EnergyQDetector[SampleRun], WavelengthMonitor[SampleRun, ElasticMonitor])
+    )
+    result = results[EnergyQDetector[SampleRun]]
 
     assert result.bins.size().sum().value > 0
     assert 'energy_transfer' in result.bins.coords
     assert 'sample_table_momentum_transfer' in result.bins.coords
+    assert results[WavelengthMonitor[SampleRun, ElasticMonitor]].bins is not None
