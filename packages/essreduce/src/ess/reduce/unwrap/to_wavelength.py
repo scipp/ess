@@ -23,6 +23,7 @@ from ..nexus.types import (
     EmptyMonitor,
     GravityVector,
     MonitorType,
+    NeutronSourcePosition,
     NeXusName,
     Position,
     RawDetector,
@@ -426,7 +427,7 @@ def _compute_wavelength_events(
 
 def detector_ltotal_from_straight_line_approximation(
     detector: EmptyDetector[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> DetectorLtotal[RunType]:
@@ -462,7 +463,7 @@ def detector_ltotal_from_straight_line_approximation(
 
 def monitor_ltotal_from_straight_line_approximation(
     monitor_beamline: EmptyMonitor[RunType, MonitorType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
 ) -> MonitorLtotal[RunType, MonitorType]:
     """
     Compute Ltotal for the monitor.

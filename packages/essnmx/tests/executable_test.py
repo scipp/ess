@@ -29,8 +29,7 @@ from ess.nmx.configurations import (
     to_command_arguments,
 )
 from ess.nmx.executables import reduction
-from ess.nmx.types import Compression, NMXLauetof, SampleRun
-from ess.reduce.nexus.types import Position
+from ess.nmx.types import Compression, NeutronSourcePosition, NMXLauetof, SampleRun
 
 
 def _build_arg_list_from_pydantic_instance(*instances: pydantic.BaseModel) -> list[str]:
@@ -430,7 +429,7 @@ def lut_file_path(tmp_path: pathlib.Path):
 
     # Simply use the default workflow for testing.
     workflow = initialize_nmx_workflow(config=WorkflowConfig())
-    workflow[Position[snx.NXsource, SampleRun]] = sc.vector(value=[0, 0, 0], unit='m')
+    workflow[NeutronSourcePosition[SampleRun]] = sc.vector(value=[0, 0, 0], unit='m')
     lut = workflow.compute(LookupTable[SampleRun, snx.NXdetector])
 
     # Change the tof range a bit for testing.

@@ -14,6 +14,7 @@ from ess.reduce.nexus.types import (
     DiskChoppers,
     EmptyDetector,
     Filename,
+    NeutronSourcePosition,
     NeXusDetectorName,
     NeXusName,
     Position,
@@ -312,9 +313,9 @@ def _component_position(filename, component):
 
 def mcstas_source_position(
     filename: Filename[RunType],
-) -> Position[snx.NXsource, RunType]:
+) -> NeutronSourcePosition[RunType]:
     """Load the moderator position from the simulation geometry."""
-    return Position[snx.NXsource, RunType](_component_position(filename, 'Source'))
+    return NeutronSourcePosition[RunType](_component_position(filename, 'Source'))
 
 
 def mcstas_sample_position(
