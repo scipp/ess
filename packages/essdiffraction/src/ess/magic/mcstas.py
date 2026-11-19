@@ -86,19 +86,16 @@ def mcstas_detector_geometry(
 ) -> EmptyDetector[RunType]:
     """Construct pixel IDs and positions without reading detector events.
 
-    Uses the cassette model of the MAGIC Mantid workflow's ``voxelization.py``
-    and its IDF's default ``pairs=plane`` convention: both counters in a cassette
-    share the central absorption plane. IDs increase with counter first, then
-    anode, then cathode. Positions are in the global McStas frame, in metres.
+    Uses the MAGIC cassette model from ``magic-notebooks``' ``voxelization.py``:
+    both counters in a cassette share the central absorption plane. IDs increase
+    with counter first, then anode, then cathode. McStasToX applies the logger's
+    placement to put positions in the common simulation frame, in metres.
 
     Bank A reads ``A_r1`` (m), ``A_section_length`` (m), ``A_casette_gamma``
     (deg) and ``A_casette_omega`` (deg). Bank B uses the reference model's
     1 m radius, 0.53 m length and -0.94 degree cassette spacing, and requires
     ``B_casette_omega`` (deg). Channel counts and trapezoid heights are fixed
-    by the reference model. The selected absorption logger supplies placement.
-
-    Mantid currently fixes A's radius, length and spacing to their nominal
-    values; agreement with that reference requires those same values.
+    by the reference model.
     """
     component = _LOGGERS[bank]
     filename = Path(filename)
