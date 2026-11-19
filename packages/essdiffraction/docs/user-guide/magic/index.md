@@ -60,4 +60,3 @@ Missing parameters are not replaced with defaults.
 
 For comparison with Mantid's sample-centred instrument definition, subtract the global sample position from these pixel positions.
 Mantid fixes bank A's radius, length and spacing to 1 m, 0.53 m and 1.05 degrees; comparisons with other values require adapting the reference model.
-This provider constructs geometry only; assigning the raw events to these pixels is a separate step.
