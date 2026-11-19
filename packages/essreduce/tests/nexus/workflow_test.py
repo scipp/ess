@@ -1467,3 +1467,21 @@ def test_provider_of_transformation_overrides_reaches_single_and_multi_chains(
     assert_identical(single.transformations[TRANS1].value, expected)
     assert_identical(multi['a'].transformations[TRANS1].value, expected)
     assert_identical(multi['b'].transformations[TRANS1].value, expected)
+
+
+def test_transformation_overrides_apply_to_chopper_positions(
+    depends_on, time_dependent_depends_on
+) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[workflow.NeXusMultiComponent[snx.NXdisk_chopper, SampleRun]] = sc.DataGroup(
+        a=sc.DataGroup(depends_on=depends_on),
+        b=sc.DataGroup(depends_on=time_dependent_depends_on),
+    )
+    wf[TransformationOverrides[snx.NXdisk_chopper, SampleRun]] = {
+        TRANS2: sc.scalar(5.0, unit='m')
+    }
+
+    choppers = wf.compute(RawChoppers[SampleRun])
+
+    assert_identical(choppers['a']['position'], sc.vector([1.0, 2.0, 3.0], unit='m'))
+    assert_identical(choppers['b']['position'], sc.vector([1.0, 5.0, 0.0], unit='m'))

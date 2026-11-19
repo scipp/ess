@@ -325,9 +325,9 @@ class TransformationOverrides(
     the overrides as well if the motor does not move all of those components.
 
     Overrides only reach providers that use :class:`NeXusTransformationChain` or
-    :class:`NeXusMultiTransformationChain`. Providers that read from a component or
-    file directly keep using the stored value, e.g., for chopper positions, the
-    BIFROST sample angle, or the ESTIA detector rotation.
+    :class:`NeXusMultiTransformationChain`, which includes chopper positions.
+    Providers that read from a component or file directly keep using the stored
+    value, e.g., for the BIFROST sample angle or the ESTIA detector rotation.
     """
 
 
