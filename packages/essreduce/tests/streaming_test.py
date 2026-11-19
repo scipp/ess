@@ -58,6 +58,7 @@ def test_StreamProcessor_with_empty_workflow_and_targets() -> None:
 
 
 def test_StreamProcessor_overall_behavior() -> None:
+    make_static_a.call_count = 0
     base_workflow = sciline.Pipeline(
         (make_static_a, make_accum_a, make_accum_b, make_target)
     )
@@ -1326,3 +1327,119 @@ def test_StreamProcessor_context_update_recomputes_dependent_context_values() ->
     assert calls == {'projection': 2, 'mask': 3}
     streaming_wf.accumulate({Streamed: 1})
     assert streaming_wf.finalize()[Output] == 1 + 20 + (20 + 3)
+
+
+def test_StreamProcessor_names_unset_context_key_read_by_chunk_stage() -> None:
+    Streamed = NewType('Streamed', int)
+    Offset = NewType('Offset', int)
+    Output = NewType('Output', int)
+
+    def process(streamed: Streamed, offset: Offset) -> Output:
+        return Output(streamed + offset)
+
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=sciline.Pipeline((process,)),
+        dynamic_keys=(Streamed,),
+        context_keys=(Offset,),
+        target_keys=(Output,),
+        accumulators=(Output,),
+    )
+    with pytest.raises(ValueError, match=r'Context keys \[.*Offset\] have not'):
+        streaming_wf.accumulate({Streamed: 2})
+
+
+def test_StreamProcessor_rejects_accumulator_reading_accumulator_read_by_target() -> (
+    None
+):
+    StreamedA = NewType('StreamedA', int)
+    StreamedB = NewType('StreamedB', int)
+    Inner = NewType('Inner', int)
+    Outer = NewType('Outer', int)
+    InnerResult = NewType('InnerResult', int)
+    OuterResult = NewType('OuterResult', int)
+
+    def inner(streamed: StreamedA) -> Inner:
+        return Inner(streamed)
+
+    def outer(inner: Inner, streamed: StreamedB) -> Outer:
+        return Outer(inner * streamed)
+
+    def inner_result(inner: Inner) -> InnerResult:
+        return InnerResult(inner)
+
+    def outer_result(outer: Outer) -> OuterResult:
+        return OuterResult(outer)
+
+    with pytest.raises(ValueError, match=r'read accumulators \[.*Inner\]'):
+        streaming.StreamProcessor(
+            base_workflow=sciline.Pipeline((inner, outer, inner_result, outer_result)),
+            dynamic_keys=(StreamedA, StreamedB),
+            target_keys=(InnerResult, OuterResult),
+            accumulators=(Inner, Outer),
+        )
+
+
+def test_StreamProcessor_failed_context_update_keeps_previous_context() -> None:
+    Streamed = NewType('Streamed', int)
+    Position = NewType('Position', int)
+    Projection = NewType('Projection', int)
+    Output = NewType('Output', int)
+
+    def project(position: Position) -> Projection:
+        if position < 0:
+            raise RuntimeError('invalid position')
+        return Projection(10 * position)
+
+    def process(
+        streamed: Streamed, projection: Projection, position: Position
+    ) -> Output:
+        return Output(streamed + projection + position)
+
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=sciline.Pipeline((project, process)),
+        dynamic_keys=(Streamed,),
+        context_keys=(Position,),
+        target_keys=(Output,),
+        accumulators=(Output,),
+    )
+    streaming_wf.set_context({Position: 1})
+    with pytest.raises(RuntimeError, match='invalid position'):
+        streaming_wf.set_context({Position: -1})
+    streaming_wf.accumulate({Streamed: 1})
+    assert streaming_wf.finalize()[Output] == 1 + 10 + 1
+
+
+def test_StreamProcessor_runs_context_stage_after_stages_it_reads() -> None:
+    # The value depending on more context keys is read by the first chunk stage,
+    # so it comes first when collecting what the context stages compute.
+    StreamedA = NewType('StreamedA', int)
+    StreamedB = NewType('StreamedB', int)
+    Position = NewType('Position', int)
+    Scale = NewType('Scale', int)
+    Projection = NewType('Projection', int)
+    Scaled = NewType('Scaled', int)
+    OutputA = NewType('OutputA', int)
+    OutputB = NewType('OutputB', int)
+
+    def project(position: Position) -> Projection:
+        return Projection(position)
+
+    def scale(projection: Projection, factor: Scale) -> Scaled:
+        return Scaled(projection * factor)
+
+    def output_a(streamed: StreamedA, scaled: Scaled) -> OutputA:
+        return OutputA(streamed + scaled)
+
+    def output_b(streamed: StreamedB, projection: Projection) -> OutputB:
+        return OutputB(streamed + projection)
+
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=sciline.Pipeline((project, scale, output_a, output_b)),
+        dynamic_keys=(StreamedA, StreamedB),
+        context_keys=(Position, Scale),
+        target_keys=(OutputA, OutputB),
+        accumulators=(OutputA, OutputB),
+    )
+    streaming_wf.set_context({Position: 2, Scale: 3})
+    streaming_wf.accumulate({StreamedA: 0, StreamedB: 0})
+    assert streaming_wf.finalize() == {OutputA: 6, OutputB: 2}

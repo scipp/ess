@@ -352,12 +352,14 @@ class StreamProcessor:
         Raises
         ------
         ValueError
-            If the dynamic and context keys overlap or depend on each other, or if
+            If the dynamic and context keys overlap or depend on each other, if
             a target depends on a dynamic key other than through an accumulator and
-            ``allow_bypass`` is False.
+            ``allow_bypass`` is False, or if an accumulator reads another accumulator
+            that the targets also read.
         """
-        self._dynamic_keys = set(dynamic_keys)
-        self._context_keys = set(context_keys)
+        # Tuples, not sets, so that stage inputs and messages have a stable order.
+        self._dynamic_keys = tuple(dict.fromkeys(dynamic_keys))
+        self._context_keys = tuple(dict.fromkeys(context_keys))
         self._target_keys = target_keys
         _validate_streaming_keys(base_workflow, self._dynamic_keys, self._context_keys)
         (
@@ -380,7 +382,7 @@ class StreamProcessor:
                 *self._finalize_stage.inputs,
             },
         )
-        self._bypassed_keys = self._dynamic_keys.intersection(
+        self._bypassed_keys = set(self._dynamic_keys).intersection(
             self._finalize_stage.inputs
         )
         # Values kept between calls: the context, what the context stages computed from
@@ -392,7 +394,8 @@ class StreamProcessor:
         Set the context for processing chunks.
 
         Context keys not given keep their value. Only what is derived from the given
-        keys is recomputed.
+        keys is recomputed. If computing a derived value raises, the context is left
+        unchanged.
 
         Parameters
         ----------
@@ -402,20 +405,19 @@ class StreamProcessor:
         for key in context:
             if key not in self._context_keys:
                 raise ValueError(f"Key '{key}' is not a context key")
-        self._held.update(context)
         # A stage runs if it reads an updated key or a value recomputed by an earlier
         # stage; the stages are ordered so that those come first. Until every context
         # key a stage needs has been set, it cannot run. Stages reading its results
         # then fail, naming the keys that are not set.
-        updated = set(context)
+        updated = dict(context)
+        values = ChainMap(updated, self._held)
         for stage in self._context_stages:
-            if updated.isdisjoint(stage.inputs) or not self._held.keys() >= set(
-                stage.inputs
+            if updated.keys().isdisjoint(stage.inputs) or not all(
+                key in values for key in stage.inputs
             ):
                 continue
-            results = stage.run(self._values_for(stage.inputs, self._held))
-            self._held.update(results)
-            updated.update(results)
+            updated.update(stage.run(self._values_for(stage.inputs, values)))
+        self._held.update(updated)
 
     def add_chunk(
         self, chunks: dict[sciline.typing.Key, Any]
@@ -453,7 +455,7 @@ class StreamProcessor:
             If non-dynamic keys are provided in chunks.
             If accumulator computation requires dynamic keys not provided in chunks.
         """
-        non_dynamic = set(chunks) - self._dynamic_keys
+        non_dynamic = set(chunks).difference(self._dynamic_keys)
         if non_dynamic:
             raise ValueError(
                 f"Can only update dynamic keys. Got non-dynamic keys: {non_dynamic}"
@@ -461,7 +463,7 @@ class StreamProcessor:
 
         stages = []
         for stage in self._chunk_stages:
-            needed = self._dynamic_keys.intersection(stage.inputs)
+            needed = set(self._dynamic_keys).intersection(stage.inputs)
             if needed.isdisjoint(chunks):
                 continue
             if not needed.issubset(chunks):
@@ -515,13 +517,14 @@ class StreamProcessor:
         values: Mapping[sciline.typing.Key, Any],
     ) -> dict[sciline.typing.Key, Any]:
         if missing := [key for key in keys if key not in values]:
-            unset = [
-                k
-                for stage in self._context_stages
-                for k in stage.inputs
-                if k in self._context_keys and k not in self._held
-            ]
-            hint = f' Context keys {unset} have not been set.' if unset else ''
+            # A missing dynamic key is a chunk not received yet, not unset context.
+            unset = [k for k in self._context_keys if k not in self._held]
+            from_context = any(k not in self._dynamic_keys for k in missing)
+            hint = (
+                f' Context keys {unset} have not been set.'
+                if unset and from_context
+                else ''
+            )
             raise ValueError(f'No value was fed for {missing}.{hint}')
         return {key: values[key] for key in keys}
 
@@ -626,14 +629,14 @@ class StreamProcessor:
 
 def _validate_streaming_keys(
     base_workflow: sciline.Pipeline,
-    dynamic_keys: set[sciline.typing.Key],
-    context_keys: set[sciline.typing.Key],
+    dynamic_keys: tuple[sciline.typing.Key, ...],
+    context_keys: tuple[sciline.typing.Key, ...],
 ) -> None:
     """Raise unless dynamic and context keys are disjoint and mutually independent."""
-    if overlap := dynamic_keys & context_keys:
+    if overlap := set(dynamic_keys).intersection(context_keys):
         raise ValueError(f"Keys cannot be both dynamic and context: {overlap}")
     graph = base_workflow.underlying_graph
-    special_keys = dynamic_keys | context_keys
+    special_keys = {*dynamic_keys, *context_keys}
     for key in special_keys:
         if key not in graph:
             continue
@@ -648,8 +651,8 @@ def _validate_streaming_keys(
 def _prepare_stages(
     workflow: sciline.Pipeline,
     *,
-    dynamic_keys: set[sciline.typing.Key],
-    context_keys: set[sciline.typing.Key],
+    dynamic_keys: tuple[sciline.typing.Key, ...],
+    context_keys: tuple[sciline.typing.Key, ...],
     target_keys: tuple[sciline.typing.Key, ...],
     accumulator_keys: tuple[sciline.typing.Key, ...],
     allow_bypass: bool,
@@ -662,14 +665,14 @@ def _prepare_stages(
     context: this is what the context stages compute. These stages are only
     inspected, so nothing is computed until all stages are built together.
     """
-    special_keys = dynamic_keys | context_keys
+    special_keys = {*dynamic_keys, *context_keys}
     finalized = tuple(
         k for k in target_keys if k not in accumulator_keys and k not in special_keys
     )
     finalize_probe = sciline.Stage(
         workflow, outputs=finalized, inputs=(*accumulator_keys, *dynamic_keys)
     )
-    if bypassed := dynamic_keys.intersection(finalize_probe.inputs):
+    if bypassed := [k for k in dynamic_keys if k in finalize_probe.inputs]:
         if not allow_bypass:
             raise ValueError(
                 f"Targets depend on dynamic keys {bypassed} other than through an "
@@ -708,7 +711,8 @@ def _prepare_stages(
     context_groups = [by_context[k] for k in sorted(by_context, key=len)]
     # The chunk stages are cut only at the accumulation keys that finalize reads, so
     # an accumulator feeding another one is computed per chunk, not read from its
-    # accumulator.
+    # accumulator. If finalize also reads the inner one, the chunk stage would read
+    # it from its accumulator; that is rejected below.
     *stages, finalize_stage = sciline.prepare_stages(
         workflow,
         inputs=(*context_keys, *forwarded, *dynamic_keys, *finalize_probe.inputs),
@@ -719,7 +723,14 @@ def _prepare_stages(
         ],
     )
     n_context = len(context_groups)
-    return tuple(stages[:n_context]), tuple(stages[n_context:]), finalize_stage
+    chunk_stages = tuple(stages[n_context:])
+    for stage in chunk_stages:
+        if inner := [k for k in stage.inputs if k in accumulator_keys]:
+            raise ValueError(
+                f"Accumulators {list(stage.outputs)} read accumulators {inner}, "
+                "which the targets also read. This is not supported."
+            )
+    return tuple(stages[:n_context]), chunk_stages, finalize_stage
 
 
 def _make_accumulators(

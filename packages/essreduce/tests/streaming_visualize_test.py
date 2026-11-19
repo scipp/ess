@@ -5,6 +5,13 @@ from typing import NewType
 
 import graphviz
 import sciline
+from sciline.visualize import (
+    CACHED_STYLE,
+    INPUT_STYLE,
+    ONCE_STYLE,
+    OUTPUT_STYLE,
+    PER_CALL_STYLE,
+)
 
 from ess.reduce import streaming
 
@@ -58,15 +65,15 @@ def node_style(source: str, key: type) -> str:
     )
 
 
-STATIC = 'fillcolor="#e8e8e8"'
-CACHED = 'penwidth=2.5'
-DYNAMIC_KEY = 'fillcolor="#90ee90"'
-DYNAMIC = 'fillcolor="#d4f4d4"'
+STATIC = f'fillcolor="{ONCE_STYLE["fillcolor"]}"'
+CACHED = f'penwidth={CACHED_STYLE["penwidth"]}'
+DYNAMIC_KEY = f'fillcolor="{INPUT_STYLE["fillcolor"]}"'
+DYNAMIC = f'fillcolor="{PER_CALL_STYLE["fillcolor"]}"'
 CONTEXT_KEY = 'fillcolor="#87CEEB"'
 CONTEXT_DEPENDENT = 'fillcolor="#d4e8f4"'
 ACCUMULATOR = 'shape=cylinder'
 FINALIZE = 'fillcolor="#DDA0DD"'
-TARGET = 'peripheries=2'
+TARGET = f'peripheries={OUTPUT_STYLE["peripheries"]}'
 
 
 class TestNodeStyles:
