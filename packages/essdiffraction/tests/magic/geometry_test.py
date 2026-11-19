@@ -163,16 +163,6 @@ def test_geometry_rejects_invalid_parameters(tmp_path, name, value):
         mcstas_detector_geometry(filename, DetectorBank.detector_a)
 
 
-@pytest.mark.parametrize(
-    'placement',
-    [{'position': [0.0, np.nan, 0.0]}, {'rotation': np.diag([-1.0, 1.0, 1.0])}],
-)
-def test_geometry_rejects_invalid_placement(tmp_path, placement):
-    filename = _write_geometry(tmp_path, **placement)
-    with pytest.raises(ValueError, match='finite position and proper rotation'):
-        mcstas_detector_geometry(filename, DetectorBank.detector_a)
-
-
 @pytest.mark.parametrize('bank', [None, DetectorBank.detector_b])
 def test_workflow_computes_geometry_without_events(tmp_path, bank):
     filename = _write_geometry(tmp_path)

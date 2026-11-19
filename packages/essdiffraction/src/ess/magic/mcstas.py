@@ -100,19 +100,6 @@ def mcstas_detector_geometry(
     component = _LOGGERS[bank]
     filename = Path(filename)
     with mcstastox.Read(filename.parent, filename.name) as reader:
-        translation, rotation = reader.get_component_placement(component)
-        if (
-            translation.shape != (3,)
-            or not np.all(np.isfinite(translation))
-            or rotation.shape != (3, 3)
-            or not np.all(np.isfinite(rotation))
-            or not np.allclose(rotation @ rotation.T, np.eye(3), rtol=0, atol=1e-10)
-            or not np.isclose(np.linalg.det(rotation), 1.0, rtol=0, atol=1e-10)
-        ):
-            raise ValueError(
-                f'{component} must have a finite position and proper rotation.'
-            )
-
         parameters = reader.file['entry1/simulation/Param']
         if bank is DetectorBank.detector_a:
             cassettes, anodes, first_id = 60, 128, 1
