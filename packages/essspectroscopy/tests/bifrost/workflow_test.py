@@ -10,7 +10,7 @@ import scipp.testing
 import scippnexus as snx
 from ess import bifrost
 from ess.bifrost.data import (
-    coda_test_run_2026_10,
+    coda_test_run_2026_11,
     computed_energy_data_simulated_5x2,
     lookup_table_simulation,
     simulated_elastic_incoherent_with_phonon,
@@ -232,7 +232,7 @@ def test_calibrated_detector_has_contiguous_detector_number() -> None:
 def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
     workflow = bifrost.BifrostWorkflow()
     workflow[NeXusDetectorNames] = detector_names
-    workflow[Filename[SampleRun]] = coda_test_run_2026_10()
+    workflow[Filename[SampleRun]] = coda_test_run_2026_11()
     # The table does not match the choppers of this run but these tests only check
     # that the file can be loaded.
     workflow[LookupTableFilename] = lookup_table_simulation()
@@ -243,7 +243,7 @@ def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
 def test_tank_angle_override_rotates_detectors_and_analyzers_and_sets_a4(
     coda_workflow: sciline.Pipeline,
 ) -> None:
-    tank_angle = '/entry/instrument/detector_tank/transformations/tank_angle'
+    tank_angle = '/entry/instrument/detector_tank_angle/value'
     # The angle in the file is 0, so the overridden positions are the original ones
     # rotated by the override, around the vertical axis through the sample.
     original_detector = coda_workflow.compute(RawDetector[SampleRun])
