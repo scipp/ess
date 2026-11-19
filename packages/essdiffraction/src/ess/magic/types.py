@@ -28,7 +28,7 @@ class DetectorBank(Enum):
 
 
 class RawMcStasEvents(sl.Scope[RunType, sc.DataArray], sc.DataArray):
-    """Flat weighted absorption-logger rows before geometry or timing corrections.
+    """Flat weighted absorption-logger rows before pixel assignment.
 
     Coordinates retain the McStas logger's local frame and original arrival time.
     These events have not been assigned to detector pixels.

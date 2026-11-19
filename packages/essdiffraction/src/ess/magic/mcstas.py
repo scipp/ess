@@ -8,6 +8,8 @@ import mcstastox
 import numpy as np
 import scipp as sc
 
+from ess.reduce.unwrap import PulsePeriod
+
 from .types import DetectorBank, EmptyDetector, Filename, RawMcStasEvents, RunType
 
 __all__ = ['load_mcstas_events', 'mcstas_detector_geometry']
@@ -29,7 +31,7 @@ _COORDINATE_UNITS = {
 
 
 def load_mcstas_events(
-    filename: Filename[RunType], bank: DetectorBank
+    filename: Filename[RunType], bank: DetectorBank, pulse_period: PulsePeriod
 ) -> RawMcStasEvents[RunType]:
     """Read all rows of the selected bank's McStas absorption logger.
 
@@ -41,11 +43,16 @@ def load_mcstas_events(
 
     Coordinates ``x``, ``y``, ``z`` (m) and ``vx``, ``vy``, ``vz`` (m/s) are in
     the logger's local frame. ``t`` (s) is the original McStas arrival time,
-    without an offset or pulse folding. Row order and zero weights are retained.
+    retained for diagnostics. Pulse-relative offsets are in ``event_time_offset``
+    (s); ``event_time_zero`` uses the Unix epoch as the simulation origin, with
+    pulse timestamps rounded to nanoseconds. Row order and zero weights are retained.
     No detector acceptance cuts, pixel assignment, or normalization are applied.
 
     The selected logger is loaded in full into memory.
     """
+    period = pulse_period.to(unit='s', dtype='float64')
+    if period.ndim or not np.isfinite(period.value) or period.value <= 0:
+        raise ValueError('PulsePeriod must be a finite positive scalar duration.')
     component = _LOGGERS[bank]
     filename = Path(filename)
     with mcstastox.Read(filename.parent, filename.name) as reader:
@@ -60,15 +67,22 @@ def load_mcstas_events(
     weights = values.pop('p')
     data = sc.array(dims=['event'], values=weights, variances=weights**2, unit='counts')
     del weights
-    return RawMcStasEvents[RunType](
-        sc.DataArray(
-            data,
-            coords={
-                name: sc.array(dims=['event'], values=values.pop(name), unit=unit)
-                for name, unit in _COORDINATE_UNITS.items()
-            },
-        )
-    )
+    coords = {
+        name: sc.array(dims=['event'], values=values.pop(name), unit=unit)
+        for name, unit in _COORDINATE_UNITS.items()
+    }
+    time = coords['t']
+    if not sc.isfinite(time).all().value:
+        raise ValueError('McStas arrival times must be finite.')
+    offset = time % period
+    # Keep round-off at frame boundaries inside the half-open pulse interval.
+    offset = sc.where(offset < sc.scalar(0.0, unit='s'), offset + period, offset)
+    offset = sc.where(offset >= period, offset - period, offset)
+    coords['event_time_offset'] = offset
+    coords['event_time_zero'] = sc.datetime(0, unit='ns') + sc.round(
+        (time - offset).to(unit='ns')
+    ).to(dtype='int64')
+    return RawMcStasEvents[RunType](sc.DataArray(data, coords=coords))
 
 
 def _geometry_parameter(parameters, name: str) -> float:

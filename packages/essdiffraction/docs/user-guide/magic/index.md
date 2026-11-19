@@ -30,12 +30,25 @@ The result is a flat Scipp DataArray with an `event` dimension:
 | `x`, `y`, `z` | Absorption position in the logger's local frame | `m` |
 | `vx`, `vy`, `vz` | Velocity in the logger's local frame | `m/s` |
 | `t` | Original McStas arrival time | `s` |
+| `event_time_offset` | Arrival time relative to the most recent pulse | `s` |
+| `event_time_zero` | Pulse timestamp using a synthetic Unix-epoch origin | `datetime64[ns]` |
 
 Weights are not normalized to an absolute count rate.
 The variance convention matches the MAGIC Mantid converter, but does not represent correlations between rows introduced by McStas splitting.
 Row order and zero-weight rows are preserved.
-The reader does not apply detector acceptance cuts, assign pixels, correct times, or calculate wavelength.
+The reader does not apply detector acceptance cuts, assign pixels, apply emission-time corrections, or calculate wavelength.
 These operations will be added as separate providers.
+
+The default pulse period is 1/14 s. Arrival times are folded into that period,
+with pulse timestamps rounded to the nearest nanosecond; `t` is retained for diagnostics.
+No emission-time correction is applied. To override the pulse period:
+
+```python
+import scipp as sc
+from ess.reduce.unwrap import PulsePeriod
+
+workflow[PulsePeriod] = sc.scalar(1 / 14, unit='s')
+```
 
 ## Detector geometry
 
