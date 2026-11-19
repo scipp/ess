@@ -11,6 +11,8 @@ import scippnexus as snx
 from scippneutron import metadata as scn_meta
 from scippneutron.chopper import DiskChopper
 
+from .patch import PatchOp
+
 FilePath = NewType('FilePath', Path)
 """Full path to a NeXus file on disk."""
 NeXusFile = NewType('NeXusFile', BinaryIO)
@@ -24,6 +26,18 @@ The type alias is provided for callers of load functions outside of pipelines.
 """
 NeXusGroup = NewType('NeXusGroup', snx.Group)
 """A ScippNexus group in an open file."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class PatchedFilePath:
+    """Path to a NeXus file and a patch to apply when opening it.
+
+    See :mod:`ess.reduce.nexus.patch`.
+    """
+
+    path: FilePath
+    patch: list[PatchOp]
+
 
 NeXusEntryName = NewType('NeXusEntryName', str)
 """Name of an entry in a NeXus file."""
@@ -301,6 +315,17 @@ class TimeInterval(Generic[RunType]):
     value: slice
 
 
+class NeXusFilePatch(Generic[RunType]):
+    """Patch to apply to the NeXus file of a run when loading it.
+
+    The default is an empty patch, i.e., the file is loaded as is.
+    See :mod:`ess.reduce.nexus.patch`.
+    """
+
+    def __new__(cls, x: list[PatchOp]) -> Any:
+        return x
+
+
 class TransformationTimeFilter(Generic[Component, RunType]):
     """Filter for time-dependent transformations."""
 
@@ -333,7 +358,7 @@ class TransformationOverrides(
 
 @dataclass
 class NeXusFileSpec(Generic[RunType]):
-    value: FilePath | NeXusFile | NeXusGroup
+    value: FilePath | NeXusFile | NeXusGroup | PatchedFilePath
 
 
 @dataclass
@@ -342,7 +367,7 @@ class NeXusLocationSpec:
     NeXus filename and optional parameters to identify (parts of) a component to load.
     """
 
-    filename: FilePath | NeXusFile | NeXusGroup
+    filename: FilePath | NeXusFile | NeXusGroup | PatchedFilePath
     entry_name: NeXusEntryName | None = None
     component_name: str | None = None
     selection: snx.typing.ScippIndex | slice = ()
@@ -368,7 +393,7 @@ class NeXusMultiLocationSpec:
     If ``location_names is None`` corresponds to all locations of the class.
     """
 
-    filename: FilePath | NeXusFile | NeXusGroup
+    filename: FilePath | NeXusFile | NeXusGroup | PatchedFilePath
     entry_name: NeXusEntryName | None = None
     selection: snx.typing.ScippIndex | slice = ()
     location_names: tuple[str, ...] | None = None
