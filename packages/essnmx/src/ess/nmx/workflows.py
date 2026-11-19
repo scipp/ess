@@ -25,7 +25,7 @@ from ess.reduce.unwrap import (
     LtotalRange,
     SimulationMaxWavelength,
     SimulationMinWavelength,
-    SimulationSeed,
+    SourceBounds,
     WavelengthDetector,
     WavelengthLutMode,
 )
@@ -33,6 +33,8 @@ from ess.reduce.workflow import register_workflow
 
 from .configurations import WorkflowConfig
 from .types import (
+    BeamMonitor1,
+    BeamMonitor2,
     NMXDetectorMetadata,
     NMXSampleMetadata,
     NMXSourceMetadata,
@@ -208,7 +210,7 @@ def compute_detector_tof(da: WavelengthDetector[RunType]) -> TofDetector[RunType
 
 @register_workflow
 def NMXWorkflow(
-    wavelength_from: WavelengthLutMode = "file", **kwargs
+    wavelength_from: WavelengthLutMode = "analytical", **kwargs
 ) -> sciline.Pipeline:
     """
     Workflow for reducing data from the NMX instrument at ESS.
@@ -222,7 +224,7 @@ def NMXWorkflow(
     """
     generic_wf = GenericUnwrapWorkflow(
         run_types=[SampleRun],
-        monitor_types=[],
+        monitor_types=[BeamMonitor1, BeamMonitor2],
         wavelength_from=wavelength_from,
         **kwargs,
     )
@@ -261,20 +263,23 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
         wf[LookupTableFilename[SampleRun, snx.NXdetector]] = (
             config.lookup_table_file_path
         )
-        # TODO: also add monitor when we have monitors in the NMXWorkflow.
     else:
-        wf = NMXWorkflow(wavelength_from="simulation")
+        wf = NMXWorkflow(wavelength_from="analytical")
         wmax = sc.scalar(config.tof_simulation_max_wavelength, unit='angstrom')
         wmin = sc.scalar(config.tof_simulation_min_wavelength, unit='angstrom')
-        wf[SimulationMaxWavelength] = wmax
-        wf[SimulationMinWavelength] = wmin
-        wf[SimulationSeed] = config.tof_simulation_seed
+        wf[SourceBounds] = (
+            SourceBounds(
+                # The ESS pulse lasts 2.86 ms, but has a long tail, so we take a wider
+                # time range to be safe.
+                time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+                wavelength=(wmin, wmax),
+            ),
+        )
         ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
         ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
         wf[LtotalRange[SampleRun, snx.NXdetector]] = ltotal_min, ltotal_max
         if not config.use_choppers_from_file:
             wf[DiskChoppers[SampleRun]] = {}
-        # TODO: replace the simulation mode with the 'analytical' (polygons) mode.
 
     return wf
 
