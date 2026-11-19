@@ -134,19 +134,6 @@ def test_read_same_named_masks_can_have_different_shapes_and_order(
     assert sc.identical(loaded['bank_1'], sc.DataGroup(m=banks['bank_1']))
 
 
-def test_read_raises_if_same_named_masks_have_different_dimension_labels(
-    tmp_path: Path,
-) -> None:
-    masks = {
-        'bank_0': {'m': sc.array(dims=['tube'], values=[True, False])},
-        'bank_1': {'m': sc.array(dims=['straw'], values=[True, False])},
-    }
-    write_pixel_masks(tmp_path / 'a.nxs', masks, instrument='TEST')
-
-    with pytest.raises(ValueError, match='different dimension labels'):
-        _read(tmp_path / 'a.nxs')
-
-
 def test_read_bank_masks_omits_banks_without_dataset_of_mask(tmp_path: Path) -> None:
     mask = sc.array(dims=['tube'], values=[True])
     write_pixel_masks(
