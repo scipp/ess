@@ -8,6 +8,16 @@ same command-line options, so that the two can be compared number by number.
 
 It is a validation tool, not part of the `ess.amor` workflow.
 
+`amor-direct-beam-reduction.ipynb` is a tutorial notebook in the style of the Amor user-guide
+notebooks. It walks through the same reduction step by step: loading a run, the detector
+images, the wavelength maps of direct beam and sample, the angle and Q of every cell, the
+projection to R(Q), three angles in one go, the comparison with eos, and the effect of the
+convention differences. It is stored without outputs; the example raw files are not
+distributed, so point `raw_path` at your own Amor files. `build_notebook.py` regenerates it.
+
+The script exposes the steps as functions: `make_config`, `load_run`, `pixel_table`,
+`detector_image`, `direct_beam_map`, `sample_map`, `lz_grid`, `project_to_q`, `reduce`.
+
 ```bash
 python amor_scipp.py -f 6310-6312 -n 6328 -o out -rp raw \
        -r 0.05 -q 0.005 0.27 -l 3 12 -m -0.055 -T -0.055 0.06 -y 18 48

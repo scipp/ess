@@ -160,12 +160,38 @@ def q_edges(resolution, q_range):
 
 
 # ------------------------------------------------------------------------------ reduction
-def reduce(sample_files, norm_files, cfg):
-    px = pixel_table("ess" if "detx" in cfg["parts"] else "eos")
-    cfg = dict(cfg, lambda_edges=lambda_edges(),
-               z_edges=sc.arange("z_index", 0.0, Detector.nBlades.value * Detector.nWires.value + 1.0, unit=None))
-    cfg["z_edges"].unit = px["z"].unit
+def make_config(*, q_resolution=0.01, q_range=None, lambda_range=(3, 12.5), y_range=(18, 48), mu_offset=0.0,
+                theta_range_rel=(-0.75, 0.75), chopper_phase_offset=-5.0, low_current=50.0, convention="eos",
+                ess_parts=("detx", "hdm", "gravity")):
+    """Reduction settings, named after what they do; defaults are those of eos.
+    q_range=None means: no event filter in Q, and the eos default grid range (0.005, 0.41)."""
+    grid_range = q_range if q_range is not None else (0.005, 0.41)
+    return dict(convention=convention, parts=set(ess_parts) if convention == "ess" else set(),
+                chopper_phase_offset=chopper_phase_offset, low_current=low_current, y_range=list(y_range),
+                lambda_range=list(lambda_range), mu_offset=mu_offset, theta_range_rel=list(theta_range_rel),
+                q_filter=list(q_range) if q_range is not None else None, q_edges=q_edges(q_resolution, grid_range))
 
+
+def _with_grids(cfg, px):
+    if "lambda_edges" in cfg:
+        return cfg
+    z_edges = sc.arange("z_index", 0.0, Detector.nBlades.value * Detector.nWires.value + 1.0, unit=None)
+    z_edges.unit = px["z"].unit
+    return dict(cfg, lambda_edges=lambda_edges(), z_edges=z_edges)
+
+
+def detector_image(path, px):
+    """Counts per (detector row z, strip y) of one raw file, all recorded events."""
+    ev = load_run(path)["events"]
+    idx = ev.coords["event_id"].values.astype(np.int64) - 1
+    img, _, _ = np.histogram2d(px["z"].values[idx], px["strip"].values[idx], bins=(np.arange(449) - 0.5, np.arange(65) - 0.5))
+    return sc.DataArray(sc.array(dims=["z_index", "strip"], values=img, unit="counts"),
+                        coords={"z_index": sc.arange("z_index", 448.0, unit=None), "strip": sc.arange("strip", 64.0, unit=None)})
+
+
+def direct_beam_map(norm_files, cfg, px):
+    """N(lambda, z) of the direct beam, mirrored in z, and its monitor."""
+    cfg = _with_grids(cfg, px)
     norm, norm_mon = None, 0.0
     for f in norm_files:
         h, m, *_ = process_events(load_run(f), cfg, px)
@@ -173,7 +199,12 @@ def reduce(sample_files, norm_files, cfg):
         norm_mon += m
     # the direct beam lands mirrored on the detector with respect to the reflected beam
     norm = sc.DataArray(sc.array(dims=norm.dims, values=norm.values[:, ::-1], unit=norm.unit), coords=dict(norm.coords))
+    return norm, norm_mon
 
+
+def sample_map(sample_files, cfg, px):
+    """I(lambda, z) of the sample summed over runs, its monitor, and the angles of the first run."""
+    cfg = _with_grids(cfg, px)
     inten, mon, nkept, mu, nu = None, 0.0, 0, None, None
     for f in sample_files:
         h, m, mu_f, nu_f, n = process_events(load_run(f), cfg, px, mu_offset=cfg["mu_offset"], q_range=cfg["q_filter"])
@@ -183,12 +214,16 @@ def reduce(sample_files, norm_files, cfg):
             # as in eos: each run's own angles are used for its event filter, but the
             # (lambda, z) -> Q grid of the summed map uses the FIRST run's angles
             mu, nu = mu_f, nu_f
+    return inten, mon, mu, nu, nkept
 
-    # (lambda, z) grid: angle with gravity term, Q, resolution
+
+def lz_grid(mu, nu, detector_distance, cfg, px):
+    """Angle, Q, resolution and acceptance mask of every (lambda, z) cell."""
+    cfg = _with_grids(cfg, px)
     lam = sc.midpoints(cfg["lambda_edges"])
     t0 = nu - mu
     alpha = sc.scalar(t0, unit="deg") + px["delta_z"]                          # dim z_index
-    L = sc.scalar(load_par_detector_distance(sample_files[0]), unit="mm")
+    L = sc.scalar(detector_distance, unit="mm")
     if "gravity" not in cfg["parts"]:
         grav = sc.atan(sc.scalar(3.07e-10, unit="1/(mm*angstrom^2)") * L * lam**2).to(unit="deg")
         alpha_lz = alpha + grav
@@ -200,30 +235,67 @@ def reduce(sample_files, norm_files, cfg):
     if q_lz["wavelength", 0]["z_index", q_lz.sizes["z_index"] // 2].value < 0:
         q_lz = -q_lz
     res_lz = q_lz * sc.sqrt(sc.scalar(0.022**2) + (sc.scalar(0.008, unit="deg") / alpha_lz) ** 2)
-
     T = cfg["theta_range_rel"]
     mask = (alpha_lz >= sc.scalar(t0 + T[0], unit="deg")) & (alpha_lz <= sc.scalar(t0 + T[1], unit="deg"))
     mask = mask & (lam >= sc.scalar(cfg["lambda_range"][0], unit="angstrom")) & (lam <= sc.scalar(cfg["lambda_range"][1], unit="angstrom"))
-    w = sc.where(mask, sc.scalar(1.0), sc.scalar(0.0))
+    return dict(wavelength=lam, theta=alpha_lz, Q=q_lz.to(unit="1/angstrom"), Q_resolution=res_lz.to(unit="1/angstrom"),
+                accepted=mask, theta0=t0, theta_window=(t0 + T[0], t0 + T[1]), delta_z=px["delta_z"])
+
+
+def project_to_q(inten, norm, grid, monitor, norm_monitor, cfg):
+    """R(Q): accepted cells summed in Q bins.  Returns (array [Q, R, sR_eos, sQ, sR_poisson], I_q, W_q, N_q)."""
+    w = sc.where(grid["accepted"], sc.scalar(1.0), sc.scalar(0.0))
 
     def to_q(values):
-        da = sc.DataArray((values * w).copy(), coords={"Q": q_lz.to(unit="1/angstrom")})
+        da = sc.DataArray((values * w).copy(), coords={"Q": grid["Q"]})
         return da.flatten(to="cell").hist(Q=cfg["q_edges"]).data
-    I_q = to_q(inten.data.transpose(["wavelength", "z_index"]))
-    W_q = to_q(norm.data.transpose(["wavelength", "z_index"]))
-    N_q = to_q(sc.ones(sizes=q_lz.sizes))
-    WR_q = to_q(norm.data.transpose(["wavelength", "z_index"]) * res_lz.to(unit="1/angstrom"))
-
+    order = ["wavelength", "z_index"]
+    I_q = to_q(inten.data.transpose(order)); W_q = to_q(norm.data.transpose(order))
+    N_q = to_q(sc.ones(sizes=grid["Q"].sizes)); WR_q = to_q(norm.data.transpose(order) * grid["Q_resolution"])
     I, W, N, WR = I_q.values, np.maximum(W_q.values, 1e-10), N_q.values, WR_q.values
     with np.errstate(invalid="ignore", divide="ignore"):
-        R = np.where(N > 0, I * norm_mon / mon / W, np.nan)
+        R = np.where(N > 0, I * norm_monitor / monitor / W, np.nan)
         dR_eos = np.where(N > 0, R * np.sqrt(1.0 / (I + 0.1) + 1.0 / (W + 0.1)), np.nan)        # eos formula
         dR_poisson = np.where((N > 0) & (I > 0), R * np.sqrt(1.0 / np.maximum(I, 1e-300) + 1.0 / W), np.nan)
         dQ = np.where(N > 0, WR / W, np.nan)
     Q = sc.midpoints(cfg["q_edges"]).values
+    return np.c_[Q, R, dR_eos, dQ, dR_poisson], I, W, N
+
+
+def reflectivity_data_array(data):
+    """The [Q, R, sR, sQ, ...] array as a scipp DataArray with variances, for plotting."""
+    ok = np.isfinite(data[:, 1])
+    return sc.DataArray(sc.array(dims=["Q"], values=data[ok, 1], variances=data[ok, 2] ** 2, unit="dimensionless"),
+                        coords={"Q": sc.array(dims=["Q"], values=data[ok, 0], unit="1/angstrom"),
+                                "Q_resolution": sc.array(dims=["Q"], values=data[ok, 3], unit="1/angstrom")})
+
+
+def reduce(sample_files, norm_files, cfg):
+    """All steps for one curve: direct-beam map, sample map, (lambda, z) grid, projection."""
+    px = pixel_table("ess" if "detx" in cfg["parts"] else "eos")
+    cfg = _with_grids(cfg, px)
+    norm, norm_mon = direct_beam_map(norm_files, cfg, px)
+    inten, mon, mu, nu, nkept = sample_map(sample_files, cfg, px)
+    grid = lz_grid(mu, nu, load_par_detector_distance(sample_files[0]), cfg, px)
+    data, I, W, N = project_to_q(inten, norm, grid, mon, norm_mon, cfg)
     info = dict(mu=mu, nu=nu, monitor_sample=mon, monitor_norm=norm_mon, events_kept=nkept,
                 counts_in_map=float(inten.values.sum()), norm_counts=float(norm.values.sum()))
-    return np.c_[Q, R, dR_eos, dQ, dR_poisson], info
+    if cfg.get("steps") is not None:
+        # intermediate arrays for plotting the reduction steps (dims wavelength x z_index)
+        cfg["steps"].update(
+            lambda_edges=cfg["lambda_edges"].values, q_edges=cfg["q_edges"].values,
+            I_lz=inten.data.transpose(["wavelength", "z_index"]).values,
+            N_lz=norm.data.transpose(["wavelength", "z_index"]).values,
+            alpha_lz=grid["theta"].values, q_lz=grid["Q"].values, mask_lz=grid["accepted"].values,
+            delta_z=px["delta_z"].values, theta0=grid["theta0"], theta_window=np.array(grid["theta_window"]),
+            I_q=I, W_q=W, N_q=N, monitor_sample=mon, monitor_norm=norm_mon)
+    return data, info
+
+
+def run_files(spec, raw_path, year="2026"):
+    """'6310-6312' -> list of raw file paths."""
+    lo, _, hi = str(spec).partition("-")
+    return [os.path.join(raw_path, f"amor{year}n{r:06d}.hdf") for r in range(int(lo), int(hi or lo) + 1)]
 
 
 def load_par_detector_distance(path):
@@ -246,13 +318,10 @@ def main():
                     help="with --convention ess: which ess.amor conventions to switch on (comma list)")
     a = ap.parse_args()
 
-    def files(spec):
-        lo, _, hi = spec.partition("-")
-        return [os.path.join(a.rp, f"amor{a.Y}n{r:06d}.hdf") for r in range(int(lo), int(hi or lo) + 1)]
-    qr = a.q if a.q is not None else (0.005, 0.41)                 # eos default qzRange
+    files = lambda spec: run_files(spec, a.rp, a.Y)
     parts = set(a.ess_parts.split(",")) if a.convention == "ess" else set()
-    cfg = dict(convention=a.convention, parts=parts, chopper_phase_offset=a.co, low_current=a.pt, y_range=a.y, lambda_range=a.l,
-               mu_offset=a.m, theta_range_rel=a.T, q_filter=a.q, q_edges=q_edges(a.r, qr))
+    cfg = make_config(q_resolution=a.r, q_range=a.q, lambda_range=a.l, y_range=a.y, mu_offset=a.m, theta_range_rel=a.T,
+                      chopper_phase_offset=a.co, low_current=a.pt, convention=a.convention, ess_parts=tuple(a.ess_parts.split(",")))
     data, info = reduce(files(a.f), files(a.n), cfg)
     hdr = (f"Amor reduction with scipp {sc.__version__} (amor_scipp.py, convention={a.convention} {sorted(parts)})\n"
            f"sample runs {a.f}, direct beam {a.n}; " + ", ".join(f"{k}={v:.6g}" for k, v in info.items()) + "\n"
