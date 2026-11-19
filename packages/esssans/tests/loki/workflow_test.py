@@ -18,6 +18,7 @@ from ess.sans.types import (
     Filename,
     IntensityQ,
     LookupTableFilename,
+    NeutronSourcePosition,
     NeXusDetectorName,
     PixelMaskFilenames,
     QBins,
@@ -31,7 +32,7 @@ from sciline import UnsatisfiedRequirement
 
 from ess.reduce import workflow
 from ess.reduce.masking import write_pixel_masks
-from ess.reduce.nexus.types import DiskChoppers, Position
+from ess.reduce.nexus.types import DiskChoppers
 from ess.reduce.unwrap import LookupTable, LtotalRange, SourceBounds
 
 
@@ -135,7 +136,7 @@ def test_loki_analytical_lookup_table_matches_simulated_source_pulse():
     # choppers, 1-10 Angstrom so that frames do not overlap. See scipp/ess#770.
     wf = loki.LokiWorkflow(wavelength_from='analytical')
     wf[DiskChoppers[SampleRun]] = {}
-    wf[Position[snx.NXsource, SampleRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[SampleRun]] = sc.vector([0, 0, 0], unit='m')
     wf[LtotalRange[SampleRun, snx.NXdetector]] = (
         sc.scalar(28.2, unit='m'),
         sc.scalar(29.2, unit='m'),

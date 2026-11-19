@@ -118,18 +118,21 @@ CaveMonitor = NewType('CaveMonitor', int)
 Component = TypeVar('Component')
 """A beamline component in a NeXus file."""
 COMPONENT_CONSTRAINTS = (
+    snx.NXcrystal,
     snx.NXdetector,
+    snx.NXdisk_chopper,
+    snx.NXmoderator,
     snx.NXsample,
     snx.NXsource,
-    snx.NXdisk_chopper,
-    snx.NXcrystal,
 )
 """Base constraints for the Component type variable.
 
 This list will be supplemented with monitor types when creating a pipeline.
 """
 
-UniqueComponent = TypeVar('UniqueComponent', snx.NXsample, snx.NXsource)
+UniqueComponent = TypeVar(
+    'UniqueComponent', snx.NXsample, snx.NXsource, snx.NXmoderator
+)
 """Components that can be identified by their type as there will only be one.
 
 This applies for a given parent for these components, not the entire file.
@@ -249,6 +252,10 @@ class DynamicPosition(Generic[Component, RunType]):
 
     def __repr__(self) -> str:
         return f"Position(position={self._position}, time={self._time})"
+
+
+class NeutronSourcePosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Position of the neutron source, usually derived from the NXmoderator."""
 
 
 class DetectorPositionOffset(sciline.Scope[RunType, sc.Variable], sc.Variable):

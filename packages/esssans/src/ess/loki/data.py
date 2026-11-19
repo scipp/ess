@@ -57,7 +57,7 @@ _registry = make_registry(
         # Small CODA file for testing purposes (data from only 30 pulses)
         'loki_999999_00009928_small.hdf': 'md5:d2f293c293cc15d90fb588afa1dcb096',
         # Small CODA file for testing purposes (data from only 5 pulses)
-        'loki-coda-5-pulses.hdf': 'md5:8368779651ccf101612b35ca075d0298',
+        'coda_loki_999999_00029868.shrunk.hdf': 'md5:941bc9a7a22de77776c3794976c8cd90',
         # Wavelength lookup table without choppers
         'loki-wavelength-lookup-table-no-choppers.h5': 'md5:34cc975a00383653cce4b3e2356e0dc7',  # noqa: E501
         # File recorded during a Loki detector test
@@ -187,10 +187,10 @@ def loki_lookup_table_no_choppers() -> Path:
 def loki_coda_file() -> Path:
     """
     Small LoKI CODA file for testing purposes (data from only 5 pulses).
-    The file was generated from a CODA file coda_loki_999999_00027624.hdf (22/04/2026)
+    The file was generated from a CODA file coda_loki_999999_00029868.hdf (16/11/2026)
     using the tools/shrink_loki_nexus.py script.
     """
-    return _registry.get_path("loki-coda-5-pulses.hdf")
+    return _registry.get_path("coda_loki_999999_00029868.shrunk.hdf")
 
 
 def loki_broken_file() -> Path:

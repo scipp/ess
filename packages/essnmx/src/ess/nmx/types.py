@@ -15,6 +15,7 @@ from ._display_helper import to_datagroup
 
 RunType = nexus_types.RunType
 SampleRun = nexus_types.SampleRun
+NeutronSourcePosition = nexus_types.NeutronSourcePosition
 TofDetector = unwrap_types.TofDetector
 
 

@@ -3,12 +3,13 @@
 import scipp as sc
 from ess.reduce.nexus.types import DetectorBankSizes, Position
 from scippneutron.conversion import graph
-from scippnexus import NXsample, NXsource
+from scippnexus import NXsample
 
 from ..reflectometry import conversions as reflectometry_conversions
 from ..reflectometry.types import (
     CoordTransformationGraph,
     DetectorRotation,
+    NeutronSourcePosition,
     RunType,
     SampleRotation,
 )
@@ -111,7 +112,7 @@ def divergence_angle(
 
 
 def coordinate_transformation_graph(
-    source_position: Position[NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[NXsample, RunType],
     sample_rotation: SampleRotation[RunType],
     detector_rotation: DetectorRotation[RunType],

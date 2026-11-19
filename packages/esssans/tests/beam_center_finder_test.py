@@ -11,6 +11,7 @@ from ess.sans.types import (
     BeamCenter,
     CorrectedDetector,
     CorrectForGravity,
+    NeutronSourcePosition,
     Numerator,
     Position,
     SampleRun,
@@ -66,7 +67,7 @@ def make_workflow(
     workflow[ElasticCoordTransformGraph[SampleRun]] = sans_elastic(
         CorrectForGravity(False),
         sample_position=Position[snx.NXsample, SampleRun](sample_position),
-        source_position=Position[snx.NXsource, SampleRun](source_position),
+        source_position=NeutronSourcePosition[SampleRun](source_position),
         beam_center=BeamCenter(sc.vector([0, 0, 0], unit='m')),
         gravity=gravity_vector(),
     )
@@ -138,7 +139,7 @@ def test_center_of_mass_result_yields_zero_scattering_angle_at_the_pattern_cente
     graph = sans_elastic(
         CorrectForGravity(False),
         sample_position=Position[snx.NXsample, SampleRun](sample_position),
-        source_position=Position[snx.NXsource, SampleRun](
+        source_position=NeutronSourcePosition[SampleRun](
             sample_position - sc.vector([0, 0, 20.0], unit='m')
         ),
         beam_center=BeamCenter(beam_center),
