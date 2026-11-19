@@ -385,14 +385,13 @@ def _prepare_wavelength_interpolation_inputs(
     }
 
 
-def _compute_wavelength_events(
+def _interpolate_event_wavelength(
     da: sc.DataArray,
     lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
     backend: FrameUnwrapBackend,
-    keep_event_time_offset: bool,
-) -> sc.DataArray:
+) -> sc.Variable:
     inputs = _prepare_wavelength_interpolation_inputs(
         da=da,
         lookup=lookup,
@@ -402,14 +401,29 @@ def _compute_wavelength_events(
     )
 
     # Compute wavelength for all neutrons using the interpolator
-    wavs = inputs["interp"](
+    return inputs["interp"](
         ltotal=inputs["ltotal"],
         event_time_offset=inputs["eto"],
         pulse_index=inputs["pulse_index"],
         pulse_period=inputs["pulse_period"],
     )
-    del inputs
 
+
+def _compute_wavelength_events(
+    da: sc.DataArray,
+    lookup: LookupTable,
+    ltotal: sc.Variable,
+    pulse_stride_offset: int | None,
+    backend: FrameUnwrapBackend,
+    keep_event_time_offset: bool,
+) -> sc.DataArray:
+    wavs = _interpolate_event_wavelength(
+        da=da,
+        lookup=lookup,
+        ltotal=ltotal,
+        pulse_stride_offset=pulse_stride_offset,
+        backend=backend,
+    )
     parts = da.bins.constituents
     parts["data"] = wavs
     out = da.bins.assign_coords(wavelength=sc.bins(**parts, validate_indices=False))
