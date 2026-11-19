@@ -27,14 +27,12 @@ pixel positions in the common simulation frame, and weighted events in each pixe
 | Field | Meaning | Unit |
 | --- | --- | --- |
 | Event data | Original simulation weight `p` | `counts` (weighted-count convention) |
-| Variances | `p**2`, assuming independent rows | `counts**2` |
 | `position` | Detector pixel centre | `m` |
 | `t` | Original McStas arrival time | `s` |
 | `event_time_offset` | Arrival time relative to the most recent pulse | `s` |
 | `event_time_zero` | Pulse timestamp using a synthetic Unix-epoch origin | `datetime64[ns]` |
 
 Weights are not normalized to an absolute count rate.
-The variance convention matches the MAGIC Mantid converter, but does not represent correlations between rows introduced by McStas splitting.
 Zero-weight events and empty pixels are retained; events outside the detector are excluded.
 The default pulse period is 1/14 s. Arrival times are folded into that period,
 with pulse timestamps rounded to the nearest nanosecond; `t` is retained for diagnostics.
@@ -60,7 +58,3 @@ geometry = workflow.compute(EmptyDetector[SampleRun])
 The result has a `pixel_id` dimension, integer pixel IDs as data and a coordinate,
 and a `position` coordinate in metres in the common simulation frame.
 Bank A has IDs 1–491520; bank B has IDs 491521–622592.
-Bank A uses the simulation's `A_r1`, `A_section_length`, `A_casette_gamma`, and `A_casette_omega` parameters.
-Bank B uses the reference model's fixed radius, length, spacing and channel counts, and requires `B_casette_omega`.
-Both banks require their absorption logger's position and rotation.
-Missing parameters are not replaced with defaults.
