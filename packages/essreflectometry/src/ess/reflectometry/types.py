@@ -18,6 +18,7 @@ RawDetector = nexus_t.RawDetector
 DetectorPositionOffset = nexus_t.DetectorPositionOffset
 Filename = nexus_t.Filename
 Measurement = nexus_t.Measurement
+NeutronSourcePosition = nexus_t.NeutronSourcePosition
 NeXusComponent = nexus_t.NeXusComponent
 NeXusDetectorName = nexus_t.NeXusDetectorName
 NeXusMonitorName = nexus_t.NeXusName

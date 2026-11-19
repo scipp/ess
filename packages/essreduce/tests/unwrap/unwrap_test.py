@@ -6,13 +6,12 @@ import numpy as np
 import pytest
 import scipp as sc
 from scippneutron.chopper import DiskChopper
-from scippnexus import NXsource
 
 from ess.reduce import unwrap
 from ess.reduce.nexus.types import (
+    NeutronSourcePosition,
     NeXusDetectorName,
     NeXusName,
-    Position,
     RawDetector,
     RawMonitor,
     SampleRun,
@@ -74,7 +73,7 @@ def _initialize_workflow(wavelength_from, distance, error_threshold, choppers):
         'monitor': error_threshold,
     }
     wf[unwrap.DiskChoppers[SampleRun]] = choppers
-    wf[Position[NXsource, SampleRun]] = fakes.source_position()
+    wf[NeutronSourcePosition[SampleRun]] = fakes.source_position()
     return wf
 
 

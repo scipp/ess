@@ -12,7 +12,7 @@ from ess.beer.mcstas.beamline import (
 from ess.beer.types import SampleRun
 
 from ess.reduce import unwrap
-from ess.reduce.nexus.types import Position
+from ess.reduce.nexus.types import NeutronSourcePosition
 from ess.reduce.unwrap import lut
 
 
@@ -24,7 +24,7 @@ def test_can_make_analytical_lookup_table_from_beer_choppers(
         run_types=[SampleRun], monitor_types=[], wavelength_from="analytical"
     )
     source_position = sc.vector([0.0, 0.0, 0.0], unit="m")
-    wf[Position[snx.NXsource, SampleRun]] = source_position
+    wf[NeutronSourcePosition[SampleRun]] = source_position
     wf[unwrap.DiskChoppers[SampleRun]] = simulation_choppers(mode, source_position)
     wf[lut.LtotalRange[SampleRun, snx.NXdetector]] = (
         sc.scalar(150.0, unit="m"),
