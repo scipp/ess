@@ -30,10 +30,10 @@ def MagicWorkflow() -> sl.Pipeline:
 def MagicMcStasWorkflow() -> sl.Pipeline:
     """Workflow for MAGIC McStas events and geometry, with detector bank A by default.
 
-    Provides ``RawMcStasEvents[RunType]`` and ``EmptyDetector[RunType]`` independently.
+    Provides ``RawDetector[RunType]`` with weighted events grouped by pixel and
+    ``EmptyDetector[RunType]`` geometry that can be loaded independently.
     Event times include pulse-relative offsets and timestamps, retaining McStas
     ``t`` for diagnostics. The default pulse period is 1/14 s.
-    Event assignment and reduction providers are not yet included.
     """
     return sl.Pipeline(
         providers=(mcstas.load_mcstas_events, mcstas.mcstas_detector_geometry),

@@ -5,40 +5,37 @@ time-of-flight single-crystal diffractometer for studying magnetic structures.
 
 ## Reading McStas simulations
 
-`MagicMcStasWorkflow` reads raw events from one MAGIC absorption logger and can independently construct its detector geometry.
-Raw-event loading reads every row of the selected bank into memory, so large simulations require substantial RAM.
+`MagicMcStasWorkflow` reads weighted events from one MAGIC absorption logger and groups them by detector pixel.
+It loads every row of the selected bank into memory, so large simulations require substantial RAM.
 
 ```python
 from ess.magic import MagicMcStasWorkflow
-from ess.magic.types import DetectorBank, Filename, RawMcStasEvents, SampleRun
+from ess.magic.types import DetectorBank, Filename, RawDetector, SampleRun
 
 workflow = MagicMcStasWorkflow()
 workflow[Filename[SampleRun]] = 'simulation.h5'
-events = workflow.compute(RawMcStasEvents[SampleRun])
+detector = workflow.compute(RawDetector[SampleRun])
 ```
 
 Bank A (`A_abs_logger`) is the default.
 To read bank B (`B_abs_logger`) from a simulation that contains it, set
 `workflow[DetectorBank] = DetectorBank.detector_b` before computing.
 
-The result is a flat Scipp DataArray with an `event` dimension:
+The result uses the shared `RawDetector` type, with a `pixel_id` dimension,
+pixel positions in the common simulation frame, and weighted events in each pixel:
 
 | Field | Meaning | Unit |
 | --- | --- | --- |
-| Data | Original simulation weight `p` | `counts` (weighted-count convention) |
+| Event data | Original simulation weight `p` | `counts` (weighted-count convention) |
 | Variances | `p**2`, assuming independent rows | `counts**2` |
-| `x`, `y`, `z` | Absorption position in the logger's local frame | `m` |
-| `vx`, `vy`, `vz` | Velocity in the logger's local frame | `m/s` |
+| `position` | Detector pixel centre | `m` |
 | `t` | Original McStas arrival time | `s` |
 | `event_time_offset` | Arrival time relative to the most recent pulse | `s` |
 | `event_time_zero` | Pulse timestamp using a synthetic Unix-epoch origin | `datetime64[ns]` |
 
 Weights are not normalized to an absolute count rate.
 The variance convention matches the MAGIC Mantid converter, but does not represent correlations between rows introduced by McStas splitting.
-Row order and zero-weight rows are preserved.
-The reader does not apply detector acceptance cuts, assign pixels, apply emission-time corrections, or calculate wavelength.
-These operations will be added as separate providers.
-
+Zero-weight events and empty pixels are retained; events outside the detector are excluded.
 The default pulse period is 1/14 s. Arrival times are folded into that period,
 with pulse timestamps rounded to the nearest nanosecond; `t` is retained for diagnostics.
 No emission-time correction is applied. To override the pulse period:
@@ -57,7 +54,7 @@ Compute the selected bank's geometry without loading its event data:
 ```python
 from ess.magic.types import EmptyDetector
 
-detector = workflow.compute(EmptyDetector[SampleRun])
+geometry = workflow.compute(EmptyDetector[SampleRun])
 ```
 
 The result has a `pixel_id` dimension, integer pixel IDs as data and a coordinate,
