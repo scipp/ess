@@ -61,6 +61,10 @@ esssans = { path = "packages/esssans", editable = true, extras = ["test"] }
 [feature.essspectroscopy.pypi-dependencies]
 essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["test"] }
 
+# mlzdiffraction (depends on essreduce)
+[feature.mlzdiffraction.pypi-dependencies]
+mlzdiffraction = { path = "packages/mlzdiffraction", editable = true, extras = ["test"] }
+
 # ==================== Full feature ====================
 
 # Each package's all extra includes every optional-dependency group.
@@ -72,6 +76,7 @@ essreflectometry = { path = "packages/essreflectometry", editable = true, extras
 essdiffraction = { path = "packages/essdiffraction", editable = true, extras = ["all"] }
 esssans = { path = "packages/esssans", editable = true, extras = ["all"] }
 essspectroscopy = { path = "packages/essspectroscopy", editable = true, extras = ["all"] }
+mlzdiffraction = { path = "packages/mlzdiffraction", editable = true, extras = ["all"] }
 
 # ==================== Dev feature ====================
 
@@ -174,11 +179,20 @@ args = [
 ]
 cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %} -D nbsphinx_execute=never{% endif %} -d packages/essspectroscopy/.docs_doctrees packages/essspectroscopy/docs packages/essspectroscopy/html"
 
+[feature.docs-mlzdiffraction.pypi-dependencies]
+mlzdiffraction = { path = "packages/mlzdiffraction", editable = true, extras = ["test", "docs"] }
+
+[feature.docs-mlzdiffraction.tasks.docs-mlzdiffraction]
+args = [
+    { "arg" = "builder", "default" = "html" },
+]
+cmd = "python -m sphinx -v -b {{ builder }}{% if builder in ['linkcheck', 'doctest'] %}  -D nbsphinx_execute=never{% endif %} -d packages/mlzdiffraction/.docs_doctrees packages/mlzdiffraction/docs packages/mlzdiffraction/html"
+
 # ==================== Environments ====================
 
 [environments]
 # Default: all packages with test extras and dev tools
-default = { features = ["dev", "essreduce", "essimaging", "essnmx", "essreflectometry", "essdiffraction", "esssans", "essspectroscopy"], solve-group = "default" }
+default = { features = ["dev", "essreduce", "essimaging", "essnmx", "essreflectometry", "essdiffraction", "esssans", "essspectroscopy", "mlzdiffraction"], solve-group = "default" }
 
 # Full: all packages with every extra, dev tools, and documentation tools
 # Keep essreduce for its conda-forge Numba dependency.
@@ -192,6 +206,7 @@ essreflectometry = { features = ["essreflectometry", "essreduce"], solve-group =
 essdiffraction = { features = ["essdiffraction", "essreduce"], solve-group = "default" }
 esssans = { features = ["esssans", "essreduce"], solve-group = "default" }
 essspectroscopy = { features = ["essspectroscopy", "essreduce"], solve-group = "default" }
+mlzdiffraction = { features = ["mlzdiffraction", "essreduce"], solve-group = "default" }
 
 # Docs environments (package with docs extra + pandoc)
 docs-essreduce = { features = ["docs-essreduce", "docs"], solve-group = "default" }
@@ -201,6 +216,7 @@ docs-essreflectometry = { features = ["docs-essreflectometry", "docs-essreduce",
 docs-essdiffraction = { features = ["docs-essdiffraction", "docs-essreduce", "docs"], solve-group = "default" }
 docs-esssans = { features = ["docs-esssans", "docs-essreduce", "docs"], solve-group = "default" }
 docs-essspectroscopy = { features = ["docs-essspectroscopy", "docs-essreduce", "docs"], solve-group = "default" }
+docs-mlzdiffraction = { features = ["docs-mlzdiffraction", "docs-essreduce", "docs"], solve-group = "default" }
 
 # Lint environment (standalone, no package deps)
 lint = { features = ["lint"], solve-group = "lint" }
