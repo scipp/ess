@@ -25,8 +25,8 @@ PixelMasks = NewType('PixelMasks', dict[str, sc.Variable | sc.DataGroup])
 """Pixel masks of the whole instrument, by mask name.
 
 Each value is either a variable of masked detector IDs, or a data group of boolean masks
-by detector bank. :py:func:`read_pixel_masks` provides them from files, and they can
-also be set directly. :py:func:`to_detector_masks` selects the masks for one detector.
+by detector. :py:func:`read_pixel_masks` provides them from files, and they can also be
+set directly. :py:func:`to_detector_masks` selects the masks for one detector.
 """
 
 _HDF5_SUFFIXES = ('.h5', '.hdf', '.hdf5', '.nxs')
@@ -54,14 +54,15 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
                             broken_tubes   integer array
                             beamstop       integer array
 
-        Bank names are the names of the NeXus detector groups, and mask names are the
-        names of the datasets. Datasets with the same name in several banks form one
-        mask. The data of each bank gets a mask of that name, made from the dataset of
-        that bank. A bank without a dataset of that name has no pixels masked by it. A
-        pixel is masked if its value is not zero. The dimensions of a dataset are given
-        by HDF5 dimension labels. They are named after the logical dimensions of the
-        bank, and may be a subset of them, in any order. Other entries of the file, such
-        as the instrument name or a validity date, are ignored.
+        Detector names are the names of the NeXus detector groups, and mask names are
+        the names of the datasets. Datasets with the same name in several detectors form
+        one mask. The data of each detector gets a mask of that name, made from the
+        dataset of that detector. A detector without a dataset of that name has no
+        pixels masked by it. A pixel is masked if its value is not zero. The dimensions
+        of a dataset are given by HDF5 dimension labels. They are named after the
+        logical dimensions of the detector, and may be a subset of them, in any order.
+        Other entries of the file, such as the instrument name or a validity date, are
+        ignored.
       - A file written by :py:func:`scipp.io.save_hdf5` with a variable of masked
         detector IDs. The mask is named after the file, without the directory, since
         directories differ between hosts. The same applies to ``.xml`` files.
@@ -140,7 +141,7 @@ def write_pixel_masks(
     *,
     instrument: str,
 ) -> None:
-    """Write named boolean masks by detector bank to a NeXus file.
+    """Write named boolean masks by detector to a NeXus file.
 
     See :py:func:`read_pixel_masks` for the layout of the file. Masks are stored as
     unsigned 8-bit integers, since HDF5 has no boolean type.
@@ -155,8 +156,10 @@ def write_pixel_masks(
     filename:
         Path of the file to write.
     masks:
-        Boolean masks by mask name and detector bank. Dimensions are named after the
-        logical dimensions of the bank, and may be a subset of them, in any order.
+        Boolean masks by detector name and mask name. Each outer key names an
+        ``NXdetector`` group; each inner key names a dataset in its ``masks``
+        collection. Dimensions are named after the logical dimensions of the detector,
+        and may be a subset of them, in any order.
     instrument:
         Name of the instrument, as in ``/entry/instrument/name`` of its raw data
         files, for example ``'LOKI'``.
@@ -168,15 +171,11 @@ def write_pixel_masks(
         entry = snx.File(h5file).create_class('entry', snx.NXentry)
         nx_instrument = entry.create_class('instrument', snx.NXinstrument)
         nx_instrument.create_field('name', instrument)
-        collections = {}
-        for name, banks in masks.items():
-            for bank, mask in banks.items():
-                if bank not in collections:
-                    detector = nx_instrument.create_class(bank, snx.NXdetector)
-                    collections[bank] = detector.create_class('masks', snx.NXcollection)
-                dataset = collections[bank].create_field(
-                    name, mask.values.astype('uint8')
-                )
+        for detector_name, detector_masks in masks.items():
+            detector = nx_instrument.create_class(detector_name, snx.NXdetector)
+            collection = detector.create_class('masks', snx.NXcollection)
+            for name, mask in detector_masks.items():
+                dataset = collection.create_field(name, mask.values.astype('uint8'))
                 for axis, dim in zip(dataset.dims, mask.dims, strict=True):
                     axis.label = dim
 
@@ -246,11 +245,11 @@ def _read_hdf5(filename: Path) -> dict[str, sc.Variable | sc.DataGroup]:
 
 def _read_nexus_masks(entry: snx.Group, filename: Path) -> dict[str, sc.DataGroup]:
     masks = {}
-    for bank, detector in entry['instrument'][snx.NXdetector].items():
+    for detector_name, detector in entry['instrument'][snx.NXdetector].items():
         if 'masks' not in detector:
             continue
         for name, field in detector['masks'].items():
-            masks.setdefault(name, {})[bank] = _read_bank_mask(field, filename)
+            masks.setdefault(name, {})[detector_name] = _read_bank_mask(field, filename)
     if not masks:
         raise ValueError(f"Mask file '{filename}' has no detector with masks.")
     return {name: sc.DataGroup(banks) for name, banks in masks.items()}

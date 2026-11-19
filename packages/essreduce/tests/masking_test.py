@@ -98,7 +98,7 @@ def test_read_bank_masks_names_masks_after_datasets(tmp_path: Path) -> None:
     beamstop = sc.array(dims=['straw'], values=[False, True, True])
     write_pixel_masks(
         tmp_path / 'a.nxs',
-        {'broken': {'bank_0': broken}, 'beamstop': {'bank_0': beamstop}},
+        {'bank_0': {'broken': broken, 'beamstop': beamstop}},
         instrument='TEST',
     )
     masks = _read(tmp_path / 'a.nxs')
@@ -106,12 +106,28 @@ def test_read_bank_masks_names_masks_after_datasets(tmp_path: Path) -> None:
     assert sc.identical(masks['beamstop'], sc.DataGroup(bank_0=beamstop))
 
 
+def test_write_uses_detector_name_and_mask_name(tmp_path: Path) -> None:
+    path = tmp_path / 'a.nxs'
+    mask = sc.array(dims=['tube'], values=[True])
+    write_pixel_masks(path, {'loki_detector_0': {'bad_tubes': mask}}, instrument='LOKI')
+
+    with h5py.File(path) as file:
+        assert file['entry/instrument/loki_detector_0/masks/bad_tubes'][
+            ()
+        ].tolist() == [1]
+    assert sc.identical(_read(path)['bad_tubes'], sc.DataGroup(loki_detector_0=mask))
+
+
 def test_read_bank_masks_keeps_dimensions_of_all_banks(tmp_path: Path) -> None:
     banks = {
         'bank_0': sc.array(dims=['layer', 'tube'], values=[[True, False]]),
         'bank_1': sc.array(dims=['straw'], values=[False, True, False]),
     }
-    write_pixel_masks(tmp_path / 'a.nxs', {'m': banks}, instrument='TEST')
+    write_pixel_masks(
+        tmp_path / 'a.nxs',
+        {bank: {'m': mask} for bank, mask in banks.items()},
+        instrument='TEST',
+    )
     assert sc.identical(_read(tmp_path / 'a.nxs')['m'], sc.DataGroup(banks))
 
 
@@ -119,7 +135,7 @@ def test_read_bank_masks_omits_banks_without_dataset_of_mask(tmp_path: Path) -> 
     mask = sc.array(dims=['tube'], values=[True])
     write_pixel_masks(
         tmp_path / 'a.nxs',
-        {'broken': {'bank_0': mask}, 'beamstop': {'bank_1': mask}},
+        {'bank_0': {'broken': mask}, 'bank_1': {'beamstop': mask}},
         instrument='TEST',
     )
     masks = _read(tmp_path / 'a.nxs')
@@ -131,7 +147,7 @@ def test_read_ignores_other_entries_of_the_file(tmp_path: Path) -> None:
     path = tmp_path / 'a.nxs'
     write_pixel_masks(
         path,
-        {'m': {'bank_0': sc.array(dims=['tube'], values=[True])}},
+        {'bank_0': {'m': sc.array(dims=['tube'], values=[True])}},
         instrument='TEST',
     )
     with snx.File(path, 'r+') as file:
@@ -144,7 +160,7 @@ def test_read_skips_detector_without_masks(tmp_path: Path) -> None:
     path = tmp_path / 'a.nxs'
     write_pixel_masks(
         path,
-        {'m': {'bank_0': sc.array(dims=['tube'], values=[True])}},
+        {'bank_0': {'m': sc.array(dims=['tube'], values=[True])}},
         instrument='TEST',
     )
     with snx.File(path, 'r+') as file:
@@ -155,10 +171,10 @@ def test_read_skips_detector_without_masks(tmp_path: Path) -> None:
 def test_read_combines_masks_of_several_files(tmp_path: Path) -> None:
     mask = sc.array(dims=['tube'], values=[True])
     write_pixel_masks(
-        tmp_path / 'a.nxs', {'broken': {'bank_0': mask}}, instrument='TEST'
+        tmp_path / 'a.nxs', {'bank_0': {'broken': mask}}, instrument='TEST'
     )
     write_pixel_masks(
-        tmp_path / 'b.nxs', {'beamstop': {'bank_0': mask}}, instrument='TEST'
+        tmp_path / 'b.nxs', {'bank_0': {'beamstop': mask}}, instrument='TEST'
     )
     masks = _read(tmp_path / 'a.nxs', tmp_path / 'b.nxs')
     assert list(masks) == ['broken', 'beamstop']
@@ -167,10 +183,10 @@ def test_read_combines_masks_of_several_files(tmp_path: Path) -> None:
 def test_read_raises_if_files_have_mask_with_same_name(tmp_path: Path) -> None:
     mask = sc.array(dims=['tube'], values=[True])
     write_pixel_masks(
-        tmp_path / 'a.nxs', {'broken': {'bank_0': mask}}, instrument='TEST'
+        tmp_path / 'a.nxs', {'bank_0': {'broken': mask}}, instrument='TEST'
     )
     write_pixel_masks(
-        tmp_path / 'b.nxs', {'broken': {'bank_1': mask}}, instrument='TEST'
+        tmp_path / 'b.nxs', {'bank_1': {'broken': mask}}, instrument='TEST'
     )
     with pytest.raises(ValueError, match='broken'):
         _read(tmp_path / 'a.nxs', tmp_path / 'b.nxs')
@@ -180,7 +196,7 @@ def test_write_stores_masks_as_uint8(tmp_path: Path) -> None:
     path = tmp_path / 'a.nxs'
     write_pixel_masks(
         path,
-        {'m': {'bank_0': sc.array(dims=['tube'], values=[True])}},
+        {'bank_0': {'m': sc.array(dims=['tube'], values=[True])}},
         instrument='TEST',
     )
     with h5py.File(path) as file:
@@ -191,7 +207,7 @@ def test_write_records_instrument_creator_and_time(tmp_path: Path) -> None:
     path = tmp_path / 'a.nxs'
     mask = sc.array(dims=['tube'], values=[True])
     before = datetime.now(UTC).replace(microsecond=0)
-    write_pixel_masks(path, {'m': {'bank_0': mask}}, instrument='LOKI')
+    write_pixel_masks(path, {'bank_0': {'m': mask}}, instrument='LOKI')
     with h5py.File(path) as file:
         assert file['entry/instrument/name'][()] == b'LOKI'
         assert file.attrs['creator'] == 'essreduce'
@@ -233,7 +249,7 @@ def test_read_raises_on_several_entries(tmp_path: Path) -> None:
     path = tmp_path / 'a.nxs'
     write_pixel_masks(
         path,
-        {'m': {'bank_0': sc.array(dims=['tube'], values=[True])}},
+        {'bank_0': {'m': sc.array(dims=['tube'], values=[True])}},
         instrument='TEST',
     )
     with snx.File(path, 'r+') as file:

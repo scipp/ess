@@ -69,24 +69,28 @@ def extract_instrument_angle(
     # We could use any detector or the elastic monitor to get a chain that contains
     # the angle. Using the monitor is simplest because there is only one, and we
     # do not have to deal with multiple detectors.
-    try:
-        transformation = chain.transformations[path]
-    except KeyError:
-        raise ValueError(
-            f'The transformation chain of {chain.parent} does not contain the '
-            f'detector tank angle {path}. The chain contains '
-            f'{list(chain.transformations)}'
-        ) from None
-    if transformation.transformation_type != 'rotation':
-        raise ValueError(
-            f"Expected the instrument angle at {path} to be a rotation, "
-            f"got '{transformation.transformation_type}' instead.'"
-        )
+    transformation = _find_transformation_in_chain(chain, path)
     angle = transformation.value
     if isinstance(angle, sc.Variable):
         # A fixed angle or a value from TransformationOverrides, not an NXlog.
         angle = sc.DataArray(angle)
     return InstrumentAngle[RunType](angle)  # type: ignore[return-value]
+
+
+def _find_transformation_in_chain(
+    chain: snx.TransformationChain, path: str
+) -> sc.DataGroup:
+    for transform_name, transform in chain.transformations.items():
+        # Use `startswith` so that `path` can point to an NXtransform or NXlog
+        # itself and does not need to include the full details for robustness
+        # E.g., `path=/a/b` and `path=/a/b/value` (an NXlog) should both work.
+        if transform_name.startswith(path):
+            return transform
+    raise ValueError(
+        f'The transformation chain of {chain.parent} does not contain the '
+        f'detector tank angle {path}. The chain contains '
+        f'{list(chain.transformations)}'
+    ) from None
 
 
 def load_bifrost_analyzers(
@@ -348,7 +352,7 @@ providers = (
 )
 
 parameters = {
-    InstrumentAnglePath: '/entry/instrument/detector_tank/transformations/tank_angle',
+    InstrumentAnglePath: '/entry/instrument/detector_tank_angle',
     SampleAngleNeXusName: 'sample_rotation',
     TransformationTimeFilter: stepwise_transformation_time_filter,
 }
