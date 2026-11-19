@@ -10,6 +10,7 @@ from ess.reduce.nexus.types import (
     EmptyDetector,
     Filename,
     GravityVector,
+    NeutronSourcePosition,
     NeXusName,
     Position,
     RawDetector,
@@ -127,7 +128,7 @@ def test_ordinary_path_preserves_positions_exactly():
 
 def test_custom_conversion_pipeline_defaults_to_no_mirror():
     wf = sciline.Pipeline(conversions.providers, constraints={RunType: [SampleRun]})
-    wf[Position[snx.NXsource, SampleRun]] = sc.vector([0.0, 0.0, -2.0], unit='m')
+    wf[NeutronSourcePosition[SampleRun]] = sc.vector([0.0, 0.0, -2.0], unit='m')
     wf[Position[snx.NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[SampleSurfaceNormal[SampleRun]] = sc.vector([0.0, 1.0, 0.0])
     wf[GravityVector] = sc.vector([0.0, -9.80665, 0.0], unit='m/s^2')
@@ -222,7 +223,7 @@ def test_missing_mirror_fails_with_manual_geometry_instructions(tmp_path):
 def _set_run(workflow, run, *, direct=False, supply_wavelength=True):
     _set_mirror(workflow, run)
     workflow[GravityVector] = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
-    workflow[Position[snx.NXsource, run]] = sc.vector([0.0, 3.0, -4.0], unit='m')
+    workflow[NeutronSourcePosition[run]] = sc.vector([0.0, 3.0, -4.0], unit='m')
     workflow[Position[snx.NXsample, run]] = sc.vector([0.0, 1.0, 0.0], unit='m')
     workflow[SampleSurfaceNormal[run]] = sc.vector([0.0, -1.0, 0.0])
     workflow[DetectorRegionOfInterest[run]] = {}
@@ -267,7 +268,7 @@ def test_detector_flight_path_includes_mirror_detour(run):
     assert_identical(graph['gravity'](), gravity)
     assert_identical(graph['sample_position'](), sc.vector([0.0, 1.0, 0.0], unit='m'))
     assert_identical(
-        wf.compute(Position[snx.NXsource, run]),
+        wf.compute(NeutronSourcePosition[run]),
         sc.vector([0.0, 3.0, -4.0], unit='m'),
     )
 
@@ -275,7 +276,7 @@ def test_detector_flight_path_includes_mirror_detour(run):
 def test_mirror_before_sample_rejects_source_on_opposite_side_of_plane():
     wf = freia.FreiaWorkflow(inversion=True)
     _set_run(wf, SampleRun, supply_wavelength=False)
-    wf[Position[snx.NXsource, SampleRun]] = sc.vector([0.0, -3.0, -4.0], unit='m')
+    wf[NeutronSourcePosition[SampleRun]] = sc.vector([0.0, -3.0, -4.0], unit='m')
     with pytest.raises(ValueError, match='same side of the mirror plane'):
         wf.compute(DetectorLtotal[SampleRun])
     graph = wf.compute(CoordTransformationGraph[SampleRun])

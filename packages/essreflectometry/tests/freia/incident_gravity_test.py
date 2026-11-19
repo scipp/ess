@@ -3,10 +3,10 @@
 import numpy as np
 import pytest
 import scipp as sc
-from ess.reduce.nexus.types import GravityVector, Position
+from ess.reduce.nexus.types import GravityVector, NeutronSourcePosition, Position
 from scipp.constants import h, m_n
 from scipp.testing import assert_allclose, assert_identical
-from scippnexus import NXsample, NXsource
+from scippnexus import NXsample
 from scipy.optimize import root_scalar
 from scipy.spatial.transform import Rotation
 
@@ -235,7 +235,7 @@ def test_workflow_corrects_binned_incidence_and_preserves_counts(method, inversi
         wf[MirrorPosition[SampleRun]] = geometry['mirror'].position
         wf[MirrorNormal[SampleRun]] = geometry['mirror'].normal
     wf[Position[NXsample, SampleRun]] = geometry['sample_position']
-    wf[Position[NXsource, SampleRun]] = 5 * geometry['upstream_slit_centers']['beam']
+    wf[NeutronSourcePosition[SampleRun]] = 5 * geometry['upstream_slit_centers']['beam']
     wf[SampleSurfaceNormal[SampleRun]] = geometry['sample_surface_normal']
     wf[UpstreamSlitCenters[SampleRun]] = geometry['upstream_slit_centers']
     wf[DownstreamSlitCenters[SampleRun]] = geometry['downstream_slit_centers']

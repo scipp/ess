@@ -7,6 +7,7 @@ import scippnexus as snx
 from ess.reduce import nexus
 from ess.reduce.nexus.types import (
     EmptyDetector,
+    NeutronSourcePosition,
     NeXusComponentLocationSpec,
     NeXusFileSpec,
     NeXusName,
@@ -142,7 +143,7 @@ def reflected_upstream_position(
 
 def detector_ltotal_with_mirror(
     detector: EmptyDetector[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     mirror: MirrorGeometry[RunType] | None,
 ) -> DetectorLtotal[RunType]:
