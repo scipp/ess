@@ -20,6 +20,7 @@ from ..types import (
     MonitorCoordTransformGraph,
     MonitorLtotal,
     MonitorType,
+    MonitorWavelengthBins,
     NeXusDetectorName,
     PulseStrideOffset,
     RawDetector,
@@ -78,6 +79,7 @@ def monitor_wavelength_data(
     lookup: ErrorLimitedLookupTable[RunType, MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
+    wavelength_bins: MonitorWavelengthBins[MonitorType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     """
     Convert the time-of-arrival data to wavelength data using a lookup table.
@@ -98,8 +100,12 @@ def monitor_wavelength_data(
         ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
         keep_event_time_offset=False,
+        wavelength_bins=wavelength_bins,
     )
-    result = result.rename(wavelength='incident_wavelength')
+    if not result.is_binned:
+        result = result.rename(wavelength='incident_wavelength')
+    else:
+        result.bins.coords['incident_wavelength'] = result.bins.coords.pop('wavelength')
     return result
 
 

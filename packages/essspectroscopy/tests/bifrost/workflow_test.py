@@ -25,9 +25,11 @@ from ess.spectroscopy.types import (
     Filename,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
+    MonitorWavelengthBins,
     NeXusDetectorName,
     NormalizationMonitor,
     OverlapMonitor,
+    ProtonCharge,
     PSCMonitor,
     RawDetector,
     RawMonitor,
@@ -233,8 +235,8 @@ def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
     workflow = bifrost.BifrostWorkflow()
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = coda_test_run_2026_11()
-    # The table does not match the choppers of this run but these tests only check
-    # that the file can be loaded.
+    # The table does not match the choppers of this run, so these tests check
+    # workflow execution, not the accuracy of the wavelength conversion.
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     return workflow
@@ -299,3 +301,56 @@ def test_workflow_can_load_monitors_from_coda_file(
 ) -> None:
     monitor = coda_workflow.compute(RawMonitor[SampleRun, monitor_type])
     assert 'position' in monitor.coords
+
+
+@pytest.mark.parametrize('monitor_type', [ElasticMonitor, NormalizationMonitor])
+def test_workflow_can_compute_event_wavelength_monitor_from_coda_file(
+    coda_workflow: sciline.Pipeline, monitor_type: type
+) -> None:
+    coda_workflow[LookupTableRelativeErrorThreshold] = {
+        'elastic_monitor': np.inf,
+        'normalization_monitor': np.inf,
+    }
+    results = coda_workflow.compute(
+        (
+            RawMonitor[SampleRun, monitor_type],
+            WavelengthMonitor[SampleRun, monitor_type],
+        )
+    )
+    raw = results[RawMonitor[SampleRun, monitor_type]]
+    monitor = results[WavelengthMonitor[SampleRun, monitor_type]]
+
+    assert monitor.is_binned
+    assert 'incident_wavelength' in monitor.bins.coords
+    assert 'wavelength' not in monitor.bins.coords
+    assert monitor.bins.coords['incident_wavelength'].unit == 'angstrom'
+    assert 'event_time_offset' not in monitor.bins.coords
+    assert 'position' in monitor.coords
+    sc.testing.assert_identical(
+        monitor.bins.sum().sum().data, raw.bins.sum().sum().data
+    )
+
+
+def test_workflow_can_compute_energy_data_from_coda_file(
+    coda_workflow: sciline.Pipeline,
+) -> None:
+    coda_workflow[LookupTableRelativeErrorThreshold] = {
+        'detector': np.inf,
+        'normalization_monitor': np.inf,
+        'elastic_monitor': np.inf,
+    }
+    coda_workflow[MonitorWavelengthBins[NormalizationMonitor]] = sc.linspace(
+        'incident_wavelength', 0.0, 20.0, 101, unit='angstrom'
+    )
+    coda_workflow[ProtonCharge[SampleRun]] = sc.DataArray(sc.scalar(1.0, unit='pC'))
+    coda_workflow[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
+
+    results = coda_workflow.compute(
+        (EnergyQDetector[SampleRun], WavelengthMonitor[SampleRun, ElasticMonitor])
+    )
+    result = results[EnergyQDetector[SampleRun]]
+
+    assert result.bins.size().sum().value > 0
+    assert 'energy_transfer' in result.bins.coords
+    assert 'sample_table_momentum_transfer' in result.bins.coords
+    assert results[WavelengthMonitor[SampleRun, ElasticMonitor]].is_binned

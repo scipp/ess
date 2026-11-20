@@ -47,7 +47,7 @@ def normalize_by_monitor_and_proton_charge(
     detector:
         Detector events to normalize.
     monitor:
-        Monitor histogram.
+        Monitor histogram in incident wavelength.
     proton_charge:
         Accumulated proton charge.
         Scalar or per setting (a3 / a4).
@@ -62,6 +62,12 @@ def normalize_by_monitor_and_proton_charge(
     """
     # We should make this function public or move the normalization to ESSreduce.
     from ess.reduce.normalization import _mask_detector_for_norm
+
+    if monitor.is_binned:
+        raise ValueError(
+            'Set MonitorWavelengthBins[NormalizationMonitor] to histogram the event '
+            'monitor before normalization.'
+        )
 
     if 'time' in monitor.dims:
         # Use a combined monitor distribution for all instrument settings.

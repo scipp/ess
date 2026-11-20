@@ -39,6 +39,7 @@ from .types import (
     LookupTable,
     LookupTableRelativeErrorThreshold,
     MonitorLtotal,
+    MonitorWavelengthBins,
     PulseStrideOffset,
     WavelengthDetector,
     WavelengthMonitor,
@@ -592,6 +593,7 @@ def monitor_wavelength_data(
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
     keep_event_time_offset: KeepEventTimeOffset,
+    wavelength_bins: MonitorWavelengthBins[MonitorType],
     backend: FrameUnwrapBackend = FrameUnwrapBackend.numba,
 ) -> WavelengthMonitor[RunType, MonitorType]:
     """
@@ -615,19 +617,27 @@ def monitor_wavelength_data(
     keep_event_time_offset:
         Whether to keep the event_time_offset coordinate after converting to
         wavelength.
+    wavelength_bins:
+        Optional one-dimensional edges for histogramming or rebinning the converted
+        monitor. The dimension name is arbitrary. None preserves the events or bins.
     backend:
         Backend used to interpolate the wavelength lookup table.
     """
-    return WavelengthMonitor[RunType, MonitorType](
-        _compute_wavelength_data(
-            da=monitor_data,
-            lookup=lookup,
-            ltotal=ltotal,
-            pulse_stride_offset=pulse_stride_offset,
-            backend=backend,
-            keep_event_time_offset=keep_event_time_offset,
-        )
+    out = _compute_wavelength_data(
+        da=monitor_data,
+        lookup=lookup,
+        ltotal=ltotal,
+        pulse_stride_offset=pulse_stride_offset,
+        backend=backend,
+        keep_event_time_offset=keep_event_time_offset,
     )
+    if wavelength_bins is not None:
+        edges = wavelength_bins.rename_dims({wavelength_bins.dim: 'wavelength'})
+        if not out.is_binned:
+            out = out.rebin(wavelength=edges)
+        else:
+            out = out.hist(wavelength=edges)
+    return WavelengthMonitor[RunType, MonitorType](out)
 
 
 def providers() -> tuple[Callable]:
