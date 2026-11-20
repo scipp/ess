@@ -1210,7 +1210,7 @@ def test_StreamProcessor_raises_if_context_was_never_set() -> None:
 
     # A context that never arrived must fail, naming the key, rather than compute
     # from a stand-in value.
-    with pytest.raises(ValueError, match='No value was fed'):
+    with pytest.raises(ValueError, match='No value for'):
         streaming_wf.finalize()
 
 
@@ -1347,6 +1347,76 @@ def test_StreamProcessor_rejects_accumulator_depending_on_accumulator(
             target_keys=targets,
             accumulators=(Histogram, Summary),
         )
+
+
+def test_StreamProcessor_rejects_accumulator_depending_on_no_dynamic_key() -> None:
+    Streamed = NewType('Streamed', int)
+    Static = NewType('Static', int)
+    Accumulated = NewType('Accumulated', int)
+
+    def accumulate(streamed: Streamed) -> Accumulated:
+        return Accumulated(streamed)
+
+    wf = sciline.Pipeline((accumulate,), params={Static: 1})
+    with pytest.raises(ValueError, match=r'Accumulator .*Static.* no dynamic key'):
+        streaming.StreamProcessor(
+            base_workflow=wf,
+            dynamic_keys=(Streamed,),
+            target_keys=(Accumulated, Static),
+            accumulators=(Accumulated, Static),
+        )
+
+
+def test_StreamProcessor_with_accumulators_reading_overlapping_dynamic_keys() -> None:
+    StreamedA = NewType('StreamedA', int)
+    StreamedB = NewType('StreamedB', int)
+    FromA = NewType('FromA', int)
+    FromAB = NewType('FromAB', int)
+
+    def from_a(a: StreamedA) -> FromA:
+        return FromA(a)
+
+    def from_ab(a: StreamedA, b: StreamedB) -> FromAB:
+        return FromAB(a * b)
+
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=sciline.Pipeline((from_a, from_ab)),
+        dynamic_keys=(StreamedA, StreamedB),
+        target_keys=(FromA, FromAB),
+        accumulators=(FromA, FromAB),
+    )
+    streaming_wf.accumulate({StreamedA: 2, StreamedB: 3})
+    streaming_wf.accumulate({StreamedA: 5, StreamedB: 7})
+    # FromAB also reads StreamedA, so a chunk with StreamedA alone is incomplete.
+    with pytest.raises(ValueError, match=r'require dynamic keys .*StreamedB'):
+        streaming_wf.accumulate({StreamedA: 11})
+    assert streaming_wf.finalize() == {FromA: 2 + 5, FromAB: 2 * 3 + 5 * 7}
+
+
+def test_StreamProcessor_failed_accumulate_keeps_previous_bypassed_chunk() -> None:
+    Streamed = NewType('Streamed', int)
+    Accumulated = NewType('Accumulated', int)
+    Output = NewType('Output', int)
+
+    def accumulate(streamed: Streamed) -> Accumulated:
+        if streamed < 0:
+            raise RuntimeError('invalid chunk')
+        return Accumulated(streamed)
+
+    def make_output(accumulated: Accumulated, streamed: Streamed) -> Output:
+        return Output(10 * accumulated + streamed)
+
+    streaming_wf = streaming.StreamProcessor(
+        base_workflow=sciline.Pipeline((accumulate, make_output)),
+        dynamic_keys=(Streamed,),
+        target_keys=(Output,),
+        accumulators=(Accumulated,),
+        allow_bypass=True,
+    )
+    streaming_wf.accumulate({Streamed: 2})
+    with pytest.raises(RuntimeError, match='invalid chunk'):
+        streaming_wf.accumulate({Streamed: -1})
+    assert streaming_wf.finalize()[Output] == 10 * 2 + 2
 
 
 def test_StreamProcessor_failed_context_update_keeps_previous_context() -> None:

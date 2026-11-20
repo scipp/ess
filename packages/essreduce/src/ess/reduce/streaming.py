@@ -308,6 +308,10 @@ class StreamProcessor:
 
     Targets that are accumulation keys, or that depend on the context only, are taken
     from the accumulators and from the results of the context stages.
+
+    The results of the context stages are held and passed by reference to the chunk
+    and finalize stages, and may be returned as targets. Providers must therefore not
+    modify their inputs in place.
     """
 
     def __init__(
@@ -355,7 +359,7 @@ class StreamProcessor:
             If the dynamic and context keys overlap or depend on each other, if
             a target depends on a dynamic key other than through an accumulator and
             ``allow_bypass`` is False, or if an accumulator that the targets need
-            depends on another accumulator.
+            depends on another accumulator or on no dynamic key.
         """
         # Tuples, not sets, so that stage inputs and messages have a stable order.
         self._dynamic_keys = tuple(dict.fromkeys(dynamic_keys))
@@ -397,6 +401,10 @@ class StreamProcessor:
         keys is recomputed. If computing a derived value raises, the context is left
         unchanged.
 
+        Setting only some of the context keys does not raise. What depends on keys
+        not set yet is not computed, and :py:meth:`accumulate` or :py:meth:`finalize`
+        raise if they need it, naming the context keys not set.
+
         Parameters
         ----------
         context:
@@ -406,9 +414,9 @@ class StreamProcessor:
             if key not in self._context_keys:
                 raise ValueError(f"Key '{key}' is not a context key")
         # A stage runs if it reads an updated key or a value recomputed by an earlier
-        # stage; the stages are ordered so that those come first. Until every context
-        # key a stage needs has been set, it cannot run. Stages reading its results
-        # then fail, naming the keys that are not set.
+        # stage; the stages are ordered so that those come first. A stage reading a
+        # context key not set yet, or the result of a stage skipped for that reason,
+        # is skipped.
         updated = dict(context)
         values = ChainMap(updated, self._held)
         for stage in self._context_stages:
@@ -473,8 +481,6 @@ class StreamProcessor:
                 )
             stages.append(stage)
 
-        # Only what finalize() reads directly outlives the call.
-        self._held.update({k: v for k, v in chunks.items() if k in self._bypassed_keys})
         values = ChainMap(chunks, self._held)
         results = [
             stage.run(self._values_for(stage.inputs, values)) for stage in stages
@@ -482,6 +488,9 @@ class StreamProcessor:
         for result in results:
             for key, value in result.items():
                 self._accumulators[key].push(value)
+        # Only what finalize() reads directly outlives the call. Stored only once all
+        # stages ran, so that it is not paired with accumulations lacking this chunk.
+        self._held.update({k: v for k, v in chunks.items() if k in self._bypassed_keys})
 
     def finalize(self) -> dict[sciline.typing.Key, Any]:
         """
@@ -525,7 +534,7 @@ class StreamProcessor:
                 if unset and from_context
                 else ''
             )
-            raise ValueError(f'No value was fed for {missing}.{hint}')
+            raise ValueError(f'No value for {missing}.{hint}')
         return {key: values[key] for key in keys}
 
     def visualize(
@@ -666,11 +675,11 @@ def _prepare_stages(
     inspected, so nothing is computed until all stages are built together.
     """
     special_keys = {*dynamic_keys, *context_keys}
-    finalized = tuple(
+    finalize_outputs = tuple(
         k for k in target_keys if k not in accumulator_keys and k not in special_keys
     )
     finalize_probe = sciline.Stage(
-        workflow, outputs=finalized, inputs=(*accumulator_keys, *dynamic_keys)
+        workflow, outputs=finalize_outputs, inputs=(*accumulator_keys, *dynamic_keys)
     )
     if bypassed := [k for k in dynamic_keys if k in finalize_probe.inputs]:
         if not allow_bypass:
@@ -680,9 +689,8 @@ def _prepare_stages(
                 "latest chunk."
             )
 
-    # Accumulators reading the same dynamic keys share a chunk stage. An accumulator
-    # that reads none is never pushed to.
-    groups: dict[frozenset[sciline.typing.Key], list[sciline.typing.Key]] = {}
+    # Accumulators reading the same dynamic keys share a chunk stage.
+    chunk_groups: dict[frozenset[sciline.typing.Key], list[sciline.typing.Key]] = {}
     for key in accumulator_keys:
         if key not in finalize_probe.inputs and key not in target_keys:
             continue
@@ -695,11 +703,15 @@ def _prepare_stages(
                 f"Accumulator {key} depends on accumulators {inner}. "
                 "This is not supported."
             )
-        if reads := probe.inputs:
-            groups.setdefault(frozenset(reads), []).append(key)
+        if not probe.inputs:
+            raise ValueError(
+                f"Accumulator {key} depends on no dynamic key, so it would never "
+                "receive a value."
+            )
+        chunk_groups.setdefault(frozenset(probe.inputs), []).append(key)
     chunk_probes = [
         sciline.Stage(workflow, outputs=keys, inputs=dynamic)
-        for dynamic, keys in groups.items()
+        for dynamic, keys in chunk_groups.items()
     ]
 
     cached = tuple(
@@ -719,11 +731,13 @@ def _prepare_stages(
     context_groups = [by_context[k] for k in sorted(by_context, key=len)]
     *stages, finalize_stage = sciline.prepare_stages(
         workflow,
-        inputs=(*context_keys, *forwarded, *dynamic_keys, *finalize_probe.inputs),
+        inputs=dict.fromkeys(
+            (*context_keys, *forwarded, *dynamic_keys, *finalize_probe.inputs)
+        ),
         outputs=[
             *context_groups,
-            *groups.values(),
-            tuple(k for k in finalized if k not in forwarded),
+            *chunk_groups.values(),
+            tuple(k for k in finalize_outputs if k not in forwarded),
         ],
     )
     n_context = len(context_groups)
