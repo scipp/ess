@@ -267,13 +267,11 @@ def initialize_nmx_workflow(*, config: WorkflowConfig) -> sciline.Pipeline:
         wf = NMXWorkflow(wavelength_from="analytical")
         wmax = sc.scalar(config.tof_simulation_max_wavelength, unit='angstrom')
         wmin = sc.scalar(config.tof_simulation_min_wavelength, unit='angstrom')
-        wf[SourceBounds] = (
-            SourceBounds(
-                # The ESS pulse lasts 2.86 ms, but has a long tail, so we take a wider
-                # time range to be safe.
-                time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
-                wavelength=(wmin, wmax),
-            ),
+        wf[SourceBounds] = SourceBounds(
+            # The ESS pulse lasts 2.86 ms, but has a long tail, so we take a wider
+            # time range to be safe.
+            time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+            wavelength=(wmin, wmax),
         )
         ltotal_min = sc.scalar(value=config.tof_simulation_min_ltotal, unit='m')
         ltotal_max = sc.scalar(value=config.tof_simulation_max_ltotal, unit='m')
