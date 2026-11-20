@@ -354,8 +354,8 @@ class StreamProcessor:
         ValueError
             If the dynamic and context keys overlap or depend on each other, if
             a target depends on a dynamic key other than through an accumulator and
-            ``allow_bypass`` is False, or if an accumulator reads another accumulator
-            that the targets also read.
+            ``allow_bypass`` is False, or if an accumulator that the targets need
+            depends on another accumulator.
         """
         # Tuples, not sets, so that stage inputs and messages have a stable order.
         self._dynamic_keys = tuple(dict.fromkeys(dynamic_keys))
@@ -686,8 +686,16 @@ def _prepare_stages(
     for key in accumulator_keys:
         if key not in finalize_probe.inputs and key not in target_keys:
             continue
-        reads = sciline.Stage(workflow, outputs=(key,), inputs=dynamic_keys).inputs
-        if reads:
+        others = tuple(k for k in accumulator_keys if k != key)
+        probe = sciline.Stage(workflow, outputs=(key,), inputs=(*dynamic_keys, *others))
+        # Whether such an accumulator would be computed from the chunk or from what
+        # the other one accumulated is ambiguous, so it is not supported.
+        if inner := [k for k in probe.inputs if k in others]:
+            raise ValueError(
+                f"Accumulator {key} depends on accumulators {inner}. "
+                "This is not supported."
+            )
+        if reads := probe.inputs:
             groups.setdefault(frozenset(reads), []).append(key)
     chunk_probes = [
         sciline.Stage(workflow, outputs=keys, inputs=dynamic)
@@ -709,10 +717,6 @@ def _prepare_stages(
         reads = sciline.Stage(workflow, outputs=(key,), inputs=context_keys).inputs
         by_context.setdefault(frozenset(reads), []).append(key)
     context_groups = [by_context[k] for k in sorted(by_context, key=len)]
-    # The chunk stages are cut only at the accumulation keys that finalize reads, so
-    # an accumulator feeding another one is computed per chunk, not read from its
-    # accumulator. If finalize also reads the inner one, the chunk stage would read
-    # it from its accumulator; that is rejected below.
     *stages, finalize_stage = sciline.prepare_stages(
         workflow,
         inputs=(*context_keys, *forwarded, *dynamic_keys, *finalize_probe.inputs),
@@ -723,14 +727,7 @@ def _prepare_stages(
         ],
     )
     n_context = len(context_groups)
-    chunk_stages = tuple(stages[n_context:])
-    for stage in chunk_stages:
-        if inner := [k for k in stage.inputs if k in accumulator_keys]:
-            raise ValueError(
-                f"Accumulators {list(stage.outputs)} read accumulators {inner}, "
-                "which the targets also read. This is not supported."
-            )
-    return tuple(stages[:n_context]), chunk_stages, finalize_stage
+    return tuple(stages[:n_context]), tuple(stages[n_context:]), finalize_stage
 
 
 def _make_accumulators(

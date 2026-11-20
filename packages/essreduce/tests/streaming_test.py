@@ -1268,29 +1268,6 @@ def test_StreamProcessor_names_context_keys_not_set_yet() -> None:
     assert streaming_wf.finalize()[Output] == 6
 
 
-def test_StreamProcessor_with_accumulator_feeding_another_accumulator() -> None:
-    Streamed = NewType('Streamed', int)
-    Histogram = NewType('Histogram', int)
-    Summary = NewType('Summary', int)
-
-    def histogram(streamed: Streamed) -> Histogram:
-        return Histogram(2 * streamed)
-
-    def summarize(hist: Histogram) -> Summary:
-        return Summary(hist + 1)
-
-    streaming_wf = streaming.StreamProcessor(
-        base_workflow=sciline.Pipeline((histogram, summarize)),
-        dynamic_keys=(Streamed,),
-        target_keys=(Summary,),
-        accumulators=(Histogram, Summary),
-    )
-    streaming_wf.accumulate({Streamed: 1})
-    streaming_wf.accumulate({Streamed: 2})
-    # Summary is computed from the Histogram of each chunk, then accumulated.
-    assert streaming_wf.finalize()[Summary] == (2 + 1) + (4 + 1)
-
-
 def test_StreamProcessor_context_update_recomputes_dependent_context_values() -> None:
     Streamed = NewType('Streamed', int)
     Position = NewType('Position', int)
@@ -1348,34 +1325,27 @@ def test_StreamProcessor_names_unset_context_key_read_by_chunk_stage() -> None:
         streaming_wf.accumulate({Streamed: 2})
 
 
-def test_StreamProcessor_rejects_accumulator_reading_accumulator_read_by_target() -> (
-    None
-):
-    StreamedA = NewType('StreamedA', int)
-    StreamedB = NewType('StreamedB', int)
-    Inner = NewType('Inner', int)
-    Outer = NewType('Outer', int)
-    InnerResult = NewType('InnerResult', int)
-    OuterResult = NewType('OuterResult', int)
+@pytest.mark.parametrize('inner_is_target', [False, True])
+def test_StreamProcessor_rejects_accumulator_depending_on_accumulator(
+    inner_is_target: bool,
+) -> None:
+    Streamed = NewType('Streamed', int)
+    Histogram = NewType('Histogram', int)
+    Summary = NewType('Summary', int)
 
-    def inner(streamed: StreamedA) -> Inner:
-        return Inner(streamed)
+    def histogram(streamed: Streamed) -> Histogram:
+        return Histogram(2 * streamed)
 
-    def outer(inner: Inner, streamed: StreamedB) -> Outer:
-        return Outer(inner * streamed)
+    def summarize(hist: Histogram) -> Summary:
+        return Summary(hist + 1)
 
-    def inner_result(inner: Inner) -> InnerResult:
-        return InnerResult(inner)
-
-    def outer_result(outer: Outer) -> OuterResult:
-        return OuterResult(outer)
-
-    with pytest.raises(ValueError, match=r'read accumulators \[.*Inner\]'):
+    targets = (Histogram, Summary) if inner_is_target else (Summary,)
+    with pytest.raises(ValueError, match=r'depends on accumulators \[.*Histogram\]'):
         streaming.StreamProcessor(
-            base_workflow=sciline.Pipeline((inner, outer, inner_result, outer_result)),
-            dynamic_keys=(StreamedA, StreamedB),
-            target_keys=(InnerResult, OuterResult),
-            accumulators=(Inner, Outer),
+            base_workflow=sciline.Pipeline((histogram, summarize)),
+            dynamic_keys=(Streamed,),
+            target_keys=targets,
+            accumulators=(Histogram, Summary),
         )
 
 
