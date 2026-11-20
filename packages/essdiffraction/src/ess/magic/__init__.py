@@ -3,7 +3,7 @@
 
 import importlib.metadata
 
-from .workflow import MagicWorkflow, default_parameters
+from .workflow import MagicMcStasWorkflow, MagicWorkflow, default_parameters
 
 try:
     __version__ = importlib.metadata.version("essdiffraction")
@@ -13,6 +13,7 @@ except importlib.metadata.PackageNotFoundError:
 del importlib
 
 __all__ = [
+    'MagicMcStasWorkflow',
     'MagicWorkflow',
     '__version__',
     'default_parameters',
