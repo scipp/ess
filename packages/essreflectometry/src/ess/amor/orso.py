@@ -14,4 +14,15 @@ def orso_amor_corrections() -> OrsoCorrectionList:
     )
 
 
+def orso_amor_direct_beam_corrections() -> OrsoCorrectionList:
+    """Return list of corrections applied when normalizing by the direct beam."""
+    return OrsoCorrectionList(
+        [
+            "chopper ToF correction",
+            "footprint correction",
+            "direct beam normalization",
+        ]
+    )
+
+
 providers = (orso_amor_corrections,)

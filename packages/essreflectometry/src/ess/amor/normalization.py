@@ -2,6 +2,8 @@
 import scipp as sc
 
 from ..reflectometry.conversions import reflectometry_q
+from ..reflectometry.corrections import correct_by_footprint
+from ..reflectometry.normalization import reduce_from_events_to_lz, reduce_reference
 from ..reflectometry.supermirror import (
     Alpha,
     CriticalEdge,
@@ -9,16 +11,21 @@ from ..reflectometry.supermirror import (
     supermirror_reflectivity,
 )
 from ..reflectometry.types import (
+    BeamDivergenceLimits,
     CoordTransformationGraph,
     DetectorSpatialResolution,
+    ProtonCharge,
     ReducedReference,
     ReducibleData,
     Reference,
     ReferenceRun,
     Sample,
     SampleRun,
+    SampleSize,
+    WavelengthBins,
 )
-from .conversions import theta
+from .conversions import divergence_angle, theta
+from .corrections import normalize_by_proton_charge
 from .resolution import (
     angular_resolution,
     q_resolution,
@@ -113,7 +120,158 @@ def evaluate_reference_at_sample_coords(
     return ref
 
 
-providers = (
-    evaluate_reference_at_sample_coords,
-    mask_events_where_supermirror_does_not_cover,
+def reduce_supermirror_reference(
+    reference: ReducibleData[ReferenceRun],
+    proton_charge: ProtonCharge[ReferenceRun],
+    wavelength_bins: WavelengthBins,
+    critical_edge: CriticalEdge,
+    mvalue: MValue,
+    alpha: Alpha,
+) -> ReducedReference:
+    """
+    Reduces the measurement on a supermirror to estimate the
+    intensity distribution in the detector for
+    an ideal sample with reflectivity :math:`R = 1`.
+    """
+    return reduce_reference(
+        normalize_by_proton_charge(correct_by_footprint(reference), proton_charge),
+        wavelength_bins,
+        critical_edge,
+        mvalue,
+        alpha,
+    )
+
+
+def normalize_sample_for_supermirror_reference(
+    sample: ReducibleData[SampleRun],
+    proton_charge: ProtonCharge[SampleRun],
+    reference: ReducedReference,
+    critical_edge: CriticalEdge,
+    mvalue: MValue,
+    alpha: Alpha,
+) -> Sample:
+    """
+    Applies the footprint correction and the normalization by proton charge
+    to the sample measurement, and masks the events in regions of the detector
+    that the supermirror reference does not cover.
+    """
+    sample = mask_events_where_supermirror_does_not_cover(
+        sample, reference, critical_edge, mvalue, alpha
+    )
+    return Sample(
+        normalize_by_proton_charge(correct_by_footprint(sample), proton_charge)
+    )
+
+
+def _mirror_detector_rows(da: sc.DataArray) -> sc.DataArray:
+    """Reverse the order of the data along the scattering direction of the detector.
+
+    The coordinates and masks are left in place.
+    """
+    mirrored = da
+    for dim in ('blade', 'wire'):
+        mirrored = sc.sort(mirrored, dim, order='descending')
+    return da.assign(mirrored.data)
+
+
+def reduce_direct_beam_reference(
+    reference: ReducibleData[ReferenceRun],
+    proton_charge: ProtonCharge[ReferenceRun],
+    wavelength_bins: WavelengthBins,
+) -> ReducedReference:
+    """
+    Reduces the measurement of the direct beam to the
+    intensity distribution in the detector for
+    an ideal sample with reflectivity :math:`R = 1`.
+
+    A reflection reverses the angular profile of the beam.
+    The neutrons that leave the guide at an angle :math:`\\delta` to the
+    center of the beam reach the detector at :math:`\\delta` in the direct beam,
+    but at :math:`-\\delta` after a reflection.
+    The intensity distribution of the direct beam is therefore mirrored
+    along the scattering direction of the detector.
+    As in the Amor reduction software ``eos``, this is done by reversing
+    the order of the detector rows.
+    """
+    # The divergence limits select a part of the reflected beam.
+    # The matching part of the direct beam is selected after mirroring,
+    # in evaluate_direct_beam_at_sample_coords.
+    reference = reference.bins.drop_masks('divergence_too_large')
+    intensity = reduce_from_events_to_lz(
+        normalize_by_proton_charge(reference, proton_charge), wavelength_bins
+    ).hist()
+    return ReducedReference(_mirror_detector_rows(intensity))
+
+
+def evaluate_direct_beam_at_sample_coords(
+    reference: ReducedReference,
+    sample: ReducibleData[SampleRun],
+    detector_spatial_resolution: DetectorSpatialResolution,
+    graph: CoordTransformationGraph[ReferenceRun],
+    divergence_limits: BeamDivergenceLimits,
+) -> Reference:
+    """
+    Adds the coordinates of the sample measurement to the intensity distribution
+    of the direct beam, see :func:`evaluate_reference_at_sample_coords`,
+    and masks the part that is outside the divergence limits.
+
+    The limits are applied to the angles of the sample measurement,
+    such that the same part of the detector is used for the sample
+    and for the reference.
+    """
+    ref = evaluate_reference_at_sample_coords(
+        reference, sample, detector_spatial_resolution, graph
+    )
+    divergence = divergence_angle(
+        ref.coords['theta'],
+        ref.coords['sample_rotation'],
+        ref.coords['detector_rotation'],
+    )
+    low, high = (limit.to(unit=divergence.unit) for limit in divergence_limits)
+    return Reference(
+        ref.assign_masks(divergence_too_large=(divergence < low) | (divergence > high))
+    )
+
+
+def normalize_sample_for_direct_beam_reference(
+    sample: ReducibleData[SampleRun],
+    proton_charge: ProtonCharge[SampleRun],
+) -> Sample:
+    """
+    Applies the footprint correction and the normalization by proton charge
+    to the sample measurement.
+
+    The direct beam does not pass a sample, so the footprint correction is not
+    applied to the reference. It has no effect if ``SampleSize[SampleRun]``
+    is much larger than the footprint of the beam.
+    """
+    return Sample(
+        normalize_by_proton_charge(correct_by_footprint(sample), proton_charge)
+    )
+
+
+def sample_size_for_direct_beam(
+    sample_size: SampleSize[SampleRun],
+) -> SampleSize[ReferenceRun]:
+    """There is no sample in the direct beam, the size of the sample
+    in the sample run is used where the reference is evaluated at the
+    coordinates of the sample run."""
+    return SampleSize[ReferenceRun](sample_size)
+
+
+providers = (evaluate_reference_at_sample_coords,)
+"""Providers that do not depend on the kind of reference measurement."""
+
+supermirror_providers = (
+    reduce_supermirror_reference,
+    normalize_sample_for_supermirror_reference,
 )
+"""Providers for normalizing by a reference measured on a supermirror."""
+
+direct_beam_providers = (
+    reduce_direct_beam_reference,
+    evaluate_direct_beam_at_sample_coords,
+    normalize_sample_for_direct_beam_reference,
+    sample_size_for_direct_beam,
+)
+"""Providers for normalizing by a measurement of the direct beam."""

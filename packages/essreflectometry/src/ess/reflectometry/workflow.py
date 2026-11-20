@@ -13,8 +13,10 @@ from ess.reflectometry.orso import (
     OrsoSampleFilenames,
 )
 from ess.reflectometry.types import (
+    CoordTransformationGraph,
     DetectorRotation,
     Filename,
+    ProtonCharge,
     ReducibleData,
     RunType,
     SampleRotation,
@@ -26,6 +28,10 @@ def _concatenate_event_lists(*das):
     da = sc.reduce(das).bins.concat()
     missing_coords = set(das[0].coords) - set(da.coords)
     return da.assign_coords({coord: das[0].coords[coord] for coord in missing_coords})
+
+
+def _concatenate_time_series(*das):
+    return sc.concat(das, 'time')
 
 
 def _any_value(x, *_):
@@ -40,7 +46,8 @@ def with_filenames(
     workflow, runtype: Hashable, runs: Sequence[Filename[RunType]]
 ) -> sciline.Pipeline:
     '''Sets a number of :code:`Filename[runtype]` simultaneously.
-    The events from all listed files are concatenated in the workflow.
+    The events from all listed files are concatenated in the workflow,
+    and so are the time series of the proton charge.
 
     Arguments
     ----------
@@ -63,6 +70,9 @@ def with_filenames(
     mapped = wf.map(df)
 
     reduce_functions = {
+        # These must be replaced before their consumers are, while they are not mapped.
+        ProtonCharge[runtype]: _concatenate_time_series,
+        CoordTransformationGraph[runtype]: _any_value,
         ReducibleData[runtype]: _concatenate_event_lists,
         SampleRotation[runtype]: _any_value,
         DetectorRotation[runtype]: _any_value,
