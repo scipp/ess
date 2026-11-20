@@ -23,7 +23,7 @@ from ess.spectroscopy.types import (
 
 @pytest.fixture
 def energy_data() -> EnergyQDetector[SampleRun]:
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = [
         f'channel_{channel}_{arc}_triplet'
         for arc in range(1, 6)
