@@ -1,4 +1,5 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+from dataclasses import dataclass
 from typing import NewType
 
 import sciline
@@ -34,12 +35,34 @@ class SampleSurfaceNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Normal pointing out of the reflecting surface, in global coordinates."""
 
 
+class MirrorPosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """A point on the inversion mirror's reflecting plane, in global coordinates."""
+
+
+class MirrorNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
+    """Normal to the inversion mirror in global coordinates; either sign is valid."""
+
+
+@dataclass(frozen=True)
+class MirrorGeometry[RunType]:
+    """A point on the mirror plane and its unit normal, in laboratory coordinates."""
+
+    position: sc.Variable
+    normal: sc.Variable
+
+
 class UpstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Upstream beam names mapped to fixed slit centers in global coordinates."""
+    """Beam names mapped to fixed slit centers before the inversion mirror.
+
+    Positions are in global coordinates, also when inversion is disabled.
+    """
 
 
 class DownstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Downstream beam names mapped to fixed slit centers in global coordinates."""
+    """Beam names mapped to fixed slit centers after the inversion mirror.
+
+    Positions are in global coordinates, also when inversion is disabled.
+    """
 
 
 class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
@@ -52,7 +75,7 @@ class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
 
 
 class IncidentAngleGraph(sciline.Scope[RunType, dict], dict):
-    """Coordinate graph fragment defining how incident angles are assigned."""
+    """Coordinate graph for assigning incident angles and correcting for gravity."""
 
 
 class ShutterPositions(sciline.Scope[RunType, dict], dict):
@@ -60,6 +83,7 @@ class ShutterPositions(sciline.Scope[RunType, dict], dict):
 
     Keys match UpstreamSlitCenters and DownstreamSlitCenters. Each beam has one
     shutter, whose position is independent of the slit centers used for angles.
+    In inversion mode, shutters must be upstream of the mirror.
     """
 
 
