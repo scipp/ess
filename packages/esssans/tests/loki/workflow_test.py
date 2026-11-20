@@ -28,7 +28,6 @@ from ess.sans.types import (
     UncertaintyBroadcastMode,
     WavelengthDetector,
 )
-from sciline import UnsatisfiedRequirement
 
 from ess.reduce import workflow
 from ess.reduce.masking import write_pixel_masks
