@@ -98,34 +98,27 @@ def test_loki_larmor_workflow_compute_with_single_pixel_mask(larmor_workflow):
 
 
 @pytest.mark.parametrize("bank", list(range(9)))
-def test_loki_workflow_needs_lookup_table(loki_workflow, bank):
-    wf = loki_workflow()
+@pytest.mark.parametrize("wavelength_from", ["analytical", "file"])
+def test_loki_workflow_can_compute_wavelength(loki_workflow, bank, wavelength_from):
+    wf = loki_workflow(wavelength_from=wavelength_from)
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    with pytest.raises(UnsatisfiedRequirement, match='LookupTableFilename'):
-        wf.compute(WavelengthDetector[SampleRun])
-
-
-@pytest.mark.parametrize("bank", list(range(9)))
-def test_loki_workflow_can_compute_wavelength(loki_workflow, bank):
-    wf = loki_workflow()
-    # For simplicity, insert a fake beam center instead of computing it.
-    wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
-    wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
+    if wavelength_from == "file":
+        wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
     result = wf.compute(WavelengthDetector[SampleRun])
     assert 'wavelength' in result.bins.coords
 
 
 @pytest.mark.parametrize("bank", list(range(9)))
-def test_loki_workflow_can_compute_iofq(loki_workflow, bank):
-    wf = loki_workflow()
+@pytest.mark.parametrize("wavelength_from", ["analytical", "file"])
+def test_loki_workflow_can_compute_iofq(loki_workflow, bank, wavelength_from):
+    wf = loki_workflow(wavelength_from=wavelength_from)
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
-
+    if wavelength_from == "file":
+        wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
     result = wf.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
     assert sc.identical(result.coords['Q'], wf.compute(QBins))
