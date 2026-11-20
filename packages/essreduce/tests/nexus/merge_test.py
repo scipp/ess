@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
+import os
 from collections.abc import Callable
 from pathlib import Path
 
@@ -313,12 +314,14 @@ def test_write_leaves_no_file_if_writing_fails(
     runs: list[Path], tmp_path: Path
 ) -> None:
     plan = plan_merge(runs, RULES)
-    plan.files[1].chmod(0)  # keeps the size and modification time
-    try:
-        with pytest.raises(OSError, match='nable to'):
-            plan.write(tmp_path / 'merged.nxs')
-    finally:
-        plan.files[1].chmod(0o644)
+    # Make opening the second file fail, after the partial file was created.
+    # Size and modification time must stay the same, or `write` refuses earlier.
+    path = plan.files[1]
+    stat = path.stat()
+    path.write_bytes(b'\0' * stat.st_size)
+    os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+    with pytest.raises(OSError, match='file signature not found'):
+        plan.write(tmp_path / 'merged.nxs')
     assert sorted(p.name for p in tmp_path.iterdir()) == ['a.nxs', 'b.nxs']
 
 
