@@ -3,16 +3,16 @@
 """Detector diagnostics for DREAM."""
 
 from collections import defaultdict
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 import scipp as sc
 
-from ess.reduce.diagnostics.flat_bank_viewer import FlatBankViewer
+from ess.reduce.diagnostics.flat_data_viewer import FlatDataViewer
 
 
-class FlatVoxelViewer(FlatBankViewer):
-    """Interactive 2D plot of all detector voxels.
+class FlatVoxelViewer(FlatDataViewer):
+    """2D plot of all detector voxels.
 
     See `DREAM Detector Diagnostics
     <../../user-guide/dream/dream-detector-diagnostics.rst>`_ for explanations
@@ -22,36 +22,61 @@ class FlatVoxelViewer(FlatBankViewer):
     def __init__(
         self,
         data: Mapping[str, sc.DataArray] | sc.DataArray,
+        horizontal: Iterable[str] | dict[str, Iterable[str]] = (
+            'module',
+            'strip',
+            'sumo',
+            'sector',
+        ),
+        vertical: Iterable[str] | dict[str, Iterable[str]] = (
+            'counter',
+            'segment',
+            'wire',
+        ),
         *,
         cbar: bool = True,
         rasterized: bool = True,
-        **kwargs: Any,
+        separators: str | None = None,
+        **fig_kwargs: Any,
     ) -> None:
         """Create a new viewer.
 
         Parameters
         ----------
         data:
-            Histogrammed data, one entry per bank.
-            cbar:
-                Whether to show a colorbar.
+            Data to show. A mapping (e.g., a data group) with one entry per bank
+            adds buttons for selecting a bank. The banks may have different dims
+            but must all have the same unit and no empty dimensions.
+        horizontal:
+            Dims to display on the horizontal axis.
+            Order is outermost to innermost (last dim varies fastest).
+            If a dict, the keys are bank names and the values are dims to display
+            on the horizontal axis for that bank.
+        vertical:
+            Dims to display on the vertical axis.
+            Order is outermost to innermost (last dim varies fastest).
+            If a dict, the keys are bank names and the values are dims to display
+            on the vertical axis for that bank.
+        cbar:
+            Whether to show a colorbar.
         rasterized:
             If ``True``, the figure is rasterized which improves rendering
             speed but reduces resolution.
-        **kwargs:
+        separators:
+            If not ``None``, draw lines along the bin edges of the slowest
+            (first-listed) dim on each axis. The value of this argument is the
+            line color.
+        **fig_kwargs:
             Additional arguments passed to :func:`plopp.imagefigure`.
         """
-        vertical = ('counter', 'segment', 'wire')
-        horizontal = ('module', 'strip', 'sumo', 'sector')
         super().__init__(
             _prepare_data(data),
-            dims=(*vertical, *horizontal),
-            sliced=(),
             vertical=vertical,
             horizontal=horizontal,
             cbar=cbar,
             rasterized=rasterized,
-            **kwargs,
+            separators=separators,
+            **fig_kwargs,
         )
 
 
