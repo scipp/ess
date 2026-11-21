@@ -242,8 +242,13 @@ def normalize_sample_for_direct_beam_reference(
     to the sample measurement.
 
     The direct beam does not pass a sample, so the footprint correction is not
-    applied to the reference. It has no effect if ``SampleSize[SampleRun]``
-    is much larger than the footprint of the beam.
+    applied to the reference.
+
+    The correction is equal to one if ``BeamSize[SampleRun]`` is much smaller
+    than the sample. Use that, and not a large ``SampleSize[SampleRun]``, for a
+    direct beam that was measured through an opening that matches the footprint
+    of the sample: the size of the sample also enters the resolution in
+    :math:`Q`.
     """
     return Sample(
         normalize_by_proton_charge(correct_by_footprint(sample), proton_charge)

@@ -17,6 +17,7 @@ from ess.amor.types import (
 )
 from ess.reflectometry import orso, supermirror
 from ess.reflectometry.types import (
+    BeamSize,
     DetectorRotation,
     Filename,
     ProtonCharge,
@@ -63,8 +64,9 @@ def sample_file(make_amor_file) -> Path:
 
 
 def _set_parameters(workflow: sciline.Pipeline) -> sciline.Pipeline:
-    # Much larger than the footprint of the beam
-    workflow[SampleSize[SampleRun]] = sc.scalar(1.0, unit='km')
+    workflow[SampleSize[SampleRun]] = sc.scalar(50.0, unit='mm')
+    # A beam much narrower than the sample: the footprint correction is one
+    workflow[BeamSize[SampleRun]] = sc.scalar(1.0, unit='nm')
     workflow[WavelengthBins] = sc.geomspace(
         'wavelength', 3.0, 12.0, 31, unit='angstrom'
     )
@@ -92,7 +94,8 @@ def direct_beam_workflow(direct_beam_file: Path, sample_file: Path) -> sciline.P
 @pytest.fixture
 def supermirror_workflow(direct_beam_file: Path, sample_file: Path) -> sciline.Pipeline:
     workflow = _set_parameters(amor.AmorWorkflow())
-    workflow[SampleSize[ReferenceRun]] = sc.scalar(1.0, unit='km')
+    workflow[SampleSize[ReferenceRun]] = sc.scalar(50.0, unit='mm')
+    workflow[BeamSize[ReferenceRun]] = sc.scalar(1.0, unit='nm')
     workflow[Filename[SampleRun]] = sample_file
     # A reflection from the sample plays the role of an ideal supermirror
     workflow[Filename[ReferenceRun]] = sample_file
@@ -264,11 +267,23 @@ def test_direct_beam_normalization_gives_simulated_reflectivity(
 def test_footprint_correction_is_applied_to_sample_only(
     direct_beam_workflow: sciline.Pipeline,
 ):
-    large_sample = _mean_reflectivity(direct_beam_workflow.compute(ReflectivityOverQ))
-    # The default beam size is 2 mm, at about 1 degree the footprint is about 115 mm
-    direct_beam_workflow[SampleSize[SampleRun]] = sc.scalar(50.0, unit='mm')
-    small_sample = _mean_reflectivity(direct_beam_workflow.compute(ReflectivityOverQ))
-    assert small_sample.value > 1.5 * large_sample.value
+    narrow_beam = _mean_reflectivity(direct_beam_workflow.compute(ReflectivityOverQ))
+    # At about 1 degree the footprint of a 2 mm beam is about 115 mm, the sample 50 mm
+    direct_beam_workflow[BeamSize[SampleRun]] = sc.scalar(2.0, unit='mm')
+    wide_beam = _mean_reflectivity(direct_beam_workflow.compute(ReflectivityOverQ))
+    assert wide_beam.value > 1.5 * narrow_beam.value
+
+
+def test_resolution_is_not_affected_by_switching_off_footprint_correction(
+    direct_beam_workflow: sciline.Pipeline,
+):
+    reflectivity = direct_beam_workflow.compute(ReflectivityOverQ)
+    relative = reflectivity.coords['Q_resolution'] / sc.midpoints(
+        reflectivity.coords['Q']
+    )
+    covered = relative[sc.isfinite(relative)]
+    assert covered.sizes['Q'] > 5
+    assert covered.max() < sc.scalar(0.1)
 
 
 def test_supermirror_normalization_of_run_by_itself_gives_unity(

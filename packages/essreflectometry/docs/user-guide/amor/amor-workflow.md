@@ -53,8 +53,15 @@ Both measurements are divided by the proton charge on the target of SINQ, so the
 
 The footprint correction is applied to the sample measurement only, because the direct beam does not pass a sample.
 It assumes that the direct beam was measured with the full beam.
-If the direct beam was instead measured through an opening that matches the footprint of the sample, set `SampleSize[SampleRun]` to a value much larger than the footprint of the beam.
-The correction is then equal to one.
+If the direct beam was instead measured through an opening that matches the footprint of the sample, the correction must not be applied.
+Set `BeamSize[SampleRun]` to a value much smaller than the sample, the correction is then equal to one:
+
+```python
+workflow[BeamSize[SampleRun]] = sc.scalar(1e-6, unit='mm')
+```
+
+Do not make `SampleSize[SampleRun]` large instead.
+The size of the sample also enters the resolution in $Q$, which would become far too wide.
 
 ## Normalization by a supermirror
 
