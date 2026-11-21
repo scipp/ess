@@ -1,5 +1,4 @@
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-from ..reflectometry.corrections import correct_by_footprint, correct_by_proton_charge
 from ..reflectometry.types import (
     BeamDivergenceLimits,
     CoordTransformationGraph,
@@ -12,9 +11,10 @@ from ..reflectometry.types import (
     ZIndexLimits,
 )
 from .conversions import add_coords, add_masks
+from .corrections import mask_events_where_proton_current_is_too_low
 
 
-def add_coords_masks_and_apply_corrections(
+def add_coords_and_masks(
     da: RawDetector[RunType],
     ylim: YIndexLimits,
     zlims: ZIndexLimits,
@@ -24,19 +24,18 @@ def add_coords_masks_and_apply_corrections(
     graph: CoordTransformationGraph[RunType],
 ) -> ReducibleData[RunType]:
     """
-    Computes coordinates, masks and corrections that are
+    Computes the coordinates and masks that are
     the same for the sample measurement and the reference measurement.
+
+    The corrections that depend on the kind of reference measurement, and
+    the normalization by the proton charge, are applied when the reference
+    and the sample are normalized, see :mod:`ess.amor.normalization`.
+    The events of several runs can therefore be combined before normalization.
     """
     da = add_coords(da, graph)
     da = add_masks(da, ylim, zlims, bdlim, wbins)
-
-    da = correct_by_footprint(da)
-
-    # For some older Amor files there are no entries in the proton charge log
-    if len(proton_charge) != 0:
-        da = correct_by_proton_charge(da, proton_charge=proton_charge)
-
+    da = mask_events_where_proton_current_is_too_low(da, proton_charge)
     return ReducibleData[RunType](da)
 
 
-providers = (add_coords_masks_and_apply_corrections,)
+providers = (add_coords_and_masks,)

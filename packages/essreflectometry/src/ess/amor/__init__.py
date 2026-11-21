@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import importlib.metadata
+from typing import Literal
 
 import sciline
 import scipp as sc
@@ -21,6 +22,8 @@ from ..reflectometry.types import (
 )
 from . import (
     conversions,
+    corrections,
+    legacy,
     load,
     normalization,
     orso,
@@ -33,7 +36,9 @@ from .types import (
     AngularResolution,
     ChopperFrequency,
     ChopperPhase,
+    ChopperPhaseOffset,
     GravityToggle,
+    ProtonCurrentThreshold,
     SampleSizeResolution,
     WavelengthResolution,
 )
@@ -47,6 +52,7 @@ providers = (
     *reflectometry_providers,
     *load.providers,
     *conversions.providers,
+    *corrections.providers,
     *normalization.providers,
     *utils.providers,
     *orso.providers,
@@ -56,6 +62,8 @@ providers = (
 List of providers for setting up a Sciline pipeline.
 
 This provides a default Amor workflow including providers for loadings files.
+The providers that depend on the kind of reference measurement are
+inserted by :func:`AmorWorkflow`.
 """
 
 
@@ -69,8 +77,8 @@ def default_parameters() -> dict:
         DetectorSpatialResolution: 0.0025 * sc.units.m,
         Position[snx.NXsample, RunType]: sc.vector([0, 0, 0], unit="m"),
         NeXusDetectorName: "detector",
-        ChopperPhase[RunType]: sc.scalar(7.0, unit="deg"),
-        ChopperFrequency[RunType]: sc.scalar(8.333, unit="Hz"),
+        ChopperPhaseOffset[RunType]: sc.scalar(-5.0, unit="deg"),
+        ProtonCurrentThreshold: sc.scalar(50.0, unit="uA"),
         BeamDivergenceLimits: (
             sc.scalar(-0.75, unit='deg'),
             sc.scalar(0.75, unit='deg'),
@@ -80,28 +88,96 @@ def default_parameters() -> dict:
     }
 
 
-def AmorWorkflow() -> sciline.Pipeline:
+def AmorWorkflow(
+    *, normalized_by: Literal['supermirror', 'direct_beam'] = 'supermirror'
+) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Amor PSI instrument.
+
+    The workflow reads the files written by Amor since 2026.
+    Use :func:`AmorWorkflow2025` for older files.
+
+    Parameters
+    ----------
+    normalized_by:
+        The kind of measurement that ``Filename[ReferenceRun]`` refers to.
+
+        - ``'supermirror'``: a reflection from a supermirror. The reference is
+          divided by the reflectivity of the supermirror.
+        - ``'direct_beam'``: the beam without a sample, with the sample stage
+          and the detector at zero angle. This is the normalization used by the
+          Amor reduction software ``eos``.
+
+    Returns
+    -------
+    :
+        The workflow.
     """
-    return sciline.Pipeline(
+    match normalized_by:
+        case 'supermirror':
+            reference_providers = normalization.supermirror_providers
+        case 'direct_beam':
+            reference_providers = (
+                *normalization.direct_beam_providers,
+                orso.orso_amor_direct_beam_corrections,
+            )
+        case _:
+            raise ValueError(
+                "normalized_by must be 'supermirror' or 'direct_beam', "
+                f"got {normalized_by!r}"
+            )
+    workflow = sciline.Pipeline(
         providers=providers,
         params=default_parameters(),
+        constraints={RunType: [SampleRun, ReferenceRun]},
+    )
+    for provider in reference_providers:
+        workflow.insert(provider)
+    return workflow
+
+
+def AmorWorkflow2025() -> sciline.Pipeline:
+    """
+    Workflow with default parameters for the files written by Amor until 2025.
+
+    The reference is a reflection from a supermirror.
+    """
+    return sciline.Pipeline(
+        providers=(
+            *reflectometry_providers,
+            load.amor_chopper,
+            load.load_amor_chopper_distance,
+            load.load_amor_chopper_separation,
+            load.load_beamline_metadata,
+            load.load_measurement_metadata,
+            normalization.evaluate_reference_at_sample_coords,
+            normalization.mask_events_where_supermirror_does_not_cover,
+            *utils.providers,
+            *orso.providers,
+            *legacy.providers,
+        ),
+        params=legacy.default_parameters(),
         constraints={RunType: [SampleRun, ReferenceRun]},
     )
 
 
 __all__ = [
     "AmorWorkflow",
+    "AmorWorkflow2025",
     "AngularResolution",
     "ChopperFrequency",
     "ChopperPhase",
+    "ChopperPhaseOffset",
+    "ProtonCurrentThreshold",
     "SampleSizeResolution",
     "WavelengthResolution",
     "conversions",
+    "corrections",
     "default_parameters",
     "instrument_view",
+    "legacy",
     "load",
+    "normalization",
     "orso",
     "providers",
     "resolution",

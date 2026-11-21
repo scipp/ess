@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-import scippnexus as snx
 from ess.reduce.nexus import workflow as nexus_workflow
 from ess.reduce.nexus.types import NeXusFileSpec
 
@@ -11,9 +10,7 @@ from ..reflectometry.types import (
     DetectorRotation,
     Filename,
     Measurement,
-    NeXusComponent,
     NeXusDetectorName,
-    ProtonCharge,
     RawChopper,
     RawDetector,
     RawSampleRotation,
@@ -24,23 +21,26 @@ from .geometry import pixel_coordinates_in_detector_system
 from .types import (
     ChopperDistance,
     ChopperFrequency,
-    ChopperPhase,
     ChopperSeparation,
+    ProtonCurrent,
+    PulseTimes,
 )
 
 
-def load_detector(
-    file_path: Filename[RunType], detector_name: NeXusDetectorName
-) -> NeXusComponent[snx.NXdetector, RunType]:
-    """Load the detector group from a NeXus file."""
-    return next(load_nx(file_path, f"NXentry/NXinstrument/{detector_name}"))
+def group_events_by_pixel(event_data: sc.DataArray) -> sc.DataArray:
+    """Reshape events binned by pulse to events binned by detector pixel.
 
+    Parameters
+    ----------
+    event_data:
+        Events as loaded from an ``NXevent_data`` group, binned by pulse.
 
-def load_events(
-    detector: NeXusComponent[snx.NXdetector, RunType],
-) -> RawDetector[RunType]:
-    """Load and reshape event data from a NeXus detector group."""
-    event_data = detector["data"]
+    Returns
+    -------
+    :
+        The events binned by ``blade``, ``wire`` and ``strip``. The pulse
+        time of each event is kept in the event coordinate ``event_time_zero``.
+    """
     if 'event_time_zero' in event_data.coords:
         event_data.bins.coords['event_time_zero'] = sc.bins_like(
             event_data, fill_value=event_data.coords['event_time_zero']
@@ -59,7 +59,15 @@ def load_events(
             "data"
         ].data.values
 
-    return RawDetector[RunType](data)
+    return data
+
+
+def load_events(
+    file_path: Filename[RunType], detector_name: NeXusDetectorName
+) -> RawDetector[RunType]:
+    """Load the events of the detector and bin them by detector pixel."""
+    (events,) = load_nx(file_path, f"NXentry/{detector_name}/data")
+    return RawDetector[RunType](group_events_by_pixel(events))
 
 
 def amor_chopper(f: Filename[RunType]) -> RawChopper[RunType]:
@@ -79,48 +87,42 @@ def load_amor_chopper_separation(ch: RawChopper[RunType]) -> ChopperSeparation[R
     return sc.scalar(ch["pair_separation"], unit="mm")
 
 
-def load_amor_ch_phase(ch: RawChopper[RunType]) -> ChopperPhase[RunType]:
-    """Extract chopper phase from the chopper group."""
-    p = ch["phase"]["value"].coords["average_value"].value
-    if getattr(p, "unit", None):
-        return p
-    raise ValueError("No unit was found for the chopper phase")
-
-
-def load_amor_ch_frequency(ch: RawChopper[RunType]) -> ChopperFrequency[RunType]:
-    """Extract chopper frequency from the chopper group."""
-    f = ch["rotation_speed"]["value"].coords["average_value"]
-    if getattr(f, "unit", None):
-        return f
-    raise ValueError("No unit was found for the chopper frequency")
+def load_amor_chopper_frequency(ch: RawChopper[RunType]) -> ChopperFrequency[RunType]:
+    """Extract the rotation frequency of the choppers from the chopper group."""
+    # Scipp does not convert between 'rpm' and 'Hz'
+    speed = ch["rotation_speed"]
+    if speed.unit != 'rpm':
+        raise ValueError(f"Expected the chopper speed in 'rpm', got '{speed.unit}'")
+    return (speed.value / sc.scalar(1.0, unit='min')).to(unit='Hz')
 
 
 def load_amor_sample_rotation(fp: Filename[RunType]) -> RawSampleRotation[RunType]:
-    """Load sample rotation log and return the first value."""
-    (mu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/mu")
-    # Jochens Amor code reads the first value of this log
-    # see https://github.com/jochenstahn/amor/blob/140e3192ddb7e7f28acee87e2acaee65ce1332aa/libeos/file_reader.py#L272  # noqa: E501
-    # might have to change if this field ever becomes truly time-dependent
-    return sc.scalar(mu['value'].data['dim_1', 0]['time', 0].value, unit='deg')
+    """Load the angle between the instrument horizon and the sample surface."""
+    (mu,) = load_nx(fp, "NXentry/measurement_configuration/mu")
+    return mu
 
 
 def load_amor_detector_rotation(fp: Filename[RunType]) -> DetectorRotation[RunType]:
-    """Load detector rotation log and return the first value."""
-    (nu,) = load_nx(fp, "NXentry/NXinstrument/master_parameters/nu")
-    # Jochens Amor code reads the first value of this log
-    # see https://github.com/jochenstahn/amor/blob/140e3192ddb7e7f28acee87e2acaee65ce1332aa/libeos/file_reader.py#L272  # noqa: E501
-    # might have to change if this field ever becomes truly time-dependent
-    return sc.scalar(nu['value'].data['dim_1', 0]['time', 0].value, unit='deg')
+    """Load the angle between the instrument horizon and the detector center."""
+    (nu,) = load_nx(fp, "NXentry/measurement_configuration/nu")
+    return nu
 
 
-def load_amor_proton_charge(
-    fp: Filename[RunType],
-) -> ProtonCharge[RunType]:
-    """Load proton current log from the NeXus detector group."""
-    (pc,) = load_nx(fp, 'NXentry/NXinstrument/NXdetector/proton_current')
-    pc = pc['value']['dim_1', 0]
-    pc.data.unit = 'mA/s'
-    return pc
+def load_amor_proton_current(
+    fp: Filename[RunType], detector_name: NeXusDetectorName
+) -> ProtonCurrent[RunType]:
+    """Load the log of the proton current from the NeXus detector group."""
+    (log,) = load_nx(fp, f"NXentry/{detector_name}/proton_current")
+    # A log with alarms is loaded as a group that holds the values and the alarms.
+    if isinstance(log, sc.DataGroup):
+        log = log["value"]
+    return ProtonCurrent[RunType](log)
+
+
+def load_amor_pulse_times(fp: Filename[RunType]) -> PulseTimes[RunType]:
+    """Load the start times of all chopper revolutions from the beam monitor."""
+    (times,) = load_nx(fp, "NXentry/beam_monitor/time")
+    return PulseTimes[RunType](times.rename_dims({times.dim: 'time'}))
 
 
 def load_beamline_metadata(filename: Filename[RunType]) -> Beamline[RunType]:
@@ -138,15 +140,14 @@ def load_measurement_metadata(filename: Filename[RunType]) -> Measurement[RunTyp
 
 
 providers = (
-    load_detector,
     load_events,
-    load_amor_ch_frequency,
-    load_amor_ch_phase,
+    load_amor_chopper_frequency,
     load_amor_chopper_distance,
     load_amor_chopper_separation,
     load_amor_sample_rotation,
     load_amor_detector_rotation,
-    load_amor_proton_charge,
+    load_amor_proton_current,
+    load_amor_pulse_times,
     amor_chopper,
     load_beamline_metadata,
     load_measurement_metadata,

@@ -53,7 +53,9 @@
    :recursive:
 
    conversions
+   corrections
    data
+   legacy
    load
    orso
    resolution

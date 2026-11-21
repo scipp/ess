@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
-import numpy as np
 import scipp as sc
 
 from ..reflectometry.conversions import reflectometry_q
@@ -20,7 +19,7 @@ from .geometry import Detector
 from .types import (
     ChopperDistance,
     ChopperFrequency,
-    ChopperPhase,
+    ChopperPhaseOffset,
     ChopperSeparation,
     GravityToggle,
 )
@@ -119,47 +118,73 @@ def divergence_angle(theta, sample_rotation, detector_rotation) -> sc.Variable:
 
 
 def wavelength(
-    event_time_offset, pixel_divergence_angle, L1, L2, chopper_phase, chopper_frequency
+    event_time_offset,
+    pixel_divergence_angle,
+    L1,
+    L2,
+    chopper_frequency,
+    chopper_phase_offset,
+    wavelength_min,
 ) -> sc.Variable:
-    "Converts event_time_offset to wavelength using the chopper settings."
-    out = event_time_offset.to(unit="ns", dtype="float64", copy=True)
-    unit = out.bins.unit
-    tau = (1 / (2 * chopper_frequency.to(unit='Hz'))).to(unit=unit)
-    tof_offset = tau * chopper_phase.to(unit='rad') / (np.pi * sc.units.rad)
+    '''
+    Wavelength of the neutrons from their arrival time at the detector.
 
-    minimum = -tof_offset
-    frame_bound = tau - tof_offset
-    maximum = 2 * tau - tof_offset
+    The chopper lets a pulse of neutrons pass every half revolution,
+    :math:`\\tau = 1 / (2 f)`, but the arrival times are recorded
+    relative to a trigger that occurs once per revolution.
+    The time of flight :math:`t` is therefore only known up to a multiple
+    of :math:`\\tau`,
 
-    # Frame unwrapping
-    out += sc.where(
-        (minimum < event_time_offset) & (event_time_offset < frame_bound),
-        tof_offset,
-        sc.where(
-            (frame_bound < event_time_offset) & (event_time_offset < maximum),
-            tof_offset - tau,
-            sc.scalar(np.nan, unit=unit),
-        ),
+    .. math::
+
+        t \\equiv t_\\text{event} + \\frac{2 \\phi - \\delta}{180^\\circ} \\tau
+        \\pmod \\tau,
+
+    where :math:`\\phi` is the phase between the trigger and the opening of
+    the chopper and :math:`\\delta` is the divergence angle of the pixel.
+    The term with :math:`\\delta` accounts for the chopper opening earlier or
+    later for neutrons that travel at an angle to the center of the beam.
+
+    The multiple of :math:`\\tau` is selected such that the wavelength
+
+    .. math::
+
+        \\lambda = \\frac{h}{m_n} \\frac{t}{L_1 + L_2}
+
+    lies in the frame that starts at ``wavelength_min``.
+    This is the convention of the Amor reduction software ``eos``.
+    '''
+    half_period = (1 / (2 * chopper_frequency)).to(unit='ns')
+    time_per_wavelength = ((L1 + L2) * sc.constants.m_n / sc.constants.h).to(
+        unit='ns/angstrom'
     )
-    # Correction for path length through guides being different
-    # depending on incident angle.
-    out -= (pixel_divergence_angle.to(unit="rad") / (np.pi * sc.units.rad)) * tau
-    out *= (sc.constants.h / sc.constants.m_n) / (L1 + L2)
-    return out.to(unit='angstrom', copy=False)
+    half_turns = (
+        2 * chopper_phase_offset.to(unit='deg') - pixel_divergence_angle.to(unit='deg')
+    ) / sc.scalar(180.0, unit='deg')
+    time_of_flight = (
+        event_time_offset.to(unit='ns', dtype='float64') + half_turns * half_period
+    )
+    frame_start = wavelength_min * time_per_wavelength
+    time_of_flight = (time_of_flight - frame_start) % half_period + frame_start
+    return (time_of_flight / time_per_wavelength).to(unit='angstrom', copy=False)
 
 
 def coordinate_transformation_graph(
     gravity: GravityToggle,
     detector_rotation: DetectorRotation[RunType],
     sample_rotation: SampleRotation[RunType],
-    chopper_phase: ChopperPhase[RunType],
+    chopper_phase_offset: ChopperPhaseOffset[RunType],
     chopper_frequency: ChopperFrequency[RunType],
     chopper_distance: ChopperDistance[RunType],
     chopper_separation: ChopperSeparation[RunType],
     sample_size: SampleSize[RunType],
     beam_size: BeamSize[RunType],
+    wavelength_bins: WavelengthBins,
 ) -> CoordTransformationGraph[RunType]:
-    """Build the coordinate transformation graph for Amor."""
+    """Build the coordinate transformation graph for Amor.
+
+    The wavelength frame starts at the lower edge of the wavelength bins.
+    """
     return {
         "wavelength": wavelength,
         "theta": theta if gravity else theta_no_gravity,
@@ -169,10 +194,11 @@ def coordinate_transformation_graph(
         "L2": lambda distance_in_detector: distance_in_detector + Detector.distance,
         "sample_rotation": lambda: sample_rotation.to(unit='rad'),
         "detector_rotation": lambda: detector_rotation.to(unit='rad'),
-        "chopper_phase": lambda: chopper_phase,
+        "chopper_phase_offset": lambda: chopper_phase_offset,
         "chopper_frequency": lambda: chopper_frequency,
         "chopper_separation": lambda: chopper_separation,
         "chopper_distance": lambda: chopper_distance,
+        "wavelength_min": lambda: wavelength_bins[0],
         "sample_size": lambda: sample_size,
         "beam_size": lambda: beam_size,
     }
@@ -199,8 +225,6 @@ def add_coords(
             "detector_rotation",
             "sample_size",
             "beam_size",
-            "chopper_phase",
-            "chopper_frequency",
             "chopper_separation",
             "chopper_distance",
         ),
