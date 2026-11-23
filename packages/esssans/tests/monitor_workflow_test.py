@@ -4,13 +4,12 @@
 import numpy as np
 import pytest
 import scipp as sc
-import scippnexus as snx
 from ess import sans
 from ess.sans import types as st
 from scipp.testing import assert_allclose, assert_identical
 
 from ess.reduce import unwrap
-from ess.reduce.nexus.types import DiskChoppers, NeXusName, Position
+from ess.reduce.nexus.types import DiskChoppers, NeutronSourcePosition, NeXusName
 from ess.reduce.unwrap.types import KeepEventTimeOffset
 
 
@@ -47,7 +46,7 @@ def workflow(request):
         )
     for run in (st.SampleRun, st.EmptyBeamRun):
         wf[DiskChoppers[run]] = {}
-        wf[Position[snx.NXsource, run]] = sc.vector([0.0, 0.0, 0.0], unit='m')
+        wf[NeutronSourcePosition[run]] = sc.vector([0.0, 0.0, 0.0], unit='m')
         for monitor in (st.Incident, st.Transmission):
             wf[NeXusName[monitor]] = 'monitor'
             wf[unwrap.MonitorLtotal[run, monitor]] = sc.scalar(75.0, unit='m')
