@@ -9,6 +9,7 @@ of reference runs and only use the metadata of the sample run.
 import datetime
 import os
 import platform
+from dataclasses import replace
 from typing import NewType
 
 import numpy as np
@@ -57,6 +58,9 @@ OrsoSample = NewType("OrsoSample", data_source.Sample)
 
 OrsoSampleFilenames = NewType("OrsoSampleFilenames", list[orso_base.File])
 """Collection of filenames used to create the ORSO file"""
+
+OrsoReferenceFilenames = NewType("OrsoReferenceFilenames", list[orso_base.File])
+"""Reference files and their roles in the reduction."""
 
 OrsoCorrectionList = NewType("OrsoCorrectionList", list[str])
 
@@ -110,28 +114,35 @@ def orso_data_files(filename: Filename[SampleRun]) -> OrsoSampleFilenames:
     return [orso_base.File(file=os.path.basename(filename))]
 
 
+def orso_reference_files(
+    reference_filename: Filename[ReferenceRun],
+) -> OrsoReferenceFilenames:
+    """Collect the supermirror reference file used by focused reflectometers."""
+    return OrsoReferenceFilenames(
+        [
+            orso_base.File(
+                file=os.path.basename(reference_filename), comment="supermirror"
+            )
+        ]
+        if reference_filename
+        else []
+    )
+
+
 def build_orso_measurement(
     sample_filenames: OrsoSampleFilenames,
-    reference_filename: Filename[ReferenceRun],
+    reference_filenames: OrsoReferenceFilenames,
     instrument: OrsoInstrument,
 ) -> OrsoMeasurement:
     """Assemble ORSO measurement metadata."""
     # TODO populate timestamp
     #      doesn't work with a local file because we need the timestamp of the original,
     #      SciCat can provide that
-    if reference_filename:
-        additional_files = [
-            orso_base.File(
-                file=os.path.basename(reference_filename), comment="supermirror"
-            )
-        ]
-    else:
-        additional_files = []
     return OrsoMeasurement(
         data_source.Measurement(
             instrument_settings=instrument,
             data_files=sample_filenames,
-            additional_files=additional_files,
+            additional_files=reference_filenames,
         )
     )
 
@@ -197,10 +208,14 @@ def build_orso_iofq_dataset(
     reduction: OrsoReduction,
     corrections: OrsoCorrectionList,
 ) -> OrsoIofQDataset:
-    """Build an ORSO dataset for reduced I-of-Q data and associated metadata."""
+    """Build an ORSO dataset for reduced I-of-Q data and associated metadata.
+
+    Masked bins and rows with non-finite data are omitted. If ``Q_resolution``
+    is absent, the fourth column contains NaN to indicate unknown resolution.
+    """
     header = Orso(
         data_source=data_source,
-        reduction=reduction,
+        reduction=replace(reduction, corrections=list(corrections)),
         columns=[
             Column("Qz", "1/angstrom", "wavevector transfer"),
             Column("R", None, "reflectivity"),
@@ -212,20 +227,28 @@ def build_orso_iofq_dataset(
             ),
         ],
     )
-    iofq = iofq.hist()
+    if iofq.bins is not None:
+        iofq = iofq.hist()
 
-    qz = iofq.coords["Q"].to(unit="1/angstrom", copy=False)
+    qz = iofq.coords["Q"].to(unit="1/angstrom", dtype="float64", copy=False)
     if iofq.coords.is_edges("Q"):
         qz = sc.midpoints(qz)
-    r = sc.values(iofq.data)
-    sr = sc.stddevs(iofq.data)
-    sqz = iofq.coords["Q_resolution"].to(unit="1/angstrom", copy=False)
+    columns = [qz, sc.values(iofq.data), sc.stddevs(iofq.data)]
+    if "Q_resolution" in iofq.coords:
+        columns.append(
+            iofq.coords["Q_resolution"].to(
+                unit="1/angstrom", dtype="float64", copy=False
+            )
+        )
 
-    data = np.column_stack(tuple(map(_extract_values_array, (qz, r, sr, sqz))))
-    data = data[np.isfinite(data).all(axis=-1)]
-    ds = OrsoIofQDataset(OrsoDataset(header, data))
-    ds.info.reduction.corrections = list(corrections)
-    return ds
+    data = np.column_stack([_extract_values_array(column) for column in columns])
+    valid = np.isfinite(data).all(axis=1)
+    for mask in iofq.masks.values():
+        valid &= ~mask.values
+    data = data[valid]
+    if len(columns) == 3:
+        data = np.column_stack((data, np.full(len(data), np.nan)))
+    return OrsoIofQDataset(OrsoDataset(header, data))
 
 
 def _extract_values_array(var: sc.Variable) -> np.ndarray:
@@ -273,6 +296,7 @@ providers = (
     parse_orso_owner,
     parse_orso_sample,
     orso_data_files,
+    orso_reference_files,
     build_orso_instrument,
     build_orso_iofq_dataset,
 )

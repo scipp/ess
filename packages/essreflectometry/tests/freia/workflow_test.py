@@ -1,8 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
+from datetime import UTC, datetime
+
 import numpy as np
 import scipp as sc
 from ess.reduce.nexus.types import GravityVector, Position
+from orsopy import fileio
 from scipp.testing import assert_allclose, assert_identical
 from scippnexus import NXsample, NXsource
 
@@ -15,10 +18,14 @@ from ess.freia.types import (
     UpstreamSlitCenters,
     WavelengthMonitor,
 )
+from ess.reflectometry import orso
 from ess.reflectometry.corrections import footprint_on_sample
 from ess.reflectometry.types import (
+    Beamline,
     BeamSize,
     CoordTransformationGraph,
+    Filename,
+    Measurement,
     QBins,
     ReducibleData,
     ReferenceRun,
@@ -119,6 +126,46 @@ def test_rebinning_integrates_before_dividing():
             dims=['Q'], values=[60.0 / 200.0], variances=[0.3**2 * (1 / 60 + 1 / 200)]
         ),
     )
+
+
+def test_orso_export(tmp_path):
+    wf = _make_workflow(RunNormalization.none)
+    wf[SampleSize[SampleRun]] = sc.scalar(10.0, unit='mm')
+    wf[BeamSize[SampleRun]] = sc.scalar(5.0, unit='mm')
+    wf[Filename[SampleRun]] = '/data/sample.h5'
+    wf[Filename[ReferenceRun]] = '/data/direct-beam.h5'
+    wf[Beamline[SampleRun]] = Beamline(name='FREIA', facility='ESS')
+    wf[Measurement[SampleRun]] = Measurement(
+        title='Silicon sample', start_time=datetime(2026, 1, 1, tzinfo=UTC)
+    )
+    wf[orso.OrsoCreator] = fileio.base.Person(name='Example', affiliation='ESS')
+    wf[orso.OrsoOwner] = wf[orso.OrsoCreator]
+    wf[orso.OrsoSample] = fileio.data_source.Sample(name='Silicon')
+
+    results = wf.compute((orso.OrsoIofQDataset, ReflectivityOverQ))
+    dataset = results[orso.OrsoIofQDataset]
+    reflectivity = results[ReflectivityOverQ]
+    assert dataset.data.shape == (2, 4)
+    np.testing.assert_allclose(dataset.data[:, 0], [1.5, 3.0])
+    np.testing.assert_allclose(dataset.data[:, 1], reflectivity.values[:2])
+    np.testing.assert_allclose(dataset.data[:, 2], np.sqrt(reflectivity.variances[:2]))
+    assert np.isnan(dataset.data[:, 3]).all()
+    source = dataset.info.data_source
+    assert source.experiment.instrument == 'FREIA'
+    assert source.measurement.additional_files == [
+        fileio.File(file='direct-beam.h5', comment='direct beam')
+    ]
+    assert dataset.info.reduction.corrections == [
+        'chopper ToF correction',
+        'footprint correction',
+        'direct beam normalization',
+    ]
+
+    filename = tmp_path / 'freia.ort'
+    dataset.save(filename)
+    (loaded,) = fileio.load_orso(filename)
+    assert loaded.info == dataset.info
+    np.testing.assert_allclose(loaded.data, dataset.data)
 
 
 def test_offspec_workflow_provides_qx_and_qz():
