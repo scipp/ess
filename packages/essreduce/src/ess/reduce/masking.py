@@ -96,7 +96,8 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
                 else:
                     if kind == "by_detector_id":
                         raise ValueError(
-                            f"Duplicate detector ID '{name}' found in multiple files."
+                            "Several mask files give detector id masks "
+                            f"with name {name}"
                         )
                     else:
                         duplicates = set(masks[kind][name]) & set(read_masks)
