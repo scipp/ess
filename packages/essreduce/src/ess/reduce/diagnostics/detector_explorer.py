@@ -11,6 +11,8 @@ import numpy as np
 import plopp as pp
 import scipp as sc
 from matplotlib.backend_bases import MouseEvent
+from matplotlib.gridspec import GridSpec
+from plopp.graphics.bbox import axis_bounds
 
 from ..masking import write_pixel_masks
 
@@ -294,6 +296,23 @@ def _slice_mask(mask: sc.Variable, slices: list[tuple[str, int]]) -> sc.Variable
     return out
 
 
+def _find_limits(figs):
+    vmin = np.inf
+    vmax = -np.inf
+    for f in figs:
+        (a,) = f.view.artists.values()
+        bounds = axis_bounds(keys=('cmin', 'cmax'), x=a.data, scale='linear')
+        vmin = min(vmin, bounds["cmin"])
+        vmax = max(vmax, bounds["cmax"])
+    return vmin, vmax
+
+
+def _update_view(figs):
+    for f in figs:
+        f.view.colormapper.autoscale()
+    figs[0].canvas.draw()
+
+
 class DetectorExplorer(ipw.VBox):
     def __init__(
         self,
@@ -452,13 +471,20 @@ class DetectorExplorer(ipw.VBox):
         ncols = min(3, nkeys)
         nrows = math.ceil(len(self.data) / ncols)
         with plt.ioff():
-            self.main_figure, axs = plt.subplots(
-                nrows=nrows, ncols=ncols, figsize=figsize
-            )
-        if nrows == 1 and ncols == 1:
-            axs = np.array([axs])
-        else:
-            axs = axs.flatten()
+            self.main_figure = plt.figure(layout="constrained", figsize=figsize)
+        gs = GridSpec(
+            ncols=ncols + 1,
+            nrows=nrows,
+            figure=self.main_figure,
+            width_ratios=[1.0] * ncols + [0.06],
+        )
+        axs = np.array(
+            [
+                self.main_figure.add_subplot(gs[i // ncols, i % ncols])
+                for i in range(nrows * ncols)
+            ]
+        )
+        cax = self.main_figure.add_subplot(gs[:, -1])
 
         self.subplots = {}
         self.tab_figs = {}
@@ -468,9 +494,14 @@ class DetectorExplorer(ipw.VBox):
                 self.all_to_plot_nodes[bank],
                 ax=axs[i],
                 title=bank,
-                cbar=True,
+                cbar=i == nkeys - 1,
+                cax=cax,
                 **_kwargs,
             )
+            if i % ncols != 0:
+                axs[i].set_ylabel('')
+            if i < (ncols * (nrows - 1)):
+                axs[i].set_xlabel('')
             axs[i]._bank_explorer_subplot_index = i
             self.tab_figs[bank] = pp.imagefigure(
                 self.to_plot_nodes[bank],
@@ -519,6 +550,9 @@ class DetectorExplorer(ipw.VBox):
         self.color_control.on_limit_change(self.update_color_range)
         self.color_control.on_log_toggle(self.toggle_log)
         self.color_control.on_fit_click(self.fit_cmap_range)
+        vmin, vmax = _find_limits(self.tab_figs.values())
+        self.color_control.vmin.value = str(vmin)
+        self.color_control.vmax.value = str(vmax)
 
         top_controls = [self.mask_control or ipw.Label(value=""), self.color_control]
 
@@ -619,13 +653,15 @@ class DetectorExplorer(ipw.VBox):
         change:
             The change dictionary containing information about the tab change.
         """
+        self.sync_color_range()
         self.update_colormapper_norm()
-        self.update_color_range()
+        _update_view(self.current_figs)
 
         new_tab, old_tab = change["new"], change["old"]
         if 0 in (old_tab, new_tab):
             self.update_slider_inds(old_tab, new_tab)
-        self.mask_control.clear_button.disabled = True if new_tab == 0 else False
+        if self.mask_control is not None:
+            self.mask_control.clear_button.disabled = True if new_tab == 0 else False
 
     def update_colormapper_norm(self) -> None:
         """
@@ -641,10 +677,14 @@ class DetectorExplorer(ipw.VBox):
         """
         Toggle the colormapper normalization between logarithmic and linear.
         """
-        self.reset_cmap_range()
+        self.sync_color_range()
         self.update_colormapper_norm()
 
-    def update_color_range(self, _=None) -> None:
+    def update_color_range(self, _) -> None:
+        self.sync_color_range()
+        _update_view(self.current_figs)
+
+    def sync_color_range(self) -> None:
         """
         Update the color range (vmin and vmax) for all current figures based on the
         values in the color control widgets.
@@ -660,9 +700,9 @@ class DetectorExplorer(ipw.VBox):
                 bounds[key] = None
 
         if self.color_control.log_button.value:
-            for bound in bounds.values():
+            for key, bound in bounds.items():
                 if (bound is not None) and (bound <= 0):
-                    return
+                    bounds[key] = None
 
         figs = self.current_figs
         for f in figs:
@@ -671,32 +711,16 @@ class DetectorExplorer(ipw.VBox):
                     getattr(f.view.colormapper, f"_{bound}").pop('user', None)
                 else:
                     setattr(f.view.colormapper, bound, new)
-            if not self._lock:
-                f.view.colormapper.autoscale()
-        if not self._lock:
-            # If this is the subplots, by taking the first figure and calling draw,
-            # it is actually calling draw on the main figure canvas so it updates all
-            # subplots in one go.
-            figs[0].canvas.draw()
-
-    def reset_cmap_range(self, _=None) -> None:
-        """
-        Reset the color map range (vmin and vmax) to their default state.
-        """
-        self._lock = True
-        self.color_control.vmin.value = ''
-        self.color_control.vmax.value = ''
-        self._lock = False
 
     def fit_cmap_range(self, _=None) -> None:
         """
         Fit the color map range (vmin and vmax) to the data for all current figures.
         """
-        self.reset_cmap_range()
         figs = self.current_figs
-        for f in figs:
-            f.view.colormapper.autoscale()
-        figs[0].canvas.draw()
+        vmin, vmax = _find_limits(figs)
+        self.color_control.vmin.value = str(vmin)
+        self.color_control.vmax.value = str(vmax)
+        _update_view(figs)
 
     def toggle_mask(self, event: MouseEvent) -> None:
         """
