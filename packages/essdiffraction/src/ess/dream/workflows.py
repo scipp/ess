@@ -7,7 +7,6 @@ import sciline
 import scipp as sc
 import scippnexus as snx
 from ess.powder import providers as powder_providers
-from ess.powder import with_pixel_mask_filenames
 from ess.powder.correction import RunNormalization, insert_run_normalization
 from ess.powder.types import (
     AccumulatedProtonCharge,
@@ -19,7 +18,7 @@ from ess.powder.types import (
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     Measurement,
-    PixelMaskFilename,
+    NeutronSourcePosition,
     Position,
     ReducerSoftware,
     SampleRun,
@@ -32,7 +31,6 @@ from ess.powder.types import (
 from scippneutron.metadata import Software
 
 from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
-from ess.reduce.parameter import parameter_mappers
 from ess.reduce.unwrap import GenericUnwrapWorkflow, WavelengthLutMode
 from ess.reduce.workflow import register_workflow
 
@@ -64,8 +62,8 @@ DETECTOR_BANK_SIZES = {
         "wire": 32,
         "module": 5,
         "segment": 6,
-        "strip": 256,
         "counter": 2,
+        "strip": 256,
     },
     "high_resolution_detector": {"strip": 32, "other": -1},
     "sans_detector": {"strip": 32, "other": -1},
@@ -149,8 +147,6 @@ _cif_providers = (
     prepare_reduced_empty_can_subtracted_tof_cif,
 )
 
-parameter_mappers[PixelMaskFilename] = with_pixel_mask_filenames
-
 
 def default_parameters() -> dict:
     """Return the default reduction parameters shared by DREAM powder workflows."""
@@ -224,9 +220,9 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
         Position[snx.NXsample, SampleRun]: sample_position,
         Position[snx.NXsample, VanadiumRun]: sample_position,
         Position[snx.NXsample, EmptyCanRun]: sample_position,
-        Position[snx.NXsource, SampleRun]: source_position,
-        Position[snx.NXsource, VanadiumRun]: source_position,
-        Position[snx.NXsource, EmptyCanRun]: source_position,
+        NeutronSourcePosition[SampleRun]: source_position,
+        NeutronSourcePosition[VanadiumRun]: source_position,
+        NeutronSourcePosition[EmptyCanRun]: source_position,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
         AccumulatedProtonCharge[EmptyCanRun]: charge,

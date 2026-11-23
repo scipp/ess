@@ -5,12 +5,12 @@ from collections.abc import Sequence
 import sciline
 import scipp as sc
 from ess.sans import SansWorkflow
-from ess.sans.io import read_xml_detector_masking
 from ess.sans.parameters import typical_outputs
 from ess.sans.types import (
     Filename,
     Incident,
     MonitorType,
+    NeutronSourcePosition,
     NeXusComponent,
     NeXusMonitorName,
     RunType,
@@ -18,9 +18,7 @@ from ess.sans.types import (
     Transmission,
     TransmissionRun,
 )
-from scippnexus import NXsource
 
-from ess.reduce.nexus.types import Position
 from ess.reduce.workflow import register_workflow
 
 from .general import MonitorSpectrumNumber, default_parameters, get_monitor_data
@@ -56,7 +54,6 @@ def ZoomWorkflow() -> sciline.Pipeline:
         workflow.insert(provider)
     for key, param in default_parameters().items():
         workflow[key] = param
-    workflow.insert(read_xml_detector_masking)
     workflow.typical_outputs = typical_outputs
     return workflow
 
@@ -160,8 +157,8 @@ def ZoomTransmissionFractionWorkflow(runs: Sequence[str]) -> sciline.Pipeline:
         workflow[NeXusComponent[mon_type, TransmissionRun[SampleRun]]] = mapped[
             NeXusComponent[mon_type, TransmissionRun[SampleRun]]
         ].reduce(func=_get_time_dependent_monitor)
-        workflow[Position[NXsource, TransmissionRun[SampleRun]]] = mapped[
-            Position[NXsource, TransmissionRun[SampleRun]]
+        workflow[NeutronSourcePosition[TransmissionRun[SampleRun]]] = mapped[
+            NeutronSourcePosition[TransmissionRun[SampleRun]]
         ].reduce(func=_get_unique_position)
 
     return workflow

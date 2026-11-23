@@ -9,6 +9,7 @@ from ess.spectroscopy.types import (
     EmptyDetector,
     ErrorLimitedLookupTable,
     GravityVector,
+    NeutronSourcePosition,
     Position,
     PulseStrideOffset,
     RawDetector,
@@ -22,7 +23,7 @@ from ess.reduce.unwrap.types import DetectorLtotal
 
 def detector_ltotal(
     sample_data: DataGroupedByRotation[RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> DetectorLtotal[RunType]:

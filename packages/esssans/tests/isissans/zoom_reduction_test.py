@@ -16,6 +16,7 @@ from ess.sans.types import (
     IntensityQxQy,
     NeXusMonitorName,
     NonBackgroundWavelengthRange,
+    PixelMaskFilenames,
     QBins,
     QxBins,
     QyBins,
@@ -69,9 +70,7 @@ def pipeline():
 
 def test_can_create_pipeline(pipeline):
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    pipeline = sans.with_pixel_mask_filenames(
-        pipeline, isis.data.zoom_tutorial_mask_filenames()
-    )
+    pipeline[PixelMaskFilenames] = isis.data.zoom_tutorial_mask_filenames()
     pipeline.get(IntensityQ[SampleRun])
 
 
@@ -83,18 +82,14 @@ def test_can_create_polarization_transmission_pipeline():
 
 def test_pipeline_can_compute_IofQ(pipeline):
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    pipeline = sans.with_pixel_mask_filenames(
-        pipeline, isis.data.zoom_tutorial_mask_filenames()
-    )
+    pipeline[PixelMaskFilenames] = isis.data.zoom_tutorial_mask_filenames()
     result = pipeline.compute(IntensityQ[SampleRun])
     assert result.dims == ('Q',)
 
 
 def test_pipeline_can_compute_IofQxQy(pipeline):
     pipeline[BeamCenter] = sc.vector([0, 0, 0], unit='m')
-    pipeline = sans.with_pixel_mask_filenames(
-        pipeline, isis.data.zoom_tutorial_mask_filenames()
-    )
+    pipeline[PixelMaskFilenames] = isis.data.zoom_tutorial_mask_filenames()
     pipeline[QxBins] = sc.linspace(
         dim='Qx', start=-0.5, stop=0.5, num=101, unit='1/angstrom'
     )

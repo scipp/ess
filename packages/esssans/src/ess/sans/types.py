@@ -12,6 +12,7 @@ from typing import Generic, NewType, TypeVar
 import sciline
 import scipp as sc
 
+from ess.reduce import masking as masking_t
 from ess.reduce.nexus import types as reduce_t
 from ess.reduce.uncertainty import UncertaintyBroadcastMode as _UncertaintyBroadcastMode
 from ess.reduce.unwrap import types as unwrap_t
@@ -24,6 +25,7 @@ Filename = reduce_t.Filename
 GravityVector = reduce_t.GravityVector
 RawMonitor = reduce_t.RawMonitor
 MonitorPositionOffset = reduce_t.MonitorPositionOffset
+NeutronSourcePosition = reduce_t.NeutronSourcePosition
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
 NeXusTransformation = reduce_t.NeXusTransformation
@@ -180,14 +182,8 @@ OutFilename = NewType('OutFilename', str)
 """Filename of the output"""
 
 
-PixelMaskFilename = NewType('PixelMaskFilename', str)
-
-DetectorIDs = NewType('DetectorIDs', sc.Variable)
-"""1-D variable listing all detector IDs."""
-
-MaskedDetectorIDs = NewType('MaskedDetectorIDs', sc.Variable)
-"""1-D variable listing all masked detector IDs."""
-
+PixelMaskFilenames = masking_t.PixelMaskFilenames
+PixelMasks = masking_t.PixelMasks
 
 DetectorMasks = NewType('DetectorMasks', dict[str, sc.Variable])
 """Masks for detector pixels"""

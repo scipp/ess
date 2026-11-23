@@ -49,8 +49,9 @@ from ess.powder.types import (
     ElasticCoordTransformGraph,
     EmptyDetector,
     KeepEvents,
-    MaskedDetectorIDs,
+    NeutronSourcePosition,
     NormalizedDspacing,
+    PixelMasks,
     QDetector,
     SampleRun,
     TofMask,
@@ -155,7 +156,7 @@ def test_modulation_workflows_can_normalize(factory):
     wf[DetectorBank] = DetectorBank.north
     wf[DHKLList] = silicon_peaks_array()
     wf[DspacingBins] = sc.linspace('dspacing', 0.8, 2.2, 31, unit='angstrom')
-    wf[MaskedDetectorIDs] = MaskedDetectorIDs({})
+    wf[PixelMasks] = PixelMasks({})
     wf[KeepEvents[SampleRun]] = KeepEvents[SampleRun](True)
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     wf[TofMask] = None
@@ -229,7 +230,7 @@ def test_beer_workflows_compute_dspacing_bins(make_workflow, mode, pulse_skippin
 
     if pulse_skipping:
         # Use pulse-skipping choppers with the existing detector geometry.
-        source_position = wf.compute(Position[snx.NXsource, SampleRun])
+        source_position = wf.compute(NeutronSourcePosition[SampleRun])
         chopper_mode = ModulationMode.ds0 if mode == 7 else PulseShapingMode.ds1
         wf[DiskChoppers[SampleRun]] = simulation_choppers(chopper_mode, source_position)
 

@@ -10,6 +10,7 @@ from scippneutron.conversion.tof import tof_from_wavelength
 from ess.reduce.nexus.types import (
     EmptyDetector,
     Filename,
+    NeutronSourcePosition,
     NeXusComponent,
     NeXusTransformation,
     Position,
@@ -86,7 +87,7 @@ def assemble_sample_metadata(
 
 
 def assemble_source_metadata(
-    source_position: Position[snx.NXsource, SampleRun],
+    source_position: NeutronSourcePosition[SampleRun],
 ) -> NMXSourceMetadata:
     """Assemble source metadata for NMX reduction workflow."""
     return NMXSourceMetadata(position=source_position)
@@ -150,7 +151,7 @@ def assemble_detector_metadata(
     detector_component: NeXusComponent[snx.NXdetector, SampleRun],
     transformation: NeXusTransformation[snx.NXdetector, SampleRun],
     sample_position: Position[snx.NXsample, SampleRun],
-    source_position: Position[snx.NXsource, SampleRun],
+    source_position: NeutronSourcePosition[SampleRun],
     empty_detector: EmptyDetector[SampleRun],
 ) -> NMXDetectorMetadata:
     """Assemble detector metadata for NMX reduction workflow."""

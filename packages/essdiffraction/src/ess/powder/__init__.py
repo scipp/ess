@@ -18,7 +18,6 @@ from . import (
     workflow,
 )
 from .correction import RunNormalization
-from .masking import with_pixel_mask_filenames
 
 try:
     __version__ = importlib.metadata.version("essdiffraction")
@@ -51,6 +50,5 @@ __all__ = [
     "masking",
     "providers",
     "smoothing",
-    "with_pixel_mask_filenames",
     "workflow",
 ]

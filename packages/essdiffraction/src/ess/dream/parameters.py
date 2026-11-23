@@ -13,7 +13,7 @@ from ess.powder.types import (
     IntensityDspacingTwoTheta,
     MonitorFilename,
     NeXusDetectorName,
-    PixelMaskFilename,
+    PixelMaskFilenames,
     ReducedTofCIF,
     SampleRun,
     UncertaintyBroadcastMode,
@@ -52,8 +52,8 @@ parameter_registry[MonitorFilename[SampleRun]] = FilenameParameter.from_type(
 parameter_registry[MonitorFilename[VanadiumRun]] = FilenameParameter.from_type(
     MonitorFilename[VanadiumRun]
 )
-parameter_registry[PixelMaskFilename] = MultiFilenameParameter.from_type(
-    PixelMaskFilename,
+parameter_registry[PixelMaskFilenames] = MultiFilenameParameter.from_type(
+    PixelMaskFilenames,
 )
 parameter_registry[NeXusDetectorName] = StringParameter.from_type(
     NeXusDetectorName, default="mantle"
