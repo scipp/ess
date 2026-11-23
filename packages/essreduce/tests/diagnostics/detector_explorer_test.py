@@ -20,7 +20,7 @@ def widget_backend():
     plt.switch_backend(backend)
 
 
-def make_banks(sizes=None, count=3):
+def make_banks(sizes=None, count=3) -> sc.DataGroup:
     if sizes is None:
         sizes = {'layer': 2, 'y': 3, 'x': 4}
     return sc.DataGroup(
@@ -34,6 +34,14 @@ def make_banks(sizes=None, count=3):
             for index in range(count)
         }
     )
+
+
+def make_y_masks(sizes) -> sc.Variable:
+    return sc.zeros(sizes={k: sizes[k] for k in ('layer', 'y')}, dtype=bool)
+
+
+def make_x_y_masks(sizes) -> sc.Variable:
+    return sc.zeros(sizes={k: sizes[k] for k in ('layer', 'y', 'x')}, dtype=bool)
 
 
 def test_initial_tabs_and_figures_follow_bank_order():
@@ -139,7 +147,10 @@ def test_single_bank_tab_uses_bank_sliders():
 
 
 def test_single_bank_clear_uses_bank_slider_slice():
-    explorer = DetectorExplorer(make_banks(count=1))
+    data = make_banks(count=1)
+    explorer = DetectorExplorer(
+        data, masks={'bank_0': {'new': make_y_masks(sizes=data['bank_0'].sizes)}}
+    )
     explorer.bank_dim_sliders['bank_0'][0].slider.value = 1
     explorer.masks['bank_0']['new'] = sc.ones(
         sizes=explorer.data['bank_0'].sizes, dtype=bool
@@ -181,11 +192,8 @@ def test_slider_disabled_if_one_bank_does_not_have_slider_dim():
     explorer = DetectorExplorer(data)
 
     assert not explorer.bank_dim_sliders['bank_0'][0].slider.disabled
-    assert not explorer.bank_dim_sliders['bank_0'][0].sum.disabled
     assert explorer.bank_dim_sliders['bank_1'][0].slider.disabled
-    assert explorer.bank_dim_sliders['bank_1'][0].sum.disabled
     assert not explorer.bank_dim_sliders['bank_2'][0].slider.disabled
-    assert not explorer.bank_dim_sliders['bank_2'][0].sum.disabled
 
     # Check that no error is raised when interacting with the sliders
     explorer.bank_dim_sliders['bank_0'][0].slider.value += 1
@@ -286,7 +294,7 @@ def mask_at(sizes, mode, layer, x, y):
 
 
 # ---------------------------------------------------------------------------
-# 2. Slicing and summing
+# 2. Slicing
 # ---------------------------------------------------------------------------
 
 
@@ -303,36 +311,6 @@ def test_slider_displays_selected_slice_including_first_and_last(index, view):
     result = nodes['bank_1']()
     assert_identical(result.data, explorer.data['bank_1']['layer', index].data)
     assert not result.masks
-
-
-@pytest.mark.parametrize('view', ['bank', 'all'])
-def test_sum_displays_reduction_and_disabling_restores_slice(view):
-    explorer = DetectorExplorer(make_banks())
-    name = 'bank_1' if view == 'bank' else 'All'
-    nodes = explorer.to_plot_nodes if view == 'bank' else (explorer.all_to_plot_nodes)
-    select(explorer, name)
-    slider = sliders_of(explorer, name)['layer']
-    slider.slider.value = 1
-
-    slider.sum.value = True
-    assert_identical(nodes['bank_1']().data, explorer.data['bank_1'].sum('layer').data)
-    slider.sum.value = False
-    assert_identical(nodes['bank_1']().data, explorer.data['bank_1']['layer', 1].data)
-
-
-def test_multiple_hidden_dimensions_support_mixed_slicing_and_summing():
-    explorer = DetectorExplorer(make_banks({'time': 3, 'layer': 2, 'y': 3, 'x': 4}))
-    sliders = sliders_of(explorer, 'bank_2')
-    sliders['time'].sum.value = True
-    sliders['layer'].slider.value = 1
-    expected = explorer.data['bank_2']['layer', 1].sum('time')
-    assert_identical(explorer.to_plot_nodes['bank_2']().data, expected.data)
-
-    sliders['time'].sum.value = False
-    sliders['time'].slider.value = 2
-    sliders['layer'].sum.value = True
-    expected = explorer.data['bank_2']['time', 2].sum('layer')
-    assert_identical(explorer.to_plot_nodes['bank_2']().data, expected.data)
 
 
 def test_all_index_beyond_smaller_bank_is_blank_and_unmasked():
@@ -386,23 +364,6 @@ def test_current_bank_and_figures_match_selected_tab():
             assert explorer.current_figs == list(explorer.subplots.values())
         else:
             assert explorer.current_figs == [explorer.tab_figs[name]]
-
-
-@pytest.mark.parametrize(('start', 'end'), TRANSITIONS)
-def test_mixed_sum_settings_transfer(start, end):
-    explorer = DetectorExplorer(make_uneven_banks())
-    select(explorer, start)
-    sliders_of(explorer, start)['time'].sum.value = True
-    sliders_of(explorer, start)['layer'].sum.value = False
-    select(explorer, end)
-    assert sliders_of(explorer, end)['time'].sum.value is True
-    assert sliders_of(explorer, end)['layer'].sum.value is False
-
-    sliders_of(explorer, end)['time'].sum.value = False
-    sliders_of(explorer, end)['layer'].sum.value = True
-    select(explorer, start)
-    assert sliders_of(explorer, start)['time'].sum.value is False
-    assert sliders_of(explorer, start)['layer'].sum.value is True
 
 
 def test_indices_transfer_clamped_when_entering_and_leaving_all():
