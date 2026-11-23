@@ -7,6 +7,7 @@ once. Converting the file content to masks for a detector is a separate step.
 """
 
 from collections.abc import Collection, Mapping, Sequence
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import NewType
@@ -21,14 +22,16 @@ from . import __version__
 PixelMaskFilenames = NewType('PixelMaskFilenames', Sequence[str | Path])
 """Files with pixel masks to apply. Use an empty sequence to apply none."""
 
-PixelMasks = NewType('PixelMasks', dict[str, sc.Variable | sc.DataGroup])
-"""Pixel masks of the whole instrument.
 
-Each value is either a variable of masked detector IDs, named by the mask, or a data
-group of boolean masks, named by detector and then mask. :py:func:`read_pixel_masks`
-provides them from files, and they can also be set directly.
-:py:func:`to_detector_masks` selects the masks for one detector.
-"""
+@dataclass(frozen=True, kw_only=True)
+class PixelMasks:
+    """Pixel masks of the whole instrument."""
+
+    by_bank: dict[str, dict[str, sc.Variable]] = field(default_factory=dict)
+    """Boolean masks by bank name, then mask name."""
+    by_detector_id: dict[str, sc.Variable] = field(default_factory=dict)
+    """Masked detector IDs by mask name (ISIS XML, scipp HDF5). Apply to any bank."""
+
 
 _HDF5_SUFFIXES = ('.h5', '.hdf', '.hdf5', '.nxs')
 
@@ -78,24 +81,28 @@ def read_pixel_masks(filenames: PixelMaskFilenames) -> PixelMasks:
         mask for a detector, or same-named masks in different detectors have different
         dimension labels. One mask would replace the other otherwise.
     """
-    masks = {}
+    masks = {"by_bank": {}, "by_detector_id": {}}
     for filename in map(Path, filenames):
-        for name, content in _read_mask_file(filename).items():
-            if name not in masks:
-                masks[name] = content
-            elif isinstance(content, sc.DataGroup) and isinstance(
-                previous := masks[name], sc.DataGroup
-            ):
-                duplicates = set(previous) & set(content)
-                if duplicates:
-                    raise ValueError(
-                        f"Several mask files give detector masks {sorted(duplicates)} "
-                        f"for detector '{name}'."
-                    )
-                masks[name] = sc.DataGroup({**dict(previous), **dict(content)})
-            else:
-                raise ValueError(f"Several mask files give the mask name '{name}'.")
-    return PixelMasks(masks)
+        masks_from_file = _read_mask_file(filename)
+        for kind in masks.keys():
+            for name, read_masks in getattr(masks_from_file, kind).items():
+                if name not in masks[kind]:
+                    masks[kind][name] = read_masks
+                else:
+                    if kind == "by_detector_id":
+                        raise ValueError(
+                            f"Duplicate detector ID '{name}' found in multiple files."
+                        )
+                    else:
+                        duplicates = set(masks[kind][name]) & set(read_masks)
+                        if duplicates:
+                            raise ValueError(
+                                "Several mask files give detector masks "
+                                f"{sorted(duplicates)} for '{name}'."
+                            )
+                        masks[kind][name].update(read_masks)
+
+    return PixelMasks(**masks)
 
 
 def to_detector_masks(
@@ -132,21 +139,27 @@ def to_detector_masks(
         Name of the coordinate of ``detector`` that holds the detector IDs. Only masks
         given as a list of detector IDs use it.
     """
-    masks = {}
-    for name, content in pixel_masks.items():
-        if isinstance(content, sc.Variable):
-            masks[name] = _mask_from_ids(content, detector.coords[id_coord], name)
-            continue
-        if known_banks is not None and name not in known_banks:
-            raise ValueError(f"Masks have unknown banks: {[name]}.")
-        if bank is None:
-            raise ValueError("Masks are given per bank, but no bank is known.")
-        if name == bank:
-            for mask_name, mask in content.items():
-                if mask_name in masks:
-                    raise ValueError(f"Several masks have the name '{mask_name}'.")
-                masks[mask_name] = _align_bank_mask(mask, detector.sizes, mask_name)
-    return masks
+    if known_banks is not None and (
+        unknown := pixel_masks.by_bank.keys() - set(known_banks)
+    ):
+        raise ValueError(f"Masks have unknown banks: {list(unknown)}.")
+    if pixel_masks.by_bank and bank is None:
+        raise ValueError("Masks are given per bank, but no bank is known.")
+    id_masks = {
+        name: _mask_from_ids(ids, detector.coords[id_coord], name)
+        for name, ids in pixel_masks.by_detector_id.items()
+    }
+    bank_masks = {
+        name: _align_bank_mask(m, detector.sizes, name)
+        for name, m in pixel_masks.by_bank.get(bank, {}).items()
+    }
+    # raise if id_masks and bank_masks share a name
+    if overlap := set(id_masks) & set(bank_masks):
+        raise ValueError(
+            "Masks with the same name were found in both ID and bank masks: "
+            f"{list(overlap)}."
+        )
+    return {**id_masks, **bank_masks}
 
 
 def write_pixel_masks(
@@ -236,7 +249,9 @@ def read_xml_masked_detector_ids(filename: str | Path) -> sc.Variable:
 
 def _read_mask_file(filename: Path) -> dict[str, sc.Variable | sc.DataGroup]:
     if filename.suffix == '.xml':
-        return {filename.name: read_xml_masked_detector_ids(filename)}
+        return PixelMasks(
+            by_detector_id={filename.name: read_xml_masked_detector_ids(filename)}
+        )
     if filename.suffix in _HDF5_SUFFIXES:
         return _read_hdf5(filename)
     raise ValueError(f"Unsupported suffix of mask file '{filename}'.")
@@ -248,10 +263,10 @@ def _read_hdf5(filename: Path) -> dict[str, sc.Variable | sc.DataGroup]:
         if len(file[snx.NXentry]) > 1:
             raise ValueError(f"Mask file '{filename}' has several NXentry groups.")
         if 'entry' in file:
-            return _read_nexus_masks(file['entry'], filename)
+            return PixelMasks(by_bank=_read_nexus_masks(file['entry'], filename))
     ids = sc.io.load_hdf5(filename)
     if isinstance(ids, sc.Variable) and ids.dtype in ('int32', 'int64'):
-        return {filename.name: ids}
+        return PixelMasks(by_detector_id={filename.name: ids})
     raise ValueError(
         f"Mask file '{filename}' holds neither a NeXus entry nor integer detector IDs."
     )
@@ -263,8 +278,8 @@ def _read_nexus_masks(entry: snx.Group, filename: Path) -> dict[str, sc.DataGrou
         if 'masks' not in detector:
             continue
         detector_masks = {}
-        for name, field in detector['masks'].items():
-            detector_masks[name] = _read_bank_mask(field, filename)
+        for name, item in detector['masks'].items():
+            detector_masks[name] = _read_bank_mask(item, filename)
         if detector_masks:
             masks[detector_name] = sc.DataGroup(detector_masks)
     if not masks:
