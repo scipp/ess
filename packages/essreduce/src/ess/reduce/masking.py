@@ -32,6 +32,11 @@ class PixelMasks:
     by_detector_id: dict[str, sc.Variable] = field(default_factory=dict)
     """Masked detector IDs by mask name (ISIS XML, scipp HDF5). Apply to any bank."""
 
+    @property
+    def empty(self) -> bool:
+        """Return True if no masks are defined."""
+        return not self.by_bank and not self.by_detector_id
+
 
 _HDF5_SUFFIXES = ('.h5', '.hdf', '.hdf5', '.nxs')
 
