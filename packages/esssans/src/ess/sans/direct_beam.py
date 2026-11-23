@@ -10,12 +10,12 @@ from .types import (
     BackgroundSubtractedIofQ,
     Denominator,
     DirectBeam,
+    NormalizationWavelengthBins,
     NormalizedQ,
     Numerator,
     ProcessedWavelengthBands,
     SampleRun,
     WavelengthBands,
-    WavelengthBins,
 )
 
 
@@ -101,7 +101,7 @@ def direct_beam(*, workflow: Pipeline, I0: sc.Variable, niter: int = 5) -> list[
     workflow = workflow.copy()
     workflow[DirectBeam] = None
 
-    wavelength_bins = workflow.compute(WavelengthBins)
+    wavelength_bins = workflow.compute(NormalizationWavelengthBins)
     parts = (
         NormalizedQ[SampleRun, Numerator],
         NormalizedQ[SampleRun, Denominator],

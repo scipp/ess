@@ -33,26 +33,12 @@ from ess.reduce.unwrap.types import KeepEventTimeOffset
 sl = pytest.importorskip("sciline")
 
 Monitor0 = NewType("Monitor0", int)
-Monitor1 = NewType("Monitor1", int)
 
 
 def test_GenericUnwrapWorkflow_defaults_to_numba_backend():
     wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
 
     assert wf.compute(FrameUnwrapBackend) == FrameUnwrapBackend.numba
-
-
-def test_monitor_wavelength_bins_are_independent_and_default_to_none():
-    wf = GenericUnwrapWorkflow(
-        run_types=[SampleRun], monitor_types=[Monitor0, Monitor1]
-    )
-    assert wf.compute(unwrap.MonitorWavelengthBins[Monitor0]) is None
-    assert wf.compute(unwrap.MonitorWavelengthBins[Monitor1]) is None
-
-    edges = sc.linspace('wavelength', 1.0, 5.0, 3, unit='angstrom')
-    wf[unwrap.MonitorWavelengthBins[Monitor0]] = edges
-    assert_identical(wf.compute(unwrap.MonitorWavelengthBins[Monitor0]), edges)
-    assert wf.compute(unwrap.MonitorWavelengthBins[Monitor1]) is None
 
 
 @pytest.mark.parametrize('bin_dim', ['wavelength', 'incident_wavelength', 'wavelenght'])
@@ -71,7 +57,7 @@ def test_monitor_wavelength_bins_rebin_histograms(bin_dim):
         'wavelength',
     ).transpose(original.dims)
 
-    wf[unwrap.MonitorWavelengthBins[Monitor0]] = edges
+    wf[unwrap.WavelengthBins[Monitor0]] = edges
     result = wf.compute(target)
 
     sc.testing.assert_allclose(result.data, expected)
@@ -109,7 +95,7 @@ def test_monitor_wavelength_bins_histogram_events(bin_dim):
         ],
         bin_dim,
     )
-    wf[unwrap.MonitorWavelengthBins[Monitor0]] = edges
+    wf[unwrap.WavelengthBins[Monitor0]] = edges
 
     result = wf.compute(target)
 

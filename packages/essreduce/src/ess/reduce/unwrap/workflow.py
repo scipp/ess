@@ -8,7 +8,7 @@ from ..nexus import GenericNeXusWorkflow
 from ..nexus.types import AnyRun
 from . import (
     FrameUnwrapBackend,
-    MonitorWavelengthBins,
+    WavelengthBins,
     WavelengthLutMode,
     lut,
     to_wavelength,
@@ -68,7 +68,7 @@ def GenericUnwrapWorkflow(
     for key, value in lut.default_parameters(wavelength_from=wavelength_from).items():
         wf[key] = value
     wf[FrameUnwrapBackend] = FrameUnwrapBackend.numba
-    wf[MonitorWavelengthBins] = None
+    wf[WavelengthBins] = None
 
     return wf
 

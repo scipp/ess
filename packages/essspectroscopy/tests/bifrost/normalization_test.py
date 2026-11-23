@@ -82,9 +82,7 @@ def test_normalize_monitor(
 def test_event_monitor_requires_bins(
     detector: sc.DataArray, event_monitor: sc.DataArray
 ) -> None:
-    with pytest.raises(
-        ValueError, match=r'MonitorWavelengthBins\[NormalizationMonitor\]'
-    ):
+    with pytest.raises(ValueError, match=r'WavelengthBins\[NormalizationMonitor\]'):
         normalize_by_monitor_and_proton_charge(
             detector=detector,
             monitor=event_monitor,

@@ -35,6 +35,7 @@ from ..sans.types import (
     IntensityQxQy,
     NeXusDetectorName,
     NeXusMonitorName,
+    NormalizationWavelengthBins,
     Numerator,
     PixelMaskFilenames,
     PixelShapePath,
@@ -47,7 +48,6 @@ from ..sans.types import (
     Transmission,
     TransmissionRun,
     UncertaintyBroadcastMode,
-    WavelengthBins,
     WavelengthMonitor,
 )
 
@@ -94,8 +94,13 @@ parameter_registry[Filename[EmptyBeamRun]] = FilenameParameter.from_type(
     Filename[EmptyBeamRun]
 )
 
-parameter_registry[WavelengthBins] = BinEdgesParameter(
-    WavelengthBins, dim='wavelength', start=2, stop=12.0, nbins=300, log=False
+parameter_registry[NormalizationWavelengthBins] = BinEdgesParameter(
+    NormalizationWavelengthBins,
+    dim='wavelength',
+    start=2,
+    stop=12.0,
+    nbins=300,
+    log=False,
 )
 parameter_registry[QBins] = BinEdgesParameter(
     QBins, dim='Q', start=0.1, stop=0.3, nbins=100, log=False

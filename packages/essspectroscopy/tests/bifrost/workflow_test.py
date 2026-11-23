@@ -25,7 +25,6 @@ from ess.spectroscopy.types import (
     Filename,
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
-    MonitorWavelengthBins,
     NeXusDetectorName,
     NormalizationMonitor,
     OverlapMonitor,
@@ -36,6 +35,7 @@ from ess.spectroscopy.types import (
     SampleRun,
     TransformationOverrides,
     UncertaintyBroadcastMode,
+    WavelengthBins,
     WavelengthMonitor,
 )
 
@@ -339,7 +339,7 @@ def test_workflow_can_compute_energy_data_from_coda_file(
         'normalization_monitor': np.inf,
         'elastic_monitor': np.inf,
     }
-    coda_workflow[MonitorWavelengthBins[NormalizationMonitor]] = sc.linspace(
+    coda_workflow[WavelengthBins[NormalizationMonitor]] = sc.linspace(
         'incident_wavelength', 0.0, 20.0, 101, unit='angstrom'
     )
     coda_workflow[ProtonCharge[SampleRun]] = sc.DataArray(sc.scalar(1.0, unit='pC'))

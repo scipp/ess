@@ -22,6 +22,7 @@ from .types import (
     IofQPart,
     MonitorType,
     NonBackgroundWavelengthRange,
+    NormalizationWavelengthBins,
     QBins,
     QDetector,
     QxBins,
@@ -30,14 +31,13 @@ from .types import (
     ReturnEvents,
     RunType,
     SampleRun,
-    WavelengthBins,
     WavelengthMonitor,
 )
 
 
 def preprocess_monitor_data(
     monitor: WavelengthMonitor[RunType, MonitorType],
-    wavelength_bins: WavelengthBins,
+    wavelength_bins: NormalizationWavelengthBins,
     non_background_range: NonBackgroundWavelengthRange,
     uncertainties: UncertaintyBroadcastMode,
 ) -> CorrectedMonitor[RunType, MonitorType]:
@@ -78,7 +78,7 @@ def preprocess_monitor_data(
         )
         background = mask_range(monitor, mask=mask).mean()
 
-    if monitor.bins is not None:
+    if monitor.is_binned:
         monitor = monitor.hist(wavelength=wavelength_bins)
     else:
         monitor = monitor.rebin(wavelength=wavelength_bins)
@@ -96,7 +96,7 @@ def preprocess_monitor_data(
 
 
 def resample_direct_beam(
-    direct_beam: DirectBeam, wavelength_bins: WavelengthBins
+    direct_beam: DirectBeam, wavelength_bins: NormalizationWavelengthBins
 ) -> CleanDirectBeam:
     """
     If the wavelength binning of the direct beam function does not match the requested

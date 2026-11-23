@@ -38,8 +38,8 @@ from .types import (
     LookupTable,
     LookupTableRelativeErrorThreshold,
     MonitorLtotal,
-    MonitorWavelengthBins,
     PulseStrideOffset,
+    WavelengthBins,
     WavelengthDetector,
     WavelengthMonitor,
 )
@@ -592,7 +592,7 @@ def monitor_wavelength_data(
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
     keep_event_time_offset: KeepEventTimeOffset,
-    wavelength_bins: MonitorWavelengthBins[MonitorType],
+    wavelength_bins: WavelengthBins[MonitorType],
     backend: FrameUnwrapBackend = FrameUnwrapBackend.numba,
 ) -> WavelengthMonitor[RunType, MonitorType]:
     """

@@ -20,12 +20,12 @@ from ..types import (
     MonitorCoordTransformGraph,
     MonitorLtotal,
     MonitorType,
-    MonitorWavelengthBins,
     NeXusDetectorName,
     PulseStrideOffset,
     RawDetector,
     RawMonitor,
     RunType,
+    WavelengthBins,
     WavelengthDetector,
     WavelengthMonitor,
 )
@@ -79,7 +79,7 @@ def monitor_wavelength_data(
     lookup: ErrorLimitedLookupTable[RunType, MonitorType],
     ltotal: MonitorLtotal[RunType, MonitorType],
     pulse_stride_offset: PulseStrideOffset,
-    wavelength_bins: MonitorWavelengthBins[MonitorType],
+    wavelength_bins: WavelengthBins[MonitorType],
 ) -> WavelengthMonitor[RunType, MonitorType]:
     """
     Convert the time-of-arrival data to wavelength data using a lookup table.

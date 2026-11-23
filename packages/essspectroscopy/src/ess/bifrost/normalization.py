@@ -65,7 +65,7 @@ def normalize_by_monitor_and_proton_charge(
 
     if monitor.is_binned:
         raise ValueError(
-            'Set MonitorWavelengthBins[NormalizationMonitor] to histogram the event '
+            'Set WavelengthBins[NormalizationMonitor] to histogram the event '
             'monitor before normalization.'
         )
 
