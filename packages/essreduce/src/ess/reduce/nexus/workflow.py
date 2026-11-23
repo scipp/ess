@@ -234,6 +234,10 @@ def nx_class_for_crystal() -> NeXusClass[snx.NXcrystal]:
     return NeXusClass[snx.NXcrystal](snx.NXcrystal)
 
 
+def nx_class_for_mirror() -> NeXusClass[snx.NXmirror]:
+    return NeXusClass[snx.NXmirror](snx.NXmirror)
+
+
 def load_nexus_component(
     location: NeXusComponentLocationSpec[Component, RunType],
     nx_class: NeXusClass[Component],
@@ -991,6 +995,7 @@ _common_providers = (
     load_multi_nexus_data,
     data_by_name,
     nx_class_for_crystal,
+    nx_class_for_mirror,
     nx_class_for_detector,
     nx_class_for_monitor,
     nx_class_for_moderator,
