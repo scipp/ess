@@ -124,7 +124,7 @@ def _make_slicer(
     horizontal_sizes = {dim: data.sizes[dim] for dim in horizontal}
     vertical_sizes = {dim: data.sizes[dim] for dim in vertical}
     slicer.ax.format_coord = _coord_formatter(
-        plotted_node, horizontal_sizes, vertical_sizes, h, v
+        plotted_node, horizontal_sizes, vertical_sizes, h, v, data.coords
     )
     if separators is not None:
         plotted = plotted_node()
@@ -219,6 +219,7 @@ def _coord_formatter(
     vertical: tuple[str, ...],
     horizontal_dim: str,
     vertical_dim: str,
+    coords: Mapping[str, sc.Variable],
 ):
     n_vertical, n_horizontal = (
         reduce(lambda a, b: a * b, dims)
@@ -235,9 +236,21 @@ def _coord_formatter(
         j = _bin_index(data.coords[vertical_dim], n_vertical, y)
         if i is None or j is None:
             return ""
-        indices = ", ".join(f"{dim}: {index}" for dim, index in unwrap(i, j).items())
+
+        coord_values = (
+            (
+                dim,
+                coord[index]
+                if (coord := coords.get(dim, None)) is not None
+                else sc.index(index),
+            )
+            for dim, index in unwrap(i, j).items()
+        )
+        formatted_coords = ", ".join(
+            f"{dim}: {scalar_to_string(value)}" for dim, value in coord_values
+        )
         value = scalar_to_string(data.data[vertical_dim, j][horizontal_dim, i])
-        return f"{{{indices}}}: {value}"
+        return f"{{{formatted_coords}}}: {value}"
 
     return format_coord
 

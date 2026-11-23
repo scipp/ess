@@ -126,7 +126,7 @@ def test_format_coord_handles_descending_coord() -> None:
     [figure] = figures_of(viewer)[1].children
     result = figure.ax.format_coord(7.2, 31.0)
     expected_value = da["b", 1]["c", 1]["d", 2].value
-    assert result == f"{{b: 1, d: 2, c: 1}}: {expected_value} counts"
+    assert result == f"{{b: 1, d: 2, c: 30.0 m}}: {expected_value} counts"
 
 
 @pytest.mark.usefixtures("widget_backend")
