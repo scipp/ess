@@ -300,7 +300,9 @@ class MergePlan:
         Write the merged file.
 
         The file is written under a temporary name next to ``output`` and renamed
-        when complete, so ``output`` never holds a partial file.
+        when complete, so ``output`` never holds a partial file. A partial file
+        would look valid: it starts as a copy of the first run's file, so
+        reducing it would silently give wrong results.
 
         Parameters
         ----------

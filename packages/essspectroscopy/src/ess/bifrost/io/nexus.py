@@ -13,7 +13,6 @@ from ess.spectroscopy.types import (
     Analyzers,
     ElasticMonitor,
     InstrumentAngle,
-    NeXusClass,
     NeXusComponent,
     NeXusComponentLocationSpec,
     NeXusData,
@@ -92,12 +91,6 @@ def _find_transformation_in_chain(
         f'detector tank angle {path}. The chain contains '
         f'{list(chain.transformations)}'
     ) from None
-
-
-# See https://github.com/scipp/ess/issues/120
-def moderator_class_for_source() -> NeXusClass[snx.NXsource]:
-    """Select NXmoderator as the source."""
-    return NeXusClass[snx.NXsource](snx.NXmoderator)
 
 
 def load_bifrost_analyzers(
@@ -356,7 +349,6 @@ providers = (
     load_bifrost_analyzers,
     load_bifrost_analyzer_for_detector,
     load_sample_angle,
-    moderator_class_for_source,
 )
 
 parameters = {

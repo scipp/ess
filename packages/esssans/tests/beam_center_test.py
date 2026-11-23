@@ -7,7 +7,13 @@ import scipp as sc
 import scippnexus as snx
 from ess.sans.common import gravity_vector
 from ess.sans.conversions import sans_elastic
-from ess.sans.types import BeamCenter, CorrectForGravity, Position, SampleRun
+from ess.sans.types import (
+    BeamCenter,
+    CorrectForGravity,
+    NeutronSourcePosition,
+    Position,
+    SampleRun,
+)
 
 SAMPLE_POSITION = sc.vector([0.0, 0.0, 0.0], unit='m')
 # Offset of the source from the sample, i.e., the nominal beam is along Z.
@@ -26,7 +32,7 @@ def make_graph(
     return sans_elastic(
         CorrectForGravity(correct_for_gravity),
         sample_position=Position[snx.NXsample, SampleRun](sample_position),
-        source_position=Position[snx.NXsource, SampleRun](
+        source_position=NeutronSourcePosition[SampleRun](
             sample_position + SOURCE_OFFSET
         ),
         beam_center=BeamCenter(beam_center),

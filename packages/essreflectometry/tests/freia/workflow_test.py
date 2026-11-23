@@ -6,7 +6,7 @@ import scipp as sc
 from ess.reduce.nexus.types import GravityVector, Position
 from ess.reduce.unwrap.types import KeepEventTimeOffset
 from scipp.testing import assert_allclose, assert_identical
-from scippnexus import NXsample, NXsource
+from scippnexus import NXsample
 
 from ess.freia import FreiaOffspecWorkflow, FreiaWorkflow
 from ess.freia.corrections import RunNormalization
@@ -23,6 +23,7 @@ from ess.reflectometry.corrections import footprint_on_sample
 from ess.reflectometry.types import (
     BeamSize,
     CorrectedDetector,
+    NeutronSourcePosition,
     QBins,
     ReducibleData,
     ReferenceRun,
@@ -62,7 +63,7 @@ def _make_workflow(run_norm):
         wf[WavelengthDetector[run]] = events
         wf[Position[NXsample, run]] = sc.vector([0.0, 0.0, 0.0], unit='m')
         # Source position must not set the angular reference frame.
-        wf[Position[NXsource, run]] = sc.vector([3.0, 2.0, -20.0], unit='m')
+        wf[NeutronSourcePosition[run]] = sc.vector([3.0, 2.0, -20.0], unit='m')
         wf[SampleSurfaceNormal[run]] = sc.vector(
             [0.0, np.cos(np.deg2rad(10.0)), -np.sin(np.deg2rad(10.0))]
         )
@@ -149,7 +150,7 @@ def test_offspec_workflow_supports_scalar_incidence_for_a_single_beam(method):
     assert wf.compute(KeepEventTimeOffset) is False
     wf[GravityVector] = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
     wf[Position[NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
-    wf[Position[NXsource, SampleRun]] = sc.vector([0.0, 0.0, -10.0], unit='m')
+    wf[NeutronSourcePosition[SampleRun]] = sc.vector([0.0, 0.0, -10.0], unit='m')
     # Horizontal incidence onto a sample tilted by 30 degrees.
     wf[SampleSurfaceNormal[SampleRun]] = sc.vector([0.0, np.sqrt(3) / 2, -0.5])
     wf[UpstreamSlitCenters[SampleRun]] = {'beam': sc.vector([0.0, 0.0, -2.0], unit='m')}
@@ -209,7 +210,7 @@ def test_offspec_workflow_assigns_incidence_with_independent_methods(method, exp
     assert wf.compute(KeepEventTimeOffset) is (method == 'shutter_logs')
     wf[GravityVector] = sc.vector([0.0, 0.0, 0.0], unit='m/s^2')
     wf[Position[NXsample, SampleRun]] = sc.vector([0.0, 0.0, 0.0], unit='m')
-    wf[Position[NXsource, SampleRun]] = sc.vector([0.0, 0.0, -29.0], unit='m')
+    wf[NeutronSourcePosition[SampleRun]] = sc.vector([0.0, 0.0, -29.0], unit='m')
     wf[SampleSurfaceNormal[SampleRun]] = sc.vector([0.0, 1.0, 0.0])
     angles = {'a': 0.3, 'b': 1.0}
     wf[UpstreamSlitCenters[SampleRun]] = {

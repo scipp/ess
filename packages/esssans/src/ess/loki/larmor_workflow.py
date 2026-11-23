@@ -24,8 +24,10 @@ from ..sans.types import (
     GravityVector,
     Incident,
     MonitorType,
+    NeutronSourcePosition,
     NeXusDetectorName,
     NeXusMonitorName,
+    NeXusTransformation,
     NonBackgroundWavelengthRange,
     PixelMaskFilenames,
     PixelShapePath,
@@ -106,7 +108,7 @@ def larmor_detector_coord_transform_graph(
     correct_for_gravity: CorrectForGravity,
     *,
     sample_position: Position[snx.NXsample, RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     beam_center: BeamCenter,
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:
@@ -121,7 +123,7 @@ def larmor_detector_coord_transform_graph(
 
 
 def larmor_monitor_coord_transform_graph(
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
 ) -> MonitorCoordTransformGraph[RunType]:
     """
     Generate a coordinate transformation graph for SANS monitor (no scattering).
@@ -135,11 +137,21 @@ def larmor_monitor_coord_transform_graph(
     )
 
 
+def larmor_compute_neutron_source_position(
+    transformation: NeXusTransformation[snx.NXsource, RunType],
+) -> NeutronSourcePosition[RunType]:
+    """Compute the neutron source position from the NXmoderator."""
+    from ess.reduce.nexus.workflow import compute_position
+
+    return compute_position(transformation)
+
+
 loki_at_larmor_providers = (
     larmor_data_to_wavelength,
     larmor_monitor_to_wavelength,
     larmor_detector_coord_transform_graph,
     larmor_monitor_coord_transform_graph,
+    larmor_compute_neutron_source_position,
 )
 
 
