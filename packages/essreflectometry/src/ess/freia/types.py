@@ -35,20 +35,27 @@ class SampleSurfaceNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
     """Normal pointing out of the reflecting surface, in global coordinates."""
 
 
-class MirrorPosition(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """A point on the inversion mirror's reflecting plane, in global coordinates."""
-
-
-class MirrorNormal(sciline.Scope[RunType, sc.Variable], sc.Variable):
-    """Normal to the inversion mirror in global coordinates; either sign is valid."""
-
-
 @dataclass(frozen=True)
 class MirrorGeometry[RunType]:
-    """A point on the mirror plane and its unit normal, in laboratory coordinates."""
+    """A point on the mirror plane and its unit normal, in laboratory coordinates.
+
+    Both inputs must be finite scalar vectors. The normal is normalized on
+    construction and must be nonzero; either sign is valid.
+    """
 
     position: sc.Variable
     normal: sc.Variable
+
+    def __post_init__(self) -> None:
+        for name, vector in [('position', self.position), ('normal', self.normal)]:
+            if vector.ndim != 0 or vector.dtype != sc.DType.vector3:
+                raise ValueError(f'Mirror {name} must be a scalar vector.')
+            if not sc.isfinite(vector).value:
+                raise ValueError(f'Mirror {name} must be finite.')
+        length = sc.norm(self.normal)
+        if not sc.isfinite(length).value or length.value == 0:
+            raise ValueError('Mirror normal must have a finite, nonzero norm.')
+        object.__setattr__(self, 'normal', self.normal / length)
 
 
 class UpstreamSlitCenters(sciline.Scope[RunType, dict], dict):

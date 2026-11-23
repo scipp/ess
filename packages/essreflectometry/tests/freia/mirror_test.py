@@ -12,9 +12,9 @@ from ess.reduce.nexus.types import (
     GravityVector,
     NeutronSourcePosition,
     NeXusName,
+    NeXusTransformation,
     Position,
     RawDetector,
-    TimeInterval,
 )
 from ess.reduce.unwrap.types import DetectorLtotal, ErrorLimitedLookupTable
 from scipp.testing import assert_allclose, assert_identical
@@ -29,8 +29,6 @@ from ess.freia.types import (
     DetectorRegionOfInterest,
     DownstreamSlitCenters,
     MirrorGeometry,
-    MirrorNormal,
-    MirrorPosition,
     SampleSurfaceNormal,
     ShutterPositions,
     ShutterStatusLogs,
@@ -51,8 +49,10 @@ from ess.reflectometry.types import (
 
 
 def _set_mirror(workflow, run=SampleRun):
-    workflow[MirrorPosition[run]] = sc.vector([0.0, 0.0, -1.0], unit='m')
-    workflow[MirrorNormal[run]] = sc.vector([0.0, 2.0, 0.0])
+    workflow[MirrorGeometry[run] | None] = MirrorGeometry(
+        position=sc.vector([0.0, 0.0, -1.0], unit='m'),
+        normal=sc.vector([0.0, 2.0, 0.0]),
+    )
 
 
 @pytest.mark.parametrize(
@@ -88,7 +88,7 @@ def test_reflected_path_through_tilted_translated_mirror(normal_scale):
     reflected = reflected_upstream_position(
         upstream,
         downstream.to(unit='cm'),
-        mirror_geometry(position.to(unit='mm'), normal_scale * normal),
+        MirrorGeometry(position.to(unit='mm'), normal_scale * normal),
     )
     expected = position + rotation * sc.vector([0.0, -2.0, -2.0], unit='m')
     assert_allclose(reflected, expected)
@@ -99,13 +99,40 @@ def test_reflected_path_through_tilted_translated_mirror(normal_scale):
 
 @pytest.mark.parametrize('normal', [[0, 0, 0], [0, np.nan, 0], [0, np.inf, 0]])
 def test_invalid_mirror_normal_is_rejected(normal):
-    with pytest.raises(ValueError, match='MirrorNormal'):
-        mirror_geometry(sc.vector([0.0, 0.0, 0.0], unit='m'), sc.vector(normal))
+    with pytest.raises(ValueError, match='Mirror normal'):
+        MirrorGeometry(sc.vector([0.0, 0.0, 0.0], unit='m'), sc.vector(normal))
+
+
+@pytest.mark.parametrize('field', ['position', 'normal'])
+@pytest.mark.parametrize(
+    'invalid',
+    [
+        sc.scalar(1.0),
+        sc.vectors(dims=['point'], values=[[0.0, 1.0, 0.0]]),
+        sc.vector([0.0, np.nan, 0.0]),
+        sc.vector([0.0, np.inf, 0.0]),
+    ],
+)
+def test_mirror_geometry_rejects_invalid_vectors(field, invalid):
+    args = {
+        'position': sc.vector([0.0, 0.0, 0.0], unit='m'),
+        'normal': sc.vector([0.0, 1.0, 0.0]),
+    }
+    args[field] = invalid
+    with pytest.raises(ValueError, match=f'Mirror {field}'):
+        MirrorGeometry(**args)
+
+
+def test_mirror_geometry_normalizes_without_modifying_input():
+    normal = sc.vector([0.0, -2.0, 0.0])
+    geometry = MirrorGeometry(sc.vector([0.0, 0.0, 0.0], unit='m'), normal)
+    assert_identical(geometry.normal, sc.vector([0.0, -1.0, 0.0]))
+    assert_identical(normal, sc.vector([0.0, -2.0, 0.0]))
 
 
 @pytest.mark.parametrize('side', [-1, 1])
 def test_reflected_upstream_position_supports_either_mirror_side_and_mixed_units(side):
-    mirror = mirror_geometry(
+    mirror = MirrorGeometry(
         sc.vector([0.0, 0.0, -1.0], unit='m'), sc.vector([0.0, 1.0, 0.0])
     )
     assert_allclose(
@@ -185,39 +212,25 @@ def test_nexus_mirror_loads_translation_and_local_minus_z_normal(tmp_path, name,
     wf[Filename[run]] = filename
     if name != 'inversion_mirror':
         wf[NeXusName[snx.NXmirror]] = name
-    assert_allclose(
-        wf.compute(MirrorPosition[run]), sc.vector([0.0, -0.3, -1.0], unit='m')
-    )
+    geometry = wf.compute(MirrorGeometry[run] | None)
+    assert_allclose(geometry.position, sc.vector([0.0, -0.3, -1.0], unit='m'))
     angle = np.deg2rad(80.0)
     assert_allclose(
-        wf.compute(MirrorNormal[run]), sc.vector([0.0, np.sin(angle), -np.cos(angle)])
-    )
-    wf.compute(MirrorGeometry[run] | None)
-
-
-def test_moving_mirror_requires_a_selected_pose(tmp_path):
-    filename = tmp_path / 'mirror.nxs'
-    _write_mirror(filename, angles=(80.0, 81.0))
-    wf = freia.FreiaWorkflow(inversion=True)
-    wf[Filename[SampleRun]] = filename
-    with pytest.raises(ValueError, match='time-dependent'):
-        wf.compute(MirrorNormal[SampleRun])
-    wf[TimeInterval[SampleRun]] = TimeInterval(slice(0, 1))
-    assert_allclose(
-        wf.compute(MirrorNormal[SampleRun]),
-        sc.vector([0.0, np.sin(np.deg2rad(80)), -np.cos(np.deg2rad(80))]),
+        geometry.normal,
+        sc.vector([0.0, np.sin(angle), -np.cos(angle)]),
     )
 
 
-def test_missing_mirror_fails_with_manual_geometry_instructions(tmp_path):
-    filename = tmp_path / 'mirror.nxs'
-    _write_mirror(filename, name='another_mirror')
-    wf = freia.FreiaWorkflow(inversion=True)
-    wf[Filename[SampleRun]] = filename
-    with pytest.raises(ValueError, match='supply MirrorPosition and MirrorNormal'):
-        wf.compute(MirrorGeometry[SampleRun] | None)
-    _set_mirror(wf)
-    wf.compute(MirrorGeometry[SampleRun] | None)
+def test_mirror_geometry_normal_is_independent_of_position():
+    rotation = sc.spatial.rotations_from_rotvecs(
+        sc.vector([80.0, 0.0, 0.0], unit='deg')
+    )
+    translation = sc.spatial.translation(value=[0.0, -0.3, -1.0], unit='m')
+    position = sc.vector([1.0, 2.0, 3.0], unit='m')
+    geometry = mirror_geometry(position, NeXusTransformation(translation * rotation))
+    assert_identical(geometry.position, position)
+    angle = np.deg2rad(80.0)
+    assert_allclose(geometry.normal, sc.vector([0.0, np.sin(angle), -np.cos(angle)]))
 
 
 def _set_run(workflow, run, *, direct=False, supply_wavelength=True):

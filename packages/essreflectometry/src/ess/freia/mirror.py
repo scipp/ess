@@ -4,23 +4,16 @@
 
 import scipp as sc
 import scippnexus as snx
-from ess.reduce import nexus
 from ess.reduce.nexus.types import (
     EmptyDetector,
     NeutronSourcePosition,
-    NeXusComponentLocationSpec,
-    NeXusFileSpec,
-    NeXusName,
     NeXusTransformation,
     Position,
-    TimeInterval,
-    TransformationTimeFilter,
 )
-from ess.reduce.nexus.workflow import reject_time_dependent_transform, to_transformation
 from ess.reduce.unwrap.types import DetectorLtotal
 
 from ..reflectometry.types import RunType
-from .types import MirrorGeometry, MirrorNormal, MirrorPosition
+from .types import MirrorGeometry
 
 
 def no_mirror() -> MirrorGeometry[RunType] | None:
@@ -28,74 +21,20 @@ def no_mirror() -> MirrorGeometry[RunType] | None:
     return None
 
 
-def mirror_time_filter() -> TransformationTimeFilter[snx.NXmirror, RunType]:
-    """Require one mirror pose, unless the caller explicitly selects a pose."""
-    return reject_time_dependent_transform
-
-
-def load_mirror_transformation(
-    file_spec: NeXusFileSpec[RunType],
-    name: NeXusName[snx.NXmirror],
-    interval: TimeInterval[RunType],
-    time_filter: TransformationTimeFilter[
-        snx.NXmirror, RunType
-    ] = reject_time_dependent_transform,
-) -> NeXusTransformation[snx.NXmirror, RunType]:
-    """Load the mirror's transformation for the selected time interval.
-
-    The component name is a provisional convention, configurable through
-    ``NeXusName[NXmirror]``. No pose is inferred if the component is missing.
-    """
-    location = NeXusComponentLocationSpec[snx.NXmirror, RunType](
-        filename=file_spec.value, component_name=name
-    )
-    try:
-        component = nexus.load_component(location, nx_class=snx.NXmirror)
-    except (KeyError, ValueError) as error:
-        raise ValueError(
-            f"Cannot load inversion mirror {name!r}. Set NeXusName[NXmirror] "
-            "to its component name, or supply MirrorPosition and MirrorNormal "
-            "for this run."
-        ) from error
-    if 'depends_on' not in component:
-        raise ValueError("The inversion NXmirror requires a depends_on chain.")
-    return to_transformation(component['depends_on'], interval, time_filter)
-
-
-def mirror_position(
-    transformation: NeXusTransformation[snx.NXmirror, RunType],
-) -> MirrorPosition[RunType]:
-    """Transform the NXmirror origin to a point on the reflecting plane."""
-    transform = transformation.value
-    if isinstance(transform, sc.DataArray):
-        raise ValueError('The inversion mirror must have a static pose for the run.')
-    return MirrorPosition[RunType](transform * sc.vector([0.0, 0.0, 0.0], unit='m'))
-
-
-def mirror_normal(
-    transformation: NeXusTransformation[snx.NXmirror, RunType],
-) -> MirrorNormal[RunType]:
-    """Rotate local -z, the NXmirror reference-plane normal, to the lab frame."""
-    origin = mirror_position(transformation)
-    tip = transformation.value * sc.vector([0.0, 0.0, -1.0], unit='m')
-    normal = tip - origin
-    return MirrorNormal[RunType](normal / sc.norm(normal))
-
-
 def mirror_geometry(
-    position: MirrorPosition[RunType],
-    normal: MirrorNormal[RunType],
+    position: Position[snx.NXmirror, RunType],
+    transformation: NeXusTransformation[snx.NXmirror, RunType],
 ) -> MirrorGeometry[RunType] | None:
-    """Validate the mirror position and normalize its surface normal."""
-    for name, vector in [('MirrorPosition', position), ('MirrorNormal', normal)]:
-        if vector.ndim != 0 or vector.dtype != sc.DType.vector3:
-            raise ValueError(f'{name} must be a scalar vector.')
-        if not sc.isfinite(vector).value:
-            raise ValueError(f'{name} must be finite.')
-    length = sc.norm(normal)
-    if not sc.isfinite(length).value or length.value == 0:
-        raise ValueError('MirrorNormal must have a finite, nonzero norm.')
-    return MirrorGeometry(position=position, normal=normal / length)
+    """Build the mirror plane from its shared NeXus position and transformation.
+
+    Rotate local -z, the NXmirror reference-plane normal, to the lab frame.
+    Subtract the transformed origin to cancel translation, independently of
+    any override of the component position.
+    """
+    transform = transformation.value
+    origin = transform * sc.vector([0.0, 0.0, 0.0], unit='m')
+    tip = transform * sc.vector([0.0, 0.0, -1.0], unit='m')
+    return MirrorGeometry(position=position, normal=tip - origin)
 
 
 def reflected_upstream_position(
@@ -165,10 +104,6 @@ def detector_ltotal_with_mirror(
 
 
 providers = (
-    mirror_time_filter,
-    load_mirror_transformation,
-    mirror_position,
-    mirror_normal,
     mirror_geometry,
     detector_ltotal_with_mirror,
 )

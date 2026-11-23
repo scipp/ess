@@ -107,7 +107,7 @@ def FreiaMcStasWorkflow(
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     inversion:
         Use the inversion-mirror geometry described in :func:`FreiaWorkflow`.
-        Supply ``MirrorPosition`` and ``MirrorNormal`` for both runs; the McStas
+        Supply ``MirrorGeometry[RunType] | None`` for both runs; the McStas
         adapter does not infer a mirror from guide walls. The loaded sample
         normal is reversed to describe reflection from the underside.
     """
@@ -162,7 +162,13 @@ def FreiaWorkflow(
         Enable a planar mirror upstream of the sample for illumination from
         below. Load its pose from the NXmirror named ``inversion_mirror``
         (configurable with ``NeXusName[NXmirror]``), or supply per-run
-        ``MirrorPosition`` and ``MirrorNormal`` in laboratory coordinates.
+        ``MirrorGeometry[RunType] | None`` in laboratory coordinates, e.g.::
+
+            workflow[MirrorGeometry[SampleRun] | None] = MirrorGeometry(
+                position, normal
+            )
+
+        The geometry validates its inputs and normalizes the normal vector.
         The detector flight path includes the mirror reflection. Supply the
         actual sample/detector positions and a ``SampleSurfaceNormal`` pointing
         out of the underside (normally -y) for both runs. The reference must be
