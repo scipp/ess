@@ -18,6 +18,7 @@ from ess.powder.types import (
     LookupTableFilename,
     LookupTableRelativeErrorThreshold,
     Measurement,
+    NeutronSourcePosition,
     Position,
     ReducerSoftware,
     SampleRun,
@@ -61,8 +62,8 @@ DETECTOR_BANK_SIZES = {
         "wire": 32,
         "module": 5,
         "segment": 6,
-        "strip": 256,
         "counter": 2,
+        "strip": 256,
     },
     "high_resolution_detector": {"strip": 32, "other": -1},
     "sans_detector": {"strip": 32, "other": -1},
@@ -96,7 +97,7 @@ def _collect_reducer_software() -> ReducerSoftware:
 
 
 def DreamWorkflow(
-    wavelength_from: WavelengthLutMode = "file", **kwargs
+    wavelength_from: WavelengthLutMode = "analytical", **kwargs
 ) -> sciline.Pipeline:
     """
     Dream generic workflow with default parameters.
@@ -219,9 +220,9 @@ def DreamGeant4Workflow(*, run_norm: RunNormalization, **kwargs) -> sciline.Pipe
         Position[snx.NXsample, SampleRun]: sample_position,
         Position[snx.NXsample, VanadiumRun]: sample_position,
         Position[snx.NXsample, EmptyCanRun]: sample_position,
-        Position[snx.NXsource, SampleRun]: source_position,
-        Position[snx.NXsource, VanadiumRun]: source_position,
-        Position[snx.NXsource, EmptyCanRun]: source_position,
+        NeutronSourcePosition[SampleRun]: source_position,
+        NeutronSourcePosition[VanadiumRun]: source_position,
+        NeutronSourcePosition[EmptyCanRun]: source_position,
         AccumulatedProtonCharge[SampleRun]: charge,
         AccumulatedProtonCharge[VanadiumRun]: charge,
         AccumulatedProtonCharge[EmptyCanRun]: charge,

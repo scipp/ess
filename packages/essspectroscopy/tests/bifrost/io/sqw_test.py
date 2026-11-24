@@ -74,7 +74,7 @@ def sample() -> sqw.SqwIXSample:
 def common_workflow(
     detector_names: list[str], sample: sqw.SqwIXSample
 ) -> sciline.Pipeline:
-    wf = bifrost.BifrostSimulationWorkflow()
+    wf = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
 
     wf[NeXusDetectorNames] = detector_names
     wf[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()

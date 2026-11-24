@@ -138,7 +138,7 @@ to setup a complete workflow.
 
 
 def SansWorkflow(
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
 ) -> sciline.Pipeline:
     """
     Common base for SANS workflows.

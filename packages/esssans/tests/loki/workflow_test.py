@@ -18,6 +18,7 @@ from ess.sans.types import (
     Filename,
     IntensityQ,
     LookupTableFilename,
+    NeutronSourcePosition,
     NeXusDetectorName,
     PixelMaskFilenames,
     QBins,
@@ -27,11 +28,10 @@ from ess.sans.types import (
     UncertaintyBroadcastMode,
     WavelengthDetector,
 )
-from sciline import UnsatisfiedRequirement
 
 from ess.reduce import workflow
 from ess.reduce.masking import write_pixel_masks
-from ess.reduce.nexus.types import DiskChoppers, Position
+from ess.reduce.nexus.types import DiskChoppers
 from ess.reduce.unwrap import LookupTable, LtotalRange, SourceBounds
 
 
@@ -97,34 +97,27 @@ def test_loki_larmor_workflow_compute_with_single_pixel_mask(larmor_workflow):
 
 
 @pytest.mark.parametrize("bank", list(range(9)))
-def test_loki_workflow_needs_lookup_table(loki_workflow, bank):
-    wf = loki_workflow()
+@pytest.mark.parametrize("wavelength_from", ["analytical", "file"])
+def test_loki_workflow_can_compute_wavelength(loki_workflow, bank, wavelength_from):
+    wf = loki_workflow(wavelength_from=wavelength_from)
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    with pytest.raises(UnsatisfiedRequirement, match='LookupTableFilename'):
-        wf.compute(WavelengthDetector[SampleRun])
-
-
-@pytest.mark.parametrize("bank", list(range(9)))
-def test_loki_workflow_can_compute_wavelength(loki_workflow, bank):
-    wf = loki_workflow()
-    # For simplicity, insert a fake beam center instead of computing it.
-    wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
-    wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
+    if wavelength_from == "file":
+        wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
     result = wf.compute(WavelengthDetector[SampleRun])
     assert 'wavelength' in result.bins.coords
 
 
 @pytest.mark.parametrize("bank", list(range(9)))
-def test_loki_workflow_can_compute_iofq(loki_workflow, bank):
-    wf = loki_workflow()
+@pytest.mark.parametrize("wavelength_from", ["analytical", "file"])
+def test_loki_workflow_can_compute_iofq(loki_workflow, bank, wavelength_from):
+    wf = loki_workflow(wavelength_from=wavelength_from)
     # For simplicity, insert a fake beam center instead of computing it.
     wf[BeamCenter] = sc.vector([0.0, 0.0, 0.0], unit='m')
     wf[NeXusDetectorName] = f'loki_detector_{bank}'
-    wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
-
+    if wavelength_from == "file":
+        wf[LookupTableFilename] = loki.data.loki_lookup_table_no_choppers()
     result = wf.compute(BackgroundSubtractedIofQ)
     assert result.dims == ('Q',)
     assert sc.identical(result.coords['Q'], wf.compute(QBins))
@@ -135,7 +128,7 @@ def test_loki_analytical_lookup_table_matches_simulated_source_pulse():
     # choppers, 1-10 Angstrom so that frames do not overlap. See scipp/ess#770.
     wf = loki.LokiWorkflow(wavelength_from='analytical')
     wf[DiskChoppers[SampleRun]] = {}
-    wf[Position[snx.NXsource, SampleRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[NeutronSourcePosition[SampleRun]] = sc.vector([0, 0, 0], unit='m')
     wf[LtotalRange[SampleRun, snx.NXdetector]] = (
         sc.scalar(28.2, unit='m'),
         sc.scalar(29.2, unit='m'),

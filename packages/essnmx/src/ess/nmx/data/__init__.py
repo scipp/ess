@@ -4,7 +4,7 @@ import pathlib
 
 from ess.reduce.data import Entry, make_registry
 
-_version = "1"
+_version = "3"
 
 __all__ = [
     "get_path",
@@ -27,7 +27,7 @@ _registry = make_registry(
             alg="md5", chk="c8259ae2e605560ab88959e7109613b6", extractor="untar"
         ),
         "small_nmx_nexus.hdf.zip": Entry(
-            alg="md5", chk="96877cddc9f6392c96890069657710ca", extractor="unzip"
+            alg="md5", chk="82b39cf86da766316383b0e10bcf3cf3", extractor="unzip"
         ),
         "essnmx-reduced-26.4.1.hdf.zip": Entry(
             alg="md5", chk="f7877cce3967dec0aa51461c1100824d", extractor="unzip"
@@ -37,6 +37,9 @@ _registry = make_registry(
         ),
         "essnmx-reduced-26.10.0.hdf.zip": Entry(
             alg="md5", chk="e2126e8f89174fb2391810514b6e0c41", extractor="unzip"
+        ),
+        "essnmx-reduced-26.11.0.hdf.zip": Entry(
+            alg="md5", chk="d9984c36cb72cedb9f539daa6a8ef0d2", extractor="unzip"
         ),
     },
 )
@@ -95,4 +98,4 @@ def get_small_nmx_reduced() -> pathlib.Path:
     of essnmx-reduce changed.
     """
 
-    return get_path("essnmx-reduced-26.10.0.hdf.zip")
+    return get_path("essnmx-reduced-26.11.0.hdf.zip")

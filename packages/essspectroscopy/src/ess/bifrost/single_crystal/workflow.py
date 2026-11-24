@@ -38,10 +38,18 @@ _SIMULATION_PROVIDERS = (
 )
 
 
-def BifrostBraggPeakMonitorWorkflow() -> sciline.Pipeline:
+def BifrostBraggPeakMonitorWorkflow(**kwargs) -> sciline.Pipeline:
+    """Data reduction workflow for BIFROST's Bragg peak monitor.
+
+    Parameters
+    ----------
+    kwargs:
+        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.
+    """
     workflow = TofWorkflow(
         run_types=(SampleRun,),
         monitor_types=(ElasticMonitor, NormalizationMonitor),
+        **kwargs,
     )
     workflow[NeXusName[ElasticMonitor]] = 'elastic_monitor'
     for provider in _PROVIDERS:
@@ -51,10 +59,18 @@ def BifrostBraggPeakMonitorWorkflow() -> sciline.Pipeline:
     return workflow
 
 
-def BifrostSimulationBraggPeakMonitorWorkflow() -> sciline.Pipeline:
+def BifrostSimulationBraggPeakMonitorWorkflow(**kwargs) -> sciline.Pipeline:
+    """Data reduction workflow for simulated BIFROST Bragg peak monitor.
+
+    Parameters
+    ----------
+    kwargs:
+        Additional keyword arguments passed to the underlying :func:`TofWorkflow`.
+    """
     workflow = TofWorkflow(
         run_types=(SampleRun,),
         monitor_types=(ElasticMonitor, NormalizationMonitor),
+        **kwargs,
     )
     workflow[NeXusName[ElasticMonitor]] = 'elastic_monitor'
     for provider in _SIMULATION_PROVIDERS:
