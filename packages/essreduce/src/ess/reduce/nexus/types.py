@@ -311,12 +311,18 @@ class TransformationTimeFilter(Generic[Component, RunType]):
 
 
 class TransformationOverrides(
-    sciline.Scope[Component, RunType, dict[str, sc.Variable]], dict[str, sc.Variable]
+    sciline.Scope[Component, RunType, dict[str, sc.Variable | sc.DataArray]],
+    dict[str, sc.Variable | sc.DataArray],
 ):
     """Values replacing entries of the transformation chains of a component type.
 
     Maps the absolute NeXus path of a chain entry to the value to use for it, e.g.,
     ``{'/entry/instrument/detector_carriage/value': sc.scalar(1.5, unit='m')}``.
+
+    Values are used as given. For a time-dependent value, pass a
+    :class:`scipp.DataArray` with a ``time`` coordinate, like the NXlog it replaces.
+    A :class:`scipp.Variable` with a ``time`` dimension has no timestamps and gives
+    an array of positions without a ``time`` coordinate.
 
     Components load their own copies of shared chain entries, so a motor that moves
     several component types must be set once per type.
