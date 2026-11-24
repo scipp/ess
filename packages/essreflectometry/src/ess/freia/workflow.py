@@ -5,13 +5,12 @@ from typing import Literal
 
 import sciline
 import scipp as sc
-from ess.reduce.nexus.types import DetectorBankSizes, NeXusName
+from ess.reduce.nexus.types import DetectorBankSizes
 from ess.reduce.uncertainty import UncertaintyBroadcastMode
 from ess.reduce.unwrap import WavelengthLutMode
 from ess.reduce.unwrap.types import KeepEventTimeOffset
 from ess.reduce.unwrap.workflow import GenericUnwrapWorkflow
 from ess.reduce.workflow import register_workflow
-from scippnexus import NXmirror
 
 from ..reflectometry import providers as reflectometry_providers
 from ..reflectometry.types import (
@@ -107,7 +106,6 @@ def FreiaMcStasWorkflow(
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     inversion:
         Use the inversion-mirror geometry described in :func:`FreiaWorkflow`.
-        Supply ``MirrorGeometry[RunType]`` for both runs.
     """
     workflow = FreiaWorkflow(
         run_norm=run_norm,
@@ -156,19 +154,10 @@ def FreiaWorkflow(
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     inversion:
         Enable a planar mirror upstream of the sample for illumination from
-        below. Load its pose from the NXmirror named ``inversion_mirror``
-        (configurable with ``NeXusName[NXmirror]``), or supply per-run
-        ``MirrorGeometry[RunType]`` in laboratory coordinates, e.g.::
-
-            workflow[MirrorGeometry[SampleRun]] = MirrorGeometry(
-                position, normal
-            )
-
-        The geometry validates its inputs and normalizes the normal vector.
-        The detector flight path includes the mirror reflection. Supply the
-        actual sample/detector positions and a ``SampleSurfaceNormal`` pointing
-        out of the underside (normally -y) for both runs. The reference must be
-        measured with the same mirror configuration.
+        below. Load its pose from the NXmirror selected by
+        ``NeXusName[NXmirror]``.
+        Measure the reference with the same mirror setting so that the mirror's
+        wavelength-dependent reflectivity cancels in the normalization.
     """
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun, ReferenceRun],
@@ -189,8 +178,7 @@ def FreiaWorkflow(
     for name, param in default_parameters().items():
         workflow[name] = param
     if inversion:
-        _insert_mirror(workflow)
-        for provider in conversions.mirror_providers:
+        for provider in (*mirror.providers, *conversions.mirror_providers):
             workflow.insert(provider)
     return workflow
 
@@ -238,10 +226,8 @@ def FreiaOffspecWorkflow(
     inversion:
         Enable the mirror geometry described in :func:`FreiaWorkflow`.
         The mirror is between the slit assemblies, after the shutters and
-        before the sample. Supply all positions in laboratory coordinates.
+        before the sample.
         Incident angles and shutter crossing times include the reflection.
-        Use the actual sample position and a surface normal pointing out of
-        the underside.
     """
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun],
@@ -279,14 +265,9 @@ def FreiaOffspecWorkflow(
     workflow[KeepEventTimeOffset] = incident_beam_from == 'shutter_logs'
     workflow[DetectorRegionOfInterest[SampleRun]] = {}
     if inversion:
-        _insert_mirror(workflow)
+        for provider in mirror.providers:
+            workflow.insert(provider)
     return workflow
-
-
-def _insert_mirror(workflow: sciline.Pipeline) -> None:
-    for provider in mirror.providers:
-        workflow.insert(provider)
-    workflow[NeXusName[NXmirror]] = 'inversion_mirror'
 
 
 @register_workflow

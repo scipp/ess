@@ -205,8 +205,7 @@ def test_nexus_mirror_loads_translation_and_local_minus_z_normal(tmp_path, name,
     _write_mirror(filename, name=name)
     wf = freia.FreiaWorkflow(inversion=True)
     wf[Filename[run]] = filename
-    if name != 'inversion_mirror':
-        wf[NeXusName[snx.NXmirror]] = name
+    wf[NeXusName[snx.NXmirror]] = name
     geometry = wf.compute(MirrorGeometry[run])
     assert_allclose(geometry.position, sc.vector([0.0, -0.3, -1.0], unit='m'))
     angle = np.deg2rad(80.0)
