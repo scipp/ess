@@ -1,4 +1,4 @@
-# Reduction of current Amor files
+# Amor data reduction
 
 {func}`ess.amor.AmorWorkflow` reduces the files that Amor writes since 2026.
 The reference measurement that the sample is normalized by is either a reflection from a supermirror or a measurement of the direct beam.
@@ -7,7 +7,8 @@ The keyword argument `normalized_by` selects which:
 | `normalized_by` | `Filename[ReferenceRun]` is | Treatment of the reference |
 |---|---|---|
 | `'supermirror'` (default) | a reflection from a supermirror | footprint correction, division by the reflectivity of the supermirror |
-| `'direct_beam'` | the beam without a sample, with sample stage and detector at zero angle | mirrored along the scattering direction of the detector |
+| `'direct_beam'` | the unrestricted beam without a sample | mirrored along the scattering direction of the detector |
+| `'direct_beam_with_aperture'` | the direct beam restricted to the sample footprint at the reference angle | footprint correction at the reference angle, then mirroring |
 
 Files recorded until 2025 have a different layout and are reduced with {func}`ess.amor.AmorWorkflow2025`, see the other pages of this section.
 
@@ -51,17 +52,20 @@ reflectivity.hist().plot(norm='log')
 The reflectivity is on an absolute scale.
 Both measurements are divided by the proton charge on the target of SINQ, so they do not need to be of the same length.
 
-The footprint correction is applied to the sample measurement only, because the direct beam does not pass a sample.
-It assumes that the direct beam was measured with the full beam.
-If the direct beam was instead measured through an opening that matches the footprint of the sample, the correction must not be applied.
-Set `BeamSize[SampleRun]` to a value much smaller than the sample, the correction is then equal to one:
+With `normalized_by='direct_beam'`, the reference contains the full beam, so only the sample receives a footprint correction.
+For a direct beam measured through an aperture matching the sample footprint, use:
 
 ```python
-workflow[BeamSize[SampleRun]] = sc.scalar(1e-6, unit='mm')
+workflow = amor.AmorWorkflow(normalized_by='direct_beam_with_aperture')
 ```
 
-Do not make `SampleSize[SampleRun]` large instead.
-The size of the sample also enters the resolution in $Q$, which would become far too wide.
+Set the filenames and other parameters as in the example above.
+This mode applies the footprint correction to both measurements, each at its own incidence angles.
+The reference uses the transmitted-ray geometry and the sample uses the reflected-ray geometry.
+The corrections cancel when the accepted fractions of the beam match; measurements at different angles generally need different corrections.
+`SampleRotation[ReferenceRun]` must describe the orientation whose footprint the aperture represents; by default it is loaded from the reference file, including `SampleRotationOffset[ReferenceRun]`.
+`SampleSize[ReferenceRun]` defaults to the sample size of the sample run and can be overridden if the aperture represents a different size.
+Keep `SampleSize` and `BeamSize` at their physical values; the sample size also determines the resolution in $Q$.
 
 ## Normalization by a supermirror
 
@@ -101,12 +105,16 @@ The angles of the first run are used to assign $Q$ to the reference.
    The sample angle $\mu$ and the detector angle $\nu$ are read from `entry1/measurement_configuration`, the distance, speed and separation of the choppers from the chopper group of the instrument.
 2. **Wavelength.**
    The chopper lets neutrons pass every half revolution, but the events are recorded relative to a trigger that occurs once per revolution.
-   The time of flight is therefore known up to a multiple of half a revolution.
-   The multiple is selected such that the wavelength lies in the frame that starts at the lower edge of `WavelengthBins`, see {func}`ess.amor.conversions.wavelength`.
+   After correcting the trigger phase and the pixel-dependent opening time, arrival times are folded into the first pulse period, see {func}`ess.amor.conversions.wavelength`.
+   `WavelengthBins` selects and histograms wavelengths without changing their assignment.
+   The wavelength range must fit within one pulse period at every detector pixel: approximately 0–13.9 Å at 450 rpm with the default geometry.
+   A range outside that interval raises an error.
+   This assumes the instrument suppresses frame overlap; selecting a wavelength range cannot distinguish slow neutrons from earlier pulses.
 3. **Angle and momentum transfer.**
    The reflection angle of each event follows from $\mu$, $\nu$ and the position of the pixel, with a correction for the drop of the neutron under gravity.
 4. **Masks.**
    Events outside `YIndexLimits`, `ZIndexLimits`, `BeamDivergenceLimits` and the range of `WavelengthBins` are masked.
+   Direct-beam divergence is expressed in the reflected beam's convention so the selection is applied to reference events before mirroring.
 5. **Proton charge.**
    The proton current at the start of every chopper revolution is multiplied by the duration of the revolution.
    Revolutions where the current is below `ProtonCurrentThreshold` are discarded, together with their events.
@@ -133,13 +141,15 @@ The angles of the first run are used to assign $Q$ to the reference.
 
 ## Relation to the Amor reduction software
 
-With `normalized_by='direct_beam'` the workflow follows the direct-beam normalization of the Amor reduction software `eos`: the same convention for the wavelength frame, the same selection of chopper revolutions by proton current, and the same mirroring of the direct beam.
+With `normalized_by='direct_beam'` the workflow uses the selection of chopper revolutions by proton current and the mirroring of the direct beam from the Amor reduction software `eos`.
 The integrated proton charge is identical to the monitor value of `eos`.
 
-The following choices differ, and lead to reflectivity curves that agree within the counting statistics but are not identical:
+The following choices differ:
 
 - `eos` histograms the sample over detector row and wavelength and assigns $Q$ to the cells of the histogram.
   The workflow assigns $Q$ to each event of the sample.
 - The path length inside the detector, the value of $h / m_n$ and the form of the gravity correction are those of {mod}`ess.amor.geometry` and {mod}`ess.amor.conversions`.
-- `eos` does not apply a footprint correction.
+- This workflow folds corrected times into the first pulse period; `eos` 3.3.4 uses a fixed 2.5 Å cutoff when merging frames in its reflectivity workflow.
+- This workflow masks direct-beam divergence per event, using transmitted-ray angles.
+- The direct-beam mode in `eos` does not apply a footprint correction.
 - The uncertainties are propagated from the counts of the sample measurement.
