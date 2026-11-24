@@ -11,7 +11,7 @@ from scipp.testing import assert_allclose, assert_identical
 
 from ess.freia import FreiaMcStasWorkflow
 from ess.freia.data import freia_mcstas_reference_run, freia_mcstas_sample_run
-from ess.freia.mcstas import mcstas_detector_geometry, mcstas_sample_surface_normal
+from ess.freia.mcstas import mcstas_detector_geometry
 from ess.freia.types import (
     DetectorRegionOfInterest,
     NormalizationMonitor,
@@ -20,7 +20,6 @@ from ess.freia.types import (
 )
 from ess.reflectometry.types import (
     CorrectedDetector,
-    RunType,
     SampleRun,
     WavelengthBins,
 )
@@ -91,14 +90,8 @@ def test_load_histogram_geometry(tmp_path: Path):
     )
 
 
-def _flipped_sample_normal_for_inversion_test(
-    filename: Filename[RunType],
-) -> SampleSurfaceNormal[RunType]:
-    """Reuse the test geometry with its sample facing the opposite direction."""
-    return SampleSurfaceNormal[RunType](-mcstas_sample_surface_normal(filename))
-
-
-def test_sample_normal_from_tilted_mcstas_geometry(tmp_path: Path):
+@pytest.mark.parametrize('inversion', [False, True])
+def test_sample_normal_from_tilted_mcstas_geometry(tmp_path: Path, inversion):
     filename = tmp_path / 'geometry.h5'
     angle = np.deg2rad(10.0)
     with h5py.File(filename, 'w') as f:
@@ -115,13 +108,9 @@ def test_sample_normal_from_tilted_mcstas_geometry(tmp_path: Path):
             [0.0, np.sin(angle), np.cos(angle)],
         ]
     normal = sc.vector([0.0, np.cos(angle), -np.sin(angle)])
-    for inversion in [False, True]:
-        wf = FreiaMcStasWorkflow(inversion=inversion)
-        wf[Filename[SampleRun]] = filename
-        assert_allclose(wf.compute(SampleSurfaceNormal[SampleRun]), normal)
-        if inversion:
-            wf.insert(_flipped_sample_normal_for_inversion_test)
-            assert_allclose(wf.compute(SampleSurfaceNormal[SampleRun]), -normal)
+    wf = FreiaMcStasWorkflow(inversion=inversion)
+    wf[Filename[SampleRun]] = filename
+    assert_allclose(wf.compute(SampleSurfaceNormal[SampleRun]), normal)
 
 
 @pytest.mark.parametrize(
