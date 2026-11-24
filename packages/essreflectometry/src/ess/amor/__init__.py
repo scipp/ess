@@ -89,7 +89,10 @@ def default_parameters() -> dict:
 
 
 def AmorWorkflow(
-    *, normalized_by: Literal['supermirror', 'direct_beam'] = 'supermirror'
+    *,
+    normalized_by: Literal[
+        'supermirror', 'direct_beam', 'direct_beam_with_aperture'
+    ] = 'supermirror',
 ) -> sciline.Pipeline:
     """
     Workflow with default parameters for the Amor PSI instrument.
@@ -104,9 +107,12 @@ def AmorWorkflow(
 
         - ``'supermirror'``: a reflection from a supermirror. The reference is
           divided by the reflectivity of the supermirror.
-        - ``'direct_beam'``: the beam without a sample, with the sample stage
-          and the detector at zero angle. This is the normalization used by the
-          Amor reduction software ``eos``.
+        - ``'direct_beam'``: the unrestricted beam without a sample. Only the
+          sample measurement receives a footprint correction.
+        - ``'direct_beam_with_aperture'``: the direct beam through an aperture
+          matching the sample footprint at the reference measurement's angle.
+          Both measurements receive a footprint correction at their own angles.
+          ``SampleSize[ReferenceRun]`` defaults to ``SampleSize[SampleRun]``.
 
     Returns
     -------
@@ -116,14 +122,20 @@ def AmorWorkflow(
     match normalized_by:
         case 'supermirror':
             reference_providers = normalization.supermirror_providers
-        case 'direct_beam':
+        case 'direct_beam' | 'direct_beam_with_aperture':
             reference_providers = (
                 *normalization.direct_beam_providers,
+                conversions.direct_beam_coordinate_transformation_graph,
                 orso.orso_amor_direct_beam_corrections,
             )
+            if normalized_by == 'direct_beam_with_aperture':
+                reference_providers += (
+                    normalization.reduce_direct_beam_reference_with_aperture,
+                )
         case _:
             raise ValueError(
-                "normalized_by must be 'supermirror' or 'direct_beam', "
+                "normalized_by must be 'supermirror', 'direct_beam', "
+                "or 'direct_beam_with_aperture', "
                 f"got {normalized_by!r}"
             )
     workflow = sciline.Pipeline(

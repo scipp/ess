@@ -11,7 +11,6 @@ from ..reflectometry.supermirror import (
     supermirror_reflectivity,
 )
 from ..reflectometry.types import (
-    BeamDivergenceLimits,
     CoordTransformationGraph,
     DetectorSpatialResolution,
     ProtonCharge,
@@ -24,7 +23,7 @@ from ..reflectometry.types import (
     SampleSize,
     WavelengthBins,
 )
-from .conversions import divergence_angle, theta
+from .conversions import theta
 from .corrections import normalize_by_proton_charge
 from .resolution import (
     angular_resolution,
@@ -79,7 +78,7 @@ def evaluate_reference_at_sample_coords(
     reference: ReducedReference,
     sample: ReducibleData[SampleRun],
     detector_spatial_resolution: DetectorSpatialResolution,
-    graph: CoordTransformationGraph[ReferenceRun],
+    graph: CoordTransformationGraph[SampleRun],
 ) -> Reference:
     """
     Adds a :math:`Q` and :math:`Q`-resolution coordinate to each bin of the ideal
@@ -193,43 +192,26 @@ def reduce_direct_beam_reference(
     As in the Amor reduction software ``eos``, this is done by reversing
     the order of the detector rows.
     """
-    # The divergence limits select a part of the reflected beam.
-    # The matching part of the direct beam is selected after mirroring,
-    # in evaluate_direct_beam_at_sample_coords.
-    reference = reference.bins.drop_masks('divergence_too_large')
     intensity = reduce_from_events_to_lz(
         normalize_by_proton_charge(reference, proton_charge), wavelength_bins
     ).hist()
     return ReducedReference(_mirror_detector_rows(intensity))
 
 
-def evaluate_direct_beam_at_sample_coords(
-    reference: ReducedReference,
-    sample: ReducibleData[SampleRun],
-    detector_spatial_resolution: DetectorSpatialResolution,
-    graph: CoordTransformationGraph[ReferenceRun],
-    divergence_limits: BeamDivergenceLimits,
-) -> Reference:
+def reduce_direct_beam_reference_with_aperture(
+    reference: ReducibleData[ReferenceRun],
+    proton_charge: ProtonCharge[ReferenceRun],
+    wavelength_bins: WavelengthBins,
+) -> ReducedReference:
     """
-    Adds the coordinates of the sample measurement to the intensity distribution
-    of the direct beam, see :func:`evaluate_reference_at_sample_coords`,
-    and masks the part that is outside the divergence limits.
+    Correct a direct beam restricted to the sample footprint at the reference angle.
 
-    The limits are applied to the angles of the sample measurement,
-    such that the same part of the detector is used for the sample
-    and for the reference.
+    The reference graph supplies the incidence angle of the transmitted rays.
+    Apply the footprint correction at that angle before mirroring the intensity
+    and assigning the sample measurement's scattering coordinates.
     """
-    ref = evaluate_reference_at_sample_coords(
-        reference, sample, detector_spatial_resolution, graph
-    )
-    divergence = divergence_angle(
-        ref.coords['theta'],
-        ref.coords['sample_rotation'],
-        ref.coords['detector_rotation'],
-    )
-    low, high = (limit.to(unit=divergence.unit) for limit in divergence_limits)
-    return Reference(
-        ref.assign_masks(divergence_too_large=(divergence < low) | (divergence > high))
+    return reduce_direct_beam_reference(
+        correct_by_footprint(reference), proton_charge, wavelength_bins
     )
 
 
@@ -241,14 +223,9 @@ def normalize_sample_for_direct_beam_reference(
     Applies the footprint correction and the normalization by proton charge
     to the sample measurement.
 
-    The direct beam does not pass a sample, so the footprint correction is not
-    applied to the reference.
-
-    The correction is equal to one if ``BeamSize[SampleRun]`` is much smaller
-    than the sample. Use that, and not a large ``SampleSize[SampleRun]``, for a
-    direct beam that was measured through an opening that matches the footprint
-    of the sample: the size of the sample also enters the resolution in
-    :math:`Q`.
+    For an unrestricted direct beam, only the sample needs this correction.
+    For a reference measured through a footprint aperture, the reference is
+    corrected separately at its own incidence angles.
     """
     return Sample(
         normalize_by_proton_charge(correct_by_footprint(sample), proton_charge)
@@ -275,7 +252,6 @@ supermirror_providers = (
 
 direct_beam_providers = (
     reduce_direct_beam_reference,
-    evaluate_direct_beam_at_sample_coords,
     normalize_sample_for_direct_beam_reference,
     sample_size_for_direct_beam,
 )

@@ -68,6 +68,8 @@ def mask_events_where_proton_current_is_too_low(
         mode='previous',
         fill_value=sc.scalar(float('nan'), unit=proton_charge.unit),
     )
+    # The lookup fills masked charge entries with NaN. Transfer the existing
+    # pulse selection to events; the current threshold is only evaluated above.
     return da.bins.assign_masks(
         proton_current_too_low=sc.isnan(charge_at(da.bins.coords['event_time_zero']))
     )

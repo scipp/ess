@@ -10,8 +10,9 @@ from ..reflectometry.types import (
     YIndexLimits,
     ZIndexLimits,
 )
-from .conversions import add_coords, add_masks
+from .conversions import add_coords, add_masks, validate_wavelength_range
 from .corrections import mask_events_where_proton_current_is_too_low
+from .types import ChopperFrequency
 
 
 def add_coords_and_masks(
@@ -22,6 +23,7 @@ def add_coords_and_masks(
     wbins: WavelengthBins,
     proton_charge: ProtonCharge[RunType],
     graph: CoordTransformationGraph[RunType],
+    chopper_frequency: ChopperFrequency[RunType],
 ) -> ReducibleData[RunType]:
     """
     Computes the coordinates and masks that are
@@ -33,6 +35,9 @@ def add_coords_and_masks(
     The events of several runs can therefore be combined before normalization.
     """
     da = add_coords(da, graph)
+    validate_wavelength_range(
+        wbins, da.coords['L1'], da.coords['L2'], chopper_frequency
+    )
     da = add_masks(da, ylim, zlims, bdlim, wbins)
     da = mask_events_where_proton_current_is_too_low(da, proton_charge)
     return ReducibleData[RunType](da)

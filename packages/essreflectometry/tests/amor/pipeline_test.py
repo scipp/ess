@@ -17,6 +17,7 @@ from ess.amor.types import (
 )
 from ess.reflectometry import orso, supermirror
 from ess.reflectometry.types import (
+    BeamDivergenceLimits,
     BeamSize,
     DetectorRotation,
     Filename,
@@ -72,6 +73,12 @@ def _set_parameters(workflow: sciline.Pipeline) -> sciline.Pipeline:
     )
     workflow[YIndexLimits] = sc.scalar(11), sc.scalar(41)
     workflow[ZIndexLimits] = sc.scalar(0), sc.scalar(447)
+    # These files populate rows uniformly, without simulating ray transport.
+    # Exercise divergence selection separately with analytic incident rays.
+    workflow[BeamDivergenceLimits] = (
+        sc.scalar(-2.0, unit='deg'),
+        sc.scalar(2.0, unit='deg'),
+    )
     workflow[QBins] = sc.geomspace('Q', 0.005, 0.2, 21, unit='1/angstrom')
     workflow[orso.OrsoCreator] = orso.OrsoCreator(
         fileio.base.Person(
@@ -151,8 +158,8 @@ def test_sample_rotation_offset(direct_beam_workflow: sciline.Pipeline):
     )
 
 
-@pytest.mark.parametrize('wavelength_min', [2.5, 3.0, 6.0])
-def test_wavelength_is_recovered_from_event_time(wavelength_min: float):
+@pytest.mark.parametrize('pulse', [0, 1])
+def test_wavelength_is_recovered_from_event_time(pulse: int):
     chopper_frequency = sc.scalar(7.5, unit='Hz')
     chopper_phase_offset = sc.scalar(-5.0, unit='deg')
     pixel_divergence_angle = sc.array(dims=['pixel'], values=[-0.01, 0.0, 0.01, 0.0])
@@ -160,7 +167,7 @@ def test_wavelength_is_recovered_from_event_time(wavelength_min: float):
     L1 = sc.scalar(14842.0, unit='mm')
     L2 = sc.array(dims=['pixel'], values=[4000.0, 4010.0, 4100.0, 4124.0], unit='mm')
     # The frame is slightly shorter than 14 angstrom
-    true_wavelength = sc.scalar(wavelength_min, unit='angstrom') + sc.array(
+    true_wavelength = sc.array(
         dims=['pixel'], values=[0.01, 3.0, 9.0, 13.5], unit='angstrom'
     )
 
@@ -174,7 +181,9 @@ def test_wavelength_is_recovered_from_event_time(wavelength_min: float):
         / sc.scalar(180.0, unit='deg')
     )
     # Events are recorded relative to the trigger, once per revolution
-    event_time_offset = (time_of_flight - delay) % (2 * half_period)
+    event_time_offset = (time_of_flight - delay + pulse * half_period) % (
+        2 * half_period
+    )
 
     result = wavelength(
         event_time_offset=event_time_offset,
@@ -183,18 +192,41 @@ def test_wavelength_is_recovered_from_event_time(wavelength_min: float):
         L2=L2,
         chopper_frequency=chopper_frequency,
         chopper_phase_offset=chopper_phase_offset,
-        wavelength_min=sc.scalar(wavelength_min, unit='angstrom'),
     )
     assert_allclose(result, true_wavelength)
 
 
-def test_wavelength_frame_starts_at_first_wavelength_bin(
+@pytest.mark.parametrize('run_type', [SampleRun, ReferenceRun])
+def test_wavelength_is_independent_of_histogram_edges(
     direct_beam_workflow: sciline.Pipeline,
+    run_type: type,
 ):
-    events = direct_beam_workflow.compute(ReducibleData[SampleRun])
+    events = direct_beam_workflow.compute(ReducibleData[run_type])
     wavelengths = events.bins.coords['wavelength'].bins.constituents['data']
-    assert wavelengths.min() >= sc.scalar(3.0, unit='angstrom')
-    assert wavelengths.max() < sc.scalar(17.0, unit='angstrom')
+    direct_beam_workflow[WavelengthBins] = sc.linspace(
+        'wavelength', 4.0, 12.5, 20, unit='angstrom'
+    )
+    rebinned = direct_beam_workflow.compute(ReducibleData[run_type])
+    assert_identical(
+        rebinned.bins.coords['wavelength'].bins.constituents['data'], wavelengths
+    )
+    assert wavelengths.min() >= sc.scalar(0.0, unit='angstrom')
+    assert wavelengths.max() < sc.scalar(14.0, unit='angstrom')
+
+
+@pytest.mark.parametrize(('low', 'high'), [(-1.0, 12.0), (3.0, 14.0)])
+def test_wavelength_range_must_fit_first_frame(direct_beam_workflow, low, high):
+    direct_beam_workflow[WavelengthBins] = sc.linspace(
+        'wavelength', low, high, 20, unit='angstrom'
+    )
+    with pytest.raises(ValueError, match='first chopper frame'):
+        direct_beam_workflow.compute(ReducibleData[SampleRun])
+
+
+def test_wavelength_range_is_checked_at_run_frequency(direct_beam_workflow):
+    direct_beam_workflow[ChopperFrequency[SampleRun]] = sc.scalar(15.0, unit='Hz')
+    with pytest.raises(ValueError, match='first chopper frame'):
+        direct_beam_workflow.compute(ReducibleData[SampleRun])
 
 
 def test_proton_charge_is_current_times_duration_of_run(
@@ -297,12 +329,19 @@ def test_supermirror_normalization_of_run_by_itself_gives_unity(
 
 
 @pytest.mark.parametrize('run_type', [SampleRun, ReferenceRun])
+@pytest.mark.parametrize('mode', ['direct_beam', 'direct_beam_with_aperture'])
 def test_reflectivity_is_unchanged_when_a_run_is_added_to_itself(
-    direct_beam_workflow: sciline.Pipeline, run_type: type
+    direct_beam_file: Path, sample_file: Path, run_type: type, mode: str
 ):
-    expected = direct_beam_workflow.compute(ReflectivityOverQ).hist()
-    filename = direct_beam_workflow.compute(Filename[run_type])
-    workflow = with_filenames(direct_beam_workflow, run_type, [filename, filename])
+    pipeline = _set_parameters(amor.AmorWorkflow(normalized_by=mode))
+    pipeline[Filename[SampleRun]] = sample_file
+    pipeline[Filename[ReferenceRun]] = direct_beam_file
+    # Model an aperture that accepts the whole narrow synthetic beam.
+    pipeline[SampleRotation[ReferenceRun]] = sc.scalar(1.5, unit='deg')
+    pipeline[BeamSize[ReferenceRun]] = sc.scalar(1.0, unit='nm')
+    expected = pipeline.compute(ReflectivityOverQ).hist()
+    filename = pipeline.compute(Filename[run_type])
+    workflow = with_filenames(pipeline, run_type, [filename, filename])
     result = workflow.compute(ReflectivityOverQ).hist()
     assert_allclose(
         sc.values(result.data), sc.values(expected.data), rtol=sc.scalar(1e-9)

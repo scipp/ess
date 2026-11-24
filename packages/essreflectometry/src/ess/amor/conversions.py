@@ -8,6 +8,7 @@ from ..reflectometry.types import (
     BeamSize,
     CoordTransformationGraph,
     DetectorRotation,
+    ReferenceRun,
     RunType,
     SampleRotation,
     SampleSize,
@@ -117,6 +118,48 @@ def divergence_angle(theta, sample_rotation, detector_rotation) -> sc.Variable:
     )
 
 
+def direct_beam_theta(
+    wavelength, pixel_divergence_angle, L2, sample_rotation, detector_rotation
+) -> sc.Variable:
+    """Incidence angle at the footprint aperture for a transmitted ray.
+
+    If the ray leaves the sample position at angle gamma to the horizon,
+    its incidence angle is mu - gamma. For a reflected ray it is gamma - mu.
+    The gravity correction to gamma is the same in both cases.
+    """
+    out = theta(
+        wavelength, pixel_divergence_angle, L2, sample_rotation, detector_rotation
+    )
+    out *= -1
+    return out
+
+
+def direct_beam_theta_no_gravity(
+    wavelength, pixel_divergence_angle, sample_rotation, detector_rotation
+) -> sc.Variable:
+    """Incidence angle of a transmitted ray without gravity."""
+    out = theta_no_gravity(
+        wavelength, pixel_divergence_angle, sample_rotation, detector_rotation
+    )
+    out *= -1
+    return out
+
+
+def direct_beam_divergence_angle(
+    theta, sample_rotation, detector_rotation
+) -> sc.Variable:
+    """Divergence of a transmitted ray in the reflected beam's convention.
+
+    Reflection reverses the angular profile. With theta = mu - gamma for
+    the direct beam, theta + nu - mu = -(gamma - nu) selects the corresponding
+    incident rays before the detector rows are mirrored.
+    """
+    out = theta.to(unit='rad', copy=True)
+    out += detector_rotation.to(unit='rad')
+    out -= sample_rotation.to(unit='rad')
+    return out
+
+
 def wavelength(
     event_time_offset,
     pixel_divergence_angle,
@@ -124,7 +167,6 @@ def wavelength(
     L2,
     chopper_frequency,
     chopper_phase_offset,
-    wavelength_min,
 ) -> sc.Variable:
     '''
     Wavelength of the neutrons from their arrival time at the detector.
@@ -151,9 +193,13 @@ def wavelength(
 
         \\lambda = \\frac{h}{m_n} \\frac{t}{L_1 + L_2}
 
-    lies in the frame that starts at ``wavelength_min``.
-    This is the convention of the Amor reduction software ``eos``.
+    lies in the first frame, with a time of flight in [0, tau).
+    This assumes the instrument suppresses neutrons from earlier pulses.
+    The wavelength bins only select and histogram events; they do not change
+    the frame assignment.
     '''
+    if not sc.isfinite(chopper_frequency).value or chopper_frequency.value <= 0:
+        raise ValueError('ChopperFrequency must be finite and positive.')
     half_period = (1 / (2 * chopper_frequency)).to(unit='ns')
     time_per_wavelength = ((L1 + L2) * sc.constants.m_n / sc.constants.h).to(
         unit='ns/angstrom'
@@ -161,12 +207,11 @@ def wavelength(
     half_turns = (
         2 * chopper_phase_offset.to(unit='deg') - pixel_divergence_angle.to(unit='deg')
     ) / sc.scalar(180.0, unit='deg')
-    time_of_flight = (
-        event_time_offset.to(unit='ns', dtype='float64') + half_turns * half_period
-    )
-    frame_start = wavelength_min * time_per_wavelength
-    time_of_flight = (time_of_flight - frame_start) % half_period + frame_start
-    return (time_of_flight / time_per_wavelength).to(unit='angstrom', copy=False)
+    time_of_flight = event_time_offset.to(unit='ns', dtype='float64', copy=True)
+    time_of_flight += half_turns * half_period
+    time_of_flight %= half_period
+    time_of_flight /= time_per_wavelength
+    return time_of_flight.to(unit='angstrom', copy=False)
 
 
 def coordinate_transformation_graph(
@@ -179,12 +224,8 @@ def coordinate_transformation_graph(
     chopper_separation: ChopperSeparation[RunType],
     sample_size: SampleSize[RunType],
     beam_size: BeamSize[RunType],
-    wavelength_bins: WavelengthBins,
 ) -> CoordTransformationGraph[RunType]:
-    """Build the coordinate transformation graph for Amor.
-
-    The wavelength frame starts at the lower edge of the wavelength bins.
-    """
+    """Build the coordinate transformation graph for reflected Amor events."""
     return {
         "wavelength": wavelength,
         "theta": theta if gravity else theta_no_gravity,
@@ -198,10 +239,55 @@ def coordinate_transformation_graph(
         "chopper_frequency": lambda: chopper_frequency,
         "chopper_separation": lambda: chopper_separation,
         "chopper_distance": lambda: chopper_distance,
-        "wavelength_min": lambda: wavelength_bins[0],
         "sample_size": lambda: sample_size,
         "beam_size": lambda: beam_size,
     }
+
+
+def direct_beam_coordinate_transformation_graph(
+    gravity: GravityToggle,
+    detector_rotation: DetectorRotation[ReferenceRun],
+    sample_rotation: SampleRotation[ReferenceRun],
+    chopper_phase_offset: ChopperPhaseOffset[ReferenceRun],
+    chopper_frequency: ChopperFrequency[ReferenceRun],
+    chopper_distance: ChopperDistance[ReferenceRun],
+    chopper_separation: ChopperSeparation[ReferenceRun],
+    sample_size: SampleSize[ReferenceRun],
+    beam_size: BeamSize[ReferenceRun],
+) -> CoordTransformationGraph[ReferenceRun]:
+    """Use transmitted-ray angles when preparing a direct-beam reference."""
+    graph = coordinate_transformation_graph(
+        gravity=gravity,
+        detector_rotation=detector_rotation,
+        sample_rotation=sample_rotation,
+        chopper_phase_offset=chopper_phase_offset,
+        chopper_frequency=chopper_frequency,
+        chopper_distance=chopper_distance,
+        chopper_separation=chopper_separation,
+        sample_size=sample_size,
+        beam_size=beam_size,
+    )
+    graph['theta'] = direct_beam_theta if gravity else direct_beam_theta_no_gravity
+    graph['divergence_angle'] = direct_beam_divergence_angle
+    return graph
+
+
+def validate_wavelength_range(wavelength_bins, L1, L2, chopper_frequency) -> None:
+    """Require a wavelength range contained in the first frame at every pixel."""
+    frame_end = (
+        (sc.constants.h / sc.constants.m_n / (2 * chopper_frequency * (L1 + L2)))
+        .to(unit='angstrom')
+        .min()
+    )
+    if (
+        not sc.all(sc.isfinite(wavelength_bins)).value
+        or wavelength_bins[0] < sc.scalar(0.0, unit='angstrom')
+        or wavelength_bins[-1] > frame_end
+    ):
+        raise ValueError(
+            'WavelengthBins must lie within the first chopper frame: '
+            f'0 to {frame_end.value:g} angstrom for this frequency and geometry.'
+        )
 
 
 def add_coords(
