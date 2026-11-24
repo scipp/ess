@@ -253,7 +253,7 @@ def read_xml_masked_detector_ids(filename: str | Path) -> sc.Variable:
     )
 
 
-def _read_mask_file(filename: Path) -> dict[str, sc.Variable | sc.DataGroup]:
+def _read_mask_file(filename: Path) -> PixelMasks:
     if filename.suffix == '.xml':
         return PixelMasks(
             by_detector_id={filename.name: read_xml_masked_detector_ids(filename)}
@@ -263,7 +263,7 @@ def _read_mask_file(filename: Path) -> dict[str, sc.Variable | sc.DataGroup]:
     raise ValueError(f"Unsupported suffix of mask file '{filename}'.")
 
 
-def _read_hdf5(filename: Path) -> dict[str, sc.Variable | sc.DataGroup]:
+def _read_hdf5(filename: Path) -> PixelMasks:
     with snx.File(filename) as file:
         # Reading only one of several entries would leave pixels unmasked.
         if len(file[snx.NXentry]) > 1:
