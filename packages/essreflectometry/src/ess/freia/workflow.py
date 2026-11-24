@@ -107,9 +107,7 @@ def FreiaMcStasWorkflow(
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
     inversion:
         Use the inversion-mirror geometry described in :func:`FreiaWorkflow`.
-        Supply ``MirrorGeometry[RunType] | None`` for both runs; the McStas
-        adapter does not infer a mirror from guide walls. The loaded sample
-        normal is reversed to describe reflection from the underside.
+        Supply ``MirrorGeometry[RunType]`` for both runs.
     """
     workflow = FreiaWorkflow(
         run_norm=run_norm,
@@ -121,8 +119,6 @@ def FreiaMcStasWorkflow(
         workflow.insert(provider)
     for name, param in mcstas_default_parameters().items():
         workflow[name] = param
-    if inversion:
-        workflow.insert(mcstas.mcstas_inverted_sample_surface_normal)
     return workflow
 
 
@@ -162,9 +158,9 @@ def FreiaWorkflow(
         Enable a planar mirror upstream of the sample for illumination from
         below. Load its pose from the NXmirror named ``inversion_mirror``
         (configurable with ``NeXusName[NXmirror]``), or supply per-run
-        ``MirrorGeometry[RunType] | None`` in laboratory coordinates, e.g.::
+        ``MirrorGeometry[RunType]`` in laboratory coordinates, e.g.::
 
-            workflow[MirrorGeometry[SampleRun] | None] = MirrorGeometry(
+            workflow[MirrorGeometry[SampleRun]] = MirrorGeometry(
                 position, normal
             )
 
@@ -194,6 +190,8 @@ def FreiaWorkflow(
         workflow[name] = param
     if inversion:
         _insert_mirror(workflow)
+        for provider in conversions.mirror_providers:
+            workflow.insert(provider)
     return workflow
 
 
@@ -224,11 +222,10 @@ def FreiaOffspecWorkflow(
     ----------
     incident_beam_from:
         ``'closest'`` assigns the beam whose nominal specular reflection angle
-        is closest to the geometrical sample-to-pixel angle. This heuristic uses
-        no gravity correction; gravity is applied after the beam is selected.
+        is closest to the geometrical sample-to-pixel angle. Gravity correction
+        is applied after the beam is selected.
         ``'fixed_slits'`` uses the single beam defined by one matching pair of
-        slit centers, independently of the reflection angle and without shutter
-        positions or status logs.
+        slit centers.
         ``'shutter_logs'`` uses ``ShutterStatusLogs[SampleRun]`` and
         ``ShutterPositions[SampleRun]`` for all candidate beams.
         Each log is evaluated at the neutron's crossing
@@ -252,15 +249,28 @@ def FreiaOffspecWorkflow(
         wavelength_from=wavelength_from,
         **kwargs,
     )
-    assignment_provider = {
-        'closest': conversions.closest_beam_incident_angle_graph,
-        'fixed_slits': conversions.fixed_slits_incident_angle_graph,
-        'shutter_logs': conversions.shutter_log_incident_angle_graph,
+    ordinary_assignment, mirror_assignment = {
+        'closest': (
+            conversions.closest_beam_incident_angle_graph,
+            conversions.closest_beam_incident_angle_graph_with_mirror,
+        ),
+        'fixed_slits': (
+            conversions.fixed_slits_incident_angle_graph,
+            conversions.fixed_slits_incident_angle_graph_with_mirror,
+        ),
+        'shutter_logs': (
+            conversions.shutter_log_incident_angle_graph,
+            conversions.shutter_log_incident_angle_graph_with_mirror,
+        ),
     }[incident_beam_from]
+    coordinate_provider = (
+        conversions.offspecular_coordinate_transformation_graph_with_mirror
+        if inversion
+        else conversions.offspecular_coordinate_transformation_graph
+    )
     for provider in (
-        mirror.no_mirror,
-        conversions.offspecular_coordinate_transformation_graph,
-        assignment_provider,
+        coordinate_provider,
+        mirror_assignment if inversion else ordinary_assignment,
         corrections.add_offspecular_coords_and_masks,
     ):
         workflow.insert(provider)

@@ -49,7 +49,7 @@ from ess.reflectometry.types import (
 
 
 def _set_mirror(workflow, run=SampleRun):
-    workflow[MirrorGeometry[run] | None] = MirrorGeometry(
+    workflow[MirrorGeometry[run]] = MirrorGeometry(
         position=sc.vector([0.0, 0.0, -1.0], unit='m'),
         normal=sc.vector([0.0, 2.0, 0.0]),
     )
@@ -62,17 +62,28 @@ def _set_mirror(workflow, run=SampleRun):
 def test_all_workflow_constructors_accept_inversion(factory):
     point = sc.vector([0.0, 2.0, -3.0], unit='m')
     ordinary = factory()
-    assert ordinary.compute(MirrorGeometry[SampleRun] | None) is None
+    for run in (SampleRun, ReferenceRun):
+        assert MirrorGeometry[run] not in ordinary.underlying_graph
+        assert (MirrorGeometry[run] | None) not in ordinary.underlying_graph
     inverted = factory(inversion=True)
+    assert MirrorGeometry[SampleRun] in inverted.underlying_graph
+    assert (MirrorGeometry[SampleRun] | None) not in inverted.underlying_graph
     _set_mirror(inverted)
     assert_identical(
         reflected_upstream_position(
             point,
             sc.vector([0.0, 1.0, 0.0], unit='m'),
-            inverted.compute(MirrorGeometry[SampleRun] | None),
+            inverted.compute(MirrorGeometry[SampleRun]),
         ),
         sc.vector([0.0, -2.0, -3.0], unit='m'),
     )
+
+
+@pytest.mark.parametrize('method', ['closest', 'fixed_slits', 'shutter_logs'])
+def test_offspecular_workflow_omits_mirror_when_inversion_is_disabled(method):
+    workflow = freia.FreiaOffspecWorkflow(incident_beam_from=method)
+    assert MirrorGeometry[SampleRun] not in workflow.underlying_graph
+    assert (MirrorGeometry[SampleRun] | None) not in workflow.underlying_graph
 
 
 @pytest.mark.parametrize('normal_scale', [0.5, -2.0])
@@ -212,7 +223,7 @@ def test_nexus_mirror_loads_translation_and_local_minus_z_normal(tmp_path, name,
     wf[Filename[run]] = filename
     if name != 'inversion_mirror':
         wf[NeXusName[snx.NXmirror]] = name
-    geometry = wf.compute(MirrorGeometry[run] | None)
+    geometry = wf.compute(MirrorGeometry[run])
     assert_allclose(geometry.position, sc.vector([0.0, -0.3, -1.0], unit='m'))
     angle = np.deg2rad(80.0)
     assert_allclose(
@@ -292,9 +303,8 @@ def test_mirror_before_sample_rejects_source_on_opposite_side_of_plane():
     wf[NeutronSourcePosition[SampleRun]] = sc.vector([0.0, -3.0, -4.0], unit='m')
     with pytest.raises(ValueError, match='same side of the mirror plane'):
         wf.compute(DetectorLtotal[SampleRun])
-    graph = wf.compute(CoordTransformationGraph[SampleRun])
     with pytest.raises(ValueError, match='same side of the mirror plane'):
-        sc.DataArray(sc.scalar(0.0)).transform_coords('L1', graph=graph)
+        wf.compute(CoordTransformationGraph[SampleRun])
 
 
 def test_slits_on_opposite_sides_of_mirror_plane_are_rejected():
@@ -359,7 +369,7 @@ def test_inverted_specular_sample_and_direct_beam_normalization():
     )
 
 
-@pytest.mark.parametrize('method', ['fixed_slits', 'shutter_logs'])
+@pytest.mark.parametrize('method', ['closest', 'fixed_slits', 'shutter_logs'])
 def test_offspecular_inversion_reflects_slit_angles_and_shutter_paths(method):
     wf = freia.FreiaOffspecWorkflow(inversion=True, incident_beam_from=method)
     data = _set_run(wf, SampleRun)

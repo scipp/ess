@@ -14,6 +14,7 @@ from ess.freia import FreiaOffspecWorkflow
 from ess.freia.conversions import (
     closest_beam_incident_angle_graph,
     fixed_slits_incident_angle_graph,
+    fixed_slits_incident_angle_graph_with_mirror,
     shutter_log_incident_angle_graph,
 )
 from ess.freia.types import (
@@ -54,7 +55,13 @@ def _geometry(mirror_tilt=0.0, *, a=1.0, b=1.0, c=0.375):
 
 
 def _angles(geometry, wavelength):
-    graph = fixed_slits_incident_angle_graph(**geometry)
+    inputs = geometry.copy()
+    mirror = inputs.pop('mirror')
+    graph = (
+        fixed_slits_incident_angle_graph(**inputs)
+        if mirror is None
+        else fixed_slits_incident_angle_graph_with_mirror(**inputs, mirror=mirror)
+    )
     coords = {'wavelength': wavelength, 'gravity': geometry['gravity']}
     data = sc.DataArray(sc.zeros(sizes=wavelength.sizes), coords=coords)
     return data.transform_coords('incident_angle', graph=graph).coords['incident_angle']
@@ -223,14 +230,14 @@ def test_closest_selection_uses_nominal_geometry_before_correcting_incidence(
     assert_allclose(result.coords['incident_angle'], expected)
 
 
-@pytest.mark.parametrize('method', ['fixed_slits', 'shutter_logs'])
+@pytest.mark.parametrize('method', ['closest', 'fixed_slits', 'shutter_logs'])
 @pytest.mark.parametrize('inversion', [False, True])
 def test_workflow_corrects_binned_incidence_and_preserves_counts(method, inversion):
     geometry = _geometry(0.0 if inversion else None)
     wf = FreiaOffspecWorkflow(incident_beam_from=method, inversion=inversion)
     wf[GravityVector] = geometry['gravity']
     if inversion:
-        wf[MirrorGeometry[SampleRun] | None] = geometry['mirror']
+        wf[MirrorGeometry[SampleRun]] = geometry['mirror']
     wf[Position[NXsample, SampleRun]] = geometry['sample_position']
     wf[NeutronSourcePosition[SampleRun]] = 5 * geometry['upstream_slit_centers']['beam']
     wf[SampleSurfaceNormal[SampleRun]] = geometry['sample_surface_normal']

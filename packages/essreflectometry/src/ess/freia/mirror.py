@@ -16,15 +16,10 @@ from ..reflectometry.types import RunType
 from .types import MirrorGeometry
 
 
-def no_mirror() -> MirrorGeometry[RunType] | None:
-    """Use the ordinary geometry when inversion is disabled."""
-    return None
-
-
 def mirror_geometry(
     position: Position[snx.NXmirror, RunType],
     transformation: NeXusTransformation[snx.NXmirror, RunType],
-) -> MirrorGeometry[RunType] | None:
+) -> MirrorGeometry[RunType]:
     """Build the mirror plane from its shared NeXus position and transformation.
 
     Rotate local -z, the NXmirror reference-plane normal, to the lab frame.
@@ -84,7 +79,7 @@ def detector_ltotal_with_mirror(
     detector: EmptyDetector[RunType],
     source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
-    mirror: MirrorGeometry[RunType] | None,
+    mirror: MirrorGeometry[RunType],
 ) -> DetectorLtotal[RunType]:
     """Compute the source-to-detector flight length through the mirror and sample.
 
@@ -93,13 +88,13 @@ def detector_ltotal_with_mirror(
     the length of the path from source through mirror to sample. Chopper and
     upstream-monitor wavelength reconstruction use the physical source position.
     """
-    reflected_source = reflected_upstream_position(
+    source_position = reflected_upstream_position(
         source_position, sample_position, mirror
     )
-    sample = sample_position.to(unit=reflected_source.unit)
-    pixels = detector.coords['position'].to(unit=reflected_source.unit)
+    sample = sample_position.to(unit=source_position.unit, copy=False)
+    pixels = detector.coords['position'].to(unit=source_position.unit, copy=False)
     return DetectorLtotal[RunType](
-        sc.norm(sample - reflected_source) + sc.norm(pixels - sample)
+        sc.norm(sample - source_position) + sc.norm(pixels - sample)
     )
 
 

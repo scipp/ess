@@ -419,8 +419,8 @@ def test_shutter_graph_requires_at_least_one_beam():
             {},
             {},
             sc.vector([0.0, 1.0, 0.0]),
-            {},
-            {},
             sc.vector([0.0, 0.0, 0.0], unit='m'),
             sc.vector([0.0, 0.0, 0.0], unit='m/s^2'),
+            {},
+            {},
         )
