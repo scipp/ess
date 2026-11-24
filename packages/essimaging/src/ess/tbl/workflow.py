@@ -39,7 +39,7 @@ def default_parameters() -> dict:
 
 
 def TblWorkflow(
-    wavelength_from: WavelengthLutMode = "file", **kwargs
+    wavelength_from: WavelengthLutMode = "analytical", **kwargs
 ) -> sciline.Pipeline:
     """
     Workflow with default parameters for TBL.

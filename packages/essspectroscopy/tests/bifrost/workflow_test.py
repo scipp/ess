@@ -51,7 +51,7 @@ def detector_names() -> list[str]:
 
 @pytest.fixture
 def workflow(detector_names: list[str]) -> sciline.Pipeline:
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[LookupTableFilename] = lookup_table_simulation()
@@ -64,7 +64,7 @@ def workflow(detector_names: list[str]) -> sciline.Pipeline:
 
 
 def test_simulation_workflow_can_load_single_detector() -> None:
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = [NeXusDetectorName("channel_3_1_triplet")]
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
@@ -90,7 +90,7 @@ def test_simulation_workflow_can_load_multiple_detectors_rectangular(
         # The order does not matter.
         random.shuffle(detector_names)
 
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
@@ -115,7 +115,7 @@ def test_simulation_workflow_can_load_multiple_detectors_non_rectangular() -> No
         'channel_6_3_triplet',
     ]
 
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
@@ -216,7 +216,7 @@ def test_simulation_workflow_produces_the_same_data_as_before(
 def test_calibrated_detector_has_contiguous_detector_number() -> None:
     # This test requires all detector pixels.
     # (the `workflow` fixture only uses the first 10.)
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
 
     detector = workflow.compute(EmptyDetector[SampleRun])
@@ -230,7 +230,7 @@ def test_calibrated_detector_has_contiguous_detector_number() -> None:
 
 @pytest.fixture
 def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
-    workflow = bifrost.BifrostWorkflow()
+    workflow = bifrost.BifrostWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = coda_test_run_2026_11()
     # The table does not match the choppers of this run but these tests only check

@@ -18,6 +18,9 @@ SampleRun = nexus_types.SampleRun
 NeutronSourcePosition = nexus_types.NeutronSourcePosition
 TofDetector = unwrap_types.TofDetector
 
+BeamMonitor1 = NewType("BeamMonitor1", int)
+BeamMonitor2 = NewType("BeamMonitor2", int)
+
 
 class Compression(enum.StrEnum):
     """Compression type of the output file.

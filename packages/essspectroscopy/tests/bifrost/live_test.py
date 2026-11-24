@@ -37,7 +37,7 @@ class TestBifrostQCutWorkflow:
     def qcut_workflow(
         self, simulation_detector_names: list[NeXusDetectorName]
     ) -> sciline.Pipeline:
-        workflow = BifrostQCutWorkflow()
+        workflow = BifrostQCutWorkflow(wavelength_from="file")
         workflow[NeXusDetectorNames] = simulation_detector_names
         # The test file is from a simulation and
         # looks slightly different from production files.

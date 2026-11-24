@@ -157,6 +157,7 @@ exclude_patterns = [
     ".DS_Store",
     "**.ipynb_checkpoints",
     "user-guide/sns-instruments/preprocess_files.ipynb",
+    "user-guide/dream/workflow-widget-dream.ipynb",
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
