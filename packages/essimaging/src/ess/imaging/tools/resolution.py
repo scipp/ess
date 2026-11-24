@@ -1,118 +1,98 @@
+from itertools import zip_longest
+from math import isqrt
+
 import numpy as np
 import scipp as sc
 from numpy.typing import NDArray
 
 
+def _all_divisors(n: int) -> list[int]:
+    return sorted(
+        {d for i in range(1, isqrt(n) + 1) if n % i == 0 for d in (i, n // i)}
+    )
+
+
 def maximum_resolution_achievable(
     events: sc.DataArray,
-    coarse_x_bin_edges: sc.Variable,
-    coarse_y_bin_edges: sc.Variable,
-    time_bin_edges: sc.Variable,
-    max_tries: int = 10,
-    max_pixels_x: int = 2048,
-    max_pixels_y: int = 2048,
-    raise_if_not_maximum: bool = False,
-):
-    """
-    Estimates the maximum resolution achievable
-    given a desired binning in time.
-    The maximum achievable resolution is defined
-    as the resolution in ``xy`` such that
-    there is at least one event in every ``xyt`` pixel.
+    image_dims: tuple[str, str],
+) -> sc.DataArray:
+    """Coarsen an image until every unmasked bin contains at least one event.
 
     Parameters
-    -------------
+    ----------
     events:
-        1D DataArray containing events with associated x, y, and t coordinates.
-        The names of the coordinates must not be `x`, `y` and `t`,
-        the names of the coordinates are taken from the provided ``bin_edges``
-        for each respective dimension.
-    coarse_x_bin_edges:
-        Minimum acceptable resolution in ``x``.
-    coarse_y_bin_edges:
-        Minimum acceptable resolution in ``y``.
-    time_bin_edges:
-        Desired resolution in ``t``.
-    max_tries:
-        The maximum number of iterations before giving up.
-    max_pixels_x:
-        The maximum number of pixels in ``x``.
-    max_pixels_y:
-        The maximum number of pixels in ``y``.
-    raise_if_not_maximum:
-        Often it is not important to find the exact maximum resolution.
-        Therefore this parameter is ``False`` by default, and the function
-        returns an estimate of the maximum resolution.
-        If you want the returned resolution to be exactly the maximum resolution,
-        set the value of this parameter to ``True``.
+        DataArray binned in at least the ``image_dims`` dimensions and optionally more.
+        No spatial coordinates are required. Other dimensions, such as wavelength
+        or time-of-flight, retain their original binning. Event weights do not
+        affect the choice of resolution.
+    image_dims:
+        Two distinct, non-empty dimensions defining the image grid.
 
     Returns
-    -------------
-        The bin edges in x respectively y that define the
-        maximum achievable resolution.
+    -------
+    :
+        Events concatenated within rectangular blocks of neighboring pixels.
+        Masked pixels are excluded. Coordinates depending on the image dimensions
+        are dropped by the concatenation. The input is not modified.
+
+    Raises
+    ------
+    ValueError
+        If the input is not binned, the image dimensions are invalid, or even
+        combining all image pixels leaves an empty unmasked bin.
+
+    Notes
+    -----
+    Block sizes follow the ascending divisors of each image dimension, paired
+    in order. Once one dimension is fully combined, only the other is coarsened.
+    The first valid grid in this sequence is returned, not necessarily the finest
+    among all possible rectangular grids. Powers of two give successive factors
+    of two; other sizes can give larger jumps.
+
+    The search folds and sums bin counts. Event contents are concatenated only
+    once, after choosing the resolution, without re-binning individual events.
     """
+    if events.bins is None:
+        raise ValueError('Input data must be binned.')
 
-    lower_nx = coarse_x_bin_edges.size
-    lower_ny = coarse_y_bin_edges.size
-    upper_nx = max_pixels_x
-    upper_ny = max_pixels_y
+    if len(image_dims) != 2 or len(set(image_dims)) != 2:
+        raise ValueError('image_dims must contain two distinct dimensions.')
+    if any(dim not in events.sizes or events.sizes[dim] == 0 for dim in image_dims):
+        raise ValueError('Image dimensions must be present and non-empty.')
+    if events.size == 0:
+        raise ValueError('Input data must contain at least one bin.')
 
-    nx = int(2**0.5 * lower_nx) + 1
-    ny = int(2**0.5 * lower_ny) + 1
-    events = events.bin({time_bin_edges.dim: time_bin_edges})
+    x, y = image_dims
 
-    for _ in range(max_tries):
-        xbins = sc.linspace(
-            coarse_x_bin_edges.dim, coarse_x_bin_edges[0], coarse_x_bin_edges[-1], nx
+    xdivisors = _all_divisors(events.sizes[x])
+    ydivisors = _all_divisors(events.sizes[y])
+    # Avoid collisions with both outer dimensions and the event dimension.
+    used_dims = set(events.dims) | {events.bins.constituents['dim']}
+    x_aux, y_aux = '_x_aux', '_y_aux'
+    while x_aux in used_dims:
+        x_aux += '_'
+    while y_aux in used_dims:
+        y_aux += '_'
+    counts = events.bins.size()
+
+    for i, j in zip_longest(xdivisors, ydivisors):
+        i = xdivisors[-1] if i is None else i
+        j = ydivisors[-1] if j is None else j
+        x_sizes, y_sizes = {x: -1, x_aux: i}, {y: -1, y_aux: j}
+        # Keep masks on the counts so sum excludes the same pixels as concat.
+        coarse_counts = (
+            counts.fold(x, sizes=x_sizes).fold(y, sizes=y_sizes).sum([x_aux, y_aux])
         )
-        ybins = sc.linspace(
-            coarse_y_bin_edges.dim, coarse_y_bin_edges[0], coarse_y_bin_edges[-1], ny
-        )
-        min_counts_per_pixel = (
-            events.bin(
-                {
-                    coarse_x_bin_edges.dim: xbins,
-                    coarse_y_bin_edges.dim: ybins,
-                }
+        if coarse_counts.min().value > 0:
+            return (
+                events.fold(x, sizes=x_sizes)
+                .fold(y, sizes=y_sizes)
+                .bins.concat([x_aux, y_aux])
             )
-            .bins.size()
-            .min()
-        )
 
-        if min_counts_per_pixel.value > 0:
-            lower_nx = nx
-            lower_ny = ny
-            nx = max(min(round((upper_nx * nx) ** 0.5), nx * 2), lower_nx + 1)
-            ny = max(min(round((upper_ny * ny) ** 0.5), ny * 2), lower_ny + 1)
-        else:
-            upper_nx = nx
-            upper_ny = ny
-            nx = min(round((lower_nx * nx) ** 0.5), upper_nx - 1)
-            ny = min(round((lower_ny * ny) ** 0.5), upper_nx - 1)
-
-        if upper_nx - lower_nx < 2 and upper_ny - lower_ny < 2:
-            break
-
-    if raise_if_not_maximum and upper_nx - lower_nx >= 2 and upper_ny - lower_ny >= 2:
-        raise RuntimeError(
-            'Maximal resolution was not found. Increase `max_tries` to search longer. '
-            'Or set `raise_if_not_maximum=False` if it is not necessary to locate the '
-            'maximum exactly.'
-        )
-
-    return (
-        sc.linspace(
-            coarse_x_bin_edges.dim,
-            coarse_x_bin_edges[0],
-            coarse_x_bin_edges[-1],
-            lower_nx,
-        ),
-        sc.linspace(
-            coarse_y_bin_edges.dim,
-            coarse_y_bin_edges[0],
-            coarse_y_bin_edges[-1],
-            lower_ny,
-        ),
+    raise ValueError(
+        'Even at the coarsest pixel binning there are some pixels that have no events.'
+        ' The binning in the remaining dimensions may be too fine.'
     )
 
 
