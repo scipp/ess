@@ -12,7 +12,8 @@ and attribute must be identical in all runs, except
   for each run are kept in ``<entry>/merged_runs``;
 - ``minimum_value``, ``maximum_value``, and ``average_value`` of an NXlog, which
   are recomputed from the merged values;
-- the paths that :attr:`MergeRules.ignore` matches.
+- the paths that :attr:`MergeRules.ignore` matches. The merge does not check the
+  NXlogs among them, nor drop their rows that repeat the previous run.
 
 The file writer starts each series of an NXlog with the values from shortly
 before the run. Those rows repeat the last rows of the previous run if it ended
@@ -157,6 +158,8 @@ class MergeRules:
     Glob patterns on absolute paths of groups and datasets whose values,
     attributes, and contents may differ between runs. The merged file has those
     of the first run. Extendable datasets in them are appended all the same.
+    The NXlogs in them are not checked, and their rows are appended as they are,
+    including rows that the file writer padded with time 0.
     """
 
     def __post_init__(self) -> None:
@@ -290,6 +293,7 @@ class MergePlan:
     issues: tuple[Issue, ...]
     stamps: tuple[tuple[int, int], ...] = field(repr=False)
     """Size and modification time of each file, to detect a changed file."""
+    rules: MergeRules = field(repr=False)
 
     @property
     def errors(self) -> tuple[Issue, ...]:
@@ -339,7 +343,7 @@ class MergePlan:
             with ExitStack() as stack:
                 sources = [stack.enter_context(h5py.File(p, 'r')) for p in self.files]
                 merged = stack.enter_context(h5py.File(partial, 'r+'))
-                _append_runs(merged, sources)
+                _append_runs(merged, sources, self.rules)
                 _update_logs(merged)
                 _update_entry(merged, sources, self.files)
                 _update_root(merged, output)
@@ -393,7 +397,9 @@ def plan_merge(files: Sequence[Path | str], rules: MergeRules) -> MergePlan:
                 *_check_logs(sources, rules),
             ]
     paths = tuple(path for path, _ in runs)
-    return MergePlan(files=paths, issues=tuple(issues), stamps=_stamps(paths))
+    return MergePlan(
+        files=paths, issues=tuple(issues), stamps=_stamps(paths), rules=rules
+    )
 
 
 def _stamps(files: Sequence[Path]) -> tuple[tuple[int, int], ...]:
@@ -629,6 +635,8 @@ def _check_logs(sources: list[h5py.File], rules: MergeRules) -> Iterator[Issue]:
     for path, node in _layout(sources[0]).items():
         if _nx_class(node) != 'NXlog':
             continue
+        if rules.ignores(path):
+            continue
         rule = rules.rule_for(path)
         if rule is not None:
             used.add(id(rule))
@@ -758,7 +766,9 @@ def _in_unit(tolerance: sc.Variable, unit: str | None) -> float:
     return tolerance.to(unit=unit, dtype='float64').value
 
 
-def _append_runs(merged: h5py.File, sources: list[h5py.File]) -> None:
+def _append_runs(
+    merged: h5py.File, sources: list[h5py.File], rules: MergeRules
+) -> None:
     """Append the extendable datasets of ``sources[1:]`` to those of ``merged``."""
     for target, paths in _streams(merged).items():
         # Of the paths of a hard-linked dataset, one in an NXlog says which rows
@@ -768,10 +778,10 @@ def _append_runs(merged: h5py.File, sources: list[h5py.File]) -> None:
         )
         parent, name = path.rsplit('/', 1)
         nx_class = _nx_class(_parent(merged, path))
-        drops = _drops(sources, parent, nx_class, name)
+        drops = _drops(sources, parent, nx_class, name, rules)
         offsets = [0] * len(sources)
         if (indexed := _INDEX_FIELDS.get((nx_class, name))) is not None:
-            indexed_drops = _drops(sources, parent, nx_class, indexed)
+            indexed_drops = _drops(sources, parent, nx_class, indexed, rules)
             kept = [
                 source[f'{parent}/{indexed}'].shape[0] - drop
                 for source, drop in zip(sources, indexed_drops, strict=True)
@@ -787,10 +797,14 @@ def _append_runs(merged: h5py.File, sources: list[h5py.File]) -> None:
 
 
 def _drops(
-    sources: list[h5py.File], parent: str, nx_class: str | None, name: str
+    sources: list[h5py.File],
+    parent: str,
+    nx_class: str | None,
+    name: str,
+    rules: MergeRules,
 ) -> list[int]:
     """Number of leading rows of ``parent/name`` of each source the merge drops."""
-    if nx_class == 'NXlog':
+    if nx_class == 'NXlog' and not rules.ignores(parent):
         for time_name, fields in _LOG_SERIES.items():
             if name == time_name or name in fields:
                 return _leading_duplicates(

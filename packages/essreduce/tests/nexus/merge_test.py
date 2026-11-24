@@ -481,6 +481,26 @@ def test_unsorted_log_is_an_error(runs: list[Path]) -> None:
     assert 'not sorted' in error.message
 
 
+def test_ignored_log_is_not_checked_and_appended_as_it_is(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    def pad(f: h5py.File) -> None:
+        time = f[f'{TEMPERATURE}/time']
+        time.resize(time.shape[0] + 1, axis=0)
+        time[-1] = 0
+        value = f[f'{TEMPERATURE}/value']
+        value.resize(value.shape[0] + 1, axis=0)
+        value[-1] = 99.0
+
+    modify(runs[0], pad)
+    rules = MergeRules(rules=(), ignore=(TEMPERATURE,))
+    plan = plan_merge(runs, rules)
+    assert plan.issues == ()
+    with h5py.File(plan.write(tmp_path / 'merged.nxs')) as f:
+        # Run a, then run b with its padding row and without dropping any row
+        assert list(f[f'{TEMPERATURE}/value']) == [10.0, 10.02, 10.05, 99.0]
+
+
 def test_unsorted_pulses_within_a_run_are_fine(runs: list[Path]) -> None:
     # Run a (runs[1]) has pulses at 1 s, 2 s, and 3 s.
     modify(runs[1], lambda f: f[f'{EVENTS}/event_time_zero'].__setitem__(0, 3 * SECOND))
