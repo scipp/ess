@@ -348,10 +348,52 @@ def test_write_refuses_to_overwrite(runs: list[Path], tmp_path: Path) -> None:
         plan_merge(runs, RULES).write(tmp_path / 'merged.nxs')
 
 
-def test_merged_file_cannot_be_merged_again(merged: Path, tmp_path: Path) -> None:
-    later = make_run(tmp_path / 'c.nxs', index=2, pulses=[[0]], temperature=[10.0])
-    (issue,) = plan_merge([merged, later], RULES).issues
-    assert (issue.severity, issue.path) == ('error', 'merged.nxs')
+def _datasets(path: Path) -> dict[str, np.ndarray]:
+    datasets = {}
+    with h5py.File(path) as f:
+        f.visititems(
+            lambda name, node: (
+                datasets.__setitem__(name, node[()])
+                if isinstance(node, h5py.Dataset)
+                else None
+            )
+        )
+    return datasets
+
+
+def _assert_same_datasets(a: Path, b: Path) -> None:
+    expected, actual = _datasets(a), _datasets(b)
+    assert actual.keys() == expected.keys()
+    for name, value in expected.items():
+        assert np.array_equal(actual[name], value), name
+
+
+@pytest.fixture
+def later(tmp_path: Path) -> Path:
+    return make_run(tmp_path / 'c.nxs', index=2, pulses=[[0]], temperature=[10.0])
+
+
+def test_merged_file_merged_with_a_later_run_is_like_merging_all_runs(
+    runs: list[Path], merged: Path, later: Path, tmp_path: Path
+) -> None:
+    all_at_once = plan_merge([*runs, later], RULES).write(tmp_path / 'all.nxs')
+    plan = plan_merge([merged, later], RULES)
+    assert plan.issues == ()
+    _assert_same_datasets(all_at_once, plan.write(tmp_path / 'again.nxs'))
+    with h5py.File(tmp_path / 'again.nxs') as f:
+        runs = f['entry/merged_runs']
+        names = [runs[f'run_{i}/file_name'].asstr()[()] for i in range(len(runs))]
+        assert names == ['a.nxs', 'b.nxs', 'c.nxs']
+
+
+def test_merged_file_merged_with_an_earlier_run_is_like_merging_all_runs(
+    runs: list[Path], later: Path, tmp_path: Path
+) -> None:
+    all_at_once = plan_merge([*runs, later], RULES).write(tmp_path / 'all.nxs')
+    b, a = runs
+    merged = plan_merge([b, later], RULES).write(tmp_path / 'bc.nxs')
+    again = plan_merge([merged, a], RULES).write(tmp_path / 'again.nxs')
+    _assert_same_datasets(all_at_once, again)
 
 
 def test_overlapping_runs_are_an_error(tmp_path: Path) -> None:
@@ -585,12 +627,19 @@ def test_single_file_is_copied_with_padding_stripped(
         assert list(f['entry/merged_runs']) == ['run_0']
 
 
-def test_merged_file_of_single_file_cannot_be_merged_again(
+def test_stripped_copies_merge_like_the_padded_runs(
     runs: list[Path], tmp_path: Path
 ) -> None:
-    stripped = plan_merge(runs[:1], STRIP).write(tmp_path / 'stripped.nxs')
-    (error,) = plan_merge([stripped, runs[1]], STRIP).errors
-    assert error.path == 'stripped.nxs'
+    for run in runs:
+        modify(run, _pad_series(1, 1))
+    all_at_once = plan_merge(runs, STRIP).write(tmp_path / 'all.nxs')
+    stripped = [
+        plan_merge([run], STRIP).write(tmp_path / f'stripped-{run.name}')
+        for run in runs
+    ]
+    plan = plan_merge(stripped, RULES)
+    assert plan.errors == ()
+    _assert_same_datasets(all_at_once, plan.write(tmp_path / 'again.nxs'))
 
 
 def test_log_row_not_later_than_previous_run_is_an_error(runs: list[Path]) -> None:

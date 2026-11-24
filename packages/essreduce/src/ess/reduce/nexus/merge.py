@@ -3,6 +3,7 @@
 """Merge the NeXus files of consecutive runs into a file that looks like one run.
 
 A single file is accepted as well, which gives a copy with the padding stripped.
+A merged file can be merged again, with more runs or with other merged files.
 
 A dataset whose first dimension is unlimited holds data streamed during the run,
 such as the fields of NXlog and NXevent_data groups, and of the NXdata groups of
@@ -11,7 +12,8 @@ along that dimension, in the order of the runs' start times. Every other dataset
 and attribute must be identical in all runs, except
 
 - the per-run fields of NXentry (``start_time``, ``end_time``, ...), whose values
-  for each run are kept in ``<entry>/merged_runs``;
+  for each run are kept in ``<entry>/merged_runs``, which lists the runs of a
+  merged input in place of the input;
 - ``minimum_value``, ``maximum_value``, and ``average_value`` of an NXlog, which
   are recomputed from the merged values;
 - the paths that :attr:`MergeRules.ignore` matches.
@@ -49,7 +51,7 @@ from contextlib import ExitStack
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from fnmatch import fnmatchcase
-from itertools import pairwise
+from itertools import count, pairwise
 from pathlib import Path
 from typing import Any, Literal
 
@@ -399,20 +401,14 @@ def plan_merge(files: Sequence[Path | str], rules: MergeRules) -> MergePlan:
             ),
             key=lambda run: _entry_time(run[1], 'start_time'),
         )
-        if merged := [path for path, file in runs if _MERGED_RUNS in _entry(file)]:
-            issues = [
-                Issue('error', path.name, 'is a merged file, which cannot be merged')
-                for path in merged
-            ]
-        else:
-            sources = [file for _, file in runs]
-            issues = [
-                *_check_order(runs),
-                *_check_layout(runs, rules),
-                *_check_streams(sources),
-                *_check_pulses(sources),
-                *_check_logs(sources, rules),
-            ]
+        sources = [file for _, file in runs]
+        issues = [
+            *_check_order(runs),
+            *_check_layout(runs, rules),
+            *_check_streams(sources),
+            *_check_pulses(sources),
+            *_check_logs(sources, rules),
+        ]
     paths = tuple(path for path, _ in runs)
     return MergePlan(
         files=paths,
@@ -517,7 +513,7 @@ def _check_layout(
     reference = _layout(first)
     canonical = _canonical_paths(reference)
     entry = _entry(first).name
-    per_run = {f'{entry}/{name}' for name in _PER_RUN_ENTRY_FIELDS} | {
+    per_run = {f'{entry}/{name}' for name in (*_PER_RUN_ENTRY_FIELDS, _MERGED_RUNS)} | {
         f'{path}/{summary}'
         for path, node in reference.items()
         if _nx_class(node) == 'NXlog'
@@ -525,7 +521,9 @@ def _check_layout(
     }
 
     def may_differ(path: str) -> bool:
-        return path in per_run or rules.ignores(path)
+        return any(
+            group in per_run for group in _self_and_ancestors(path)
+        ) or rules.ignores(path)
 
     for other_path, other in others:
         where = f'{first_path.name} and {other_path.name}'
@@ -966,17 +964,28 @@ def _update_logs(merged: h5py.File) -> None:
 def _update_entry(
     merged: h5py.File, sources: list[h5py.File], files: Sequence[Path]
 ) -> None:
-    """Set the end time of the last run, and keep the per-run fields of all runs."""
+    """
+    Set the end time of the last run, and keep the per-run fields of all runs.
+
+    A merged source contributes the runs it lists, not a run of its own.
+    """
     entry = _entry(merged)
     if 'end_time' in entry:
         entry['end_time'][()] = _entry(sources[-1])['end_time'][()]
+    if _MERGED_RUNS in entry:  # the first source is a merged file
+        del entry[_MERGED_RUNS]
     merged_runs = entry.create_group(_MERGED_RUNS)
     merged_runs.attrs['NX_class'] = 'NXcollection'
-    for i, (source, path) in enumerate(zip(sources, files, strict=True)):
-        group = merged_runs.create_group(f'run_{i}')
+    names = (f'run_{i}' for i in count())
+    for source, path in zip(sources, files, strict=True):
+        source_entry = _entry(source)
+        if (runs := source_entry.get(_MERGED_RUNS)) is not None:
+            for i in range(len(runs)):
+                source.copy(runs[f'run_{i}'], merged_runs, name=next(names))
+            continue
+        group = merged_runs.create_group(next(names))
         group.attrs['NX_class'] = 'NXcollection'
         group.create_dataset('file_name', data=path.name, dtype=h5py.string_dtype())
-        source_entry = _entry(source)
         for name in _PER_RUN_ENTRY_FIELDS:
             if name in source_entry:
                 source.copy(source_entry[name], group, name=name)
