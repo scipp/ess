@@ -454,12 +454,7 @@ def test_per_run_field_may_differ_in_shape(runs: list[Path]) -> None:
 
 
 def test_padding_rows_with_time_zero_are_an_error(runs: list[Path]) -> None:
-    def pad(f: h5py.File) -> None:
-        time = f[f'{TEMPERATURE}/time']
-        time.resize(time.shape[0] + 1, axis=0)  # the fill value is not 0
-        time[-1] = 0
-
-    modify(runs[0], pad)
+    modify(runs[0], _pad_series(0, 1))
     (error,) = plan_merge(runs, RULES).errors
     assert error.path == TEMPERATURE
     assert 'time 0' in error.message
@@ -494,6 +489,47 @@ def test_write_strips_padding_at_the_ends_of_a_series(
         log = f[TEMPERATURE]
         assert list(log['time']) == [SECOND, 2 * SECOND, 11 * SECOND]
         assert list(log['value']) == [10.0, 10.02, 10.05]
+
+
+def _pad_alarms(f: h5py.File) -> None:
+    """Pad the alarm series of the temperature log with a row of zeros."""
+    for name, zero in (
+        ('alarm_time', 0),
+        ('alarm_severity', 0),
+        ('alarm_message', b''),
+    ):
+        dataset = f[f'{TEMPERATURE}/{name}']
+        dataset.resize(dataset.shape[0] + 1, axis=0)
+        dataset[-1] = zero
+
+
+def test_write_strips_all_fields_of_each_series(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    for run in runs:
+        modify(run, _pad_series(1, 1))
+        modify(run, _pad_alarms)
+    with h5py.File(plan_merge(runs, STRIP).write(tmp_path / 'merged.nxs')) as f:
+        log = f[TEMPERATURE]
+        assert len(log['time']) == len(log['value']) == 3
+        # One alarm row per run, as written by make_run
+        assert list(log['alarm_time']) == [SECOND, 11 * SECOND]
+        assert list(log['alarm_severity']) == [0, 0]
+        assert list(log['alarm_message']) == [b'', b'']
+
+
+@pytest.mark.parametrize('rules', [RULES, STRIP], ids=['keep', 'strip'])
+def test_series_fields_of_different_length_are_an_error(
+    runs: list[Path], rules: MergeRules
+) -> None:
+    def drop_last_row(f: h5py.File) -> None:
+        dataset = f[f'{TEMPERATURE}/value']
+        dataset.resize(dataset.shape[0] - 1, axis=0)
+
+    modify(runs[1], drop_last_row)
+    (error,) = plan_merge(runs, rules).errors
+    assert error.path == TEMPERATURE
+    assert 'value in a.nxs has 1 rows, but time has 2' in error.message
 
 
 def test_padding_is_an_error_unless_stripped(runs: list[Path]) -> None:

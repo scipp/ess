@@ -715,9 +715,14 @@ def _valid_rows(
 ) -> range:
     """The rows of a series that are not padding by the file writer."""
     times = log[time_name][()]
+    run = Path(log.file.filename).name
+    for name in names:
+        if (rows := log[name].shape[0]) != len(times):
+            raise ValueError(
+                f'{name} in {run} has {rows} rows, but {time_name} has {len(times)}'
+            )
     if not np.any(times == 0):
         return range(len(times))
-    run = Path(log.file.filename).name
     if not strip_padding:
         raise ValueError(
             f'{time_name} in {run} has rows with time 0, possibly padding by the '
