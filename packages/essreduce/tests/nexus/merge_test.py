@@ -537,6 +537,26 @@ def test_row_with_time_zero_inside_a_series_is_an_error_even_if_stripping(
     assert 'between others' in error.message
 
 
+def test_single_file_is_copied_with_padding_stripped(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    modify(runs[1], _pad_series(1, 2))
+    plan = plan_merge(runs[1:], STRIP)
+    with h5py.File(plan.write(tmp_path / 'stripped.nxs')) as f:
+        assert list(f[f'{TEMPERATURE}/time']) == [SECOND, 2 * SECOND]
+        assert list(f[f'{TEMPERATURE}/value']) == [10.0, 10.02]
+        assert list(f[f'{EVENTS}/event_id']) == [3, 2, 2]
+        assert list(f['entry/merged_runs']) == ['run_0']
+
+
+def test_merged_file_of_single_file_cannot_be_merged_again(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    stripped = plan_merge(runs[:1], STRIP).write(tmp_path / 'stripped.nxs')
+    (error,) = plan_merge([stripped, runs[1]], STRIP).errors
+    assert error.path == 'stripped.nxs'
+
+
 def test_log_row_not_later_than_previous_run_is_an_error(runs: list[Path]) -> None:
     # Run b (runs[0]) has one reading, at 11 s. Move it before the end of run a.
     modify(runs[0], lambda f: f[f'{TEMPERATURE}/time'].__setitem__(0, SECOND))

@@ -2,6 +2,8 @@
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 """Merge the NeXus files of consecutive runs into a file that looks like one run.
 
+A single file is accepted as well, which gives a copy with the padding stripped.
+
 A dataset whose first dimension is unlimited holds data streamed during the run,
 such as the fields of NXlog and NXevent_data groups, and of the NXdata groups of
 monitors in histogram mode, with a histogram per row. The merge concatenates it
@@ -387,8 +389,8 @@ def plan_merge(files: Sequence[Path | str], rules: MergeRules) -> MergePlan:
     :
         The runs in the order of their start times, and the issues found.
     """
-    if len(files) < 2:
-        raise ValueError('merging needs at least two files')
+    if len(files) < 1:
+        raise ValueError('merging needs at least one file')
     with ExitStack() as stack:
         runs = sorted(
             (
