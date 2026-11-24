@@ -105,7 +105,7 @@ def test_integrate_two_theta_covers_full_detector_range(detector, keep_events):
         detector, DSPACING_BINS, two_theta_bins, KeepEvents[SampleRun](keep_events)
     )
     result = integrate_two_theta(focussed)
-    if result.bins is not None:
+    if result.is_binned:
         result = result.hist()
     expected = detector.hist(dspacing=DSPACING_BINS).sum('pixel')
     assert sc.allclose(result.data, expected.data)

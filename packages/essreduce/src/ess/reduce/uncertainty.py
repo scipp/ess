@@ -100,7 +100,7 @@ def broadcast_with_upper_bound_variances(
             mask = irred
     data = data.copy()
     sizes = {**sizes, **data.sizes}
-    if prototype.bins is None:
+    if not prototype.is_binned:
         size = (~mask).sum().to(dtype='int64', copy=False)
         for dim, dim_size in sizes.items():
             if dim not in data.dims and dim not in mask.dims:
@@ -113,7 +113,7 @@ def broadcast_with_upper_bound_variances(
         scale.values[mask.broadcast(sizes=sizes).values] = np.inf
     data = data.broadcast(sizes=sizes).copy()
     data.variances *= scale.values
-    if prototype.bins is not None:
+    if prototype.is_binned:
         # Note that we are not using event masks in the upper-bound computation. Less
         # than optimal, but simpler.
         if isinstance(data, sc.Variable):
@@ -163,11 +163,11 @@ def drop_variances_if_broadcast(
 def _no_variance_broadcast(
     data: sc.Variable | sc.DataArray, /, *, prototype: sc.Variable | sc.DataArray
 ) -> bool:
-    if data.bins is not None:
+    if data.is_binned:
         raise ValueError("Cannot broadcast binned data.")
     if data.variances is None:
         return True
-    if prototype.bins is not None:
+    if prototype.is_binned:
         return False
     sizes = prototype.sizes
     return all(data.sizes.get(dim) == size for dim, size in sizes.items())

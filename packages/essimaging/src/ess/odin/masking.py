@@ -16,7 +16,7 @@ def apply_masks(
     """Apply configured masking rules to wavelength-resolved detector data."""
     out = da.copy(deep=False)
     for coord_name, mask in masks.items():
-        if (out.bins is not None) and (coord_name in out.bins.coords):
+        if out.is_binned and (coord_name in out.bins.coords):
             out.bins.masks[coord_name] = mask(out.bins.coords[coord_name])
         else:
             coord = (

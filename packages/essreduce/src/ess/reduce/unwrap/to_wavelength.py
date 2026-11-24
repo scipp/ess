@@ -525,7 +525,7 @@ def _compute_wavelength_data(
     backend: FrameUnwrapBackend,
     keep_event_time_offset: bool,
 ) -> sc.DataArray:
-    if da.bins is None:
+    if not da.is_binned:
         data = _compute_wavelength_histogram(
             da=da, lookup=lookup, ltotal=ltotal, backend=backend
         )

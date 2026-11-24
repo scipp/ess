@@ -134,9 +134,7 @@ def to_dspacing_with_calibration(
     # The mechanism with `_tag_positions_consumed` is meant to ensure that,
     # if positions are present, they are consumed (mad unaligned or dropped)
     # by the coordinate transform similarly to `to_dspacing_with_positions`.
-    if "position" in out.coords or (
-        out.bins is not None and "position" in out.bins.coords
-    ):
+    if "position" in out.coords or (out.is_binned and "position" in out.bins.coords):
         pos_graph["_tag_positions_consumed"] = _consume_positions
     else:
         pos_graph["_tag_positions_consumed"] = lambda: sc.scalar(0)
@@ -234,7 +232,7 @@ def add_q_coordinate(
 def _convert_reduced_to_tof_impl(
     data: sc.DataArray, calibration: OutputCalibrationData
 ) -> sc.DataArray:
-    if data.bins is not None:
+    if data.is_binned:
         if 'tof' in data.bins.coords:
             data.bins.coords.pop('tof')
     return data.transform_coords(

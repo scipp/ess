@@ -102,7 +102,7 @@ def test_pipeline_can_compute_IofQ_in_event_mode(
     pipeline[ReturnEvents] = True
     result = pipeline.compute(target)
     qxy = target in (IntensityQxQy[SampleRun], BackgroundSubtractedIofQxy)
-    assert result.bins is not None
+    assert result.is_binned
     assert result.dims == ('Qy', 'Qx') if qxy else ('Q',)
     assert sc.allclose(
         sc.values(reference.data),

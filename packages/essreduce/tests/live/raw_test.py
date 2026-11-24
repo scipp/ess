@@ -663,7 +663,7 @@ class TestLogicalView:
 
         # Should be binned data with 4 bins, each containing 2 indices
         assert indices.sizes == {'x_pixel_offset': 4}
-        assert indices.bins is not None
+        assert indices.is_binned
 
         # Check each bin contains the correct indices
         # Bin 0: [0, 1], Bin 1: [2, 3], Bin 2: [4, 5], Bin 3: [6, 7]
@@ -693,7 +693,7 @@ class TestLogicalView:
 
         # Should be binned data with 2x2 output bins
         assert indices.sizes == {'x_pixel_offset': 2, 'y_pixel_offset': 2}
-        assert indices.bins is not None
+        assert indices.is_binned
 
         # Each bin should contain 2x2=4 indices from the flattened input
         bin_sizes = indices.bins.size()
@@ -789,7 +789,7 @@ class TestLogicalView:
         indices = view.input_indices()
 
         # Should be dense (not binned) - 1:1 mapping
-        assert indices.bins is None
+        assert not indices.is_binned
         assert indices.sizes == {'x': 2, 'y': 2}
 
         # Indices should correspond to front layer of folded volume
@@ -868,7 +868,7 @@ class TestRollingDetectorViewWithLogicalView:
         roi_filter = view.make_roi_filter()
 
         # The indices should be binned data (check via private attribute for now)
-        assert roi_filter._indices.bins is not None
+        assert roi_filter._indices.is_binned
         assert roi_filter._indices.sizes == {'x_pixel_offset': 4}
         # Each bin should contain 2 indices
         assert all(roi_filter._indices.bins.size().values == 2)
@@ -946,5 +946,5 @@ class TestRollingDetectorViewWithLogicalView:
         roi_filter = view.make_roi_filter()
 
         # Indices should be dense (not binned) for non-reducing view
-        assert roi_filter._indices.bins is None
+        assert not roi_filter._indices.is_binned
         assert roi_filter._indices.sizes == {'x': 2, 'y': 2}

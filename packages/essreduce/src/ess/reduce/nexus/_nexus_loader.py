@@ -404,7 +404,7 @@ def extract_signal_data_array(dg: sc.DataGroup) -> sc.DataArray:
     event_data_arrays = {
         key: value
         for key, value in dg.items()
-        if isinstance(value, sc.DataArray) and value.bins is not None
+        if isinstance(value, sc.DataArray) and value.is_binned
     }
     # Transformations and thus the position can be time dependent, in which case they
     # are stored as DataArray instead of Variable. We do not want to select these.
@@ -412,7 +412,7 @@ def extract_signal_data_array(dg: sc.DataGroup) -> sc.DataArray:
         key: value
         for key, value in dg.items()
         if isinstance(value, sc.DataArray)
-        and value.bins is None
+        and not value.is_binned
         and key not in ('position', 'transform')
     }
     if (array := _select_unique_array(event_data_arrays, 'event')) is not None:

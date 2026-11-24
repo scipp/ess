@@ -432,7 +432,7 @@ def scale_for_reflectivity_overlap(
 
     # First sort the dict of reflectivities by the Q min value
     curves = {
-        k: v.hist() if v.bins is not None else v
+        k: v.hist() if v.is_binned else v
         for k, v in sorted(
             reflectivities.items(), key=lambda item: item[1].coords['Q'].min().value
         )

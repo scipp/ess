@@ -384,7 +384,7 @@ def _iofq_in_quadrants(
         phi = with_phi.bins.coords['phi'].bins.mean()
     else:
         phi = with_phi.coords['phi']
-        if phi.bins is not None or 'wavelength' in phi.dims:
+        if phi.is_binned or 'wavelength' in phi.dims:
             phi = phi.mean('wavelength')
 
     out = {}
