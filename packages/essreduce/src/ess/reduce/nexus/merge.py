@@ -661,9 +661,6 @@ def _check_log_series(path: str, logs: list[h5py.Group]) -> Iterator[Issue]:
                     'by the file writer',
                 )
                 return
-            if np.any(times[1:] < times[:-1]):
-                yield Issue('error', path, f'{time_name} in {name} is not sorted')
-                return
         try:
             _leading_duplicates(logs, time_name)
         except ValueError as err:
@@ -674,8 +671,11 @@ def _leading_duplicates(logs: list[h5py.Group], time_name: str) -> list[int]:
     """
     Number of leading rows of a series of each run that repeat the previous run.
 
-    Rows not later than the last row of the previous run are dropped if they are
-    identical to the last rows of the previous run. Otherwise, they are an error.
+    The file writer does not guarantee sorted times, so the rows of a run may be
+    unsorted. The leading rows not later than the latest time of the previous run
+    are dropped if they are identical to the last rows of the previous run.
+    Otherwise, they are an error, as are later rows that are not later than the
+    previous run.
     """
     names = [name for name in (time_name, *_LOG_SERIES[time_name]) if name in logs[0]]
     drops: list[int] = []
@@ -685,10 +685,16 @@ def _leading_duplicates(logs: list[h5py.Group], time_name: str) -> list[int]:
         drop = 0
         if previous is not None:
             previous_times = previous[time_name][()]
-            drop = int(np.searchsorted(times, previous_times[-1], side='right'))
+            latest = previous_times.max()
+            later = times > latest
+            drop = int(np.argmax(later)) if later.any() else len(times)
             tail = len(previous_times) - drop
-            if tail < 0 or not all(
-                _equal(log[name][:drop], previous[name][tail:]) for name in names
+            if (
+                tail < 0
+                or np.any(times[drop:] <= latest)
+                or not all(
+                    _equal(log[name][:drop], previous[name][tail:]) for name in names
+                )
             ):
                 raise ValueError(
                     f'{time_name} of {Path(log.file.filename).name} overlaps the '
