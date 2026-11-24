@@ -7,7 +7,7 @@ from ess.imaging.tools import maximum_resolution_achievable
 
 
 def _events(counts, dims=('x', 'y'), event_dim='event'):
-    """Construct tiny bins directly, without a multi-dimensional binning workspace."""
+    """Create event bins with the given number of events in each bin."""
     counts = np.asarray(counts, dtype=np.int64)
     ends = counts.cumsum().reshape(counts.shape)
     data = sc.DataArray(

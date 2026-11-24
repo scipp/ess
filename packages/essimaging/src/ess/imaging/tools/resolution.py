@@ -16,41 +16,43 @@ def maximum_resolution_achievable(
     events: sc.DataArray,
     image_dims: tuple[str, str],
 ) -> sc.DataArray:
-    """Coarsen an image until every unmasked bin contains at least one event.
+    """
+    Estimate the achievable image resolution from the number of events per bin.
+
+    Neighboring pixels are combined until every unmasked output bin contains
+    at least one event. For wavelength-binned data, this requires events in
+    every unmasked wavelength bin of every output pixel.
+
+    The search starts at the input resolution and combines progressively larger
+    rectangular blocks of pixels. Both block widths increase together through
+    sizes that divide the image dimensions evenly. Once a dimension has a single
+    output pixel, the search continues along the other dimension.
 
     Parameters
     ----------
     events:
-        DataArray binned in at least the ``image_dims`` dimensions and optionally more.
-        No spatial coordinates are required. Other dimensions, such as wavelength
-        or time-of-flight, retain their original binning. Event weights do not
-        affect the choice of resolution.
+        Events grouped by image pixel, optionally binned along further dimensions
+        such as wavelength or time-of-flight.
     image_dims:
-        Two distinct, non-empty dimensions defining the image grid.
+        Names of the two dimensions that form the image, such as ``('x', 'y')``.
 
     Returns
     -------
     :
-        Events concatenated within rectangular blocks of neighboring pixels.
-        Masked pixels are excluded. Coordinates depending on the image dimensions
-        are dropped by the concatenation. The input is not modified.
+        Binned events at the first resolution in the search that meets the
+        criterion above. Each output pixel contains the events from one block
+        of input pixels, excluding masked pixels. The other dimensions retain
+        their original binning.
+
+        Coordinates depending on the image dimensions, including pixel bin edges
+        and positions, are dropped.
 
     Raises
     ------
     ValueError
-        If the input is not binned, the image dimensions are invalid, or even
-        combining all image pixels leaves an empty unmasked bin.
-
-    Notes
-    -----
-    Block sizes follow the ascending divisors of each image dimension, paired
-    in order. Once one dimension is fully combined, only the other is coarsened.
-    The first valid grid in this sequence is returned, not necessarily the finest
-    among all possible rectangular grids. Powers of two give successive factors
-    of two; other sizes can give larger jumps.
-
-    The search folds and sums bin counts. Event contents are concatenated only
-    once, after choosing the resolution, without re-binning individual events.
+        If the input is not binned, any dimension is empty, or ``image_dims``
+        does not name two distinct input dimensions. Also raised if empty
+        unmasked bins remain after combining all image pixels.
     """
     if events.bins is None:
         raise ValueError('Input data must be binned.')
