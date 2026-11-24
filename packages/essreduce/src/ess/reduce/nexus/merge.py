@@ -389,7 +389,7 @@ def plan_merge(files: Sequence[Path | str], rules: MergeRules) -> MergePlan:
     :
         The runs in the order of their start times, and the issues found.
     """
-    if len(files) < 1:
+    if not files:
         raise ValueError('merging needs at least one file')
     with ExitStack() as stack:
         runs = sorted(
@@ -663,16 +663,15 @@ def _check_logs(sources: list[h5py.File], rules: MergeRules) -> Iterator[Issue]:
         if any(log is None for log in logs) or key is None or key in seen:
             continue  # missing logs are reported by _check_layout
         seen.add(key)
-        issues = list(_check_log_series(path, logs, strip_padding=rules.strip_padding))
+        issues, series = _check_log_series(
+            path, logs, strip_padding=rules.strip_padding
+        )
         yield from issues
         if any(issue.severity == 'error' for issue in issues) or 'value' not in node:
             continue
         valid = (
-            [
-                run.valid
-                for run in _series_rows(logs, 'time', strip_padding=rules.strip_padding)
-            ]
-            if 'time' in node
+            [run.valid for run in series['time']]
+            if 'time' in series
             else [range(log['value'].shape[0]) for log in logs]
         )
         yield from _check_log_values(path, [log['value'] for log in logs], valid, rule)
@@ -683,21 +682,28 @@ def _check_logs(sources: list[h5py.File], rules: MergeRules) -> Iterator[Issue]:
 
 def _check_log_series(
     path: str, logs: list[h5py.Group], *, strip_padding: bool
-) -> Iterator[Issue]:
+) -> tuple[list[Issue], dict[str, list[_Rows]]]:
+    """The issues of the series of a log, and the rows of each valid series."""
+    issues: list[Issue] = []
+    series: dict[str, list[_Rows]] = {}
     for time_name in _LOG_SERIES:
         if time_name not in logs[0]:
             continue
         try:
             rows = _series_rows(logs, time_name, strip_padding=strip_padding)
         except ValueError as err:
-            yield Issue('error', path, str(err))
+            issues.append(Issue('error', path, str(err)))
             continue
+        series[time_name] = rows
         for log, run in zip(logs, rows, strict=True):
             if (stripped := log[time_name].shape[0] - len(run.valid)) > 0:
                 name = Path(log.file.filename).name
-                yield Issue(
-                    'info', path, f'{time_name} in {name}: stripped {stripped} rows'
+                issues.append(
+                    Issue(
+                        'info', path, f'{time_name} in {name}: stripped {stripped} rows'
+                    )
                 )
+    return issues, series
 
 
 @dataclass(frozen=True)
