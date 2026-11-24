@@ -465,6 +465,78 @@ def test_padding_rows_with_time_zero_are_an_error(runs: list[Path]) -> None:
     assert 'time 0' in error.message
 
 
+STRIP = MergeRules(rules=RULES.rules, strip_padding=True)
+
+
+def _pad_series(front: int, back: int) -> Callable[[h5py.File], None]:
+    """Pad the time and value of the temperature log with rows of zeros."""
+
+    def pad(f: h5py.File) -> None:
+        for name in ('time', 'value'):
+            dataset = f[f'{TEMPERATURE}/{name}']
+            data = dataset[()]
+            dataset.resize(len(data) + front + back, axis=0)
+            dataset[:] = [*[0] * front, *data, *[0] * back]
+
+    return pad
+
+
+@pytest.mark.parametrize(('front', 'back'), [(0, 2), (3, 0), (1, 1)])
+def test_write_strips_padding_at_the_ends_of_a_series(
+    runs: list[Path], tmp_path: Path, front: int, back: int
+) -> None:
+    modify(runs[0], _pad_series(front, back))
+    modify(runs[1], _pad_series(back, front))
+    plan = plan_merge(runs, STRIP)
+    assert {issue.severity for issue in plan.issues} == {'info'}
+    assert all('stripped' in issue.message for issue in plan.issues)
+    with h5py.File(plan.write(tmp_path / 'merged.nxs')) as f:
+        log = f[TEMPERATURE]
+        assert list(log['time']) == [SECOND, 2 * SECOND, 11 * SECOND]
+        assert list(log['value']) == [10.0, 10.02, 10.05]
+
+
+def test_padding_is_an_error_unless_stripped(runs: list[Path]) -> None:
+    modify(runs[0], _pad_series(0, 1))
+    assert _error_paths(runs, RULES) == {TEMPERATURE}
+    assert _error_paths(runs, STRIP) == set()
+
+
+def test_cue_index_of_padding_row_points_to_last_row_that_is_not(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    modify(runs[1], _pad_series(0, 1))  # run a has two readings, then the padding
+    modify(runs[1], lambda f: f[f'{TEMPERATURE}/cue_index'].__setitem__(0, 2))
+    with h5py.File(plan_merge(runs, STRIP).write(tmp_path / 'merged.nxs')) as f:
+        assert list(f[f'{TEMPERATURE}/cue_index']) == [1, 2]
+
+
+def test_padding_with_data_is_an_error_even_if_stripping(runs: list[Path]) -> None:
+    def pad_with_data(f: h5py.File) -> None:
+        _pad_series(0, 1)(f)
+        f[f'{TEMPERATURE}/value'][-1] = 7.0
+
+    modify(runs[0], pad_with_data)
+    (error,) = plan_merge(runs, STRIP).errors
+    assert error.path == TEMPERATURE
+    assert 'data in rows with time 0' in error.message
+
+
+def test_row_with_time_zero_inside_a_series_is_an_error_even_if_stripping(
+    runs: list[Path],
+) -> None:
+    modify(runs[1], _pad_series(0, 1))
+    modify(
+        runs[1],
+        lambda f: f[f'{TEMPERATURE}/time'].__setitem__(
+            slice(None), [SECOND, 0, 2 * SECOND]
+        ),
+    )
+    (error,) = plan_merge(runs, STRIP).errors
+    assert error.path == TEMPERATURE
+    assert 'between others' in error.message
+
+
 def test_log_row_not_later_than_previous_run_is_an_error(runs: list[Path]) -> None:
     # Run b (runs[0]) has one reading, at 11 s. Move it before the end of run a.
     modify(runs[0], lambda f: f[f'{TEMPERATURE}/time'].__setitem__(0, SECOND))
@@ -650,6 +722,7 @@ error = "5e-1 K"
     )
     rules = MergeRules.from_toml(path)
     assert rules.ignore == ('/entry/title',)
+    assert not rules.strip_padding
     target, temperature = rules.rules
     assert rules.rule_for(TARGET) is target
     assert rules.rule_for(TEMPERATURE) is temperature
@@ -686,6 +759,15 @@ def test_rules_from_toml_refuses_invalid_rules(
     path = tmp_path / 'rules.toml'
     path.write_text(content)
     with pytest.raises(ValueError, match=match):
+        MergeRules.from_toml(path)
+
+
+def test_strip_padding_from_toml(tmp_path: Path) -> None:
+    path = tmp_path / 'rules.toml'
+    path.write_text('strip_padding = true\n')
+    assert MergeRules.from_toml(path).strip_padding
+    path.write_text('strip_padding = "yes"\n')
+    with pytest.raises(ValueError, match='strip_padding'):
         MergeRules.from_toml(path)
 
 
