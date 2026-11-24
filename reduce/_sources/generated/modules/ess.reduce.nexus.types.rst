@@ -70,6 +70,7 @@ ess.reduce.nexus.types
       NeXusName
       NeXusTransformation
       NeXusTransformationChain
+      NeutronSourcePosition
       Position
       ProtonCharge
       RawChoppers

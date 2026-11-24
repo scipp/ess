@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -492,7 +492,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -995,6 +995,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">EmptyMonitor</span><span class="p">,</span>
     <span class="n">GravityVector</span><span class="p">,</span>
     <span class="n">MonitorType</span><span class="p">,</span>
+    <span class="n">NeutronSourcePosition</span><span class="p">,</span>
     <span class="n">NeXusName</span><span class="p">,</span>
     <span class="n">Position</span><span class="p">,</span>
     <span class="n">RawDetector</span><span class="p">,</span>
@@ -1406,7 +1407,7 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.unwrap.to_wavelength.detector_ltotal_from_straight_line_approximation.html#ess.reduce.unwrap.to_wavelength.detector_ltotal_from_straight_line_approximation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">detector_ltotal_from_straight_line_approximation</span><span class="p">(</span>
     <span class="n">detector</span><span class="p">:</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
@@ -1445,7 +1446,7 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../../../generated/modules/ess.reduce.unwrap.to_wavelength.monitor_ltotal_from_straight_line_approximation.html#ess.reduce.unwrap.to_wavelength.monitor_ltotal_from_straight_line_approximation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">monitor_ltotal_from_straight_line_approximation</span><span class="p">(</span>
     <span class="n">monitor_beamline</span><span class="p">:</span> <span class="n">EmptyMonitor</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">],</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MonitorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute Ltotal for the monitor.</span>
@@ -1511,7 +1512,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">backend</span><span class="p">:</span> <span class="n">FrameUnwrapBackend</span><span class="p">,</span>
     <span class="n">keep_event_time_offset</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">da</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">da</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">_compute_wavelength_histogram</span><span class="p">(</span>
             <span class="n">da</span><span class="o">=</span><span class="n">da</span><span class="p">,</span> <span class="n">lookup</span><span class="o">=</span><span class="n">lookup</span><span class="p">,</span> <span class="n">ltotal</span><span class="o">=</span><span class="n">ltotal</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span>
         <span class="p">)</span>
@@ -1699,7 +1700,7 @@ window.runMermaid = runMermaid;</script>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -492,7 +492,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -1093,18 +1093,21 @@ window.runMermaid = runMermaid;</script>
 <span class="n">Component</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Component&#39;</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;A beamline component in a NeXus file.&quot;&quot;&quot;</span>
 <span class="n">COMPONENT_CONSTRAINTS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">snx</span><span class="o">.</span><span class="n">NXcrystal</span><span class="p">,</span>
     <span class="n">snx</span><span class="o">.</span><span class="n">NXdetector</span><span class="p">,</span>
+    <span class="n">snx</span><span class="o">.</span><span class="n">NXdisk_chopper</span><span class="p">,</span>
+    <span class="n">snx</span><span class="o">.</span><span class="n">NXmoderator</span><span class="p">,</span>
     <span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span>
     <span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span>
-    <span class="n">snx</span><span class="o">.</span><span class="n">NXdisk_chopper</span><span class="p">,</span>
-    <span class="n">snx</span><span class="o">.</span><span class="n">NXcrystal</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Base constraints for the Component type variable.</span>
 
 <span class="sd">This list will be supplemented with monitor types when creating a pipeline.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">UniqueComponent</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;UniqueComponent&#39;</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">)</span>
+<span class="n">UniqueComponent</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span>
+    <span class="s1">&#39;UniqueComponent&#39;</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXmoderator</span>
+<span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Components that can be identified by their type as there will only be one.</span>
 
 <span class="sd">This applies for a given parent for these components, not the entire file.</span>
@@ -1256,6 +1259,13 @@ window.runMermaid = runMermaid;</script>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Position(position=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="si">}</span><span class="s2">, time=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_time</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NeutronSourcePosition">
+<a class="viewcode-back" href="../../../../generated/modules/ess.reduce.nexus.types.NeutronSourcePosition.html#ess.reduce.nexus.types.NeutronSourcePosition">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeutronSourcePosition</span><span class="p">(</span><span class="n">sciline</span><span class="o">.</span><span class="n">Scope</span><span class="p">[</span><span class="n">RunType</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position of the neutron source, usually derived from the NXmoderator.&quot;&quot;&quot;</span></div>
 
 
 
@@ -1595,7 +1605,7 @@ window.runMermaid = runMermaid;</script>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

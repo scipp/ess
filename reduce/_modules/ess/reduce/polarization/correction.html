@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -492,7 +492,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -1097,7 +1097,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    :</span>
 <span class="sd">        Correction matrix coefficients.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">channel</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">channel</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">bins</span>
 
     <span class="n">t_plus</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="s1">&#39;plus&#39;</span><span class="p">)</span>
@@ -1188,7 +1188,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    :</span>
 <span class="sd">        The polarization corrected data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">upup</span><span class="o">.</span><span class="n">upup</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">upup</span><span class="o">.</span><span class="n">upup</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">PolarizationCorrectedData</span><span class="p">(</span>
             <span class="n">upup</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">upup</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="n">upup</span><span class="p">,</span> <span class="n">updown</span><span class="p">,</span> <span class="n">downup</span><span class="p">,</span> <span class="n">downdown</span><span class="p">)]</span>
@@ -1407,7 +1407,7 @@ window.runMermaid = runMermaid;</script>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreduce version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
+Current ESSreduce version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essreduce">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

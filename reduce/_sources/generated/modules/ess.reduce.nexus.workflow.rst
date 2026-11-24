@@ -29,8 +29,10 @@ ess.reduce.nexus.workflow
       assemble_monitor_data
       component_spec_by_name
       compute_dynamic_position
+      compute_neutron_source_position
       compute_position
       data_by_name
+      deny_source_position
       file_path_to_file_spec
       full_time_interval
       get_calibrated_detector
@@ -54,6 +56,7 @@ ess.reduce.nexus.workflow
       nx_class_for_crystal
       nx_class_for_detector
       nx_class_for_disk_chopper
+      nx_class_for_moderator
       nx_class_for_monitor
       nx_class_for_sample
       nx_class_for_source

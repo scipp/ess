@@ -28,5 +28,6 @@
    :template: module-template.rst
    :recursive:
 
+   flat_data_viewer
    load_nexus
 
