@@ -69,7 +69,7 @@ def test_simulation_workflow_can_load_single_detector() -> None:
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
 
-    assert result.bins is not None
+    assert result.is_binned
     assert set(result.dims) == {'arc', 'channel', 'tube', 'length', 'time'}
     assert result.sizes['tube'] == 3
     assert 'position' in result.coords
@@ -95,7 +95,7 @@ def test_simulation_workflow_can_load_multiple_detectors_rectangular(
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
 
-    assert result.bins is not None
+    assert result.is_binned
     assert set(result.dims) == {'arc', 'channel', 'tube', 'length', 'time'}
     assert result.sizes['arc'] == 3
     assert result.sizes['channel'] == 6
@@ -120,7 +120,7 @@ def test_simulation_workflow_can_load_multiple_detectors_non_rectangular() -> No
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
 
-    assert result.bins is not None
+    assert result.is_binned
     assert set(result.dims) == {'triplet', 'tube', 'length', 'time'}
     assert result.sizes['triplet'] == len(detector_names)
     assert result.sizes['tube'] == 3
@@ -130,7 +130,7 @@ def test_simulation_workflow_can_load_multiple_detectors_non_rectangular() -> No
 def test_simulation_workflow_can_load_monitor(workflow: sciline.Pipeline) -> None:
     result = workflow.compute(RawMonitor[SampleRun, NormalizationMonitor])
 
-    assert result.bins is None
+    assert not result.is_binned
     assert 'position' in result.coords
 
 
@@ -169,7 +169,7 @@ def test_simulation_workflow_can_compute_wavelength_monitor(
     assert set(monitor.dims) == {'time', 'incident_wavelength'}
     expected_coords = {'position', 'incident_wavelength', 'time'}
     assert expected_coords.issubset(monitor.coords)
-    assert monitor.bins is None
+    assert not monitor.is_binned
 
 
 def test_simulation_workflow_produces_the_same_data_as_before(

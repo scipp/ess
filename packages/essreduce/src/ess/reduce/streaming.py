@@ -36,7 +36,7 @@ def maybe_hist(value: T) -> T:
     """
     if not isinstance(value, sc.Variable | sc.DataArray):
         return value
-    return value if value.bins is None else value.hist()
+    return value if not value.is_binned else value.hist()
 
 
 class Accumulator(ABC, Generic[T]):

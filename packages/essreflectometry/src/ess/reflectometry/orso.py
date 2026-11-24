@@ -251,7 +251,7 @@ def _limits_of_coord(data: sc.DataArray, name: str) -> tuple[float, float, str] 
 def _get_coord(data: sc.DataArray, name: str) -> sc.Variable | None:
     if name in data.coords:
         return sc.DataArray(data=data.coords[name], masks=data.masks)
-    if (data.bins is not None) and (name in data.bins.coords):
+    if data.is_binned and (name in data.bins.coords):
         # Note that .bins.concat() applies the top-level masks
         events = data.bins.concat().value
         return sc.DataArray(data=events.coords[name], masks=events.masks)

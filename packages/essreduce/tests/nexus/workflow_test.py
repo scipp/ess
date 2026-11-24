@@ -499,7 +499,7 @@ def test_assemble_detector_data_groups_events_by_detector_number(
     calibrated_detector, detector_event_data
 ) -> None:
     detector = workflow.assemble_detector_data(calibrated_detector, detector_event_data)
-    assert detector.bins is not None
+    assert detector.is_binned
     assert_identical(
         detector.coords['detector_number'],
         calibrated_detector.coords['detector_number'],
@@ -742,7 +742,7 @@ def test_load_event_monitor_workflow(loki_tutorial_sample_run_60250: Path) -> No
     wf[NeXusName[Monitor1]] = 'monitor_1'
     da = wf.compute(RawMonitor[SampleRun, Monitor1])
     assert 'position' in da.coords
-    assert da.bins is not None
+    assert da.is_binned
     assert da.dims == ('event_time_zero',)
     assert da.bins.constituents['data'].variances is not None
 
@@ -753,7 +753,7 @@ def test_load_histogram_monitor_workflow(dream_coda_test_file: Path) -> None:
     wf[NeXusName[Monitor1]] = 'monitor_bunker'
     da = wf.compute(RawMonitor[SampleRun, Monitor1])
     assert 'position' in da.coords
-    assert da.bins is None
+    assert not da.is_binned
     assert set(da.dims) == {'time', 'frame_time'}
     assert 'time' in da.coords.keys()
     assert 'frame_time' in da.coords.keys()
@@ -817,7 +817,7 @@ def test_load_detector_workflow(loki_tutorial_sample_run_60250: Path) -> None:
     wf[NeXusName[snx.NXdetector]] = 'larmor_detector'
     da = wf.compute(RawDetector[SampleRun])
     assert 'position' in da.coords
-    assert da.bins is not None
+    assert da.is_binned
     assert da.dims == ('detector_number',)
 
 
@@ -827,7 +827,7 @@ def test_load_histogram_detector_workflow(tbl_commissioning_orca_file: Path) -> 
     wf[NeXusName[snx.NXdetector]] = 'orca_detector'
     da = wf.compute(RawDetector[SampleRun])
     assert 'position' in da.coords
-    assert da.bins is None
+    assert not da.is_binned
     assert 'time' in da.dims
     assert da.ndim == 3
 
@@ -840,7 +840,7 @@ def test_load_empty_histogram_detector_workflow(
     wf[NeXusName[snx.NXdetector]] = 'orca_detector'
     da = wf.compute(EmptyDetector[SampleRun])
     assert 'position' in da.coords
-    assert da.bins is None
+    assert not da.is_binned
     # The empty detector has no time dimension, only the dimensions of the geometry
     assert 'time' not in da.dims
     assert da.ndim == 2
@@ -857,11 +857,11 @@ def test_generic_nexus_workflow(
     wf[PreopenNeXusFile] = preopen
     da = wf.compute(RawDetector[SampleRun])
     assert 'position' in da.coords
-    assert da.bins is not None
+    assert da.is_binned
     assert da.dims == ('detector_number',)
     da = wf.compute(RawMonitor[SampleRun, Monitor1])
     assert 'position' in da.coords
-    assert da.bins is not None
+    assert da.is_binned
     assert da.dims == ('event_time_zero',)
 
 

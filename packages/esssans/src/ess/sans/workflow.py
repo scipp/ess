@@ -36,7 +36,7 @@ def merge_contributions(*data: sc.DataArray) -> sc.DataArray:
     if len(data) == 1:
         return data[0]
     reducer = sc.reduce(data)
-    return reducer.bins.concat() if data[0].bins is not None else reducer.sum()
+    return reducer.bins.concat() if data[0].is_binned else reducer.sum()
 
 
 def with_banks(

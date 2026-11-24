@@ -909,7 +909,7 @@ class _NXdataWithoutAuxSignals(snx.NXdata):
 
 def _add_variances(da: sc.DataArray) -> sc.DataArray:
     out = da.copy(deep=False)
-    if out.bins is not None:
+    if out.is_binned:
         content = out.bins.constituents['data']
         content.data = _assign_values_as_variances(content.data)
     elif out.variances is None:

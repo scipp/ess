@@ -115,7 +115,7 @@ def reduce_sample_over_q(
         R.coords['Q_resolution'] = sc.sqrt(
             (
                 weighted_resolution
-                if weighted_resolution.bins is None
+                if not weighted_resolution.is_binned
                 else weighted_resolution.bins.concat()
             ).hist(Q=s.coords['Q'])
             / h

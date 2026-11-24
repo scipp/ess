@@ -217,7 +217,7 @@ def test_direct_beam_returns_expected_dims() -> None:
         q_range=q_range,
         background_q_range=background_q_range,
     )
-    assert db.bins is None
+    assert not db.is_binned
     assert db.dims == ('time', 'wavelength')
 
 

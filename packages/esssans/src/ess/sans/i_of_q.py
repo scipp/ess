@@ -78,7 +78,7 @@ def preprocess_monitor_data(
         )
         background = mask_range(monitor, mask=mask).mean()
 
-    if monitor.bins is not None:
+    if monitor.is_binned:
         monitor = monitor.hist(wavelength=wavelength_bins)
     else:
         monitor = monitor.rebin(wavelength=wavelength_bins)
@@ -211,7 +211,7 @@ def _bin_in_q(
     data: sc.DataArray, edges: dict[str, sc.Variable], dims_to_keep: tuple[str, ...]
 ) -> sc.DataArray:
     dims_to_reduce = set(data.dims) - {'wavelength'} - set(dims_to_keep or ())
-    return (data.hist if data.bins is None else data.bin)(**edges, dim=dims_to_reduce)
+    return (data.hist if not data.is_binned else data.bin)(**edges, dim=dims_to_reduce)
 
 
 def _subtract_background(
@@ -219,11 +219,11 @@ def _subtract_background(
     background: sc.DataArray,
     return_events: ReturnEvents,
 ) -> sc.DataArray:
-    if return_events and sample.bins is not None and background.bins is not None:
+    if return_events and sample.is_binned and background.is_binned:
         return sample.bins.concatenate(-background)
-    if sample.bins is not None:
+    if sample.is_binned:
         sample = sample.bins.sum()
-    if background.bins is not None:
+    if background.is_binned:
         background = background.bins.sum()
     return sample - background
 
