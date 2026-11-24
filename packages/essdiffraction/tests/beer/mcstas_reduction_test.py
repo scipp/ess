@@ -156,7 +156,7 @@ def test_modulation_workflows_can_normalize(factory):
     wf[DetectorBank] = DetectorBank.north
     wf[DHKLList] = silicon_peaks_array()
     wf[DspacingBins] = sc.linspace('dspacing', 0.8, 2.2, 31, unit='angstrom')
-    wf[PixelMasks] = PixelMasks({})
+    wf[PixelMasks] = PixelMasks()
     wf[KeepEvents[SampleRun]] = KeepEvents[SampleRun](True)
     wf[UncertaintyBroadcastMode] = UncertaintyBroadcastMode.drop
     wf[TofMask] = None

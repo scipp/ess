@@ -27,7 +27,7 @@ def apply_masks(
 ) -> sc.DataArray:
     """ """
     out = data.copy(deep=False)
-    if len(pixel_masks) > 0:
+    if not pixel_masks.empty:
         key = (
             set(out.coords.keys()) & {"detector_number", "detector_id", "spectrum"}
         ).pop()
