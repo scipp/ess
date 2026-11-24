@@ -59,17 +59,11 @@ class MirrorGeometry[RunType]:
 
 
 class UpstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Beam names mapped to fixed slit centers before the inversion mirror.
-
-    Positions are in global coordinates, also when inversion is disabled.
-    """
+    """Beam names mapped to upstream slit centers in global coordinates."""
 
 
 class DownstreamSlitCenters(sciline.Scope[RunType, dict], dict):
-    """Beam names mapped to fixed slit centers after the inversion mirror.
-
-    Positions are in global coordinates, also when inversion is disabled.
-    """
+    """Beam names mapped to downstream slit centers in global coordinates."""
 
 
 class DetectorRegionOfInterest(sciline.Scope[RunType, dict], dict):
