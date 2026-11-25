@@ -18464,7 +18464,7 @@ packages:
   requires_dist:
   - dask>=2022.1.0
   - graphviz>=0.20
-  - essreduce>=26.10.1
+  - essreduce>=26.11.1
   - mcstastox>=0.0.11
   - numpy>=2
   - plopp>=26.5.0
@@ -18503,7 +18503,7 @@ packages:
   - graphviz>=0.20
   - plopp>=23.10.0
   - tifffile>=2026.5.2
-  - essreduce>=26.10.1
+  - essreduce>=26.11.1
   - scitiff>=26.6
   - numba>=0.63 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
@@ -18532,7 +18532,7 @@ packages:
   requires_dist:
   - dask>=2022.1.0
   - graphviz>=0.20
-  - essreduce>=26.6.2
+  - essreduce>=26.11.1
   - plopp>=26.5.0
   - pooch>=1.9.0
   - pandas>=2.1.2
@@ -18607,7 +18607,7 @@ packages:
   - python-dateutil>=2.9.0
   - plopp>=26.5.0
   - orsopy>=1.2
-  - essreduce>=26.11.0
+  - essreduce>=26.11.1
   - esspolarization>=25.7.0
   - pandas>=2.1.2
   - scippneutron>=26.9.0
@@ -18645,7 +18645,7 @@ packages:
   requires_dist:
   - dask>=2022.1.0
   - graphviz>=0.20
-  - essreduce>=26.11.0
+  - essreduce>=26.11.1
   - lazy-loader>=0.4
   - numpy>=1.26.4
   - pandas>=2.1.2
@@ -18679,7 +18679,7 @@ packages:
   requires_dist:
   - dask>=2022.1.0
   - graphviz>=0.20
-  - essreduce>=26.11.0
+  - essreduce>=26.11.1
   - pandas>=2.1.2
   - tof>=25.11.0
   - numba>=0.63 ; extra == 'test'
