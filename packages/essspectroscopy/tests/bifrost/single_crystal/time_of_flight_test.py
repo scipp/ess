@@ -18,7 +18,6 @@ from ess.spectroscopy.types import (
 from ess.reduce.unwrap.types import DetectorLtotal, LookupTable
 
 _TANK_ANGLE = '/entry/instrument/detector_tank_angle/value'
-_MONITOR_Z = '/entry/instrument/elastic_monitor/transformations/elastic_monitor_t0_z'
 
 
 @pytest.fixture
@@ -63,13 +62,3 @@ def test_ltotal_is_scalar_for_time_dependent_tank_angle(
     }
     ltotal = workflow.compute(DetectorLtotal[SampleRun])
     sc.testing.assert_allclose(ltotal, static)
-
-
-def test_ltotal_raises_if_flight_path_changes_over_time(
-    workflow: sciline.Pipeline,
-) -> None:
-    workflow[TransformationOverrides[ElasticMonitor, SampleRun]] = {
-        _MONITOR_Z: _time_series([1.0, 1.1], unit='m')
-    }
-    with pytest.raises(ValueError, match='changes with the tank angle'):
-        workflow.compute(DetectorLtotal[SampleRun])

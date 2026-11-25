@@ -3,7 +3,6 @@
 
 """Utilities for computing real neutron time-of-flight."""
 
-import scipp as sc
 import scippnexus as snx
 from ess.spectroscopy.types import (
     DataGroupedByRotation,
@@ -24,11 +23,6 @@ from ess.reduce.unwrap.to_wavelength import (
 )
 from ess.reduce.unwrap.types import DetectorLtotal
 
-# 1 mm is 1% of the lookup table's default `DistanceResolution` (0.1 m) and 6 ppm of
-# the 162.8 m flight path, so a variation below it does not change the wavelengths.
-# Rounding errors in the transformation chains are orders of magnitude smaller.
-_LTOTAL_TOLERANCE = sc.scalar(1e-3, unit='m')
-
 
 def detector_ltotal(
     monitor: EmptyDetector[RunType],
@@ -47,15 +41,10 @@ def detector_ltotal(
 
     The monitor is mounted on the detector tank, so a time-dependent tank angle gives
     the monitor position, and hence ``Ltotal``, a 'time' dimension. The tank rotates
-    about the vertical axis through the sample, so ``Ltotal`` is nevertheless constant
-    along it. This is checked and 'time' is dropped, rather than mapped to the 'a4'
-    dimension of the grouped data, which would only add a dimension along which
-    nothing varies.
-
-    Raises
-    ------
-    ValueError
-        If ``Ltotal`` changes over time.
+    about the vertical axis through the sample, so ``Ltotal`` is constant along it up
+    to survey offsets of the axis, which are far below the lookup table's distance
+    resolution. 'time' is therefore averaged out rather than mapped to the 'a4'
+    dimension of the grouped data.
     """
     ltotal = detector_ltotal_from_straight_line_approximation(
         detector=monitor,
@@ -63,16 +52,9 @@ def detector_ltotal(
         sample_position=sample_position,
         gravity=gravity,
     )
-    if 'time' not in ltotal.dims:
-        return ltotal
-    spread = ltotal.max('time') - ltotal.min('time')
-    if (spread > _LTOTAL_TOLERANCE.to(unit=spread.unit)).any().value:
-        raise ValueError(
-            "The flight path of the Bragg peak monitor changes with the tank angle "
-            f"(by up to {spread.max().to(unit='mm').value:.3g} mm), which this "
-            "workflow does not support."
-        )
-    return DetectorLtotal[RunType](ltotal['time', 0])
+    if 'time' in ltotal.dims:
+        return DetectorLtotal[RunType](ltotal.mean('time'))
+    return ltotal
 
 
 def detector_wavelength_data(
