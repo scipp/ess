@@ -23,6 +23,7 @@ ess.spectroscopy.indirect.time\_of\_flight
    
       TofWorkflow
       compute_monitor_ltotal
+      detector_ltotal_at_sample
       detector_wavelength_data
       mask_large_uncertainty_in_lut_detector
       monitor_wavelength_data

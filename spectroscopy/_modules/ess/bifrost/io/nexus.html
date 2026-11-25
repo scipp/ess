@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=b7a0930b"></script>
+    <script src="../../../../_static/documentation_options.js?v=0c5c1116"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.2" />
+  <meta name="docsearch:version" content="26.11.3" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -533,7 +533,6 @@
     <span class="n">Analyzers</span><span class="p">,</span>
     <span class="n">ElasticMonitor</span><span class="p">,</span>
     <span class="n">InstrumentAngle</span><span class="p">,</span>
-    <span class="n">NeXusClass</span><span class="p">,</span>
     <span class="n">NeXusComponent</span><span class="p">,</span>
     <span class="n">NeXusComponentLocationSpec</span><span class="p">,</span>
     <span class="n">NeXusData</span><span class="p">,</span>
@@ -566,7 +565,7 @@
             <span class="sa">f</span><span class="s2">&quot;Expected the sample angle at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> to be a rotation,&quot;</span>
             <span class="sa">f</span><span class="s2">&quot; got &#39;</span><span class="si">{</span><span class="n">transform</span><span class="o">.</span><span class="n">transformation_type</span><span class="si">}</span><span class="s2">&#39; instead.&#39;&quot;</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="n">SampleAngle</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">transform</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+    <span class="k">return</span> <span class="n">SampleAngle</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">_value_as_data_array</span><span class="p">(</span><span class="n">transform</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
 
@@ -595,34 +594,34 @@
     <span class="c1"># We could use any detector or the elastic monitor to get a chain that contains</span>
     <span class="c1"># the angle. Using the monitor is simplest because there is only one, and we</span>
     <span class="c1"># do not have to deal with multiple detectors.</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">transformation</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="p">[</span><span class="n">path</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;The transformation chain of </span><span class="si">{</span><span class="n">chain</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s1"> does not contain the &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;detector tank angle </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">. The chain contains &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-    <span class="k">if</span> <span class="n">transformation</span><span class="o">.</span><span class="n">transformation_type</span> <span class="o">!=</span> <span class="s1">&#39;rotation&#39;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Expected the instrument angle at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> to be a rotation, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;got &#39;</span><span class="si">{</span><span class="n">transformation</span><span class="o">.</span><span class="n">transformation_type</span><span class="si">}</span><span class="s2">&#39; instead.&#39;&quot;</span>
-        <span class="p">)</span>
-    <span class="n">angle</span> <span class="o">=</span> <span class="n">transformation</span><span class="o">.</span><span class="n">value</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
-        <span class="c1"># A fixed angle or a value from TransformationOverrides, not an NXlog.</span>
-        <span class="n">angle</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">InstrumentAngle</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">angle</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+    <span class="n">transformation</span> <span class="o">=</span> <span class="n">_find_transformation_in_chain</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">InstrumentAngle</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span><span class="n">_value_as_data_array</span><span class="p">(</span><span class="n">transformation</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
 
-<span class="c1"># See https://github.com/scipp/ess/issues/120</span>
-<div class="viewcode-block" id="moderator_class_for_source">
-<a class="viewcode-back" href="../../../../generated/modules/ess.bifrost.io.nexus.moderator_class_for_source.html#ess.bifrost.io.nexus.moderator_class_for_source">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">moderator_class_for_source</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">NeXusClass</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select NXmoderator as the source.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">NeXusClass</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">](</span><span class="n">snx</span><span class="o">.</span><span class="n">NXmoderator</span><span class="p">)</span></div>
+<span class="k">def</span><span class="w"> </span><span class="nf">_value_as_data_array</span><span class="p">(</span><span class="n">transform</span><span class="p">:</span> <span class="n">snx</span><span class="o">.</span><span class="n">nxtransformations</span><span class="o">.</span><span class="n">Transform</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the value of a transformation, possibly a time-series, as a DataArray.&quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+        <span class="c1"># A fixed value or a value from TransformationOverrides, not an NXlog.</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
 
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_transformation_in_chain</span><span class="p">(</span>
+    <span class="n">chain</span><span class="p">:</span> <span class="n">snx</span><span class="o">.</span><span class="n">TransformationChain</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">transform_name</span><span class="p">,</span> <span class="n">transform</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Use `startswith` so that `path` can point to an NXtransform or NXlog</span>
+        <span class="c1"># itself and does not need to include the full details for robustness</span>
+        <span class="c1"># E.g., `path=/a/b` and `path=/a/b/value` (an NXlog) should both work.</span>
+        <span class="k">if</span> <span class="n">transform_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">transform</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;The transformation chain of </span><span class="si">{</span><span class="n">chain</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s1"> does not contain the &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;detector tank angle </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">. The chain contains &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
 
 <div class="viewcode-block" id="load_bifrost_analyzers">
@@ -899,11 +898,10 @@
     <span class="n">load_bifrost_analyzers</span><span class="p">,</span>
     <span class="n">load_bifrost_analyzer_for_detector</span><span class="p">,</span>
     <span class="n">load_sample_angle</span><span class="p">,</span>
-    <span class="n">moderator_class_for_source</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">InstrumentAnglePath</span><span class="p">:</span> <span class="s1">&#39;/entry/instrument/detector_tank/transformations/tank_angle&#39;</span><span class="p">,</span>
+    <span class="n">InstrumentAnglePath</span><span class="p">:</span> <span class="s1">&#39;/entry/instrument/detector_tank_angle&#39;</span><span class="p">,</span>
     <span class="n">SampleAngleNeXusName</span><span class="p">:</span> <span class="s1">&#39;sample_rotation&#39;</span><span class="p">,</span>
     <span class="n">TransformationTimeFilter</span><span class="p">:</span> <span class="n">stepwise_transformation_time_filter</span><span class="p">,</span>
 <span class="p">}</span>
@@ -969,7 +967,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSspectroscopy version: 26.11.2 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
+Current ESSspectroscopy version: 26.11.3 (<a href="https://github.com/scipp/ess/releases?q=essspectroscopy">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

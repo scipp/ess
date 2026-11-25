@@ -21,7 +21,6 @@ ess.bifrost.io.nexus
       load_bifrost_analyzer_for_detector
       load_bifrost_analyzers
       load_sample_angle
-      moderator_class_for_source
       stepwise_transformation_time_filter
    
    
