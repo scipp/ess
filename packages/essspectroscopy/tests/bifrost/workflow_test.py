@@ -31,6 +31,7 @@ from ess.spectroscopy.types import (
     PSCMonitor,
     RawDetector,
     RawMonitor,
+    SampleAngle,
     SampleRun,
     TransformationOverrides,
     UncertaintyBroadcastMode,
@@ -271,6 +272,19 @@ def test_tank_angle_override_rotates_detectors_and_analyzers_and_sets_a4(
         )
     data = coda_workflow.compute(DataAtSample[SampleRun])
     sc.testing.assert_identical(data.coords['a4'], sc.concat([angle], 'a4'))
+
+
+def test_sample_angle_override_sets_a3(coda_workflow: sciline.Pipeline) -> None:
+    # Live data supplies motor readbacks as scalars through overrides.
+    angle = sc.scalar(12.5, unit='deg')
+    coda_workflow[TransformationOverrides[snx.NXsample, SampleRun]] = {
+        '/entry/instrument/sample_rotation/value': angle
+    }
+
+    sample_angle = coda_workflow.compute(SampleAngle[SampleRun])
+    sc.testing.assert_identical(sample_angle, sc.DataArray(angle))
+    data = coda_workflow.compute(DataAtSample[SampleRun])
+    sc.testing.assert_identical(data.coords['a3'], sc.concat([angle], 'a3'))
 
 
 def test_workflow_can_load_detector_with_analyzers_and_angles_from_coda_file(
