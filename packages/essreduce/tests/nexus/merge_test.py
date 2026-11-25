@@ -348,10 +348,52 @@ def test_write_refuses_to_overwrite(runs: list[Path], tmp_path: Path) -> None:
         plan_merge(runs, RULES).write(tmp_path / 'merged.nxs')
 
 
-def test_merged_file_cannot_be_merged_again(merged: Path, tmp_path: Path) -> None:
-    later = make_run(tmp_path / 'c.nxs', index=2, pulses=[[0]], temperature=[10.0])
-    (issue,) = plan_merge([merged, later], RULES).issues
-    assert (issue.severity, issue.path) == ('error', 'merged.nxs')
+def _datasets(path: Path) -> dict[str, np.ndarray]:
+    datasets = {}
+    with h5py.File(path) as f:
+        f.visititems(
+            lambda name, node: (
+                datasets.__setitem__(name, node[()])
+                if isinstance(node, h5py.Dataset)
+                else None
+            )
+        )
+    return datasets
+
+
+def _assert_same_datasets(a: Path, b: Path) -> None:
+    expected, actual = _datasets(a), _datasets(b)
+    assert actual.keys() == expected.keys()
+    for name, value in expected.items():
+        assert np.array_equal(actual[name], value), name
+
+
+@pytest.fixture
+def later(tmp_path: Path) -> Path:
+    return make_run(tmp_path / 'c.nxs', index=2, pulses=[[0]], temperature=[10.0])
+
+
+def test_merged_file_merged_with_a_later_run_is_like_merging_all_runs(
+    runs: list[Path], merged: Path, later: Path, tmp_path: Path
+) -> None:
+    all_at_once = plan_merge([*runs, later], RULES).write(tmp_path / 'all.nxs')
+    plan = plan_merge([merged, later], RULES)
+    assert plan.issues == ()
+    _assert_same_datasets(all_at_once, plan.write(tmp_path / 'again.nxs'))
+    with h5py.File(tmp_path / 'again.nxs') as f:
+        runs = f['entry/merged_runs']
+        names = [runs[f'run_{i}/file_name'].asstr()[()] for i in range(len(runs))]
+        assert names == ['a.nxs', 'b.nxs', 'c.nxs']
+
+
+def test_merged_file_merged_with_an_earlier_run_is_like_merging_all_runs(
+    runs: list[Path], later: Path, tmp_path: Path
+) -> None:
+    all_at_once = plan_merge([*runs, later], RULES).write(tmp_path / 'all.nxs')
+    b, a = runs
+    merged = plan_merge([b, later], RULES).write(tmp_path / 'bc.nxs')
+    again = plan_merge([merged, a], RULES).write(tmp_path / 'again.nxs')
+    _assert_same_datasets(all_at_once, again)
 
 
 def test_overlapping_runs_are_an_error(tmp_path: Path) -> None:
@@ -454,15 +496,150 @@ def test_per_run_field_may_differ_in_shape(runs: list[Path]) -> None:
 
 
 def test_padding_rows_with_time_zero_are_an_error(runs: list[Path]) -> None:
-    def pad(f: h5py.File) -> None:
-        time = f[f'{TEMPERATURE}/time']
-        time.resize(time.shape[0] + 1, axis=0)  # the fill value is not 0
-        time[-1] = 0
-
-    modify(runs[0], pad)
+    modify(runs[0], _pad_series(0, 1))
     (error,) = plan_merge(runs, RULES).errors
     assert error.path == TEMPERATURE
     assert 'time 0' in error.message
+
+
+STRIP = MergeRules(rules=RULES.rules, strip_padding=True)
+
+
+def _pad_series(front: int, back: int) -> Callable[[h5py.File], None]:
+    """Pad the time and value of the temperature log with rows of zeros."""
+
+    def pad(f: h5py.File) -> None:
+        for name in ('time', 'value'):
+            dataset = f[f'{TEMPERATURE}/{name}']
+            data = dataset[()]
+            dataset.resize(len(data) + front + back, axis=0)
+            dataset[:] = [*[0] * front, *data, *[0] * back]
+
+    return pad
+
+
+@pytest.mark.parametrize(('front', 'back'), [(0, 2), (3, 0), (1, 1)])
+def test_write_strips_padding_at_the_ends_of_a_series(
+    runs: list[Path], tmp_path: Path, front: int, back: int
+) -> None:
+    modify(runs[0], _pad_series(front, back))
+    modify(runs[1], _pad_series(back, front))
+    plan = plan_merge(runs, STRIP)
+    assert {issue.severity for issue in plan.issues} == {'info'}
+    assert all('stripped' in issue.message for issue in plan.issues)
+    with h5py.File(plan.write(tmp_path / 'merged.nxs')) as f:
+        log = f[TEMPERATURE]
+        assert list(log['time']) == [SECOND, 2 * SECOND, 11 * SECOND]
+        assert list(log['value']) == [10.0, 10.02, 10.05]
+
+
+def _pad_alarms(f: h5py.File) -> None:
+    """Pad the alarm series of the temperature log with a row of zeros."""
+    for name, zero in (
+        ('alarm_time', 0),
+        ('alarm_severity', 0),
+        ('alarm_message', b''),
+    ):
+        dataset = f[f'{TEMPERATURE}/{name}']
+        dataset.resize(dataset.shape[0] + 1, axis=0)
+        dataset[-1] = zero
+
+
+def test_write_strips_all_fields_of_each_series(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    for run in runs:
+        modify(run, _pad_series(1, 1))
+        modify(run, _pad_alarms)
+    with h5py.File(plan_merge(runs, STRIP).write(tmp_path / 'merged.nxs')) as f:
+        log = f[TEMPERATURE]
+        assert len(log['time']) == len(log['value']) == 3
+        # One alarm row per run, as written by make_run
+        assert list(log['alarm_time']) == [SECOND, 11 * SECOND]
+        assert list(log['alarm_severity']) == [0, 0]
+        assert list(log['alarm_message']) == [b'', b'']
+
+
+@pytest.mark.parametrize('rules', [RULES, STRIP], ids=['keep', 'strip'])
+def test_series_fields_of_different_length_are_an_error(
+    runs: list[Path], rules: MergeRules
+) -> None:
+    def drop_last_row(f: h5py.File) -> None:
+        dataset = f[f'{TEMPERATURE}/value']
+        dataset.resize(dataset.shape[0] - 1, axis=0)
+
+    modify(runs[1], drop_last_row)
+    (error,) = plan_merge(runs, rules).errors
+    assert error.path == TEMPERATURE
+    assert 'value in a.nxs has 1 rows, but time has 2' in error.message
+
+
+def test_padding_is_an_error_unless_stripped(runs: list[Path]) -> None:
+    modify(runs[0], _pad_series(0, 1))
+    assert _error_paths(runs, RULES) == {TEMPERATURE}
+    assert _error_paths(runs, STRIP) == set()
+
+
+def test_cue_index_of_padding_row_points_to_last_row_that_is_not(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    modify(runs[1], _pad_series(0, 1))  # run a has two readings, then the padding
+    modify(runs[1], lambda f: f[f'{TEMPERATURE}/cue_index'].__setitem__(0, 2))
+    with h5py.File(plan_merge(runs, STRIP).write(tmp_path / 'merged.nxs')) as f:
+        assert list(f[f'{TEMPERATURE}/cue_index']) == [1, 2]
+
+
+def test_padding_with_data_is_an_error_even_if_stripping(runs: list[Path]) -> None:
+    def pad_with_data(f: h5py.File) -> None:
+        _pad_series(0, 1)(f)
+        f[f'{TEMPERATURE}/value'][-1] = 7.0
+
+    modify(runs[0], pad_with_data)
+    (error,) = plan_merge(runs, STRIP).errors
+    assert error.path == TEMPERATURE
+    assert 'data in rows with time 0' in error.message
+
+
+def test_row_with_time_zero_inside_a_series_is_an_error_even_if_stripping(
+    runs: list[Path],
+) -> None:
+    modify(runs[1], _pad_series(0, 1))
+    modify(
+        runs[1],
+        lambda f: f[f'{TEMPERATURE}/time'].__setitem__(
+            slice(None), [SECOND, 0, 2 * SECOND]
+        ),
+    )
+    (error,) = plan_merge(runs, STRIP).errors
+    assert error.path == TEMPERATURE
+    assert 'between others' in error.message
+
+
+def test_single_file_is_copied_with_padding_stripped(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    modify(runs[1], _pad_series(1, 2))
+    plan = plan_merge(runs[1:], STRIP)
+    with h5py.File(plan.write(tmp_path / 'stripped.nxs')) as f:
+        assert list(f[f'{TEMPERATURE}/time']) == [SECOND, 2 * SECOND]
+        assert list(f[f'{TEMPERATURE}/value']) == [10.0, 10.02]
+        assert list(f[f'{EVENTS}/event_id']) == [3, 2, 2]
+        assert list(f['entry/merged_runs']) == ['run_0']
+
+
+def test_stripped_copies_merge_like_the_padded_runs(
+    runs: list[Path], tmp_path: Path
+) -> None:
+    for run in runs:
+        modify(run, _pad_series(1, 1))
+    all_at_once = plan_merge(runs, STRIP).write(tmp_path / 'all.nxs')
+    stripped = [
+        plan_merge([run], STRIP).write(tmp_path / f'stripped-{run.name}')
+        for run in runs
+    ]
+    plan = plan_merge(stripped, RULES)
+    assert plan.errors == ()
+    _assert_same_datasets(all_at_once, plan.write(tmp_path / 'again.nxs'))
 
 
 def test_log_row_not_later_than_previous_run_is_an_error(runs: list[Path]) -> None:
@@ -473,12 +650,30 @@ def test_log_row_not_later_than_previous_run_is_an_error(runs: list[Path]) -> No
     assert 'overlaps' in error.message
 
 
-def test_unsorted_log_is_an_error(runs: list[Path]) -> None:
+def test_unsorted_log_within_a_run_is_appended_as_it_is(
+    runs: list[Path], tmp_path: Path
+) -> None:
     # Run a (runs[1]) has readings at 1 s and 2 s.
     modify(runs[1], lambda f: f[f'{TEMPERATURE}/time'].__setitem__(0, 3 * SECOND))
+    plan = plan_merge(runs, RULES)
+    assert plan.issues == ()
+    with h5py.File(plan.write(tmp_path / 'merged.nxs')) as f:
+        assert list(f[f'{TEMPERATURE}/time']) == [3 * SECOND, 2 * SECOND, 11 * SECOND]
+        assert list(f[f'{TEMPERATURE}/value']) == [10.0, 10.02, 10.05]
+
+
+def test_log_row_interleaved_with_previous_run_is_an_error(runs: list[Path]) -> None:
+    # Run b (runs[0]) has one reading, at 11 s. Add one before the end of run a.
+    def add_early_row(f: h5py.File) -> None:
+        for name, early in (('time', SECOND), ('value', 10.05)):
+            dataset = f[f'{TEMPERATURE}/{name}']
+            dataset.resize(2, axis=0)
+            dataset[1] = early
+
+    modify(runs[0], add_early_row)
     (error,) = plan_merge(runs, RULES).errors
     assert error.path == TEMPERATURE
-    assert 'not sorted' in error.message
+    assert 'overlaps' in error.message
 
 
 def test_unsorted_pulses_within_a_run_are_fine(runs: list[Path]) -> None:
@@ -632,6 +827,7 @@ error = "5e-1 K"
     )
     rules = MergeRules.from_toml(path)
     assert rules.ignore == ('/entry/title',)
+    assert not rules.strip_padding
     target, temperature = rules.rules
     assert rules.rule_for(TARGET) is target
     assert rules.rule_for(TEMPERATURE) is temperature
@@ -668,6 +864,15 @@ def test_rules_from_toml_refuses_invalid_rules(
     path = tmp_path / 'rules.toml'
     path.write_text(content)
     with pytest.raises(ValueError, match=match):
+        MergeRules.from_toml(path)
+
+
+def test_strip_padding_from_toml(tmp_path: Path) -> None:
+    path = tmp_path / 'rules.toml'
+    path.write_text('strip_padding = true\n')
+    assert MergeRules.from_toml(path).strip_padding
+    path.write_text('strip_padding = "yes"\n')
+    with pytest.raises(ValueError, match='strip_padding'):
         MergeRules.from_toml(path)
 
 

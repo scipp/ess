@@ -2,6 +2,9 @@
 # Copyright (c) 2026 Scipp contributors (https://github.com/scipp)
 """Merge the NeXus files of consecutive runs into a file that looks like one run.
 
+A single file is accepted as well, which gives a copy with the padding stripped.
+A merged file can be merged again, with more runs or with other merged files.
+
 A dataset whose first dimension is unlimited holds data streamed during the run,
 such as the fields of NXlog and NXevent_data groups, and of the NXdata groups of
 monitors in histogram mode, with a histogram per row. The merge concatenates it
@@ -9,10 +12,15 @@ along that dimension, in the order of the runs' start times. Every other dataset
 and attribute must be identical in all runs, except
 
 - the per-run fields of NXentry (``start_time``, ``end_time``, ...), whose values
-  for each run are kept in ``<entry>/merged_runs``;
+  for each run are kept in ``<entry>/merged_runs``, which lists the runs of a
+  merged input in place of the input;
 - ``minimum_value``, ``maximum_value``, and ``average_value`` of an NXlog, which
   are recomputed from the merged values;
 - the paths that :attr:`MergeRules.ignore` matches.
+
+The file writer allocates more rows than it fills and leaves the rest with
+time 0. Those rows are an error, unless :attr:`MergeRules.strip_padding` is set,
+which drops them from the start and the end of a series.
 
 The file writer starts each series of an NXlog with the values from shortly
 before the run. Those rows repeat the last rows of the previous run if it ended
@@ -43,7 +51,7 @@ from contextlib import ExitStack
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from fnmatch import fnmatchcase
-from itertools import pairwise
+from itertools import count, pairwise
 from pathlib import Path
 from typing import Any, Literal
 
@@ -159,6 +167,14 @@ class MergeRules:
     of the first run. Extendable datasets in them are appended all the same.
     """
 
+    strip_padding: bool = False
+    """
+    Drop the rows of the series of NXlogs that the file writer padded with time 0,
+    which it does by allocating more rows than it fills. The padding must be a
+    block at the start or the end of a series, and zero in all fields of the
+    series. By default, such rows are an error.
+    """
+
     def __post_init__(self) -> None:
         if isinstance(self.ignore, str):
             raise ValueError(f'ignore must be a tuple of patterns: {self.ignore}')
@@ -175,6 +191,7 @@ class MergeRules:
         .. code-block:: toml
 
             ignore = ["/entry/experiment_description"]
+            strip_padding = true
 
             [[rule]]
             paths = ["/entry/instrument/*/target_value"]
@@ -197,7 +214,7 @@ class MergeRules:
         """
         with Path(path).open('rb') as f:
             content = tomllib.load(f)
-        _refuse_unknown_keys(content, {'ignore', 'rule'}, f'{path}')
+        _refuse_unknown_keys(content, {'ignore', 'rule', 'strip_padding'}, f'{path}')
         rules = []
         for i, rule in enumerate(content.get('rule', [])):
             where = f'rule {i} in {path}'
@@ -216,7 +233,12 @@ class MergeRules:
             ignore = _patterns(content.get('ignore', []), 'ignore')
         except ValueError as err:
             raise ValueError(f'{path}: {err}') from err
-        return cls(rules=tuple(rules), ignore=ignore)
+        strip_padding = content.get('strip_padding', False)
+        if not isinstance(strip_padding, bool):
+            raise ValueError(
+                f'{path}: strip_padding must be true or false, got {strip_padding!r}'
+            )
+        return cls(rules=tuple(rules), ignore=ignore, strip_padding=strip_padding)
 
     def rule_for(self, path: str) -> Rule | None:
         return next((rule for rule in self.rules if rule.matches(path)), None)
@@ -290,6 +312,7 @@ class MergePlan:
     issues: tuple[Issue, ...]
     stamps: tuple[tuple[int, int], ...] = field(repr=False)
     """Size and modification time of each file, to detect a changed file."""
+    strip_padding: bool = field(repr=False)
 
     @property
     def errors(self) -> tuple[Issue, ...]:
@@ -339,7 +362,7 @@ class MergePlan:
             with ExitStack() as stack:
                 sources = [stack.enter_context(h5py.File(p, 'r')) for p in self.files]
                 merged = stack.enter_context(h5py.File(partial, 'r+'))
-                _append_runs(merged, sources)
+                _append_runs(merged, sources, self.strip_padding)
                 _update_logs(merged)
                 _update_entry(merged, sources, self.files)
                 _update_root(merged, output)
@@ -368,8 +391,8 @@ def plan_merge(files: Sequence[Path | str], rules: MergeRules) -> MergePlan:
     :
         The runs in the order of their start times, and the issues found.
     """
-    if len(files) < 2:
-        raise ValueError('merging needs at least two files')
+    if not files:
+        raise ValueError('merging needs at least one file')
     with ExitStack() as stack:
         runs = sorted(
             (
@@ -378,22 +401,21 @@ def plan_merge(files: Sequence[Path | str], rules: MergeRules) -> MergePlan:
             ),
             key=lambda run: _entry_time(run[1], 'start_time'),
         )
-        if merged := [path for path, file in runs if _MERGED_RUNS in _entry(file)]:
-            issues = [
-                Issue('error', path.name, 'is a merged file, which cannot be merged')
-                for path in merged
-            ]
-        else:
-            sources = [file for _, file in runs]
-            issues = [
-                *_check_order(runs),
-                *_check_layout(runs, rules),
-                *_check_streams(sources),
-                *_check_pulses(sources),
-                *_check_logs(sources, rules),
-            ]
+        sources = [file for _, file in runs]
+        issues = [
+            *_check_order(runs),
+            *_check_layout(runs, rules),
+            *_check_streams(sources),
+            *_check_pulses(sources),
+            *_check_logs(sources, rules),
+        ]
     paths = tuple(path for path, _ in runs)
-    return MergePlan(files=paths, issues=tuple(issues), stamps=_stamps(paths))
+    return MergePlan(
+        files=paths,
+        issues=tuple(issues),
+        stamps=_stamps(paths),
+        strip_padding=rules.strip_padding,
+    )
 
 
 def _stamps(files: Sequence[Path]) -> tuple[tuple[int, int], ...]:
@@ -491,7 +513,7 @@ def _check_layout(
     reference = _layout(first)
     canonical = _canonical_paths(reference)
     entry = _entry(first).name
-    per_run = {f'{entry}/{name}' for name in _PER_RUN_ENTRY_FIELDS} | {
+    per_run = {f'{entry}/{name}' for name in (*_PER_RUN_ENTRY_FIELDS, _MERGED_RUNS)} | {
         f'{path}/{summary}'
         for path, node in reference.items()
         if _nx_class(node) == 'NXlog'
@@ -499,7 +521,9 @@ def _check_layout(
     }
 
     def may_differ(path: str) -> bool:
-        return path in per_run or rules.ignores(path)
+        return any(
+            group in per_run for group in _self_and_ancestors(path)
+        ) or rules.ignores(path)
 
     for other_path, other in others:
         where = f'{first_path.name} and {other_path.name}'
@@ -637,71 +661,140 @@ def _check_logs(sources: list[h5py.File], rules: MergeRules) -> Iterator[Issue]:
         if any(log is None for log in logs) or key is None or key in seen:
             continue  # missing logs are reported by _check_layout
         seen.add(key)
-        if issues := list(_check_log_series(path, logs)):
-            yield from issues
-        elif 'value' in node:
-            yield from _check_log_values(path, [log['value'] for log in logs], rule)
+        issues, series = _check_log_series(
+            path, logs, strip_padding=rules.strip_padding
+        )
+        yield from issues
+        if any(issue.severity == 'error' for issue in issues) or 'value' not in node:
+            continue
+        valid = (
+            [run.valid for run in series['time']]
+            if 'time' in series
+            else [range(log['value'].shape[0]) for log in logs]
+        )
+        yield from _check_log_values(path, [log['value'] for log in logs], valid, rule)
     for rule in rules.rules:
         if id(rule) not in used:
             yield Issue('warning', ', '.join(rule.paths), 'rule matches no NXlog')
 
 
-def _check_log_series(path: str, logs: list[h5py.Group]) -> Iterator[Issue]:
+def _check_log_series(
+    path: str, logs: list[h5py.Group], *, strip_padding: bool
+) -> tuple[list[Issue], dict[str, list[_Rows]]]:
+    """The issues of the series of a log, and the rows of each valid series."""
+    issues: list[Issue] = []
+    series: dict[str, list[_Rows]] = {}
     for time_name in _LOG_SERIES:
         if time_name not in logs[0]:
             continue
-        for log in logs:
-            times = log[time_name][()]
-            name = Path(log.file.filename).name
-            if np.any(times == 0):
-                yield Issue(
-                    'error',
-                    path,
-                    f'{time_name} in {name} has rows with time 0, possibly padding '
-                    'by the file writer',
-                )
-                return
-            if np.any(times[1:] < times[:-1]):
-                yield Issue('error', path, f'{time_name} in {name} is not sorted')
-                return
         try:
-            _leading_duplicates(logs, time_name)
+            rows = _series_rows(logs, time_name, strip_padding=strip_padding)
         except ValueError as err:
-            yield Issue('error', path, str(err))
+            issues.append(Issue('error', path, str(err)))
+            continue
+        series[time_name] = rows
+        for log, run in zip(logs, rows, strict=True):
+            if (stripped := log[time_name].shape[0] - len(run.valid)) > 0:
+                name = Path(log.file.filename).name
+                issues.append(
+                    Issue(
+                        'info', path, f'{time_name} in {name}: stripped {stripped} rows'
+                    )
+                )
+    return issues, series
 
 
-def _leading_duplicates(logs: list[h5py.Group], time_name: str) -> list[int]:
+@dataclass(frozen=True)
+class _Rows:
+    """The rows of a series of one run that go into the merged file."""
+
+    valid: range
+    """The rows that are not padding."""
+    keep: range
+    """The valid rows without the leading rows that repeat the previous run."""
+
+
+def _valid_rows(
+    log: h5py.Group, time_name: str, names: list[str], *, strip_padding: bool
+) -> range:
+    """The rows of a series that are not padding by the file writer."""
+    times = log[time_name][()]
+    run = Path(log.file.filename).name
+    for name in names:
+        if (rows := log[name].shape[0]) != len(times):
+            raise ValueError(
+                f'{name} in {run} has {rows} rows, but {time_name} has {len(times)}'
+            )
+    if not np.any(times == 0):
+        return range(len(times))
+    if not strip_padding:
+        raise ValueError(
+            f'{time_name} in {run} has rows with time 0, possibly padding by the '
+            'file writer'
+        )
+    (written,) = np.nonzero(times)
+    valid = range(written[0], written[-1] + 1) if written.size else range(0)
+    if np.any(times[valid.start : valid.stop] == 0):
+        raise ValueError(f'{time_name} in {run} has rows with time 0 between others')
+    for name in names:
+        field = log[name]
+        zero = np.zeros((), field.dtype)
+        if np.any(field[: valid.start] != zero) or np.any(field[valid.stop :] != zero):
+            raise ValueError(f'{name} in {run} has data in rows with time 0')
+    return valid
+
+
+def _series_rows(
+    logs: list[h5py.Group], time_name: str, *, strip_padding: bool
+) -> list[_Rows]:
     """
-    Number of leading rows of a series of each run that repeat the previous run.
+    The rows of a series of each run that go into the merged file.
 
-    Rows not later than the last row of the previous run are dropped if they are
-    identical to the last rows of the previous run. Otherwise, they are an error.
+    The file writer does not guarantee sorted times, so the rows of a run may be
+    unsorted. The leading rows not later than the latest time of the previous run
+    are dropped if they are identical to the last rows of the previous run.
+    Otherwise, they are an error, as are later rows that are not later than the
+    previous run.
     """
     names = [name for name in (time_name, *_LOG_SERIES[time_name]) if name in logs[0]]
-    drops: list[int] = []
+    rows: list[_Rows] = []
     previous: h5py.Group | None = None  # the last run with rows in the series
+    previous_valid = range(0)
     for log in logs:
-        times = log[time_name][()]
+        valid = _valid_rows(log, time_name, names, strip_padding=strip_padding)
+        times = log[time_name][valid.start : valid.stop]
         drop = 0
         if previous is not None:
-            previous_times = previous[time_name][()]
-            drop = int(np.searchsorted(times, previous_times[-1], side='right'))
-            tail = len(previous_times) - drop
-            if tail < 0 or not all(
-                _equal(log[name][:drop], previous[name][tail:]) for name in names
+            previous_times = previous[time_name][
+                previous_valid.start : previous_valid.stop
+            ]
+            latest = previous_times.max()
+            later = times > latest
+            drop = int(np.argmax(later)) if later.any() else len(times)
+            tail = previous_valid.stop - drop
+            if (
+                tail < previous_valid.start
+                or np.any(times[drop:] <= latest)
+                or not all(
+                    _equal(
+                        log[name][valid.start : valid.start + drop],
+                        previous[name][tail : previous_valid.stop],
+                    )
+                    for name in names
+                )
             ):
                 raise ValueError(
                     f'{time_name} of {Path(log.file.filename).name} overlaps the '
                     'previous run'
                 )
-        drops.append(drop)
+        rows.append(_Rows(valid=valid, keep=range(valid.start + drop, valid.stop)))
         if len(times) > drop:
-            previous = log
-    return drops
+            previous, previous_valid = log, valid
+    return rows
 
 
 def _check_log_values(
-    path: str, values: list[h5py.Dataset], rule: Rule | None
+    path: str, values: list[h5py.Dataset], valid: list[range], rule: Rule | None
 ) -> Iterator[Issue]:
     if any(v.dtype.kind not in 'biuf' for v in values):
         if rule is not None:
@@ -714,7 +807,9 @@ def _check_log_values(
         yield Issue('error', path, f'units differ between runs: {units}')
         return
     unit = units[0]
-    merged = np.concatenate([v[()] for v in values])
+    merged = np.concatenate(
+        [v[rows.start : rows.stop] for v, rows in zip(values, valid, strict=True)]
+    )
     if merged.size == 0:
         return
     if merged.dtype.kind == 'f' and np.isnan(merged).any():
@@ -758,65 +853,96 @@ def _in_unit(tolerance: sc.Variable, unit: str | None) -> float:
     return tolerance.to(unit=unit, dtype='float64').value
 
 
-def _append_runs(merged: h5py.File, sources: list[h5py.File]) -> None:
-    """Append the extendable datasets of ``sources[1:]`` to those of ``merged``."""
+def _append_runs(
+    merged: h5py.File, sources: list[h5py.File], strip_padding: bool
+) -> None:
+    """Write the kept rows of the extendable datasets of ``sources`` to ``merged``."""
     for target, paths in _streams(merged).items():
         # Of the paths of a hard-linked dataset, one in an NXlog says which rows
-        # to drop.
+        # to keep.
         path = next(
             (p for p in paths if _nx_class(_parent(merged, p)) == 'NXlog'), paths[0]
         )
         parent, name = path.rsplit('/', 1)
         nx_class = _nx_class(_parent(merged, path))
-        drops = _drops(sources, parent, nx_class, name)
+        parts = [source[path] for source in sources]
+        rows = _rows(sources, parent, nx_class, name, strip_padding)
         offsets = [0] * len(sources)
+        clips: list[range | None] = [None] * len(sources)
         if (indexed := _INDEX_FIELDS.get((nx_class, name))) is not None:
-            indexed_drops = _drops(sources, parent, nx_class, indexed)
-            kept = [
-                source[f'{parent}/{indexed}'].shape[0] - drop
-                for source, drop in zip(sources, indexed_drops, strict=True)
-            ]
+            indexed_rows = _rows(sources, parent, nx_class, indexed, strip_padding)
+            kept = [len(run.keep) for run in indexed_rows]
             # An index of a dropped row points to the identical row before it.
-            offsets = [sum(kept[:k]) - indexed_drops[k] for k in range(len(sources))]
-        _append(
+            offsets = [
+                sum(kept[:k]) - run.keep.start for k, run in enumerate(indexed_rows)
+            ]
+            # An index of a padding row points to the nearest row that is not.
+            clips = [
+                run.valid
+                if run.valid != range(source[f'{parent}/{indexed}'].shape[0])
+                else None
+                for source, run in zip(sources, indexed_rows, strict=True)
+            ]
+        _write(
             target,
-            [source[path] for source in sources[1:]],
-            drops=drops[1:],
-            offsets=offsets[1:],
+            parts,
+            rows=[run.keep for run in rows],
+            offsets=offsets,
+            clips=clips,
         )
 
 
-def _drops(
-    sources: list[h5py.File], parent: str, nx_class: str | None, name: str
-) -> list[int]:
-    """Number of leading rows of ``parent/name`` of each source the merge drops."""
+def _rows(
+    sources: list[h5py.File],
+    parent: str,
+    nx_class: str | None,
+    name: str,
+    strip_padding: bool,
+) -> list[_Rows]:
+    """The rows of ``parent/name`` of each source that go into the merged file."""
     if nx_class == 'NXlog':
         for time_name, fields in _LOG_SERIES.items():
             if name == time_name or name in fields:
-                return _leading_duplicates(
-                    [source[parent] for source in sources], time_name
+                return _series_rows(
+                    [source[parent] for source in sources],
+                    time_name,
+                    strip_padding=strip_padding,
                 )
-    return [0] * len(sources)
+    return [
+        _Rows(valid=range(n), keep=range(n))
+        for n in (source[f'{parent}/{name}'].shape[0] for source in sources)
+    ]
 
 
-def _append(
+def _write(
     target: h5py.Dataset,
     parts: list[h5py.Dataset],
     *,
-    drops: list[int],
+    rows: list[range],
     offsets: list[int],
+    clips: list[range | None],
 ) -> None:
-    start = target.shape[0]
-    target.resize(
-        start
-        + sum(part.shape[0] - drop for part, drop in zip(parts, drops, strict=True)),
-        axis=0,
-    )
+    """
+    Make ``target`` hold ``rows`` of ``parts``, one after the other.
+
+    Indices in a part are moved by its offset after clipping them to its clip.
+    The first part is the same as the content of ``target``, which is left alone
+    if all of it is kept.
+    """
+    target.resize(sum(len(run) for run in rows), axis=0)
     row_bytes = target.dtype.itemsize * int(np.prod(target.shape[1:]))
     step = max(1, _BLOCK_BYTES // max(1, row_bytes))
-    for part, drop, offset in zip(parts, drops, offsets, strict=True):
-        for begin in range(drop, part.shape[0], step):
-            block = part[begin : begin + step]
+    start = 0
+    for k, (part, keep, offset, clip) in enumerate(
+        zip(parts, rows, offsets, clips, strict=True)
+    ):
+        if k == 0 and keep == range(part.shape[0]) and not offset and clip is None:
+            start = len(keep)  # already in place
+            continue
+        for begin in range(keep.start, keep.stop, step):
+            block = part[begin : min(begin + step, keep.stop)]
+            if clip is not None and len(clip):
+                block = np.clip(block, clip.start, clip.stop - 1)
             if offset:
                 block += block.dtype.type(offset)
             target[start : start + len(block)] = block
@@ -838,17 +964,28 @@ def _update_logs(merged: h5py.File) -> None:
 def _update_entry(
     merged: h5py.File, sources: list[h5py.File], files: Sequence[Path]
 ) -> None:
-    """Set the end time of the last run, and keep the per-run fields of all runs."""
+    """
+    Set the end time of the last run, and keep the per-run fields of all runs.
+
+    A merged source contributes the runs it lists, not a run of its own.
+    """
     entry = _entry(merged)
     if 'end_time' in entry:
         entry['end_time'][()] = _entry(sources[-1])['end_time'][()]
+    if _MERGED_RUNS in entry:  # the first source is a merged file
+        del entry[_MERGED_RUNS]
     merged_runs = entry.create_group(_MERGED_RUNS)
     merged_runs.attrs['NX_class'] = 'NXcollection'
-    for i, (source, path) in enumerate(zip(sources, files, strict=True)):
-        group = merged_runs.create_group(f'run_{i}')
+    names = (f'run_{i}' for i in count())
+    for source, path in zip(sources, files, strict=True):
+        source_entry = _entry(source)
+        if (runs := source_entry.get(_MERGED_RUNS)) is not None:
+            for i in range(len(runs)):
+                source.copy(runs[f'run_{i}'], merged_runs, name=next(names))
+            continue
+        group = merged_runs.create_group(next(names))
         group.attrs['NX_class'] = 'NXcollection'
         group.create_dataset('file_name', data=path.name, dtype=h5py.string_dtype())
-        source_entry = _entry(source)
         for name in _PER_RUN_ENTRY_FIELDS:
             if name in source_entry:
                 source.copy(source_entry[name], group, name=name)
