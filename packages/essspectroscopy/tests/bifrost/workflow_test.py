@@ -35,8 +35,11 @@ from ess.spectroscopy.types import (
     SampleRun,
     TransformationOverrides,
     UncertaintyBroadcastMode,
+    WavelengthDetector,
     WavelengthMonitor,
 )
+
+from ess.reduce.unwrap import LtotalRange
 
 
 @pytest.fixture(scope='module')
@@ -239,6 +242,35 @@ def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     return workflow
+
+
+@pytest.fixture
+def coda_analytical_workflow(detector_names: list[str]) -> sciline.Pipeline:
+    # The default mode builds the lookup table from the choppers in the file.
+    workflow = bifrost.BifrostWorkflow()
+    workflow[NeXusDetectorNames] = detector_names
+    workflow[Filename[SampleRun]] = coda_test_run_2026_11()
+    workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
+    return workflow
+
+
+def test_lookup_table_range_contains_l1(
+    coda_analytical_workflow: sciline.Pipeline,
+) -> None:
+    # Events are shifted to the time at the sample, so the table is evaluated at L1.
+    l1 = coda_analytical_workflow.compute(DataAtSample[SampleRun]).coords['L1']
+    low, high = coda_analytical_workflow.compute(LtotalRange[SampleRun, snx.NXdetector])
+    assert sc.all(low <= l1).value
+    assert sc.all(l1 <= high).value
+
+
+def test_analytical_workflow_computes_finite_incident_wavelength(
+    coda_analytical_workflow: sciline.Pipeline,
+) -> None:
+    data = coda_analytical_workflow.compute(WavelengthDetector[SampleRun])
+    wavelength = data.bins.concat().value.coords['incident_wavelength']
+    assert wavelength.size > 0
+    assert np.isfinite(wavelength.values).all()
 
 
 def test_tank_angle_override_rotates_detectors_and_analyzers_and_sets_a4(

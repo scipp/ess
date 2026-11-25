@@ -435,6 +435,10 @@ def detector_ltotal_from_straight_line_approximation(
 
     This is a naive straight-line approximation to Ltotal based on basic component
     positions.
+    It is the default :class:`DetectorLtotal` for elastic scattering, where the
+    neutron speed is the same on both sides of the sample. Workflows for which the
+    lookup table is evaluated at a different distance (e.g., indirect geometry
+    spectrometers) must provide their own :class:`DetectorLtotal`.
 
     Parameters
     ----------
