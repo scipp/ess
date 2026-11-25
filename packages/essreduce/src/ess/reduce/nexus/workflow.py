@@ -710,8 +710,18 @@ def assemble_monitor_data(
 
 def parse_raw_choppers(
     choppers: NeXusMultiComponent[snx.NXdisk_chopper, RunType],
+    chains: NeXusMultiTransformationChain[snx.NXdisk_chopper, RunType],
 ) -> RawChoppers[RunType]:
     """Convert the NeXus representation of a chopper to ours.
+
+    Parameters
+    ----------
+    choppers:
+        Loaded NeXus chopper groups.
+    chains:
+        Transformation chains of the choppers, with
+        :class:`ess.reduce.nexus.types.TransformationOverrides` applied.
+        They replace the chains stored in ``choppers``.
 
     Returns
     -------
@@ -722,10 +732,15 @@ def parse_raw_choppers(
         :class:`ess.reduce.nexus.types.DiskChoppers`.
     """
     return RawChoppers[RunType](
-        choppers.apply(
-            lambda chopper: extract_chopper_from_nexus(
-                nexus.compute_component_position(chopper)
-            )
+        sc.DataGroup(
+            {
+                name: extract_chopper_from_nexus(
+                    nexus.compute_component_position(
+                        sc.DataGroup({**chopper, 'depends_on': chains[name]})
+                    )
+                )
+                for name, chopper in choppers.items()
+            }
         )
     )
 
