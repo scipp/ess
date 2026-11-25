@@ -29,8 +29,6 @@
       CorrectForGravity
       DimsToKeep
       OutFilename
-      DetectorIDs
-      MaskedDetectorIDs
       DetectorMasks
       DirectBeam
       CleanDirectBeam

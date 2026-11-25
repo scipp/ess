@@ -22,13 +22,13 @@
       get_calibrated_isis_detector
       get_calibrated_isis_monitor
       get_detector_data
-      get_detector_ids_from_sample_run
       get_monitor_data
       get_sample_position
       get_source_position
       helium3_tube_detector_pixel_shape
       lab_frame_transform
       monitor_to_wavelength
+      to_detector_mask_without_bank
       to_detector_position_offset
       to_monitor_position_offset
    

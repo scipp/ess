@@ -14,7 +14,6 @@
    .. autosummary::
       :toctree:
    
-      read_xml_detector_masking
       save_background_subtracted_iofq
    
    

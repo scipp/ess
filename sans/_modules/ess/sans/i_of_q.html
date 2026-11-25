@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/sans/i_of_q';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -602,7 +602,7 @@
         <span class="p">)</span>
         <span class="n">background</span> <span class="o">=</span> <span class="n">mask_range</span><span class="p">(</span><span class="n">monitor</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">monitor</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">monitor</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="n">monitor</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength_bins</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">monitor</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">rebin</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength_bins</span><span class="p">)</span>
@@ -745,7 +745,7 @@
     <span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">edges</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="n">dims_to_keep</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
     <span class="n">dims_to_reduce</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s1">&#39;wavelength&#39;</span><span class="p">}</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dims_to_keep</span> <span class="ow">or</span> <span class="p">())</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">hist</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">bin</span><span class="p">)(</span><span class="o">**</span><span class="n">edges</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dims_to_reduce</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">hist</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">is_binned</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">bin</span><span class="p">)(</span><span class="o">**</span><span class="n">edges</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dims_to_reduce</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_subtract_background</span><span class="p">(</span>
@@ -753,11 +753,11 @@
     <span class="n">background</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">return_events</span><span class="p">:</span> <span class="n">ReturnEvents</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">return_events</span> <span class="ow">and</span> <span class="n">sample</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">background</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">return_events</span> <span class="ow">and</span> <span class="n">sample</span><span class="o">.</span><span class="n">is_binned</span> <span class="ow">and</span> <span class="n">background</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">sample</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="o">-</span><span class="n">background</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">background</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">background</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="n">background</span> <span class="o">=</span> <span class="n">background</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">sample</span> <span class="o">-</span> <span class="n">background</span>
 
@@ -863,7 +863,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSsans version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
+Current ESSsans version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

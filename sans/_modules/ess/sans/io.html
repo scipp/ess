@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/sans/io';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -529,10 +529,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BackgroundSubtractedIofQ</span><span class="p">,</span>
-    <span class="n">MaskedDetectorIDs</span><span class="p">,</span>
     <span class="n">Measurement</span><span class="p">,</span>
     <span class="n">OutFilename</span><span class="p">,</span>
-    <span class="n">PixelMaskFilename</span><span class="p">,</span>
     <span class="n">SampleRun</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -546,7 +544,7 @@
     <span class="n">measurement</span><span class="p">:</span> <span class="n">Measurement</span><span class="p">[</span><span class="n">SampleRun</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save background-subtracted I(Q) histogram as an NXcanSAS file.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">iofq</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">iofq</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="n">da</span> <span class="o">=</span> <span class="n">iofq</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">da</span> <span class="o">=</span> <span class="n">iofq</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
@@ -557,49 +555,6 @@
             <span class="n">title</span><span class="o">=</span><span class="n">measurement</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">run</span><span class="o">=</span><span class="n">measurement</span><span class="o">.</span><span class="n">run_number_maybe_int</span>
         <span class="p">)</span>
         <span class="n">f</span><span class="p">[</span><span class="s1">&#39;sasentry&#39;</span><span class="p">][</span><span class="s1">&#39;sasdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nxcansas</span><span class="o">.</span><span class="n">SASdata</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">Q_variances</span><span class="o">=</span><span class="s1">&#39;resolutions&#39;</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="read_xml_detector_masking">
-<a class="viewcode-back" href="../../../generated/modules/ess.sans.io.read_xml_detector_masking.html#ess.sans.io.read_xml_detector_masking">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">read_xml_detector_masking</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">PixelMaskFilename</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MaskedDetectorIDs</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a pixel mask from an ISIS XML file.</span>
-
-<span class="sd">    The format is as follows, where the detids are inclusive ranges of detector IDs:</span>
-
-<span class="sd">    .. code-block:: xml</span>
-
-<span class="sd">        &lt;?xml version=&quot;1.0&quot;?&gt;</span>
-<span class="sd">        &lt;detector-masking&gt;</span>
-<span class="sd">            &lt;group&gt;</span>
-<span class="sd">                &lt;detids&gt;1400203-1400218,1401199,1402190-1402223&lt;/detids&gt;</span>
-<span class="sd">            &lt;/group&gt;</span>
-<span class="sd">        &lt;/detector-masking&gt;</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    filename:</span>
-<span class="sd">        Path to the XML file.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">xml.etree.ElementTree</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ET</span>  <span class="c1"># nosec</span>
-
-    <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>  <span class="c1"># noqa: S314</span>
-    <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
-
-    <span class="n">masked_detids</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;group&#39;</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">detids</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;detids&#39;</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">detid</span> <span class="ow">in</span> <span class="n">detids</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
-                <span class="n">detid</span> <span class="o">=</span> <span class="n">detid</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">detid</span><span class="p">:</span>
-                    <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">detid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
-                    <span class="n">masked_detids</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">masked_detids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">detid</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">MaskedDetectorIDs</span><span class="p">(</span>
-        <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;detector_id&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="n">masked_detids</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
-    <span class="p">)</span></div>
 
 </pre></div>
 
@@ -664,7 +619,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSsans version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
+Current ESSsans version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

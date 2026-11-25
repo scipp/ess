@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/loki/data';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -528,7 +528,7 @@
     <span class="n">BackgroundRun</span><span class="p">,</span>
     <span class="n">DirectBeamFilename</span><span class="p">,</span>
     <span class="n">Filename</span><span class="p">,</span>
-    <span class="n">PixelMaskFilename</span><span class="p">,</span>
+    <span class="n">PixelMaskFilenames</span><span class="p">,</span>
     <span class="n">SampleRun</span><span class="p">,</span>
     <span class="n">TransmissionRun</span><span class="p">,</span>
 <span class="p">)</span>
@@ -579,7 +579,7 @@
         <span class="c1"># Small CODA file for testing purposes (data from only 30 pulses)</span>
         <span class="s1">&#39;loki_999999_00009928_small.hdf&#39;</span><span class="p">:</span> <span class="s1">&#39;md5:d2f293c293cc15d90fb588afa1dcb096&#39;</span><span class="p">,</span>
         <span class="c1"># Small CODA file for testing purposes (data from only 5 pulses)</span>
-        <span class="s1">&#39;loki-coda-5-pulses.hdf&#39;</span><span class="p">:</span> <span class="s1">&#39;md5:8368779651ccf101612b35ca075d0298&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;coda_loki_999999_00029868.shrunk.hdf&#39;</span><span class="p">:</span> <span class="s1">&#39;md5:941bc9a7a22de77776c3794976c8cd90&#39;</span><span class="p">,</span>
         <span class="c1"># Wavelength lookup table without choppers</span>
         <span class="s1">&#39;loki-wavelength-lookup-table-no-choppers.h5&#39;</span><span class="p">:</span> <span class="s1">&#39;md5:34cc975a00383653cce4b3e2356e0dc7&#39;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
         <span class="c1"># File recorded during a Loki detector test</span>
@@ -720,11 +720,9 @@
 
 <div class="viewcode-block" id="loki_tutorial_mask_filenames">
 <a class="viewcode-back" href="../../../generated/modules/ess.loki.data.loki_tutorial_mask_filenames.html#ess.loki.data.loki_tutorial_mask_filenames">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">loki_tutorial_mask_filenames</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PixelMaskFilename</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loki_tutorial_mask_filenames</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">PixelMaskFilenames</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;List of pixel mask filenames for the LoKI@Larmor detector test experiment.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span>
-        <span class="n">PixelMaskFilename</span><span class="p">(</span><span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;mask_new_July2022.xml&#39;</span><span class="p">)),</span>
-    <span class="p">]</span></div>
+    <span class="k">return</span> <span class="n">PixelMaskFilenames</span><span class="p">([</span><span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;mask_new_July2022.xml&#39;</span><span class="p">)])</span></div>
 
 
 
@@ -767,10 +765,10 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">loki_coda_file</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Small LoKI CODA file for testing purposes (data from only 5 pulses).</span>
-<span class="sd">    The file was generated from a CODA file coda_loki_999999_00027624.hdf (22/04/2026)</span>
+<span class="sd">    The file was generated from a CODA file coda_loki_999999_00029868.hdf (16/11/2026)</span>
 <span class="sd">    using the tools/shrink_loki_nexus.py script.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;loki-coda-5-pulses.hdf&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;coda_loki_999999_00029868.shrunk.hdf&quot;</span><span class="p">)</span></div>
 
 
 
@@ -848,7 +846,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSsans version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
+Current ESSsans version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=esssans">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
