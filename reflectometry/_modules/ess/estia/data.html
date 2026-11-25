@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -569,8 +569,10 @@
         <span class="s2">&quot;spin_flip_example/supermirror_offon.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:68ea97d4c83410360a04cc55da4d0a33&quot;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
         <span class="s2">&quot;spin_flip_example/supermirror_onoff.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:4e682089541046bf6c167c94068569e1&quot;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
         <span class="s2">&quot;spin_flip_example/supermirror_onon.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:6fc2090e6947949fe937fe0bf42600ec&quot;</span><span class="p">,</span>
+        <span class="c1"># Lookup tables for wavelength and time-of-flight</span>
         <span class="s2">&quot;estia-tof-lookup-table-pulse-stride-1.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:696953c772209fadc9c4a2ca619cf04d&quot;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
         <span class="s2">&quot;estia-lookup-table-pulse-stride-1.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:01787012c678ea6ddce6a5f3a33d8895&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;estia-lookup-table-5m-45m-pulse-stride-1.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:bf8a58c46cdb16ea80bd00caa8cfa171&quot;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -737,8 +739,13 @@
 <div class="viewcode-block" id="estia_wavelength_lookup_table">
 <a class="viewcode-back" href="../../../generated/modules/ess.estia.data.estia_wavelength_lookup_table.html#ess.estia.data.estia_wavelength_lookup_table">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">estia_wavelength_lookup_table</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return path to the ESTIA wavelength lookup table.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;estia-lookup-table-pulse-stride-1.h5&#39;</span><span class="p">)</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return path to the ESTIA wavelength lookup table.</span>
+<span class="sd">    This table was created using the</span>
+<span class="sd">    https://scipp.github.io/ess/reflectometry/user-guide/estia/create-estia-wavelength-lookup-table.html</span>
+<span class="sd">    notebook, with 5_000_000 simulated neutrons.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_registry</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;estia-lookup-table-5m-45m-pulse-stride-1.h5&#39;</span><span class="p">)</span></div>
 
 
 
@@ -816,7 +823,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

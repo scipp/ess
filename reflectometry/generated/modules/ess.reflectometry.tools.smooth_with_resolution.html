@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.reflectometry.tools.scale_for_reflectivity_overlap" href="ess.reflectometry.tools.scale_for_reflectivity_overlap.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -929,10 +929,10 @@ Requires the optional Refl1D package (<code class="docutils literal notranslate"
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ideal</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – One-dimensional reflectivity with point coordinates <code class="docutils literal notranslate"><span class="pre">Q</span></code>. Refl1D
+<li><p><strong>ideal</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.11.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – One-dimensional reflectivity with point coordinates <code class="docutils literal notranslate"><span class="pre">Q</span></code>. Refl1D
 linearly interpolates between these samples; the grid should be fine
 compared with the resolution width.</p></li>
-<li><p><strong>measured</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – One-dimensional reduced reflectivity with <code class="docutils literal notranslate"><span class="pre">Q</span></code> and <code class="docutils literal notranslate"><span class="pre">Q_resolution</span></code>
+<li><p><strong>measured</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.11.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span>) – One-dimensional reduced reflectivity with <code class="docutils literal notranslate"><span class="pre">Q</span></code> and <code class="docutils literal notranslate"><span class="pre">Q_resolution</span></code>
 coordinates. <code class="docutils literal notranslate"><span class="pre">Q</span></code> may contain points or bin edges; <code class="docutils literal notranslate"><span class="pre">Q_resolution</span></code>
 contains the standard deviation at each point or bin.</p></li>
 <li><p><strong>plateau_fraction</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">0.6</span></code>) – Fraction of the kernel’s full support occupied by the plateau, in
@@ -940,7 +940,7 @@ the interval [0, 1). Zero gives a triangular kernel.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span> – Smoothed reflectivity at the measured Q points or bin centres, with the
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scipp.github.io/generated/classes/scipp.DataArray.html#scipp.DataArray" title="(in Scipp v26.11.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></a></span> – Smoothed reflectivity at the measured Q points or bin centres, with the
 unit of <code class="docutils literal notranslate"><span class="pre">ideal</span></code>. Invalid resolutions and points whose kernel extends
 beyond the ideal curve are NaN. Zero resolution gives linear
 interpolation without smoothing. The final bin width is not included
@@ -1031,7 +1031,7 @@ in the resolution; measured bins should be fine compared with it.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

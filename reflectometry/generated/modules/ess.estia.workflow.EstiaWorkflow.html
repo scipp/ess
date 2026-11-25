@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=1b289170"></script>
+    <script src="../../_static/documentation_options.js?v=a0d4136d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -59,7 +59,7 @@
     <link rel="prev" title="ess.estia.workflow.EstiaUnnormalizedWorkflow" href="ess.estia.workflow.EstiaUnnormalizedWorkflow.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.11.0" />
+  <meta name="docsearch:version" content="26.11.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -920,13 +920,13 @@
 <h1>ess.estia.workflow.EstiaWorkflow<a class="headerlink" href="#ess-estia-workflow-estiaworkflow" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="ess.estia.workflow.EstiaWorkflow">
-<span class="sig-prename descclassname"><span class="pre">ess.estia.workflow.</span></span><span class="sig-name descname"><span class="pre">EstiaWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunNormalization.proton_charge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength_from</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'file'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/estia/workflow.html#EstiaWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.estia.workflow.EstiaWorkflow" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ess.estia.workflow.</span></span><span class="sig-name descname"><span class="pre">EstiaWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunNormalization.proton_charge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength_from</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ess/estia/workflow.html#EstiaWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ess.estia.workflow.EstiaWorkflow" title="Link to this definition">#</a></dt>
 <dd><p>Workflow for reduction of data for the Estia instrument.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>run_norm</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunNormalization</span></code></span>, default: <code class="docutils literal notranslate"><span class="pre">&lt;RunNormalization.proton_charge:</span> <span class="pre">4&gt;</span></code>) – Normalization procedure to be used. See <code class="xref py py-class docutils literal notranslate"><span class="pre">RunNormalization</span></code>.</p></li>
-<li><p><strong>wavelength_from</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">WavelengthLutMode</span></code></span>, default: <code class="docutils literal notranslate"><span class="pre">'file'</span></code>) – Mode for creating the wavelength lookup table. Possible values are
+<li><p><strong>wavelength_from</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">WavelengthLutMode</span></code></span>, default: <code class="docutils literal notranslate"><span class="pre">'analytical'</span></code>) – Mode for creating the wavelength lookup table. Possible values are
 ‘analytical’, ‘simulation’, and ‘file’. See
 <a class="reference external" href="https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html">https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html</a></p></li>
 </ul>
@@ -1019,7 +1019,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSreflectometry version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
+Current ESSreflectometry version: 26.11.1 (<a href="https://github.com/scipp/ess/releases?q=essreflectometry">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">
