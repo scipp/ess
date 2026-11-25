@@ -38,7 +38,6 @@
    beamline
    calibration
    data
-   instrument_view
    peaks
    workflow
 

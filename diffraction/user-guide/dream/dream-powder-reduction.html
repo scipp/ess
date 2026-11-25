@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -54,7 +54,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/dream/dream-powder-reduction';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -62,7 +62,7 @@
     <link rel="prev" title="DREAM" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -485,7 +485,6 @@
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">DREAM powder data reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dream-advanced-powder-reduction.html">DREAM advanced data reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dream-instrument-view.html">DREAM instrument view</a></li>
-<li class="toctree-l2"><a class="reference internal" href="workflow-widget-dream.html">Workflow widgets example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dream-detector-diagnostics.html">DREAM Detector Diagnostics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dream-visualize-absorption.html">Visualize effect of absorption</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dream-make-wavelength-lookup-table.html">Create a wavelength lookup table for DREAM</a></li>
@@ -620,6 +619,7 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span> <span class="o">=</span> <span class="n">dream</span><span class="o">.</span><span class="n">DreamGeant4Workflow</span><span class="p">(</span>
     <span class="n">run_norm</span><span class="o">=</span><span class="n">powder</span><span class="o">.</span><span class="n">RunNormalization</span><span class="o">.</span><span class="n">monitor_histogram</span><span class="p">,</span>
+    <span class="n">wavelength_from</span><span class="o">=</span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -648,7 +648,7 @@
 <span class="n">workflow</span><span class="p">[</span><span class="n">DspacingBins</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s2">&quot;dspacing&quot;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">2.3434</span><span class="p">,</span> <span class="mi">201</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;angstrom&quot;</span><span class="p">)</span>
 
 <span class="c1"># Do not mask any pixels / voxels:</span>
-<span class="n">workflow</span> <span class="o">=</span> <span class="n">powder</span><span class="o">.</span><span class="n">with_pixel_mask_filenames</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="p">[])</span>
+<span class="n">workflow</span><span class="p">[</span><span class="n">PixelMaskFilenames</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 </pre></div>
 </div>
 </div>
@@ -796,7 +796,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -817,7 +817,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

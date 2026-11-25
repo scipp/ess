@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/beer/conversions';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -520,24 +520,42 @@
                 <article class="bd-article">
                   
   <h1>Source code for ess.beer.conversions</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp.constants</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippneutron</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scn</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">powder_coordinate_transformation_graph</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">,</span> <span class="n">GravityVector</span><span class="p">,</span> <span class="n">RunType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.chopper</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiskChopper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scippneutron.conversion.tof</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavelength_from_tof</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiskChoppers</span><span class="p">,</span> <span class="n">Position</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.lut</span><span class="w"> </span><span class="kn">import</span> <span class="n">chopper_distance_along_beam</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiskChoppers</span><span class="p">,</span> <span class="n">NeutronSourcePosition</span><span class="p">,</span> <span class="n">Position</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.lut</span><span class="w"> </span><span class="kn">import</span> <span class="n">ActiveDiskChoppers</span><span class="p">,</span> <span class="n">chopper_distance_along_beam</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorLtotal</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BeamlineGeometryGraph</span><span class="p">,</span>
     <span class="n">DHKLList</span><span class="p">,</span>
     <span class="n">PulseLength</span><span class="p">,</span>
     <span class="n">RawDetector</span><span class="p">,</span>
     <span class="n">StreakClusteredData</span><span class="p">,</span>
     <span class="n">WavelengthDetector</span><span class="p">,</span>
 <span class="p">)</span>
+
+
+<div class="viewcode-block" id="effective_chopper_position">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.effective_chopper_position.html#ess.beer.conversions.effective_chopper_position">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">effective_chopper_position</span><span class="p">(</span><span class="n">choppers</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DiskChopper</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Midpoint of the named BEER pulse-shaping or modulation choppers.&quot;&quot;&quot;</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;PSC1&#39;</span><span class="p">,</span> <span class="s1">&#39;PSC2&#39;</span><span class="p">,</span> <span class="s1">&#39;PSC3&#39;</span><span class="p">,</span> <span class="s1">&#39;MCA&#39;</span><span class="p">,</span> <span class="s1">&#39;MCB&#39;</span><span class="p">,</span> <span class="s1">&#39;MCC&#39;</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">unknown</span> <span class="o">:=</span> <span class="n">choppers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">names</span> <span class="o">-</span> <span class="p">{</span><span class="s1">&#39;FC1A&#39;</span><span class="p">,</span> <span class="s1">&#39;FC1B&#39;</span><span class="p">,</span> <span class="s1">&#39;FC2A&#39;</span><span class="p">,</span> <span class="s1">&#39;FC2B&#39;</span><span class="p">}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unrecognized BEER chopper names: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">ch</span><span class="o">.</span><span class="n">axle_position</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">choppers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">positions</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No BEER pulse-shaping or modulation choppers found.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;chopper&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
+
 
 
 <div class="viewcode-block" id="compute_wavelength_in_each_cluster">
@@ -606,35 +624,57 @@
     <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_modulation_chopper_position</span><span class="p">(</span>
-    <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">chopper</span><span class="o">.</span><span class="n">axle_position</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">chopper</span> <span class="ow">in</span> <span class="n">choppers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;FC&#39;</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;chopper&#39;</span><span class="p">,</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_modulation_coordinate_transformation_graph</span><span class="p">(</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+<div class="viewcode-block" id="powder_beamline_geometry_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.powder_beamline_geometry_graph.html#ess.beer.conversions.powder_beamline_geometry_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">powder_beamline_geometry_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
-    <span class="n">detector_ltotal</span><span class="p">:</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BeamlineGeometryGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Geometry with source-based flight paths for powder reduction.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">BeamlineGeometryGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="p">{</span>
+            <span class="o">**</span><span class="n">scn</span><span class="o">.</span><span class="n">conversion</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">beamline</span><span class="p">(</span><span class="n">scatter</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="s1">&#39;source_position&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">source_position</span><span class="p">,</span>
+            <span class="s1">&#39;sample_position&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sample_position</span><span class="p">,</span>
+            <span class="s1">&#39;gravity&#39;</span><span class="p">:</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">gravity</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="modulation_beamline_geometry_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.modulation_beamline_geometry_graph.html#ess.beer.conversions.modulation_beamline_geometry_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">modulation_beamline_geometry_graph</span><span class="p">(</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">choppers</span><span class="p">:</span> <span class="n">ActiveDiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BeamlineGeometryGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Geometry with chopper-based flight paths for both modulation workflows.&quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">powder_beamline_geometry_graph</span><span class="p">(</span><span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">gravity</span><span class="p">)</span>
+    <span class="n">source_to_chopper</span> <span class="o">=</span> <span class="n">chopper_distance_along_beam</span><span class="p">(</span>
+        <span class="n">effective_chopper_position</span><span class="p">(</span><span class="n">choppers</span><span class="p">),</span> <span class="n">source_position</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="c1"># Keep the incident-beam direction for scattering angles, but use the chopper</span>
+    <span class="c1"># as the flight-path origin. The shared Ltotal node then adds L1 and L2.</span>
+    <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;L1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">incident_beam</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n">scn</span><span class="o">.</span><span class="n">conversion</span><span class="o">.</span><span class="n">beamline</span><span class="o">.</span><span class="n">L1</span><span class="p">(</span><span class="n">incident_beam</span><span class="o">=</span><span class="n">incident_beam</span><span class="p">)</span> <span class="o">-</span> <span class="n">source_to_chopper</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">graph</span></div>
+
+
+
+<div class="viewcode-block" id="elastic_coordinate_transformation_graph">
+<a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.elastic_coordinate_transformation_graph.html#ess.beer.conversions.elastic_coordinate_transformation_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">elastic_coordinate_transformation_graph</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">BeamlineGeometryGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use chopper-to-detector distance as ``Ltotal`` in modulation workflows.&quot;&quot;&quot;</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">powder_coordinate_transformation_graph</span><span class="p">(</span>
-        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">gravity</span>
-    <span class="p">)</span>
-    <span class="n">ltotal</span> <span class="o">=</span> <span class="n">detector_ltotal</span> <span class="o">-</span> <span class="n">chopper_distance_along_beam</span><span class="p">(</span>
-        <span class="n">_modulation_chopper_position</span><span class="p">(</span><span class="n">choppers</span><span class="p">),</span> <span class="n">source_position</span>
-    <span class="p">)</span>
-    <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;Ltotal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">ltotal</span>
-    <span class="k">return</span> <span class="n">graph</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extend the workflow&#39;s geometry with elastic wavelength conversions.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">](</span>
+        <span class="p">{</span><span class="o">**</span><span class="n">scn</span><span class="o">.</span><span class="n">conversion</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">tof</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span><span class="s1">&#39;wavelength&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">geometry</span><span class="p">}</span>
+    <span class="p">)</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_linear_regression_by_bin</span><span class="p">(</span>
@@ -730,7 +770,7 @@
         <span class="p">[</span><span class="n">center_time</span><span class="p">(</span><span class="n">chopper</span><span class="p">)</span> <span class="k">for</span> <span class="n">chopper</span> <span class="ow">in</span> <span class="n">definition_choppers</span><span class="p">],</span>
         <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;chopper&#39;</span><span class="p">,</span>
     <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">modulation_position</span> <span class="o">=</span> <span class="n">_modulation_chopper_position</span><span class="p">(</span><span class="n">choppers</span><span class="p">)</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span>
+    <span class="n">modulation_position</span> <span class="o">=</span> <span class="n">effective_chopper_position</span><span class="p">(</span><span class="n">choppers</span><span class="p">)</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">z</span>
 
     <span class="n">frame_chopper</span> <span class="o">=</span> <span class="n">choppers</span><span class="p">[</span><span class="s1">&#39;FC2A&#39;</span><span class="p">]</span>
     <span class="n">inverse_velocity</span> <span class="o">=</span> <span class="p">(</span><span class="n">center_time</span><span class="p">(</span><span class="n">frame_chopper</span><span class="p">)</span> <span class="o">-</span> <span class="n">nominal_time_at_chopper</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
@@ -753,16 +793,11 @@
 <div class="viewcode-block" id="automatic_coordinate_transformation_graph">
 <a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.automatic_coordinate_transformation_graph.html#ess.beer.conversions.automatic_coordinate_transformation_graph">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">automatic_coordinate_transformation_graph</span><span class="p">(</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
-    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
-    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
-    <span class="n">detector_ltotal</span><span class="p">:</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">BeamlineGeometryGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Coordinate transformations for automatic modulation reduction.&quot;&quot;&quot;</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">_modulation_coordinate_transformation_graph</span><span class="p">(</span>
-        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">detector_ltotal</span><span class="p">,</span> <span class="n">choppers</span>
-    <span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">elastic_coordinate_transformation_graph</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">tof</span><span class="p">(</span><span class="n">event_time_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">Ltotal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">modulation_time_of_arrival</span><span class="p">(</span><span class="n">event_time_offset</span><span class="p">,</span> <span class="n">Ltotal</span><span class="p">,</span> <span class="n">choppers</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
@@ -809,18 +844,14 @@
 <div class="viewcode-block" id="known_peaks_coordinate_transformation_graph">
 <a class="viewcode-back" href="../../../generated/modules/ess.beer.conversions.known_peaks_coordinate_transformation_graph.html#ess.beer.conversions.known_peaks_coordinate_transformation_graph">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">known_peaks_coordinate_transformation_graph</span><span class="p">(</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
-    <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
-    <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">BeamlineGeometryGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">detector_ltotal</span><span class="p">:</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">choppers</span><span class="p">:</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">pulse_length</span><span class="p">:</span> <span class="n">PulseLength</span><span class="p">,</span>
     <span class="n">dhkl_list</span><span class="p">:</span> <span class="n">DHKLList</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Coordinate transformations for modulation with known peak positions.&quot;&quot;&quot;</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">_modulation_coordinate_transformation_graph</span><span class="p">(</span>
-        <span class="n">source_position</span><span class="p">,</span> <span class="n">sample_position</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">detector_ltotal</span><span class="p">,</span> <span class="n">choppers</span>
-    <span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">elastic_coordinate_transformation_graph</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
     <span class="n">mod_period</span> <span class="o">=</span> <span class="n">_modulation_period</span><span class="p">(</span><span class="n">choppers</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">modulation_times</span><span class="p">(</span><span class="n">event_time_offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">Ltotal</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
@@ -899,7 +930,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -920,7 +951,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

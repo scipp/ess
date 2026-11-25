@@ -14,6 +14,7 @@
    .. autosummary::
       :toctree:
    
+      dream_coda_file
       get_path
       lookup_table_high_flux
       simulated_diamond_sample

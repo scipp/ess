@@ -9,24 +9,9 @@
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-   
-      unwrap_flat_indices_2d
-   
    
 
    
-   
-   .. rubric:: Classes
-
-   .. autosummary::
-      :toctree:
-      :template: class-template.rst
-   
-      FlatVoxelViewer
    
    
 
@@ -35,4 +20,14 @@
    
 
 
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: module-template.rst
+   :recursive:
+
+   load_nexus
+   voxel_viewer
 

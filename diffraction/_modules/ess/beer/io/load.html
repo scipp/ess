@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/beer/io/load';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../../_static/searchtools.js"></script>
@@ -529,7 +529,13 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">mcstastox</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaveMonitor</span><span class="p">,</span> <span class="n">EmptyDetector</span><span class="p">,</span> <span class="n">RunType</span><span class="p">,</span> <span class="n">WavelengthMonitor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ess.powder.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CaveMonitor</span><span class="p">,</span>
+    <span class="n">EmptyDetector</span><span class="p">,</span>
+    <span class="n">NeutronSourcePosition</span><span class="p">,</span>
+    <span class="n">RunType</span><span class="p">,</span>
+    <span class="n">WavelengthMonitor</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.nexus.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiskChoppers</span><span class="p">,</span> <span class="n">Position</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ess.reduce.unwrap.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorLtotal</span>
@@ -809,7 +815,7 @@
 <a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.mcstas_source_position.html#ess.beer.io.load.mcstas_source_position">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mcstas_source_position</span><span class="p">(</span>
     <span class="n">fname</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span> <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the effective source position for the McStas geometry.</span>
 
 <span class="sd">    ``sourceMantid`` is close to the choppers and its direction towards the sample</span>
@@ -856,7 +862,7 @@
 <a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.mcstas_choppers.html#ess.beer.io.load.mcstas_choppers">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mcstas_choppers</span><span class="p">(</span>
     <span class="n">da</span><span class="p">:</span> <span class="n">RawDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return BEER choppers for the McStas mode in the data.&quot;&quot;&quot;</span>
     <span class="n">mode</span> <span class="o">=</span> <span class="n">chopper_mode_from_mcstas_mode</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
@@ -866,7 +872,7 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_mcstas_choppers_from_file</span><span class="p">(</span>
     <span class="n">fname</span><span class="p">:</span> <span class="n">Filename</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DiskChoppers</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return BEER choppers without loading detector events.&quot;&quot;&quot;</span>
     <span class="n">fname</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
@@ -879,7 +885,7 @@
 <a class="viewcode-back" href="../../../../generated/modules/ess.beer.io.load.mcstas_detector_ltotal.html#ess.beer.io.load.mcstas_detector_ltotal">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mcstas_detector_ltotal</span><span class="p">(</span>
     <span class="n">detector</span><span class="p">:</span> <span class="n">EmptyDetector</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLtotal</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return moderator-to-detector flight path lengths for BEER McStas data.&quot;&quot;&quot;</span>
@@ -940,7 +946,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -961,7 +967,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

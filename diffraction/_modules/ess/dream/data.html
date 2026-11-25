@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/dream/data';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -560,6 +560,8 @@
         <span class="c1"># Wavelength lookup tables</span>
         <span class="s2">&quot;DREAM-high-flux-wavelength-lut-5m-80m-bc215.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:10c80c9de311cfa246f7b2c165eb0b49&quot;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
         <span class="s2">&quot;DREAM-high-flux-wavelength-lut-5m-80m-bc240.h5&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:9741176f8da9b34c2a15967a43e21462&quot;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
+        <span class="c1"># Small coda file</span>
+        <span class="s2">&quot;coda_dream_999999_00024365_small.hdf&quot;</span><span class="p">:</span> <span class="s2">&quot;md5:05428a195c0cea53b14383ea5a2ebff9&quot;</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -840,6 +842,17 @@
         <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported band-control chopper (BC) value: </span><span class="si">{</span><span class="n">bc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
+
+
+<div class="viewcode-block" id="dream_coda_file">
+<a class="viewcode-back" href="../../../generated/modules/ess.dream.data.dream_coda_file.html#ess.dream.data.dream_coda_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dream_coda_file</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Path to a DREAM coda file (09/10/2026).</span>
+<span class="sd">    The original file was shrunk using tools/shrink_nexus.py.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;coda_dream_999999_00024365_small.hdf&quot;</span><span class="p">)</span></div>
+
 </pre></div>
 
                 </article>
@@ -882,7 +895,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -903,7 +916,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

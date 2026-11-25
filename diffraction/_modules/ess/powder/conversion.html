@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
-    <script src="../../../_static/documentation_options.js?v=e7f2a49c"></script>
+    <script src="../../../_static/documentation_options.js?v=1b289170"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,13 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ess/powder/conversion';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <script src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <script defer="defer" src="../../../_static/anaconda-icon.js?v=461bdc62"></script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="26.10.0" />
+  <meta name="docsearch:version" content="26.11.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -543,6 +543,7 @@
     <span class="n">IntensityDspacing</span><span class="p">,</span>
     <span class="n">IntensityTof</span><span class="p">,</span>
     <span class="n">MonitorCoordTransformGraph</span><span class="p">,</span>
+    <span class="n">NeutronSourcePosition</span><span class="p">,</span>
     <span class="n">Position</span><span class="p">,</span>
     <span class="n">QDetector</span><span class="p">,</span>
     <span class="n">RunType</span><span class="p">,</span>
@@ -657,9 +658,7 @@
     <span class="c1"># The mechanism with `_tag_positions_consumed` is meant to ensure that,</span>
     <span class="c1"># if positions are present, they are consumed (mad unaligned or dropped)</span>
     <span class="c1"># by the coordinate transform similarly to `to_dspacing_with_positions`.</span>
-    <span class="k">if</span> <span class="s2">&quot;position&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">coords</span> <span class="ow">or</span> <span class="p">(</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;position&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span>
-    <span class="p">):</span>
+    <span class="k">if</span> <span class="s2">&quot;position&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">coords</span> <span class="ow">or</span> <span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">is_binned</span> <span class="ow">and</span> <span class="s2">&quot;position&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">):</span>
         <span class="n">pos_graph</span><span class="p">[</span><span class="s2">&quot;_tag_positions_consumed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_consume_positions</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">pos_graph</span><span class="p">[</span><span class="s2">&quot;_tag_positions_consumed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -672,7 +671,7 @@
 <div class="viewcode-block" id="powder_coordinate_transformation_graph">
 <a class="viewcode-back" href="../../../generated/modules/ess.powder.conversion.powder_coordinate_transformation_graph.html#ess.powder.conversion.powder_coordinate_transformation_graph">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">powder_coordinate_transformation_graph</span><span class="p">(</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
@@ -770,7 +769,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_convert_reduced_to_tof_impl</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">calibration</span><span class="p">:</span> <span class="n">OutputCalibrationData</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">is_binned</span><span class="p">:</span>
         <span class="k">if</span> <span class="s1">&#39;tof&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
             <span class="n">data</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;tof&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">transform_coords</span><span class="p">(</span>
@@ -801,7 +800,7 @@
 <div class="viewcode-block" id="powder_monitor_coordinate_transformation_graph">
 <a class="viewcode-back" href="../../../generated/modules/ess.powder.conversion.powder_monitor_coordinate_transformation_graph.html#ess.powder.conversion.powder_monitor_coordinate_transformation_graph">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">powder_monitor_coordinate_transformation_graph</span><span class="p">(</span>
-    <span class="n">source_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsource</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
+    <span class="n">source_position</span><span class="p">:</span> <span class="n">NeutronSourcePosition</span><span class="p">[</span><span class="n">RunType</span><span class="p">],</span>
     <span class="n">sample_position</span><span class="p">:</span> <span class="n">Position</span><span class="p">[</span><span class="n">snx</span><span class="o">.</span><span class="n">NXsample</span><span class="p">,</span> <span class="n">RunType</span><span class="p">],</span>
     <span class="n">gravity</span><span class="p">:</span> <span class="n">GravityVector</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MonitorCoordTransformGraph</span><span class="p">[</span><span class="n">RunType</span><span class="p">]:</span>
@@ -883,7 +882,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025 Scipp contributors.
+      © Copyright 2026 Scipp contributors.
       <br/>
     
   </p>
@@ -904,7 +903,7 @@
     <div class="footer-items__end">
       
         <div class="footer-item"><!-- This will display the version of the docs -->
-Current ESSdiffraction version: 26.10.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
+Current ESSdiffraction version: 26.11.0 (<a href="https://github.com/scipp/ess/releases?q=essdiffraction">older versions</a>).</div>
       
         <div class="footer-item">
 <p class="theme-version">

@@ -23,9 +23,7 @@
       EmptyCanSubtractedIofDspacingTwoTheta
       IntensityTof
       EmptyCanSubtractedIntensityTof
-      MaskedDetectorIDs
       CaveMonitorPosition
-      PixelMaskFilename
       TofMask
       TwoThetaMask
       WavelengthMask
