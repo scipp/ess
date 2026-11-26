@@ -15,9 +15,14 @@ from ess.freia.mcstas import mcstas_detector_geometry
 from ess.freia.types import (
     DetectorRegionOfInterest,
     NormalizationMonitor,
+    SampleSurfaceNormal,
     WavelengthMonitor,
 )
-from ess.reflectometry.types import CorrectedDetector, SampleRun, WavelengthBins
+from ess.reflectometry.types import (
+    CorrectedDetector,
+    SampleRun,
+    WavelengthBins,
+)
 
 
 def _component(components, name, position):
@@ -83,6 +88,29 @@ def test_load_histogram_geometry(tmp_path: Path):
             unit='m',
         ),
     )
+
+
+@pytest.mark.parametrize('inversion', [False, True])
+def test_sample_normal_from_tilted_mcstas_geometry(tmp_path: Path, inversion):
+    filename = tmp_path / 'geometry.h5'
+    angle = np.deg2rad(10.0)
+    with h5py.File(filename, 'w') as f:
+        entry = f.create_group('entry1')
+        entry.create_group('data')
+        simulation = entry.create_group('simulation')
+        simulation.attrs['program'] = np.bytes_('3.7.18, git')
+        simulation.create_group('Param')
+        components = entry.create_group('instrument/components')
+        sample = _component(components, 'Arm_Sample', [0.0, 0.0, 22.0])
+        sample['Rotation'][...] = [
+            [1.0, 0.0, 0.0],
+            [0.0, np.cos(angle), -np.sin(angle)],
+            [0.0, np.sin(angle), np.cos(angle)],
+        ]
+    normal = sc.vector([0.0, np.cos(angle), -np.sin(angle)])
+    wf = FreiaMcStasWorkflow(inversion=inversion)
+    wf[Filename[SampleRun]] = filename
+    assert_allclose(wf.compute(SampleSurfaceNormal[SampleRun]), normal)
 
 
 @pytest.mark.parametrize(

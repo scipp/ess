@@ -121,6 +121,7 @@ COMPONENT_CONSTRAINTS = (
     snx.NXcrystal,
     snx.NXdetector,
     snx.NXdisk_chopper,
+    snx.NXmirror,
     snx.NXmoderator,
     snx.NXsample,
     snx.NXsource,

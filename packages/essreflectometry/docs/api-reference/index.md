@@ -100,6 +100,7 @@
    corrections
    data
    mcstas
+   mirror
    load
    resolution
    types

@@ -21,7 +21,7 @@ from ..reflectometry.types import (
     ReferenceRun,
     SampleRun,
 )
-from . import conversions, corrections, mcstas, normalization, orso
+from . import conversions, corrections, mcstas, mirror, normalization, orso
 from .corrections import RunNormalization, insert_run_normalization
 from .types import (
     DetectorRegionOfInterest,
@@ -88,6 +88,7 @@ def FreiaMcStasWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.none,
     wavelength_from: WavelengthLutMode = "analytical",
+    inversion: bool = False,
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for reducing FREIA McStas events with a no-sample direct beam.
@@ -103,9 +104,14 @@ def FreiaMcStasWorkflow(
         Mode for creating the wavelength lookup table. Possible values are
         'analytical', 'simulation', and 'file'. See
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    inversion:
+        Use the inversion-mirror geometry described in :func:`FreiaWorkflow`.
     """
     workflow = FreiaWorkflow(
-        run_norm=run_norm, wavelength_from=wavelength_from, **kwargs
+        run_norm=run_norm,
+        wavelength_from=wavelength_from,
+        inversion=inversion,
+        **kwargs,
     )
     for provider in mcstas.providers:
         workflow.insert(provider)
@@ -118,6 +124,7 @@ def FreiaWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.proton_charge,
     wavelength_from: WavelengthLutMode = "analytical",
+    inversion: bool = False,
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for reduction of data for the Freia instrument.
@@ -145,6 +152,12 @@ def FreiaWorkflow(
         Mode for creating the wavelength lookup table. Possible values are
         'analytical', 'simulation', and 'file'. See
         https://scipp.github.io/ess/reduce/user-guide/unwrap/lut-building-methods.html
+    inversion:
+        Enable a planar mirror upstream of the sample for illumination from
+        below. Load its pose from the NXmirror selected by
+        ``NeXusName[NXmirror]``.
+        Measure the reference with the same mirror setting so that the mirror's
+        wavelength-dependent reflectivity cancels in the normalization.
     """
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun, ReferenceRun],
@@ -164,6 +177,9 @@ def FreiaWorkflow(
     insert_run_normalization(workflow, run_norm)
     for name, param in default_parameters().items():
         workflow[name] = param
+    if inversion:
+        for provider in (*mirror.providers, *conversions.mirror_providers):
+            workflow.insert(provider)
     return workflow
 
 
@@ -172,6 +188,7 @@ def FreiaOffspecWorkflow(
     *,
     incident_beam_from: Literal['closest', 'fixed_slits', 'shutter_logs'] = 'closest',
     wavelength_from: WavelengthLutMode = "analytical",
+    inversion: bool = False,
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for unnormalized, coplanar off-specular FREIA data.
@@ -181,22 +198,36 @@ def FreiaOffspecWorkflow(
     The assigned ``incident_angle`` and measured ``reflection_angle`` determine
     ``Qx`` and ``Qz``. The output is ``CorrectedDetector[SampleRun]``.
 
+    All three modes assign a nominal angle and signed effective gravity length.
+    These are computed once per candidate from the slit centres, sample plane,
+    and (in inversion mode) mirror pose. A coordinate kernel then corrects the
+    assigned angle using the event's wavelength. Gravity stays in the lab frame.
+    Setting ``GravityVector`` to zero disables both incident and outgoing
+    gravity corrections. Flight lengths and shutter crossing times retain
+    their straight-segment approximations.
+
     Parameters
     ----------
     incident_beam_from:
-        ``'closest'`` assigns the beam whose specular reflection angle is closest
-        to the measured reflection angle. ``'fixed_slits'`` uses the single beam
-        defined by one matching pair of slit centers, independently of the
-        reflection angle and without shutter positions or status logs.
-        ``'shutter_logs'`` uses
-        ``ShutterStatusLogs[SampleRun]`` and ``ShutterPositions[SampleRun]`` for
-        all candidate beams. Each log is evaluated at the neutron's crossing
+        ``'closest'`` assigns the beam whose nominal specular reflection angle
+        is closest to the geometrical sample-to-pixel angle. Gravity correction
+        is applied after the beam is selected.
+        ``'fixed_slits'`` uses the single beam defined by one matching pair of
+        slit centers.
+        ``'shutter_logs'`` uses ``ShutterStatusLogs[SampleRun]`` and
+        ``ShutterPositions[SampleRun]`` for all candidate beams.
+        Each log is evaluated at the neutron's crossing
         time at that shutter, independently of the slit positions. Exactly one
         open shutter, with all states known, determines the incident beam.
         Otherwise the incidence is NaN and the event is masked as
         ``incident_beam_unassigned``.
     wavelength_from:
         Wavelength lookup table mode: 'analytical', 'simulation', or 'file'.
+    inversion:
+        Enable the mirror geometry described in :func:`FreiaWorkflow`.
+        The mirror is between the slit assemblies, after the shutters and
+        before the sample.
+        Incident angles and shutter crossing times include the reflection.
     """
     workflow = GenericUnwrapWorkflow(
         run_types=[SampleRun],
@@ -204,14 +235,28 @@ def FreiaOffspecWorkflow(
         wavelength_from=wavelength_from,
         **kwargs,
     )
-    assignment_provider = {
-        'closest': conversions.closest_beam_incident_angle_graph,
-        'fixed_slits': conversions.fixed_slits_incident_angle_graph,
-        'shutter_logs': conversions.shutter_log_incident_angle_graph,
+    ordinary_assignment, mirror_assignment = {
+        'closest': (
+            conversions.closest_beam_incident_angle_graph,
+            conversions.closest_beam_incident_angle_graph_with_mirror,
+        ),
+        'fixed_slits': (
+            conversions.fixed_slits_incident_angle_graph,
+            conversions.fixed_slits_incident_angle_graph_with_mirror,
+        ),
+        'shutter_logs': (
+            conversions.shutter_log_incident_angle_graph,
+            conversions.shutter_log_incident_angle_graph_with_mirror,
+        ),
     }[incident_beam_from]
+    coordinate_provider = (
+        conversions.offspecular_coordinate_transformation_graph_with_mirror
+        if inversion
+        else conversions.offspecular_coordinate_transformation_graph
+    )
     for provider in (
-        conversions.offspecular_coordinate_transformation_graph,
-        assignment_provider,
+        coordinate_provider,
+        mirror_assignment if inversion else ordinary_assignment,
         corrections.add_offspecular_coords_and_masks,
     ):
         workflow.insert(provider)
@@ -219,55 +264,70 @@ def FreiaOffspecWorkflow(
         workflow[name] = param
     workflow[KeepEventTimeOffset] = incident_beam_from == 'shutter_logs'
     workflow[DetectorRegionOfInterest[SampleRun]] = {}
+    if inversion:
+        for provider in mirror.providers:
+            workflow.insert(provider)
     return workflow
 
 
 @register_workflow
-def FreiaMcStasUnnormalizedWorkflow() -> sciline.Pipeline:
+def FreiaMcStasUnnormalizedWorkflow(*, inversion: bool = False) -> sciline.Pipeline:
     """Workflow for Freia McStas data without run normalization."""
-    return FreiaMcStasWorkflow(run_norm=RunNormalization.none)
+    return FreiaMcStasWorkflow(run_norm=RunNormalization.none, inversion=inversion)
 
 
 @register_workflow
-def FreiaMcStasMonitorHistogramWorkflow() -> sciline.Pipeline:
+def FreiaMcStasMonitorHistogramWorkflow(*, inversion: bool = False) -> sciline.Pipeline:
     """Workflow for Freia McStas data using histogrammed monitor normalization."""
-    return FreiaMcStasWorkflow(run_norm=RunNormalization.monitor_histogram)
+    return FreiaMcStasWorkflow(
+        run_norm=RunNormalization.monitor_histogram, inversion=inversion
+    )
 
 
 @register_workflow
-def FreiaMcStasMonitorIntegratedWorkflow() -> sciline.Pipeline:
+def FreiaMcStasMonitorIntegratedWorkflow(
+    *, inversion: bool = False
+) -> sciline.Pipeline:
     """Workflow for Freia McStas data using integrated monitor normalization."""
-    return FreiaMcStasWorkflow(run_norm=RunNormalization.monitor_integrated)
+    return FreiaMcStasWorkflow(
+        run_norm=RunNormalization.monitor_integrated, inversion=inversion
+    )
 
 
 @register_workflow
-def FreiaMcStasProtonChargeWorkflow() -> sciline.Pipeline:
+def FreiaMcStasProtonChargeWorkflow(*, inversion: bool = False) -> sciline.Pipeline:
     """Workflow for Freia McStas data using proton charge normalization."""
-    return FreiaMcStasWorkflow(run_norm=RunNormalization.proton_charge)
+    return FreiaMcStasWorkflow(
+        run_norm=RunNormalization.proton_charge, inversion=inversion
+    )
 
 
 @register_workflow
-def FreiaUnnormalizedWorkflow() -> sciline.Pipeline:
+def FreiaUnnormalizedWorkflow(*, inversion: bool = False) -> sciline.Pipeline:
     """Workflow for Freia NeXus data without run normalization."""
-    return FreiaWorkflow(run_norm=RunNormalization.none)
+    return FreiaWorkflow(run_norm=RunNormalization.none, inversion=inversion)
 
 
 @register_workflow
-def FreiaMonitorHistogramWorkflow() -> sciline.Pipeline:
+def FreiaMonitorHistogramWorkflow(*, inversion: bool = False) -> sciline.Pipeline:
     """Workflow for Freia NeXus data using histogrammed monitor normalization."""
-    return FreiaWorkflow(run_norm=RunNormalization.monitor_histogram)
+    return FreiaWorkflow(
+        run_norm=RunNormalization.monitor_histogram, inversion=inversion
+    )
 
 
 @register_workflow
-def FreiaMonitorIntegratedWorkflow() -> sciline.Pipeline:
+def FreiaMonitorIntegratedWorkflow(*, inversion: bool = False) -> sciline.Pipeline:
     """Workflow for Freia NeXus data using integrated monitor normalization."""
-    return FreiaWorkflow(run_norm=RunNormalization.monitor_integrated)
+    return FreiaWorkflow(
+        run_norm=RunNormalization.monitor_integrated, inversion=inversion
+    )
 
 
 @register_workflow
-def FreiaProtonChargeWorkflow() -> sciline.Pipeline:
+def FreiaProtonChargeWorkflow(*, inversion: bool = False) -> sciline.Pipeline:
     """Workflow for Freia NeXus data using proton charge normalization."""
-    return FreiaWorkflow(run_norm=RunNormalization.proton_charge)
+    return FreiaWorkflow(run_norm=RunNormalization.proton_charge, inversion=inversion)
 
 
 __all__ = [
