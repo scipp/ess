@@ -42,7 +42,7 @@ def project_momentum_transfer(
         },
         keep_inputs=False,
     )
-    if transformed.bins is not None:
+    if transformed.is_binned:
         transformed.bins.coords['a3'] = sc.bins_like(
             transformed, transformed.coords['a3']
         )

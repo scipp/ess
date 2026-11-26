@@ -31,11 +31,15 @@ from ess.spectroscopy.types import (
     PSCMonitor,
     RawDetector,
     RawMonitor,
+    SampleAngle,
     SampleRun,
     TransformationOverrides,
     UncertaintyBroadcastMode,
+    WavelengthDetector,
     WavelengthMonitor,
 )
+
+from ess.reduce.unwrap import LtotalRange
 
 
 @pytest.fixture(scope='module')
@@ -51,7 +55,7 @@ def detector_names() -> list[str]:
 
 @pytest.fixture
 def workflow(detector_names: list[str]) -> sciline.Pipeline:
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     workflow[LookupTableFilename] = lookup_table_simulation()
@@ -64,12 +68,12 @@ def workflow(detector_names: list[str]) -> sciline.Pipeline:
 
 
 def test_simulation_workflow_can_load_single_detector() -> None:
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = [NeXusDetectorName("channel_3_1_triplet")]
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
 
-    assert result.bins is not None
+    assert result.is_binned
     assert set(result.dims) == {'arc', 'channel', 'tube', 'length', 'time'}
     assert result.sizes['tube'] == 3
     assert 'position' in result.coords
@@ -90,12 +94,12 @@ def test_simulation_workflow_can_load_multiple_detectors_rectangular(
         # The order does not matter.
         random.shuffle(detector_names)
 
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
 
-    assert result.bins is not None
+    assert result.is_binned
     assert set(result.dims) == {'arc', 'channel', 'tube', 'length', 'time'}
     assert result.sizes['arc'] == 3
     assert result.sizes['channel'] == 6
@@ -115,12 +119,12 @@ def test_simulation_workflow_can_load_multiple_detectors_non_rectangular() -> No
         'channel_6_3_triplet',
     ]
 
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
     result = workflow.compute(RawDetector[SampleRun])
 
-    assert result.bins is not None
+    assert result.is_binned
     assert set(result.dims) == {'triplet', 'tube', 'length', 'time'}
     assert result.sizes['triplet'] == len(detector_names)
     assert result.sizes['tube'] == 3
@@ -130,7 +134,7 @@ def test_simulation_workflow_can_load_multiple_detectors_non_rectangular() -> No
 def test_simulation_workflow_can_load_monitor(workflow: sciline.Pipeline) -> None:
     result = workflow.compute(RawMonitor[SampleRun, NormalizationMonitor])
 
-    assert result.bins is None
+    assert not result.is_binned
     assert 'position' in result.coords
 
 
@@ -169,7 +173,7 @@ def test_simulation_workflow_can_compute_wavelength_monitor(
     assert set(monitor.dims) == {'time', 'incident_wavelength'}
     expected_coords = {'position', 'incident_wavelength', 'time'}
     assert expected_coords.issubset(monitor.coords)
-    assert monitor.bins is None
+    assert not monitor.is_binned
 
 
 def test_simulation_workflow_produces_the_same_data_as_before(
@@ -216,7 +220,7 @@ def test_simulation_workflow_produces_the_same_data_as_before(
 def test_calibrated_detector_has_contiguous_detector_number() -> None:
     # This test requires all detector pixels.
     # (the `workflow` fixture only uses the first 10.)
-    workflow = bifrost.BifrostSimulationWorkflow()
+    workflow = bifrost.BifrostSimulationWorkflow(wavelength_from="file")
     workflow[Filename[SampleRun]] = simulated_elastic_incoherent_with_phonon()
 
     detector = workflow.compute(EmptyDetector[SampleRun])
@@ -230,7 +234,7 @@ def test_calibrated_detector_has_contiguous_detector_number() -> None:
 
 @pytest.fixture
 def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
-    workflow = bifrost.BifrostWorkflow()
+    workflow = bifrost.BifrostWorkflow(wavelength_from="file")
     workflow[NeXusDetectorNames] = detector_names
     workflow[Filename[SampleRun]] = coda_test_run_2026_11()
     # The table does not match the choppers of this run but these tests only check
@@ -238,6 +242,35 @@ def coda_workflow(detector_names: list[str]) -> sciline.Pipeline:
     workflow[LookupTableFilename] = lookup_table_simulation()
     workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
     return workflow
+
+
+@pytest.fixture
+def coda_analytical_workflow(detector_names: list[str]) -> sciline.Pipeline:
+    # The default mode builds the lookup table from the choppers in the file.
+    workflow = bifrost.BifrostWorkflow()
+    workflow[NeXusDetectorNames] = detector_names
+    workflow[Filename[SampleRun]] = coda_test_run_2026_11()
+    workflow[LookupTableRelativeErrorThreshold] = {'detector': np.inf}
+    return workflow
+
+
+def test_lookup_table_range_contains_l1(
+    coda_analytical_workflow: sciline.Pipeline,
+) -> None:
+    # Events are shifted to the time at the sample, so the table is evaluated at L1.
+    l1 = coda_analytical_workflow.compute(DataAtSample[SampleRun]).coords['L1']
+    low, high = coda_analytical_workflow.compute(LtotalRange[SampleRun, snx.NXdetector])
+    assert sc.all(low <= l1).value
+    assert sc.all(l1 <= high).value
+
+
+def test_analytical_workflow_computes_finite_incident_wavelength(
+    coda_analytical_workflow: sciline.Pipeline,
+) -> None:
+    data = coda_analytical_workflow.compute(WavelengthDetector[SampleRun])
+    wavelength = data.bins.concat().value.coords['incident_wavelength']
+    assert wavelength.size > 0
+    assert np.isfinite(wavelength.values).all()
 
 
 def test_tank_angle_override_rotates_detectors_and_analyzers_and_sets_a4(
@@ -271,6 +304,19 @@ def test_tank_angle_override_rotates_detectors_and_analyzers_and_sets_a4(
         )
     data = coda_workflow.compute(DataAtSample[SampleRun])
     sc.testing.assert_identical(data.coords['a4'], sc.concat([angle], 'a4'))
+
+
+def test_sample_angle_override_sets_a3(coda_workflow: sciline.Pipeline) -> None:
+    # Live data supplies motor readbacks as scalars through overrides.
+    angle = sc.scalar(12.5, unit='deg')
+    coda_workflow[TransformationOverrides[snx.NXsample, SampleRun]] = {
+        '/entry/instrument/sample_rotation/value': angle
+    }
+
+    sample_angle = coda_workflow.compute(SampleAngle[SampleRun])
+    sc.testing.assert_identical(sample_angle, sc.DataArray(angle))
+    data = coda_workflow.compute(DataAtSample[SampleRun])
+    sc.testing.assert_identical(data.coords['a3'], sc.concat([angle], 'a3'))
 
 
 def test_workflow_can_load_detector_with_analyzers_and_angles_from_coda_file(

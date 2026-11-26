@@ -499,7 +499,7 @@ def test_assemble_detector_data_groups_events_by_detector_number(
     calibrated_detector, detector_event_data
 ) -> None:
     detector = workflow.assemble_detector_data(calibrated_detector, detector_event_data)
-    assert detector.bins is not None
+    assert detector.is_binned
     assert_identical(
         detector.coords['detector_number'],
         calibrated_detector.coords['detector_number'],
@@ -742,7 +742,7 @@ def test_load_event_monitor_workflow(loki_tutorial_sample_run_60250: Path) -> No
     wf[NeXusName[Monitor1]] = 'monitor_1'
     da = wf.compute(RawMonitor[SampleRun, Monitor1])
     assert 'position' in da.coords
-    assert da.bins is not None
+    assert da.is_binned
     assert da.dims == ('event_time_zero',)
     assert da.bins.constituents['data'].variances is not None
 
@@ -753,7 +753,7 @@ def test_load_histogram_monitor_workflow(dream_coda_test_file: Path) -> None:
     wf[NeXusName[Monitor1]] = 'monitor_bunker'
     da = wf.compute(RawMonitor[SampleRun, Monitor1])
     assert 'position' in da.coords
-    assert da.bins is None
+    assert not da.is_binned
     assert set(da.dims) == {'time', 'frame_time'}
     assert 'time' in da.coords.keys()
     assert 'frame_time' in da.coords.keys()
@@ -817,7 +817,7 @@ def test_load_detector_workflow(loki_tutorial_sample_run_60250: Path) -> None:
     wf[NeXusName[snx.NXdetector]] = 'larmor_detector'
     da = wf.compute(RawDetector[SampleRun])
     assert 'position' in da.coords
-    assert da.bins is not None
+    assert da.is_binned
     assert da.dims == ('detector_number',)
 
 
@@ -827,7 +827,7 @@ def test_load_histogram_detector_workflow(tbl_commissioning_orca_file: Path) -> 
     wf[NeXusName[snx.NXdetector]] = 'orca_detector'
     da = wf.compute(RawDetector[SampleRun])
     assert 'position' in da.coords
-    assert da.bins is None
+    assert not da.is_binned
     assert 'time' in da.dims
     assert da.ndim == 3
 
@@ -840,7 +840,7 @@ def test_load_empty_histogram_detector_workflow(
     wf[NeXusName[snx.NXdetector]] = 'orca_detector'
     da = wf.compute(EmptyDetector[SampleRun])
     assert 'position' in da.coords
-    assert da.bins is None
+    assert not da.is_binned
     # The empty detector has no time dimension, only the dimensions of the geometry
     assert 'time' not in da.dims
     assert da.ndim == 2
@@ -857,11 +857,11 @@ def test_generic_nexus_workflow(
     wf[PreopenNeXusFile] = preopen
     da = wf.compute(RawDetector[SampleRun])
     assert 'position' in da.coords
-    assert da.bins is not None
+    assert da.is_binned
     assert da.dims == ('detector_number',)
     da = wf.compute(RawMonitor[SampleRun, Monitor1])
     assert 'position' in da.coords
-    assert da.bins is not None
+    assert da.is_binned
     assert da.dims == ('event_time_zero',)
 
 
@@ -1467,3 +1467,49 @@ def test_provider_of_transformation_overrides_reaches_single_and_multi_chains(
     assert_identical(single.transformations[TRANS1].value, expected)
     assert_identical(multi['a'].transformations[TRANS1].value, expected)
     assert_identical(multi['b'].transformations[TRANS1].value, expected)
+
+
+def test_transformation_overrides_apply_to_chopper_positions(
+    depends_on, time_dependent_depends_on
+) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[workflow.NeXusMultiComponent[snx.NXdisk_chopper, SampleRun]] = sc.DataGroup(
+        a=sc.DataGroup(depends_on=depends_on),
+        b=sc.DataGroup(depends_on=time_dependent_depends_on),
+    )
+    # Replaces the time-dependent trans2, so the position of 'b' is static.
+    wf[TransformationOverrides[snx.NXdisk_chopper, SampleRun]] = {
+        TRANS2: sc.scalar(5.0, unit='m')
+    }
+
+    choppers = wf.compute(RawChoppers[SampleRun])
+
+    assert_identical(choppers['a']['position'], sc.vector([1.0, 2.0, 3.0], unit='m'))
+    assert_identical(choppers['b']['position'], sc.vector([1.0, 5.0, 0.0], unit='m'))
+
+
+def test_time_dependent_transformation_override_gives_time_dependent_chopper_position(
+    time_dependent_depends_on,
+) -> None:
+    wf = GenericNeXusWorkflow(run_types=[SampleRun], monitor_types=[])
+    wf[workflow.NeXusMultiComponent[snx.NXdisk_chopper, SampleRun]] = sc.DataGroup(
+        b=sc.DataGroup(depends_on=time_dependent_depends_on)
+    )
+    time = sc.array(dims=['time'], values=[0.0, 1.0, 2.0], unit='s')
+    value = sc.DataArray(
+        sc.array(dims=['time'], values=[3.0, 2.0, 1.0], unit='m'),
+        coords={'time': time},
+    )
+    wf[TransformationOverrides[snx.NXdisk_chopper, SampleRun]] = {TRANS2: value}
+
+    position = wf.compute(RawChoppers[SampleRun])['b']['position']
+
+    expected = sc.DataArray(
+        sc.vectors(
+            dims=['time'],
+            values=[[1.0, 3.0, 0.0], [1.0, 2.0, 0.0], [1.0, 1.0, 0.0]],
+            unit='m',
+        ),
+        coords={'time': time},
+    )
+    assert_identical(position, expected)

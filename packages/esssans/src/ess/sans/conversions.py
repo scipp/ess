@@ -112,7 +112,7 @@ def Qxy(Q: sc.Variable, phi: sc.Variable) -> dict[str, sc.Variable]:
     """
     Qx = sc.cos(phi)
     Qy = sc.sin(phi)
-    if Q.bins is not None and phi.bins is not None:
+    if Q.is_binned and phi.is_binned:
         Qx *= Q
         Qy *= Q
     else:

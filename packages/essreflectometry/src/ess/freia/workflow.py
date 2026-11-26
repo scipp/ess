@@ -123,7 +123,7 @@ def FreiaMcStasWorkflow(
 def FreiaWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.proton_charge,
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
     inversion: bool = False,
     **kwargs,
 ) -> sciline.Pipeline:
@@ -187,7 +187,7 @@ def FreiaWorkflow(
 def FreiaOffspecWorkflow(
     *,
     incident_beam_from: Literal['closest', 'fixed_slits', 'shutter_logs'] = 'closest',
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
     inversion: bool = False,
     **kwargs,
 ) -> sciline.Pipeline:

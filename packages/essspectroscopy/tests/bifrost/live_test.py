@@ -37,7 +37,7 @@ class TestBifrostQCutWorkflow:
     def qcut_workflow(
         self, simulation_detector_names: list[NeXusDetectorName]
     ) -> sciline.Pipeline:
-        workflow = BifrostQCutWorkflow()
+        workflow = BifrostQCutWorkflow(wavelength_from="file")
         workflow[NeXusDetectorNames] = simulation_detector_names
         # The test file is from a simulation and
         # looks slightly different from production files.
@@ -79,7 +79,7 @@ class TestBifrostQCutWorkflow:
         cut_data = qcut_workflow.compute(CutData[SampleRun])
 
         # Verify the structure of the result (now 3-D with arc dimension)
-        assert cut_data.bins is None  # Should be histogrammed
+        assert not cut_data.is_binned  # Should be histogrammed
         assert set(cut_data.dims) == {'arc', '|Q|', 'E'}
         assert cut_data.sizes['arc'] == 5
         assert cut_data.sizes['|Q|'] == 49  # num bins - 1
@@ -120,7 +120,7 @@ class TestBifrostQCutWorkflow:
         cut_data = qcut_workflow.compute(CutData[SampleRun])
 
         # Verify the result structure (now 3-D with arc dimension)
-        assert cut_data.bins is None
+        assert not cut_data.is_binned
         assert set(cut_data.dims) == {'arc', 'Qx', 'E'}
         assert cut_data.sizes['arc'] == 5
         assert cut_data.sizes['Qx'] == 39

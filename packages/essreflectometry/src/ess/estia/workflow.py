@@ -125,7 +125,7 @@ def EstiaMcStasWorkflow(
 def EstiaWorkflow(
     *,
     run_norm: RunNormalization = RunNormalization.proton_charge,
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
     **kwargs,
 ) -> sciline.Pipeline:
     """Workflow for reduction of data for the Estia instrument.

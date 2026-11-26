@@ -203,7 +203,7 @@ def test_pixel_mask_with_name_of_computed_mask_raises():
     with pytest.raises(ValueError, match='edges'):
         sans2d.to_detector_masks(
             EmptyDetector[SampleRun](detector),
-            PixelMasks({'edges': masked}),
+            PixelMasks(by_detector_id={'edges': masked}),
             sans2d.DetectorEdgeMask(edge_mask),
             sans2d.SampleHolderMask(None),
         )

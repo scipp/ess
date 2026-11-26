@@ -43,7 +43,7 @@ def load_sample_angle(
             f"Expected the sample angle at {path} to be a rotation,"
             f" got '{transform.transformation_type}' instead.'"
         )
-    return SampleAngle[RunType](transform.value)  # type: ignore[return-value]
+    return SampleAngle[RunType](_value_as_data_array(transform))  # type: ignore[return-value]
 
 
 def _find_sample_rotation_in_chain(
@@ -70,11 +70,16 @@ def extract_instrument_angle(
     # the angle. Using the monitor is simplest because there is only one, and we
     # do not have to deal with multiple detectors.
     transformation = _find_transformation_in_chain(chain, path)
-    angle = transformation.value
-    if isinstance(angle, sc.Variable):
-        # A fixed angle or a value from TransformationOverrides, not an NXlog.
-        angle = sc.DataArray(angle)
-    return InstrumentAngle[RunType](angle)  # type: ignore[return-value]
+    return InstrumentAngle[RunType](_value_as_data_array(transformation))  # type: ignore[return-value]
+
+
+def _value_as_data_array(transform: snx.nxtransformations.Transform) -> sc.DataArray:
+    """Return the value of a transformation, possibly a time-series, as a DataArray."""
+    value = transform.value
+    if isinstance(value, sc.Variable):
+        # A fixed value or a value from TransformationOverrides, not an NXlog.
+        return sc.DataArray(value)
+    return value
 
 
 def _find_transformation_in_chain(

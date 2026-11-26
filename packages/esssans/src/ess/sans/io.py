@@ -20,7 +20,7 @@ def save_background_subtracted_iofq(
     measurement: Measurement[SampleRun],
 ) -> None:
     """Save background-subtracted I(Q) histogram as an NXcanSAS file."""
-    if iofq.bins is None:
+    if not iofq.is_binned:
         da = iofq.copy(deep=False)
     else:
         da = iofq.hist()
