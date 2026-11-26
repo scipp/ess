@@ -334,11 +334,12 @@ def _prepare_wavelength_interpolation_inputs(
         # Compute a pulse index for every event: it is the index of the pulse within a
         # frame period. The index ranges from zero to pulse_stride - 1.
         etz_unit = 'ns'
+        per_bin = "event_time_zero" not in da.bins.coords
         etz = (
-            da.bins.coords["event_time_zero"]
-            .bins.constituents["data"]
-            .to(unit=etz_unit, copy=False)
-        )
+            da.coords["event_time_zero"]
+            if per_bin
+            else da.bins.coords["event_time_zero"].bins.constituents["data"]
+        ).to(unit=etz_unit, copy=False)
         pulse_period_ns = pulse_period.to(unit=etz_unit, dtype=int)
         frame_period = pulse_period_ns * pulse_stride
         # Define a common reference time using epoch as a base, but making sure that it
@@ -359,6 +360,9 @@ def _prepare_wavelength_interpolation_inputs(
         pulse_index = etz - reference
         pulse_index %= frame_period
         pulse_index //= pulse_period_ns
+
+        if per_bin:
+            pulse_index = sc.bins_like(da, pulse_index).bins.constituents["data"]
 
         # Apply the pulse_stride_offset
         if pulse_stride_offset is None:
@@ -382,14 +386,13 @@ def _prepare_wavelength_interpolation_inputs(
     }
 
 
-def _compute_wavelength_events(
+def _interpolate_event_wavelength(
     da: sc.DataArray,
     lookup: LookupTable,
     ltotal: sc.Variable,
     pulse_stride_offset: int | None,
     backend: FrameUnwrapBackend,
-    keep_event_time_offset: bool,
-) -> sc.DataArray:
+) -> sc.Variable:
     inputs = _prepare_wavelength_interpolation_inputs(
         da=da,
         lookup=lookup,
@@ -399,13 +402,29 @@ def _compute_wavelength_events(
     )
 
     # Compute wavelength for all neutrons using the interpolator
-    wavs = inputs["interp"](
+    return inputs["interp"](
         ltotal=inputs["ltotal"],
         event_time_offset=inputs["eto"],
         pulse_index=inputs["pulse_index"],
         pulse_period=inputs["pulse_period"],
     )
 
+
+def _compute_wavelength_events(
+    da: sc.DataArray,
+    lookup: LookupTable,
+    ltotal: sc.Variable,
+    pulse_stride_offset: int | None,
+    backend: FrameUnwrapBackend,
+    keep_event_time_offset: bool,
+) -> sc.DataArray:
+    wavs = _interpolate_event_wavelength(
+        da=da,
+        lookup=lookup,
+        ltotal=ltotal,
+        pulse_stride_offset=pulse_stride_offset,
+        backend=backend,
+    )
     parts = da.bins.constituents
     parts["data"] = wavs
     out = da.bins.assign_coords(wavelength=sc.bins(**parts, validate_indices=False))

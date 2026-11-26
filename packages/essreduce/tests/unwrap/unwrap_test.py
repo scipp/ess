@@ -105,6 +105,9 @@ def _make_workflow_event_wavelength_from(
     if detector_or_monitor == "detector":
         wf[RawDetector[SampleRun]] = mon
     else:
+        # Cover both per-event timestamps and the per-pulse layout of NeXus monitors.
+        if detector_or_monitor == "monitor_per_pulse":
+            mon = mon.squeeze().group('event_time_zero')
         wf[RawMonitor[SampleRun, Monitor0]] = mon
 
     wf[unwrap.PulseStrideOffset] = pulse_stride_offset
@@ -149,6 +152,8 @@ def _validate_result_events(wavs, ref, percentile, diff_threshold, rtol):
     assert "tof" not in wavs.coords
 
     wavs = wavs.bins.concat().value
+    wavs = sc.sort(wavs, key='id')
+    ref = sc.sort(ref, key='id')
 
     diff = abs(
         (wavs.coords["wavelength"] - ref.coords["wavelength"])
@@ -181,7 +186,9 @@ def _validate_result_histogram_wavelength_from(
 
 
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
-@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize(
+    "detector_or_monitor", ["detector", "monitor", "monitor_per_pulse"]
+)
 def test_unwrap_with_no_choppers(wavelength_from, detector_or_monitor) -> None:
     # At this small distance the frames are not overlapping (with the given wavelength
     # range), despite not using any choppers.
@@ -219,7 +226,9 @@ def test_unwrap_with_no_choppers(wavelength_from, detector_or_monitor) -> None:
 # At 90m, events are split between the third and fourth pulse.
 @pytest.mark.parametrize("dist", [25.0, 50.0, 62.0, 90.0])
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
-@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize(
+    "detector_or_monitor", ["detector", "monitor", "monitor_per_pulse"]
+)
 def test_standard_unwrap(
     dist, wavelength_from, detector_or_monitor, simulation_results_psc_choppers
 ) -> None:
@@ -290,7 +299,9 @@ def test_standard_unwrap_histogram_wavelength_from(
 
 @pytest.mark.parametrize("dist", [60.0, 100.0])
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
-@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize(
+    "detector_or_monitor", ["detector", "monitor", "monitor_per_pulse"]
+)
 def test_pulse_skipping_unwrap(
     dist, wavelength_from, detector_or_monitor, simulation_results_pulse_skipping
 ) -> None:
@@ -321,7 +332,9 @@ def test_pulse_skipping_unwrap(
     )
 
 
-@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize(
+    "detector_or_monitor", ["detector", "monitor", "monitor_per_pulse"]
+)
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
 def test_pulse_skipping_unwrap_180_phase_shift(
     wavelength_from, detector_or_monitor
@@ -360,7 +373,9 @@ def test_pulse_skipping_unwrap_180_phase_shift(
 
 @pytest.mark.parametrize("dist", [60.0, 100.0])
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
-@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize(
+    "detector_or_monitor", ["detector", "monitor", "monitor_per_pulse"]
+)
 def test_pulse_skipping_stride_offset_guess_gives_expected_result(
     dist, wavelength_from, detector_or_monitor, simulation_results_pulse_skipping
 ) -> None:
@@ -392,7 +407,9 @@ def test_pulse_skipping_stride_offset_guess_gives_expected_result(
 
 
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
-@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize(
+    "detector_or_monitor", ["detector", "monitor", "monitor_per_pulse"]
+)
 def test_pulse_skipping_unwrap_when_all_neutrons_arrive_after_second_pulse(
     wavelength_from, detector_or_monitor
 ) -> None:
@@ -517,7 +534,9 @@ def test_pulse_skipping_unwrap_when_first_half_of_first_pulse_is_missing(
 
 
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
-@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize(
+    "detector_or_monitor", ["detector", "monitor", "monitor_per_pulse"]
+)
 def test_pulse_skipping_stride_3(wavelength_from, detector_or_monitor) -> None:
     choppers = fakes.pulse_skipping_choppers()
     choppers["pulse_skipping"].frequency.value = -14.0 / 3.0
@@ -585,7 +604,9 @@ def test_pulse_skipping_unwrap_histogram_wavelength_from(
 
 @pytest.mark.parametrize("dtype", ["int32", "int64"])
 @pytest.mark.parametrize("wavelength_from", ["simulation", "analytical"])
-@pytest.mark.parametrize("detector_or_monitor", ["detector", "monitor"])
+@pytest.mark.parametrize(
+    "detector_or_monitor", ["detector", "monitor", "monitor_per_pulse"]
+)
 def test_unwrap_int(
     dtype, wavelength_from, detector_or_monitor, simulation_results_psc_choppers
 ) -> None:
