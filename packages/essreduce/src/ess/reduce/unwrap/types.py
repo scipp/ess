@@ -127,4 +127,13 @@ class WavelengthMonitor(sl.Scope[RunType, MonitorType, sc.DataArray], sc.DataArr
     """Monitor data with wavelength coordinate."""
 
 
+class WavelengthBins(sl.Scope[Component, sc.Variable], sc.Variable):
+    """Optional wavelength bin edges for a component, shared across run types.
+
+    If None, preserve events or existing histogram bins. Otherwise,
+    histogram events or rebin a histogram using these one-dimensional edges.
+    The dimension name is arbitrary.
+    """
+
+
 KeepEventTimeOffset = NewType("KeepEventTimeOffset", bool)

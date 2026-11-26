@@ -95,12 +95,19 @@ transformation chain is stored, for the detectors and the monitors
 ReturnEvents = NewType('ReturnEvents', bool)
 """Whether to return events in the output I(Q)"""
 
-WavelengthBins = NewType('WavelengthBins', sc.Variable)
-"""Wavelength binning"""
+NormalizationWavelengthBins = NewType('NormalizationWavelengthBins', sc.Variable)
+"""Shared wavelength bin edges for all SANS normalization terms.
+
+Monitors are histogrammed or rebinned onto these edges during preprocessing, after
+estimating their background. The direct beam and wavelength bands use the same grid.
+"""
+
+WavelengthBins = NormalizationWavelengthBins
+"""Compatibility alias for :py:obj:`NormalizationWavelengthBins`."""
 
 WavelengthBands = NewType('WavelengthBands', sc.Variable | None)
 """Wavelength bands. Typically a single band, set to first and last value of
-WavelengthBins.
+NormalizationWavelengthBins.
 
 The wavelength bands can however be used to compute the scattering cross section inside
 multiple wavelength bands. In this case, the wavelength bands must be either one- or
@@ -120,9 +127,10 @@ ProcessedWavelengthBands = NewType('ProcessedWavelengthBands', sc.Variable)
 being the band index and the second dimension being the wavelength. For each band, there
 must be two wavelength values defining the start and end wavelength of the band.
 
-Band edges coincide exactly with values of :py:obj:`WavelengthBins`. Reducing over a
-band relies on this, so that event data, dense data with a bin-edge wavelength coord and
-dense data with a midpoint wavelength coord all select the same wavelength range.
+Band edges coincide exactly with values of :py:obj:`NormalizationWavelengthBins`.
+Reducing over a band relies on this, so that event data, dense data with a bin-edge
+wavelength coord and dense data with a midpoint wavelength coord all select the same
+wavelength range.
 Construct this via :py:func:`ess.sans.normalization.process_wavelength_bands`, which
 establishes the alignment; hand-built bands silently bias I(Q) per band."""
 

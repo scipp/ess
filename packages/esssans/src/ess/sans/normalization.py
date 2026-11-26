@@ -23,6 +23,7 @@ from .types import (
     IofQPart,
     MonitorTerm,
     NeXusTransformation,
+    NormalizationWavelengthBins,
     NormalizedQ,
     NormalizedQxQy,
     Numerator,
@@ -37,7 +38,6 @@ from .types import (
     TransmissionFraction,
     TransmissionRun,
     WavelengthBands,
-    WavelengthBins,
 )
 
 
@@ -271,7 +271,7 @@ def norm_detector_term_numerator(
 
 def process_wavelength_bands(
     wavelength_bands: WavelengthBands,
-    wavelength_bins: WavelengthBins,
+    wavelength_bins: NormalizationWavelengthBins,
 ) -> ProcessedWavelengthBands:
     """
     Perform some checks and potential reshaping on the wavelength bands.
@@ -339,7 +339,7 @@ def process_wavelength_bands(
         raise ValueError(
             f'{collapsed} of {widths.size} wavelength bands are narrower than a '
             'wavelength bin and collapse to zero width when snapped onto it. Widen the '
-            'bands or refine WavelengthBins.'
+            'bands or refine NormalizationWavelengthBins.'
         )
     return bands
 

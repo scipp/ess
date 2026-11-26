@@ -20,6 +20,7 @@ from ess.reduce.nexus.types import (
     NeXusName,
     Position,
     RawDetector,
+    RawMonitor,
     SampleRun,
 )
 from ess.reduce.unwrap import (
@@ -39,6 +40,80 @@ def test_GenericUnwrapWorkflow_defaults_to_numba_backend():
     wf = GenericUnwrapWorkflow(run_types=[SampleRun], monitor_types=[])
 
     assert wf.compute(FrameUnwrapBackend) == FrameUnwrapBackend.numba
+
+
+@pytest.mark.parametrize('bin_dim', ['wavelength', 'incident_wavelength', 'wavelenght'])
+def test_monitor_wavelength_bins_rebin_histograms(bin_dim):
+    wf = _make_workflow(wavelength_from='analytical')
+    target = unwrap.WavelengthMonitor[SampleRun, Monitor0]
+    original = wf.compute(target)
+    mid = original.sizes['wavelength'] // 2
+    wavelengths = original.coords['wavelength']
+    edges = sc.concat([wavelengths[0], wavelengths[mid], wavelengths[-1]], bin_dim)
+    expected = sc.concat(
+        [
+            original['wavelength', :mid].sum('wavelength').data,
+            original['wavelength', mid:].sum('wavelength').data,
+        ],
+        'wavelength',
+    ).transpose(original.dims)
+
+    wf[unwrap.WavelengthBins[Monitor0]] = edges
+    result = wf.compute(target)
+
+    sc.testing.assert_allclose(result.data, expected)
+    assert_identical(
+        result.coords['wavelength'], edges.rename_dims({bin_dim: 'wavelength'})
+    )
+    assert edges.dim == bin_dim
+
+
+@pytest.mark.parametrize('bin_dim', ['wavelength', 'incident_wavelength', 'wavelenght'])
+def test_monitor_wavelength_bins_histogram_events(bin_dim):
+    wf = _make_workflow(wavelength_from='analytical')
+    wf[DiskChoppers[SampleRun]] = {}
+    events = sc.DataArray(
+        sc.ones(dims=['event'], shape=[4], unit='counts', with_variances=True),
+        coords={
+            'event_time_offset': sc.array(
+                dims=['event'], values=[15.0, 15.0, 30.0, 45.0], unit='ms'
+            )
+        },
+    )
+    wf[RawMonitor[SampleRun, Monitor0]] = sc.DataArray(
+        sc.bins(data=events, dim='event', begin=sc.index(0), end=sc.index(4))
+    )
+    target = unwrap.WavelengthMonitor[SampleRun, Monitor0]
+    original = wf.compute(target)
+    assert original.is_binned
+    wavelengths = original.bins.constituents['data'].coords['wavelength']
+    edges = sc.concat(
+        [
+            sc.scalar(0.0, unit='angstrom'),
+            (wavelengths[1] + wavelengths[2]) / 2,
+            (wavelengths[2] + wavelengths[3]) / 2,
+            sc.scalar(15.0, unit='angstrom'),
+        ],
+        bin_dim,
+    )
+    wf[unwrap.WavelengthBins[Monitor0]] = edges
+
+    result = wf.compute(target)
+
+    assert not result.is_binned
+    assert_identical(
+        result.data,
+        sc.array(
+            dims=['wavelength'],
+            values=[2.0, 1.0, 1.0],
+            variances=[2.0, 1.0, 1.0],
+            unit='counts',
+        ),
+    )
+    assert_identical(
+        result.coords['wavelength'], edges.rename_dims({bin_dim: 'wavelength'})
+    )
+    assert edges.dim == bin_dim
 
 
 def _make_workflow(

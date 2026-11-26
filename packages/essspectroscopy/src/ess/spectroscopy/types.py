@@ -68,6 +68,7 @@ MonitorType = TypeVar(
 
 WavelengthDetector = unwrap.WavelengthDetector
 WavelengthMonitor = unwrap.WavelengthMonitor
+WavelengthBins = unwrap.WavelengthBins
 LookupTableRelativeErrorThreshold = unwrap.LookupTableRelativeErrorThreshold
 MonitorLtotal = unwrap.MonitorLtotal
 PulseStride = unwrap.PulseStride
