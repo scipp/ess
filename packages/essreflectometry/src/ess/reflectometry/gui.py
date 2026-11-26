@@ -127,7 +127,7 @@ class DetectorView(widgets.HBox):
         self.working_label.layout.display = ''
         run = selected_rows.iloc[0]['Run']
 
-        workflow = amor.AmorWorkflow()
+        workflow = amor.AmorWorkflow2025()
         workflow[SampleSize[SampleRun]] = sc.scalar(10, unit='mm')
         workflow[SampleSize[ReferenceRun]] = sc.scalar(10, unit='mm')
 
@@ -976,7 +976,7 @@ class AmorBatchReductionGUI(ReflectometryBatchReductionGUI):
         sample_df = self.get_selected_rows()
         used_references = set(sample_df['Reference'])
 
-        workflow = amor.AmorWorkflow()
+        workflow = amor.AmorWorkflow2025()
         workflow[SampleSize[SampleRun]] = sc.scalar(10, unit='mm')
         workflow[SampleSize[ReferenceRun]] = sc.scalar(10, unit='mm')
 
