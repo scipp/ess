@@ -91,7 +91,7 @@ loki_providers = (detector_pixel_shape, load_direct_beam)
 
 @register_workflow
 def LokiWorkflow(
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
 ) -> sciline.Pipeline:
     """
     Workflow with default parameters for Loki.

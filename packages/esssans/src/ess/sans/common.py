@@ -57,14 +57,10 @@ def mask_range(
             f'Found dimensions {da.coords[dim].dims} for coordinate {dim}.'
         )
 
-    coord = (
-        da.bins.constituents['data'].coords[dim]
-        if da.bins is not None
-        else da.coords[dim]
-    )
+    coord = da.bins.constituents['data'].coords[dim] if da.is_binned else da.coords[dim]
     edges = edges.to(unit=coord.unit)
     lu = sc.DataArray(data=mask.data, coords={dim: edges})
-    if da.bins is not None:
+    if da.is_binned:
         if dim not in da.coords:
             underlying = da.bins.coords[dim]
             new_bins = np.union1d(

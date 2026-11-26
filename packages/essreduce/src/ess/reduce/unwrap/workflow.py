@@ -19,7 +19,7 @@ def GenericUnwrapWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
 ) -> sciline.Pipeline:
     """
     Generic workflow for computing the neutron wavelength for detector and monitor

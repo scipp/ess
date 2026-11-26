@@ -64,8 +64,8 @@ def larmor_workflow() -> sciline.Pipeline:
 
 @pytest.fixture
 def loki_workflow() -> sciline.Pipeline:
-    def make_workflow() -> sciline.Pipeline:
-        wf = loki.LokiWorkflow()
+    def make_workflow(**kwargs) -> sciline.Pipeline:
+        wf = loki.LokiWorkflow(**kwargs)
 
         # For now, use a dummy file for all runs. This produces a result with all NaNs,
         # but is sufficient to test that the workflow runs end-to-end.

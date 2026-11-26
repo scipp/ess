@@ -18,37 +18,43 @@ from ess.spectroscopy.types import (
 )
 
 from ess.reduce import unwrap as reduce_unwrap
+from ess.reduce.unwrap.to_wavelength import (
+    detector_ltotal_from_straight_line_approximation,
+)
 from ess.reduce.unwrap.types import DetectorLtotal
 
 
 def detector_ltotal(
-    sample_data: DataGroupedByRotation[RunType],
+    monitor: EmptyDetector[RunType],
     source_position: NeutronSourcePosition[RunType],
     sample_position: Position[snx.NXsample, RunType],
     gravity: GravityVector,
 ) -> DetectorLtotal[RunType]:
     """
-    Compute Ltotal from the straight-line approximation.
+    Compute Ltotal of the Bragg peak monitor from the straight-line approximation.
 
     The Bragg peak monitor views the beam direct from the sample, without an analyzer
-    in between, so a straight line is the correct flight path.
+    in between, so source -> sample -> monitor is the correct flight path.
 
-    Computed after grouping so that ``Ltotal`` carries the dimensions of the grouped
-    data. BIFROST's tank rotates and the Bragg peak monitor is mounted on it, so the
-    monitor position -- and hence ``Ltotal`` -- is time-dependent; ``group_by_rotation``
-    turns that 'time' dimension into 'a4'. Deriving ``Ltotal`` from the ungrouped
-    geometry instead would leave it labelled with a dimension the data no longer has.
+    Computed from the geometry alone, not from the event data, so that the lookup
+    table built from ``Ltotal`` is a static node when the workflow streams.
 
-    This is a wrapper around
-    :func:`ess.reduce.unwrap.detector_ltotal_from_straight_line_approximation`
-    for different input types.
+    The monitor is mounted on the detector tank, so a time-dependent tank angle gives
+    the monitor position, and hence ``Ltotal``, a 'time' dimension. The tank rotates
+    about the vertical axis through the sample, so ``Ltotal`` is constant along it up
+    to survey offsets of the axis, which are far below the lookup table's distance
+    resolution. 'time' is therefore averaged out rather than mapped to the 'a4'
+    dimension of the grouped data.
     """
-    return reduce_unwrap.to_wavelength.detector_ltotal_from_straight_line_approximation(
-        detector=EmptyDetector[RunType](sample_data),
+    ltotal = detector_ltotal_from_straight_line_approximation(
+        detector=monitor,
         source_position=source_position,
         sample_position=sample_position,
         gravity=gravity,
     )
+    if 'time' in ltotal.dims:
+        return DetectorLtotal[RunType](ltotal.mean('time'))
+    return ltotal
 
 
 def detector_wavelength_data(

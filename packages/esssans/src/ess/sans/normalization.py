@@ -425,13 +425,13 @@ def _normalize(
     :
         Normalized I(Q) or I(Qx, Qy).
     """  # noqa: E501
-    if return_events and numerator.bins is not None:
+    if return_events and numerator.is_binned:
         # Naive event-mode normalization is not correct if norm-term has variances.
         # See https://doi.org/10.3233/JNR-220049 for context.
         denominator = broadcast_uncertainties(
             denominator, prototype=numerator, mode=uncertainties
         )
-    elif numerator.bins is not None:
+    elif numerator.is_binned:
         numerator = numerator.hist()
     numerator /= denominator.drop_coords(
         [name for name in denominator.coords if name not in denominator.dims]
@@ -443,7 +443,7 @@ def _do_reduce(da: sc.DataArray) -> sc.DataArray:
     wav = 'wavelength'
     if da.sizes[wav] == 1:  # Can avoid costly event-data da.bins.concat
         return da.squeeze(wav)
-    return da.sum(wav) if da.bins is None else da.bins.concat(wav)
+    return da.sum(wav) if not da.is_binned else da.bins.concat(wav)
 
 
 def _reduce(part: sc.DataArray, /, *, bands: ProcessedWavelengthBands) -> sc.DataArray:
@@ -466,7 +466,7 @@ def _reduce(part: sc.DataArray, /, *, bands: ProcessedWavelengthBands) -> sc.Dat
         Q-dependent data, ready for normalization.
     """
     wav = 'wavelength'
-    if part.bins is not None:
+    if part.is_binned:
         # If in event mode the desired wavelength binning has not been applied, we need
         # it for splitting by bands, or restricting the range in case of a single band.
         part = part.bin(wavelength=sc.sort(bands.flatten(to=wav), wav))

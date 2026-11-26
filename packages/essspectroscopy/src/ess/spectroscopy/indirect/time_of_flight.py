@@ -7,6 +7,7 @@ from collections.abc import Iterable
 from dataclasses import asdict
 
 import sciline
+import scipp as sc
 import scippnexus as snx
 
 from ess.reduce import unwrap as reduce_unwrap
@@ -21,6 +22,7 @@ from ..types import (
     MonitorLtotal,
     MonitorType,
     NeXusDetectorName,
+    PrimarySpecCoordTransformGraph,
     PulseStrideOffset,
     RawDetector,
     RawMonitor,
@@ -35,7 +37,7 @@ def TofWorkflow(
     *,
     run_types: Iterable[sciline.typing.Key],
     monitor_types: Iterable[sciline.typing.Key],
-    wavelength_from: WavelengthLutMode = "file",
+    wavelength_from: WavelengthLutMode = "analytical",
 ) -> sciline.Pipeline:
     workflow = reduce_unwrap.GenericUnwrapWorkflow(
         run_types=run_types,
@@ -47,9 +49,30 @@ def TofWorkflow(
     return workflow
 
 
+def detector_ltotal_at_sample(
+    primary_graph: PrimarySpecCoordTransformGraph[RunType],
+) -> DetectorLtotal[RunType]:
+    """Return L1, the flight path from the source to the sample.
+
+    :func:`detector_wavelength_data` shifts the event times back to the sample
+    (subtracting the secondary flight time), so the lookup table is evaluated at L1
+    and not at the full path to the detector pixel.
+    The full path cannot be used because the neutron speed changes at the sample.
+
+    This depends on the beamline geometry only, not on event data,
+    so that the lookup table derived from it does not change between chunks
+    when streaming.
+    """
+    geometry = sc.DataArray(sc.scalar(0.0)).transform_coords(
+        'L1', graph=primary_graph, keep_intermediate=False, keep_aliases=False
+    )
+    return DetectorLtotal[RunType](geometry.coords['L1'])
+
+
 def detector_wavelength_data(
     sample_data: DataAtSample[RunType],
     lookup: ErrorLimitedLookupTable[RunType, snx.NXdetector],
+    ltotal: DetectorLtotal[RunType],
     pulse_stride_offset: PulseStrideOffset,
 ) -> WavelengthDetector[RunType]:
     """
@@ -60,11 +83,13 @@ def detector_wavelength_data(
     This is a wrapper around
     :func:`ess.reduce.unwrap.detector_wavelength_data`
     for indirect geometry spectrometers.
+    The event times in ``sample_data`` are times at the sample,
+    so ``ltotal`` must be L1, see :func:`detector_ltotal_at_sample`.
     """
     result = reduce_unwrap.to_wavelength.detector_wavelength_data(
         detector_data=RawDetector[RunType](sample_data),
         lookup=lookup,
-        ltotal=DetectorLtotal(sample_data.coords['L1']),
+        ltotal=ltotal,
         pulse_stride_offset=pulse_stride_offset,
         keep_event_time_offset=False,
     )
@@ -165,6 +190,7 @@ def mask_large_uncertainty_in_lut_detector(
 
 providers = (
     compute_monitor_ltotal,
+    detector_ltotal_at_sample,
     detector_wavelength_data,
     mask_large_uncertainty_in_lut_detector,
     monitor_wavelength_data,

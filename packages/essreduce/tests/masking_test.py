@@ -50,17 +50,21 @@ def _write_raw_mask(path: Path, values: np.ndarray, label: str = 'tube') -> Path
 
 
 def test_read_no_files_gives_no_masks() -> None:
-    assert read_pixel_masks(PixelMaskFilenames([])) == {}
+    masks = read_pixel_masks(PixelMaskFilenames([]))
+    assert masks.by_bank == {}
+    assert masks.by_detector_id == {}
 
 
 def test_read_xml_expands_ranges(tmp_path: Path) -> None:
     masks = _read(_write_xml(tmp_path / 'a.xml', '1-3, 7'))
-    assert masks['a.xml'].values.tolist() == [1, 2, 3, 7]
+    assert masks.by_detector_id['a.xml'].values.tolist() == [1, 2, 3, 7]
+    assert masks.by_bank == {}
 
 
 def test_read_hdf5_detector_ids(tmp_path: Path) -> None:
     masks = _read(_write_ids(tmp_path / 'a.h5', [4, 5]))
-    assert masks['a.h5'].values.tolist() == [4, 5]
+    assert masks.by_detector_id['a.h5'].values.tolist() == [4, 5]
+    assert masks.by_bank == {}
 
 
 def test_read_combines_formats_and_names_masks_without_directory(
@@ -69,7 +73,7 @@ def test_read_combines_formats_and_names_masks_without_directory(
     masks = _read(
         _write_xml(tmp_path / 'a.xml', '1'), _write_ids(tmp_path / 'b.hdf5', [2])
     )
-    assert list(masks) == ['a.xml', 'b.hdf5']
+    assert list(masks.by_detector_id) == ['a.xml', 'b.hdf5']
 
 
 def test_read_raises_if_two_files_have_same_name(tmp_path: Path) -> None:
@@ -93,7 +97,7 @@ def test_read_raises_if_hdf5_does_not_hold_integers(tmp_path: Path) -> None:
         _read(path)
 
 
-def test_read_bank_masks_names_masks_after_datasets(tmp_path: Path) -> None:
+def test_read_bank_masks_by_detector_and_mask_name(tmp_path: Path) -> None:
     broken = sc.array(dims=['tube'], values=[True, False])
     beamstop = sc.array(dims=['straw'], values=[False, True, True])
     write_pixel_masks(
@@ -102,8 +106,9 @@ def test_read_bank_masks_names_masks_after_datasets(tmp_path: Path) -> None:
         instrument='TEST',
     )
     masks = _read(tmp_path / 'a.nxs')
-    assert sc.identical(masks['broken'], sc.DataGroup(bank_0=broken))
-    assert sc.identical(masks['beamstop'], sc.DataGroup(bank_0=beamstop))
+    assert sc.identical(
+        masks.by_bank['bank_0'], sc.DataGroup(broken=broken, beamstop=beamstop)
+    )
 
 
 def test_write_uses_detector_name_and_mask_name(tmp_path: Path) -> None:
@@ -115,20 +120,26 @@ def test_write_uses_detector_name_and_mask_name(tmp_path: Path) -> None:
         assert file['entry/instrument/loki_detector_0/masks/bad_tubes'][
             ()
         ].tolist() == [1]
-    assert sc.identical(_read(path)['bad_tubes'], sc.DataGroup(loki_detector_0=mask))
+    assert sc.identical(
+        _read(path).by_bank['loki_detector_0'], sc.DataGroup(bad_tubes=mask)
+    )
 
 
-def test_read_bank_masks_keeps_dimensions_of_all_banks(tmp_path: Path) -> None:
+def test_read_same_named_masks_can_have_different_shapes_and_order(
+    tmp_path: Path,
+) -> None:
     banks = {
         'bank_0': sc.array(dims=['layer', 'tube'], values=[[True, False]]),
-        'bank_1': sc.array(dims=['straw'], values=[False, True, False]),
+        'bank_1': sc.array(dims=['tube', 'layer'], values=[[True], [False]]),
     }
     write_pixel_masks(
         tmp_path / 'a.nxs',
         {bank: {'m': mask} for bank, mask in banks.items()},
         instrument='TEST',
     )
-    assert sc.identical(_read(tmp_path / 'a.nxs')['m'], sc.DataGroup(banks))
+    loaded = _read(tmp_path / 'a.nxs')
+    assert sc.identical(loaded.by_bank['bank_0'], sc.DataGroup(m=banks['bank_0']))
+    assert sc.identical(loaded.by_bank['bank_1'], sc.DataGroup(m=banks['bank_1']))
 
 
 def test_read_bank_masks_omits_banks_without_dataset_of_mask(tmp_path: Path) -> None:
@@ -139,8 +150,8 @@ def test_read_bank_masks_omits_banks_without_dataset_of_mask(tmp_path: Path) -> 
         instrument='TEST',
     )
     masks = _read(tmp_path / 'a.nxs')
-    assert list(masks['broken']) == ['bank_0']
-    assert list(masks['beamstop']) == ['bank_1']
+    assert list(masks.by_bank['bank_0']) == ['broken']
+    assert list(masks.by_bank['bank_1']) == ['beamstop']
 
 
 def test_read_ignores_other_entries_of_the_file(tmp_path: Path) -> None:
@@ -153,7 +164,7 @@ def test_read_ignores_other_entries_of_the_file(tmp_path: Path) -> None:
     with snx.File(path, 'r+') as file:
         file['entry'].create_field('valid_from', '2026-11-01T00:00:00Z')
         file['entry/instrument/bank_0'].create_field('pixel_mask', np.array([1]))
-    assert list(_read(path)) == ['m']
+    assert list(_read(path).by_bank) == ['bank_0']
 
 
 def test_read_skips_detector_without_masks(tmp_path: Path) -> None:
@@ -165,7 +176,7 @@ def test_read_skips_detector_without_masks(tmp_path: Path) -> None:
     )
     with snx.File(path, 'r+') as file:
         file['entry/instrument'].create_class('bank_1', snx.NXdetector)
-    assert list(_read(path)['m']) == ['bank_0']
+    assert list(_read(path).by_bank['bank_0']) == ['m']
 
 
 def test_read_combines_masks_of_several_files(tmp_path: Path) -> None:
@@ -177,19 +188,44 @@ def test_read_combines_masks_of_several_files(tmp_path: Path) -> None:
         tmp_path / 'b.nxs', {'bank_0': {'beamstop': mask}}, instrument='TEST'
     )
     masks = _read(tmp_path / 'a.nxs', tmp_path / 'b.nxs')
-    assert list(masks) == ['broken', 'beamstop']
+    assert list(masks.by_bank['bank_0']) == ['broken', 'beamstop']
 
 
-def test_read_raises_if_files_have_mask_with_same_name(tmp_path: Path) -> None:
+def test_read_raises_if_files_have_mask_for_same_detector_and_name(
+    tmp_path: Path,
+) -> None:
     mask = sc.array(dims=['tube'], values=[True])
     write_pixel_masks(
         tmp_path / 'a.nxs', {'bank_0': {'broken': mask}}, instrument='TEST'
     )
     write_pixel_masks(
-        tmp_path / 'b.nxs', {'bank_1': {'broken': mask}}, instrument='TEST'
+        tmp_path / 'b.nxs', {'bank_0': {'broken': mask}}, instrument='TEST'
     )
     with pytest.raises(ValueError, match='broken'):
         _read(tmp_path / 'a.nxs', tmp_path / 'b.nxs')
+
+
+def test_read_round_trips_masks_by_detector(tmp_path: Path) -> None:
+    masks = {
+        f'loki_detector_{i}': {
+            'bad_tubes': sc.array(
+                dims=['layer', 'tube'],
+                values=np.arange(4 * 32).reshape(4, 32) % 9 == i,
+            ),
+            'bad_straws': sc.array(
+                dims=['layer', 'tube', 'straw'],
+                values=np.arange(4 * 32 * 7).reshape(4, 32, 7) % 9 == i,
+            ),
+        }
+        for i in range(9)
+    }
+    path = tmp_path / 'masks.hdf'
+    write_pixel_masks(path, masks, instrument='LOKI')
+
+    loaded = _read(path)
+    assert list(loaded.by_bank) == list(masks)
+    for detector, detector_masks in masks.items():
+        assert sc.identical(loaded.by_bank[detector], sc.DataGroup(detector_masks))
 
 
 def test_write_stores_masks_as_uint8(tmp_path: Path) -> None:
@@ -220,7 +256,7 @@ def test_read_masks_pixels_with_nonzero_value(tmp_path: Path, dtype: str) -> Non
     values = np.array([0, 1, 1], dtype=dtype)
     if dtype != 'bool':
         values[2] = 2
-    loaded = _read(_write_raw_mask(tmp_path / 'a.nxs', values))['m']['bank_0']
+    loaded = _read(_write_raw_mask(tmp_path / 'a.nxs', values)).by_bank['bank_0']['m']
     assert loaded.dims == ('tube',)
     assert loaded.values.tolist() == [False, True, True]
 
@@ -275,7 +311,7 @@ def _detector(ids: sc.Variable, id_coord: str = 'detector_number') -> sc.DataArr
 def test_to_detector_masks_keeps_shape_of_ids() -> None:
     ids = sc.array(dims=['tube', 'pixel'], values=[[1, 2], [3, 4]], unit=None)
     masked = sc.array(dims=['detector_id'], values=[2, 3, 99], unit=None)
-    masks = to_detector_masks(PixelMasks({'m': masked}), _detector(ids))
+    masks = to_detector_masks(PixelMasks(by_detector_id={'m': masked}), _detector(ids))
     expected = sc.array(dims=['tube', 'pixel'], values=[[False, True], [True, False]])
     assert sc.identical(masks['m'], expected)
 
@@ -284,7 +320,9 @@ def test_to_detector_masks_reads_ids_from_given_coord() -> None:
     ids = sc.array(dims=['spectrum'], values=[1, 2, 3], unit=None)
     masked = sc.array(dims=['detector_id'], values=[2], unit=None)
     masks = to_detector_masks(
-        PixelMasks({'m': masked}), _detector(ids, 'detector_id'), id_coord='detector_id'
+        PixelMasks(by_detector_id={'m': masked}),
+        _detector(ids, 'detector_id'),
+        id_coord='detector_id',
     )
     assert sc.identical(
         masks['m'], sc.array(dims=['spectrum'], values=[False, True, False])
@@ -305,7 +343,9 @@ def bank() -> sc.DataArray:
 
 
 def _per_bank(**banks: sc.Variable) -> PixelMasks:
-    return PixelMasks({'m': sc.DataGroup(banks)})
+    return PixelMasks(
+        by_bank={bank: sc.DataGroup(m=mask) for bank, mask in banks.items()}
+    )
 
 
 def test_to_detector_masks_selects_bank_and_allows_fewer_dims(
@@ -324,7 +364,7 @@ def test_to_detector_masks_skips_file_without_this_bank(bank: sc.DataArray) -> N
 
 def test_to_detector_masks_applies_ids_to_any_bank(bank: sc.DataArray) -> None:
     masked = sc.array(dims=['detector_id'], values=[1], unit=None)
-    masks = to_detector_masks(PixelMasks({'m': masked}), bank, bank='a')
+    masks = to_detector_masks(PixelMasks(by_detector_id={'m': masked}), bank, bank='a')
     assert masks['m'].values.sum() == 1
 
 
@@ -349,7 +389,7 @@ def test_to_detector_masks_raises_if_masked_ids_are_not_integer(
 ) -> None:
     masked = sc.array(dims=['x'], values=[True])
     with pytest.raises(sc.DTypeError, match='integer detector IDs'):
-        to_detector_masks(PixelMasks({'m': masked}), bank)
+        to_detector_masks(PixelMasks(by_detector_id={'m': masked}), bank)
 
 
 def test_to_detector_masks_raises_if_bank_mask_is_not_boolean(

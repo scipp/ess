@@ -188,7 +188,7 @@ def integrate_two_theta(
         raise sc.DimensionError("Data does not have a 'two_theta' dimension.")
     return FocussedDataDspacing[RunType](
         data.nansum(dim='two_theta')
-        if data.bins is None
+        if not data.is_binned
         else data.bins.concat('two_theta')
     )
 
@@ -228,7 +228,7 @@ def group_two_theta(
     data = data.assign_coords(two_theta=sc.midpoints(edges))
     grouped = (
         data.groupby('two_theta', bins=bins).nansum('two_theta')
-        if data.bins is None
+        if not data.is_binned
         else data.bin(two_theta=bins)
     )
     return FocussedDataDspacingTwoTheta[RunType](

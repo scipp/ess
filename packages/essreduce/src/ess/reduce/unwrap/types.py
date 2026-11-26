@@ -92,7 +92,19 @@ Example:
 
 
 class DetectorLtotal(sl.Scope[RunType, sc.Variable], sc.Variable):
-    """Total path length of neutrons from source to detector (L1 + L2)."""
+    """Flight path length at which the detector's wavelength lookup table is evaluated.
+
+    The lookup table maps (distance from source, time of arrival at that distance)
+    to wavelength. This is the distance used for the detector data, and the
+    on-the-fly lookup table modes derive the table's distance range from it.
+
+    For elastic scattering this is the total path length from source to detector
+    pixel (L1 + L2), see
+    :func:`ess.reduce.unwrap.to_wavelength.detector_ltotal_from_straight_line_approximation`.
+    Workflows that shift event times to another point on the flight path
+    provide a different value. For example, indirect geometry spectrometers shift
+    event times back to the sample, so this is L1.
+    """
 
 
 class MonitorLtotal(sl.Scope[RunType, MonitorType, sc.Variable], sc.Variable):

@@ -61,8 +61,10 @@ _registry = make_registry(
         "spin_flip_example/supermirror_offon.h5": "md5:68ea97d4c83410360a04cc55da4d0a33",  # noqa: E501
         "spin_flip_example/supermirror_onoff.h5": "md5:4e682089541046bf6c167c94068569e1",  # noqa: E501
         "spin_flip_example/supermirror_onon.h5": "md5:6fc2090e6947949fe937fe0bf42600ec",
+        # Lookup tables for wavelength and time-of-flight
         "estia-tof-lookup-table-pulse-stride-1.h5": "md5:696953c772209fadc9c4a2ca619cf04d",  # noqa: E501
         "estia-lookup-table-pulse-stride-1.h5": "md5:01787012c678ea6ddce6a5f3a33d8895",
+        "estia-lookup-table-5m-45m-pulse-stride-1.h5": "md5:bf8a58c46cdb16ea80bd00caa8cfa171",  # noqa: E501
     },
 )
 
@@ -197,8 +199,13 @@ def estia_mcstas_spin_flip_example_download_all_to_cache() -> None:
 
 
 def estia_wavelength_lookup_table() -> Path:
-    """Return path to the ESTIA wavelength lookup table."""
-    return _registry.get_path('estia-lookup-table-pulse-stride-1.h5')
+    """
+    Return path to the ESTIA wavelength lookup table.
+    This table was created using the
+    https://scipp.github.io/ess/reflectometry/user-guide/estia/create-estia-wavelength-lookup-table.html
+    notebook, with 5_000_000 simulated neutrons.
+    """
+    return _registry.get_path('estia-lookup-table-5m-45m-pulse-stride-1.h5')
 
 
 __all__ = [
