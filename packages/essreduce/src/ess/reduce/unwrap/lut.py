@@ -777,6 +777,38 @@ def _estimate_wavelength_by_polygon_centers(
     )
 
 
+def _slit_open_close_times(
+    chopper: DiskChopper, *, time_max: sc.Variable
+) -> tuple[sc.Variable, sc.Variable]:
+    """Return open and close times of all slit openings that overlap [0, time_max].
+
+    ``DiskChopper.time_offset_open``/``time_offset_close`` return times for a fixed
+    range of rotation indices, so where these times start depends on beam position
+    and phase. Phases ``φ`` and ``φ - 360°`` are the same physical state and must
+    give the same openings. We therefore shift each slit by whole rotations such
+    that its first close time lies in ``[0, period)``. This includes the opening in
+    progress at time 0.
+    """
+    freq = abs(chopper.frequency).to(unit='Hz')
+    period = (1 / freq).to(unit='s')
+    # time_offset_open/close require freq / pulse_frequency to be an integer,
+    # which holds by construction. They return nrot + 1 rotations.
+    # After the shift, the first opening starts after -period, so opening
+    # nrot + 1 (the first one not returned) starts after nrot * period >= time_max.
+    nrot = max(int(np.ceil((time_max * freq).to(unit='').value)), 1)
+    pulse_frequency = freq / nrot
+    time_open = chopper.time_offset_open(pulse_frequency=pulse_frequency)
+    time_close = chopper.time_offset_close(pulse_frequency=pulse_frequency)
+
+    # Times are ordered as (rotation, slit), flattened.
+    dim = time_close.dim
+    sizes = {'_rotation': nrot + 1, dim: -1}
+    time_open = time_open.to(unit='s').fold(dim=dim, sizes=sizes)
+    time_close = time_close.to(unit='s').fold(dim=dim, sizes=sizes)
+    shift = sc.floor(time_close.min('_rotation') / period) * period
+    return (time_open - shift).flatten(to=dim), (time_close - shift).flatten(to=dim)
+
+
 def compute_frame_sequence(
     pulse_period: PulsePeriod,
     disk_choppers: FrameCompatibleDiskChoppers[RunType],
@@ -809,11 +841,8 @@ def compute_frame_sequence(
             ch.axle_position, source_position
         )
 
-        # The `pulse_frequency` parameter in time_offset_open and time_offset_close
-        # below decides how many rotations the chopper will perform when computing
-        # the open and close times.
-        # We need to cover the entire time range from 0 to the time it takes the
-        # slowest neutron to travel the distance to the chopper.
+        # The chopper openings need to cover the entire time range from 0 to the
+        # time it takes the slowest neutron to travel the distance to the chopper.
         slowest_to_chopper = chopper_distance / _wavelength_to_speed(
             source_bounds.wavelength[1]
         )
@@ -823,21 +852,9 @@ def compute_frame_sequence(
             + slowest_to_chopper.to(unit='s')
         )
 
-        freq = abs(ch.frequency).to(unit='Hz')
-        # time_offset_open/close require freq / pulse_frequency to be an integer,
-        # which holds here by construction. DiskChopper starts its repetitions at
-        # rotation -1, so nrot repetitions only reach rotation nrot - 1, hence +1.
-        nrot = int(np.ceil((travel_time * freq).value)) + 1
-        pulse_frequency_for_diskchopper = freq / nrot
-
+        time_open, time_close = _slit_open_close_times(ch, time_max=travel_time)
         chops[key] = chopper_cascade.Chopper(
-            distance=chopper_distance,
-            time_open=ch.time_offset_open(
-                pulse_frequency=pulse_frequency_for_diskchopper
-            ),
-            time_close=ch.time_offset_close(
-                pulse_frequency=pulse_frequency_for_diskchopper
-            ),
+            distance=chopper_distance, time_open=time_open, time_close=time_close
         )
 
     frames = chopper_cascade.FrameSequence.from_source_pulse(

@@ -694,6 +694,67 @@ def test_choppers_rotate_enough_times_with_slow_neutrons_to_pollute_lut():
     ).value
 
 
+def _transmitted_bands(frequency: float, phase: float) -> list[tuple[float, float]]:
+    """Wavelength bands [Å] transmitted by a single-slit chopper at 8 m."""
+    chopper = DiskChopper(
+        frequency=sc.scalar(frequency, unit='Hz'),
+        beam_position=sc.scalar(90.0, unit='deg'),
+        phase=sc.scalar(phase, unit='deg'),
+        axle_position=sc.vector([0.0, 0.0, 8.0], unit='m'),
+        slit_begin=sc.array(dims=['slit'], values=[0.0], unit='deg'),
+        slit_end=sc.array(dims=['slit'], values=[60.0], unit='deg'),
+    )
+    wf = _make_workflow("analytical")
+    wf[unwrap.DiskChoppers[AnyRun]] = {'chopper': chopper}
+    wf[NeutronSourcePosition[AnyRun]] = sc.vector([0, 0, 0], unit='m')
+    wf[SourceBounds] = SourceBounds(
+        time=(sc.scalar(0.0, unit='ms'), sc.scalar(5.0, unit='ms')),
+        wavelength=(sc.scalar(0.5, unit='angstrom'), sc.scalar(15.0, unit='angstrom')),
+    )
+    frames = wf.compute(unwrap.ChopperFrameSequence[AnyRun])
+    return [
+        (
+            round(float(s.start_wavelength.value), 3),
+            round(float(s.end_wavelength.value), 3),
+        )
+        for s in frames[-1].subframes
+    ]
+
+
+def test_chopper_opening_in_progress_at_pulse_start_transmits():
+    # Phase 300 deg is the same physical state as -60 deg: the slit is on the beam
+    # from -6 ms to 30 deg / (360 deg * 14 Hz) = 5.95 ms. The slowest neutron that
+    # passes leaves at t=0, i.e., v = 8 m / 5.95 ms = 1344 m/s, i.e., 2.943 Å.
+    assert _transmitted_bands(frequency=14.0, phase=300.0) == [(0.5, 2.943)]
+
+
+# Phases at which the chopper transmits a band.
+# For clockwise rotation, phase -120 deg - p gives the same timing as phase p
+# for anticlockwise rotation.
+@pytest.mark.parametrize(
+    ('frequency', 'phase'),
+    [
+        (14.0, -60.0),
+        (14.0, 0.0),
+        (14.0, 100.0),
+        (14.0, 300.0),
+        (-14.0, -60.0),
+        (-14.0, -120.0),
+        (-14.0, -220.0),
+        (-14.0, 300.0),
+    ],
+)
+@pytest.mark.parametrize('turns', [-2, -1, 1, 2, 3])
+def test_transmitted_bands_are_periodic_in_chopper_phase(
+    frequency: float, phase: float, turns: int
+) -> None:
+    expected = _transmitted_bands(frequency=frequency, phase=phase)
+    assert expected
+    assert _transmitted_bands(frequency=frequency, phase=phase + 360.0 * turns) == (
+        expected
+    )
+
+
 def test_chopper_processing_drops_choppers_with_zero_frequency():
     wf = _make_workflow("analytical")
     choppers = _make_choppers()
