@@ -3,7 +3,6 @@
 
 import math
 from collections.abc import Callable
-from pathlib import Path
 from types import MappingProxyType
 
 import ipywidgets as ipw
@@ -679,11 +678,6 @@ class DetectorExplorer(ipw.VBox):
         change:
             The change dictionary containing information about the tab change.
         """
-        # print(
-        #     "COLOR CONTROL",
-        #     self.color_control.vmin.value,
-        #     self.color_control.vmax.value,
-        # )
         self.sync_color_range()
         self.update_colormapper_norm()
         _update_view(self.current_figs)
