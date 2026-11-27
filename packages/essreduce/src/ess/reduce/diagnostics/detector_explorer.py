@@ -349,7 +349,7 @@ class DetectorExplorer(ipw.VBox):
         | None = None,
         figsize: tuple[int, int] = (11, 8),
         show_dims: list[str] | None = None,
-        norm: Literal["linear", "log", None] = None,
+        norm: Literal["linear", "log"] | None = None,
         logc: bool | None = None,
         **kwargs,
     ):
