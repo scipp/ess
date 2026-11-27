@@ -36,7 +36,7 @@ class MaskControl(ipw.HBox):
         """
         self.mask_dims = mask_dims
 
-        self.mask_selector = ipw.Dropdown(
+        self.selector = ipw.Dropdown(
             options=["", *self.mask_dims.keys()],
             value="",
             description='Edit mask:',
@@ -58,7 +58,7 @@ class MaskControl(ipw.HBox):
 
         super().__init__(
             [
-                self.mask_selector,
+                self.selector,
                 self.clear_button,
                 ipw.HTML(value="&nbsp;&nbsp; Save to file: &nbsp;"),
                 self.filename_input,
@@ -69,10 +69,10 @@ class MaskControl(ipw.HBox):
 
     @property
     def selected(self) -> str:
-        return self.mask_selector.value
+        return self.selector.value
 
     def select(self, mask: str) -> None:
-        self.mask_selector.value = mask
+        self.selector.value = mask
 
     def on_clear(self, callback: callable) -> None:
         """
@@ -98,13 +98,13 @@ class ColorControl(ipw.HBox):
         log:
             Whether to enable logarithmic scaling initially, by default ``False``.
         """
-        self.vmin = ipw.Text(
+        self._vmin = ipw.Text(
             description='Min:',
             layout={'width': '130px'},
             style={"description_width": 'initial'},
             continuous_update=False,
         )
-        self.vmax = ipw.Text(
+        self._vmax = ipw.Text(
             description='Max:',
             layout={'width': '130px'},
             style={"description_width": 'initial'},
@@ -118,8 +118,8 @@ class ColorControl(ipw.HBox):
         super().__init__(
             [
                 ipw.Label("Colorscale:"),
-                self.vmin,
-                self.vmax,
+                self._vmin,
+                self._vmax,
                 self.log_button,
                 self.fit_button,
             ],
@@ -133,8 +133,8 @@ class ColorControl(ipw.HBox):
         """
         Register a callback to be called when the color scale limits are changed.
         """
-        self.vmin.observe(callback, names='value')
-        self.vmax.observe(callback, names='value')
+        self._vmin.observe(callback, names='value')
+        self._vmax.observe(callback, names='value')
 
     def on_log_toggle(self, callback: Callable) -> None:
         """
@@ -147,6 +147,30 @@ class ColorControl(ipw.HBox):
         Register a callback to be called when the fit button is clicked.
         """
         self.fit_button.on_click(callback)
+
+    @property
+    def vmin(self) -> float | None:
+        try:
+            return float(self._vmin.value)
+        except ValueError:
+            return None
+
+    @vmin.setter
+    def vmin(self, value: float) -> None:
+        if np.isfinite(value):
+            self._vmin.value = str(value)
+
+    @property
+    def vmax(self) -> float | None:
+        try:
+            return float(self._vmax.value)
+        except ValueError:
+            return None
+
+    @vmax.setter
+    def vmax(self, value: float) -> None:
+        if np.isfinite(value):
+            self._vmax.value = str(value)
 
 
 class DimSlider(ipw.HBox, ipw.ValueWidget):
@@ -303,8 +327,10 @@ def _find_limits(figs):
     for f in figs:
         (a,) = f.view.artists.values()
         bounds = axis_bounds(keys=('cmin', 'cmax'), x=a.data, scale='linear')
-        vmin = min(vmin, bounds["cmin"])
-        vmax = max(vmax, bounds["cmax"])
+        if bounds["cmin"] is not None:
+            vmin = min(vmin, bounds["cmin"])
+        if bounds["cmax"] is not None:
+            vmax = max(vmax, bounds["cmax"])
     return vmin, vmax
 
 
@@ -551,8 +577,8 @@ class DetectorExplorer(ipw.VBox):
         self.color_control.on_log_toggle(self.toggle_log)
         self.color_control.on_fit_click(self.fit_cmap_range)
         vmin, vmax = _find_limits(self.tab_figs.values())
-        self.color_control.vmin.value = str(vmin)
-        self.color_control.vmax.value = str(vmax)
+        self.color_control.vmin = vmin
+        self.color_control.vmax = vmax
 
         top_controls = [self.mask_control or ipw.Label(value=""), self.color_control]
 
@@ -653,6 +679,11 @@ class DetectorExplorer(ipw.VBox):
         change:
             The change dictionary containing information about the tab change.
         """
+        # print(
+        #     "COLOR CONTROL",
+        #     self.color_control.vmin.value,
+        #     self.color_control.vmax.value,
+        # )
         self.sync_color_range()
         self.update_colormapper_norm()
         _update_view(self.current_figs)
@@ -689,16 +720,7 @@ class DetectorExplorer(ipw.VBox):
         Update the color range (vmin and vmax) for all current figures based on the
         values in the color control widgets.
         """
-        bounds = {}
-        for key, item in [
-            ("cmin", self.color_control.vmin),
-            ("cmax", self.color_control.vmax),
-        ]:
-            try:
-                bounds[key] = float(item.value)
-            except ValueError:  # noqa: PERF203
-                bounds[key] = None
-
+        bounds = {"cmin": self.color_control.vmin, "cmax": self.color_control.vmax}
         if self.color_control.log_button.value:
             for key, bound in bounds.items():
                 if (bound is not None) and (bound <= 0):
@@ -718,8 +740,17 @@ class DetectorExplorer(ipw.VBox):
         """
         figs = self.current_figs
         vmin, vmax = _find_limits(figs)
-        self.color_control.vmin.value = str(vmin)
-        self.color_control.vmax.value = str(vmax)
+        current_vmax = self.color_control.vmax
+        if current_vmax is None:
+            current_vmax = float('inf')
+        # If the new vmin is greater than the current vmax, we have to update the max
+        # bound first.
+        if vmin > current_vmax:
+            self.color_control.vmax = vmax
+            self.color_control.vmin = vmin
+        else:
+            self.color_control.vmin = vmin
+            self.color_control.vmax = vmax
         _update_view(figs)
 
     def toggle_mask(self, event: MouseEvent) -> None:

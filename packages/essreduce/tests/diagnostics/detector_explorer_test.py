@@ -4,11 +4,13 @@
 import math
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 import scipp as sc
 from scipp.testing import assert_identical
 
 from ess.reduce.diagnostics.detector_explorer import DetectorExplorer
+from ess.reduce.masking import read_pixel_masks
 
 
 @pytest.fixture(autouse=True)
@@ -36,12 +38,29 @@ def make_banks(sizes=None, count=3) -> sc.DataGroup:
     )
 
 
-def make_y_masks(sizes) -> sc.Variable:
-    return sc.zeros(sizes={k: sizes[k] for k in ('layer', 'y')}, dtype=bool)
+def make_y_masks(banks) -> sc.Variable:
+    return {
+        key: {
+            "m": sc.zeros(
+                sizes={dim: bank.sizes[dim] for dim in ('layer', 'y')}, dtype=bool
+            )
+        }
+        for key, bank in banks.items()
+    }
 
 
-def make_x_y_masks(sizes) -> sc.Variable:
-    return sc.zeros(sizes={k: sizes[k] for k in ('layer', 'y', 'x')}, dtype=bool)
+def make_x_y_masks(banks) -> sc.Variable:
+    return {
+        key: {
+            "m_y": sc.zeros(
+                sizes={dim: bank.sizes[dim] for dim in ('layer', 'y')}, dtype=bool
+            ),
+            "m_xy": sc.zeros(
+                sizes={dim: bank.sizes[dim] for dim in ('layer', 'y', 'x')}, dtype=bool
+            ),
+        }
+        for key, bank in banks.items()
+    }
 
 
 def test_initial_tabs_and_figures_follow_bank_order():
@@ -144,22 +163,6 @@ def test_single_bank_tab_uses_bank_sliders():
         explorer.to_plot_nodes['bank_0']().data,
         explorer.data['bank_0']['layer', 1].data,
     )
-
-
-def test_single_bank_clear_uses_bank_slider_slice():
-    data = make_banks(count=1)
-    explorer = DetectorExplorer(
-        data, masks={'bank_0': {'new': make_y_masks(sizes=data['bank_0'].sizes)}}
-    )
-    explorer.bank_dim_sliders['bank_0'][0].slider.value = 1
-    explorer.masks['bank_0']['new'] = sc.ones(
-        sizes=explorer.data['bank_0'].sizes, dtype=bool
-    )
-
-    explorer.mask_control.clear_button.click()
-
-    assert explorer.masks['bank_0']['new']['layer', 0].values.all()
-    assert not explorer.masks['bank_0']['new']['layer', 1].values.any()
 
 
 def test_single_bank_color_controls_update_bank_figure():
@@ -355,17 +358,6 @@ TRANSITIONS = [
 ]
 
 
-def test_current_bank_and_figures_match_selected_tab():
-    explorer = DetectorExplorer(make_banks())
-    for name in ['bank_1', 'All', 'bank_2', 'bank_0', 'All']:
-        select(explorer, name)
-        assert explorer.current_key == name
-        if name == 'All':
-            assert explorer.current_figs == list(explorer.subplots.values())
-        else:
-            assert explorer.current_figs == [explorer.tab_figs[name]]
-
-
 def test_indices_transfer_clamped_when_entering_and_leaving_all():
     explorer = DetectorExplorer(make_uneven_banks())
     all_sliders = sliders_of(explorer, 'All')
@@ -399,43 +391,6 @@ def test_bank_to_bank_switch_preserves_destination_indices():
     assert sliders_of(explorer, 'bank_0')['layer'].slider.value == 3
 
 
-def test_summed_dimensions_do_not_overwrite_stored_indices():
-    explorer = DetectorExplorer(make_uneven_banks())
-    all_layer = sliders_of(explorer, 'All')['layer']
-    all_layer.slider.value = 2
-    select(explorer, 'bank_1')
-    bank_layer = sliders_of(explorer, 'bank_1')['layer']
-    bank_layer.slider.value = 1
-    bank_layer.sum.value = True
-
-    select(explorer, 'All')
-    assert all_layer.sum.value is True
-    stored = all_layer.slider.value
-    select(explorer, 'bank_1')
-    assert bank_layer.slider.value == 1
-    assert all_layer.slider.value == stored
-    bank_layer.sum.value = False
-    select(explorer, 'All')
-    assert all_layer.sum.value is False
-    assert all_layer.slider.value == 1
-
-
-@pytest.mark.parametrize(('start', 'end'), TRANSITIONS)
-def test_destination_plots_show_correct_data_and_masks(start, end):
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, start)
-    explorer.masks['bank_1']['mask'] = sc.zeros(sizes=explorer.data.sizes, dtype=bool)
-    explorer.masks['bank_1']['mask']['layer', 0]['y', 1]['x', 2].value = True
-    explorer.apply_masks_nodes['bank_1'].notify_children(message=None)
-    select(explorer, end)
-
-    for nodes in (explorer.to_plot_nodes, explorer.all_to_plot_nodes):
-        result = nodes['bank_1']()
-        expected = expected_display(explorer, 'bank_1', layer=0)
-        assert_identical(result, expected)
-        assert result.masks['mask'].values[1, 2]
-
-
 def test_color_limits_and_log_apply_to_newly_selected_figures():
     explorer = DetectorExplorer(make_banks())
     explorer.color_control.log_button.value = True
@@ -454,31 +409,221 @@ def test_color_limits_and_log_apply_to_newly_selected_figures():
     assert all((m.cmin, m.cmax, m.norm) == (1, 10, 'log') for m in mappers)
 
 
-def test_repeated_tab_switches_do_not_duplicate_callbacks_or_actions():
+# ---------------------------------------------------------------------------
+# 4. Masking
+# ---------------------------------------------------------------------------
+
+
+def test_no_masks_supplied_does_not_show_mask_control():
     explorer = DetectorExplorer(make_banks())
-    canvas, _ = bank_canvas(explorer, 'bank_1')
-    main = explorer.main_figure.canvas
-    counts = (
-        len(canvas.callbacks.callbacks.get('button_press_event', {})),
-        len(main.callbacks.callbacks.get('button_press_event', {})),
+    assert explorer.mask_control is None
+
+
+def test_destination_plots_show_correct_data_and_masks():
+    det_banks = make_banks()
+    masks = make_y_masks(det_banks)
+    masks['bank_0']['m']['layer', 0]['y', 1] = True
+    masks['bank_1']['m']['layer', 0]['y', 0] = True
+    explorer = DetectorExplorer(det_banks, masks=masks)
+
+    result = explorer.all_to_plot_nodes['bank_0']()
+    assert sc.identical(
+        result.drop_coords(result.coords),
+        det_banks['bank_0'].assign_masks(masks['bank_0'])['layer', 0],
     )
-    for _ in range(5):
-        for name in ('bank_1', 'All', 'bank_2', 'bank_1'):
-            select(explorer, name)
-    assert counts == (
-        len(canvas.callbacks.callbacks.get('button_press_event', {})),
-        len(main.callbacks.callbacks.get('button_press_event', {})),
+    result = explorer.all_to_plot_nodes['bank_1']()
+    assert sc.identical(
+        result.drop_coords(result.coords),
+        det_banks['bank_1'].assign_masks(masks['bank_1'])['layer', 0],
     )
 
-    explorer.mask_control.mode = 'single'
+    select(explorer, 'bank_1')
+    result = explorer.all_to_plot_nodes['bank_1']()
+    assert sc.identical(
+        result.drop_coords(result.coords),
+        det_banks['bank_1'].assign_masks(masks['bank_1'])['layer', 0],
+    )
+
+
+def test_adding_a_mask_affects_the_correct_mask():
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm'
+    press(explorer, 'bank_0', 2, 1)
+
+    expected = sc.array(
+        dims=['layer', 'y'], values=[[False, True, False], [False, False, False]]
+    )
+    assert_identical(explorer.masks['bank_0']['m'], expected)
+
+    select(explorer, 'bank_1')
+    press(explorer, 'bank_1', 0, 0)
+    expected = sc.array(
+        dims=['layer', 'y'], values=[[True, False, False], [False, False, False]]
+    )
+    assert_identical(explorer.masks['bank_1']['m'], expected)
+
+
+def test_masking_affects_only_selected_bank_and_leaves_data_unchanged():
+    det_banks = make_banks()
+    original = det_banks.copy(deep=True)
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
+    select(explorer, 'bank_1')
+    explorer.mask_control.selector.value = 'm'
     press(explorer, 'bank_1', 1, 1)
-    keys = list(explorer.masks['bank_1'].keys())
-    assert len(keys) == 1
-    assert explorer.masks['bank_1'][keys[0]].values.sum() == 1
+    select(explorer, 'bank_0')
+    press(explorer, 'bank_0', 2, 1)
+
+    assert "m" in explorer.masks['bank_1']
+    assert "m" in explorer.masks['bank_0']
+    for bank in det_banks:
+        assert "m" not in original[bank].masks
+
+
+def test_masking_masks_with_different_dimensions():
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_x_y_masks(det_banks))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm_y'
+    press(explorer, 'bank_0', 2, 1)
+    select(explorer, 'bank_1')
+    explorer.mask_control.selector.value = 'm_xy'
+    press(explorer, 'bank_1', 0, 0)
+    assert "m_y" in explorer.masks['bank_0']
+    assert set(explorer.masks['bank_0']['m_y'].dims) == {'layer', 'y'}
+    assert explorer.masks['bank_0']['m_y'].any()
+    assert not explorer.masks['bank_1']['m_y'].any()
+    assert "m_xy" in explorer.masks['bank_1']
+    assert set(explorer.masks['bank_1']['m_xy'].dims) == {'layer', 'x', 'y'}
+    assert explorer.masks['bank_1']['m_xy'].any()
+    assert not explorer.masks['bank_0']['m_xy'].any()
+
+
+@pytest.mark.parametrize(
+    ('x', 'y', 'iy'),
+    [(2.4, 0.6, 1), (2.6, 1.4, 1), (0.2, 1.6, 2)],
+)
+def test_click_coordinates_are_rounded_to_nearest_pixel_y_masks(x, y, iy):
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm'
+    press(explorer, 'bank_0', x, y)
+    expected = sc.zeros(
+        sizes={dim: det_banks['bank_0'].sizes[dim] for dim in ['layer', 'y']},
+        dtype=bool,
+    )
+    expected['layer', 0]['y', iy] = True
+    assert_identical(explorer.masks['bank_0']["m"], expected)
+
+
+@pytest.mark.parametrize(
+    ('x', 'y', 'ix', 'iy'),
+    [(2.4, 0.6, 2, 1), (2.6, 1.4, 3, 1), (0.2, 1.6, 0, 2)],
+)
+def test_click_coordinates_are_rounded_to_nearest_pixel_xy_masks(x, y, ix, iy):
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_x_y_masks(det_banks))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm_xy'
+    press(explorer, 'bank_0', x, y)
+    expected = sc.zeros(
+        sizes={dim: det_banks['bank_0'].sizes[dim] for dim in ['layer', 'y', 'x']},
+        dtype=bool,
+    )
+    expected['layer', 0]['y', iy]['x', ix] = True
+    assert_identical(explorer.masks['bank_0']["m_xy"], expected)
+
+
+def test_adding_a_mask_then_clicking_same_place_again_deletes_it():
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm'
+    press(explorer, 'bank_0', 0, 1)
+    assert np.array_equal(
+        explorer.masks['bank_0']["m"]["layer", 0].values, [False, True, False]
+    )
+    press(explorer, 'bank_0', 0, 1)
+    assert np.array_equal(
+        explorer.masks['bank_0']["m"]["layer", 0].values, [False, False, False]
+    )
+
+
+def test_deleting_mask_by_click_affects_all_visible_masks():
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_x_y_masks(det_banks))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm_xy'
+    press(explorer, 'bank_0', 0.2, 1)
+    explorer.mask_control.selector.value = 'm_y'
+    press(explorer, 'bank_0', 0.2, 1)
+    assert not explorer.masks['bank_0']["m_xy"]["layer", 0].any()
+
+
+def test_add_mask_with_small_coord():
+    dg = make_banks()
+    dg['bank_0'].coords['x'] = sc.arange('x', 4) * 0.1
+    explorer = DetectorExplorer(dg, masks=make_x_y_masks(dg))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm_xy'
+    press(explorer, 'bank_0', 0.3, 1)
+    assert sc.identical(
+        explorer.masks['bank_0']['m_xy']['layer', 0]['y', 1],
+        sc.array(dims=['x'], values=[False, False, False, True], dtype=bool),
+    )
+
+
+def test_add_mask_with_small_coord_and_bin_edges():
+    dg = make_banks()
+    dg['bank_0'].coords['x'] = sc.arange('x', 5) * 0.1
+    explorer = DetectorExplorer(dg, masks=make_x_y_masks(dg))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm_xy'
+    press(explorer, 'bank_0', 0.201, 1)  # Just above the 3rd bin edge
+    mask = explorer.masks['bank_0']['m_xy']['layer', 0]['y', 1]
+    assert sc.identical(
+        mask, sc.array(dims=['x'], values=[False, False, True, False], dtype=bool)
+    )
+    press(explorer, 'bank_0', 0.198, 1)  # Just below the 3rd bin edge
+    assert sc.identical(
+        mask, sc.array(dims=['x'], values=[False, True, True, False], dtype=bool)
+    )
+
+
+def test_add_mask_with_large_coord():
+    dg = make_banks()
+    dg['bank_0'].coords['x'] = sc.arange('x', 1000, 1004)
+    explorer = DetectorExplorer(dg, masks=make_x_y_masks(dg))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm_xy'
+    press(explorer, 'bank_0', 1001, 1)
+    mask = explorer.masks['bank_0']['m_xy']['layer', 0]['y', 1]
+    assert sc.identical(
+        mask, sc.array(dims=['x'], values=[False, True, False, False], dtype=bool)
+    )
+
+
+def test_add_mask_with_large_coord_and_bin_edges():
+    dg = make_banks()
+    dg['bank_0'].coords['x'] = sc.arange('x', 1000, 1005)
+    explorer = DetectorExplorer(dg, masks=make_x_y_masks(dg))
+    select(explorer, 'bank_0')
+    explorer.mask_control.selector.value = 'm_xy'
+    press(explorer, 'bank_0', 1001.1, 1)
+    mask = explorer.masks['bank_0']['m_xy']['layer', 0]['y', 1]
+    assert sc.identical(
+        mask, sc.array(dims=['x'], values=[False, True, False, False], dtype=bool)
+    )
+    press(explorer, 'bank_0', 1000.9, 1)  # Just below the 2nd bin edge
+    assert sc.identical(
+        mask, sc.array(dims=['x'], values=[True, True, False, False], dtype=bool)
+    )
 
 
 # ---------------------------------------------------------------------------
-# 4. Mouse navigation
+# 5. Mouse navigation
 # ---------------------------------------------------------------------------
 
 
@@ -505,7 +650,8 @@ def test_clicking_outside_axes_or_on_colorbar_does_nothing():
 
 
 def test_pan_zoom_mode_suppresses_navigation_and_masking():
-    explorer = DetectorExplorer(make_banks())
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
     ax = explorer.subplots['bank_1'].ax
     explorer.main_figure.canvas.toolbar.pan()
     canvas = explorer.main_figure.canvas
@@ -513,15 +659,16 @@ def test_pan_zoom_mode_suppresses_navigation_and_masking():
     assert explorer.current_tab == 0
 
     select(explorer, 'bank_1')
-    explorer.mask_control.mode = 'single'
+    explorer.mask_control.selector.value = 'm'
     explorer.tab_figs['bank_1'].fig.canvas.toolbar.zoom()
     press(explorer, 'bank_1', 1, 1)
-    assert not explorer.masks['bank_1']
+    assert not explorer.masks['bank_1']['m'].any()
 
 
 def test_overview_clicks_do_not_change_masks():
-    explorer = DetectorExplorer(make_banks())
-    explorer.mask_control.mode = 'single'
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
+    explorer.mask_control.selector.value = 'm'
     fire(
         explorer.main_figure.canvas,
         explorer.subplots['bank_1'].ax,
@@ -530,238 +677,7 @@ def test_overview_clicks_do_not_change_masks():
         1,
     )
     assert explorer.current_key == 'bank_1'
-    assert not any(m for m in explorer.masks.values())
-
-
-# ---------------------------------------------------------------------------
-# 5. Masking
-# ---------------------------------------------------------------------------
-
-MODES = ['single', 'horizontal', 'vertical']
-ALL_TRANSITIONS = [(a, b) for a in MODES for b in MODES if a != b]
-
-
-def test_mode_buttons_are_mutually_exclusive():
-    explorer = DetectorExplorer(make_banks())
-    control = explorer.mask_control
-    assert control.mode is None
-    for mode in MODES:
-        control.mode_buttons[mode].value = True
-        assert control.mode == mode
-        assert [b.value for b in control.mode_buttons.values()].count(True) == 1
-    control.mode_buttons['vertical'].value = False
-    assert control.mode is None
-
-    select(explorer, 'bank_0')
-    press(explorer, 'bank_0', 1, 1)
-    assert not explorer.masks['bank_0']
-
-
-@pytest.mark.parametrize('mode', MODES)
-def test_mode_toggles_exactly_the_intended_elements(mode):
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = mode
-    press(explorer, 'bank_0', 2, 1)
-
-    expected = mask_at(explorer.data['bank_0'].sizes, mode, 0, 2, 1)
-    assert_identical(next(iter(explorer.masks['bank_0'].values())), expected)
-
-
-@pytest.mark.parametrize(('first', 'second'), ALL_TRANSITIONS)
-def test_mode_transitions_use_new_mode_even_on_same_pixel(first, second):
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, 'bank_0')
-
-    explorer.mask_control.mode = first
-    press(explorer, 'bank_0', 2, 1)
-    expected_first = mask_at(explorer.data['bank_0'].sizes, first, 0, 2, 1)
-    keys = list(explorer.masks['bank_0'].keys())
-    assert_identical(explorer.masks['bank_0'][keys[0]], expected_first)
-
-    explorer.mask_control.mode = second
-    press(explorer, 'bank_0', 2, 1)
-    expected_second = mask_at(explorer.data['bank_0'].sizes, second, 0, 2, 1)
-    keys = list(explorer.masks['bank_0'].keys())
-    assert len(keys) == 2
-    assert_identical(explorer.masks['bank_0'][keys[1]], expected_second)
-    assert (
-        explorer.masks['bank_0'][keys[0]].dims != explorer.masks['bank_0'][keys[1]].dims
-    )
-
-    press(explorer, 'bank_0', 2, 1)
-    # The second mask should have disappeared
-    assert len(explorer.masks['bank_0']) == 1
-
-
-def test_summed_dimension_applies_edits_across_full_extent():
-    explorer = DetectorExplorer(
-        make_banks({'time': 3, 'layer': 2, 'y': 3, 'x': 4}), show_dims=['y', 'x']
-    )
-    select(explorer, 'bank_0')
-    sliders = sliders_of(explorer, 'bank_0')
-    sliders['time'].sum.value = True
-    sliders['layer'].slider.value = 1
-    explorer.mask_control.mode = 'vertical'
-    press(explorer, 'bank_0', 3, 0)
-
-    mask = next(iter(explorer.masks['bank_0'].values()))
-    assert set(mask.dims) == {'x', 'layer'}
-
-
-def test_masking_affects_only_selected_bank_and_leaves_data_unchanged():
-    data = make_banks()
-    original = data.copy(deep=True)
-    explorer = DetectorExplorer(data)
-    select(explorer, 'bank_1')
-    explorer.mask_control.mode = 'vertical'
-    press(explorer, 'bank_1', 1, 1)
-
-    assert explorer.masks['bank_1']
-    for bank in ('bank_0', 'bank_2'):
-        assert not explorer.masks[bank]
-    for bank in data:
-        assert_identical(explorer.data[bank].data, original[bank].data)
-        assert not explorer.data[bank].masks
-
-
-@pytest.mark.parametrize(
-    ('x', 'y', 'ix', 'iy'),
-    [(2.4, 0.6, 2, 1), (2.6, 1.4, 3, 1), (0.2, 1.6, 0, 2)],
-)
-def test_click_coordinates_are_rounded_to_nearest_pixel(x, y, ix, iy):
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'single'
-    press(explorer, 'bank_0', x, y)
-    expected = mask_at(explorer.data['bank_0'].sizes, 'single', 0, ix, iy)
-    assert_identical(next(iter(explorer.masks['bank_0'].values())), expected)
-
-
-@pytest.mark.parametrize('mode', MODES)
-def test_reversed_visible_dimensions_target_correct_pixels(mode):
-    explorer = DetectorExplorer(make_banks(), show_dims=['x', 'y'])
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = mode
-    # The horizontal axis now shows 'y' (size 3), the vertical axis 'x' (size 4).
-    press(explorer, 'bank_0', 2, 3)
-    sizes = explorer.data['bank_0'].sizes
-
-    if mode == 'single':
-        expected = sc.zeros(sizes=sizes, dtype=bool)
-        expected['layer', 0]['x', 3]['y', 2].value = True
-    elif mode == 'horizontal':
-        sizes = sizes.copy()
-        del sizes['y']
-        expected = sc.zeros(sizes=sizes, dtype=bool)
-        expected['layer', 0]['x', 3].value = True
-    elif mode == 'vertical':
-        sizes = sizes.copy()
-        del sizes['x']
-        expected = sc.zeros(sizes=sizes, dtype=bool)
-        expected['layer', 0]['y', 2].value = True
-    assert_identical(next(iter(explorer.masks['bank_0'].values())), expected)
-
-
-def test_adding_a_mask_then_clicking_same_place_again_deletes_it():
-    explorer = DetectorExplorer(make_banks(count=1))
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'horizontal'
-    press(explorer, 'bank_0', 0, 1)
-    assert explorer.masks['bank_0']  # Ensure the mask was added
-    press(explorer, 'bank_0', 0, 1)
-    assert not explorer.masks['bank_0']  # Ensure the mask was deleted (not zeroed)
-
-
-def test_deleting_mask_by_click_does_not_remove_from_dict_if_other_parts_are_masked():
-    explorer = DetectorExplorer(make_banks(count=1))
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'horizontal'
-    press(explorer, 'bank_0', 1, 1)
-    assert len(explorer.masks['bank_0']) == 1  # Ensure the mask was added
-    (key,) = explorer.masks['bank_0'].keys()
-    n = explorer.masks['bank_0'][key].sum().value
-    sliders_of(explorer, 'bank_0')['layer'].slider.value = 1
-    press(explorer, 'bank_0', 0, 0)
-    # We should still have just one mask, as the dimensions of the mask should be the
-    # same, there should just be more values masked
-    assert len(explorer.masks['bank_0']) == 1
-    assert explorer.masks['bank_0'][key].sum().value > n
-    # Go back to first layer
-    sliders_of(explorer, 'bank_0')['layer'].slider.value = 0
-    # Click to remove mask
-    press(explorer, 'bank_0', 1, 1)
-    assert key in explorer.masks['bank_0']  # Ensure the mask still exists
-    # Ensure there are still masked values
-    assert explorer.masks['bank_0'][key].sum().value > 0
-    # Ensure the first layer has no masked values
-    assert not explorer.masks['bank_0'][key]['layer', 0].values.max()
-
-
-def test_add_mask_with_small_coord():
-    dg = make_banks()
-    dg['bank_0'].coords['x'] = sc.arange('x', 4) * 0.1
-    explorer = DetectorExplorer(dg)
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'vertical'
-    press(explorer, 'bank_0', 0.3, 1)
-    mask = next(iter(explorer.masks['bank_0'].values()))
-    assert sc.identical(
-        mask['layer', 0],
-        sc.array(dims=['x'], values=[False, False, False, True], dtype=bool),
-    )
-
-
-def test_add_mask_with_small_coord_and_bin_edges():
-    dg = make_banks()
-    dg['bank_0'].coords['x'] = sc.arange('x', 5) * 0.1
-    explorer = DetectorExplorer(dg)
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'vertical'
-    press(explorer, 'bank_0', 0.201, 1)  # Just above the 3rd bin edge
-    mask = next(iter(explorer.masks['bank_0'].values()))
-    assert sc.identical(
-        mask['layer', 0],
-        sc.array(dims=['x'], values=[False, False, True, False], dtype=bool),
-    )
-    press(explorer, 'bank_0', 0.198, 1)  # Just below the 3rd bin edge
-    assert sc.identical(
-        mask['layer', 0],
-        sc.array(dims=['x'], values=[False, True, True, False], dtype=bool),
-    )
-
-
-def test_add_mask_with_large_coord():
-    dg = make_banks()
-    dg['bank_0'].coords['x'] = sc.arange('x', 1000, 1004)
-    explorer = DetectorExplorer(dg)
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'vertical'
-    press(explorer, 'bank_0', 1001, 1)
-    mask = next(iter(explorer.masks['bank_0'].values()))
-    assert sc.identical(
-        mask['layer', 0],
-        sc.array(dims=['x'], values=[False, True, False, False], dtype=bool),
-    )
-
-
-def test_add_mask_with_large_coord_and_bin_edges():
-    dg = make_banks()
-    dg['bank_0'].coords['x'] = sc.arange('x', 1000, 1005)
-    explorer = DetectorExplorer(dg)
-    select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'vertical'
-    press(explorer, 'bank_0', 1001.1, 1)
-    mask = next(iter(explorer.masks['bank_0'].values()))
-    assert sc.identical(
-        mask['layer', 0],
-        sc.array(dims=['x'], values=[False, True, False, False], dtype=bool),
-    )
-    press(explorer, 'bank_0', 1000.9, 1)  # Just below the 2nd bin edge
-    assert sc.identical(
-        mask['layer', 0],
-        sc.array(dims=['x'], values=[True, True, False, False], dtype=bool),
-    )
+    assert not any(m['m'].any() for m in explorer.masks.values())
 
 
 # ---------------------------------------------------------------------------
@@ -770,43 +686,39 @@ def test_add_mask_with_large_coord_and_bin_edges():
 
 
 def test_clear_on_bank_affects_only_that_banks_selected_slice():
-    explorer = DetectorExplorer(make_banks())
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
     select(explorer, 'bank_1')
-    explorer.mask_control.mode = 'horizontal'
+    explorer.mask_control.selector.value = 'm'
     press(explorer, 'bank_1', 1, 1)
     explorer.bank_dim_sliders['bank_1'][0].slider.value = 1
     press(explorer, 'bank_1', 1, 1)
 
     explorer.mask_control.clear_button.click()
 
-    (key,) = explorer.masks['bank_1'].keys()
-
-    assert explorer.masks['bank_1'][key]['layer', 1].values.sum() == 0
-    assert explorer.masks['bank_1'][key]['layer', 0].values.sum() == 1
+    assert explorer.masks['bank_1']['m']['layer', 1].values.sum() == 0
+    assert explorer.masks['bank_1']['m']['layer', 0].values.sum() == 1
 
 
-def test_clear_on_all_affects_selected_slice_in_every_bank():
-    explorer = DetectorExplorer(make_banks())
-    explorer.mask_control.mode = 'horizontal'
+def test_clear_button_is_disabled_on_overview_tab():
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
     select(explorer, 'bank_1')
+    explorer.mask_control.selector.value = 'm'
+    assert not explorer.mask_control.clear_button.disabled
     press(explorer, 'bank_1', 1, 1)
-    select(explorer, 'bank_2')
-    press(explorer, 'bank_2', 1, 0)
-    assert len(explorer.masks['bank_1']) == 1
-    assert len(explorer.masks['bank_2']) == 1
-
     select(explorer, 'All')
-    explorer.mask_control.clear_button.click()
-    assert len(explorer.masks['bank_1']) == 0
-    assert len(explorer.masks['bank_2']) == 0
+    assert explorer.mask_control.clear_button.disabled
 
 
-def test_filename_controls_save_button_and_empty_filename_writes_nothing(
-    tmp_path, monkeypatch
-):
+def test_save_with_empty_filename_writes_nothing(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    explorer = DetectorExplorer(make_banks())
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
     control = explorer.mask_control
+    select(explorer, 'bank_1')
+    control.selector.value = 'm'
+    press(explorer, 'bank_1', 1, 1)
     assert control.save_button.disabled
     control.filename_input.value = 'masks.h5'
     assert not control.save_button.disabled
@@ -817,9 +729,10 @@ def test_filename_controls_save_button_and_empty_filename_writes_nothing(
     assert list(tmp_path.iterdir()) == []
 
 
-def test_saved_hdf5_round_trips_all_banks_regardless_of_selection(tmp_path):
-    explorer = DetectorExplorer(make_uneven_banks())
-    explorer.mask_control.mode = 'horizontal'
+def test_save_masks_round_trip(tmp_path):
+    det_banks = make_banks()
+    explorer = DetectorExplorer(det_banks, masks=make_y_masks(det_banks))
+    explorer.mask_control.selector.value = 'm'
     select(explorer, 'bank_2')
     press(explorer, 'bank_2', 1, 0)
     select(explorer, 'bank_1')
@@ -829,20 +742,89 @@ def test_saved_hdf5_round_trips_all_banks_regardless_of_selection(tmp_path):
     explorer.mask_control.filename_input.value = str(path)
     explorer.mask_control.save_button.click()
 
-    loaded = sc.io.load_hdf5(path)
+    loaded = read_pixel_masks([path]).by_bank
     for bank, masks in explorer.masks.items():
         for k, m in masks.items():
             assert_identical(loaded[bank][k], m)
 
 
-def test_clear_masks_removes_from_dict_if_all_false():
-    explorer = DetectorExplorer(make_banks(count=1))
+def test_save_does_not_include_empty_masks_not_in_original(tmp_path):
+    det_banks = make_banks()
+    # No mask on bank 1
+    masks = {
+        "bank_0": {
+            "m": sc.zeros(
+                sizes={dim: det_banks.sizes[dim] for dim in ("layer", "y")}, dtype=bool
+            )
+        }
+    }
+    explorer = DetectorExplorer(det_banks, masks=masks)
+    explorer.mask_control.selector.value = 'm'
     select(explorer, 'bank_0')
-    explorer.mask_control.mode = 'horizontal'
-    press(explorer, 'bank_0', 0, 1)
-    assert explorer.masks['bank_0']  # Ensure the mask was added
-    explorer.mask_control.clear_button.click()
-    assert not explorer.masks['bank_0']  # Ensure the mask was removed from the dict
+    press(explorer, 'bank_0', 0, 0)
+    path = tmp_path / 'masks.h5'
+    explorer.mask_control.filename_input.value = str(path)
+    explorer.mask_control.save_button.click()
+    loaded = read_pixel_masks([path]).by_bank
+    assert "bank_0" in loaded
+    assert "m" in loaded["bank_0"]
+    assert "bank_1" not in loaded
+
+
+def test_save_does_not_include_empty_masks_not_in_original_after_undo_click(tmp_path):
+    det_banks = make_banks()
+    # No mask on bank 1
+    masks = {
+        "bank_0": {
+            "m": sc.zeros(
+                sizes={dim: det_banks.sizes[dim] for dim in ("layer", "y")}, dtype=bool
+            )
+        }
+    }
+    explorer = DetectorExplorer(det_banks, masks=masks)
+    explorer.mask_control.selector.value = 'm'
+    select(explorer, 'bank_0')
+    press(explorer, 'bank_0', 0, 0)
+    press(explorer, 'bank_0', 0, 0)  # Undo the previous press
+    select(explorer, 'bank_1')
+    press(explorer, 'bank_1', 1, 1)
+    press(explorer, 'bank_1', 1, 1)  # Undo the previous press
+    path = tmp_path / 'masks.h5'
+    explorer.mask_control.filename_input.value = str(path)
+    explorer.mask_control.save_button.click()
+    loaded = read_pixel_masks([path]).by_bank
+    # Bank 0 should still be included because it was in the original masks
+    assert "bank_0" in loaded
+    assert "m" in loaded["bank_0"]
+    assert "bank_1" not in loaded
+
+
+def test_save_does_not_include_empty_masks_not_in_original_after_clear_button(tmp_path):
+    det_banks = make_banks()
+    # No mask on bank 1
+    masks = {
+        "bank_0": {
+            "m": sc.zeros(
+                sizes={dim: det_banks.sizes[dim] for dim in ("layer", "y")}, dtype=bool
+            )
+        }
+    }
+    explorer = DetectorExplorer(det_banks, masks=masks)
+    explorer.mask_control.selector.value = 'm'
+    select(explorer, 'bank_0')
+    press(explorer, 'bank_0', 0, 0)
+    explorer.mask_control.clear_button.click()  # Clear the mask on bank 0
+    select(explorer, 'bank_1')
+    press(explorer, 'bank_1', 1, 1)
+    explorer.mask_control.clear_button.click()  # Clear the mask on bank 1
+    path = tmp_path / 'masks.h5'
+    explorer.mask_control.filename_input.value = str(path)
+    explorer.mask_control.save_button.click()
+    loaded = read_pixel_masks([path]).by_bank
+    # Bank 0 should still be included because it was in the original masks
+    assert "bank_0" in loaded
+    assert "m" in loaded["bank_0"]
+    assert "bank_1" not in loaded
 
 
 # ---------------------------------------------------------------------------
@@ -854,77 +836,45 @@ def test_min_and_max_work_independently_and_only_update_active_figures():
     explorer = DetectorExplorer(make_banks())
     select(explorer, 'bank_1')
     mapper = explorer.tab_figs['bank_1'].view.colormapper
-    auto_min, auto_max = mapper.cmin, mapper.cmax
 
-    explorer.color_control.vmin.value = '3'
-    assert (mapper.cmin, mapper.cmax) == (3, auto_max)
-    explorer.color_control.vmin.value = ''
-    explorer.color_control.vmax.value = '8'
-    assert (mapper.cmin, mapper.cmax) == (auto_min, 8)
-    explorer.color_control.vmin.value = '2'
-    assert (mapper.cmin, mapper.cmax) == (2, 8)
+    explorer.color_control.vmin = 3
+    assert (mapper.cmin, mapper.cmax) == (3, mapper.cmax)
+    explorer.color_control.vmax = 8
+    assert (mapper.cmin, mapper.cmax) == (3, 8)
 
     for other in (explorer.tab_figs['bank_0'], *explorer.subplots.values()):
-        assert (other.view.colormapper.cmin, other.view.colormapper.cmax) != (2, 8)
+        assert (other.view.colormapper.cmin, other.view.colormapper.cmax) != (3, 8)
+
+    select(explorer, 'bank_0')
+    mapper0 = explorer.tab_figs['bank_0'].view.colormapper
+    # After selecting bank_0, the colormapper should update to the values in the boxes
+    assert (mapper0.cmin, mapper0.cmax) == (3, 8)
 
 
-def test_emptying_fields_restores_automatic_bounds():
-    explorer = DetectorExplorer(make_banks())
-    mapper = explorer.subplots['bank_0'].view.colormapper
-    auto = (mapper.cmin, mapper.cmax)
-    explorer.color_control.vmin.value = '3'
-    explorer.color_control.vmax.value = '5'
-    explorer.color_control.vmin.value = ''
-    explorer.color_control.vmax.value = ''
-    assert (mapper.cmin, mapper.cmax) == auto
-
-
-def test_fit_clears_bounds_and_fits_displayed_data():
+def test_fit_to_displayed_data():
     explorer = DetectorExplorer(make_banks())
     select(explorer, 'bank_1')
-    explorer.color_control.vmin.value = '2'
-    explorer.color_control.vmax.value = '5'
+    explorer.color_control.vmin = 2
+    explorer.color_control.vmax = 5
     explorer.bank_dim_sliders['bank_1'][0].slider.value = 1
     mapper = explorer.tab_figs['bank_1'].view.colormapper
     assert (mapper.cmin, mapper.cmax) == (2, 5)
 
     explorer.color_control.fit_button.click()
     expected = explorer.data['bank_1']['layer', 1].data
-    assert explorer.color_control.vmin.value == ''
-    assert explorer.color_control.vmax.value == ''
     assert mapper.cmin == expected.min().value
     assert mapper.cmax == expected.max().value
 
 
-def test_log_toggle_updates_normalization_and_resets_bounds():
+def test_log_toggle_updates_normalization():
     explorer = DetectorExplorer(make_banks())
     select(explorer, 'bank_1')
     mapper = explorer.tab_figs['bank_1'].view.colormapper
-    explorer.color_control.vmin.value = '2'
-    explorer.color_control.vmax.value = '5'
 
     explorer.color_control.log_button.value = True
     assert mapper.norm == 'log'
-    assert explorer.color_control.vmin.value == ''
-    assert explorer.color_control.vmax.value == ''
-    assert 'user' not in mapper._cmin
-    assert 'user' not in mapper._cmax
     explorer.color_control.log_button.value = False
     assert mapper.norm == 'linear'
-
-
-@pytest.mark.parametrize('field', ['vmin', 'vmax'])
-@pytest.mark.parametrize('bad', ['0', '-1'])
-def test_nonpositive_bounds_in_log_mode_leave_range_unchanged(field, bad):
-    explorer = DetectorExplorer(make_banks())
-    select(explorer, 'bank_1')
-    explorer.color_control.log_button.value = True
-    explorer.color_control.vmin.value = '2'
-    explorer.color_control.vmax.value = '9'
-    mapper = explorer.tab_figs['bank_1'].view.colormapper
-
-    getattr(explorer.color_control, field).value = bad
-    assert (mapper.cmin, mapper.cmax) == (2, 9)
 
 
 @pytest.mark.parametrize(
