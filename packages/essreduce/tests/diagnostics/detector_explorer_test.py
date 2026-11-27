@@ -832,6 +832,16 @@ def test_save_does_not_include_empty_masks_not_in_original_after_clear_button(tm
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.parametrize("norm", [{"norm": "log"}, {"logc": True}])
+def test_log_norm_as_arg(norm):
+    explorer = DetectorExplorer(make_banks(), **norm)
+    mapper = explorer.subplots['bank_1'].view.colormapper
+    assert mapper.norm == 'log'
+    select(explorer, 'bank_2')
+    mapper = explorer.tab_figs['bank_2'].view.colormapper
+    assert mapper.norm == 'log'
+
+
 def test_min_and_max_work_independently_and_only_update_active_figures():
     explorer = DetectorExplorer(make_banks())
     select(explorer, 'bank_1')

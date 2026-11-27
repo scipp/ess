@@ -4,6 +4,7 @@
 import math
 from collections.abc import Callable
 from types import MappingProxyType
+from typing import Literal
 
 import ipywidgets as ipw
 import matplotlib.pyplot as plt
@@ -320,12 +321,12 @@ def _slice_mask(mask: sc.Variable, slices: list[tuple[str, int]]) -> sc.Variable
     return out
 
 
-def _find_limits(figs):
+def _find_limits(figs, scale):
     vmin = np.inf
     vmax = -np.inf
     for f in figs:
         (a,) = f.view.artists.values()
-        bounds = axis_bounds(keys=('cmin', 'cmax'), x=a.data, scale='linear')
+        bounds = axis_bounds(keys=('cmin', 'cmax'), x=a.data, scale=scale)
         if bounds["cmin"] is not None:
             vmin = min(vmin, bounds["cmin"])
         if bounds["cmax"] is not None:
@@ -348,6 +349,8 @@ class DetectorExplorer(ipw.VBox):
         | None = None,
         figsize: tuple[int, int] = (11, 8),
         show_dims: list[str] | None = None,
+        norm: Literal["linear", "log", None] = None,
+        logc: bool | None = None,
         **kwargs,
     ):
         """GUI to view and mask detector banks.
@@ -513,7 +516,17 @@ class DetectorExplorer(ipw.VBox):
 
         self.subplots = {}
         self.tab_figs = {}
-        _kwargs = {**{"hide_log_buttons": True, "autoscale": False}, **kwargs}
+        log_norm = {
+            None: False,
+            True: True,
+            False: False,
+            "log": True,
+            "linear": False,
+        }[logc or norm]
+        _kwargs = {
+            **{"hide_log_buttons": True, "autoscale": False, "logc": log_norm},
+            **kwargs,
+        }
         for i, bank in enumerate(self.data.keys()):
             self.subplots[bank] = pp.imagefigure(
                 self.all_to_plot_nodes[bank],
@@ -571,11 +584,11 @@ class DetectorExplorer(ipw.VBox):
         else:
             self.mask_control = None
 
-        self.color_control = ColorControl()
+        self.color_control = ColorControl(log=log_norm)
         self.color_control.on_limit_change(self.update_color_range)
         self.color_control.on_log_toggle(self.toggle_log)
         self.color_control.on_fit_click(self.fit_cmap_range)
-        vmin, vmax = _find_limits(self.tab_figs.values())
+        vmin, vmax = _find_limits(self.tab_figs.values(), scale=norm)
         self.color_control.vmin = vmin
         self.color_control.vmax = vmax
 
@@ -733,7 +746,9 @@ class DetectorExplorer(ipw.VBox):
         Fit the color map range (vmin and vmax) to the data for all current figures.
         """
         figs = self.current_figs
-        vmin, vmax = _find_limits(figs)
+        vmin, vmax = _find_limits(
+            figs, scale="log" if self.color_control.log_button.value else "linear"
+        )
         current_vmax = self.color_control.vmax
         if current_vmax is None:
             current_vmax = float('inf')
