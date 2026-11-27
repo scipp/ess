@@ -168,8 +168,8 @@ def test_single_bank_tab_uses_bank_sliders():
 def test_single_bank_color_controls_update_bank_figure():
     explorer = DetectorExplorer(make_banks(count=1))
 
-    explorer.color_control.vmin.value = '1'
-    explorer.color_control.vmax.value = '10'
+    explorer.color_control.vmin = 1
+    explorer.color_control.vmax = 10
 
     colormapper = explorer.tab_figs['bank_0'].view.colormapper
     assert colormapper.cmin == 1
@@ -337,13 +337,13 @@ def test_all_index_beyond_smaller_bank_is_blank_and_unmasked():
 def test_slider_updates_preserve_manual_color_limits():
     explorer = DetectorExplorer(make_banks())
     select(explorer, 'bank_1')
-    explorer.color_control.vmin.value = '2'
-    explorer.color_control.vmax.value = '9'
+    explorer.color_control.vmin = 2
+    explorer.color_control.vmax = 9
     explorer.bank_dim_sliders['bank_1'][0].slider.value = 1
 
     colormapper = explorer.tab_figs['bank_1'].view.colormapper
     assert (colormapper.cmin, colormapper.cmax) == (2, 9)
-    assert explorer.color_control.vmin.value == '2'
+    assert explorer.color_control.vmin == 2
 
 
 # ---------------------------------------------------------------------------
@@ -394,8 +394,8 @@ def test_bank_to_bank_switch_preserves_destination_indices():
 def test_color_limits_and_log_apply_to_newly_selected_figures():
     explorer = DetectorExplorer(make_banks())
     explorer.color_control.log_button.value = True
-    explorer.color_control.vmin.value = '1'
-    explorer.color_control.vmax.value = '10'
+    explorer.color_control.vmin = 1
+    explorer.color_control.vmax = 10
     mappers = [f.view.colormapper for f in explorer.subplots.values()]
     assert all((m.cmin, m.cmax, m.norm) == (1, 10, 'log') for m in mappers)
     tab_mapper = explorer.tab_figs['bank_1'].view.colormapper
