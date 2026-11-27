@@ -108,7 +108,7 @@ def compute_polarizing_element_correction(
     :
         Correction matrix coefficients.
     """
-    if isinstance(channel, sc.Variable | sc.DataArray) and channel.bins is not None:
+    if isinstance(channel, sc.Variable | sc.DataArray) and channel.is_binned:
         channel = channel.bins
 
     t_plus = transmission.apply(channel, 'plus')
@@ -190,7 +190,7 @@ def sum_polarization_contributions(
     :
         The polarization corrected data.
     """
-    if upup.upup.bins is not None:
+    if upup.upup.is_binned:
         return PolarizationCorrectedData(
             upup=sc.reduce(
                 [v.upup for v in (upup, updown, downup, downdown)]

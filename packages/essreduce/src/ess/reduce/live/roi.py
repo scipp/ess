@@ -40,7 +40,7 @@ def select_indices_in_intervals(
         indices = indices[dim, low:high]
     indices = indices if isinstance(indices, sc.Variable) else indices.data
     indices = indices.flatten(to=out_dim)
-    if indices.bins is None:
+    if not indices.is_binned:
         return indices
     indices = indices.bins.concat().value
     return indices.rename_dims({indices.dim: out_dim})
@@ -161,7 +161,7 @@ def select_indices_in_polygon(
     sc_mask = sc.array(dims=[out_dim], values=mask)
     selected = all_indices[sc_mask]
 
-    if selected.bins is not None:
+    if selected.is_binned:
         selected = selected.bins.concat().value
         selected = selected.rename_dims({selected.dim: out_dim})
 

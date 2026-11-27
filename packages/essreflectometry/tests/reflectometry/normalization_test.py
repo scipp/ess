@@ -53,4 +53,4 @@ def test_reduce_sample_over_zw_has_expected_coords(sample, reference):
     )
     assert r.dims == reference.dims
     assert r.shape == reference.shape
-    assert not (sample.bins is None) ^ (r.bins is None)
+    assert not (not sample.is_binned) ^ (not r.is_binned)

@@ -15,10 +15,9 @@ from ess.imaging.types import (
     Filename,
     LookupTableFilename,
     MaskingRules,
+    NeutronSourcePosition,
     NeXusDetectorName,
-    NXsource,
     OpenBeamRun,
-    Position,
     RawDetector,
     SampleRun,
     TofDetector,
@@ -40,7 +39,7 @@ def _make_workflow(wavelength_from: unwrap.WavelengthLutMode) -> sl.Pipeline:
         wf[LookupTableFilename] = odin.data.odin_wavelength_lookup_table()
     else:
         disk_choppers = odin_choppers(
-            source_position=wf.compute(Position[NXsource, SampleRun])
+            source_position=wf.compute(NeutronSourcePosition[SampleRun])
         )
         # Shortcut to set DiskChoppers for both [SampleRun, NXdetector] and
         # [OpenBeamRun, NXdetector] at once
@@ -58,7 +57,7 @@ def test_can_load_detector_data(run_type):
         "x_pixel_offset",
         "y_pixel_offset",
     }.issubset(set(da.coords.keys()))
-    assert da.bins is not None
+    assert da.is_binned
     assert "event_time_offset" in da.bins.coords
     assert "event_time_zero" in da.bins.coords
 

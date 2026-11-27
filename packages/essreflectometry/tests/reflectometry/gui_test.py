@@ -48,7 +48,7 @@ def test_amor_batch_reduction_and_plot(tmp_path):
     gui.run_workflow()
     for _, row in gui.reduction_table.data.iterrows():
         curve = gui.results[gui.get_row_key(row)]
-        assert curve.bins is None
+        assert not curve.is_binned
         assert curve.sizes == {'Q': 390}
         assert curve.variances is not None
         # Bins without reference coverage can be non-finite.

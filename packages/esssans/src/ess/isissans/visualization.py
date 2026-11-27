@@ -32,7 +32,7 @@ def plot_flat_detector_xy(
     kwargs:
         Additional arguments passed to `sc.plot`.
     """
-    if da.bins is not None:
+    if da.is_binned:
         da = da.hist()
     da.coords['x'] = da.coords['position'].fields.x.copy()
     da.coords['y'] = da.coords['position'].fields.y.copy()

@@ -24,6 +24,7 @@ from .types import (
     GravityVector,
     IofQPart,
     MonitorTerm,
+    NeutronSourcePosition,
     NormalizedQ,
     NormalizedQxQy,
     Numerator,
@@ -111,7 +112,7 @@ def Qxy(Q: sc.Variable, phi: sc.Variable) -> dict[str, sc.Variable]:
     """
     Qx = sc.cos(phi)
     Qy = sc.sin(phi)
-    if Q.bins is not None and phi.bins is not None:
+    if Q.is_binned and phi.is_binned:
         Qx *= Q
         Qy *= Q
     else:
@@ -132,7 +133,7 @@ def sans_elastic(
     correct_for_gravity: CorrectForGravity,
     *,
     sample_position: Position[snx.NXsample, RunType],
-    source_position: Position[snx.NXsource, RunType],
+    source_position: NeutronSourcePosition[RunType],
     beam_center: BeamCenter,
     gravity: GravityVector,
 ) -> ElasticCoordTransformGraph[RunType]:

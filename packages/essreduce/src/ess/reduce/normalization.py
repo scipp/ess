@@ -325,7 +325,7 @@ class _HistogramNormalizationMode(enum.Enum):
     @classmethod
     def deduce(cls, detector: sc.DataArray, dim: str) -> _HistogramNormalizationMode:
         # Use an event-coord when available:
-        if detector.bins is not None and dim in detector.bins.coords:
+        if detector.is_binned and dim in detector.bins.coords:
             return _HistogramNormalizationMode.Events
         # else: use a bin-coord.
 

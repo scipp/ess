@@ -42,7 +42,7 @@ def test_can_load_detector_data(workflow, bank_name):
         "x_pixel_offset",
         "y_pixel_offset",
     }.issubset(set(da.coords.keys()))
-    assert da.bins is not None
+    assert da.is_binned
     assert "event_time_offset" in da.bins.coords
     assert "event_time_zero" in da.bins.coords
 

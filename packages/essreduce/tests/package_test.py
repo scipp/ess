@@ -26,6 +26,7 @@ WIDGET_MODULES = (
     'ess.reduce.ui',
     'ess.reduce.widgets',
     'ess.reduce.diagnostics.detector_explorer',
+    'ess.reduce.diagnostics.flat_data_viewer',
 )
 
 

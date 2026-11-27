@@ -27,7 +27,7 @@ def apply_masks(
 ) -> sc.DataArray:
     """ """
     out = data.copy(deep=False)
-    if len(pixel_masks) > 0:
+    if not pixel_masks.empty:
         key = (
             set(out.coords.keys()) & {"detector_number", "detector_id", "spectrum"}
         ).pop()
@@ -39,7 +39,7 @@ def apply_masks(
         "two_theta": two_theta_mask_func,
     }.items():
         if mask is not None:
-            if (out.bins is not None) and (dim in out.bins.coords):
+            if out.is_binned and (dim in out.bins.coords):
                 out.bins.masks[dim] = mask(out.bins.coords[dim])
             else:
                 coord = (
