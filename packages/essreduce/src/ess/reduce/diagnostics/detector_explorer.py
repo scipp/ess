@@ -3,6 +3,7 @@
 
 import math
 from collections.abc import Callable
+from pathlib import Path
 from types import MappingProxyType
 
 import ipywidgets as ipw
@@ -349,10 +350,9 @@ class DetectorExplorer(ipw.VBox):
         if not hasattr(data, 'items'):
             key = data.name or 'detector_0'
             data = sc.DataGroup({key: data})
-            if masks is not None and isinstance(
-                next(iter(masks.values())), sc.Variable
-            ):
-                masks = {key: masks}
+
+        if (masks is not None) and isinstance(next(iter(masks.values())), sc.Variable):
+            masks = {key: masks}
 
         self.data = sc.DataGroup(
             {k: _add_missing_coordinates(da) for k, da in data.items()}
@@ -803,11 +803,24 @@ class DetectorExplorer(ipw.VBox):
         filename is provided.
         """
 
-        # TODO: when we save, compare with original masks and remove any masks that are
-        # all false that were not in the originals.
-
         filename = self.mask_control.filename_input.value
         if not filename:
             return
 
-        write_pixel_masks(filename, self.masks, instrument="loki")
+        # When we save, compare with original masks and remove any masks that are
+        # all false that were not in the originals. This is needed because for logic
+        # simplicity, we created masks for all detector banks to begin with, but they
+        # shouldn't appear in the output if they were never modified.
+        to_file = {}
+        for key, masks in self.masks.items():
+            for name, mask in masks.items():
+                if not mask.values.any() and (
+                    (key not in self.original_masks)
+                    or (name not in self.original_masks[key])
+                ):
+                    continue
+                if key not in to_file:
+                    to_file[key] = {}
+                to_file[key][name] = mask
+
+        write_pixel_masks(filename, to_file, instrument="loki")
